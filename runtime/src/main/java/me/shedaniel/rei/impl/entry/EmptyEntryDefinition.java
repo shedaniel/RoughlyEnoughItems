@@ -46,7 +46,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public enum EmptyEntryDefinition implements EntryDefinition<Object> {
+public enum EmptyEntryDefinition implements EntryDefinition<Object>, EntrySerializer<Object> {
     EMPTY(BuiltinEntryTypes.EMPTY, true, () -> Unit.INSTANCE, EmptyRenderer.INSTANCE),
     RENDERING(BuiltinEntryTypes.RENDERING, false, EmptyEntryDefinition::throwRendering, DeferredRenderer.INSTANCE);
     
@@ -87,16 +87,6 @@ public enum EmptyEntryDefinition implements EntryDefinition<Object> {
     }
     
     @Override
-    public Fraction getAmount(EntryStack<Object> entry, Object value) {
-        return Fraction.zero();
-    }
-    
-    @Override
-    public void setAmount(EntryStack<Object> entry, Object value, Fraction amount) {
-        
-    }
-    
-    @Override
     public boolean isEmpty(EntryStack<Object> entry, Object value) {
         return empty;
     }
@@ -117,13 +107,9 @@ public enum EmptyEntryDefinition implements EntryDefinition<Object> {
     }
     
     @Override
-    public CompoundTag toTag(EntryStack<Object> entry, Object value) {
-        return new CompoundTag();
-    }
-    
-    @Override
-    public Object fromTag(CompoundTag tag) {
-        return defaultValue.get();
+    @Nullable
+    public EntrySerializer<Object> getSerializer() {
+        return this;
     }
     
     @Override
@@ -141,6 +127,27 @@ public enum EmptyEntryDefinition implements EntryDefinition<Object> {
     public Collection<ResourceLocation> getTagsFor(EntryStack<Object> entry, Object value) {
         return Collections.emptyList();
     }
+    
+    @Override
+    public boolean supportReading() {
+        return true;
+    }
+    
+    @Override
+    public boolean supportSaving() {
+        return true;
+    }
+    
+    @Override
+    public CompoundTag save(EntryStack<Object> entry, Object value) {
+        return new CompoundTag();
+    }
+    
+    @Override
+    public Object read(CompoundTag tag) {
+        return defaultValue.get();
+    }
+    
     
     private enum EmptyRenderer implements EntryRenderer<Unit> {
         INSTANCE;

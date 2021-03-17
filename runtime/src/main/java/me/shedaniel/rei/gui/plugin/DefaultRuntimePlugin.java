@@ -194,7 +194,6 @@ public class DefaultRuntimePlugin implements REIPlugin {
         
         public EntryStackFavoriteEntry(EntryStack<?> stack) {
             this.stack = stack.copy();
-            this.stack.setAmount(Fraction.ofWhole(127));
             if (this.stack.getType() == VanillaEntryTypes.ITEM)
                 this.stack.setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE);
             else if (this.stack.getType() == VanillaEntryTypes.FLUID)
@@ -224,7 +223,7 @@ public class DefaultRuntimePlugin implements REIPlugin {
                     }
                 }
                 if (entry.getType() == VanillaEntryTypes.ITEM)
-                    entry.setAmount(Fraction.ofWhole(button != 1 && !Screen.hasShiftDown() ? 1 : ((ItemStack) entry.getValue()).getMaxStackSize()));
+                    entry.<ItemStack>cast().getValue().setCount(button != 1 && !Screen.hasShiftDown() ? 1 : ((ItemStack) entry.getValue()).getMaxStackSize());
                 return ClientHelper.getInstance().tryCheatingEntry(entry);
             }
             

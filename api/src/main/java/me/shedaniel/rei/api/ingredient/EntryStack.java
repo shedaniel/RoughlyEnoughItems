@@ -28,12 +28,9 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
-import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
-import me.shedaniel.rei.api.ingredient.entry.EntryRenderer;
-import me.shedaniel.rei.api.ingredient.entry.EntryType;
+import me.shedaniel.rei.api.ingredient.entry.*;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.util.TextRepresentable;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
@@ -75,25 +72,31 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         try {
             JsonObject obj = jsonElement.getAsJsonObject();
             EntryType<Object> type = EntryType.deferred(new ResourceLocation(GsonHelper.getAsString(obj, "type")));
-            Object o = type.getDefinition().fromTag(TagParser.parseTag(obj.toString()));
-            return EntryStack.of(type, o);
+            EntrySerializer<Object> serializer = type.getDefinition().getSerializer();
+            if (serializer != null && serializer.supportReading()) {
+                Object o = serializer.read(TagParser.parseTag(obj.toString()));
+                return EntryStack.of(type, o);
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return EntryStack.empty();
         }
+        return EntryStack.empty();
     }
     
     @ApiStatus.Internal
     @Nullable
     default JsonElement toJson() {
         try {
-            JsonObject object = Dynamic.convert(NbtOps.INSTANCE, JsonOps.INSTANCE, getDefinition().toTag(this, getValue())).getAsJsonObject();
-            object.addProperty("type", getType().getId().toString());
-            return object;
+            EntrySerializer<T> serializer = getDefinition().getSerializer();
+            if (serializer != null && serializer.supportSaving()) {
+                JsonObject object = Dynamic.convert(NbtOps.INSTANCE, JsonOps.INSTANCE, serializer.save(this, getValue())).getAsJsonObject();
+                object.addProperty("type", getType().getId().toString());
+                return object;
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
         }
+        return null;
     }
     
     @NotNull
@@ -115,10 +118,6 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     }
     
     Optional<ResourceLocation> getIdentifier();
-    
-    Fraction getAmount();
-    
-    void setAmount(Fraction amount);
     
     boolean isEmpty();
     
@@ -198,17 +197,12 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         public static class Fluid {
             private static final String FLUID_AMOUNT = Platform.isForge() ? "tooltip.rei.fluid_amount.forge" : "tooltip.rei.fluid_amount";
             // Return null to disable
-            public static final Settings<Function<EntryStack<?>, String>> AMOUNT_TOOLTIP = new Settings<>(stack -> I18n.get(FLUID_AMOUNT, stack.simplifyAmount().getAmount()));
+            public static final Settings<Function<EntryStack<?>, String>> AMOUNT_TOOLTIP = new Settings<>(stack -> I18n.get(FLUID_AMOUNT, EntryStacks.simplifyAmount(stack.cast()).getValue().getAmount()));
             
             private Fluid() {
             }
         }
         
-    }
-    
-    default EntryStack<T> simplifyAmount() {
-        setAmount(getAmount().simplify());
-        return this;
     }
     
     @ApiStatus.NonExtendable

@@ -87,7 +87,7 @@ public abstract class EntryListEntryWidget extends EntryWidget {
                 }
             }
             if (entry.getValueType() == ItemStack.class)
-                entry.setAmount(Fraction.ofWhole(button != 1 && !Screen.hasShiftDown() ? 1 : ((ItemStack) entry.getValue()).getMaxStackSize()));
+                entry.<ItemStack>cast().getValue().setCount(button != 1 && !Screen.hasShiftDown() ? 1 : ((ItemStack) entry.getValue()).getMaxStackSize());
             return ClientHelper.getInstance().tryCheatingEntry(entry);
         }
         

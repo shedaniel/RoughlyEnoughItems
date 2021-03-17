@@ -196,4 +196,9 @@ public final class EntryStacks {
     public static <T> int hashIgnoreNbt(EntryStack<T> stack) {
         return stack.hash(ComparisonContext.IGNORE_NBT);
     }
+    
+    public static EntryStack<FluidStack> simplifyAmount(EntryStack<FluidStack> stack) {
+        stack.getValue().setAmount(stack.getValue().getAmount().simplify());
+        return stack;
+    }
 }

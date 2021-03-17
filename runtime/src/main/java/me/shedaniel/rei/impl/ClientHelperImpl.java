@@ -154,7 +154,7 @@ public class ClientHelperImpl implements ClientHelper {
             Inventory inventory = Minecraft.getInstance().player.inventory;
             EntryStack<ItemStack> stack = entry.copy();
             if (!inventory.getCarried().isEmpty() && EntryStacks.equalsIgnoreCount(EntryStacks.of(inventory.getCarried()), stack)) {
-                stack.setAmount(Fraction.ofWhole(Mth.clamp(stack.getAmount().intValue() + inventory.getCarried().getCount(), 1, stack.getValue().getMaxStackSize())));
+                stack.getValue().setCount(Mth.clamp(stack.getValue().getCount() + inventory.getCarried().getCount(), 1, stack.getValue().getMaxStackSize()));
             } else if (!inventory.getCarried().isEmpty()) {
                 return false;
             }

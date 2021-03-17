@@ -71,16 +71,6 @@ public class TypedEntryStack<T> extends AbstractEntryStack<T> {
     }
     
     @Override
-    public Fraction getAmount() {
-        return getDefinition().getAmount(this, value);
-    }
-    
-    @Override
-    public void setAmount(Fraction amount) {
-        getDefinition().setAmount(this, value, amount);
-    }
-    
-    @Override
     public boolean isEmpty() {
         return getDefinition().isEmpty(this, value);
     }

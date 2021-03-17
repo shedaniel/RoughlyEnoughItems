@@ -57,7 +57,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class FluidEntryDefinition implements EntryDefinition<FluidStack> {
+public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntrySerializer<FluidStack> {
     private final EntryRenderer<FluidStack> renderer = new FluidEntryRenderer();
     
     @Override
@@ -78,16 +78,6 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack> {
     @Override
     public @NotNull Optional<ResourceLocation> getIdentifier(EntryStack<FluidStack> entry, FluidStack value) {
         return Optional.ofNullable(Registry.FLUID.getKey(value.getFluid()));
-    }
-    
-    @Override
-    public @NotNull Fraction getAmount(EntryStack<FluidStack> entry, FluidStack value) {
-        return value.getAmount();
-    }
-    
-    @Override
-    public void setAmount(EntryStack<FluidStack> entry, FluidStack value, Fraction amount) {
-        value.setAmount(amount);
     }
     
     @Override
@@ -125,12 +115,28 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack> {
     }
     
     @Override
-    public @NotNull CompoundTag toTag(EntryStack<FluidStack> entry, FluidStack value) {
+    @Nullable
+    public EntrySerializer<FluidStack> getSerializer() {
+        return this;
+    }
+    
+    @Override
+    public boolean supportSaving() {
+        return true;
+    }
+    
+    @Override
+    public boolean supportReading() {
+        return true;
+    }
+    
+    @Override
+    public CompoundTag save(EntryStack<FluidStack> entry, FluidStack value) {
         return value.write(new CompoundTag());
     }
     
     @Override
-    public @NotNull FluidStack fromTag(@NotNull CompoundTag tag) {
+    public FluidStack read(CompoundTag tag) {
         return FluidStack.read(tag);
     }
     
@@ -178,7 +184,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack> {
             if (!entry.get(EntryStack.Settings.TOOLTIP_ENABLED).get() || entry.isEmpty())
                 return null;
             List<Component> toolTip = Lists.newArrayList(entry.asFormattedText());
-            Fraction amount = entry.getAmount();
+            Fraction amount = entry.getValue().getAmount();
             if (!amount.isLessThan(Fraction.zero())) {
                 String amountTooltip = entry.get(EntryStack.Settings.Fluid.AMOUNT_TOOLTIP).apply(entry);
                 if (amountTooltip != null)

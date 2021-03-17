@@ -23,11 +23,9 @@
 
 package me.shedaniel.rei.api.gui;
 
-import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.gui.widgets.Slot;
@@ -43,10 +41,9 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -64,22 +61,13 @@ public class SimpleDisplayRenderer extends DisplayRenderer {
     }
     
     private static List<EntryIngredient> simplify(List<EntryIngredient> original) {
-        Map<EntryIngredient, AtomicReference<Fraction>> inputCounter = Maps.newLinkedHashMap();
-        original.stream().collect(Collectors.groupingBy(stacks -> CollectionUtils.mapAndMax(stacks, EntryStack::getAmount, Fraction::compareTo).orElse(Fraction.zero())))
-                .forEach((fraction, value) -> {
-                    if (!fraction.equals(Fraction.zero())) {
-                        value.forEach(stackList -> {
-                            EntryIngredient stacks = inputCounter.keySet().stream().filter(s -> equalsList(stackList, s)).findFirst().orElse(stackList);
-                            AtomicReference<Fraction> reference = inputCounter.computeIfAbsent(stacks, s -> new AtomicReference<>(Fraction.zero()));
-                            reference.set(reference.get().add(fraction));
-                        });
-                    }
-                });
-        return inputCounter.entrySet().stream().map(entry -> EntryIngredient.of(CollectionUtils.map(entry.getKey(), stack -> {
-            EntryStack<?> s = stack.copy();
-            s.setAmount(entry.getValue().get());
-            return s;
-        }))).collect(Collectors.toList());
+        List<EntryIngredient> out = new ArrayList<>();
+        for (EntryIngredient ingredient : original) {
+            if (out.stream().noneMatch(s -> equalsList(ingredient, s))) {
+                out.add(ingredient);
+            }
+        }
+        return out;
     }
     
     public static DisplayRenderer from(Supplier<List<EntryIngredient>> input, Supplier<List<EntryIngredient>> output) {
