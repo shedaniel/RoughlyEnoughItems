@@ -92,8 +92,15 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     }
     
     @Override
-    public @NotNull ItemStack copy(EntryStack<ItemStack> entry, ItemStack value) {
+    public ItemStack copy(EntryStack<ItemStack> entry, ItemStack value) {
         return value.copy();
+    }
+    
+    @Override
+    public ItemStack normalize(EntryStack<ItemStack> entry, ItemStack value) {
+        ItemStack copy = value.copy();
+        copy.setCount(127);
+        return copy;
     }
     
     @Override

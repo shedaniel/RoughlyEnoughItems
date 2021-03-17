@@ -175,7 +175,7 @@ public class SubSubsetsMenuEntry extends MenuEntry {
                     if (!filtered) {
                         filteredStacks.removeIf(next -> EntryStacks.equalsIgnoreCount(next, ((EntryStackSubsetsMenuEntry) entry).stack));
                     } else {
-                        filteredStacks.add(((EntryStackSubsetsMenuEntry) entry).stack.copy());
+                        filteredStacks.add(((EntryStackSubsetsMenuEntry) entry).stack.normalize());
                     }
                 }
                 if (subsetsMenu != null)

@@ -94,6 +94,15 @@ public class TypedEntryStack<T> extends AbstractEntryStack<T> {
     }
     
     @Override
+    public EntryStack<T> normalize() {
+        TypedEntryStack<T> stack = new TypedEntryStack<>(definition, getDefinition().normalize(this, value));
+        for (Short2ObjectMap.Entry<Object> entry : getSettings().short2ObjectEntrySet()) {
+            stack.setting(EntryStack.Settings.getById(entry.getShortKey()), entry.getValue());
+        }
+        return stack;
+    }
+    
+    @Override
     public boolean equals(EntryStack<T> other, ComparisonContext context) {
         return this.getDefinition().equals(value, other.getValue(), context);
     }

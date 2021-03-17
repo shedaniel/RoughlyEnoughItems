@@ -43,7 +43,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -99,20 +98,16 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         return null;
     }
     
-    @NotNull
     EntryDefinition<T> getDefinition();
     
-    @NotNull
     default EntryType<T> getType() {
         return getDefinition().getType();
     }
     
-    @NotNull
     default Class<T> getValueType() {
         return getDefinition().getValueType();
     }
     
-    @NotNull
     default EntryRenderer<T> getRenderer() {
         return getDefinition().getRenderer();
     }
@@ -127,6 +122,8 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     default EntryStack<T> rewrap() {
         return copy();
     }
+    
+    EntryStack<T> normalize();
     
     @Deprecated
     int hashCode();

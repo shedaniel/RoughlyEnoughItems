@@ -90,6 +90,11 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T>, EntryRenderer<
     }
     
     @Override
+    public T normalize(EntryStack<T> entry, T value) {
+        return ingredientHelper.normalizeIngredient(value);
+    }
+    
+    @Override
     public int hash(EntryStack<T> entry, T value, ComparisonContext context) {
         return ingredientHelper.getUniqueId(value, wrapContext(context)).hashCode();
     }

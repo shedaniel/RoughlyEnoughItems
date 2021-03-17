@@ -86,8 +86,15 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     }
     
     @Override
-    public @NotNull FluidStack copy(EntryStack<FluidStack> entry, FluidStack value) {
+    public FluidStack copy(EntryStack<FluidStack> entry, FluidStack value) {
         return value.copy();
+    }
+    
+    @Override
+    public FluidStack normalize(EntryStack<FluidStack> entry, FluidStack value) {
+        FluidStack copy = value.copy();
+        copy.setAmount(FluidStack.bucketAmount());
+        return copy;
     }
     
     @Override

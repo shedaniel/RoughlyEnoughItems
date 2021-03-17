@@ -79,6 +79,19 @@ public interface EntryTypeRegistry extends Reloadable {
     
     Set<EntryDefinition<?>> values();
     
+    /**
+     * Register a bridge between two entry types, for example, item to fluid, this is used, to
+     * approximately match two entry stacks,.
+     * <p>
+     * For bridging two entry types, only 1 one way bridge is required, two way bridges are discouraged
+     * for performance issues.
+     *
+     * @param original    the original entry type
+     * @param destination the destination entry type
+     * @param bridge      the bridge to bridge between the original and the destination types
+     * @param <A>         the type of the original entry type
+     * @param <B>         the type of the destination entry type
+     */
     <A, B> void registerBridge(EntryType<A> original, EntryType<B> destination, EntryTypeBridge<A, B> bridge);
     
     <A, B> Iterable<EntryTypeBridge<A, B>> getBridgesFor(EntryType<A> original, EntryType<B> destination);

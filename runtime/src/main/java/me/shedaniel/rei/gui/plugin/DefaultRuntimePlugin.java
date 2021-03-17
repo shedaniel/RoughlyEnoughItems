@@ -193,12 +193,12 @@ public class DefaultRuntimePlugin implements REIPlugin {
         private final int hashIgnoreAmount;
         
         public EntryStackFavoriteEntry(EntryStack<?> stack) {
-            this.stack = stack.copy();
+            this.stack = stack.normalize();
             if (this.stack.getType() == VanillaEntryTypes.ITEM)
                 this.stack.setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE);
             else if (this.stack.getType() == VanillaEntryTypes.FLUID)
                 this.stack.setting(EntryStack.Settings.Fluid.AMOUNT_TOOLTIP, CANCEL_FLUID_AMOUNT);
-            this.hashIgnoreAmount = stack.hash(ComparisonContext.IGNORE_COUNT);
+            this.hashIgnoreAmount = EntryStacks.hashIgnoreCount(this.stack);
         }
         
         @Override
@@ -237,7 +237,7 @@ public class DefaultRuntimePlugin implements REIPlugin {
         
         @Override
         public FavoriteEntry copy() {
-            return new EntryStackFavoriteEntry(stack.copy());
+            return new EntryStackFavoriteEntry(stack.normalize());
         }
         
         @Override
@@ -249,7 +249,7 @@ public class DefaultRuntimePlugin implements REIPlugin {
         public boolean isSame(FavoriteEntry other) {
             if (!(other instanceof EntryStackFavoriteEntry)) return false;
             EntryStackFavoriteEntry that = (EntryStackFavoriteEntry) other;
-            return EntryStacks.equals(stack, that.stack, ComparisonContext.IGNORE_COUNT);
+            return EntryStacks.equalsIgnoreCount(stack, that.stack);
         }
     }
 }
