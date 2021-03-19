@@ -87,28 +87,9 @@ public class CollectionUtils {
     }
     
     @Environment(EnvType.CLIENT)
-    public static boolean anyMatchEqualsAll(Iterable<? extends EntryStack<?>> list, EntryStack<?> stack) {
-        return firstOrNullEqualsAll(list, stack) != null;
-    }
-    
-    @Environment(EnvType.CLIENT)
-    public static boolean anyMatchEqualsEntryIgnoreAmount(Iterable<? extends EntryStack<?>> list, EntryStack<?> stack) {
-        return findFirstOrNullEqualsEntryIgnoreAmount(list, stack) != null;
-    }
-    
-    @Environment(EnvType.CLIENT)
-    public static EntryStack<?> firstOrNullEqualsAll(Iterable<? extends EntryStack<?>> list, EntryStack<?> stack) {
+    public static EntryStack<?> findFirstOrNullEqualsExact(Iterable<? extends EntryStack<?>> list, EntryStack<?> stack) {
         for (EntryStack<?> t : list) {
             if (EntryStacks.equalsExact(t, stack))
-                return t;
-        }
-        return null;
-    }
-    
-    @Environment(EnvType.CLIENT)
-    public static EntryStack<?> findFirstOrNullEqualsEntryIgnoreAmount(Iterable<? extends EntryStack<?>> list, EntryStack<?> stack) {
-        for (EntryStack<?> t : list) {
-            if (EntryStacks.equalsIgnoreCount(t, stack))
                 return t;
         }
         return null;

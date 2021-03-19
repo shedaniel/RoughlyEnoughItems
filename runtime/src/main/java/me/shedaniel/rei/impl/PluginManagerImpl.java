@@ -35,6 +35,7 @@ import me.shedaniel.rei.api.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.util.CollectionUtils;
+import me.shedaniel.rei.impl.entry.ItemComparatorRegistryImpl;
 import me.shedaniel.rei.impl.registry.CategoryRegistryImpl;
 import me.shedaniel.rei.impl.registry.DisplayRegistryImpl;
 import me.shedaniel.rei.impl.subsets.SubsetsRegistryImpl;
@@ -63,6 +64,7 @@ public class PluginManagerImpl implements PluginManager {
     public PluginManagerImpl() {
         registerReloadable(new ConfigManagerImpl());
         registerReloadable(new EntryTypeRegistryImpl());
+        registerReloadable(new ItemComparatorRegistryImpl());
         registerReloadable(new FluidSupportProviderImpl());
         registerReloadable(new CategoryRegistryImpl());
         registerReloadable(new DisplayRegistryImpl());

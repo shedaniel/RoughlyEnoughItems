@@ -315,7 +315,7 @@ public class FilteringScreen extends Screen {
         Set<EntryStack<?>> list = Sets.newLinkedHashSet();
         EntryRegistry.getInstance().getEntryStacks().forEach(stack -> {
             if (canLastSearchTermsBeAppliedTo(stack)) {
-                list.add(stack.copy().setting(EntryStack.Settings.CHECK_AMOUNT, EntryStack.Settings.FALSE).setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
+                list.add(stack.normalize());
             }
         });
         

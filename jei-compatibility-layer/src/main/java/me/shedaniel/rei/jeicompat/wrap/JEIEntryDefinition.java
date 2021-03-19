@@ -28,7 +28,11 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.*;
+import me.shedaniel.rei.api.ingredient.entry.EntrySerializer;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
@@ -46,11 +50,12 @@ import java.util.Optional;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapContext;
 
-public class JEIEntryDefinition<T> implements EntryDefinition<T>, EntryRenderer<T> {
+public class JEIEntryDefinition<T> implements EntryDefinition<T> {
     private final EntryType<T> type;
     private final IIngredientType<T> ingredientType;
     private final IIngredientHelper<T> ingredientHelper;
     private final IIngredientRenderer<T> ingredientRenderer;
+    private final Renderer renderer = new Renderer();
     
     public JEIEntryDefinition(EntryType<T> type, IIngredientType<T> ingredientType, IIngredientHelper<T> ingredientHelper, IIngredientRenderer<T> ingredientRenderer) {
         this.type = type;
@@ -71,7 +76,7 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T>, EntryRenderer<
     
     @Override
     public EntryRenderer<T> getRenderer() {
-        return this;
+        return renderer;
     }
     
     @Override
@@ -120,17 +125,19 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T>, EntryRenderer<
         return ingredientHelper.getTags(value);
     }
     
-    @Override
-    public void render(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-        ingredientRenderer.render(matrices, bounds.x, bounds.y, entry.getValue());
-    }
-    
-    @Override
-    public @Nullable Tooltip getTooltip(EntryStack<T> entry, Point mouse) {
-        List<Component> components = ingredientRenderer.getTooltip(entry.getValue(), Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
-        if (components != null && !components.isEmpty()) {
-            return Tooltip.create(mouse, components);
+    private class Renderer implements EntryRenderer<T> {
+        @Override
+        public void render(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+            ingredientRenderer.render(matrices, bounds.x, bounds.y, entry.getValue());
         }
-        return null;
+        
+        @Override
+        public @Nullable Tooltip getTooltip(EntryStack<T> entry, Point mouse) {
+            List<Component> components = ingredientRenderer.getTooltip(entry.getValue(), Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+            if (components != null && !components.isEmpty()) {
+                return Tooltip.create(mouse, components);
+            }
+            return null;
+        }
     }
 }

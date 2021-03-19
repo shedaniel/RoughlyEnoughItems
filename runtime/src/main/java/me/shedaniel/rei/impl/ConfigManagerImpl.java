@@ -57,6 +57,7 @@ import me.shedaniel.rei.api.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.gui.config.entry.*;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.TransformingScreen;
 import me.shedaniel.rei.gui.WarningAndErrorScreen;
@@ -195,9 +196,9 @@ public class ConfigManagerImpl implements ConfigManager {
             getConfig().getFavoriteEntries().removeIf(Objects::isNull);
         if (getConfig().getFilteredStacks() != null) {
             getConfig().getFilteredStacks().removeIf(EntryStack::isEmpty);
-            for (EntryStack stack : getConfig().getFilteredStacks()) {
-                stack.setting(EntryStack.Settings.CHECK_AMOUNT, EntryStack.Settings.FALSE).setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE);
-            }
+            List<EntryStack<?>> normalizedFilteredStacks = CollectionUtils.map(getConfig().getFilteredStacks(), EntryStack::normalize);
+            getConfig().getFilteredStacks().clear();
+            getConfig().getFilteredStacks().addAll(normalizedFilteredStacks);
         }
         if (getConfig().getFilteringRules().stream().noneMatch(filteringRule -> filteringRule instanceof ManualFilteringRule)) {
             getConfig().getFilteringRules().add(new ManualFilteringRule());

@@ -26,7 +26,6 @@ package me.shedaniel.rei.gui.plugin;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.fluid.FluidStack;
-import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
@@ -38,9 +37,8 @@ import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.gui.widgets.Panel;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
-import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
-import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryTypeRegistry;
+import me.shedaniel.rei.api.ingredient.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.plugins.REIPlugin;
 import me.shedaniel.rei.api.registry.entry.EntryRegistry;
@@ -194,11 +192,7 @@ public class DefaultRuntimePlugin implements REIPlugin {
         
         public EntryStackFavoriteEntry(EntryStack<?> stack) {
             this.stack = stack.normalize();
-            if (this.stack.getType() == VanillaEntryTypes.ITEM)
-                this.stack.setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE);
-            else if (this.stack.getType() == VanillaEntryTypes.FLUID)
-                this.stack.setting(EntryStack.Settings.Fluid.AMOUNT_TOOLTIP, CANCEL_FLUID_AMOUNT);
-            this.hashIgnoreAmount = EntryStacks.hashIgnoreCount(this.stack);
+            this.hashIgnoreAmount = EntryStacks.hashExact(this.stack);
         }
         
         @Override
@@ -249,7 +243,7 @@ public class DefaultRuntimePlugin implements REIPlugin {
         public boolean isSame(FavoriteEntry other) {
             if (!(other instanceof EntryStackFavoriteEntry)) return false;
             EntryStackFavoriteEntry that = (EntryStackFavoriteEntry) other;
-            return EntryStacks.equalsIgnoreCount(stack, that.stack);
+            return EntryStacks.equalsExact(stack, that.stack);
         }
     }
 }

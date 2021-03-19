@@ -13,6 +13,7 @@ accessible    field  net/minecraft/client/gui/screens/recipebook/RecipeBookCompo
 accessible    field  net/minecraft/client/gui/screens/recipebook/RecipeBookComponent           searchBox               Lnet/minecraft/client/gui/components/EditBox;
 accessible    field  net/minecraft/client/gui/screens/recipebook/RecipeBookComponent           tabButtons              Ljava/util/List;
 accessible    field  net/minecraft/client/StringSplitter                                       widthProvider           Lnet/minecraft/client/StringSplitter$WidthProvider;
+accessible    field  net/minecraft/nbt/CompoundTag                                             tags                    Ljava/util/Map;
 accessible    field  net/minecraft/world/entity/player/Inventory                               compartments            Ljava/util/List;
 accessible    field  net/minecraft/world/item/alchemy/PotionBrewing                            ALLOWED_CONTAINERS      Ljava/util/List;
 accessible    field  net/minecraft/world/item/alchemy/PotionBrewing                            CONTAINER_MIXES         Ljava/util/List;

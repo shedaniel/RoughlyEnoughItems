@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.ingredient.entry;
+package me.shedaniel.rei.api.ingredient.entry.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;

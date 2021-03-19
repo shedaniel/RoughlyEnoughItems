@@ -34,7 +34,7 @@ import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.config.RecipeScreenType;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
+import me.shedaniel.rei.api.ingredient.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
@@ -152,7 +152,7 @@ public class ClientHelperImpl implements ClientHelper {
         if (ConfigObject.getInstance().isGrabbingItems() && Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
             Inventory inventory = Minecraft.getInstance().player.inventory;
             EntryStack<ItemStack> stack = entry.copy();
-            if (!inventory.getCarried().isEmpty() && EntryStacks.equalsIgnoreCount(EntryStacks.of(inventory.getCarried()), stack)) {
+            if (!inventory.getCarried().isEmpty() && EntryStacks.equalsExact(EntryStacks.of(inventory.getCarried()), stack)) {
                 stack.getValue().setCount(Mth.clamp(stack.getValue().getCount() + inventory.getCarried().getCount(), 1, stack.getValue().getMaxStackSize()));
             } else if (!inventory.getCarried().isEmpty()) {
                 return false;
@@ -162,7 +162,7 @@ public class ClientHelperImpl implements ClientHelper {
         } else if (RoughlyEnoughItemsCore.canUsePackets()) {
             Inventory inventory = Minecraft.getInstance().player.inventory;
             EntryStack<ItemStack> stack = entry.copy();
-            if (!inventory.getCarried().isEmpty() && !EntryStacks.equalsIgnoreCount(EntryStacks.of(inventory.getCarried()), stack)) {
+            if (!inventory.getCarried().isEmpty() && !EntryStacks.equalsExact(EntryStacks.of(inventory.getCarried()), stack)) {
                 return false;
             }
             try {

@@ -21,35 +21,16 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.filtering;
+package me.shedaniel.rei.api.ingredient.entry.type;
 
-import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.impl.HashedEntryStackWrapper;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraft.world.InteractionResultHolder;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Set;
+import java.util.stream.Stream;
 
-@Environment(EnvType.CLIENT)
-public class FilteringResultImpl implements FilteringResult {
-    private final Set<HashedEntryStackWrapper> hiddenStacks, shownStacks;
-    
-    public FilteringResultImpl(List<? extends EntryStack<?>> hiddenStacks, List<? extends EntryStack<?>> shownStacks) {
-        this.hiddenStacks = Sets.newHashSetWithExpectedSize(hiddenStacks.size());
-        this.shownStacks = Sets.newHashSetWithExpectedSize(shownStacks.size());
-        hide(hiddenStacks);
-        show(shownStacks);
-    }
-    
-    @Override
-    public Set<HashedEntryStackWrapper> getHiddenStacks() {
-        return hiddenStacks;
-    }
-    
-    @Override
-    public Set<HashedEntryStackWrapper> getShownStacks() {
-        return shownStacks;
-    }
+@FunctionalInterface
+public interface EntryTypeBridge<A, B> {
+    @NotNull
+    InteractionResultHolder<Stream<EntryStack<B>>> bridge(EntryStack<A> object);
 }

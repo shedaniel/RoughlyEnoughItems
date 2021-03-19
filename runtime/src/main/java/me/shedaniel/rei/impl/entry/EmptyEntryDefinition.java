@@ -24,14 +24,18 @@
 package me.shedaniel.rei.impl.entry;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.*;
+import me.shedaniel.rei.api.ingredient.entry.EntrySerializer;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.type.BuiltinEntryTypes;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -153,8 +157,7 @@ public enum EmptyEntryDefinition implements EntryDefinition<Object>, EntrySerial
         return defaultValue.get();
     }
     
-    
-    private enum EmptyRenderer implements EntryRenderer<Unit> {
+    public enum EmptyRenderer implements EntryRenderer<Unit> {
         INSTANCE;
         
         @Override
@@ -168,7 +171,7 @@ public enum EmptyEntryDefinition implements EntryDefinition<Object>, EntrySerial
         }
     }
     
-    private enum DeferredRenderer implements EntryRenderer<Renderer> {
+    public enum DeferredRenderer implements EntryRenderer<Renderer> {
         INSTANCE;
         
         @Override

@@ -24,12 +24,11 @@
 package me.shedaniel.rei.impl;
 
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
-import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.BuiltinEntryTypes;
-import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
-import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
-import me.shedaniel.rei.api.ingredient.entry.EntryType;
+import me.shedaniel.rei.api.ingredient.entry.type.BuiltinEntryTypes;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;

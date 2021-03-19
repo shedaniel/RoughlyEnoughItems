@@ -21,9 +21,19 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.ingredient.entry;
+package me.shedaniel.rei.api.ingredient.entry.type;
 
-import net.minecraft.client.gui.GuiComponent;
+import me.shedaniel.rei.api.gui.Renderer;
+import me.shedaniel.rei.impl.Internals;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Unit;
+import org.jetbrains.annotations.ApiStatus;
 
-public abstract class AbstractEntryRenderer<T> extends GuiComponent implements EntryRenderer<T> {
+@ApiStatus.NonExtendable
+public interface BuiltinEntryTypes {
+    ResourceLocation EMPTY_ID = new ResourceLocation("empty");
+    ResourceLocation RENDERING_ID = new ResourceLocation("rendering");
+    
+    EntryType<Unit> EMPTY = Internals.getEntryStackProvider().emptyType(EMPTY_ID);
+    EntryType<Renderer> RENDERING = Internals.getEntryStackProvider().renderingType(RENDERING_ID);
 }

@@ -21,18 +21,42 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.ingredient.entry;
+package me.shedaniel.rei.impl;
 
-import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.impl.Internals;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Unit;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.NonExtendable
-public interface BuiltinEntryTypes {
-    ResourceLocation EMPTY_ID = new ResourceLocation("empty");
-    ResourceLocation RENDERING_ID = new ResourceLocation("rendering");
-    EntryType<Unit> EMPTY = Internals.getEntryStackProvider().emptyType(EMPTY_ID);
-    EntryType<Renderer> RENDERING = Internals.getEntryStackProvider().renderingType(RENDERING_ID);
+import java.util.Objects;
+
+@ApiStatus.Internal
+@Environment(EnvType.CLIENT)
+public class HashedEntryStackWrapper {
+    private final EntryStack<?> stack;
+    private int hash;
+    
+    public HashedEntryStackWrapper(EntryStack<?> stack) {
+        this.stack = Objects.requireNonNull(stack);
+        this.hash = EntryStacks.hashExact(stack);
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof HashedEntryStackWrapper && hashCode() == o.hashCode();
+    }
+    
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+    
+    public boolean isEmpty() {
+        return stack.isEmpty();
+    }
+    
+    public EntryStack<?> unwrap() {
+        return stack;
+    }
 }

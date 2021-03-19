@@ -29,13 +29,17 @@ import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.config.ConfigObject;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryTypeRegistry;
+import me.shedaniel.rei.api.ingredient.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.registry.display.LiveDisplayGenerator;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.AbstractRenderer;
 import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.*;
 import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.plugins.BuiltinPlugin;
@@ -606,7 +610,7 @@ public class JEIPluginDetector {
     }
     
     public static UidContext wrapContext(ComparisonContext context) {
-        return context.isIgnoresNbt() ? UidContext.Recipe : UidContext.Ingredient;
+        return context == ComparisonContext.FUZZY ? UidContext.Recipe : UidContext.Ingredient;
     }
     
     public static class JEIPluginWrapper implements REIPlugin {

@@ -127,7 +127,7 @@ public abstract class AbstractRecipeViewingScreen extends Screen implements Reci
             if (widget instanceof EntryWidget) {
                 EntryWidget entry = (EntryWidget) widget;
                 if (entry.getNoticeMark() == marker && entry.getEntries().size() > 1) {
-                    EntryStack<?> stack = CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(entry.getEntries(), noticeStack);
+                    EntryStack<?> stack = CollectionUtils.findFirstOrNullEqualsExact(entry.getEntries(), noticeStack);
                     if (stack != null) {
                         entry.clearStacks();
                         entry.entry(stack);

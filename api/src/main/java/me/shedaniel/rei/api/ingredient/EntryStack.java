@@ -27,15 +27,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
-import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.ingredient.entry.*;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.ingredient.entry.EntrySerializer;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
 import me.shedaniel.rei.api.util.TextRepresentable;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
@@ -109,7 +110,8 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     }
     
     default EntryRenderer<T> getRenderer() {
-        return getDefinition().getRenderer();
+        EntryRenderer<?> renderer = get(Settings.RENDER).apply(this);
+        return renderer == null ? EntryRenderer.empty() : renderer.cast();
     }
     
     Optional<ResourceLocation> getIdentifier();
@@ -151,16 +153,12 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         
         public static final Supplier<Boolean> TRUE = () -> true;
         public static final Supplier<Boolean> FALSE = () -> false;
-        public static final Settings<Supplier<Boolean>> RENDER = new Settings<>(TRUE);
-        @Deprecated
-        public static final Settings<Supplier<Boolean>> CHECK_TAGS = new Settings<>(FALSE);
-        @Deprecated
-        public static final Settings<Supplier<Boolean>> CHECK_AMOUNT = new Settings<>(FALSE);
+        public static final Function<EntryStack<?>, EntryRenderer<?>> DEFAULT_RENDERER = stack -> stack.getDefinition().getRenderer();
+        public static final Settings<Function<EntryStack<?>, EntryRenderer<?>>> RENDER = new Settings<>(DEFAULT_RENDERER);
         @Deprecated
         public static final Settings<Supplier<Boolean>> TOOLTIP_ENABLED = new Settings<>(TRUE);
         @Deprecated
         public static final Settings<Supplier<Boolean>> TOOLTIP_APPEND_MOD = new Settings<>(TRUE);
-        public static final Settings<Supplier<Boolean>> RENDER_COUNTS = new Settings<>(TRUE);
         @Deprecated
         public static final Settings<Function<EntryStack<?>, List<Component>>> TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
         @Deprecated
@@ -190,16 +188,6 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         public short getId() {
             return id;
         }
-        
-        public static class Fluid {
-            private static final String FLUID_AMOUNT = Platform.isForge() ? "tooltip.rei.fluid_amount.forge" : "tooltip.rei.fluid_amount";
-            // Return null to disable
-            public static final Settings<Function<EntryStack<?>, String>> AMOUNT_TOOLTIP = new Settings<>(stack -> I18n.get(FLUID_AMOUNT, EntryStacks.simplifyAmount(stack.cast()).getValue().getAmount()));
-            
-            private Fluid() {
-            }
-        }
-        
     }
     
     @ApiStatus.NonExtendable

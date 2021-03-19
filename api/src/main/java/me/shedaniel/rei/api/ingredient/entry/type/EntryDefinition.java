@@ -21,28 +21,49 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.ingredient.entry;
+package me.shedaniel.rei.api.ingredient.entry.type;
 
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.EntrySerializer;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-@ApiStatus.NonExtendable
-public interface EntryType<T> {
-    static <T> EntryType<T> deferred(ResourceLocation id) {
-        return Internals.deferEntryType(id).cast();
-    }
+import java.util.Collection;
+import java.util.Optional;
+
+public interface EntryDefinition<T> {
+    Class<T> getValueType();
     
-    @NotNull
-    ResourceLocation getId();
+    EntryType<T> getType();
     
-    @NotNull
-    EntryDefinition<T> getDefinition();
+    EntryRenderer<T> getRenderer();
+    
+    Optional<ResourceLocation> getIdentifier(EntryStack<T> entry, T value);
+    
+    boolean isEmpty(EntryStack<T> entry, T value);
+    
+    T copy(EntryStack<T> entry, T value);
+    
+    T normalize(EntryStack<T> entry, T value);
+    
+    int hash(EntryStack<T> entry, T value, ComparisonContext context);
+    
+    boolean equals(T o1, T o2, ComparisonContext context);
+    
+    @Nullable
+    EntrySerializer<T> getSerializer();
+    
+    Component asFormattedText(EntryStack<T> entry, T value);
+    
+    Collection<ResourceLocation> getTagsFor(EntryStack<T> entry, T value);
     
     @ApiStatus.NonExtendable
-    @NotNull
-    default <O> EntryType<O> cast() {
-        return (EntryType<O>) this;
+    default <O> EntryDefinition<O> cast() {
+        return (EntryDefinition<O>) this;
     }
 }
+

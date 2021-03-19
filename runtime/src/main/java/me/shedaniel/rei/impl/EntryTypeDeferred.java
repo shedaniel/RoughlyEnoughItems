@@ -23,9 +23,9 @@
 
 package me.shedaniel.rei.impl;
 
-import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
-import me.shedaniel.rei.api.ingredient.entry.EntryType;
-import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryTypeRegistry;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;

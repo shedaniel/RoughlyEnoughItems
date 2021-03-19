@@ -81,7 +81,7 @@ public class ViewsImpl implements Views {
                     for (List<? extends EntryStack<?>> results : display.getResultingEntries()) {
                         for (EntryStack<?> otherEntry : results) {
                             for (EntryStack<?> stack : recipesFor) {
-                                if (EntryStacks.equalsIgnoreCount(otherEntry, stack)) {
+                                if (EntryStacks.equalsExact(otherEntry, stack)) {
                                     set.add(display);
                                     break back;
                                 }
@@ -94,7 +94,7 @@ public class ViewsImpl implements Views {
                     for (List<? extends EntryStack<?>> input : display.getInputEntries()) {
                         for (EntryStack<?> otherEntry : input) {
                             for (EntryStack<?> stack : usagesFor) {
-                                if (EntryStacks.equalsIgnoreCount(otherEntry, stack)) {
+                                if (EntryStacks.equalsExact(otherEntry, stack)) {
                                     set.add(display);
                                     break back;
                                 }
@@ -196,7 +196,7 @@ public class ViewsImpl implements Views {
                     back:
                     for (EntryStack<?> possibleType : inventoryItems) {
                         for (EntryStack<?> slotPossible : slot)
-                            if (EntryStacks.equalsIgnoreCount(possibleType, slotPossible)) {
+                            if (EntryStacks.equalsExact(possibleType, slotPossible)) {
                                 slotsCraftable++;
                                 break back;
                             }

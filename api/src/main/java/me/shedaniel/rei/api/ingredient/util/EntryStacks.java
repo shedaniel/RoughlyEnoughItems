@@ -28,7 +28,8 @@ import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.*;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.ingredient.entry.type.*;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
@@ -176,28 +177,32 @@ public final class EntryStacks {
         return equals(left, right, ComparisonContext.FUZZY);
     }
     
-    public static <A, B> boolean equalsIgnoreCount(EntryStack<A> left, EntryStack<B> right) {
-        return equals(left, right, ComparisonContext.IGNORE_COUNT);
-    }
-    
-    public static <A, B> boolean equalsIgnoreNbt(EntryStack<A> left, EntryStack<B> right) {
-        return equals(left, right, ComparisonContext.IGNORE_NBT);
-    }
-    
+    /**
+     * Hash Code of the {@link ComparisonContext#EXACT} context, stacks with the same hash code should share the same normalized stack.
+     * <p>
+     * For example, enchantment books of different enchantments will not receive the same hash code under this context.
+     * However, difference between the amount of objects in a stack will not affect the hash code.
+     *
+     * @param stack the stack to hash code
+     * @param <T>   the type of the stack
+     * @return the hash code of the {@link ComparisonContext#EXACT} context
+     */
     public static <T> int hashExact(EntryStack<T> stack) {
         return stack.hash(ComparisonContext.EXACT);
     }
     
+    /**
+     * Hash Code of the {@link ComparisonContext#FUZZY} context, stacks with the same hash code may not share the same normalized stack.
+     * This hash is less specific, mainly used for fuzzy matching between different stacks.
+     * <p>
+     * For example, enchantment books of different enchantments should still receive the same hash code under this context.
+     *
+     * @param stack the stack to hash code
+     * @param <T>   the type of the stack
+     * @return the hash code of the {@link ComparisonContext#FUZZY} context
+     */
     public static <T> int hashFuzzy(EntryStack<T> stack) {
         return stack.hash(ComparisonContext.FUZZY);
-    }
-    
-    public static <T> int hashIgnoreCount(EntryStack<T> stack) {
-        return stack.hash(ComparisonContext.IGNORE_COUNT);
-    }
-    
-    public static <T> int hashIgnoreNbt(EntryStack<T> stack) {
-        return stack.hash(ComparisonContext.IGNORE_NBT);
     }
     
     public static EntryStack<FluidStack> simplifyAmount(EntryStack<FluidStack> stack) {

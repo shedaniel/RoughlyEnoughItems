@@ -29,7 +29,6 @@ import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.item.Item;
@@ -107,7 +106,7 @@ public abstract class EntryListEntryWidget extends EntryWidget {
                         entry = EntryStacks.of(bucketItem);
                     }
                 }
-                return EntryStacks.equalsIgnoreCount(entry, stack);
+                return EntryStacks.equalsExact(entry, stack);
             }
         }
         return super.cancelDeleteItems(stack);

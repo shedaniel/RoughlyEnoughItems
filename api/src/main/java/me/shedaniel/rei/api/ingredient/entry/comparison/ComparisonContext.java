@@ -21,39 +21,29 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.ingredient.entry;
+package me.shedaniel.rei.api.ingredient.entry.comparison;
 
 public enum ComparisonContext {
     /**
-     * Should only compare the type of the object
+     * Should only compare the type of the object, normalized stacks may still not be the same.
      */
-    FUZZY(true, true),
+    FUZZY(false),
     /**
-     * Should compare the nbt and the type of the object
+     * Should compare the nbt and the type of the object, normalized stacks should be exactly the same.
      */
-    IGNORE_COUNT(true, false),
-    /**
-     * Should compare the amount and the type of the object
-     */
-    IGNORE_NBT(true, false),
-    /**
-     * Should compare the amount, the nbt and the type of the object
-     */
-    EXACT(false, false);
+    EXACT(true);
     
-    boolean ignoresCount;
-    boolean ignoresNbt;
+    boolean exact;
     
-    ComparisonContext(boolean ignoresCount, boolean ignoresNbt) {
-        this.ignoresCount = ignoresCount;
-        this.ignoresNbt = ignoresNbt;
+    ComparisonContext(boolean exact) {
+        this.exact = exact;
     }
     
-    public boolean isIgnoresCount() {
-        return ignoresCount;
+    public boolean isExact() {
+        return exact;
     }
     
-    public boolean isIgnoresNbt() {
-        return ignoresNbt;
+    public boolean isFuzzy() {
+        return !exact;
     }
 }

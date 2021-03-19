@@ -21,46 +21,9 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.ingredient.entry;
+package me.shedaniel.rei.api.ingredient.entry.renderer;
 
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.client.gui.GuiComponent;
 
-import java.util.Collection;
-import java.util.Optional;
-
-public interface EntryDefinition<T> {
-    Class<T> getValueType();
-    
-    EntryType<T> getType();
-    
-    EntryRenderer<T> getRenderer();
-    
-    Optional<ResourceLocation> getIdentifier(EntryStack<T> entry, T value);
-    
-    boolean isEmpty(EntryStack<T> entry, T value);
-    
-    T copy(EntryStack<T> entry, T value);
-    
-    T normalize(EntryStack<T> entry, T value);
-    
-    int hash(EntryStack<T> entry, T value, ComparisonContext context);
-    
-    boolean equals(T o1, T o2, ComparisonContext context);
-    
-    @Nullable
-    EntrySerializer<T> getSerializer();
-    
-    Component asFormattedText(EntryStack<T> entry, T value);
-    
-    Collection<ResourceLocation> getTagsFor(EntryStack<T> entry, T value);
-    
-    @ApiStatus.NonExtendable
-    default <O> EntryDefinition<O> cast() {
-        return (EntryDefinition<O>) this;
-    }
+public abstract class AbstractEntryRenderer<T> extends GuiComponent implements EntryRenderer<T> {
 }
-

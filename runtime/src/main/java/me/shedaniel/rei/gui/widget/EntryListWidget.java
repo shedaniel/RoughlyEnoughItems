@@ -50,10 +50,9 @@ import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.BatchEntryRenderer;
-import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
-import me.shedaniel.rei.api.ingredient.entry.EntryRenderer;
-import me.shedaniel.rei.api.ingredient.entry.VanillaEntryTypes;
+import me.shedaniel.rei.api.ingredient.entry.renderer.BatchEntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.registry.screen.OverlayDecider;
@@ -525,7 +524,7 @@ public class EntryListWidget extends WidgetWithBounds {
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ContainerScreenOverlay.getInstance().inventoryStacks.isEmpty();
             IntSet workingItems = checkCraftable ? new IntOpenHashSet() : null;
             if (checkCraftable)
-                workingItems.addAll(CollectionUtils.map(Views.getInstance().findCraftableEntriesByItems(ContainerScreenOverlay.getInstance().inventoryStacks), EntryStacks::hashIgnoreCount));
+                workingItems.addAll(CollectionUtils.map(Views.getInstance().findCraftableEntriesByItems(ContainerScreenOverlay.getInstance().inventoryStacks), EntryStacks::hashExact));
             List<EntryStack<?>> stacks = EntryRegistry.getInstance().getPreFilteredList();
             if (!stacks.isEmpty()) {
                 if (ConfigObject.getInstance().shouldAsyncSearch()) {
@@ -535,9 +534,9 @@ public class EntryListWidget extends WidgetWithBounds {
                             List<EntryStack<?>> filtered = Lists.newArrayList();
                             for (EntryStack<?> stack : partitionStacks) {
                                 if (canLastSearchTermsBeAppliedTo(stack)) {
-                                    if (workingItems != null && !workingItems.contains(EntryStacks.hashIgnoreCount(stack)))
+                                    if (workingItems != null && !workingItems.contains(EntryStacks.hashExact(stack)))
                                         continue;
-                                    filtered.add(stack.rewrap().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE));
+                                    filtered.add(stack.normalize());
                                 }
                             }
                             return filtered;
@@ -556,9 +555,9 @@ public class EntryListWidget extends WidgetWithBounds {
                 } else {
                     for (EntryStack<?> stack : stacks) {
                         if (canLastSearchTermsBeAppliedTo(stack)) {
-                            if (workingItems != null && !workingItems.contains(EntryStacks.hashIgnoreCount(stack)))
+                            if (workingItems != null && !workingItems.contains(EntryStacks.hashExact(stack)))
                                 continue;
-                            list.add(stack.rewrap().setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE));
+                            list.add(stack.normalize());
                         }
                     }
                 }

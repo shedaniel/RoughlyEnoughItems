@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
@@ -39,6 +40,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
@@ -56,7 +58,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     private final List<EntryStack<?>> preFilteredList = Lists.newCopyOnWriteArrayList();
     private final List<EntryStack<?>> entries = Lists.newCopyOnWriteArrayList();
     @Nullable
-    private List<AmountIgnoredEntryStackWrapper> reloadingRegistry;
+    private List<HashedEntryStackWrapper> reloadingRegistry;
     private boolean reloading;
     
     @Override
@@ -78,9 +80,9 @@ public class EntryRegistryImpl implements EntryRegistry {
     public void endReload() {
         reloading = false;
         preFilteredList.clear();
-        reloadingRegistry.removeIf(AmountIgnoredEntryStackWrapper::isEmpty);
+        reloadingRegistry.removeIf(HashedEntryStackWrapper::isEmpty);
         entries.clear();
-        entries.addAll(CollectionUtils.map(reloadingRegistry, AmountIgnoredEntryStackWrapper::unwrap));
+        entries.addAll(CollectionUtils.map(reloadingRegistry, HashedEntryStackWrapper::unwrap));
         reloadingRegistry = null;
     }
     
@@ -92,7 +94,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     @Override
     @NotNull
     public Stream<EntryStack<?>> getEntryStacks() {
-        return reloading ? reloadingRegistry.stream().map(AmountIgnoredEntryStackWrapper::unwrap) : entries.stream();
+        return reloading ? reloadingRegistry.stream().map(HashedEntryStackWrapper::unwrap) : entries.stream();
     }
     
     @Override
@@ -115,16 +117,16 @@ public class EntryRegistryImpl implements EntryRegistry {
             RoughlyEnoughItemsCore.LOGGER.debug("Refiltered rule [%s] in %s.", FilteringRule.REGISTRY.getKey(rule).toString(), innerStopwatch.stop().toString());
         }
         
-        Set<AmountIgnoredEntryStackWrapper> hiddenStacks = context.stacks.get(FilteringContextType.HIDDEN);
+        Set<HashedEntryStackWrapper> hiddenStacks = context.stacks.get(FilteringContextType.HIDDEN);
         if (hiddenStacks.isEmpty()) {
             preFilteredList.clear();
             preFilteredList.addAll(entries);
         } else {
             preFilteredList.clear();
             preFilteredList.addAll(entries.parallelStream()
-                    .map(AmountIgnoredEntryStackWrapper::new)
+                    .map(HashedEntryStackWrapper::new)
                     .filter(not(hiddenStacks::contains))
-                    .map(AmountIgnoredEntryStackWrapper::unwrap)
+                    .map(HashedEntryStackWrapper::unwrap)
                     .collect(Collectors.toList()));
         }
         
@@ -142,9 +144,11 @@ public class EntryRegistryImpl implements EntryRegistry {
     @Override
     public List<ItemStack> appendStacksForItem(@NotNull Item item) {
         NonNullList<ItemStack> list = NonNullList.create();
-        item.fillItemCategory(item.getItemCategory(), list);
-        if (list.isEmpty())
+        CreativeModeTab category = item.getItemCategory();
+        item.fillItemCategory(MoreObjects.firstNonNull(category, CreativeModeTab.TAB_SEARCH), list);
+        if (list.isEmpty()) {
             return Collections.singletonList(item.getDefaultInstance());
+        }
         list.sort(STACK_COMPARATOR);
         return list;
     }
@@ -152,10 +156,10 @@ public class EntryRegistryImpl implements EntryRegistry {
     @Override
     public void registerEntryAfter(@Nullable EntryStack<?> afterEntry, @NotNull EntryStack<?> stack) {
         if (reloading) {
-            int index = afterEntry != null ? reloadingRegistry.lastIndexOf(new AmountIgnoredEntryStackWrapper(afterEntry)) : -1;
+            int index = afterEntry != null ? reloadingRegistry.lastIndexOf(new HashedEntryStackWrapper(afterEntry)) : -1;
             if (index >= 0) {
-                reloadingRegistry.add(index, new AmountIgnoredEntryStackWrapper(stack));
-            } else reloadingRegistry.add(new AmountIgnoredEntryStackWrapper(stack));
+                reloadingRegistry.add(index, new HashedEntryStackWrapper(stack));
+            } else reloadingRegistry.add(new HashedEntryStackWrapper(stack));
         } else {
             if (afterEntry != null) {
                 int index = entries.lastIndexOf(afterEntry);
@@ -167,10 +171,10 @@ public class EntryRegistryImpl implements EntryRegistry {
     @Override
     public void registerEntriesAfter(@Nullable EntryStack<?> afterEntry, @NotNull Collection<@NotNull ? extends EntryStack<?>> stacks) {
         if (reloading) {
-            int index = afterEntry != null ? reloadingRegistry.lastIndexOf(new AmountIgnoredEntryStackWrapper(afterEntry)) : -1;
+            int index = afterEntry != null ? reloadingRegistry.lastIndexOf(new HashedEntryStackWrapper(afterEntry)) : -1;
             if (index >= 0) {
-                reloadingRegistry.addAll(index, CollectionUtils.map(stacks, AmountIgnoredEntryStackWrapper::new));
-            } else reloadingRegistry.addAll(CollectionUtils.map(stacks, AmountIgnoredEntryStackWrapper::new));
+                reloadingRegistry.addAll(index, CollectionUtils.map(stacks, HashedEntryStackWrapper::new));
+            } else reloadingRegistry.addAll(CollectionUtils.map(stacks, HashedEntryStackWrapper::new));
         } else {
             if (afterEntry != null) {
                 int index = entries.lastIndexOf(afterEntry);
@@ -190,7 +194,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     @Override
     public boolean removeEntry(EntryStack<?> stack) {
         if (reloading) {
-            return reloadingRegistry.remove(new AmountIgnoredEntryStackWrapper(stack));
+            return reloadingRegistry.remove(new HashedEntryStackWrapper(stack));
         } else {
             return entries.remove(stack);
         }

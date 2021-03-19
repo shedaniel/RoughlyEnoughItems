@@ -32,7 +32,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.gui.AbstractRenderer;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -98,7 +98,7 @@ public abstract class AbstractEntryStack<A> extends AbstractRenderer implements 
     
     @Override
     public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-        this.getDefinition().getRenderer().render(this, matrices, bounds, mouseX, mouseY, delta);
+        this.getRenderer().render(this, matrices, bounds, mouseX, mouseY, delta);
     }
     
     @Override

@@ -25,7 +25,8 @@ package me.shedaniel.rei.api.plugins;
 
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
-import me.shedaniel.rei.api.ingredient.entry.EntryTypeRegistry;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ItemComparatorRegistry;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.registry.entry.EntryRegistry;
@@ -61,6 +62,15 @@ public interface REIPlugin extends Comparable<REIPlugin> {
      */
     @ApiStatus.OverrideOnly
     default void registerEntryTypes(EntryTypeRegistry registry) {
+    }
+    
+    /**
+     * Registers item comparators for identifying variants of {@link net.minecraft.world.item.ItemStack}.
+     *
+     * @see ItemComparatorRegistry
+     */
+    @ApiStatus.OverrideOnly
+    default void registerItemComparators(ItemComparatorRegistry registry) {
     }
     
     /**
