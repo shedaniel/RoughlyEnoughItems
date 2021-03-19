@@ -30,6 +30,8 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ItemComparator;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
 import me.shedaniel.rei.api.ingredient.entry.type.EntryTypeRegistry;
@@ -70,6 +72,7 @@ import mezz.jei.api.helpers.IStackHelper;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
 import mezz.jei.api.ingredients.subtypes.ISubtypeManager;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.recipe.IFocus;
@@ -86,6 +89,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraftforge.fluids.FluidStack;
@@ -613,19 +617,48 @@ public class JEIPluginDetector {
         return context == ComparisonContext.FUZZY ? UidContext.Recipe : UidContext.Ingredient;
     }
     
+    private static ISubtypeRegistration wrapSubtypeRegistration(ItemComparatorRegistry registry) {
+        return new ISubtypeRegistration() {
+            @Override
+            public void registerSubtypeInterpreter(@NotNull Item item, @NotNull ISubtypeInterpreter interpreter) {
+                registry.register(wrapItemComparator(interpreter), item);
+            }
+    
+            @Override
+            public void useNbtForSubtypes(@NotNull Item... items) {
+                registry.registerNbt(items);
+            }
+    
+            @Override
+            public boolean hasSubtypeInterpreter(@NotNull ItemStack itemStack) {
+                throw TODO();
+            }
+        };
+    }
+    
+    private static ItemComparator wrapItemComparator(ISubtypeInterpreter interpreter) {
+        return stack -> interpreter.apply(stack).hashCode();
+    }
+    
     public static class JEIPluginWrapper implements REIPlugin {
         private final IModPlugin backingPlugin;
+    
         private final List<JEIWrappedCategory<?>> categories = new ArrayList<>();
-        
+    
         public JEIPluginWrapper(IModPlugin backingPlugin) {
             this.backingPlugin = backingPlugin;
         }
-        
+    
         @Override
         public void registerEntryTypes(EntryTypeRegistry registry) {
             backingPlugin.registerIngredients(wrapModIngredientRegistration(this, registry));
         }
-        
+    
+        @Override
+        public void registerItemComparators(ItemComparatorRegistry registry) {
+            backingPlugin.registerItemSubtypes(wrapSubtypeRegistration(registry));
+        }
+    
         @Override
         public void registerCategories(CategoryRegistry registry) {
             this.categories.clear();

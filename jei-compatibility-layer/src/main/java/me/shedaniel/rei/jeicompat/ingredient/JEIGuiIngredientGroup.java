@@ -130,9 +130,9 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     
     @Override
     public void init(int slotIndex, boolean input, @NotNull IIngredientRenderer<T> ingredientRenderer, int xPosition, int yPosition, int width, int height, int xPadding, int yPadding) {
-        init(slotIndex, input, xPosition, yPosition);
+        init(slotIndex, input, xPosition - 1, yPosition - 1);
         SlotWrapper slot = getSlot(slotIndex);
-        slot.slot.getBounds().setSize(width, height);
+        slot.slot.getBounds().setSize(width + 2, height + 2);
     }
     
     @Override
