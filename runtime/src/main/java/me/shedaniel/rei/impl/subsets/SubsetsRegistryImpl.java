@@ -57,7 +57,7 @@ public class SubsetsRegistryImpl implements SubsetsRegistry {
     public @NotNull List<String> getEntryPaths(@NotNull EntryStack<?> stack) {
         List<String> strings = null;
         for (Map.Entry<String, Set<EntryStack<?>>> entry : paths.entrySet()) {
-            if (CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(entry.getValue(), stack) != null) {
+            if (CollectionUtils.findFirstOrNullEqualsExact(entry.getValue(), stack) != null) {
                 if (strings == null)
                     strings = new ArrayList<>();
                 strings.add(entry.getKey());
@@ -68,14 +68,14 @@ public class SubsetsRegistryImpl implements SubsetsRegistry {
     
     @Override
     public void registerPathEntry(@NotNull String path, @NotNull EntryStack<?> stack) {
-        getOrCreatePathEntries(path).add(stack.normalize().setting(EntryStack.Settings.CHECK_AMOUNT, EntryStack.Settings.FALSE).setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
+        getOrCreatePathEntries(path).add(stack.normalize());
     }
     
     @Override
     public void registerPathEntries(@NotNull String path, @NotNull Collection<? extends EntryStack<?>> stacks) {
         Set<EntryStack<?>> entries = getOrCreatePathEntries(path);
         for (EntryStack<?> stack : stacks) {
-            entries.add(stack.normalize().setting(EntryStack.Settings.CHECK_AMOUNT, EntryStack.Settings.FALSE).setting(EntryStack.Settings.RENDER_COUNTS, EntryStack.Settings.FALSE).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
+            entries.add(stack.normalize());
         }
     }
     

@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.search;
 
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;

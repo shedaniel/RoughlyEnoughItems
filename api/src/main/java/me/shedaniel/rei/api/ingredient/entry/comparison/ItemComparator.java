@@ -21,42 +21,47 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl;
+package me.shedaniel.rei.api.ingredient.entry.comparison;
 
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import org.jetbrains.annotations.ApiStatus;
+import me.shedaniel.rei.impl.Internals;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.Objects;
+import java.util.function.ToLongFunction;
 
-@ApiStatus.Internal
-@Environment(EnvType.CLIENT)
-public class AmountIgnoredEntryStackWrapper {
-    private final EntryStack<?> stack;
-    private int hash;
-    
-    public AmountIgnoredEntryStackWrapper(EntryStack<?> stack) {
-        this.stack = Objects.requireNonNull(stack);
-        this.hash = EntryStacks.hashIgnoreCount(stack);
+/**
+ * Hasher implementation for {@link ItemStack}.
+ */
+@FunctionalInterface
+public interface ItemComparator {
+    static ItemComparator noop() {
+        return stack -> 1;
     }
     
-    @Override
-    public boolean equals(Object o) {
-        return o instanceof AmountIgnoredEntryStackWrapper && hashCode() == o.hashCode();
+    static ItemComparator itemNbt() {
+        ToLongFunction<Tag> nbtHasher = nbtHasher("Count");
+        return stack -> {
+            CompoundTag tag = stack.getTag();
+            return tag == null ? 0L : nbtHasher.applyAsLong(tag);
+        };
     }
     
-    @Override
-    public int hashCode() {
-        return hash;
+    static ToLongFunction<Tag> nbtHasher(String... ignoredKeys) {
+        return Internals.getNbtHasher(ignoredKeys);
     }
     
-    public boolean isEmpty() {
-        return stack.isEmpty();
-    }
+    long hash(ItemStack stack);
     
-    public EntryStack<?> unwrap() {
-        return stack;
+    default ItemComparator then(ItemComparator other) {
+        Objects.requireNonNull(other);
+        
+        return stack -> {
+            long hash = 1L;
+            hash = hash * 31 + hash(stack);
+            hash = hash * 31 + other.hash(stack);
+            return hash;
+        };
     }
 }

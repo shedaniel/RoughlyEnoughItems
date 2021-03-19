@@ -28,7 +28,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.util.CollectionUtils;
-import me.shedaniel.rei.impl.AmountIgnoredEntryStackWrapper;
+import me.shedaniel.rei.impl.HashedEntryStackWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -43,7 +43,7 @@ import java.util.concurrent.TimeoutException;
 
 @Environment(EnvType.CLIENT)
 public class FilteringContextImpl implements FilteringContext {
-    public final Map<FilteringContextType, Set<AmountIgnoredEntryStackWrapper>> stacks;
+    public final Map<FilteringContextType, Set<HashedEntryStackWrapper>> stacks;
     private final Map<FilteringContextType, Collection<EntryStack<?>>> cachedStacks;
     
     public FilteringContextImpl(List<EntryStack<?>> allStacks) {
@@ -52,11 +52,11 @@ public class FilteringContextImpl implements FilteringContext {
         for (FilteringContextType type : FilteringContextType.values()) {
             this.stacks.computeIfAbsent(type, t -> Sets.newHashSet());
         }
-        this.stacks.get(FilteringContextType.DEFAULT).addAll(CollectionUtils.mapParallel(allStacks, AmountIgnoredEntryStackWrapper::new));
+        this.stacks.get(FilteringContextType.DEFAULT).addAll(CollectionUtils.mapParallel(allStacks, HashedEntryStackWrapper::new));
         fillCache();
     }
     
-    public FilteringContextImpl(Map<FilteringContextType, Set<AmountIgnoredEntryStackWrapper>> stacks) {
+    public FilteringContextImpl(Map<FilteringContextType, Set<HashedEntryStackWrapper>> stacks) {
         this.stacks = stacks;
         this.cachedStacks = Maps.newHashMap();
         for (FilteringContextType type : FilteringContextType.values()) {
@@ -68,7 +68,7 @@ public class FilteringContextImpl implements FilteringContext {
     private void fillCache() {
         this.cachedStacks.clear();
         for (FilteringContextType type : FilteringContextType.values()) {
-            this.cachedStacks.put(type, CollectionUtils.map(stacks.get(type), AmountIgnoredEntryStackWrapper::unwrap));
+            this.cachedStacks.put(type, CollectionUtils.map(stacks.get(type), HashedEntryStackWrapper::unwrap));
         }
     }
     
@@ -78,8 +78,8 @@ public class FilteringContextImpl implements FilteringContext {
     }
     
     public void handleResult(FilteringResult result) {
-        Collection<AmountIgnoredEntryStackWrapper> hiddenStacks = result.getHiddenStacks();
-        Collection<AmountIgnoredEntryStackWrapper> shownStacks = result.getShownStacks();
+        Collection<HashedEntryStackWrapper> hiddenStacks = result.getHiddenStacks();
+        Collection<HashedEntryStackWrapper> shownStacks = result.getShownStacks();
         
         List<CompletableFuture<Void>> completableFutures = Lists.newArrayList();
         completableFutures.add(CompletableFuture.runAsync(() -> {

@@ -127,9 +127,10 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
                 lastMap = getOrCreateSubEntryInMap(lastMap, pathSegment);
             }
             for (EntryStack<?> entry : SubsetsRegistry.getInstance().getPathEntries(path)) {
-                EntryStack<?> firstStack = CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(stacks, entry);
-                if (firstStack != null)
+                EntryStack<?> firstStack = CollectionUtils.findFirstOrNullEqualsExact(stacks, entry);
+                if (firstStack != null) {
                     putEntryInMap(lastMap, firstStack);
+                }
             }
         }
         return new Menu(menuStartPoint, buildEntries(entries));

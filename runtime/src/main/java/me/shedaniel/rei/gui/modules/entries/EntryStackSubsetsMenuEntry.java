@@ -27,9 +27,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.config.ConfigManager;
 import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.registry.entry.EntryRegistry;
@@ -98,7 +98,7 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
                     minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     List<EntryStack<?>> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
                     if (isFiltered()) {
-                        filteredStacks.removeIf(next -> EntryStacks.equalsIgnoreCount(next, stack));
+                        filteredStacks.removeIf(next -> EntryStacks.equalsExact(next, stack));
                     } else {
                         filteredStacks.add(stack.normalize());
                     }
@@ -117,10 +117,11 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
     
     void recalculateFilter(Menu menu) {
         for (MenuEntry child : menu.children()) {
-            if (child instanceof SubSubsetsMenuEntry && ((SubSubsetsMenuEntry) child).getSubsetsMenu() != null)
+            if (child instanceof SubSubsetsMenuEntry && ((SubSubsetsMenuEntry) child).getSubsetsMenu() != null) {
                 recalculateFilter(((SubSubsetsMenuEntry) child).getSubsetsMenu());
-            else if (child instanceof EntryStackSubsetsMenuEntry && EntryStacks.equalsIgnoreCount(((EntryStackSubsetsMenuEntry) child).stack, stack))
+            } else if (child instanceof EntryStackSubsetsMenuEntry && EntryStacks.equalsExact(((EntryStackSubsetsMenuEntry) child).stack, stack)) {
                 ((EntryStackSubsetsMenuEntry) child).isFiltered = null;
+            }
         }
     }
     
@@ -137,7 +138,7 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
     public boolean isFiltered() {
         if (isFiltered == null) {
             List<EntryStack<?>> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
-            isFiltered = CollectionUtils.findFirstOrNullEqualsEntryIgnoreAmount(filteredStacks, stack) != null;
+            isFiltered = CollectionUtils.findFirstOrNullEqualsExact(filteredStacks, stack) != null;
         }
         return isFiltered;
     }

@@ -31,19 +31,20 @@ import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.architectury.hooks.FluidStackHooks;
 import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.utils.NbtType;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ItemComparator;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.plugins.BuiltinPlugin;
 import me.shedaniel.rei.api.plugins.REIPlugin;
 import me.shedaniel.rei.api.registry.category.CategoryRegistry;
-import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.registry.screen.DisplayBoundsProvider;
@@ -98,6 +99,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.*;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -111,19 +114,19 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.crafting.*;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
-import java.util.function.IntConsumer;
+import java.util.function.Function;
+import java.util.function.ToLongFunction;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
@@ -181,40 +184,34 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
     @Override
     public void registerEntries(EntryRegistry registry) {
         for (Item item : Registry.ITEM) {
-            List<ItemStack> stacks = null;
             try {
-                stacks = registry.appendStacksForItem(item);
+                registry.registerEntries(EntryStacks.ofItemStacks(registry.appendStacksForItem(item)));
             } catch (Exception ignored) {
-            }
-            if (stacks != null) {
-                for (ItemStack stack : stacks) {
-                    registry.registerEntry(EntryStacks.of(stack));
-                }
-            } else
                 registry.registerEntry(EntryStacks.of(item));
-        }
-        EntryStack<ItemStack> stack = EntryStacks.of(Items.ENCHANTED_BOOK);
-        List<EntryStack<?>> enchantments = new ArrayList<>();
-        for (Enchantment enchantment : Registry.ENCHANTMENT) {
-            IntConsumer consumer = level -> {
-                Map<Enchantment, Integer> map = new HashMap<>();
-                map.put(enchantment, level);
-                ItemStack itemStack = new ItemStack(Items.ENCHANTED_BOOK);
-                EnchantmentHelper.setEnchantments(map, itemStack);
-                enchantments.add(EntryStacks.of(itemStack).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
-            };
-            if (enchantment.getMaxLevel() - enchantment.getMinLevel() >= 10) {
-                consumer.accept(enchantment.getMinLevel());
-                consumer.accept(enchantment.getMaxLevel());
-            } else {
-                for (int i = enchantment.getMinLevel(); i <= enchantment.getMaxLevel(); i++) consumer.accept(i);
             }
         }
-        registry.registerEntriesAfter(stack, enchantments);
         for (Fluid fluid : Registry.FLUID) {
-            if (!fluid.defaultFluidState().isEmpty() && fluid.defaultFluidState().isSource())
+            FluidState state = fluid.defaultFluidState();
+            if (!state.isEmpty() && state.isSource()) {
                 registry.registerEntry(EntryStacks.of(fluid));
+            }
         }
+    }
+    
+    @Override
+    public void registerItemComparators(ItemComparatorRegistry registry) {
+        ToLongFunction<net.minecraft.nbt.Tag> nbtHasher = ItemComparator.nbtHasher();
+        Function<ItemStack, ListTag> enchantmentTag = stack -> {
+            CompoundTag tag = stack.getTag();
+            if (tag == null) return null;
+            if (!tag.contains("Enchantments", NbtType.LIST)) return null;
+            return tag.getList("Enchantments", NbtType.COMPOUND);
+        };
+        registry.register(stack -> nbtHasher.applyAsLong(enchantmentTag.apply(stack)), Items.ENCHANTED_BOOK);
+        registry.registerNbt(Items.POTION);
+        registry.registerNbt(Items.SPLASH_POTION);
+        registry.registerNbt(Items.LINGERING_POTION);
+        registry.registerNbt(Items.TIPPED_ARROW);
     }
     
     @Override
@@ -320,7 +317,7 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
                 ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
                 PotionUtils.setPotion(outputStack, potion);
                 PotionUtils.setCustomEffects(outputStack, PotionUtils.getCustomEffects(itemStack));
-                EntryIngredient output = EntryIngredient.of(EntryStacks.of(outputStack).setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE));
+                EntryIngredient output = EntryIngredient.of(EntryStacks.of(outputStack));
                 registry.registerDisplay(new DefaultCustomDisplay(null, input, output));
             }
         });
@@ -375,31 +372,6 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
                 }
             }
         }
-    }
-    
-    @Override
-    public void postRegister() {
-        // TODO Turn this into an API
-        // Sit tight! This will be a fast journey!
-        long time = System.currentTimeMillis();
-        EntryRegistry.getInstance().getEntryStacks().forEach(this::applyPotionTransformer);
-        for (List<Display> displays : DisplayRegistry.getInstance().getAllDisplays().values()) {
-            for (Display display : displays) {
-                for (List<? extends EntryStack<?>> entries : display.getInputEntries())
-                    for (EntryStack<?> stack : entries)
-                        applyPotionTransformer(stack);
-                for (List<? extends EntryStack<?>> entries : display.getResultingEntries())
-                    for (EntryStack<?> stack : entries)
-                        applyPotionTransformer(stack);
-            }
-        }
-        time = System.currentTimeMillis() - time;
-        LOGGER.info("Applied Check Tags for potion in %dms.", time);
-    }
-    
-    private void applyPotionTransformer(EntryStack<?> stack) {
-        if (stack.getValue() instanceof PotionItem)
-            stack.setting(EntryStack.Settings.CHECK_TAGS, EntryStack.Settings.TRUE);
     }
     
     @Override

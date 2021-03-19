@@ -21,16 +21,28 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.ingredient.entry;
+package me.shedaniel.rei.api.ingredient.entry.type;
 
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import net.minecraft.world.InteractionResultHolder;
+import me.shedaniel.rei.impl.Internals;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.stream.Stream;
-
-@FunctionalInterface
-public interface EntryTypeBridge<A, B> {
+@ApiStatus.NonExtendable
+public interface EntryType<T> {
+    static <T> EntryType<T> deferred(ResourceLocation id) {
+        return Internals.deferEntryType(id).cast();
+    }
+    
     @NotNull
-    InteractionResultHolder<Stream<EntryStack<B>>> bridge(EntryStack<A> object);
+    ResourceLocation getId();
+    
+    @NotNull
+    EntryDefinition<T> getDefinition();
+    
+    @ApiStatus.NonExtendable
+    @NotNull
+    default <O> EntryType<O> cast() {
+        return (EntryType<O>) this;
+    }
 }

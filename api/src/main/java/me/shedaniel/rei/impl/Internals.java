@@ -33,8 +33,9 @@ import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.gui.widgets.*;
 import me.shedaniel.rei.api.ingredient.EntryIngredient;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
-import me.shedaniel.rei.api.ingredient.entry.EntryType;
+import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
 import me.shedaniel.rei.api.plugins.BuiltinPlugin;
 import me.shedaniel.rei.api.plugins.PluginManager;
 import me.shedaniel.rei.api.registry.screen.ClickArea;
@@ -42,6 +43,7 @@ import me.shedaniel.rei.api.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.view.Views;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
@@ -55,6 +57,7 @@ import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.ToLongFunction;
 
 @ApiStatus.Internal
 public final class Internals {
@@ -66,6 +69,8 @@ public final class Internals {
     private static Function<ResourceLocation, EntryType<?>> entryTypeDeferred = (object) -> throwNotSetup();
     private static Supplier<Views> views = Internals::throwNotSetup;
     private static Supplier<PluginManager> pluginManager = Internals::throwNotSetup;
+    private static Supplier<NbtHasherProvider> nbtHasherProvider = Internals::throwNotSetup;
+    private static Supplier<EntryRenderer<?>> emptyEntryRenderer = Internals::throwNotSetup;
     private static BiFunction<Supplier<FavoriteEntry>, Supplier<JsonObject>, FavoriteEntry> delegateFavoriteEntry = (supplier, toJson) -> throwNotSetup();
     private static Function<JsonObject, FavoriteEntry> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<@NotNull Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
@@ -149,6 +154,14 @@ public final class Internals {
         return pluginManager.get();
     }
     
+    public static ToLongFunction<Tag> getNbtHasher(String[] ignoredKeys) {
+        return nbtHasherProvider.get().provide(ignoredKeys);
+    }
+    
+    public static <T> EntryRenderer<T> getEmptyEntryRenderer() {
+        return emptyEntryRenderer.get().cast();
+    }
+    
     public interface EntryStackProvider {
         EntryStack<Unit> empty();
         
@@ -190,5 +203,9 @@ public final class Internals {
         DrawableConsumer createTexturedConsumer(ResourceLocation texture, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight);
         
         DrawableConsumer createFillRectangleConsumer(Rectangle rectangle, int color);
+    }
+    
+    public interface NbtHasherProvider {
+        ToLongFunction<Tag> provide(String... ignoredKeys);
     }
 }

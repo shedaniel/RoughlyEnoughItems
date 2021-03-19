@@ -52,7 +52,7 @@ import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.BatchEntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.renderer.BatchEntryRenderer;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;

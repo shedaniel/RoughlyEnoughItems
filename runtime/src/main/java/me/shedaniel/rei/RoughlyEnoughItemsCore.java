@@ -32,8 +32,8 @@ import me.shedaniel.architectury.event.events.client.ClientScreenInputEvent;
 import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
@@ -41,9 +41,10 @@ import me.shedaniel.rei.api.gui.DrawableConsumer;
 import me.shedaniel.rei.api.gui.Renderer;
 import me.shedaniel.rei.api.gui.widgets.*;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.BuiltinEntryTypes;
-import me.shedaniel.rei.api.ingredient.entry.EntryDefinition;
-import me.shedaniel.rei.api.ingredient.entry.EntryType;
+import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.type.BuiltinEntryTypes;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.plugins.PluginManager;
 import me.shedaniel.rei.api.registry.screen.ClickArea;
@@ -56,6 +57,7 @@ import me.shedaniel.rei.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.*;
 import me.shedaniel.rei.impl.entry.EmptyEntryDefinition;
 import me.shedaniel.rei.impl.entry.EntryIngredientImpl;
+import me.shedaniel.rei.impl.nbt.NbtHasherProviderImpl;
 import me.shedaniel.rei.impl.view.ViewsImpl;
 import me.shedaniel.rei.impl.widgets.*;
 import me.shedaniel.rei.tests.plugin.REITestPlugin;
@@ -123,6 +125,9 @@ public class RoughlyEnoughItemsCore {
         }, "entryTypeDeferred");
         attachInstance(new PluginManagerImpl(), PluginManager.class);
         attachInstance(new Internals.EntryStackProvider() {
+            private EntryType<Unit> empty;
+            private EntryType<Renderer> render;
+            
             @Override
             public EntryStack<Unit> empty() {
                 return TypedEntryStack.EMPTY;
@@ -130,39 +135,49 @@ public class RoughlyEnoughItemsCore {
             
             @Override
             public <T> EntryStack<T> of(EntryDefinition<T> definition, T value) {
+                if (Objects.equals(definition.getType().getId(), BuiltinEntryTypes.EMPTY_ID)) {
+                    return empty().cast();
+                }
+                
                 return new TypedEntryStack<>(definition, value);
             }
             
             @Override
             public EntryType<Unit> emptyType(ResourceLocation id) {
-                return new EntryType<Unit>() {
-                    @Override
-                    public @NotNull ResourceLocation getId() {
-                        return id;
-                    }
-                    
-                    @SuppressWarnings("rawtypes")
-                    @Override
-                    public @NotNull EntryDefinition<Unit> getDefinition() {
-                        return (EntryDefinition) EmptyEntryDefinition.EMPTY;
-                    }
-                };
+                if (empty == null) {
+                    empty = new EntryType<Unit>() {
+                        @Override
+                        public @NotNull ResourceLocation getId() {
+                            return id;
+                        }
+                        
+                        @SuppressWarnings("rawtypes")
+                        @Override
+                        public @NotNull EntryDefinition<Unit> getDefinition() {
+                            return (EntryDefinition) EmptyEntryDefinition.EMPTY;
+                        }
+                    };
+                }
+                return empty;
             }
             
             @Override
             public EntryType<Renderer> renderingType(ResourceLocation id) {
-                return new EntryType<Renderer>() {
-                    @Override
-                    public @NotNull ResourceLocation getId() {
-                        return id;
-                    }
-                    
-                    @SuppressWarnings("rawtypes")
-                    @Override
-                    public @NotNull EntryDefinition<Renderer> getDefinition() {
-                        return (EntryDefinition) EmptyEntryDefinition.RENDERING;
-                    }
-                };
+                if (render == null) {
+                    render = new EntryType<Renderer>() {
+                        @Override
+                        public @NotNull ResourceLocation getId() {
+                            return id;
+                        }
+                        
+                        @SuppressWarnings("rawtypes")
+                        @Override
+                        public @NotNull EntryDefinition<Renderer> getDefinition() {
+                            return (EntryDefinition) EmptyEntryDefinition.RENDERING;
+                        }
+                    };
+                }
+                return render;
             }
         }, Internals.EntryStackProvider.class);
         attachInstance(new Internals.WidgetsProvider() {
@@ -217,7 +232,9 @@ public class RoughlyEnoughItemsCore {
             }
         }, Internals.WidgetsProvider.class);
         attachInstance(new ViewsImpl(), Views.class);
+        attachInstance(new NbtHasherProviderImpl(), Internals.NbtHasherProvider.class);
         attachInstance(EntryIngredientImpl.provide(), Internals.EntryIngredientProvider.class);
+        attachInstance((Supplier<EntryRenderer<?>>) () -> EmptyEntryDefinition.EmptyRenderer.INSTANCE, "emptyEntryRenderer");
         attachInstance((BiFunction<Supplier<FavoriteEntry>, Supplier<JsonObject>, FavoriteEntry>) (supplier, toJson) -> new FavoriteEntry() {
             FavoriteEntry value = null;
             
@@ -512,8 +529,6 @@ public class RoughlyEnoughItemsCore {
             if (shouldReturn(screen))
                 return;
             REIHelper.getInstance().getOverlay().get().render(matrices, mouseX, mouseY, delta);
-            if (!REIHelper.getInstance().isOverlayVisible())
-                return;
             ((ContainerScreenOverlay) REIHelper.getInstance().getOverlay().get()).lateRender(matrices, mouseX, mouseY, delta);
         });
         ClientScreenInputEvent.MOUSE_DRAGGED_PRE.register((minecraftClient, screen, mouseX1, mouseY1, button, mouseX2, mouseY2) -> {

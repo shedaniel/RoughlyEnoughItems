@@ -173,7 +173,7 @@ public class SubSubsetsMenuEntry extends MenuEntry {
             if (entry instanceof EntryStackSubsetsMenuEntry) {
                 if (((EntryStackSubsetsMenuEntry) entry).isFiltered() != filtered) {
                     if (!filtered) {
-                        filteredStacks.removeIf(next -> EntryStacks.equalsIgnoreCount(next, ((EntryStackSubsetsMenuEntry) entry).stack));
+                        filteredStacks.removeIf(next -> EntryStacks.equalsExact(next, ((EntryStackSubsetsMenuEntry) entry).stack));
                     } else {
                         filteredStacks.add(((EntryStackSubsetsMenuEntry) entry).stack.normalize());
                     }

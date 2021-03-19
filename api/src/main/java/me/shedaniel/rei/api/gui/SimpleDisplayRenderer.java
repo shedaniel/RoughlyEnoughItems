@@ -81,12 +81,12 @@ public class SimpleDisplayRenderer extends DisplayRenderer {
     public static boolean equalsList(EntryIngredient left, EntryIngredient right) {
         IntSet leftBytes = new IntOpenHashSet(left.size());
         for (EntryStack<?> entryStack : left) {
-            leftBytes.add(EntryStacks.hashIgnoreCount(entryStack));
+            leftBytes.add(EntryStacks.hashExact(entryStack));
         }
         if (leftBytes.size() > right.size()) return false;
         IntSet rightBytes = new IntOpenHashSet(right.size());
         for (EntryStack<?> entryStack : right) {
-            rightBytes.add(EntryStacks.hashIgnoreCount(entryStack));
+            rightBytes.add(EntryStacks.hashExact(entryStack));
             
             if (rightBytes.size() > leftBytes.size()) return false;
         }
@@ -149,5 +149,4 @@ public class SimpleDisplayRenderer extends DisplayRenderer {
     public int getItemsPerLine() {
         return Mth.floor((getWidth() - 4f) / 18f);
     }
-    
 }

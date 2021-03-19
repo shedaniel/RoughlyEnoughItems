@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.ingredient.entry;
+package me.shedaniel.rei.api.ingredient.entry.type;
 
 import me.shedaniel.rei.api.plugins.PluginManager;
 import me.shedaniel.rei.api.registry.Reloadable;

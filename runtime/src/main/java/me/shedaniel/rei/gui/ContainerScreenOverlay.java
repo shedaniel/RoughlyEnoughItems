@@ -597,24 +597,27 @@ public class ContainerScreenOverlay extends REIOverlay {
                 if (widget instanceof LateRenderable && (overlayMenu == null || overlayMenu.wrappedMenu != widget))
                     widget.render(matrices, mouseX, mouseY, delta);
             }
-        }
-        if (overlayMenu != null) {
-            if (overlayMenu.wrappedMenu.containsMouse(mouseX, mouseY)) {
-                TOOLTIPS.clear();
+            if (overlayMenu != null) {
+                if (overlayMenu.wrappedMenu.containsMouse(mouseX, mouseY)) {
+                    TOOLTIPS.clear();
+                }
+                overlayMenu.wrappedMenu.render(matrices, mouseX, mouseY, delta);
             }
-            overlayMenu.wrappedMenu.render(matrices, mouseX, mouseY, delta);
         }
         Screen currentScreen = Minecraft.getInstance().screen;
-        if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
+        if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated) {
             for (Tooltip tooltip : TOOLTIPS) {
                 if (tooltip != null)
                     renderTooltip(matrices, tooltip);
             }
-        for (Runnable runnable : AFTER_RENDER) {
-            runnable.run();
         }
         TOOLTIPS.clear();
-        AFTER_RENDER.clear();
+        if (REIHelper.getInstance().isOverlayVisible()) {
+            for (Runnable runnable : AFTER_RENDER) {
+                runnable.run();
+            }
+            AFTER_RENDER.clear();
+        }
     }
     
     public void renderTooltip(PoseStack matrices, Tooltip tooltip) {

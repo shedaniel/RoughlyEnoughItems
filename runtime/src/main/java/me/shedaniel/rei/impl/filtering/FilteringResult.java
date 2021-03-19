@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.filtering;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.util.CollectionUtils;
-import me.shedaniel.rei.impl.AmountIgnoredEntryStackWrapper;
+import me.shedaniel.rei.impl.HashedEntryStackWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
@@ -47,46 +47,46 @@ public interface FilteringResult {
         return new FilteringResultImpl(hiddenStacks, shownStacks);
     }
     
-    Set<AmountIgnoredEntryStackWrapper> getHiddenStacks();
+    Set<HashedEntryStackWrapper> getHiddenStacks();
     
-    Set<AmountIgnoredEntryStackWrapper> getShownStacks();
+    Set<HashedEntryStackWrapper> getShownStacks();
     
     default FilteringResult hide(EntryStack<?> stack) {
-        getHiddenStacks().add(new AmountIgnoredEntryStackWrapper(stack));
+        getHiddenStacks().add(new HashedEntryStackWrapper(stack));
         return this;
     }
     
     default FilteringResult hide(Collection<? extends EntryStack<?>> stacks) {
-        getHiddenStacks().addAll(CollectionUtils.map(stacks, AmountIgnoredEntryStackWrapper::new));
+        getHiddenStacks().addAll(CollectionUtils.map(stacks, HashedEntryStackWrapper::new));
         return this;
     }
     
     default FilteringResult show(EntryStack<?> stack) {
-        getShownStacks().add(new AmountIgnoredEntryStackWrapper(stack));
+        getShownStacks().add(new HashedEntryStackWrapper(stack));
         return this;
     }
     
     default FilteringResult show(Collection<? extends EntryStack<?>> stacks) {
-        getShownStacks().addAll(CollectionUtils.map(stacks, AmountIgnoredEntryStackWrapper::new));
+        getShownStacks().addAll(CollectionUtils.map(stacks, HashedEntryStackWrapper::new));
         return this;
     }
     
-    default FilteringResult hideW(AmountIgnoredEntryStackWrapper stack) {
+    default FilteringResult hideW(HashedEntryStackWrapper stack) {
         getHiddenStacks().add(stack);
         return this;
     }
     
-    default FilteringResult hideW(Collection<AmountIgnoredEntryStackWrapper> stacks) {
+    default FilteringResult hideW(Collection<HashedEntryStackWrapper> stacks) {
         getHiddenStacks().addAll(stacks);
         return this;
     }
     
-    default FilteringResult showW(AmountIgnoredEntryStackWrapper stack) {
+    default FilteringResult showW(HashedEntryStackWrapper stack) {
         getShownStacks().add(stack);
         return this;
     }
     
-    default FilteringResult showW(Collection<AmountIgnoredEntryStackWrapper> stacks) {
+    default FilteringResult showW(Collection<HashedEntryStackWrapper> stacks) {
         getShownStacks().addAll(stacks);
         return this;
     }

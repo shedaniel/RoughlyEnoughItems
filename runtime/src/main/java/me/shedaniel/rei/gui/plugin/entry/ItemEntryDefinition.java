@@ -37,6 +37,14 @@ import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.*;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ItemComparatorRegistry;
+import me.shedaniel.rei.api.ingredient.entry.renderer.AbstractEntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.renderer.BatchEntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
+import me.shedaniel.rei.api.ingredient.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -99,7 +107,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     @Override
     public ItemStack normalize(EntryStack<ItemStack> entry, ItemStack value) {
         ItemStack copy = value.copy();
-        copy.setCount(127);
+        copy.setCount(1);
         return copy;
     }
     
@@ -107,8 +115,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     public int hash(EntryStack<ItemStack> entry, ItemStack value, ComparisonContext context) {
         int code = 1;
         code = 31 * code + System.identityHashCode(value.getItem());
-        code = 31 * code + (context.isIgnoresCount() ? 0 : value.getCount());
-        code = 31 * code + (context.isIgnoresNbt() || !value.hasTag() ? 0 : value.getTag().hashCode());
+        code = 31 * code + (context.isFuzzy() ? 0 : Long.hashCode(ItemComparatorRegistry.getInstance().hashOf(value)));
         return code;
     }
     
@@ -116,69 +123,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     public boolean equals(ItemStack o1, ItemStack o2, ComparisonContext context) {
         if (o1.getItem() != o2.getItem())
             return false;
-        if (!context.isIgnoresCount() && o1.getCount() != o2.getCount())
-            return false;
-        if (!context.isIgnoresNbt()) {
-            CompoundTag tag1 = o1.getTag();
-            CompoundTag tag2 = o2.getTag();
-            return tag1 == tag2 || ((tag1 != null && tag2 != null) && equalsTagWithoutCount(tag1, tag2));
-        }
-        return true;
-    }
-    
-    private boolean equalsTagWithoutCount(CompoundTag o1, CompoundTag o2) {
-        int o1Size = 0;
-        int o2Size = 0;
-        for (String key : o1.getAllKeys()) {
-            if (key.equals("Count"))
-                continue;
-            o1Size++;
-        }
-        for (String key : o2.getAllKeys()) {
-            if (key.equals("Count"))
-                continue;
-            o2Size++;
-            if (o2Size > o1Size)
-                return false;
-        }
-        if (o1Size != o2Size)
-            return false;
-        
-        try {
-            for (String key : o1.getAllKeys()) {
-                if (key.equals("Count"))
-                    continue;
-                Tag value = o1.get(key);
-                Tag otherValue = o2.get(key);
-                if (!equalsTag(value, otherValue))
-                    return false;
-            }
-        } catch (ClassCastException | NullPointerException unused) {
-            return false;
-        }
-        
-        return true;
-    }
-    
-    private boolean equalsTag(Tag tag, Tag otherTag) {
-        if (tag == null || otherTag == null) {
-            return tag == otherTag;
-        }
-        if (tag instanceof ListTag && otherTag instanceof ListTag)
-            return equalsList((ListTag) tag, (ListTag) otherTag);
-        return tag.equals(otherTag);
-    }
-    
-    private boolean equalsList(ListTag listTag, ListTag otherListTag) {
-        if (listTag.size() != otherListTag.size())
-            return false;
-        for (int i = 0; i < listTag.size(); i++) {
-            Tag value = listTag.get(i);
-            Tag otherValue = otherListTag.get(i);
-            if (!equalsTag(value, otherValue))
-                return false;
-        }
-        return true;
+        return context.isFuzzy() || ItemComparatorRegistry.getInstance().hashOf(o1) == ItemComparatorRegistry.getInstance().hashOf(o2);
     }
     
     @Override
@@ -272,7 +217,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         
         @Override
         public void renderBase(EntryStack<ItemStack> entry, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
-            if (!entry.isEmpty() && entry.get(EntryStack.Settings.RENDER).get()) {
+            if (!entry.isEmpty()) {
                 ItemStack stack = entry.getValue();
                 matrices.pushPose();
                 matrices.translate(bounds.getCenterX(), bounds.getCenterY(), 100.0F + entry.getZ());
@@ -284,9 +229,9 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         
         @Override
         public void renderOverlay(EntryStack<ItemStack> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-            if (!entry.isEmpty() && entry.get(EntryStack.Settings.RENDER).get()) {
+            if (!entry.isEmpty()) {
                 Minecraft.getInstance().getItemRenderer().blitOffset = entry.getZ();
-                Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, entry.getValue(), bounds.x, bounds.y, entry.get(EntryStack.Settings.RENDER_COUNTS).get() ? entry.get(EntryStack.Settings.COUNTS).apply(entry) : "");
+                Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, entry.getValue(), bounds.x, bounds.y, entry.get(EntryStack.Settings.COUNTS).apply(entry));
                 Minecraft.getInstance().getItemRenderer().blitOffset = 0.0F;
             }
         }

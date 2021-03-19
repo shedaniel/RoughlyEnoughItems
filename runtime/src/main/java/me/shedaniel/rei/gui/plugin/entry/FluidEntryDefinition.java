@@ -30,6 +30,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -37,12 +38,20 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.*;
+import me.shedaniel.rei.api.ingredient.entry.EntrySerializer;
+import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.ingredient.entry.renderer.AbstractEntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
+import me.shedaniel.rei.api.ingredient.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.impl.SimpleFluidRenderer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -58,6 +67,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntrySerializer<FluidStack> {
+    private static final String FLUID_AMOUNT = Platform.isForge() ? "tooltip.rei.fluid_amount.forge" : "tooltip.rei.fluid_amount";
     private final EntryRenderer<FluidStack> renderer = new FluidEntryRenderer();
     
     @Override
@@ -101,8 +111,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     public int hash(EntryStack<FluidStack> entry, FluidStack value, ComparisonContext context) {
         int code = 1;
         code = 31 * code + value.getFluid().hashCode();
-        code = 31 * code + (context.isIgnoresCount() ? 0 : value.getAmount().hashCode());
-        code = 31 * code + (context.isIgnoresNbt() || !value.hasTag() ? 0 : value.getTag().hashCode());
+        code = 31 * code + (context.isFuzzy() || !value.hasTag() ? 0 : value.getTag().hashCode());
         return code;
     }
     
@@ -110,9 +119,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     public boolean equals(FluidStack o1, FluidStack o2, ComparisonContext context) {
         if (o1.getFluid() != o2.getFluid())
             return false;
-        if (!context.isIgnoresCount() && !o1.getAmount().equals(o2.getAmount()))
-            return false;
-        return context.isIgnoresNbt() || isTagEqual(o1, o2);
+        return context.isFuzzy() || isTagEqual(o1, o2);
     }
     
     private boolean isTagEqual(FluidStack o1, FluidStack o2) {
@@ -161,28 +168,26 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     public static class FluidEntryRenderer extends AbstractEntryRenderer<FluidStack> {
         @Override
         public void render(EntryStack<FluidStack> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-            if (entry.get(EntryStack.Settings.RENDER).get()) {
-                FluidStack stack = entry.getValue();
-                SimpleFluidRenderer.FluidRenderingData renderingData = SimpleFluidRenderer.fromFluid(stack.getFluid());
-                if (renderingData != null) {
-                    TextureAtlasSprite sprite = renderingData.getSprite();
-                    int color = renderingData.getColor();
-                    int a = 255;
-                    int r = (color >> 16 & 255);
-                    int g = (color >> 8 & 255);
-                    int b = (color & 255);
-                    Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
-                    Tesselator tess = Tesselator.getInstance();
-                    BufferBuilder bb = tess.getBuilder();
-                    Matrix4f matrix = matrices.last().pose();
-                    bb.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-                    int z = entry.getZ();
-                    bb.vertex(matrix, bounds.getMaxX(), bounds.y, z).uv(sprite.getU1(), sprite.getV0()).color(r, g, b, a).endVertex();
-                    bb.vertex(matrix, bounds.x, bounds.y, z).uv(sprite.getU0(), sprite.getV0()).color(r, g, b, a).endVertex();
-                    bb.vertex(matrix, bounds.x, bounds.getMaxY(), z).uv(sprite.getU0(), sprite.getV1()).color(r, g, b, a).endVertex();
-                    bb.vertex(matrix, bounds.getMaxX(), bounds.getMaxY(), z).uv(sprite.getU1(), sprite.getV1()).color(r, g, b, a).endVertex();
-                    tess.end();
-                }
+            FluidStack stack = entry.getValue();
+            SimpleFluidRenderer.FluidRenderingData renderingData = SimpleFluidRenderer.fromFluid(stack.getFluid());
+            if (renderingData != null) {
+                TextureAtlasSprite sprite = renderingData.getSprite();
+                int color = renderingData.getColor();
+                int a = 255;
+                int r = (color >> 16 & 255);
+                int g = (color >> 8 & 255);
+                int b = (color & 255);
+                Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
+                Tesselator tess = Tesselator.getInstance();
+                BufferBuilder bb = tess.getBuilder();
+                Matrix4f matrix = matrices.last().pose();
+                bb.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+                int z = entry.getZ();
+                bb.vertex(matrix, bounds.getMaxX(), bounds.y, z).uv(sprite.getU1(), sprite.getV0()).color(r, g, b, a).endVertex();
+                bb.vertex(matrix, bounds.x, bounds.y, z).uv(sprite.getU0(), sprite.getV0()).color(r, g, b, a).endVertex();
+                bb.vertex(matrix, bounds.x, bounds.getMaxY(), z).uv(sprite.getU0(), sprite.getV1()).color(r, g, b, a).endVertex();
+                bb.vertex(matrix, bounds.getMaxX(), bounds.getMaxY(), z).uv(sprite.getU1(), sprite.getV1()).color(r, g, b, a).endVertex();
+                tess.end();
             }
         }
         
@@ -193,7 +198,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
             List<Component> toolTip = Lists.newArrayList(entry.asFormattedText());
             Fraction amount = entry.getValue().getAmount();
             if (!amount.isLessThan(Fraction.zero())) {
-                String amountTooltip = entry.get(EntryStack.Settings.Fluid.AMOUNT_TOOLTIP).apply(entry);
+                String amountTooltip = I18n.get(FLUID_AMOUNT, EntryStacks.simplifyAmount(entry).getValue().getAmount());
                 if (amountTooltip != null)
                     toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList()));
             }

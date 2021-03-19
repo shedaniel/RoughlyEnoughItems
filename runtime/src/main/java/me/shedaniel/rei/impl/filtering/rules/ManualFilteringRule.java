@@ -27,7 +27,6 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.ComparisonContext;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.impl.filtering.AbstractFilteringRule;
@@ -61,8 +60,8 @@ public class ManualFilteringRule extends AbstractFilteringRule<ManualFilteringRu
     }
     
     private void processList(Collection<EntryStack<?>> stacks, FilteringResult result) {
-        IntSet filteredStacks = CollectionUtils.mapParallel(ConfigObject.getInstance().getFilteredStacks(), EntryStacks::hashIgnoreCount, IntOpenHashSet::new);
-        result.hide(stacks.parallelStream().filter(stack -> filteredStacks.contains(EntryStacks.hashIgnoreCount(stack))).collect(Collectors.toList()));
+        IntSet filteredStacks = CollectionUtils.mapParallel(ConfigObject.getInstance().getFilteredStacks(), EntryStacks::hashExact, IntOpenHashSet::new);
+        result.hide(stacks.parallelStream().filter(stack -> filteredStacks.contains(EntryStacks.hashExact(stack))).collect(Collectors.toList()));
     }
     
     @Override
