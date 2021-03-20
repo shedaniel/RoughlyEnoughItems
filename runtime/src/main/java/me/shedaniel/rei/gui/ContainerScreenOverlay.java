@@ -35,7 +35,9 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.*;
+import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.REIHelper;
+import me.shedaniel.rei.api.REIOverlay;
 import me.shedaniel.rei.api.config.ConfigManager;
 import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
@@ -74,6 +76,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -470,7 +473,8 @@ public class ContainerScreenOverlay extends REIOverlay {
     }
     
     private GameType getCurrentGameMode() {
-        return Minecraft.getInstance().getConnection().getPlayerInfo(Minecraft.getInstance().player.getGameProfile().getId()).getGameMode();
+        PlayerInfo info = Minecraft.getInstance().getConnection().getPlayerInfo(Minecraft.getInstance().player.getGameProfile().getId());
+        return info == null ? GameType.SURVIVAL : info.getGameMode();
     }
     
     private Rectangle getSearchFieldArea() {
