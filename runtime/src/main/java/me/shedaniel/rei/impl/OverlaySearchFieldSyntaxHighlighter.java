@@ -56,14 +56,16 @@ public class OverlaySearchFieldSyntaxHighlighter implements Consumer<String> {
             }
             
             @Override
-            public void addPart(SearchArgument<?, ?> argument, Collection<IntRange> grammarRanges, int index) {
-                int argIndex = ArgumentsRegistry.ARGUMENT_LIST.indexOf(argument.getArgument()) * 2 + 1;
-                for (int i = argument.start(); i < argument.end(); i++) {
-                    highlighted[i] = (byte) argIndex;
-                }
-                for (IntRange grammarRange : grammarRanges) {
-                    for (int i = grammarRange.getMinInclusive(); i <= grammarRange.getMaxInclusive(); i++) {
-                        highlighted[i + index] = (byte) (argIndex + 1);
+            public void addPart(SearchArgument<?, ?> argument, boolean usingGrammar, Collection<IntRange> grammarRanges, int index) {
+                if (usingGrammar) {
+                    int argIndex = ArgumentsRegistry.ARGUMENT_LIST.indexOf(argument.getArgument()) * 2 + 1;
+                    for (int i = argument.start(); i < argument.end(); i++) {
+                        highlighted[i] = (byte) argIndex;
+                    }
+                    for (IntRange grammarRange : grammarRanges) {
+                        for (int i = grammarRange.getMinInclusive(); i <= grammarRange.getMaxInclusive(); i++) {
+                            highlighted[i + index] = (byte) (argIndex + 1);
+                        }
                     }
                 }
             }
