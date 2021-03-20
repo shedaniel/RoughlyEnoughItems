@@ -28,6 +28,7 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import me.shedaniel.rei.api.gui.Renderer;
+import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.entry.EntrySerializer;
 import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
@@ -46,10 +47,8 @@ import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -147,6 +146,18 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     
     <R> R get(Settings<R> settings);
     
+    default EntryStack<T> tooltip(Component... tooltips) {
+        return tooltip(Arrays.asList(tooltips));
+    }
+    
+    default EntryStack<T> tooltip(List<Component> tooltips) {
+        return tooltip(stack -> tooltips);
+    }
+    
+    default EntryStack<T> tooltip(Function<EntryStack<?>, List<Component>> tooltipProvider) {
+        return setting(Settings.TOOLTIP_APPEND_EXTRA, tooltipProvider);
+    }
+    
     class Settings<R> {
         @ApiStatus.Internal
         private static final List<Settings<?>> SETTINGS = new ArrayList<>();
@@ -154,15 +165,12 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         public static final Supplier<Boolean> TRUE = () -> true;
         public static final Supplier<Boolean> FALSE = () -> false;
         public static final Function<EntryStack<?>, EntryRenderer<?>> DEFAULT_RENDERER = stack -> stack.getDefinition().getRenderer();
+        public static final BiFunction<EntryStack<?>, Tooltip, Tooltip> DEFAULT_TOOLTIP_PROCESSOR = (stack, tooltip) -> tooltip;
         public static final Settings<Function<EntryStack<?>, EntryRenderer<?>>> RENDER = new Settings<>(DEFAULT_RENDERER);
         @Deprecated
-        public static final Settings<Supplier<Boolean>> TOOLTIP_ENABLED = new Settings<>(TRUE);
-        @Deprecated
-        public static final Settings<Supplier<Boolean>> TOOLTIP_APPEND_MOD = new Settings<>(TRUE);
+        public static final Settings<BiFunction<EntryStack<?>, Tooltip, Tooltip>> TOOLTIP_PROCESSOR = new Settings<>(DEFAULT_TOOLTIP_PROCESSOR);
         @Deprecated
         public static final Settings<Function<EntryStack<?>, List<Component>>> TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
-        @Deprecated
-        public static final Settings<Function<EntryStack<?>, String>> COUNTS = new Settings<>(stack -> null);
         
         private static short nextId;
         private R defaultValue;

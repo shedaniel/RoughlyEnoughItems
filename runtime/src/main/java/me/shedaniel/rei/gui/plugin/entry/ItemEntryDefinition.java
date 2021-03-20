@@ -231,7 +231,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         public void renderOverlay(EntryStack<ItemStack> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
             if (!entry.isEmpty()) {
                 Minecraft.getInstance().getItemRenderer().blitOffset = entry.getZ();
-                Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, entry.getValue(), bounds.x, bounds.y, entry.get(EntryStack.Settings.COUNTS).apply(entry));
+                Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, entry.getValue(), bounds.x, bounds.y, null);
                 Minecraft.getInstance().getItemRenderer().blitOffset = 0.0F;
             }
         }
@@ -249,14 +249,9 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         
         @Override
         public @Nullable Tooltip getTooltip(EntryStack<ItemStack> entry, Point mouse) {
-            if (entry.isEmpty() || !entry.get(EntryStack.Settings.TOOLTIP_ENABLED).get())
+            if (entry.isEmpty())
                 return null;
-            List<Component> toolTip = tryGetItemStackToolTip(entry, entry.getValue(), true);
-            toolTip.addAll(entry.get(EntryStack.Settings.TOOLTIP_APPEND_EXTRA).apply(entry));
-            if (entry.get(EntryStack.Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
-                ClientHelper.getInstance().appendModIdToTooltips(toolTip, Registry.ITEM.getKey(entry.getValue().getItem()).getNamespace());
-            }
-            return Tooltip.create(toolTip);
+            return Tooltip.create(tryGetItemStackToolTip(entry, entry.getValue(), true));
         }
     }
 }

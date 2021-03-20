@@ -46,7 +46,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
 public class DefaultCompostingCategory implements DisplayCategory<DefaultCompostingDisplay> {
@@ -94,7 +97,7 @@ public class DefaultCompostingCategory implements DisplayCategory<DefaultCompost
                 if (!entryStack.isEmpty()) {
                     display.getInputMap().object2FloatEntrySet().stream().filter(entry -> entry.getKey() != null && Objects.equals(entry.getKey().asItem(), entryStack.get(0).getValue())).findAny().map(Map.Entry::getValue).ifPresent(chance -> {
                         for (EntryStack<?> stack : entryStack) {
-                            stack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableComponent("text.rei.composting.chance", Mth.fastFloor(chance * 100)).withStyle(ChatFormatting.YELLOW)));
+                            stack.tooltip(new TranslatableComponent("text.rei.composting.chance", Mth.fastFloor(chance * 100)).withStyle(ChatFormatting.YELLOW));
                         }
                     });
                 }
