@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.gui.widgets;
 
+import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -75,7 +76,11 @@ public class DelegateWidget extends WidgetWithBounds {
     
     @Override
     public void setFocused(@Nullable GuiEventListener guiEventListener) {
-        widget.setFocused(guiEventListener);
+        if (guiEventListener == widget) {
+            super.setFocused(widget);
+        } else {
+            widget.setFocused(guiEventListener);
+        }
     }
     
     @Override

@@ -80,11 +80,11 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         return TextTransformations.forwardWithTransformation(text, (s, charIndex, c) -> {
             byte arg = highlighter.highlighted[charIndex + index];
             Style style = Style.EMPTY;
+            if (isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
+                style = ERROR_STYLE;
+            }
             if (arg > 0) {
                 Argument<?, ?> argument = ArgumentsRegistry.ARGUMENT_LIST.get((arg - 1) / 2);
-                if (isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
-                    style = ERROR_STYLE;
-                }
                 if (!isPlain) {
                     style = argument.getHighlightedStyle();
                 }
@@ -130,7 +130,6 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     public void laterRender(PoseStack matrices, int int_1, int int_2, float float_1) {
         RenderSystem.disableDepthTest();
-        setEditableColor(isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty() ? 16733525 : isHighlighting && isMain ? -852212 : (containsMouse(PointHelper.ofMouse()) || isFocused()) ? (REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
         super.render(matrices, int_1, int_2, float_1);
         RenderSystem.enableDepthTest();

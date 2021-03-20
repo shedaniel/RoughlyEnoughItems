@@ -245,7 +245,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 MutableLong current = new MutableLong(0);
                 parentTranslated = new TransformingScreen(true, parent,
                         null,
-                        () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (getConfig().isReducedMotion() ? -3000 : 0) : current.getValue()),
+                        () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (!getConfig().isConfigScreenAnimated() ? -3000 : 0) : current.getValue()),
                         () -> 0, () -> (EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
                                        * Minecraft.getInstance().getWindow().getGuiScaledHeight(), () -> Util.getMillis() - current.getValue() > 800);
                 parentTranslated.setInitAfter(true);
@@ -266,7 +266,7 @@ public class ConfigManagerImpl implements ConfigManager {
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
                         Minecraft.getInstance().setScreen(new TransformingScreen(false, creditsScreen,
                                 screen,
-                                () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (getConfig().isReducedMotion() ? -3000 : 0) : current.getValue()),
+                                () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (!getConfig().isCreditsScreenAnimated() ? -3000 : 0) : current.getValue()),
                                 () -> (1 - EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
                                       * Minecraft.getInstance().getWindow().getGuiScaledWidth() * 1.3,
                                 () -> 0,
@@ -284,7 +284,7 @@ public class ConfigManagerImpl implements ConfigManager {
             MutableLong current = new MutableLong(0);
             return new TransformingScreen(false, configScreen,
                     parent,
-                    () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (getConfig().isReducedMotion() ? -3000 : 0) : current.getValue()),
+                    () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (!getConfig().isConfigScreenAnimated() ? -3000 : 0) : current.getValue()),
                     () -> 0, () -> (1 - EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
                                    * Minecraft.getInstance().getWindow().getGuiScaledHeight() * 1.3, () -> Util.getMillis() - current.getValue() > 800);
         } catch (Exception e) {

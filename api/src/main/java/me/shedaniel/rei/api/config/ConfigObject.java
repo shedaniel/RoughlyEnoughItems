@@ -58,7 +58,11 @@ public interface ConfigObject {
     
     boolean isGrabbingItems();
     
-    boolean isReducedMotion();
+    boolean isConfigScreenAnimated();
+    
+    boolean isCreditsScreenAnimated();
+    
+    boolean isFavoritesAnimated();
     
     boolean isToastDisplayedOnCopyIdentifier();
     
@@ -97,6 +101,7 @@ public interface ConfigObject {
     boolean areClickableRecipeArrowsEnabled();
     
     RecipeBorderType getRecipeBorderType();
+    
     
     boolean doesVillagerScreenHavePermanentScrollBar();
     
