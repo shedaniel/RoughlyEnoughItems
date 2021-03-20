@@ -387,10 +387,10 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
             public Rectangle getScreenBounds(AbstractContainerScreen<?> screen) {
                 return new Rectangle(screen.leftPos, screen.topPos, screen.imageWidth, screen.imageHeight);
             }
-            
+    
             @Override
-            public Class<? extends Screen> getBaseSupportedClass() {
-                return AbstractContainerScreen.class;
+            public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
+                return AbstractContainerScreen.class.isAssignableFrom(screen);
             }
         });
         

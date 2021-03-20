@@ -443,15 +443,16 @@ public class RoughlyEnoughItemsCore {
         if (!REIHelper.getInstance().getOverlay().isPresent()) return true;
         if (screen == null) return true;
         if (screen != Minecraft.getInstance().screen) return true;
-        return shouldReturn(screen.getClass());
+        return _shouldReturn(screen);
     }
     
-    private boolean shouldReturn(Class<? extends Screen> screen) {
+    private boolean _shouldReturn(Screen screen) {
         try {
+            Class<? extends Screen> screenClass = screen.getClass();
             for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders()) {
-                if (!decider.isHandingScreen(screen))
+                if (!decider.isHandingScreen(screen.getClass()))
                     continue;
-                InteractionResult result = decider.shouldScreenBeOverlaid(screen);
+                InteractionResult result = decider.shouldScreenBeOverlaid(screenClass);
                 if (result != InteractionResult.PASS) {
                     return result == InteractionResult.FAIL || REIHelper.getInstance().getPreviousScreen() == null;
                 }

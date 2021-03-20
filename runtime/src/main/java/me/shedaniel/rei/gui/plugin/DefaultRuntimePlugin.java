@@ -116,17 +116,18 @@ public class DefaultRuntimePlugin implements REIPlugin {
     @Override
     public void registerScreens(ScreenRegistry registry) {
         ExclusionZones zones = registry.exclusionZones();
-        zones.register(RecipeViewingScreen.class, () -> {
-            Panel widget = ((RecipeViewingScreen) Minecraft.getInstance().screen).getWorkingStationsBaseWidget();
+        zones.register(RecipeViewingScreen.class, screen -> {
+            Panel widget = screen.getWorkingStationsBaseWidget();
             if (widget == null)
                 return Collections.emptyList();
             return Collections.singletonList(widget.getBounds().clone());
         });
-        zones.register(Screen.class, () -> {
+        zones.register(Screen.class, screen -> {
             FavoritesListWidget widget = ContainerScreenOverlay.getFavoritesListWidget();
             if (widget != null) {
-                if (widget.favoritePanelButton.isVisible())
+                if (widget.favoritePanelButton.isVisible()) {
                     return Collections.singletonList(widget.favoritePanelButton.bounds);
+                }
             }
             return Collections.emptyList();
         });
@@ -135,12 +136,12 @@ public class DefaultRuntimePlugin implements REIPlugin {
             public Rectangle getScreenBounds(AbstractRecipeViewingScreen screen) {
                 return screen.getBounds();
             }
-            
+    
             @Override
-            public Class<? extends Screen> getBaseSupportedClass() {
-                return AbstractRecipeViewingScreen.class;
+            public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
+                return  AbstractRecipeViewingScreen.class.isAssignableFrom(screen);
             }
-            
+    
             @Override
             public InteractionResult shouldScreenBeOverlaid(Class<?> screen) {
                 return InteractionResult.SUCCESS;

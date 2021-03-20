@@ -25,11 +25,10 @@ package me.shedaniel.rei.plugin;
 
 import com.google.common.collect.Ordering;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.registry.screen.ExclusionZonesProvider;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.world.effect.MobEffectInstance;
 
@@ -37,29 +36,26 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
-public class DefaultPotionEffectExclusionZones implements Supplier<List<Rectangle>> {
+public class DefaultPotionEffectExclusionZones implements ExclusionZonesProvider<EffectRenderingInventoryScreen<?>> {
     @Override
-    public List<Rectangle> get() {
-        Screen screen = Minecraft.getInstance().screen;
-        if (!(screen instanceof EffectRenderingInventoryScreen) || !((EffectRenderingInventoryScreen<?>) screen).doRenderEffects)
+    public Collection<Rectangle> provide(EffectRenderingInventoryScreen<?> screen) {
+        if (!screen.doRenderEffects)
             return Collections.emptyList();
         Collection<MobEffectInstance> activePotionEffects = Minecraft.getInstance().player.getActiveEffects();
         if (activePotionEffects.isEmpty())
             return Collections.emptyList();
-        AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) screen;
-        List<Rectangle> list = new ArrayList<>();
-        int x = containerScreen.leftPos - 124;
-        int y = containerScreen.topPos;
+        List<Rectangle> zones = new ArrayList<>();
+        int x = screen.leftPos - 124;
+        int y = screen.topPos;
         int height = 33;
         if (activePotionEffects.size() > 5)
             height = 132 / (activePotionEffects.size() - 1);
         for (MobEffectInstance instance : Ordering.natural().sortedCopy(activePotionEffects)) {
-            list.add(new Rectangle(x, y, 166, height));
+            zones.add(new Rectangle(x, y, 166, height));
             y += height;
         }
-        return list;
+        return zones;
     }
 }

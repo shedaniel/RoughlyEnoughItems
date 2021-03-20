@@ -489,7 +489,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                 return getBottomSideSearchFieldArea(widthRemoved);
             default:
             case CENTER: {
-                for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().screen.getClass())) {
+                for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().screen)) {
                     if (decider instanceof DisplayBoundsProvider) {
                         Rectangle containerBounds = ((DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
                         return getBottomCenterSearchFieldArea(containerBounds, widthRemoved);
@@ -545,7 +545,7 @@ public class ContainerScreenOverlay extends REIOverlay {
             ENTRY_LIST_WIDGET.updateSearch(REIHelperImpl.getSearchField().getText(), true);
             init();
         } else {
-            for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(minecraft.screen.getClass())) {
+            for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(minecraft.screen)) {
                 if (decider != null && decider.shouldRecalculateArea(ConfigObject.getInstance().getDisplayPanelLocation(), bounds)) {
                     init();
                     break;
@@ -707,7 +707,7 @@ public class ContainerScreenOverlay extends REIOverlay {
             REIHelper.getInstance().toggleOverlayVisible();
             return true;
         }
-        EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen);
+        EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen, PointHelper.ofMouse());
         if (stack != null && !stack.isEmpty()) {
             stack = stack.copy();
             if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(keyCode, scanCode)) {
@@ -760,7 +760,7 @@ public class ContainerScreenOverlay extends REIOverlay {
             REIHelper.getInstance().toggleOverlayVisible();
             return true;
         }
-        EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen);
+        EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen, PointHelper.ofMouse());
         if (stack != null && !stack.isEmpty()) {
             stack = stack.copy();
             if (ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button)) {
@@ -844,7 +844,7 @@ public class ContainerScreenOverlay extends REIOverlay {
     
     @Override
     public boolean isNotInExclusionZones(double mouseX, double mouseY) {
-        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().screen.getClass())) {
+        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().screen)) {
             InteractionResult in = decider.isInZone(mouseX, mouseY);
             if (in != InteractionResult.PASS)
                 return in == InteractionResult.SUCCESS;

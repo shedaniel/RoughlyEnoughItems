@@ -28,7 +28,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.ClientHelper;
+import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.config.ConfigObject;
+import me.shedaniel.rei.api.gui.AbstractRenderer;
+import me.shedaniel.rei.api.gui.Renderer;
+import me.shedaniel.rei.api.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.ingredient.entry.comparison.ItemComparator;
 import me.shedaniel.rei.api.ingredient.entry.comparison.ItemComparatorRegistry;
@@ -36,12 +41,6 @@ import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
 import me.shedaniel.rei.api.ingredient.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.ingredient.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.registry.display.LiveDisplayGenerator;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.AbstractRenderer;
-import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.plugins.BuiltinPlugin;
@@ -50,7 +49,9 @@ import me.shedaniel.rei.api.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.registry.display.LiveDisplayGenerator;
 import me.shedaniel.rei.api.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.registry.screen.DisplayBoundsProvider;
 import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
@@ -61,10 +62,7 @@ import me.shedaniel.rei.jeicompat.wrap.JEIWrappedDisplay;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
-import mezz.jei.api.gui.handlers.IGlobalGuiHandler;
-import mezz.jei.api.gui.handlers.IGuiContainerHandler;
-import mezz.jei.api.gui.handlers.IScreenHandler;
+import mezz.jei.api.gui.handlers.*;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.helpers.IModIdHelper;
@@ -84,10 +82,13 @@ import mezz.jei.api.registration.*;
 import mezz.jei.api.runtime.*;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -565,22 +566,47 @@ public class JEIPluginDetector {
         return new IGuiHandlerRegistration() {
             @Override
             public <T extends AbstractContainerScreen<?>> void addGuiContainerHandler(@NotNull Class<? extends T> guiClass, @NotNull IGuiContainerHandler<T> guiHandler) {
-                addGenericGuiContainerHandler(guiClass, guiHandler);
+                this.<T>add(guiClass, guiHandler::getGuiExtraAreas, guiHandler::getIngredientUnderMouse);
             }
             
             @Override
             public <T extends AbstractContainerScreen<?>> void addGenericGuiContainerHandler(@NotNull Class<? extends T> guiClass, @NotNull IGuiContainerHandler<?> guiHandler) {
-                throw TODO();
+                addGuiContainerHandler(guiClass, (IGuiContainerHandler<T>) guiHandler);
             }
             
             @Override
             public <T extends Screen> void addGuiScreenHandler(@NotNull Class<T> guiClass, @NotNull IScreenHandler<T> handler) {
-                throw TODO();
+                registry.registerDecider(new DisplayBoundsProvider<T>() {
+                    @Override
+                    public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
+                        return guiClass.isAssignableFrom(screen);
+                    }
+                    
+                    @Override
+                    public Rectangle getScreenBounds(T screen) {
+                        IGuiProperties properties = handler.apply(screen);
+                        return new Rectangle(properties.getGuiLeft(), properties.getGuiTop(), properties.getGuiXSize(), properties.getGuiYSize());
+                    }
+                });
             }
             
             @Override
             public void addGlobalGuiHandler(@NotNull IGlobalGuiHandler globalGuiHandler) {
-                throw TODO();
+                add(Screen.class, screen -> globalGuiHandler.getGuiExtraAreas(),
+                        (screen, mouseX, mouseY) -> globalGuiHandler.getIngredientUnderMouse(mouseX, mouseY));
+            }
+            
+            private <T extends Screen> void add(Class<? extends T> screenClass, Function<T, Collection<Rect2i>> exclusionZones, PropertyDispatch.TriFunction<T, Double, Double, Object> focusedStack) {
+                registry.exclusionZones().register(screenClass, screen -> {
+                    return CollectionUtils.map(exclusionZones.apply(screen), rect2i -> new Rectangle(rect2i.getX(), rect2i.getY(), rect2i.getWidth(), rect2i.getHeight()));
+                });
+                registry.registerFocusedStack((screen, mouse) -> {
+                    if (!screenClass.isInstance(screen)) return InteractionResultHolder.pass(EntryStack.empty());
+                    Object ingredient = focusedStack.apply((T) screen, (double) mouse.x, (double) mouse.y);
+                    if (ingredient == null) return InteractionResultHolder.pass(EntryStack.empty());
+                    
+                    return InteractionResultHolder.success(wrap(ingredient));
+                });
             }
             
             @Override
@@ -623,12 +649,12 @@ public class JEIPluginDetector {
             public void registerSubtypeInterpreter(@NotNull Item item, @NotNull ISubtypeInterpreter interpreter) {
                 registry.register(wrapItemComparator(interpreter), item);
             }
-    
+            
             @Override
             public void useNbtForSubtypes(@NotNull Item... items) {
                 registry.registerNbt(items);
             }
-    
+            
             @Override
             public boolean hasSubtypeInterpreter(@NotNull ItemStack itemStack) {
                 throw TODO();
@@ -642,23 +668,23 @@ public class JEIPluginDetector {
     
     public static class JEIPluginWrapper implements REIPlugin {
         private final IModPlugin backingPlugin;
-    
+        
         private final List<JEIWrappedCategory<?>> categories = new ArrayList<>();
-    
+        
         public JEIPluginWrapper(IModPlugin backingPlugin) {
             this.backingPlugin = backingPlugin;
         }
-    
+        
         @Override
         public void registerEntryTypes(EntryTypeRegistry registry) {
             backingPlugin.registerIngredients(wrapModIngredientRegistration(this, registry));
         }
-    
+        
         @Override
         public void registerItemComparators(ItemComparatorRegistry registry) {
             backingPlugin.registerItemSubtypes(wrapSubtypeRegistration(registry));
         }
-    
+        
         @Override
         public void registerCategories(CategoryRegistry registry) {
             this.categories.clear();

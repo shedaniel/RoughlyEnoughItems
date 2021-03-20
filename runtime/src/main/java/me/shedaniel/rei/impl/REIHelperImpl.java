@@ -29,10 +29,10 @@ import com.mojang.blaze3d.platform.Window;
 import me.shedaniel.architectury.event.events.GuiEvent;
 import me.shedaniel.architectury.event.events.client.ClientTickEvent;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.config.ConfigManager;
-import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.REIOverlay;
+import me.shedaniel.rei.api.config.ConfigManager;
+import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.gui.widgets.TextField;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
@@ -175,7 +175,7 @@ public class REIHelperImpl implements REIHelper {
     @Override
     public SearchFieldLocation getContextualSearchFieldLocation() {
         Window window = Minecraft.getInstance().getWindow();
-        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().screen.getClass())) {
+        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().screen)) {
             if (decider instanceof DisplayBoundsProvider) {
                 Rectangle containerBounds = ((DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
                 if (window.getGuiScaledHeight() - 20 <= containerBounds.getMaxY()) {

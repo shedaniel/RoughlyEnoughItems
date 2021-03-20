@@ -26,9 +26,8 @@ package me.shedaniel.rei.impl;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.platform.Window;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.registry.screen.FocusedStackProvider;
-import me.shedaniel.rei.api.registry.screen.SimpleClickArea;
 import me.shedaniel.rei.api.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
@@ -70,7 +69,8 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     }
     
     @Override
-    public <R extends Screen> List<OverlayDecider> getDeciders(Class<R> screenClass) {
+    public <R extends Screen> List<OverlayDecider> getDeciders(R screen) {
+        Class<? extends Screen> screenClass = screen.getClass();
         List<OverlayDecider> possibleCached = cache.get(screenClass);
         if (possibleCached != null) {
             return possibleCached;
@@ -97,7 +97,7 @@ public class ScreenRegistryImpl implements ScreenRegistry {
         Window window = Minecraft.getInstance().getWindow();
         int scaledWidth = window.getGuiScaledWidth();
         int scaledHeight = window.getGuiScaledHeight();
-        for (OverlayDecider decider : getDeciders(screen.getClass())) {
+        for (OverlayDecider decider : getDeciders(screen)) {
             if (decider instanceof DisplayBoundsProvider) {
                 Rectangle containerBounds = ((DisplayBoundsProvider<T>) decider).getScreenBounds(screen);
                 if (location == DisplayPanelLocation.LEFT) {
@@ -114,9 +114,9 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     
     @Nullable
     @Override
-    public <T extends Screen> EntryStack<?> getFocusedStack(T screen) {
+    public <T extends Screen> EntryStack<?> getFocusedStack(T screen, Point mouse) {
         for (FocusedStackProvider provider : focusedStackProviders) {
-            InteractionResultHolder<EntryStack<?>> result = Objects.requireNonNull(provider.provide(screen));
+            InteractionResultHolder<EntryStack<?>> result = Objects.requireNonNull(provider.provide(screen, mouse));
             if (result.getResult() == InteractionResult.SUCCESS) {
                 if (result != null && !result.getObject().isEmpty())
                     return result.getObject();
@@ -211,7 +211,7 @@ public class ScreenRegistryImpl implements ScreenRegistry {
         registerFocusedStack(new FocusedStackProvider() {
             @Override
             @NotNull
-            public InteractionResultHolder<EntryStack<?>> provide(Screen screen) {
+            public InteractionResultHolder<EntryStack<?>> provide(Screen screen, Point mouse) {
                 if (screen instanceof AbstractContainerScreen) {
                     AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) screen;
                     if (containerScreen.hoveredSlot != null && !containerScreen.hoveredSlot.getItem().isEmpty())

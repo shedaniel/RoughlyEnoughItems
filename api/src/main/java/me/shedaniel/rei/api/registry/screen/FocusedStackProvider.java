@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.registry.screen;
 
+import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.InteractionResultHolder;
@@ -38,7 +39,7 @@ public interface FocusedStackProvider extends Comparable<FocusedStackProvider> {
     }
     
     @NotNull
-    InteractionResultHolder<EntryStack<?>> provide(Screen screen);
+    InteractionResultHolder<EntryStack<?>> provide(Screen screen, Point mouse);
     
     @Override
     default int compareTo(@NotNull FocusedStackProvider o) {
