@@ -101,8 +101,18 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
-    public boolean isReducedMotion() {
-        return basics.reducedMotion;
+    public boolean isConfigScreenAnimated() {
+        return basics.motion.configScreenAnimation;
+    }
+    
+    @Override
+    public boolean isCreditsScreenAnimated() {
+        return basics.motion.creditsScreenAnimation;
+    }
+    
+    @Override
+    public boolean isFavoritesAnimated() {
+        return basics.motion.favoritesAnimation;
     }
     
     @Override
@@ -400,7 +410,14 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares whether REI is visible.") @ConfigEntry.Gui.Excluded private boolean overlayVisible = true;
         @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private ItemCheatingStyle cheatingStyle = ItemCheatingStyle.GRAB;
-        private boolean reducedMotion = false;
+        @ConfigEntry.Gui.CollapsibleObject
+        private Motion motion = new Motion();
+    }
+    
+    public static class Motion {
+        private boolean configScreenAnimation = false;
+        private boolean creditsScreenAnimation = true;
+        private boolean favoritesAnimation = true;
     }
     
     public static class KeyBindings {

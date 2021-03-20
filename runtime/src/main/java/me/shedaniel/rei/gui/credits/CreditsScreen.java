@@ -125,7 +125,7 @@ public class CreditsScreen extends Screen {
         MutableLong current = new MutableLong(0);
         Minecraft.getInstance().setScreen(new TransformingScreen(true, parent,
                 this,
-                () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (ConfigObject.getInstance().isReducedMotion() ? -3000 : 0) : current.getValue()),
+                () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (!ConfigObject.getInstance().isCreditsScreenAnimated() ? -3000 : 0) : current.getValue()),
                 () -> EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1))
                       * Minecraft.getInstance().getWindow().getGuiScaledWidth(),
                 () -> 0,

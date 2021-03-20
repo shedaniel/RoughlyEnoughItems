@@ -322,7 +322,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 entry = new Entry(favorite, entrySize);
             }
             
-            if (ConfigObject.getInstance().isReducedMotion()) entry.size.setAs(entrySize * 100);
+            if (!ConfigObject.getInstance().isFavoritesAnimated()) entry.size.setAs(entrySize * 100);
             else entry.size.setTo(entrySize * 100, 300);
             entries.put(entry.hashIgnoreAmount(), entry);
         }
@@ -530,7 +530,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         public void remove() {
             if (!hidden) {
                 this.hidden = true;
-                if (ConfigObject.getInstance().isReducedMotion()) this.size.setAs(0);
+                if (!ConfigObject.getInstance().isFavoritesAnimated()) this.size.setAs(0);
                 else this.size.setTo(0, 300);
             }
         }
@@ -562,7 +562,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         }
         
         public void moveTo(boolean animated, int xPos, int yPos) {
-            if (animated && !ConfigObject.getInstance().isReducedMotion()) {
+            if (animated && ConfigObject.getInstance().isFavoritesAnimated()) {
                 x.setTo(xPos, 200);
                 y.setTo(yPos, 200);
             } else {
