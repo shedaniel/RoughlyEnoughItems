@@ -34,8 +34,6 @@ import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.EntrySerializer;
@@ -193,7 +191,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
         
         @Override
         public @Nullable Tooltip getTooltip(EntryStack<FluidStack> entry, Point mouse) {
-            if (!entry.get(EntryStack.Settings.TOOLTIP_ENABLED).get() || entry.isEmpty())
+            if (entry.isEmpty())
                 return null;
             List<Component> toolTip = Lists.newArrayList(entry.asFormattedText());
             Fraction amount = entry.getValue().getAmount();
@@ -202,19 +200,9 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
                 if (amountTooltip != null)
                     toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList()));
             }
-            ResourceLocation fluidId = null;
             if (Minecraft.getInstance().options.advancedItemTooltips) {
-                if (fluidId == null) {
-                    fluidId = Registry.FLUID.getKey(entry.getValue().getFluid());
-                }
+                ResourceLocation fluidId = Registry.FLUID.getKey(entry.getValue().getFluid());
                 toolTip.add((new TextComponent(fluidId.toString())).withStyle(ChatFormatting.DARK_GRAY));
-            }
-            toolTip.addAll(entry.get(EntryStack.Settings.TOOLTIP_APPEND_EXTRA).apply(entry));
-            if (entry.get(EntryStack.Settings.TOOLTIP_APPEND_MOD).get() && ConfigObject.getInstance().shouldAppendModNames()) {
-                if (fluidId == null) {
-                    fluidId = Registry.FLUID.getKey(entry.getValue().getFluid());
-                }
-                ClientHelper.getInstance().appendModIdToTooltips(toolTip, fluidId.getNamespace());
             }
             return Tooltip.create(toolTip);
         }

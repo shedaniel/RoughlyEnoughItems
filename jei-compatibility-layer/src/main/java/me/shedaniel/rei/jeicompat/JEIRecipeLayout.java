@@ -28,6 +28,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupFluid;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupItem;
@@ -38,6 +39,7 @@ import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.ingredient.IGuiFluidStackGroup;
 import mezz.jei.api.gui.ingredient.IGuiIngredientGroup;
 import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
+import mezz.jei.api.gui.ingredient.ITooltipCallback;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.category.IRecipeCategory;
@@ -49,6 +51,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
 
 public class JEIRecipeLayout<T> implements IRecipeLayout {
     private final JEIWrappedCategory<T> category;
@@ -116,14 +119,29 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
     
     public void addTo(List<Widget> widgets, Rectangle bounds) {
         for (Map.Entry<IIngredientType<?>, IGuiIngredientGroup<?>> groupEntry : getGroups().entrySet()) {
-            Int2ObjectMap<JEIGuiIngredientGroup.SlotWrapper> guiIngredients = ((JEIGuiIngredientGroup) groupEntry.getValue()).getGuiIngredients();
+            JEIGuiIngredientGroup<?> group = (JEIGuiIngredientGroup<?>) groupEntry.getValue();
+            Int2ObjectMap<? extends JEIGuiIngredientGroup<?>.SlotWrapper> guiIngredients = group.getGuiIngredients();
             IntArrayList integers = new IntArrayList(guiIngredients.keySet());
             integers.sort(Comparator.naturalOrder());
             for (int integer : integers) {
-                JEIGuiIngredientGroup.SlotWrapper wrapper = guiIngredients.get(integer);
+                JEIGuiIngredientGroup<?>.SlotWrapper wrapper = guiIngredients.get(integer);
                 wrapper.slot.getBounds().translate(bounds.x + 4, bounds.y + 4);
                 wrapper.slot.highlightEnabled(!wrapper.isEmpty());
                 widgets.add(Widgets.withTranslate(wrapper.slot, 0, 0, 10));
+                
+                List<ITooltipCallback<Object>> tooltipCallbacks = (List<ITooltipCallback<Object>>) (List) group.tooltipCallbacks;
+                for (EntryStack<?> entry : wrapper.slot.getEntries()) {
+                    entry.setting(EntryStack.Settings.TOOLTIP_PROCESSOR, (stack, tooltip) -> {
+                        Object ingredient = null;
+                        for (ITooltipCallback<Object> callback : tooltipCallbacks) {
+                            if (ingredient == null) {
+                                ingredient = unwrap(stack);
+                            }
+                            callback.onTooltip(integer, wrapper.isInput(), ingredient, tooltip.getText());
+                        }
+                        return tooltip;
+                    });
+                }
             }
         }
     }

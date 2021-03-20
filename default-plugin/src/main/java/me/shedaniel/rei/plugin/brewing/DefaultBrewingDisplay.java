@@ -52,20 +52,16 @@ public class DefaultBrewingDisplay implements Display {
         ItemStack[] inputItems = input.getItems();
         List<EntryStack<?>> i = new ArrayList<>(inputItems.length);
         for (ItemStack inputItem : inputItems) {
-            EntryStack<?> entryStack = EntryStacks.of(inputItem);
-            entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableComponent("category.rei.brewing.input").withStyle(ChatFormatting.YELLOW)));
-            i.add(entryStack);
+            i.add(EntryStacks.of(inputItem).tooltip(new TranslatableComponent("category.rei.brewing.input").withStyle(ChatFormatting.YELLOW)));
         }
         this.input = EntryIngredient.of(i);
         ItemStack[] reactantStacks = reactant.getItems();
         List<EntryStack<?>> r = new ArrayList<>(reactantStacks.length);
         for (ItemStack stack : reactantStacks) {
-            EntryStack<?> entryStack = EntryStacks.of(stack);
-            entryStack.setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, s -> Collections.singletonList(new TranslatableComponent("category.rei.brewing.reactant").withStyle(ChatFormatting.YELLOW)));
-            r.add(entryStack);
+            r.add(EntryStacks.of(stack).tooltip(new TranslatableComponent("category.rei.brewing.reactant").withStyle(ChatFormatting.YELLOW)));
         }
         this.reactant = EntryIngredient.of(r);
-        this.output = EntryStacks.of(output).setting(EntryStack.Settings.TOOLTIP_APPEND_EXTRA, stack -> Collections.singletonList(new TranslatableComponent("category.rei.brewing.result").withStyle(ChatFormatting.YELLOW)));
+        this.output = EntryStacks.of(output).tooltip(new TranslatableComponent("category.rei.brewing.result").withStyle(ChatFormatting.YELLOW));
     }
     
     @Override

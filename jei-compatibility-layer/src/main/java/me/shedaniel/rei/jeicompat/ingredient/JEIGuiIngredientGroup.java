@@ -47,10 +47,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
@@ -60,7 +57,7 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
             PoseStack.class, Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE);
     private final IIngredientType<T> type;
     private final Int2ObjectMap<SlotWrapper> slots = new Int2ObjectOpenHashMap<>();
-    private final List<ITooltipCallback<T>> tooltipCallbacks = new ArrayList<>();
+    public final List<ITooltipCallback<T>> tooltipCallbacks = new ArrayList<>();
     
     public JEIGuiIngredientGroup(IIngredientType<T> type) {
         this.type = type;
@@ -75,17 +72,20 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     public void set(@NotNull IIngredients ingredients) {
         List<List<T>> inputs = ingredients.getInputs(type);
         List<List<T>> outputs = ingredients.getOutputs(type);
-        for (Int2ObjectMap.Entry<SlotWrapper> entry : slots.int2ObjectEntrySet()) {
-            byte noticeMark = entry.getValue().slot.getNoticeMark();
-            if (noticeMark == Slot.INPUT) {
-                if (entry.getIntKey() < inputs.size()) {
-                    entry.getValue().slot.clearEntries();
-                    entry.getValue().slot.entries(JEIPluginDetector.wrapList(type, inputs.get(entry.getIntKey())));
+        int inputIndex = 0, outputIndex = 0;
+        int[] array = slots.keySet().toArray(new int[0]);
+        Arrays.parallelSort(array);
+        for (int slot : array) {
+            SlotWrapper slotWrapper = slots.get(slot);
+            if (slotWrapper.slot.getNoticeMark() == Slot.INPUT) {
+                if (inputIndex < inputs.size()) {
+                    slotWrapper.slot.clearEntries();
+                    slotWrapper.slot.entries(JEIPluginDetector.wrapList(type, inputs.get(inputIndex++)));
                 }
-            } else if (noticeMark == Slot.OUTPUT) {
-                if (entry.getIntKey() < outputs.size()) {
-                    entry.getValue().slot.clearEntries();
-                    entry.getValue().slot.entries(JEIPluginDetector.wrapList(type, outputs.get(entry.getIntKey())));
+            } else if (slotWrapper.slot.getNoticeMark() == Slot.OUTPUT) {
+                if (outputIndex < outputs.size()) {
+                    slotWrapper.slot.clearEntries();
+                    slotWrapper.slot.entries(JEIPluginDetector.wrapList(type, outputs.get(outputIndex++)));
                 }
             }
         }
