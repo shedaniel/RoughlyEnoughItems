@@ -82,14 +82,13 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
             Style style = Style.EMPTY;
             if (arg > 0) {
                 Argument<?, ?> argument = ArgumentsRegistry.ARGUMENT_LIST.get((arg - 1) / 2);
+                if (isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
+                    style = ERROR_STYLE;
+                }
                 if (!isPlain) {
                     style = argument.getHighlightedStyle();
                 }
-                if (argument instanceof TextArgument) {
-                    if (isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
-                        style = ERROR_STYLE;
-                    }
-                } else if (hasUnderscore && arg % 2 == 1) {
+                if (!(argument instanceof TextArgument) && hasUnderscore && arg % 2 == 1) {
                     style = style.withUnderlined(true);
                 }
             } else if (!isPlain) {
@@ -99,7 +98,6 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                     style = QUOTES_STYLE;
                 }
             }
-            
             
             if (containsMouse(PointHelper.ofMouse()) || isFocused()) {
                 return style;
@@ -132,6 +130,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     public void laterRender(PoseStack matrices, int int_1, int int_2, float float_1) {
         RenderSystem.disableDepthTest();
+        setEditableColor(isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty() ? 16733525 : isHighlighting && isMain ? -852212 : (containsMouse(PointHelper.ofMouse()) || isFocused()) ? (REIHelper.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
         super.render(matrices, int_1, int_2, float_1);
         RenderSystem.enableDepthTest();

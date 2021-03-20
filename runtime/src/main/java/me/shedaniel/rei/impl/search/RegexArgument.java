@@ -30,7 +30,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Matcher;
@@ -74,7 +73,7 @@ public final class RegexArgument extends Argument<@Nullable Pattern, String> {
     }
     
     @Override
-    public @NotNull Style getHighlightedStyle() {
+    public Style getHighlightedStyle() {
         return STYLE;
     }
     

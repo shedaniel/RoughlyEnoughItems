@@ -350,6 +350,21 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return appearance.syntaxHighlightingMode;
     }
     
+    @Override
+    public SearchMode getTooltipSearchMode() {
+        return advanced.search.tooltipSearch;
+    }
+    
+    @Override
+    public SearchMode getTagSearchMode() {
+        return advanced.search.tagSearch;
+    }
+    
+    @Override
+    public SearchMode getModSearchMode() {
+        return advanced.search.modSearch;
+    }
+    
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface DontApplyFieldName {}
@@ -475,6 +490,12 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares whether REI should search async.") private boolean asyncSearch = true;
             @Comment("Declares how many entries should be grouped one async search.") @ConfigEntry.BoundedDiscrete(min = 25, max = 400)
             private int asyncSearchPartitionSize = 100;
+            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+            private SearchMode tooltipSearch = SearchMode.ALWAYS;
+            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+            private SearchMode tagSearch = SearchMode.PREFIX;
+            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+            private SearchMode modSearch = SearchMode.PREFIX;
         }
         
         public static class Commands {

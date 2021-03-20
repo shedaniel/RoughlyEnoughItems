@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.search;
 
+import me.shedaniel.rei.api.gui.config.SearchMode;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -45,13 +46,29 @@ public abstract class Argument<T, R> {
         return null;
     }
     
-    @NotNull
     public Style getHighlightedStyle() {
         return Style.EMPTY;
     }
     
+    public SearchMode getSearchMode() {
+        return SearchMode.PREFIX;
+    }
+    
     public MatchStatus matchesArgumentPrefix(String text) {
-        String prefix = getPrefix();
+        MatchStatus status = checkMatchPrefix(text, getPrefix());
+        if (status.isMatched()) {
+            return status;
+        } else if (getSearchMode() == SearchMode.ALWAYS) {
+            status = checkMatchPrefix(text, "");
+            if (status.isMatched()) {
+                status.notUsingGrammar();
+            }
+            return status;
+        }
+        return MatchStatus.unmatched();
+    }
+    
+    private MatchStatus checkMatchPrefix(String text, String prefix) {
         if (prefix == null) return MatchStatus.unmatched();
         if (text.startsWith("-" + prefix)) return MatchStatus.invertMatched(text.substring(1 + prefix.length())).grammar(0, prefix.length() + 1);
         if (text.startsWith(prefix + "-")) return MatchStatus.invertMatched(text.substring(1 + prefix.length())).grammar(0, prefix.length() + 1);

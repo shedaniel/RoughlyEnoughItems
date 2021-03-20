@@ -23,6 +23,8 @@
 
 package me.shedaniel.rei.impl.search;
 
+import me.shedaniel.rei.api.config.ConfigObject;
+import me.shedaniel.rei.api.gui.config.SearchMode;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
 import net.fabricmc.api.EnvType;
@@ -34,7 +36,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -53,13 +54,19 @@ public final class TagArgument extends Argument<Unit, String[]> {
     }
     
     @Override
-    public @Nullable String getPrefix() {
+    @Nullable
+    public String getPrefix() {
         return "$";
     }
     
     @Override
-    public @NotNull Style getHighlightedStyle() {
+    public Style getHighlightedStyle() {
         return STYLE;
+    }
+    
+    @Override
+    public SearchMode getSearchMode() {
+        return ConfigObject.getInstance().getTagSearchMode();
     }
     
     @Override
