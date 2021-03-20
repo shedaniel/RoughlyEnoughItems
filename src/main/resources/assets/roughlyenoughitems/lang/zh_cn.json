@@ -102,6 +102,7 @@
   "favorite.section.weather": "天气",
   "tooltip.rei.fluid_amount": "§7%d 单位",
   "tooltip.rei.fluid_amount.forge": "§7%d mB",
+  "tooltip.rei.drag_to_add_favorites": "§7拖动这个向上来将它添加到您的收藏夹!",
   "msg.rei.copied_recipe_id": "已复制配方ID",
   "msg.rei.recipe_id_details": "配方ID：%s",
   "msg.rei.exported_recipe": "已导出配方",
