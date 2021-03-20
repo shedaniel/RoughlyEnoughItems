@@ -137,7 +137,7 @@ public class EntryListWidget extends WidgetWithBounds {
     
     static boolean notSteppingOnExclusionZones(int left, int top, int width, int height, Rectangle listArea) {
         Minecraft instance = Minecraft.getInstance();
-        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(instance.screen.getClass())) {
+        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(instance.screen)) {
             InteractionResult fit = canItemSlotWidgetFit(left, top, width, height, decider);
             if (fit != InteractionResult.PASS)
                 return fit == InteractionResult.SUCCESS;

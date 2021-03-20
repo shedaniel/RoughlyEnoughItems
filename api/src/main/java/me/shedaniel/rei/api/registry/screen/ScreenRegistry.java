@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.registry.screen;
 
+import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.ingredient.EntryStack;
@@ -55,7 +56,7 @@ public interface ScreenRegistry extends Reloadable {
      *
      * @return the list of registered overlay deciders
      */
-    <R extends Screen> List<OverlayDecider> getDeciders(Class<R> screenClass);
+    <R extends Screen> List<OverlayDecider> getDeciders(R screen);
     
     /**
      * Gets all registered overlay deciders
@@ -81,7 +82,7 @@ public interface ScreenRegistry extends Reloadable {
      */
     <T extends Screen> Rectangle getOverlayBounds(DisplayPanelLocation location, T screen);
     
-    @Nullable <T extends Screen> EntryStack<?> getFocusedStack(T screen);
+    @Nullable <T extends Screen> EntryStack<?> getFocusedStack(T screen, Point mouse);
     
     ExclusionZones exclusionZones();
     

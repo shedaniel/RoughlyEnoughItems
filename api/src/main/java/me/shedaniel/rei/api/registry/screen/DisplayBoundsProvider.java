@@ -24,7 +24,6 @@
 package me.shedaniel.rei.api.registry.screen;
 
 import me.shedaniel.math.Rectangle;
-import net.minecraft.client.gui.screens.Screen;
 
 public interface DisplayBoundsProvider<T> extends OverlayDecider {
     /**
@@ -32,16 +31,4 @@ public interface DisplayBoundsProvider<T> extends OverlayDecider {
      * @return the boundary of the base container panel.
      */
     Rectangle getScreenBounds(T screen);
-    
-    /**
-     * Gets the base supported class for the bounds handler
-     *
-     * @return the base class
-     */
-    Class<? extends Screen> getBaseSupportedClass();
-    
-    @Override
-    default <R extends Screen> boolean isHandingScreen(Class<R> screen) {
-        return getBaseSupportedClass().isAssignableFrom(screen);
-    }
 }

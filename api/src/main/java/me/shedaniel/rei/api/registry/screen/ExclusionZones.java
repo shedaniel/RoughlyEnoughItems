@@ -28,7 +28,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
 public interface ExclusionZones extends OverlayDecider {
@@ -49,8 +48,8 @@ public interface ExclusionZones extends OverlayDecider {
     /**
      * Register an exclusion zone
      *
-     * @param screenClass the screen
-     * @param supplier    the exclusion zone supplier, returns the list of exclusion zones
+     * @param screenClass the screen class
+     * @param provider    the exclusion zone provider, returns a collection of exclusion zones
      */
-    void register(Class<?> screenClass, Supplier<List<Rectangle>> supplier);
+    <T> void register(Class<? extends T> screenClass, ExclusionZonesProvider<? extends T> provider);
 }
