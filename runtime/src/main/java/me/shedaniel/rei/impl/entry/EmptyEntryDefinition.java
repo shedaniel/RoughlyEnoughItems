@@ -46,6 +46,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -107,12 +108,12 @@ public enum EmptyEntryDefinition implements EntryDefinition<Object>, EntrySerial
     
     @Override
     public int hash(EntryStack<Object> entry, Object value, ComparisonContext context) {
-        return ordinal();
+        return empty ? ordinal() : Objects.hashCode(value);
     }
     
     @Override
     public boolean equals(Object o1, Object o2, ComparisonContext context) {
-        return true;
+        return empty || Objects.equals(o1, o2);
     }
     
     @Override

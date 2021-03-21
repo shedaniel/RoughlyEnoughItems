@@ -93,23 +93,29 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     }
     
     @Override
+    public <T extends Screen> Rectangle getScreenBounds(T screen) {
+        for (OverlayDecider decider : getDeciders(screen)) {
+            if (decider instanceof DisplayBoundsProvider) {
+                return ((DisplayBoundsProvider<T>) decider).getScreenBounds(screen);
+            }
+        }
+        return new Rectangle();
+    }
+    
+    @Override
     public <T extends Screen> Rectangle getOverlayBounds(DisplayPanelLocation location, T screen) {
         Window window = Minecraft.getInstance().getWindow();
         int scaledWidth = window.getGuiScaledWidth();
         int scaledHeight = window.getGuiScaledHeight();
-        for (OverlayDecider decider : getDeciders(screen)) {
-            if (decider instanceof DisplayBoundsProvider) {
-                Rectangle containerBounds = ((DisplayBoundsProvider<T>) decider).getScreenBounds(screen);
-                if (location == DisplayPanelLocation.LEFT) {
-                    if (containerBounds.x < 10) continue;
-                    return new Rectangle(2, 0, containerBounds.x - 2, scaledHeight);
-                } else {
-                    if (scaledWidth - containerBounds.getMaxX() < 10) continue;
-                    return new Rectangle(containerBounds.getMaxX() + 2, 0, scaledWidth - containerBounds.getMaxX() - 4, scaledHeight);
-                }
-            }
+        Rectangle screenBounds = getScreenBounds(screen);
+        if (screenBounds.isEmpty()) return new Rectangle();
+        if (location == DisplayPanelLocation.LEFT) {
+            if (screenBounds.x < 10) return new Rectangle();
+            return new Rectangle(2, 0, screenBounds.x - 2, scaledHeight);
+        } else {
+            if (scaledWidth - screenBounds.getMaxX() < 10) return new Rectangle();
+            return new Rectangle(screenBounds.getMaxX() + 2, 0, scaledWidth - screenBounds.getMaxX() - 4, scaledHeight);
         }
-        return new Rectangle();
     }
     
     @Nullable

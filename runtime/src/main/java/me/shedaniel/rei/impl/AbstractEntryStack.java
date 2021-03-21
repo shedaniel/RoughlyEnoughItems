@@ -93,8 +93,9 @@ public abstract class AbstractEntryStack<A> extends AbstractRenderer implements 
     @Override
     public <T> T get(Settings<T> settings) {
         Object o = this.settings == null ? null : this.settings.get(settings.getId());
-        if (o == null)
+        if (o == null) {
             return settings.getDefaultValue();
+        }
         return (T) o;
     }
     

@@ -59,11 +59,11 @@ public interface OverlayDecider extends Comparable<OverlayDecider> {
     }
     
     /**
-     * Checks if mouse is inside the overlay
+     * Checks if a point is inside the overlay, return false for indicating that REI should not display anything here.
      *
      * @param mouseX mouse's x coordinates
      * @param mouseY mouse's y coordinates
-     * @return whether mouse is inside the overlay
+     * @return whether a point is inside the overlay
      */
     default InteractionResult isInZone(double mouseX, double mouseY) {
         return PASS;

@@ -422,7 +422,8 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
         registry.register(GameModeFavoriteEntry.ID, GameModeFavoriteEntry.Type.INSTANCE);
         registry.getOrCrateSection(new TranslatableComponent(GameModeFavoriteEntry.TRANSLATION_KEY))
                 .add(Stream.concat(
-                        Arrays.stream(GameType.values()),
+                        Arrays.stream(GameType.values())
+                        .filter(type -> type != GameType.NOT_SET),
                         Stream.of((GameType) null)
                 ).<FavoriteEntry>map(GameModeFavoriteEntry.Type.INSTANCE::fromArgs).toArray(FavoriteEntry[]::new));
         registry.register(WeatherFavoriteEntry.ID, WeatherFavoriteEntry.Type.INSTANCE);
@@ -431,12 +432,6 @@ public class DefaultPlugin implements REIPlugin, BuiltinPlugin {
                         Arrays.stream(WeatherFavoriteEntry.Weather.values()),
                         Stream.of((WeatherFavoriteEntry.Weather) null)
                 ).<FavoriteEntry>map(WeatherFavoriteEntry.Type.INSTANCE::fromArgs).toArray(FavoriteEntry[]::new));
-    }
-    
-    @Override
-    public void registerSubsets(SubsetsRegistry registry) {
-//        registry.registerPathEntry("roughlyenoughitems:food", EntryStacks.of(Items.MILK_BUCKET));
-//        registry.registerPathEntry("roughlyenoughitems:food/roughlyenoughitems:cookies", EntryStacks.of(Items.COOKIE));
     }
     
     @Override

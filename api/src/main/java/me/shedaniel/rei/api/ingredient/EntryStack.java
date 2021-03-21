@@ -172,15 +172,14 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         @Deprecated
         public static final Settings<Function<EntryStack<?>, List<Component>>> TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
         
-        private static short nextId;
         private R defaultValue;
         private short id;
         
         @ApiStatus.Internal
         public Settings(R defaultValue) {
             this.defaultValue = defaultValue;
-            this.id = nextId++;
             SETTINGS.add(this);
+            this.id = (short) SETTINGS.indexOf(this);
         }
         
         @ApiStatus.Internal

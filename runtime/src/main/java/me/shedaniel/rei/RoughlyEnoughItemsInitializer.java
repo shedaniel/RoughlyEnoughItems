@@ -105,6 +105,9 @@ public class RoughlyEnoughItemsInitializer {
     }
     
     public static void checkClothConfig() {
+        if (!Platform.isModLoaded(Platform.isFabric() ? "cloth-config2" : "cloth-config")) {
+            RoughlyEnoughItemsState.error("Cloth Config is not installed!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
+        }
         /*try {
             if (!Platform.isModLoaded("cloth-config2")) {
                 RoughlyEnoughItemsState.error("Cloth Config is not installed!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");

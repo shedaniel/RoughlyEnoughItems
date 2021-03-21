@@ -36,8 +36,6 @@ import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.gui.widgets.TextField;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.registry.screen.DisplayBoundsProvider;
-import me.shedaniel.rei.api.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
@@ -174,17 +172,14 @@ public class REIHelperImpl implements REIHelper {
     
     @Override
     public SearchFieldLocation getContextualSearchFieldLocation() {
+        SearchFieldLocation location = ConfigObject.getInstance().getSearchFieldLocation();
         Window window = Minecraft.getInstance().getWindow();
-        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().screen)) {
-            if (decider instanceof DisplayBoundsProvider) {
-                Rectangle containerBounds = ((DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
-                if (window.getGuiScaledHeight() - 20 <= containerBounds.getMaxY()) {
-                    return SearchFieldLocation.BOTTOM_SIDE;
-                } else break;
-            }
+        Rectangle screenBounds = ScreenRegistry.getInstance().getScreenBounds(Minecraft.getInstance().screen);
+        if (location == SearchFieldLocation.CENTER && window.getGuiScaledHeight() - 20 <= screenBounds.getMaxY()) {
+            return SearchFieldLocation.BOTTOM_SIDE;
         }
         
-        return ConfigObject.getInstance().getSearchFieldLocation();
+        return location;
     }
     
     @Override
