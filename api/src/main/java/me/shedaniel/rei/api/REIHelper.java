@@ -40,7 +40,6 @@ import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public interface REIHelper extends Reloadable {
-    
     /**
      * @return the instance of {@link REIHelper}
      */

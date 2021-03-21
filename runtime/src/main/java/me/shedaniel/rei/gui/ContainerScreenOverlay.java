@@ -53,7 +53,6 @@ import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.registry.screen.ClickArea;
-import me.shedaniel.rei.api.registry.screen.DisplayBoundsProvider;
 import me.shedaniel.rei.api.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.util.CollectionUtils;
@@ -429,16 +428,10 @@ public class ContainerScreenOverlay extends REIOverlay {
     }
     
     private Rectangle getSubsetsButtonBounds() {
-        // TODO rely on the screen registry
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
-            if (Minecraft.getInstance().screen instanceof AbstractRecipeViewingScreen) {
-                AbstractRecipeViewingScreen widget = (AbstractRecipeViewingScreen) Minecraft.getInstance().screen;
-                return new Rectangle(widget.getBounds().x, 3, widget.getBounds().width, 18);
-            }
-            AbstractContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
-            if (containerScreen != null) {
-                return new Rectangle(containerScreen.leftPos, 3, containerScreen.imageWidth, 18);
-            }
+            ScreenRegistry registry = ScreenRegistry.getInstance();
+            Rectangle screenBounds = registry.getScreenBounds(minecraft.screen);
+            return new Rectangle(screenBounds.x, 3, screenBounds.width, 18);
         }
         return null;
     }
@@ -488,15 +481,8 @@ public class ContainerScreenOverlay extends REIOverlay {
             case BOTTOM_SIDE:
                 return getBottomSideSearchFieldArea(widthRemoved);
             default:
-            case CENTER: {
-                for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(Minecraft.getInstance().screen)) {
-                    if (decider instanceof DisplayBoundsProvider) {
-                        Rectangle containerBounds = ((DisplayBoundsProvider<Screen>) decider).getScreenBounds(Minecraft.getInstance().screen);
-                        return getBottomCenterSearchFieldArea(containerBounds, widthRemoved);
-                    }
-                }
-                return new Rectangle();
-            }
+            case CENTER:
+                return getCenterSearchFieldArea(widthRemoved);
         }
     }
     
@@ -506,6 +492,11 @@ public class ContainerScreenOverlay extends REIOverlay {
     
     private Rectangle getBottomSideSearchFieldArea(int widthRemoved) {
         return new Rectangle(bounds.x + 2, window.getGuiScaledHeight() - 22, bounds.width - 6 - widthRemoved, 18);
+    }
+    
+    private Rectangle getCenterSearchFieldArea(int widthRemoved) {
+        Rectangle screenBounds = ScreenRegistry.getInstance().getScreenBounds(minecraft.screen);
+        return getBottomCenterSearchFieldArea(screenBounds, widthRemoved);
     }
     
     private Rectangle getBottomCenterSearchFieldArea(Rectangle containerBounds, int widthRemoved) {

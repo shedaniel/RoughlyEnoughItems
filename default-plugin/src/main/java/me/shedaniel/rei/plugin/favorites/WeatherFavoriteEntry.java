@@ -143,10 +143,23 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
             }
             
             @Override
-            public @Nullable Tooltip getTooltip(Point mouse) {
+            @Nullable
+            public Tooltip getTooltip(Point mouse) {
                 if (weather == null)
                     return Tooltip.create(mouse, new TranslatableComponent("text.rei.weather_button.tooltip.dropdown"));
                 return Tooltip.create(mouse, new TranslatableComponent("text.rei.weather_button.tooltip.entry", new TranslatableComponent(weather.getTranslateKey())));
+            }
+    
+            @Override
+            public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                return hashCode() == o.hashCode();
+            }
+    
+            @Override
+            public int hashCode() {
+                return Objects.hash(getClass(), showcase, weather);
             }
         };
     }

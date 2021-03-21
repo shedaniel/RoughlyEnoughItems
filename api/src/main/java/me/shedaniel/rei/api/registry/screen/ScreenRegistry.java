@@ -66,19 +66,36 @@ public interface ScreenRegistry extends Reloadable {
     List<OverlayDecider> getDeciders();
     
     /**
-     * Registers an overlay decider
+     * Registers an overlay decider, may be an instance of {@link DisplayBoundsProvider} for providing
+     * the boundaries of a screen.
      *
      * @param decider the decider to register
      */
     void registerDecider(OverlayDecider decider);
     
+    /**
+     * Registers a provider for getting the focused stack by the mouse.
+     *
+     * @param provider the provider to register
+     */
     void registerFocusedStack(FocusedStackProvider provider);
     
     /**
-     * Gets the bounds of the overlay.
+     * Returns the main center screen bounds returned, provided by deciders.
      *
-     * @param screen the current screen
-     * @return the left bounds
+     * @param screen the screen to check
+     * @param <T>    the type of screen
+     * @return the main center screen bounds, may be an empty {@link Rectangle} if there are no providers
+     */
+    <T extends Screen> Rectangle getScreenBounds(T screen);
+    
+    /**
+     * Returns the bounds of the overlay, provided by deciders.
+     *
+     * @param location the side of the overlay
+     * @param screen   the screen to check
+     * @param <T>      the type of screen
+     * @return the overlay bounds decided by the {@code location}
      */
     <T extends Screen> Rectangle getOverlayBounds(DisplayPanelLocation location, T screen);
     
@@ -130,5 +147,13 @@ public interface ScreenRegistry extends Reloadable {
      */
     <T extends Screen> void registerClickArea(Class<? extends T> screenClass, ClickArea<T> area);
     
+    /**
+     * Handles the click area, returns an optional collection of category identifiers.
+     *
+     * @param screenClass the class of the screen
+     * @param context     the click area context
+     * @param <T>         the type of screen
+     * @return the collection of category identifiers, may be null if there are no click area handlers.
+     */
     @Nullable <T extends Screen> Set<ResourceLocation> handleClickArea(Class<T> screenClass, ClickArea.ClickAreaContext<T> context);
 }
