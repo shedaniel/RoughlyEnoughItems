@@ -38,6 +38,7 @@ import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.impl.entry.ItemComparatorRegistryImpl;
 import me.shedaniel.rei.impl.registry.CategoryRegistryImpl;
 import me.shedaniel.rei.impl.registry.DisplayRegistryImpl;
+import me.shedaniel.rei.impl.search.SearchProviderImpl;
 import me.shedaniel.rei.impl.subsets.SubsetsRegistryImpl;
 import me.shedaniel.rei.impl.transfer.TransferHandlerRegistryImpl;
 import net.fabricmc.api.EnvType;
@@ -62,6 +63,7 @@ public class PluginManagerImpl implements PluginManager {
     private final List<REIPlugin> plugins = new ArrayList<>();
     
     public PluginManagerImpl() {
+        registerReloadable(new SearchProviderImpl());
         registerReloadable(new ConfigManagerImpl());
         registerReloadable(new EntryTypeRegistryImpl());
         registerReloadable(new ItemComparatorRegistryImpl());

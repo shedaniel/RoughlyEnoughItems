@@ -371,6 +371,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public SearchMode getIdentifierSearchMode() {
+        return advanced.search.identifierSearch;
+    }
+    
+    @Override
     public SearchMode getModSearchMode() {
         return advanced.search.modSearch;
     }
@@ -511,6 +516,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             private SearchMode tooltipSearch = SearchMode.ALWAYS;
             @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
             private SearchMode tagSearch = SearchMode.PREFIX;
+            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+            private SearchMode identifierSearch = SearchMode.ALWAYS;
             @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
             private SearchMode modSearch = SearchMode.PREFIX;
         }

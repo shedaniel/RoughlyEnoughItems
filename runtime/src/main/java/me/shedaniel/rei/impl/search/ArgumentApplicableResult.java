@@ -33,8 +33,8 @@ import java.util.List;
 import java.util.Objects;
 
 @ApiStatus.Internal
-public final class MatchStatus {
-    private static final MatchStatus UNMATCHED = new MatchStatus(MatchType.UNMATCHED, null, false);
+public final class ArgumentApplicableResult {
+    private static final ArgumentApplicableResult UNMATCHED = new ArgumentApplicableResult(MatchType.UNMATCHED, null, false);
     private MatchType type;
     @Nullable
     private final String text;
@@ -42,55 +42,55 @@ public final class MatchStatus {
     private boolean usingGrammar = true;
     private final List<IntRange> grammarRanges = new ArrayList<>();
     
-    private MatchStatus(MatchType type, @Nullable String text, boolean preserveCasing) {
+    private ArgumentApplicableResult(MatchType type, @Nullable String text, boolean preserveCasing) {
         this.type = type;
         this.text = text;
         this.preserveCasing = preserveCasing;
     }
     
-    public static MatchStatus unmatched() {
+    public static ArgumentApplicableResult notApplicable() {
         return UNMATCHED;
     }
     
-    public static MatchStatus invertMatched(@NotNull String text) {
-        return matched(text, false).invert();
+    public static ArgumentApplicableResult applyInverted(@NotNull String text) {
+        return apply(text, false).invert();
     }
     
-    public static MatchStatus invertMatched(@NotNull String text, boolean preserveCasing) {
-        return matched(Objects.requireNonNull(text), preserveCasing).invert();
+    public static ArgumentApplicableResult applyInverted(@NotNull String text, boolean preserveCasing) {
+        return apply(text, preserveCasing).invert();
     }
     
-    public static MatchStatus matched(@NotNull String text) {
-        return matched(text, false);
+    public static ArgumentApplicableResult apply(@NotNull String text) {
+        return apply(text, false);
     }
     
-    public static MatchStatus matched(@NotNull String text, boolean preserveCasing) {
-        return new MatchStatus(MatchType.MATCHED, Objects.requireNonNull(text), preserveCasing);
+    public static ArgumentApplicableResult apply(@NotNull String text, boolean preserveCasing) {
+        return new ArgumentApplicableResult(MatchType.MATCHED, Objects.requireNonNull(text), preserveCasing);
     }
     
-    public static MatchStatus result(@NotNull String text, boolean preserveCasing, boolean inverted) {
-        return new MatchStatus(!inverted ? MatchType.MATCHED : MatchType.INVERT_MATCHED, Objects.requireNonNull(text), preserveCasing);
+    public static ArgumentApplicableResult result(@NotNull String text, boolean preserveCasing, boolean inverted) {
+        return new ArgumentApplicableResult(!inverted ? MatchType.MATCHED : MatchType.INVERT_MATCHED, Objects.requireNonNull(text), preserveCasing);
     }
     
     public List<IntRange> grammarRanges() {
         return grammarRanges;
     }
     
-    public MatchStatus grammar(int start, int end) {
+    public ArgumentApplicableResult grammar(int start, int end) {
         if (end - 1 >= start) {
             this.grammarRanges.add(IntRange.of(start, end - 1));
         }
         return this;
     }
     
-    public MatchStatus invert() {
-        if (isMatched()) {
+    public ArgumentApplicableResult invert() {
+        if (isApplicable()) {
             this.type = isInverted() ? MatchType.MATCHED : MatchType.INVERT_MATCHED;
         }
         return this;
     }
     
-    public boolean isMatched() {
+    public boolean isApplicable() {
         return type != MatchType.UNMATCHED;
     }
     
@@ -98,7 +98,7 @@ public final class MatchStatus {
         return type == MatchType.INVERT_MATCHED;
     }
     
-    public MatchStatus notUsingGrammar() {
+    public ArgumentApplicableResult notUsingGrammar() {
         usingGrammar = false;
         return this;
     }

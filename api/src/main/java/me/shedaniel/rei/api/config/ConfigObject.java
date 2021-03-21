@@ -172,5 +172,7 @@ public interface ConfigObject {
     
     SearchMode getTagSearchMode();
     
+    SearchMode getIdentifierSearchMode();
+    
     SearchMode getModSearchMode();
 }

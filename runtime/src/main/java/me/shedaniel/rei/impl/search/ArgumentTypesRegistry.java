@@ -23,38 +23,30 @@
 
 package me.shedaniel.rei.impl.search;
 
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.util.Unit;
-import org.apache.commons.lang3.mutable.Mutable;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.List;
+import java.util.Map;
+
 @ApiStatus.Internal
-@Environment(EnvType.CLIENT)
-public final class AlwaysMatchingArgument extends Argument<Unit, Unit> {
-    public static final AlwaysMatchingArgument INSTANCE = new AlwaysMatchingArgument();
+public final class ArgumentTypesRegistry {
+    public static final Map<String, ArgumentType<?, ?>> ARGUMENT_TYPES = Maps.newHashMap();
+    public static final List<ArgumentType<?, ?>> ARGUMENT_TYPE_LIST = Lists.newArrayList();
     
-    @Override
-    public String getName() {
-        return "always";
+    static {
+        register(AlwaysMatchingArgumentType.INSTANCE);
+        register(ModArgumentType.INSTANCE);
+        register(TooltipArgumentType.INSTANCE);
+        register(TagArgumentType.INSTANCE);
+        register(IdentifierArgumentType.INSTANCE);
+        register(RegexArgumentType.INSTANCE);
+        register(TextArgumentType.INSTANCE);
     }
     
-    @Override
-    public boolean matches(Mutable<Unit> data, EntryStack<?> stack, String searchText, Unit filterData) {
-        return true;
-    }
-    
-    @Override
-    public Unit prepareSearchFilter(String searchText) {
-        return Unit.INSTANCE;
-    }
-    
-    @Override
-    public MatchStatus matchesArgumentPrefix(String text) {
-        return MatchStatus.unmatched();
-    }
-    
-    private AlwaysMatchingArgument() {
+    private static void register(ArgumentType<?, ?> argumentType) {
+        ARGUMENT_TYPES.put(argumentType.getName(), argumentType);
+        ARGUMENT_TYPE_LIST.add(argumentType);
     }
 }

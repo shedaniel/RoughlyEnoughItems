@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -107,13 +108,16 @@ public abstract class AbstractEntryStack<A> extends AbstractRenderer implements 
     @Override
     @Nullable
     public Tooltip getTooltip(Point mouse) {
-        Tooltip[] tooltip = {this.getDefinition().getRenderer().getTooltip(this, mouse)};
+        Tooltip[] tooltip = {this.get(Settings.RENDER).apply(this).<A>cast().getTooltip(this, mouse)};
         if (tooltip[0] == null) return null;
         tooltip[0].getText().addAll(get(EntryStack.Settings.TOOLTIP_APPEND_EXTRA).apply(this));
         tooltip[0] = get(EntryStack.Settings.TOOLTIP_PROCESSOR).apply(this, tooltip[0]);
         if (tooltip[0] == null) return null;
         if (ConfigObject.getInstance().shouldAppendModNames()) {
-            getIdentifier().ifPresent(location -> ClientHelper.getInstance().appendModIdToTooltips(tooltip[0].getText(), location.getNamespace()));
+            ResourceLocation location = getIdentifier();
+            if (location != null) {
+                ClientHelper.getInstance().appendModIdToTooltips(tooltip[0].getText(), location.getNamespace());
+            }
         }
         return tooltip[0];
     }

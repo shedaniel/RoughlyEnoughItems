@@ -95,6 +95,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -263,8 +264,10 @@ public class JEIPluginDetector {
             @Override
             @NotNull
             public <T> List<Component> addModNameToIngredientTooltip(@NotNull List<Component> tooltip, @NotNull T ingredient, @NotNull IIngredientHelper<T> ingredientHelper) {
-                Optional<ResourceLocation> identifier = wrap(ingredient).getIdentifier();
-                identifier.ifPresent(location -> helper.appendModIdToTooltips(tooltip, location.getNamespace()));
+                ResourceLocation location = wrap(ingredient).getIdentifier();
+                if (location != null) {
+                    helper.appendModIdToTooltips(tooltip, location.getNamespace());
+                }
                 return tooltip;
             }
         };

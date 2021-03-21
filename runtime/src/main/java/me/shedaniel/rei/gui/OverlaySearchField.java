@@ -35,9 +35,9 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.impl.OverlaySearchFieldSyntaxHighlighter;
 import me.shedaniel.rei.impl.TextTransformations;
-import me.shedaniel.rei.impl.search.Argument;
-import me.shedaniel.rei.impl.search.ArgumentsRegistry;
-import me.shedaniel.rei.impl.search.TextArgument;
+import me.shedaniel.rei.impl.search.ArgumentType;
+import me.shedaniel.rei.impl.search.ArgumentTypesRegistry;
+import me.shedaniel.rei.impl.search.TextArgumentType;
 import me.shedaniel.rei.impl.widgets.TextFieldWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -84,11 +84,11 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                 style = ERROR_STYLE;
             }
             if (arg > 0) {
-                Argument<?, ?> argument = ArgumentsRegistry.ARGUMENT_LIST.get((arg - 1) / 2);
+                ArgumentType<?, ?> argumentType = ArgumentTypesRegistry.ARGUMENT_TYPE_LIST.get((arg - 1) / 2);
                 if (!isPlain) {
-                    style = argument.getHighlightedStyle();
+                    style = argumentType.getHighlightedStyle();
                 }
-                if (!(argument instanceof TextArgument) && hasUnderscore && arg % 2 == 1) {
+                if (!(argumentType instanceof TextArgumentType) && hasUnderscore && arg % 2 == 1) {
                     style = style.withUnderlined(true);
                 }
             } else if (!isPlain) {

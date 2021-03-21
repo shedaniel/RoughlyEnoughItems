@@ -24,7 +24,8 @@
 package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.gui.OverlaySearchField;
-import me.shedaniel.rei.impl.search.ArgumentsRegistry;
+import me.shedaniel.rei.impl.search.ArgumentTypesRegistry;
+import me.shedaniel.rei.impl.search.Argument;
 import net.minecraft.util.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -44,7 +45,7 @@ public class OverlaySearchFieldSyntaxHighlighter implements Consumer<String> {
     @Override
     public void accept(String text) {
         this.highlighted = new byte[text.length()];
-        SearchArgument.processSearchTerm(text, new SearchArgument.ProcessedSink() {
+        Argument.bakeArguments(text, new Argument.ProcessedSink() {
             @Override
             public void addQuote(int index) {
                 highlighted[index] = -2;
@@ -56,9 +57,9 @@ public class OverlaySearchFieldSyntaxHighlighter implements Consumer<String> {
             }
             
             @Override
-            public void addPart(SearchArgument<?, ?> argument, boolean usingGrammar, Collection<IntRange> grammarRanges, int index) {
+            public void addPart(Argument<?, ?> argument, boolean usingGrammar, Collection<IntRange> grammarRanges, int index) {
                 if (usingGrammar) {
-                    int argIndex = ArgumentsRegistry.ARGUMENT_LIST.indexOf(argument.getArgument()) * 2 + 1;
+                    int argIndex = ArgumentTypesRegistry.ARGUMENT_TYPE_LIST.indexOf(argument.getArgument()) * 2 + 1;
                     for (int i = argument.start(); i < argument.end(); i++) {
                         highlighted[i] = (byte) argIndex;
                     }

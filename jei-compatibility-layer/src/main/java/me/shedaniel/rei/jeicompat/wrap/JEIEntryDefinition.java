@@ -46,7 +46,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapContext;
 
@@ -80,8 +79,11 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
     }
     
     @Override
-    public Optional<ResourceLocation> getIdentifier(EntryStack<T> entry, T value) {
-        return Optional.ofNullable(ingredientHelper.getResourceId(value)).map(ResourceLocation::new);
+    @Nullable
+    public ResourceLocation getIdentifier(EntryStack<T> entry, T value) {
+        String resourceId = ingredientHelper.getResourceId(value);
+        if (resourceId == null) return null;
+        return ResourceLocation.tryParse(resourceId);
     }
     
     @Override
