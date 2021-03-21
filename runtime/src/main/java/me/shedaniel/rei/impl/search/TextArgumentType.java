@@ -21,48 +21,47 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.ingredient.entry.type;
+package me.shedaniel.rei.impl.search;
 
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
-import me.shedaniel.rei.api.ingredient.entry.EntrySerializer;
-import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.util.Unit;
+import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
+import java.util.Locale;
 
-public interface EntryDefinition<T> {
-    Class<T> getValueType();
+@ApiStatus.Internal
+@Environment(EnvType.CLIENT)
+public final class TextArgumentType extends ArgumentType<Unit, String> {
+    public static final TextArgumentType INSTANCE = new TextArgumentType();
     
-    EntryType<T> getType();
+    @Override
+    public String getName() {
+        return "text";
+    }
     
-    EntryRenderer<T> getRenderer();
+    @Override
+    public @Nullable String getPrefix() {
+        return "";
+    }
     
-    @Nullable ResourceLocation getIdentifier(EntryStack<T> entry, T value);
+    @Override
+    public boolean matches(Mutable<String> data, EntryStack<?> stack, String searchText, Unit filterData) {
+        if (data.getValue() == null) {
+            data.setValue(stack.asFormatStrippedText().getString().toLowerCase(Locale.ROOT));
+        }
+        String value = data.getValue();
+        return !value.isEmpty() && value.contains(searchText);
+    }
     
-    boolean isEmpty(EntryStack<T> entry, T value);
+    @Override
+    public Unit prepareSearchFilter(String searchText) {
+        return null;
+    }
     
-    T copy(EntryStack<T> entry, T value);
-    
-    T normalize(EntryStack<T> entry, T value);
-    
-    int hash(EntryStack<T> entry, T value, ComparisonContext context);
-    
-    boolean equals(T o1, T o2, ComparisonContext context);
-    
-    @Nullable
-    EntrySerializer<T> getSerializer();
-    
-    Component asFormattedText(EntryStack<T> entry, T value);
-    
-    Collection<ResourceLocation> getTagsFor(EntryStack<T> entry, T value);
-    
-    @ApiStatus.NonExtendable
-    default <O> EntryDefinition<O> cast() {
-        return (EntryDefinition<O>) this;
+    private TextArgumentType() {
     }
 }
-

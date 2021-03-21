@@ -25,8 +25,8 @@ package me.shedaniel.rei.impl;
 
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.type.BuiltinEntryTypes;
 import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.ingredient.entry.type.BuiltinEntryTypes;
 import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
 import net.minecraft.network.chat.Component;
@@ -34,8 +34,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Optional;
+import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
 public class TypedEntryStack<T> extends AbstractEntryStack<T> {
@@ -65,7 +64,8 @@ public class TypedEntryStack<T> extends AbstractEntryStack<T> {
     }
     
     @Override
-    public Optional<ResourceLocation> getIdentifier() {
+    @Nullable
+    public ResourceLocation getIdentifier() {
         return getDefinition().getIdentifier(this, value);
     }
     
@@ -99,11 +99,6 @@ public class TypedEntryStack<T> extends AbstractEntryStack<T> {
             stack.setting(EntryStack.Settings.getById(entry.getShortKey()), entry.getValue());
         }
         return stack;
-    }
-    
-    @Override
-    public boolean equals(EntryStack<T> other, ComparisonContext context) {
-        return this.getDefinition().equals(value, other.getValue(), context);
     }
     
     @Override

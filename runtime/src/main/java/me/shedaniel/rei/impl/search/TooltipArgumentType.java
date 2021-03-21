@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.search;
 
-import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.gui.config.SearchMode;
 import me.shedaniel.rei.api.ingredient.EntryStack;
@@ -31,57 +30,28 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
-import java.util.Optional;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public final class ModArgument extends Argument<Unit, ModArgument.@Nullable ModInfoPair> {
-    public static final ModArgument INSTANCE = new ModArgument();
-    private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xffa8f3));
+public final class TooltipArgumentType extends ArgumentType<Unit, String> {
+    public static final TooltipArgumentType INSTANCE = new TooltipArgumentType();
+    private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xffe0ad));
     
     @Override
     public String getName() {
-        return "mod";
+        return "tooltip";
     }
     
     @Override
     @Nullable
     public String getPrefix() {
-        return "@";
-    }
-    
-    @Override
-    public SearchMode getSearchMode() {
-        return ConfigObject.getInstance().getModSearchMode();
-    }
-    
-    @Override
-    public boolean matches(Mutable<@Nullable ModInfoPair> data, EntryStack<?> stack, String searchText, Unit filterData) {
-        if (data.getValue() == null) {
-            Optional<ResourceLocation> id = stack.getIdentifier();
-            data.setValue(id.isPresent() ? new ModInfoPair(
-                    id.get().getNamespace(),
-                    null
-            ) : ModInfoPair.EMPTY);
-        }
-        ModInfoPair pair = data.getValue();
-        if (pair.modId == null || pair.modId.contains(searchText)) return true;
-        if (pair.modName == null) {
-            pair.modName = ClientHelper.getInstance().getModFromModId(pair.modId).toLowerCase(Locale.ROOT);
-        }
-        return pair.modName.isEmpty() || pair.modName.contains(searchText);
-    }
-    
-    @Override
-    public Unit prepareSearchFilter(String searchText) {
-        return Unit.INSTANCE;
+        return "#";
     }
     
     @Override
@@ -89,19 +59,25 @@ public final class ModArgument extends Argument<Unit, ModArgument.@Nullable ModI
         return STYLE;
     }
     
-    private ModArgument() {
+    @Override
+    public SearchMode getSearchMode() {
+        return ConfigObject.getInstance().getTooltipSearchMode();
     }
     
-    protected static class ModInfoPair {
-        private static final ModInfoPair EMPTY = new ModInfoPair(null, null);
-        @Nullable
-        private final String modId;
-        @Nullable
-        private String modName;
-        
-        public ModInfoPair(@Nullable String modId, @Nullable String modName) {
-            this.modId = modId;
-            this.modName = modName;
+    @Override
+    public boolean matches(Mutable<String> data, EntryStack<?> stack, String searchText, Unit filterData) {
+        if (data.getValue() == null) {
+            data.setValue(Argument.tryGetEntryStackTooltip(stack).toLowerCase(Locale.ROOT));
         }
+        String tooltip = data.getValue();
+        return tooltip.isEmpty() || tooltip.contains(searchText);
+    }
+    
+    @Override
+    public Unit prepareSearchFilter(String searchText) {
+        return Unit.INSTANCE;
+    }
+    
+    private TooltipArgumentType() {
     }
 }

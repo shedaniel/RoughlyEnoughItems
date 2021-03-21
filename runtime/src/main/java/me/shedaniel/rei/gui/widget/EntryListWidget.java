@@ -57,12 +57,15 @@ import me.shedaniel.rei.api.ingredient.util.EntryStacks;
 import me.shedaniel.rei.api.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.search.SearchFilter;
+import me.shedaniel.rei.api.search.SearchProvider;
 import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.api.view.Views;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.ConfigManagerImpl;
 import me.shedaniel.rei.impl.ConfigObjectImpl;
-import me.shedaniel.rei.impl.SearchArgument;
+import me.shedaniel.rei.impl.search.Argument;
+import me.shedaniel.rei.impl.search.CompoundArgument;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
@@ -128,7 +131,7 @@ public class EntryListWidget extends WidgetWithBounds {
     private List<EntryListEntry> entries = Collections.emptyList();
     private List<Widget> renders = Collections.emptyList();
     private List<Widget> widgets = Collections.emptyList();
-    private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
+    private SearchFilter lastFilter = SearchFilter.matchAll();
     private String lastSearchTerm = null;
     
     public static int entrySize() {
@@ -519,7 +522,7 @@ public class EntryListWidget extends WidgetWithBounds {
         Stopwatch stopwatch = Stopwatch.createStarted();
         if (ignoreLastSearch || this.lastSearchTerm == null || !this.lastSearchTerm.equals(searchTerm)) {
             this.lastSearchTerm = searchTerm;
-            this.lastSearchArguments = SearchArgument.processSearchTerm(searchTerm);
+            this.lastFilter = SearchProvider.getInstance().createFilter(searchTerm);
             List<EntryStack<?>> list = Lists.newArrayList();
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ContainerScreenOverlay.getInstance().inventoryStacks.isEmpty();
             IntSet workingItems = checkCraftable ? new IntOpenHashSet() : null;
@@ -533,7 +536,7 @@ public class EntryListWidget extends WidgetWithBounds {
                         completableFutures.add(CompletableFuture.supplyAsync(() -> {
                             List<EntryStack<?>> filtered = Lists.newArrayList();
                             for (EntryStack<?> stack : partitionStacks) {
-                                if (canLastSearchTermsBeAppliedTo(stack)) {
+                                if (matches(stack)) {
                                     if (workingItems != null && !workingItems.contains(EntryStacks.hashExact(stack)))
                                         continue;
                                     filtered.add(stack.normalize());
@@ -554,7 +557,7 @@ public class EntryListWidget extends WidgetWithBounds {
                     }
                 } else {
                     for (EntryStack<?> stack : stacks) {
-                        if (canLastSearchTermsBeAppliedTo(stack)) {
+                        if (matches(stack)) {
                             if (workingItems != null && !workingItems.contains(EntryStacks.hashExact(stack)))
                                 continue;
                             list.add(stack.normalize());
@@ -580,8 +583,8 @@ public class EntryListWidget extends WidgetWithBounds {
         updateEntriesPosition();
     }
     
-    public boolean canLastSearchTermsBeAppliedTo(EntryStack<?> stack) {
-        return lastSearchArguments.isEmpty() || SearchArgument.canSearchTermsBeAppliedTo(stack, lastSearchArguments);
+    public boolean matches(EntryStack<?> stack) {
+        return lastFilter.test(stack);
     }
     
     @Override

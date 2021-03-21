@@ -32,8 +32,6 @@ import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.*;
@@ -55,8 +53,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagCollection;
@@ -90,8 +86,9 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     }
     
     @Override
-    public @NotNull Optional<ResourceLocation> getIdentifier(EntryStack<ItemStack> entry, ItemStack value) {
-        return Optional.ofNullable(Registry.ITEM.getKey(value.getItem()));
+    @Nullable
+    public ResourceLocation getIdentifier(EntryStack<ItemStack> entry, ItemStack value) {
+        return Registry.ITEM.getKey(value.getItem());
     }
     
     @Override

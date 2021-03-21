@@ -23,13 +23,12 @@
 
 package me.shedaniel.rei.impl.search;
 
+import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.gui.config.SearchMode;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
@@ -38,59 +37,45 @@ import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
+import java.util.Locale;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public final class TagArgument extends Argument<Unit, String[]> {
-    public static final TagArgument INSTANCE = new TagArgument();
-    private static final Minecraft minecraft = Minecraft.getInstance();
-    private static final String[] EMPTY_ARRAY = new String[0];
-    private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x9efff4));
+public final class ModArgumentType extends ArgumentType<Unit, ModArgumentType.@Nullable ModInfoPair> {
+    public static final ModArgumentType INSTANCE = new ModArgumentType();
+    private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xffa8f3));
     
     @Override
     public String getName() {
-        return "tag";
+        return "mod";
     }
     
     @Override
     @Nullable
     public String getPrefix() {
-        return "$";
-    }
-    
-    @Override
-    public Style getHighlightedStyle() {
-        return STYLE;
+        return "@";
     }
     
     @Override
     public SearchMode getSearchMode() {
-        return ConfigObject.getInstance().getTagSearchMode();
+        return ConfigObject.getInstance().getModSearchMode();
     }
     
     @Override
-    public boolean matches(Mutable<String[]> data, EntryStack<?> stack, String searchText, Unit filterData) {
+    public boolean matches(Mutable<@Nullable ModInfoPair> data, EntryStack<?> stack, String searchText, Unit filterData) {
         if (data.getValue() == null) {
-            Collection<ResourceLocation> tags = ((EntryDefinition<Object>) stack.getDefinition()).getTagsFor((EntryStack<Object>) stack, stack.getValue());
-            if (tags.isEmpty()) {
-                data.setValue(EMPTY_ARRAY);
-            } else {
-                data.setValue(new String[tags.size()]);
-                int i = 0;
-                
-                for (ResourceLocation identifier : tags) {
-                    data.getValue()[i] = identifier.toString();
-                    i++;
-                }
-            }
+            ResourceLocation id = stack.getIdentifier();
+            data.setValue(id != null ? new ModInfoPair(
+                    id.getNamespace(),
+                    null
+            ) : ModInfoPair.EMPTY);
         }
-        for (String tag : data.getValue()) {
-            if (tag.isEmpty() || tag.contains(searchText)) {
-                return true;
-            }
+        ModInfoPair pair = data.getValue();
+        if (pair.modId == null || pair.modId.contains(searchText)) return true;
+        if (pair.modName == null) {
+            pair.modName = ClientHelper.getInstance().getModFromModId(pair.modId).toLowerCase(Locale.ROOT);
         }
-        return false;
+        return pair.modName.isEmpty() || pair.modName.contains(searchText);
     }
     
     @Override
@@ -98,6 +83,24 @@ public final class TagArgument extends Argument<Unit, String[]> {
         return Unit.INSTANCE;
     }
     
-    private TagArgument() {
+    @Override
+    public Style getHighlightedStyle() {
+        return STYLE;
+    }
+    
+    private ModArgumentType() {
+    }
+    
+    protected static class ModInfoPair {
+        private static final ModInfoPair EMPTY = new ModInfoPair(null, null);
+        @Nullable
+        private final String modId;
+        @Nullable
+        private String modName;
+        
+        public ModInfoPair(@Nullable String modId, @Nullable String modName) {
+            this.modId = modId;
+            this.modName = modName;
+        }
     }
 }

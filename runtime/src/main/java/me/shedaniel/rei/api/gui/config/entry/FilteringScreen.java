@@ -43,10 +43,13 @@ import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.search.SearchFilter;
+import me.shedaniel.rei.api.search.SearchProvider;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.OverlaySearchField;
 import me.shedaniel.rei.gui.widget.EntryWidget;
-import me.shedaniel.rei.impl.SearchArgument;
+import me.shedaniel.rei.impl.search.Argument;
+import me.shedaniel.rei.impl.search.CompoundArgument;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -103,7 +106,7 @@ public class FilteringScreen extends Screen {
     private Button backButton;
     private Rectangle selectionCache;
     
-    private List<SearchArgument.SearchArguments> lastSearchArguments = Collections.emptyList();
+    private SearchFilter lastFilter = SearchFilter.matchAll();
     
     public FilteringScreen(FilteringEntry filteringEntry) {
         super(new TranslatableComponent("config.roughlyenoughitems.filteringScreen"));
@@ -311,10 +314,10 @@ public class FilteringScreen extends Screen {
     }
     
     public void updateSearch(String searchTerm) {
-        lastSearchArguments = SearchArgument.processSearchTerm(searchTerm);
+        lastFilter = SearchProvider.getInstance().createFilter(searchTerm);
         Set<EntryStack<?>> list = Sets.newLinkedHashSet();
         EntryRegistry.getInstance().getEntryStacks().forEach(stack -> {
-            if (canLastSearchTermsBeAppliedTo(stack)) {
+            if (matches(stack)) {
                 list.add(stack.normalize());
             }
         });
@@ -323,8 +326,8 @@ public class FilteringScreen extends Screen {
         updateEntriesPosition();
     }
     
-    public boolean canLastSearchTermsBeAppliedTo(EntryStack<?> stack) {
-        return lastSearchArguments.isEmpty() || SearchArgument.canSearchTermsBeAppliedTo(stack, lastSearchArguments);
+    public boolean matches(EntryStack<?> stack) {
+        return lastFilter.test(stack);
     }
     
     public void updateEntriesPosition() {

@@ -57,10 +57,12 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagCollection;
 import net.minecraft.world.level.material.Fluid;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -69,23 +71,24 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     private final EntryRenderer<FluidStack> renderer = new FluidEntryRenderer();
     
     @Override
-    public @NotNull Class<FluidStack> getValueType() {
+    public Class<FluidStack> getValueType() {
         return FluidStack.class;
     }
     
     @Override
-    public @NotNull EntryType<FluidStack> getType() {
+    public EntryType<FluidStack> getType() {
         return VanillaEntryTypes.FLUID;
     }
     
     @Override
-    public @NotNull EntryRenderer<FluidStack> getRenderer() {
+    public EntryRenderer<FluidStack> getRenderer() {
         return renderer;
     }
     
     @Override
-    public @NotNull Optional<ResourceLocation> getIdentifier(EntryStack<FluidStack> entry, FluidStack value) {
-        return Optional.ofNullable(Registry.FLUID.getKey(value.getFluid()));
+    @Nullable
+    public ResourceLocation getIdentifier(EntryStack<FluidStack> entry, FluidStack value) {
+        return Registry.FLUID.getKey(value.getFluid());
     }
     
     @Override
@@ -153,12 +156,12 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     }
     
     @Override
-    public @NotNull Component asFormattedText(EntryStack<FluidStack> entry, FluidStack value) {
+    public Component asFormattedText(EntryStack<FluidStack> entry, FluidStack value) {
         return value.getFluid().defaultFluidState().createLegacyBlock().getBlock().getName();
     }
     
     @Override
-    public @NotNull Collection<ResourceLocation> getTagsFor(EntryStack<FluidStack> entry, FluidStack value) {
+    public Collection<ResourceLocation> getTagsFor(EntryStack<FluidStack> entry, FluidStack value) {
         TagCollection<Fluid> collection = Minecraft.getInstance().getConnection().getTags().getFluids();
         return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getFluid());
     }

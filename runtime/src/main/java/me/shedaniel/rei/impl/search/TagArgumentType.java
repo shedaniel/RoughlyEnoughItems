@@ -26,33 +26,35 @@ package me.shedaniel.rei.impl.search;
 import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.gui.config.SearchMode;
 import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.impl.SearchArgument;
+import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Locale;
+import java.util.Collection;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public final class TooltipArgument extends Argument<Unit, String> {
-    public static final TooltipArgument INSTANCE = new TooltipArgument();
-    private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xffe0ad));
+public final class TagArgumentType extends ArgumentType<Unit, String[]> {
+    public static final TagArgumentType INSTANCE = new TagArgumentType();
+    private static final String[] EMPTY_ARRAY = new String[0];
+    private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x9efff4));
     
     @Override
     public String getName() {
-        return "tooltip";
+        return "tag";
     }
     
     @Override
     @Nullable
     public String getPrefix() {
-        return "#";
+        return "$";
     }
     
     @Override
@@ -62,16 +64,31 @@ public final class TooltipArgument extends Argument<Unit, String> {
     
     @Override
     public SearchMode getSearchMode() {
-        return ConfigObject.getInstance().getTooltipSearchMode();
+        return ConfigObject.getInstance().getTagSearchMode();
     }
     
     @Override
-    public boolean matches(Mutable<String> data, EntryStack<?> stack, String searchText, Unit filterData) {
+    public boolean matches(Mutable<String[]> data, EntryStack<?> stack, String searchText, Unit filterData) {
         if (data.getValue() == null) {
-            data.setValue(SearchArgument.tryGetEntryStackTooltip(stack).toLowerCase(Locale.ROOT));
+            Collection<ResourceLocation> tags = ((EntryDefinition<Object>) stack.getDefinition()).getTagsFor((EntryStack<Object>) stack, stack.getValue());
+            if (tags.isEmpty()) {
+                data.setValue(EMPTY_ARRAY);
+            } else {
+                data.setValue(new String[tags.size()]);
+                int i = 0;
+                
+                for (ResourceLocation identifier : tags) {
+                    data.getValue()[i] = identifier.toString();
+                    i++;
+                }
+            }
         }
-        String tooltip = data.getValue();
-        return tooltip.isEmpty() || tooltip.contains(searchText);
+        for (String tag : data.getValue()) {
+            if (!tag.isEmpty() && tag.contains(searchText)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     @Override
@@ -79,6 +96,6 @@ public final class TooltipArgument extends Argument<Unit, String> {
         return Unit.INSTANCE;
     }
     
-    private TooltipArgument() {
+    private TagArgumentType() {
     }
 }

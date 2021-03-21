@@ -47,7 +47,10 @@ import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -113,7 +116,8 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         return renderer == null ? EntryRenderer.empty() : renderer.cast();
     }
     
-    Optional<ResourceLocation> getIdentifier();
+    @Nullable
+    ResourceLocation getIdentifier();
     
     boolean isEmpty();
     
@@ -130,8 +134,6 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     int hashCode();
     
     int hash(ComparisonContext context);
-    
-    boolean equals(EntryStack<T> other, ComparisonContext context);
     
     @Deprecated
     boolean equals(Object o);

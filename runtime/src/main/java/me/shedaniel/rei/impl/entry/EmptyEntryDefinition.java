@@ -47,7 +47,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
@@ -87,8 +86,9 @@ public enum EmptyEntryDefinition implements EntryDefinition<Object>, EntrySerial
     }
     
     @Override
-    public Optional<ResourceLocation> getIdentifier(EntryStack<Object> entry, Object value) {
-        return Optional.empty();
+    @Nullable
+    public ResourceLocation getIdentifier(EntryStack<Object> entry, Object value) {
+        return null;
     }
     
     @Override

@@ -38,8 +38,9 @@ import java.util.regex.PatternSyntaxException;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public final class RegexArgument extends Argument<@Nullable Pattern, String> {
-    public static final RegexArgument INSTANCE = new RegexArgument();
+public final class RegexArgumentType extends ArgumentType<@Nullable Pattern, String> {
+    public static final RegexArgumentType INSTANCE = new RegexArgumentType();
+    private static final String EMPTY = "";
     private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xbfffa8));
     
     @Override
@@ -48,7 +49,7 @@ public final class RegexArgument extends Argument<@Nullable Pattern, String> {
     }
     
     @Override
-    public MatchStatus matchesArgumentPrefix(String text) {
+    public ArgumentApplicableResult checkApplicable(String text) {
         boolean inverted = false;
         String matchText = text;
         if (matchText.startsWith("-")) {
@@ -56,10 +57,10 @@ public final class RegexArgument extends Argument<@Nullable Pattern, String> {
             matchText = matchText.substring(1);
         }
         if (matchText.length() >= 3 && matchText.startsWith("r/") && matchText.endsWith("/"))
-            return MatchStatus.result(matchText.substring(2, matchText.length() - 1), true, inverted)
+            return ArgumentApplicableResult.result(matchText.substring(2, matchText.length() - 1), true, inverted)
                     .grammar(0, inverted ? 3 : 2)
                     .grammar(text.length() - 1, text.length());
-        return MatchStatus.unmatched();
+        return ArgumentApplicableResult.notApplicable();
     }
     
     @Override
@@ -87,7 +88,7 @@ public final class RegexArgument extends Argument<@Nullable Pattern, String> {
         return matcher != null && matcher.matches();
     }
     
-    private RegexArgument() {
+    private RegexArgumentType() {
     }
 }
 

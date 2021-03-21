@@ -23,29 +23,38 @@
 
 package me.shedaniel.rei.impl.search;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import me.shedaniel.rei.api.ingredient.EntryStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.util.Unit;
+import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.List;
-import java.util.Map;
-
 @ApiStatus.Internal
-public final class ArgumentsRegistry {
-    public static final Map<String, Argument<?, ?>> ARGUMENTS = Maps.newHashMap();
-    public static final List<Argument<?, ?>> ARGUMENT_LIST = Lists.newArrayList();
+@Environment(EnvType.CLIENT)
+public final class AlwaysMatchingArgumentType extends ArgumentType<Unit, Unit> {
+    public static final AlwaysMatchingArgumentType INSTANCE = new AlwaysMatchingArgumentType();
     
-    static {
-        register(AlwaysMatchingArgument.INSTANCE);
-        register(ModArgument.INSTANCE);
-        register(TooltipArgument.INSTANCE);
-        register(TagArgument.INSTANCE);
-        register(RegexArgument.INSTANCE);
-        register(TextArgument.INSTANCE);
+    @Override
+    public String getName() {
+        return "always";
     }
     
-    private static void register(Argument<?, ?> argument) {
-        ARGUMENTS.put(argument.getName(), argument);
-        ARGUMENT_LIST.add(argument);
+    @Override
+    public boolean matches(Mutable<Unit> data, EntryStack<?> stack, String searchText, Unit filterData) {
+        return true;
+    }
+    
+    @Override
+    public Unit prepareSearchFilter(String searchText) {
+        return Unit.INSTANCE;
+    }
+    
+    @Override
+    public ArgumentApplicableResult checkApplicable(String text) {
+        return ArgumentApplicableResult.notApplicable();
+    }
+    
+    private AlwaysMatchingArgumentType() {
     }
 }

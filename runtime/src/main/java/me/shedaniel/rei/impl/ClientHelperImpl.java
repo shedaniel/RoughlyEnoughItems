@@ -172,9 +172,10 @@ public class ClientHelperImpl implements ClientHelper {
                 return false;
             }
         } else {
-            ResourceLocation identifier = entry.getIdentifier().orElse(null);
-            if (identifier == null)
+            ResourceLocation identifier = entry.getIdentifier();
+            if (identifier == null) {
                 return false;
+            }
             String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().getAsString() : "";
             String og = cheatedStack.getCount() == 1 ? ConfigObject.getInstance().getGiveCommand().replaceAll(" \\{count}", "") : ConfigObject.getInstance().getGiveCommand();
             String madeUpCommand = og.replaceAll("\\{player_name}", Minecraft.getInstance().player.getScoreboardName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", tagMessage).replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
