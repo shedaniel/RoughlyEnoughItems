@@ -54,6 +54,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -76,6 +77,7 @@ public final class Internals {
     private static Function<@NotNull Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
     private static BiFunction<@Nullable Point, Collection<Component>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
     private static Supplier<BuiltinPlugin> builtinPlugin = Internals::throwNotSetup;
+    private static Supplier<List<String>> jeiCompatMods = Internals::throwNotSetup;
     
     private static <T> T throwNotSetup() {
         throw new AssertionError("REI Internals have not been initialized!");
@@ -160,6 +162,10 @@ public final class Internals {
     
     public static <T> EntryRenderer<T> getEmptyEntryRenderer() {
         return emptyEntryRenderer.get().cast();
+    }
+    
+    public static List<String> getJeiCompatMods() {
+        return jeiCompatMods.get();
     }
     
     public interface EntryStackProvider {

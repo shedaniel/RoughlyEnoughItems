@@ -27,8 +27,8 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
-import me.shedaniel.rei.api.gui.config.RecipeScreenType;
-import me.shedaniel.rei.gui.PreRecipeViewingScreen;
+import me.shedaniel.rei.api.gui.config.DisplayScreenType;
+import me.shedaniel.rei.gui.UncertainDisplayViewingScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -41,18 +41,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
+public class RecipeScreenTypeEntry extends TooltipListEntry<DisplayScreenType> {
     private int width;
-    private final RecipeScreenType original;
-    private RecipeScreenType type;
-    private RecipeScreenType defaultValue;
-    private Consumer<RecipeScreenType> save;
+    private final DisplayScreenType original;
+    private DisplayScreenType type;
+    private DisplayScreenType defaultValue;
+    private Consumer<DisplayScreenType> save;
     private final AbstractWidget buttonWidget = new AbstractButton(0, 0, 0, 20, NarratorChatListener.NO_TITLE) {
         @Override
         public void onPress() {
-            Minecraft.getInstance().setScreen(new PreRecipeViewingScreen(getConfigScreen(), type, false, original -> {
+            Minecraft.getInstance().setScreen(new UncertainDisplayViewingScreen(getConfigScreen(), type, false, original -> {
                 Minecraft.getInstance().setScreen(getConfigScreen());
-                type = original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER;
+                type = original ? DisplayScreenType.ORIGINAL : DisplayScreenType.COMPOSITE;
             }));
         }
         
@@ -65,7 +65,7 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
     private final List<GuiEventListener> children = ImmutableList.of(buttonWidget);
     
     @SuppressWarnings("deprecation")
-    public RecipeScreenTypeEntry(int width, Component fieldName, RecipeScreenType type, RecipeScreenType defaultValue, Consumer<RecipeScreenType> save) {
+    public RecipeScreenTypeEntry(int width, Component fieldName, DisplayScreenType type, DisplayScreenType defaultValue, Consumer<DisplayScreenType> save) {
         super(fieldName, null);
         this.original = type;
         this.width = width;
@@ -80,12 +80,12 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<RecipeScreenType> {
     }
     
     @Override
-    public RecipeScreenType getValue() {
+    public DisplayScreenType getValue() {
         return type;
     }
     
     @Override
-    public Optional<RecipeScreenType> getDefaultValue() {
+    public Optional<DisplayScreenType> getDefaultValue() {
         return Optional.ofNullable(defaultValue);
     }
     

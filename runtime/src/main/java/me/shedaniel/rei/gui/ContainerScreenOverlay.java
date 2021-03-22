@@ -600,7 +600,7 @@ public class ContainerScreenOverlay extends REIOverlay {
             }
         }
         Screen currentScreen = Minecraft.getInstance().screen;
-        if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated) {
+        if (!(currentScreen instanceof DefaultDisplayViewingScreen) || !((DefaultDisplayViewingScreen) currentScreen).choosePageActivated) {
             for (Tooltip tooltip : TOOLTIPS) {
                 if (tooltip != null)
                     renderTooltip(matrices, tooltip);

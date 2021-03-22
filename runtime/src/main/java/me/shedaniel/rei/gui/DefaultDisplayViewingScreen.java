@@ -50,7 +50,7 @@ import me.shedaniel.rei.api.util.CollectionUtils;
 import me.shedaniel.rei.api.util.ImmutableLiteralText;
 import me.shedaniel.rei.api.view.ViewSearchBuilder;
 import me.shedaniel.rei.gui.widget.EntryWidget;
-import me.shedaniel.rei.gui.widget.RecipeChoosePageWidget;
+import me.shedaniel.rei.gui.widget.DefaultDisplayChoosePageWidget;
 import me.shedaniel.rei.gui.widget.TabWidget;
 import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.InternalWidgets;
@@ -78,7 +78,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public class RecipeViewingScreen extends AbstractRecipeViewingScreen {
+public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private final List<Widget> preWidgets = Lists.newArrayList();
     private final List<Widget> widgets = Lists.newArrayList();
@@ -87,14 +87,14 @@ public class RecipeViewingScreen extends AbstractRecipeViewingScreen {
     public int page;
     public int categoryPages = -1;
     public boolean choosePageActivated = false;
-    public RecipeChoosePageWidget recipeChoosePageWidget;
+    public DefaultDisplayChoosePageWidget choosePageWidget;
     @Nullable
     private Panel workingStationsBaseWidget;
     private Button recipeBack, recipeNext, categoryBack, categoryNext;
     private EntryStack<?> ingredientStackToNotice = EntryStack.empty();
     private EntryStack<?> resultStackToNotice = EntryStack.empty();
     
-    public RecipeViewingScreen(Map<DisplayCategory<?>, List<Display>> categoriesMap, @Nullable ResourceLocation category) {
+    public DefaultDisplayViewingScreen(Map<DisplayCategory<?>, List<Display>> categoriesMap, @Nullable ResourceLocation category) {
         super(categoriesMap, category, 5);
         this.bounds = new Rectangle(0, 0, 176, 150);
     }
@@ -123,7 +123,7 @@ public class RecipeViewingScreen extends AbstractRecipeViewingScreen {
             return true;
         }
         if (choosePageActivated)
-            return recipeChoosePageWidget.keyPressed(keyCode, scanCode, modifiers);
+            return choosePageWidget.keyPressed(keyCode, scanCode, modifiers);
         else if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(keyCode, scanCode)) {
             if (recipeNext.isEnabled())
                 recipeNext.onClick();
@@ -179,7 +179,7 @@ public class RecipeViewingScreen extends AbstractRecipeViewingScreen {
                     categoryPages--;
                     if (categoryPages < 0)
                         categoryPages = Mth.ceil(categories.size() / (float) tabsPerPage) - 1;
-                    RecipeViewingScreen.this.init();
+                    DefaultDisplayViewingScreen.this.init();
                 })
                 .enabled(categories.size() > tabsPerPage));
         this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - 10, bounds.y - 16, 10, 10), new TranslatableComponent("text.rei.right_arrow"))
@@ -187,7 +187,7 @@ public class RecipeViewingScreen extends AbstractRecipeViewingScreen {
                     categoryPages++;
                     if (categoryPages > Mth.ceil(categories.size() / (float) tabsPerPage) - 1)
                         categoryPages = 0;
-                    RecipeViewingScreen.this.init();
+                    DefaultDisplayViewingScreen.this.init();
                 })
                 .enabled(categories.size() > tabsPerPage));
         widgets.add(categoryBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.left_arrow"))
@@ -205,11 +205,11 @@ public class RecipeViewingScreen extends AbstractRecipeViewingScreen {
                     page--;
                     if (page < 0)
                         page = getCurrentTotalPages() - 1;
-                    RecipeViewingScreen.this.init();
+                    DefaultDisplayViewingScreen.this.init();
                 }).tooltipLine(I18n.get("text.rei.previous_page")));
         widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 21), NarratorChatListener.NO_TITLE, label -> {
-            RecipeViewingScreen.this.choosePageActivated = true;
-            RecipeViewingScreen.this.init();
+            DefaultDisplayViewingScreen.this.choosePageActivated = true;
+            DefaultDisplayViewingScreen.this.init();
         }).onRender((matrices, label) -> {
             label.setText(new ImmutableLiteralText(String.format("%d/%d", page + 1, getCurrentTotalPages())));
             label.setClickable(getCurrentTotalPages() > 1);
@@ -219,7 +219,7 @@ public class RecipeViewingScreen extends AbstractRecipeViewingScreen {
                     page++;
                     if (page >= getCurrentTotalPages())
                         page = 0;
-                    RecipeViewingScreen.this.init();
+                    DefaultDisplayViewingScreen.this.init();
                 }).tooltipLine(I18n.get("text.rei.next_page")));
         recipeBack.setEnabled(getCurrentTotalPages() > 1);
         recipeNext.setEnabled(getCurrentTotalPages() > 1);
@@ -255,9 +255,9 @@ public class RecipeViewingScreen extends AbstractRecipeViewingScreen {
                 this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, supplier.get().get(displayBounds), new TextComponent(supplier.get().getButtonText()), displaySupplier, setupDisplay, getSelectedCategory()));
         }
         if (choosePageActivated)
-            recipeChoosePageWidget = new RecipeChoosePageWidget(this, page, getCurrentTotalPages());
+            choosePageWidget = new DefaultDisplayChoosePageWidget(this, page, getCurrentTotalPages());
         else
-            recipeChoosePageWidget = null;
+            choosePageWidget = null;
         
         workingStationsBaseWidget = null;
         List<EntryIngredient> workstations = CategoryRegistry.getInstance().get(getCurrentCategory()).getWorkstations();
@@ -374,7 +374,7 @@ public class RecipeViewingScreen extends AbstractRecipeViewingScreen {
             setBlitOffset(500);
             this.fillGradient(matrices, 0, 0, this.width, this.height, -1072689136, -804253680);
             setBlitOffset(0);
-            recipeChoosePageWidget.render(matrices, mouseX, mouseY, delta);
+            choosePageWidget.render(matrices, mouseX, mouseY, delta);
         }
     }
     
@@ -404,7 +404,7 @@ public class RecipeViewingScreen extends AbstractRecipeViewingScreen {
     @Override
     public boolean charTyped(char char_1, int int_1) {
         if (choosePageActivated) {
-            return recipeChoosePageWidget.charTyped(char_1, int_1);
+            return choosePageWidget.charTyped(char_1, int_1);
         }
         for (GuiEventListener listener : children())
             if (listener.charTyped(char_1, int_1))
@@ -415,7 +415,7 @@ public class RecipeViewingScreen extends AbstractRecipeViewingScreen {
     @Override
     public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
         if (choosePageActivated) {
-            return recipeChoosePageWidget.mouseDragged(double_1, double_2, int_1, double_3, double_4);
+            return choosePageWidget.mouseDragged(double_1, double_2, int_1, double_3, double_4);
         }
         for (GuiEventListener entry : children())
             if (entry.mouseDragged(double_1, double_2, int_1, double_3, double_4))
@@ -426,7 +426,7 @@ public class RecipeViewingScreen extends AbstractRecipeViewingScreen {
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (choosePageActivated) {
-            return recipeChoosePageWidget.mouseReleased(mouseX, mouseY, button);
+            return choosePageWidget.mouseReleased(mouseX, mouseY, button);
         } else {
             ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
             if (export.matchesMouse(button)) {
@@ -473,8 +473,8 @@ public class RecipeViewingScreen extends AbstractRecipeViewingScreen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (choosePageActivated) {
-            if (recipeChoosePageWidget.containsMouse(mouseX, mouseY)) {
-                return recipeChoosePageWidget.mouseClicked(mouseX, mouseY, button);
+            if (choosePageWidget.containsMouse(mouseX, mouseY)) {
+                return choosePageWidget.mouseClicked(mouseX, mouseY, button);
             } else {
                 choosePageActivated = false;
                 init();
@@ -495,7 +495,7 @@ public class RecipeViewingScreen extends AbstractRecipeViewingScreen {
     @Override
     public GuiEventListener getFocused() {
         if (choosePageActivated)
-            return recipeChoosePageWidget;
+            return choosePageWidget;
         return super.getFocused();
     }
     

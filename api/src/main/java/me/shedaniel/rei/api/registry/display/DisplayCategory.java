@@ -55,7 +55,7 @@ public interface DisplayCategory<T extends Display> extends Identifiable {
     Component getTitle();
     
     /**
-     * Gets the recipe renderer for the category, used in {@link me.shedaniel.rei.gui.VillagerRecipeViewingScreen} for rendering simple recipes
+     * Gets the recipe renderer for the category, used in {@link me.shedaniel.rei.gui.CompositeRecipeViewingScreen} for rendering simple recipes
      *
      * @param display the display to render
      * @return the display renderer

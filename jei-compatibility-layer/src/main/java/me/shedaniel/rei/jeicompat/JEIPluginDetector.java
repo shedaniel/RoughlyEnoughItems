@@ -121,9 +121,9 @@ public class JEIPluginDetector {
         }
     };
     
-    public static void detect(BiConsumer<Class<?>, Consumer<?>> annotationScanner, Consumer<REIPlugin> pluginAdder) {
-        annotationScanner.accept(JeiPlugin.class, plugin -> {
-            pluginAdder.accept(new JEIPluginWrapper((IModPlugin) plugin));
+    public static void detect(BiConsumer<Class<?>, BiConsumer<List<String>, ?>> annotationScanner, Consumer<REIPlugin> pluginAdder) {
+        annotationScanner.accept(JeiPlugin.class, (modIds, plugin) -> {
+            pluginAdder.accept(new JEIPluginWrapper(modIds, (IModPlugin) plugin));
         });
     }
     
@@ -448,7 +448,7 @@ public class JEIPluginDetector {
                 return EntryRegistry.getInstance().getEntryStacks()
                         .filter(stack -> Objects.equals(stack.getDefinition(), definition))
                         .<EntryStack<V>>map(EntryStack::cast)
-                        .map(EntryStack::getValue)
+                        .map(JEIPluginDetector::unwrap)
                         .collect(Collectors.toList());
             }
             
@@ -670,11 +670,13 @@ public class JEIPluginDetector {
     }
     
     public static class JEIPluginWrapper implements REIPlugin {
+        public final List<String> modIds;
         private final IModPlugin backingPlugin;
         
         private final List<JEIWrappedCategory<?>> categories = new ArrayList<>();
         
-        public JEIPluginWrapper(IModPlugin backingPlugin) {
+        public JEIPluginWrapper(List<String> modIds, IModPlugin backingPlugin) {
+            this.modIds = modIds;
             this.backingPlugin = backingPlugin;
         }
         

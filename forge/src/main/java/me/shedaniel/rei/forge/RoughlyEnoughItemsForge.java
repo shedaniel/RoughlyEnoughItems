@@ -31,14 +31,18 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.objectweb.asm.Type;
 
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 @Mod("roughlyenoughitems")
 @ApiStatus.Internal
@@ -51,18 +55,22 @@ public class RoughlyEnoughItemsForge {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> RoughlyEnoughItemsInitializer::onInitializeClient);
     }
     
-    public static <T> void scanAnnotation(Class<T> clazz, Consumer<T> consumer) {
+    public static <T> void scanAnnotation(Class<T> clazz, BiConsumer<List<String>, T> consumer) {
         scanAnnotation(Type.getType(clazz), consumer);
     }
     
-    public static <T> void scanAnnotation(Type annotationType, Consumer<T> consumer) {
-        List<T> instances = Lists.newArrayList();
+    public static <T> void scanAnnotation(Type annotationType, BiConsumer<List<String>, T> consumer) {
+        List<Pair<List<String>, T>> instances = Lists.newArrayList();
         for (ModFileScanData data : ModList.get().getAllScanData()) {
+            List<String> modIds = data.getIModInfoData().stream()
+                    .flatMap(info -> info.getMods().stream())
+                    .map(IModInfo::getModId)
+                    .collect(Collectors.toList());
             for (ModFileScanData.AnnotationData annotation : data.getAnnotations()) {
                 if (annotationType.equals(annotation.getAnnotationType())) {
                     try {
                         T instance = (T) Class.forName(annotation.getMemberName()).getDeclaredConstructor().newInstance();
-                        instances.add(instance);
+                        instances.add(new ImmutablePair<>(modIds, instance));
                     } catch (Throwable throwable) {
                         LOGGER.error("Failed to load plugin: " + annotation.getMemberName(), throwable);
                     }
@@ -70,8 +78,8 @@ public class RoughlyEnoughItemsForge {
             }
         }
         
-        for (T instance : instances) {
-            consumer.accept(instance);
+        for (Pair<List<String>, T> pair : instances) {
+            consumer.accept(pair.getLeft(), pair.getRight());
         }
     }
 }

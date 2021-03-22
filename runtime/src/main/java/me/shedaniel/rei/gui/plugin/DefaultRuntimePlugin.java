@@ -46,9 +46,9 @@ import me.shedaniel.rei.api.registry.screen.DisplayBoundsProvider;
 import me.shedaniel.rei.api.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.registry.transfer.TransferHandlerRegistry;
-import me.shedaniel.rei.gui.AbstractRecipeViewingScreen;
+import me.shedaniel.rei.gui.AbstractDisplayViewingScreen;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.gui.RecipeViewingScreen;
+import me.shedaniel.rei.gui.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.gui.plugin.entry.FluidEntryDefinition;
 import me.shedaniel.rei.gui.plugin.entry.ItemEntryDefinition;
 import me.shedaniel.rei.gui.widget.FavoritesListWidget;
@@ -116,7 +116,7 @@ public class DefaultRuntimePlugin implements REIPlugin {
     @Override
     public void registerScreens(ScreenRegistry registry) {
         ExclusionZones zones = registry.exclusionZones();
-        zones.register(RecipeViewingScreen.class, screen -> {
+        zones.register(DefaultDisplayViewingScreen.class, screen -> {
             Panel widget = screen.getWorkingStationsBaseWidget();
             if (widget == null)
                 return Collections.emptyList();
@@ -131,15 +131,15 @@ public class DefaultRuntimePlugin implements REIPlugin {
             }
             return Collections.emptyList();
         });
-        registry.registerDecider(new DisplayBoundsProvider<AbstractRecipeViewingScreen>() {
+        registry.registerDecider(new DisplayBoundsProvider<AbstractDisplayViewingScreen>() {
             @Override
-            public Rectangle getScreenBounds(AbstractRecipeViewingScreen screen) {
+            public Rectangle getScreenBounds(AbstractDisplayViewingScreen screen) {
                 return screen.getBounds();
             }
     
             @Override
             public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
-                return  AbstractRecipeViewingScreen.class.isAssignableFrom(screen);
+                return  AbstractDisplayViewingScreen.class.isAssignableFrom(screen);
             }
     
             @Override

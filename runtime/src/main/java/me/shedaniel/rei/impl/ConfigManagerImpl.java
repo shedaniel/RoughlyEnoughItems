@@ -52,7 +52,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.config.ConfigManager;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.favorites.FavoriteEntry;
-import me.shedaniel.rei.api.gui.config.RecipeScreenType;
+import me.shedaniel.rei.api.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.gui.config.entry.*;
 import me.shedaniel.rei.api.ingredient.EntryStack;
@@ -167,8 +167,8 @@ public class ConfigManagerImpl implements ConfigManager {
         }, (field) -> field.getType() == Double.TYPE || field.getType() == Double.class, ConfigObjectImpl.UsePercentage.class);
         
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
-                        Collections.singletonList(new RecipeScreenTypeEntry(220, new TranslatableComponent(i13n), getUnsafely(field, config, RecipeScreenType.UNSET), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
-                , (field) -> field.getType() == RecipeScreenType.class, ConfigObjectImpl.UseSpecialRecipeTypeScreen.class);
+                        Collections.singletonList(new RecipeScreenTypeEntry(220, new TranslatableComponent(i13n), getUnsafely(field, config, DisplayScreenType.UNSET), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
+                , (field) -> field.getType() == DisplayScreenType.class, ConfigObjectImpl.UseSpecialRecipeTypeScreen.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
                         Collections.singletonList(new SearchFilterSyntaxHighlightingEntry(new TranslatableComponent(i13n), getUnsafely(field, config, SyntaxHighlightingMode.COLORFUL), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
                 , (field) -> field.getType() == SyntaxHighlightingMode.class, ConfigObjectImpl.UseSpecialSearchFilterSyntaxHighlightingScreen.class);

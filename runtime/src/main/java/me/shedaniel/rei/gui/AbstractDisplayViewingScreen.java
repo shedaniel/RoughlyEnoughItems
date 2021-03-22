@@ -43,7 +43,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractRecipeViewingScreen extends Screen implements RecipeScreen {
+public abstract class AbstractDisplayViewingScreen extends Screen implements RecipeScreen {
     protected final Map<DisplayCategory<?>, List<Display>> categoryMap;
     protected final List<DisplayCategory<?>> categories;
     protected EntryStack<?> ingredientStackToNotice = EntryStack.empty();
@@ -52,7 +52,7 @@ public abstract class AbstractRecipeViewingScreen extends Screen implements Reci
     protected int tabsPerPage;
     protected Rectangle bounds;
     
-    protected AbstractRecipeViewingScreen(Map<DisplayCategory<?>, List<Display>> categoryMap, @Nullable ResourceLocation category, int tabsPerPage) {
+    protected AbstractDisplayViewingScreen(Map<DisplayCategory<?>, List<Display>> categoryMap, @Nullable ResourceLocation category, int tabsPerPage) {
         super(NarratorChatListener.NO_TITLE);
         this.categoryMap = categoryMap;
         this.categories = Lists.newArrayList(categoryMap.keySet());

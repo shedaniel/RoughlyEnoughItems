@@ -32,10 +32,10 @@ import java.util.Locale;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public enum RecipeScreenType {
+public enum DisplayScreenType {
     UNSET,
     ORIGINAL,
-    VILLAGER;
+    COMPOSITE;
     
     @Override
     public String toString() {

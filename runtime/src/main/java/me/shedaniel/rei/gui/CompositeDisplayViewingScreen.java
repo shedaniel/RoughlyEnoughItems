@@ -68,7 +68,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @ApiStatus.Internal
-public class VillagerRecipeViewingScreen extends AbstractRecipeViewingScreen {
+public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen {
     private final List<Widget> widgets = Lists.newArrayList();
     private final List<Button> buttonList = Lists.newArrayList();
     private final List<DisplayRenderer> displayRenderers = Lists.newArrayList();
@@ -95,7 +95,7 @@ public class VillagerRecipeViewingScreen extends AbstractRecipeViewingScreen {
     private long scrollBarAlphaFutureTime = -1;
     private int tabsPage = -1;
     
-    public VillagerRecipeViewingScreen(Map<DisplayCategory<?>, List<Display>> categoryMap, @Nullable ResourceLocation category) {
+    public CompositeDisplayViewingScreen(Map<DisplayCategory<?>, List<Display>> categoryMap, @Nullable ResourceLocation category) {
         super(categoryMap, category, 8);
     }
     
@@ -138,7 +138,7 @@ public class VillagerRecipeViewingScreen extends AbstractRecipeViewingScreen {
             widgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, 2 + w * 16, 2 + h * 16)));
             int index = 0;
             for (EntryIngredient workingStation : workstations) {
-                widgets.add(new RecipeViewingScreen.WorkstationSlotWidget(xx, yy, workingStation));
+                widgets.add(new DefaultDisplayViewingScreen.WorkstationSlotWidget(xx, yy, workingStation));
                 index++;
                 xx += 16;
                 if (index >= ww) {
@@ -170,7 +170,7 @@ public class VillagerRecipeViewingScreen extends AbstractRecipeViewingScreen {
             buttonList.add(Widgets.createButton(new Rectangle(bounds.x + 5, 0, displayRenderer.getWidth(), displayRenderer.getHeight()), NarratorChatListener.NO_TITLE)
                     .onClick(button -> {
                         selectedRecipeIndex = finalIndex;
-                        VillagerRecipeViewingScreen.this.init();
+                        CompositeDisplayViewingScreen.this.init();
                     })
                     .containsMousePredicate((button, point) -> {
                         return (button.getBounds().contains(point) && scrollListBounds.contains(point)) || button.isFocused();
@@ -199,7 +199,7 @@ public class VillagerRecipeViewingScreen extends AbstractRecipeViewingScreen {
                     tabsPage--;
                     if (tabsPage < 0)
                         tabsPage = Mth.ceil(categories.size() / (float) tabsPerPage) - 1;
-                    VillagerRecipeViewingScreen.this.init();
+                    CompositeDisplayViewingScreen.this.init();
                 })
                 .enabled(categories.size() > tabsPerPage));
         this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10), new TranslatableComponent("text.rei.right_arrow"))
@@ -207,7 +207,7 @@ public class VillagerRecipeViewingScreen extends AbstractRecipeViewingScreen {
                     tabsPage++;
                     if (tabsPage > Mth.ceil(categories.size() / (float) tabsPerPage) - 1)
                         tabsPage = 0;
-                    VillagerRecipeViewingScreen.this.init();
+                    CompositeDisplayViewingScreen.this.init();
                 })
                 .enabled(categories.size() > tabsPerPage));
         
@@ -305,7 +305,7 @@ public class VillagerRecipeViewingScreen extends AbstractRecipeViewingScreen {
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (ConfigObject.getInstance().doesVillagerScreenHavePermanentScrollBar()) {
+        if (ConfigObject.getInstance().isCompositeScrollBarPermanent()) {
             scrollBarAlphaFutureTime = System.currentTimeMillis();
             scrollBarAlphaFuture = 0;
             scrollBarAlpha = 1;

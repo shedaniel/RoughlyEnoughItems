@@ -36,6 +36,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -48,6 +49,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
 public final class Widgets {
@@ -69,13 +72,23 @@ public final class Widgets {
     
     public static WidgetWithBounds withTranslate(Widget widget, Matrix4f translate) {
         WidgetWithBounds widgetWithBounds = wrapWidgetWithBounds(widget);
+        return new WidgetWithBoundsWithTranslate(widgetWithBounds, () -> translate);
+    }
+    
+    public static <T extends Widget> WidgetWithBounds withTranslate(T widget, Function<T, Matrix4f> translate) {
+        WidgetWithBounds widgetWithBounds = wrapWidgetWithBounds(widget);
+        return new WidgetWithBoundsWithTranslate(widgetWithBounds, () -> translate.apply(widget));
+    }
+    
+    public static WidgetWithBounds withTranslate(Widget widget, Supplier<Matrix4f> translate) {
+        WidgetWithBounds widgetWithBounds = wrapWidgetWithBounds(widget);
         return new WidgetWithBoundsWithTranslate(widgetWithBounds, translate);
     }
     
     private static class WidgetWithBoundsWithTranslate extends DelegateWidget {
-        private final Matrix4f translate;
+        private final Supplier<Matrix4f> translate;
         
-        private WidgetWithBoundsWithTranslate(WidgetWithBounds widget, Matrix4f translate) {
+        private WidgetWithBoundsWithTranslate(WidgetWithBounds widget, Supplier<Matrix4f> translate) {
             super(widget);
             this.translate = translate;
         }
@@ -83,7 +96,7 @@ public final class Widgets {
         @Override
         public void render(PoseStack poseStack, int i, int j, float f) {
             poseStack.pushPose();
-            poseStack.last().pose().multiply(translate);
+            poseStack.last().pose().multiply(translate.get());
             super.render(poseStack, i, j, f);
             poseStack.popPose();
         }
@@ -94,6 +107,7 @@ public final class Widgets {
         
         public VanillaWrappedWidget(GuiEventListener element) {
             this.element = Objects.requireNonNull(element);
+            setFocused(element);
         }
         
         @Override
@@ -107,6 +121,26 @@ public final class Widgets {
         @Override
         public List<? extends GuiEventListener> children() {
             return Collections.singletonList(element);
+        }
+        
+        @Nullable
+        @Override
+        public GuiEventListener getFocused() {
+            return element;
+        }
+        
+        @Override
+        public void setFocused(@Nullable GuiEventListener guiEventListener) {
+            if (guiEventListener == element) {
+                super.setFocused(element);
+            } else if (element instanceof ContainerEventHandler) {
+                ((ContainerEventHandler) element).setFocused(guiEventListener);
+            }
+        }
+        
+        @Override
+        public boolean containsMouse(double mouseX, double mouseY) {
+            return element.isMouseOver(mouseX, mouseY);
         }
     }
     

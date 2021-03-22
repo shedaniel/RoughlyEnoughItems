@@ -25,22 +25,32 @@ package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
+import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.config.RecipeScreenType;
+import me.shedaniel.rei.api.gui.config.DisplayScreenType;
+import me.shedaniel.rei.api.gui.widgets.Button;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.util.ImmutableLiteralText;
+import me.shedaniel.rei.impl.Animator;
+import me.shedaniel.rei.impl.Internals;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -48,12 +58,15 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @ApiStatus.Internal
-public class PreRecipeViewingScreen extends Screen {
-    private static final ResourceLocation IDENTIFIER = new ResourceLocation("roughlyenoughitems", "textures/gui/screenshot.png");
+public class UncertainDisplayViewingScreen extends Screen {
+    private static final ResourceLocation DEFAULT = new ResourceLocation("roughlyenoughitems", "textures/gui/screenshot_default.png");
+    private static final ResourceLocation COMPOSITE = new ResourceLocation("roughlyenoughitems", "textures/gui/screenshot_composite.png");
     private final List<Widget> widgets;
     protected long start;
     protected long duration;
@@ -62,23 +75,34 @@ public class PreRecipeViewingScreen extends Screen {
     private double frame = 0;
     private double target = 0;
     private BooleanConsumer callback;
+    private Button button;
     private Screen parent;
+    private Widget slider;
     private boolean showTips;
+    private Animator scroll = new Animator();
+    private List<String> allModsUsingJEI = new ArrayList<>();
     
-    public PreRecipeViewingScreen(Screen parent, RecipeScreenType type, boolean showTips, BooleanConsumer callback) {
-        super(new TranslatableComponent("text.rei.recipe_screen_type.selection"));
+    public UncertainDisplayViewingScreen(Screen parent, DisplayScreenType type, boolean showTips, BooleanConsumer callback) {
+        super(ImmutableLiteralText.EMPTY);
         this.widgets = Lists.newArrayList();
-        if (type == RecipeScreenType.UNSET) {
+        if (type == DisplayScreenType.UNSET) {
             this.isSet = false;
             this.original = true;
         } else {
             this.isSet = true;
-            this.original = type == RecipeScreenType.ORIGINAL;
+            this.original = type == DisplayScreenType.ORIGINAL;
             moveFrameTo(original ? 0 : 1, false, 0);
         }
+        this.scroll.setAs(0);
         this.callback = callback;
         this.parent = parent;
         this.showTips = showTips;
+        if (showTips && Platform.isForge()) {
+            allModsUsingJEI = Internals.getJeiCompatMods().stream()
+                    .distinct()
+                    .map(ClientHelper.getInstance()::getModFromModId)
+                    .collect(Collectors.toList());
+        }
     }
     
     public final double clamp(double v) {
@@ -95,40 +119,87 @@ public class PreRecipeViewingScreen extends Screen {
         if (animated) {
             start = System.currentTimeMillis();
             this.duration = duration;
-        } else
+        } else {
             frame = target;
+        }
     }
     
     @Override
     public void init() {
         this.children.clear();
         this.widgets.clear();
-        this.widgets.add(Widgets.createButton(new Rectangle(width / 2 - 100, height - 40, 200, 20), NarratorChatListener.NO_TITLE)
+        this.children.add(button = Widgets.createButton(new Rectangle(width / 2 - 100, height - 40, 200, 20), NarratorChatListener.NO_TITLE)
                 .onRender((matrices, button) -> {
                     button.setEnabled(isSet);
-                    button.setText(isSet ? new TranslatableComponent("text.rei.select") : new TranslatableComponent("config.roughlyenoughitems.recipeScreenType.unset"));
+                    if (scroll.target() != 0 && allModsUsingJEI != null) {
+                        button.setText(new TranslatableComponent("gui.done"));
+                    } else {
+                        button.setText(isSet ? new TranslatableComponent("text.rei.select") : new TranslatableComponent("config.roughlyenoughitems.recipeScreenType.unset"));
+                    }
                 })
-                .onClick(button -> callback.accept(original)));
-        this.widgets.add(new ScreenTypeSelection(width / 2 - 200 - 5, height / 2 - 112 / 2 - 10, 0));
-        this.widgets.add(Widgets.createLabel(new Point(width / 2 - 200 - 5 + 104, height / 2 - 112 / 2 + 115), new TranslatableComponent("config.roughlyenoughitems.recipeScreenType.original")).noShadow().color(-1124073473));
-        this.widgets.add(new ScreenTypeSelection(width / 2 + 5, height / 2 - 112 / 2 - 10, 112));
-        this.widgets.add(Widgets.createLabel(new Point(width / 2 + 5 + 104, height / 2 - 112 / 2 + 115), new TranslatableComponent("config.roughlyenoughitems.recipeScreenType.villager")).noShadow().color(-1124073473));
+                .onClick(button -> {
+                    if (scroll.target() == 0 && allModsUsingJEI != null) {
+                        scroll.setTo(200, 450);
+                    } else {
+                        callback.accept(original);
+                    }
+                }));
+        this.widgets.add(transformScroll(new ScreenTypeSelection(width / 2 - 200 - 5, height / 2 - 112 / 2 - 10, DisplayScreenType.ORIGINAL)));
+        this.widgets.add(transformScroll(Widgets.createLabel(new Point(width / 2 - 200 - 5 + 104, height / 2 - 112 / 2 + 115), new TranslatableComponent("config.roughlyenoughitems.recipeScreenType.original")).noShadow().color(-1124073473)));
+        this.widgets.add(transformScroll(new ScreenTypeSelection(width / 2 + 5, height / 2 - 112 / 2 - 10, DisplayScreenType.COMPOSITE)));
+        this.widgets.add(transformScroll(Widgets.createLabel(new Point(width / 2 + 5 + 104, height / 2 - 112 / 2 + 115), new TranslatableComponent("config.roughlyenoughitems.recipeScreenType.composite")).noShadow().color(-1124073473)));
+        this.widgets.add(slider = transformScroll(Widgets.wrapVanillaWidget(new AbstractSliderButton(width / 2 - 100, height * 2 - 64, 200, 20, new TranslatableComponent("text.rei.jei_compat.false"), 0) {
+            @Override
+            protected void updateMessage() {
+                setMessage(new TranslatableComponent("text.rei.jei_compat." + (value == 1f)));
+            }
+            
+            @Override
+            protected void applyValue() {
+                
+            }
+            
+            @Override
+            public void renderButton(PoseStack poseStack, int i, int j, float f) {
+                y = UncertainDisplayViewingScreen.this.height * 2 - 64;
+                super.renderButton(poseStack, i, j, f);
+                y = UncertainDisplayViewingScreen.this.height * 2 - 64 - (int) (scroll.floatValue() / 200f * height);
+            }
+        })));
         this.children.addAll(widgets);
+    }
+    
+    private Widget transformScroll(Widget widget) {
+        return Widgets.withTranslate(widget, () -> Matrix4f.createTranslateMatrix(0, -(scroll.floatValue() / 200f * height), 0));
     }
     
     @Override
     public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
+        scroll.update(float_1);
         if (this.minecraft.level != null) {
             this.fillGradient(matrices, 0, 0, this.width, this.height, -1072689136, -804253680);
         } else {
             this.fillGradient(matrices, 0, 0, this.width, this.height, -16777216, -16777216);
         }
-        drawCenteredString(matrices, this.font, this.title, this.width / 2, 20, 16777215);
+        if (scroll.target() == 0) {
+            drawCenteredString(matrices, this.font, new TranslatableComponent("text.rei.recipe_screen_type.selection"), this.width / 2, 20, 16777215);
+        } else {
+            drawCenteredString(matrices, this.font, new TranslatableComponent("text.rei.jei_compat"), this.width / 2, 20, 16777215);
+        }
+        ScissorsHandler.INSTANCE.scissor(new Rectangle(0, 20 + font.lineHeight + 2, width, height - 42));
         if (showTips) {
-            int i = 30;
+            float i = 32 - (scroll.floatValue() / 200f * height);
             for (FormattedCharSequence s : this.font.split(new TranslatableComponent("text.rei.recipe_screen_type.selection.sub").withStyle(ChatFormatting.GRAY), width - 30)) {
                 font.drawShadow(matrices, s, width / 2 - font.width(s) / 2, i, -1);
                 i += 10;
+            }
+            if (allModsUsingJEI != null) {
+                i = 32 + height - (scroll.floatValue() / 200f * height);
+                for (FormattedCharSequence s : this.font.split(new TranslatableComponent("text.rei.jei_compat.sub", new TranslatableComponent("text.rei.jei_compat.sub.stability"),
+                        new TextComponent(String.join(", ", allModsUsingJEI))).withStyle(ChatFormatting.GRAY), width - 30)) {
+                    font.drawShadow(matrices, s, width / 2 - font.width(s) / 2, i, -1);
+                    i += 10;
+                }
             }
         }
         super.render(matrices, int_1, int_2, float_1);
@@ -136,14 +207,19 @@ public class PreRecipeViewingScreen extends Screen {
             widget.render(matrices, int_1, int_2, float_1);
         }
         if (isSet) {
+            matrices.pushPose();
+            matrices.translate(0, -(scroll.floatValue() / 200f * height), 0);
             updateFramePosition(float_1);
             int x = (int) (width / 2 - 205 + (210 * frame));
             int y = height / 2 - 112 / 2 - 10;
             fillGradient(matrices, x - 2, y - 4, x - 6 + 208, y - 4 + 2, -1778384897, -1778384897);
-            fillGradient(matrices, x - 2, y - 4 + 120 - 2, x - 6 + 208, y - 4 + 120, -1778384897, -1778384897);
-            fillGradient(matrices, x - 4, y - 4, x - 4 + 2, y - 4 + 120, -1778384897, -1778384897);
-            fillGradient(matrices, x - 4 + 208 - 2, y - 4, x - 4 + 208, y - 4 + 120, -1778384897, -1778384897);
+            fillGradient(matrices, x - 2, y - 4 + 126 - 2, x - 6 + 208, y - 4 + 126, -1778384897, -1778384897);
+            fillGradient(matrices, x - 4, y - 4, x - 4 + 2, y - 4 + 126, -1778384897, -1778384897);
+            fillGradient(matrices, x - 4 + 208 - 2, y - 4, x - 4 + 208, y - 4 + 126, -1778384897, -1778384897);
+            matrices.popPose();
         }
+        ScissorsHandler.INSTANCE.removeLastScissor();
+        button.render(matrices, int_1, int_2, float_1);
     }
     
     private void updateFramePosition(float delta) {
@@ -170,15 +246,18 @@ public class PreRecipeViewingScreen extends Screen {
         return super.keyPressed(int_1, int_2, int_3);
     }
     
+    @Override
+    public boolean mouseDragged(double d, double e, int i, double f, double g) {
+        return slider.mouseDragged(d, e, i, f, g) || super.mouseDragged(d, e, i, f, g);
+    }
+    
     public class ScreenTypeSelection extends WidgetWithBounds {
-        
+        private final DisplayScreenType type;
         private Rectangle bounds;
-        private int u, v;
         
-        public ScreenTypeSelection(int x, int y, int v) {
-            this.bounds = new Rectangle(x - 4, y - 4, 208, 120);
-            this.u = 0;
-            this.v = v;
+        public ScreenTypeSelection(int x, int y, DisplayScreenType type) {
+            this.type = type;
+            this.bounds = new Rectangle(x - 4 + 16, y - 4, 176 + 8, 120 + 8);
         }
         
         @NotNull
@@ -189,14 +268,14 @@ public class PreRecipeViewingScreen extends Screen {
         
         @Override
         public void render(PoseStack matrices, int i, int i1, float delta) {
-            Minecraft.getInstance().getTextureManager().bind(IDENTIFIER);
-            blit(matrices, bounds.x + 4, bounds.y + 4, u, v, 200, 112);
+            Minecraft.getInstance().getTextureManager().bind(type == DisplayScreenType.ORIGINAL ? DEFAULT : COMPOSITE);
+            blit(matrices, bounds.x + (type == DisplayScreenType.ORIGINAL ? 8 : 4), bounds.y + 4, bounds.width - 8, bounds.height - 8, 113, type == DisplayScreenType.ORIGINAL ? 16 : 27, 854 - 113 * 2, 480 - 27 * 2, 854, 480);
         }
         
         @Override
         public boolean mouseClicked(double double_1, double double_2, int int_1) {
             if (containsMouse(double_1, double_2)) {
-                original = (v == 0);
+                original = (type == DisplayScreenType.ORIGINAL);
                 if (!isSet) {
                     moveFrameTo(original ? 0 : 1, false, 0);
                 }
