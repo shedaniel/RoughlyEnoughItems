@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.api.gui.widgets;
 
-import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import net.minecraft.client.gui.components.events.GuiEventListener;

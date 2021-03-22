@@ -26,10 +26,10 @@ package me.shedaniel.rei.api.gui.widgets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.gui.AbstractContainerEventHandler;
 import me.shedaniel.rei.api.gui.Renderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 
 /**
  * The base class for a screen widget

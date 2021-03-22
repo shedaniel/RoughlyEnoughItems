@@ -32,7 +32,7 @@ import me.shedaniel.rei.api.ClientHelper;
 import me.shedaniel.rei.api.config.ConfigManager;
 import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.config.RecipeScreenType;
+import me.shedaniel.rei.api.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.ingredient.EntryStack;
 import me.shedaniel.rei.api.ingredient.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.ingredient.util.EntryStacks;
@@ -40,10 +40,10 @@ import me.shedaniel.rei.api.registry.display.Display;
 import me.shedaniel.rei.api.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.view.Views;
-import me.shedaniel.rei.gui.PreRecipeViewingScreen;
+import me.shedaniel.rei.gui.DefaultDisplayViewingScreen;
+import me.shedaniel.rei.gui.UncertainDisplayViewingScreen;
 import me.shedaniel.rei.gui.RecipeScreen;
-import me.shedaniel.rei.gui.RecipeViewingScreen;
-import me.shedaniel.rei.gui.VillagerRecipeViewingScreen;
+import me.shedaniel.rei.gui.CompositeDisplayViewingScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -206,16 +206,16 @@ public class ClientHelperImpl implements ClientHelper {
         Map<DisplayCategory<?>, List<Display>> map = builder.buildMap();
         if (map.isEmpty()) return false;
         Screen screen;
-        if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.VILLAGER) {
-            screen = new VillagerRecipeViewingScreen(map, builder.getPreferredOpenedCategory());
-        } else if (ConfigObject.getInstance().getRecipeScreenType() == RecipeScreenType.UNSET) {
-            screen = new PreRecipeViewingScreen(REIHelper.getInstance().getPreviousScreen(), RecipeScreenType.UNSET, true, original -> {
-                ConfigObject.getInstance().setRecipeScreenType(original ? RecipeScreenType.ORIGINAL : RecipeScreenType.VILLAGER);
+        if (ConfigObject.getInstance().getRecipeScreenType() == DisplayScreenType.COMPOSITE) {
+            screen = new CompositeDisplayViewingScreen(map, builder.getPreferredOpenedCategory());
+        } else if (ConfigObject.getInstance().getRecipeScreenType() == DisplayScreenType.UNSET) {
+            screen = new UncertainDisplayViewingScreen(REIHelper.getInstance().getPreviousScreen(), DisplayScreenType.UNSET, true, original -> {
+                ConfigObject.getInstance().setRecipeScreenType(original ? DisplayScreenType.ORIGINAL : DisplayScreenType.COMPOSITE);
                 ConfigManager.getInstance().saveConfig();
                 openView(builder);
             });
         } else {
-            screen = new RecipeViewingScreen(map, builder.getPreferredOpenedCategory());
+            screen = new DefaultDisplayViewingScreen(map, builder.getPreferredOpenedCategory());
         }
         if (screen instanceof RecipeScreen) {
             if (builder.getInputNotice() != null)

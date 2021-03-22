@@ -23,16 +23,19 @@
 
 package me.shedaniel.rei.forge;
 
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.plugins.PluginManager;
 import me.shedaniel.rei.gui.plugin.DefaultRuntimePlugin;
+import me.shedaniel.rei.impl.Internals;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.plugin.DefaultPlugin;
 import me.shedaniel.rei.plugin.DefaultServerContainerPlugin;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public class PluginDetectorImpl {
     public static void detectServerPlugins() {
@@ -43,10 +46,19 @@ public class PluginDetectorImpl {
     public static void detectClientPlugins() {
         PluginManager.getInstance().registerPlugin(new DefaultPlugin());
         PluginManager.getInstance().registerPlugin(new DefaultRuntimePlugin());
-        RoughlyEnoughItemsForge.scanAnnotation(REIPlugin.class, plugin -> {
+        RoughlyEnoughItemsForge.scanAnnotation(REIPlugin.class, (modId, plugin) -> {
             PluginManager.getInstance().registerPlugin(((me.shedaniel.rei.api.plugins.REIPlugin) plugin));
         });
-        JEIPluginDetector.detect((aClass, consumer) -> RoughlyEnoughItemsForge.scanAnnotation((Class<Object>) aClass, (Consumer<Object>) consumer),
+        Internals.attachInstance((Supplier<List<String>>) () -> {
+            List<String> modIds = new ArrayList<>();
+            for (me.shedaniel.rei.api.plugins.REIPlugin plugin : PluginManager.getInstance().getPlugins()) {
+                if (plugin instanceof JEIPluginDetector.JEIPluginWrapper) {
+                    modIds.addAll(((JEIPluginDetector.JEIPluginWrapper) plugin).modIds);
+                }
+            }
+            return modIds;
+        }, "jeiCompatMods");
+        JEIPluginDetector.detect((aClass, consumer) -> RoughlyEnoughItemsForge.scanAnnotation((Class<Object>) aClass, (BiConsumer<List<String>, Object>) consumer),
                 PluginManager.getInstance()::registerPlugin);
     }
 }

@@ -33,7 +33,7 @@ import me.shedaniel.rei.api.gui.widgets.Button;
 import me.shedaniel.rei.api.gui.widgets.Panel;
 import me.shedaniel.rei.api.gui.widgets.Widget;
 import me.shedaniel.rei.api.gui.widgets.Widgets;
-import me.shedaniel.rei.gui.RecipeViewingScreen;
+import me.shedaniel.rei.gui.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.widgets.TextFieldWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -46,20 +46,20 @@ import java.util.List;
 import java.util.Optional;
 
 @ApiStatus.Internal
-public class RecipeChoosePageWidget extends DraggableWidget {
+public class DefaultDisplayChoosePageWidget extends DraggableWidget {
     
     private int currentPage;
     private int maxPage;
     private Rectangle bounds, grabBounds, dragBounds;
     private List<Widget> widgets;
-    private RecipeViewingScreen recipeViewingScreen;
+    private DefaultDisplayViewingScreen screen;
     private TextFieldWidget textFieldWidget;
     private Panel base1, base2;
     private Button btnDone;
     
-    public RecipeChoosePageWidget(RecipeViewingScreen recipeViewingScreen, int currentPage, int maxPage) {
+    public DefaultDisplayChoosePageWidget(DefaultDisplayViewingScreen screen, int currentPage, int maxPage) {
         super(getPointFromConfig());
-        this.recipeViewingScreen = recipeViewingScreen;
+        this.screen = screen;
         this.currentPage = currentPage;
         this.maxPage = maxPage;
         initWidgets(getMidPoint());
@@ -147,9 +147,9 @@ public class RecipeChoosePageWidget extends DraggableWidget {
         textFieldWidget.setText(String.valueOf(currentPage + 1));
         widgets.add(btnDone = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20), new TranslatableComponent("gui.done"))
                 .onClick(button -> {
-                    recipeViewingScreen.page = Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getCurrentTotalPages() - 1);
-                    recipeViewingScreen.choosePageActivated = false;
-                    recipeViewingScreen.init();
+                    screen.page = Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, screen.getCurrentTotalPages() - 1);
+                    screen.choosePageActivated = false;
+                    screen.init();
                 }));
         textFieldWidget.setFocused(true);
     }
@@ -185,9 +185,9 @@ public class RecipeChoosePageWidget extends DraggableWidget {
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 335 || int_1 == 257) {
-            recipeViewingScreen.page = Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, recipeViewingScreen.getCurrentTotalPages() - 1);
-            recipeViewingScreen.choosePageActivated = false;
-            recipeViewingScreen.init();
+            screen.page = Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, screen.getCurrentTotalPages() - 1);
+            screen.choosePageActivated = false;
+            screen.init();
             return true;
         }
         for (Widget widget : widgets)

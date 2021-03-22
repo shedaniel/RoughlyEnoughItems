@@ -131,13 +131,13 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
-    public RecipeScreenType getRecipeScreenType() {
+    public DisplayScreenType getRecipeScreenType() {
         return appearance.recipeScreenType;
     }
     
     @Override
-    public void setRecipeScreenType(RecipeScreenType recipeScreenType) {
-        appearance.recipeScreenType = recipeScreenType;
+    public void setRecipeScreenType(DisplayScreenType displayScreenType) {
+        appearance.recipeScreenType = displayScreenType;
     }
     
     @Override
@@ -201,8 +201,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
-    public boolean doesVillagerScreenHavePermanentScrollBar() {
-        return advanced.accessibility.villagerScreenPermanentScrollBar;
+    public boolean isCompositeScrollBarPermanent() {
+        return advanced.accessibility.compositeScrollBarPermanent;
     }
     
     @Override
@@ -438,7 +438,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public static class Appearance {
-        @UseSpecialRecipeTypeScreen private RecipeScreenType recipeScreenType = RecipeScreenType.ORIGINAL;
+        @UseSpecialRecipeTypeScreen private DisplayScreenType recipeScreenType = DisplayScreenType.UNSET;
         @Comment("Declares the appearance of REI windows.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private AppearanceTheme theme = AppearanceTheme.LIGHT;
         @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
@@ -502,7 +502,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares the position of the entry panel.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
             private DisplayPanelLocation displayPanelLocation = DisplayPanelLocation.RIGHT;
             @Comment("Declares whether scrolled entry panel should snap to rows.") private boolean snapToRows = false;
-            @Comment("Declares how the scrollbar in villager screen should act.") private boolean villagerScreenPermanentScrollBar = false;
+            @Comment("Declares how the scrollbar in composite screen should act.") private boolean compositeScrollBarPermanent = false;
             private boolean toastDisplayedOnCopyIdentifier = true;
             @Comment("Declares whether REI should use compact tabs for categories.") private boolean useCompactTabs = true;
         }

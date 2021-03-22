@@ -70,9 +70,9 @@ public interface ConfigObject {
     
     boolean shouldAppendModNames();
     
-    RecipeScreenType getRecipeScreenType();
+    DisplayScreenType getRecipeScreenType();
     
-    void setRecipeScreenType(RecipeScreenType recipeScreenType);
+    void setRecipeScreenType(DisplayScreenType displayScreenType);
     
     SearchFieldLocation getSearchFieldLocation();
     
@@ -103,7 +103,7 @@ public interface ConfigObject {
     RecipeBorderType getRecipeBorderType();
     
     
-    boolean doesVillagerScreenHavePermanentScrollBar();
+    boolean isCompositeScrollBarPermanent();
     
     boolean doesRegisterRecipesInAnotherThread();
     

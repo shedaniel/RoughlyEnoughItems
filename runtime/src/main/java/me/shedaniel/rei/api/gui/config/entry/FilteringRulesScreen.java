@@ -45,7 +45,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 
-import static me.shedaniel.rei.gui.RecipeViewingScreen.CHEST_GUI_TEXTURE;
+import static me.shedaniel.rei.gui.DefaultDisplayViewingScreen.CHEST_GUI_TEXTURE;
 
 public class FilteringRulesScreen extends Screen {
     private final FilteringEntry entry;

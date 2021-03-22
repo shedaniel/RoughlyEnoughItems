@@ -31,7 +31,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.config.ConfigObject;
 import me.shedaniel.rei.api.REIHelper;
 import me.shedaniel.rei.api.gui.config.RecipeBorderType;
-import me.shedaniel.rei.api.gui.config.RecipeScreenType;
+import me.shedaniel.rei.api.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.gui.widgets.Panel;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -56,7 +56,7 @@ public final class PanelWidget extends Panel {
     private Predicate<Panel> rendering = Predicates.alwaysTrue();
     
     public static boolean isRendering(Panel panel) {
-        return ConfigObject.getInstance().getRecipeScreenType() != RecipeScreenType.VILLAGER;
+        return ConfigObject.getInstance().getRecipeScreenType() != DisplayScreenType.COMPOSITE;
     }
     
     public PanelWidget(@NotNull Rectangle bounds) {
