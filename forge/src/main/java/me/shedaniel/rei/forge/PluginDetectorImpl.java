@@ -23,12 +23,16 @@
 
 package me.shedaniel.rei.forge;
 
-import me.shedaniel.rei.api.plugins.PluginManager;
-import me.shedaniel.rei.gui.plugin.DefaultRuntimePlugin;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.plugins.PluginView;
+import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
+import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
+import me.shedaniel.rei.gui.plugin.DefaultClientRuntimePlugin;
 import me.shedaniel.rei.impl.Internals;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import me.shedaniel.rei.plugin.DefaultPlugin;
-import me.shedaniel.rei.plugin.DefaultServerContainerPlugin;
+import me.shedaniel.rei.plugin.client.DefaultClientPlugin;
+import me.shedaniel.rei.plugin.common.DefaultPlugin;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -39,26 +43,35 @@ import java.util.function.Supplier;
 
 public class PluginDetectorImpl {
     public static void detectServerPlugins() {
-        new DefaultServerContainerPlugin().run();
+        PluginView.getServerInstance().registerPlugin(new DefaultPlugin());
+        RoughlyEnoughItemsForge.<REIPlugin, REIServerPlugin>scanAnnotation(REIPlugin.class, REIServerPlugin.class::isAssignableFrom, (modId, plugin) -> {
+            ((PluginView<REIServerPlugin>) PluginManager.getServerInstance()).registerPlugin(plugin);
+        });
+    }
+    
+    public static void detectCommonPlugins() {
+        RoughlyEnoughItemsForge.<REIPlugin, me.shedaniel.rei.api.common.plugins.REIPlugin<?>>scanAnnotation(REIPlugin.class, me.shedaniel.rei.api.common.plugins.REIPlugin.class::isAssignableFrom, (modId, plugin) -> {
+            ((PluginView) PluginManager.getInstance()).registerPlugin(plugin);
+        });
     }
     
     @OnlyIn(Dist.CLIENT)
     public static void detectClientPlugins() {
-        PluginManager.getInstance().registerPlugin(new DefaultPlugin());
-        PluginManager.getInstance().registerPlugin(new DefaultRuntimePlugin());
-        RoughlyEnoughItemsForge.scanAnnotation(REIPlugin.class, (modId, plugin) -> {
-            PluginManager.getInstance().registerPlugin(((me.shedaniel.rei.api.plugins.REIPlugin) plugin));
+        PluginView.getClientInstance().registerPlugin(new DefaultClientPlugin());
+        PluginView.getClientInstance().registerPlugin(new DefaultClientRuntimePlugin());
+        RoughlyEnoughItemsForge.<REIPlugin, REIClientPlugin>scanAnnotation(REIPlugin.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin) -> {
+            ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(plugin);
         });
         Internals.attachInstance((Supplier<List<String>>) () -> {
             List<String> modIds = new ArrayList<>();
-            for (me.shedaniel.rei.api.plugins.REIPlugin plugin : PluginManager.getInstance().getPlugins()) {
-                if (plugin instanceof JEIPluginDetector.JEIPluginWrapper) {
-                    modIds.addAll(((JEIPluginDetector.JEIPluginWrapper) plugin).modIds);
+            for (REIPluginProvider<REIClientPlugin> plugin : PluginManager.getClientInstance().getPluginProviders()) {
+                if (plugin instanceof JEIPluginDetector.JEIPluginProvider) {
+                    modIds.addAll(((JEIPluginDetector.JEIPluginProvider) plugin).wrapper.modIds);
                 }
             }
             return modIds;
         }, "jeiCompatMods");
-        JEIPluginDetector.detect((aClass, consumer) -> RoughlyEnoughItemsForge.scanAnnotation((Class<Object>) aClass, (BiConsumer<List<String>, Object>) consumer),
-                PluginManager.getInstance()::registerPlugin);
+        JEIPluginDetector.detect((aClass, consumer) -> RoughlyEnoughItemsForge.scanAnnotation((Class<Object>) aClass, clazz -> true, (BiConsumer<List<String>, Object>) consumer),
+                PluginView.getClientInstance()::registerPlugin);
     }
 }

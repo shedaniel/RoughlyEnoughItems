@@ -23,15 +23,15 @@
 
 package me.shedaniel.rei.plugin.pathing;
 
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.api.client.ingredient.util.ClientEntryIngredients;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.ingredient.util.EntryStacks;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
@@ -61,16 +61,16 @@ public class DefaultPathingDisplay implements Display {
     
     @Override
     public List<EntryIngredient> getInputEntries() {
-        return Collections.singletonList(EntryIngredients.of(in));
+        return Collections.singletonList(ClientEntryIngredients.of(in));
     }
     
     @Override
-    public List<EntryIngredient> getResultingEntries() {
-        return Collections.singletonList(EntryIngredients.of(out));
+    public List<EntryIngredient> getOutputEntries() {
+        return Collections.singletonList(ClientEntryIngredients.of(out));
     }
     
     @Override
-    public ResourceLocation getCategoryIdentifier() {
-        return DefaultPlugin.PATHING;
+    public CategoryIdentifier<?> getCategoryIdentifier() {
+        return BuiltinPlugin.PATHING;
     }
 }

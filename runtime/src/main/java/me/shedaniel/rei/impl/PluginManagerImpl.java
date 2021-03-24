@@ -25,22 +25,20 @@ package me.shedaniel.rei.impl;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterables;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.plugins.PluginManager;
-import me.shedaniel.rei.api.plugins.REIPlugin;
-import me.shedaniel.rei.api.registry.Reloadable;
-import me.shedaniel.rei.api.registry.category.CategoryRegistry;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.registry.display.DisplayRegistry;
-import me.shedaniel.rei.api.registry.entry.EntryRegistry;
-import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.api.util.CollectionUtils;
-import me.shedaniel.rei.impl.entry.ItemComparatorRegistryImpl;
-import me.shedaniel.rei.impl.registry.CategoryRegistryImpl;
-import me.shedaniel.rei.impl.registry.DisplayRegistryImpl;
-import me.shedaniel.rei.impl.search.SearchProviderImpl;
-import me.shedaniel.rei.impl.subsets.SubsetsRegistryImpl;
-import me.shedaniel.rei.impl.transfer.TransferHandlerRegistryImpl;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.plugins.PluginView;
+import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
+import me.shedaniel.rei.api.common.registry.Reloadable;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -52,35 +50,29 @@ import java.io.Closeable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public class PluginManagerImpl implements PluginManager {
-    private final List<Reloadable> reloadables = new ArrayList<>();
-    private final Map<Class<? extends Reloadable>, Reloadable> cache = new ConcurrentHashMap<>();
+public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<P>, PluginView<P> {
+    private final List<Reloadable<P>> reloadables = new ArrayList<>();
+    private final Map<Class<? extends Reloadable<P>>, Reloadable<? super P>> cache = new ConcurrentHashMap<>();
+    private final UnaryOperator<PluginView<P>> view;
     private boolean arePluginsLoading = false;
-    private final List<REIPlugin> plugins = new ArrayList<>();
+    private final List<REIPluginProvider<P>> plugins = new ArrayList<>();
     
-    public PluginManagerImpl() {
-        registerReloadable(new SearchProviderImpl());
-        registerReloadable(new ConfigManagerImpl());
-        registerReloadable(new EntryTypeRegistryImpl());
-        registerReloadable(new ItemComparatorRegistryImpl());
-        registerReloadable(new FluidSupportProviderImpl());
-        registerReloadable(new CategoryRegistryImpl());
-        registerReloadable(new DisplayRegistryImpl());
-        registerReloadable(new ScreenRegistryImpl());
-        registerReloadable(new EntryRegistryImpl());
-        registerReloadable(new FavoriteEntryTypeRegistryImpl());
-        registerReloadable(new SubsetsRegistryImpl());
-        registerReloadable(new TransferHandlerRegistryImpl());
-        registerReloadable(new REIHelperImpl());
+    @SafeVarargs
+    public PluginManagerImpl(UnaryOperator<PluginView<P>> view, Reloadable<P>... reloadables) {
+        this.view = view;
+        for (Reloadable<P> reloadable : reloadables) {
+            registerReloadable(reloadable);
+        }
     }
     
     @Override
-    public void registerReloadable(Reloadable reloadable) {
-        this.reloadables.add(reloadable);
+    public void registerReloadable(Reloadable<? extends P> reloadable) {
+        this.reloadables.add((Reloadable<P>) reloadable);
     }
     
     @Override
@@ -89,13 +81,13 @@ public class PluginManagerImpl implements PluginManager {
     }
     
     @Override
-    public <T extends Reloadable> T get(Class<T> reloadableClass) {
-        Reloadable reloadable = this.cache.get(reloadableClass);
+    public <T extends Reloadable<? super P>> T get(Class<T> reloadableClass) {
+        Reloadable<? super P> reloadable = this.cache.get(reloadableClass);
         if (reloadable != null) return (T) reloadable;
         
-        for (Reloadable r : reloadables) {
+        for (Reloadable<P> r : reloadables) {
             if (reloadableClass.isInstance(r)) {
-                this.cache.put(reloadableClass, r);
+                this.cache.put((Class<? extends Reloadable<P>>) reloadableClass, r);
                 return (T) r;
             }
         }
@@ -103,20 +95,29 @@ public class PluginManagerImpl implements PluginManager {
     }
     
     @Override
-    public List<Reloadable> getReloadables() {
+    public List<Reloadable<P>> getReloadables() {
         return Collections.unmodifiableList(reloadables);
     }
     
     @Override
-    public <T extends REIPlugin> T registerPlugin(T plugin) {
-        plugins.add(plugin);
-        RoughlyEnoughItemsCore.LOGGER.info("Registered plugin %s", plugin.getPluginName());
-        return plugin;
+    public PluginView<P> view() {
+        return view.apply(this);
     }
     
     @Override
-    public List<REIPlugin> getPlugins() {
+    public void registerPlugin(REIPluginProvider<? extends P> plugin) {
+        plugins.add((REIPluginProvider<P>) plugin);
+        RoughlyEnoughItemsCore.LOGGER.info("Registered plugin provider %s", plugin.getPluginProviderName());
+    }
+    
+    @Override
+    public List<REIPluginProvider<P>> getPluginProviders() {
         return Collections.unmodifiableList(plugins);
+    }
+    
+    @Override
+    public FluentIterable<P> getPlugins() {
+        return FluentIterable.concat(Iterables.transform(plugins, REIPluginProvider::provide));
     }
     
     private static class SectionClosable implements Closeable {
@@ -142,8 +143,8 @@ public class PluginManagerImpl implements PluginManager {
         return new SectionClosable(sectionData, section);
     }
     
-    private void pluginSection(MutablePair<Stopwatch, String> sectionData, String sectionName, List<REIPlugin> list, Consumer<REIPlugin> consumer) {
-        for (REIPlugin plugin : list) {
+    private void pluginSection(MutablePair<Stopwatch, String> sectionData, String sectionName, List<P> list, Consumer<P> consumer) {
+        for (P plugin : list) {
             try (SectionClosable section = section(sectionData, sectionName + " for " + plugin.getPluginName())) {
                 consumer.accept(plugin);
             } catch (Throwable throwable) {
@@ -152,62 +153,61 @@ public class PluginManagerImpl implements PluginManager {
         }
     }
     
-    public void tryResetData() {
-        try {
-            this.startReload();
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-        }
-        arePluginsLoading = false;
-    }
-    
     @Override
     public void startReload() {
-        long startTime = Util.getMillis();
-        MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
-        
-        try (SectionClosable startReload = section(sectionData, "start-reload")) {
-            for (Reloadable reloadable : reloadables) {
-                reloadable.startReload();
+        try {
+            long startTime = Util.getMillis();
+            MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
+            
+            try (SectionClosable startReload = section(sectionData, "start-reload")) {
+                for (Reloadable<P> reloadable : reloadables) {
+                    reloadable.startReload();
+                }
             }
-        }
-        
-        arePluginsLoading = true;
-        List<REIPlugin> plugins = new ArrayList<>(getPlugins());
-        plugins.sort(Comparator.comparingInt(REIPlugin::getPriority).reversed());
-        RoughlyEnoughItemsCore.LOGGER.info("Reloading REI, registered %d plugins: %s", plugins.size(), CollectionUtils.mapAndJoinToString(plugins, REIPlugin::getPluginName, ", "));
-        Collections.reverse(plugins);
-        
-        pluginSection(sectionData, "pre-register", plugins, REIPlugin::preRegister);
-        for (Reloadable reloadable : getReloadables()) {
-            Class<? extends Reloadable> reloadableClass = reloadable.getClass();
-            pluginSection(sectionData, "reloadable-plugin-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()), plugins, reloadable::acceptPlugin);
-        }
-        pluginSection(sectionData, "post-register", plugins, REIPlugin::postRegister);
-        
-        try (SectionClosable endReload = section(sectionData, "end-reload")) {
-            for (Reloadable reloadable : reloadables) {
-                reloadable.endReload();
+            
+            arePluginsLoading = true;
+            List<P> plugins = new ArrayList<>(getPlugins().toList());
+            plugins.sort(Comparator.comparingInt(P::getPriority).reversed());
+            RoughlyEnoughItemsCore.LOGGER.info("Reloading REI, registered %d plugins: %s", plugins.size(), CollectionUtils.mapAndJoinToString(plugins, REIPlugin::getPluginName, ", "));
+            Collections.reverse(plugins);
+            
+            pluginSection(sectionData, "pre-register", plugins, REIPlugin::preRegister);
+            for (Reloadable<P> reloadable : getReloadables()) {
+                Class<?> reloadableClass = reloadable.getClass();
+                pluginSection(sectionData, "reloadable-plugin-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()), plugins, reloadable::acceptPlugin);
             }
+            pluginSection(sectionData, "post-register", plugins, REIPlugin::postRegister);
+            
+            try (SectionClosable endReload = section(sectionData, "end-reload")) {
+                for (Reloadable<P> reloadable : reloadables) {
+                    reloadable.endReload();
+                }
+            }
+            
+            arePluginsLoading = false;
+            
+            try (SectionClosable refilter = section(sectionData, "entry-registry-refilter")) {
+                EntryRegistry.getInstance().refilter();
+            }
+            
+            long usedTime = Util.getMillis() - startTime;
+            RoughlyEnoughItemsCore.LOGGER.info("Reloaded %d stack entries, %d displays, %d exclusion zones suppliers, %d overlay deciders, %d visibility predicates and %d categories (%s) in %dms.",
+                    EntryRegistry.getInstance().size(),
+                    DisplayRegistry.getInstance().getDisplayCount(),
+                    ScreenRegistry.getInstance().exclusionZones().getZonesCount(),
+                    ScreenRegistry.getInstance().getDeciders().size(),
+                    DisplayRegistry.getInstance().getVisibilityPredicates().size(),
+                    CategoryRegistry.getInstance().size(),
+                    CategoryRegistry.getInstance().stream()
+                            .map(CategoryRegistry.CategoryConfiguration::getCategory)
+                            .map(DisplayCategory::getTitle)
+                            .map(Component::getString).collect(Collectors.joining(", ")),
+                    usedTime
+            );
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+        } finally {
+            arePluginsLoading = false;
         }
-        arePluginsLoading = false;
-        try (SectionClosable refilter = section(sectionData, "entry-registry-refilter")) {
-            EntryRegistry.getInstance().refilter();
-        }
-        
-        long usedTime = Util.getMillis() - startTime;
-        RoughlyEnoughItemsCore.LOGGER.info("Reloaded %d stack entries, %d displays, %d exclusion zones suppliers, %d overlay deciders, %d visibility predicates and %d categories (%s) in %dms.",
-                EntryRegistry.getInstance().size(),
-                DisplayRegistry.getInstance().getDisplayCount(),
-                ScreenRegistry.getInstance().exclusionZones().getZonesCount(),
-                ScreenRegistry.getInstance().getDeciders().size(),
-                DisplayRegistry.getInstance().getVisibilityPredicates().size(),
-                CategoryRegistry.getInstance().size(),
-                CategoryRegistry.getInstance().stream()
-                        .map(CategoryRegistry.CategoryConfiguration::getCategory)
-                        .map(DisplayCategory::getTitle)
-                        .map(Component::getString).collect(Collectors.joining(", ")),
-                usedTime
-        );
     }
 }

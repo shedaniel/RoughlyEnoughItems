@@ -25,19 +25,19 @@ package me.shedaniel.rei.gui;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.gui.widgets.Slot;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.util.CollectionUtils;
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.gui.widget.EntryWidget;
-import me.shedaniel.rei.impl.ClientHelperImpl;
+import me.shedaniel.rei.impl.registry.ClientHelperImpl;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -52,14 +52,14 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Rec
     protected int tabsPerPage;
     protected Rectangle bounds;
     
-    protected AbstractDisplayViewingScreen(Map<DisplayCategory<?>, List<Display>> categoryMap, @Nullable ResourceLocation category, int tabsPerPage) {
+    protected AbstractDisplayViewingScreen(Map<DisplayCategory<?>, List<Display>> categoryMap, @Nullable CategoryIdentifier<?> category, int tabsPerPage) {
         super(NarratorChatListener.NO_TITLE);
         this.categoryMap = categoryMap;
         this.categories = Lists.newArrayList(categoryMap.keySet());
         this.tabsPerPage = tabsPerPage;
         if (category != null) {
             for (int i = 0; i < categories.size(); i++) {
-                if (categories.get(i).getIdentifier().equals(category)) {
+                if (categories.get(i).getCategoryIdentifier().equals(category)) {
                     this.selectedCategoryIndex = i;
                     break;
                 }
@@ -88,8 +88,8 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Rec
     }
     
     @Override
-    public ResourceLocation getCurrentCategory() {
-        return getSelectedCategory().getIdentifier();
+    public CategoryIdentifier<?> getCurrentCategory() {
+        return getSelectedCategory().getCategoryIdentifier();
     }
     
     public DisplayCategory<Display> getSelectedCategory() {
@@ -101,7 +101,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Rec
         currentCategoryIndex--;
         if (currentCategoryIndex < 0)
             currentCategoryIndex = categories.size() - 1;
-        ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(currentCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
+        ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
     }
     
     protected void nextCategory() {
@@ -109,7 +109,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Rec
         currentCategoryIndex++;
         if (currentCategoryIndex >= categories.size())
             currentCategoryIndex = 0;
-        ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(currentCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
+        ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
     }
     
     protected void transformIngredientNotice(List<Widget> setupDisplay, EntryStack<?> noticeStack) {

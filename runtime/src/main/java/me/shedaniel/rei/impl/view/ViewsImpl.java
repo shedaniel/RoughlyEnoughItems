@@ -27,20 +27,20 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.registry.display.LiveDisplayGenerator;
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.registry.category.CategoryRegistry;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.registry.display.DisplayRegistry;
-import me.shedaniel.rei.api.util.CollectionUtils;
-import me.shedaniel.rei.api.view.ViewSearchBuilder;
-import me.shedaniel.rei.api.view.Views;
-import net.minecraft.resources.ResourceLocation;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.registry.display.LiveDisplayGenerator;
+import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.client.view.Views;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.ingredient.util.EntryIngredients;
+import me.shedaniel.rei.api.common.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -52,15 +52,15 @@ public class ViewsImpl implements Views {
     @Override
     public Map<DisplayCategory<?>, List<Display>> buildMapFor(ViewSearchBuilder builder) {
         Stopwatch stopwatch = Stopwatch.createStarted();
-        Set<ResourceLocation> categories = builder.getCategories();
+        Set<CategoryIdentifier<?>> categories = builder.getCategories();
         List<EntryStack<?>> recipesFor = builder.getRecipesFor();
         List<EntryStack<?>> usagesFor = builder.getUsagesFor();
         
         Map<DisplayCategory<?>, List<Display>> result = Maps.newLinkedHashMap();
         for (CategoryRegistry.CategoryConfiguration<?> categoryConfiguration : CategoryRegistry.getInstance()) {
             DisplayCategory<?> category = categoryConfiguration.getCategory();
-            ResourceLocation categoryId = categoryConfiguration.getIdentifier();
-            List<Display> allRecipesFromCategory = DisplayRegistry.getInstance().getDisplays(categoryId);
+            CategoryIdentifier<?> categoryId = categoryConfiguration.getCategoryIdentifier();
+            List<Display> allRecipesFromCategory = DisplayRegistry.getInstance().getDisplays((CategoryIdentifier<Display>) categoryId);
             
             Set<Display> set = Sets.newLinkedHashSet();
             if (categories.contains(categoryId)) {
@@ -78,7 +78,7 @@ public class ViewsImpl implements Views {
                 if (!isDisplayVisible(display)) continue;
                 if (!recipesFor.isEmpty()) {
                     back:
-                    for (List<? extends EntryStack<?>> results : display.getResultingEntries()) {
+                    for (List<? extends EntryStack<?>> results : display.getOutputEntries()) {
                         for (EntryStack<?> otherEntry : results) {
                             for (EntryStack<?> stack : recipesFor) {
                                 if (EntryStacks.equalsExact(otherEntry, stack)) {
@@ -116,8 +116,8 @@ public class ViewsImpl implements Views {
         
         int generatorsCount = 0;
         
-        for (Map.Entry<ResourceLocation, List<LiveDisplayGenerator<?>>> entry : DisplayRegistry.getInstance().getCategoryDisplayGenerators().entrySet()) {
-            ResourceLocation categoryId = entry.getKey();
+        for (Map.Entry<CategoryIdentifier<?>, List<LiveDisplayGenerator<?>>> entry : DisplayRegistry.getInstance().getCategoryDisplayGenerators().entrySet()) {
+            CategoryIdentifier<?> categoryId = entry.getKey();
             Set<Display> set = new LinkedHashSet<>();
             generatorsCount += entry.getValue().size();
             
@@ -203,7 +203,7 @@ public class ViewsImpl implements Views {
                     }
                 }
                 if (slotsCraftable == display.getRequiredEntries().size())
-                    display.getResultingEntries().stream().flatMap(Collection::stream).collect(Collectors.toCollection(() -> craftables));
+                    display.getOutputEntries().stream().flatMap(Collection::stream).collect(Collectors.toCollection(() -> craftables));
             }
         return craftables;
     }
@@ -219,5 +219,10 @@ public class ViewsImpl implements Views {
     
     private boolean isDisplayVisible(Display display) {
         return DisplayRegistry.getInstance().isDisplayVisible(display);
+    }
+    
+    @Override
+    public void startReload() {
+        
     }
 }

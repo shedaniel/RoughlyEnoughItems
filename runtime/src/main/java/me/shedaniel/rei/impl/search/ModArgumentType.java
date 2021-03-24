@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.impl.search;
 
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.gui.config.SearchMode;
-import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.config.SearchMode;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Style;

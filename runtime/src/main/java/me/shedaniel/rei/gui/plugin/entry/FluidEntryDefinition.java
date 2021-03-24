@@ -30,21 +30,21 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.hooks.FluidStackHooks;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.EntrySerializer;
-import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
-import me.shedaniel.rei.api.ingredient.entry.renderer.AbstractEntryRenderer;
-import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
-import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
-import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
-import me.shedaniel.rei.api.ingredient.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.impl.SimpleFluidRenderer;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.ingredient.entry.renderer.AbstractEntryRenderer;
+import me.shedaniel.rei.api.client.ingredient.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.ingredient.entry.EntrySerializer;
+import me.shedaniel.rei.api.common.ingredient.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.common.ingredient.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.ingredient.entry.type.EntryType;
+import me.shedaniel.rei.api.common.ingredient.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.ingredient.util.EntryStacks;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -170,26 +170,23 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
         @Override
         public void render(EntryStack<FluidStack> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
             FluidStack stack = entry.getValue();
-            SimpleFluidRenderer.FluidRenderingData renderingData = SimpleFluidRenderer.fromFluid(stack.getFluid());
-            if (renderingData != null) {
-                TextureAtlasSprite sprite = renderingData.getSprite();
-                int color = renderingData.getColor();
-                int a = 255;
-                int r = (color >> 16 & 255);
-                int g = (color >> 8 & 255);
-                int b = (color & 255);
-                Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
-                Tesselator tess = Tesselator.getInstance();
-                BufferBuilder bb = tess.getBuilder();
-                Matrix4f matrix = matrices.last().pose();
-                bb.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-                int z = entry.getZ();
-                bb.vertex(matrix, bounds.getMaxX(), bounds.y, z).uv(sprite.getU1(), sprite.getV0()).color(r, g, b, a).endVertex();
-                bb.vertex(matrix, bounds.x, bounds.y, z).uv(sprite.getU0(), sprite.getV0()).color(r, g, b, a).endVertex();
-                bb.vertex(matrix, bounds.x, bounds.getMaxY(), z).uv(sprite.getU0(), sprite.getV1()).color(r, g, b, a).endVertex();
-                bb.vertex(matrix, bounds.getMaxX(), bounds.getMaxY(), z).uv(sprite.getU1(), sprite.getV1()).color(r, g, b, a).endVertex();
-                tess.end();
-            }
+            TextureAtlasSprite sprite = FluidStackHooks.getStillTexture(stack);
+            int color = FluidStackHooks.getColor(stack);
+            int a = 255;
+            int r = (color >> 16 & 255);
+            int g = (color >> 8 & 255);
+            int b = (color & 255);
+            Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
+            Tesselator tesselator = Tesselator.getInstance();
+            BufferBuilder builder = tesselator.getBuilder();
+            Matrix4f matrix = matrices.last().pose();
+            builder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
+            int z = entry.getZ();
+            builder.vertex(matrix, bounds.getMaxX(), bounds.y, z).uv(sprite.getU1(), sprite.getV0()).color(r, g, b, a).endVertex();
+            builder.vertex(matrix, bounds.x, bounds.y, z).uv(sprite.getU0(), sprite.getV0()).color(r, g, b, a).endVertex();
+            builder.vertex(matrix, bounds.x, bounds.getMaxY(), z).uv(sprite.getU0(), sprite.getV1()).color(r, g, b, a).endVertex();
+            builder.vertex(matrix, bounds.getMaxX(), bounds.getMaxY(), z).uv(sprite.getU1(), sprite.getV1()).color(r, g, b, a).endVertex();
+            tesselator.end();
         }
         
         @Override

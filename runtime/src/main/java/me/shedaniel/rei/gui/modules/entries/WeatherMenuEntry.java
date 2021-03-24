@@ -24,9 +24,9 @@
 package me.shedaniel.rei.gui.modules.entries;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.Weather;
 import net.minecraft.client.Minecraft;

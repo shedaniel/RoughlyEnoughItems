@@ -30,18 +30,18 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.config.ConfigManager;
-import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.favorites.FavoriteEntry;
-import me.shedaniel.rei.api.gui.drag.DraggableStack;
-import me.shedaniel.rei.api.gui.drag.DraggableStackProvider;
-import me.shedaniel.rei.api.gui.drag.DraggingContext;
-import me.shedaniel.rei.api.gui.widgets.Slot;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.config.ConfigManager;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
+import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.REIHelperImpl;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -50,7 +50,6 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -77,17 +76,16 @@ public class EntryWidget extends Slot implements DraggableStackProvider {
     private Rectangle bounds;
     private List<EntryStack<?>> entryStacks;
     
-    public EntryWidget(int x, int y) {
-        this(new Point(x, y));
+    public EntryWidget(Point point) {
+        this(new Rectangle(point.x - 1, point.y - 1, 18, 18));
     }
     
-    public EntryWidget(Point point) {
-        this.bounds = new Rectangle(point.x - 1, point.y - 1, 18, 18);
-        this.entryStacks = new ArrayList<>();
+    public EntryWidget(Rectangle bounds) {
+        this.bounds = bounds;
+        this.entryStacks = Collections.emptyList();
     }
     
     @Override
-    @NotNull
     public EntryWidget unmarkInputOrOutput() {
         noticeMark = 0;
         return this;
@@ -137,7 +135,6 @@ public class EntryWidget extends Slot implements DraggableStackProvider {
         return interactable(false);
     }
     
-    @NotNull
     @Override
     public EntryWidget interactable(boolean b) {
         interactable = b;
@@ -149,7 +146,6 @@ public class EntryWidget extends Slot implements DraggableStackProvider {
         return interactableFavorites(false);
     }
     
-    @NotNull
     @Override
     public EntryWidget interactableFavorites(boolean b) {
         interactableFavorites = b && interactable;
@@ -218,13 +214,11 @@ public class EntryWidget extends Slot implements DraggableStackProvider {
         return this;
     }
     
-    @NotNull
     @Override
     public Slot clearEntries() {
         return clearStacks();
     }
     
-    @NotNull
     @Override
     public EntryWidget entry(EntryStack<?> stack) {
         if (entryStacks.isEmpty()) {
@@ -238,7 +232,6 @@ public class EntryWidget extends Slot implements DraggableStackProvider {
         return this;
     }
     
-    @NotNull
     @Override
     public EntryWidget entries(Collection<? extends EntryStack<?>> stacks) {
         if (!stacks.isEmpty()) {
@@ -261,11 +254,10 @@ public class EntryWidget extends Slot implements DraggableStackProvider {
     }
     
     @Override
-    public @NotNull List<EntryStack<?>> getEntries() {
+    public List<EntryStack<?>> getEntries() {
         return entryStacks;
     }
     
-    @NotNull
     @Override
     public Rectangle getBounds() {
         return bounds;

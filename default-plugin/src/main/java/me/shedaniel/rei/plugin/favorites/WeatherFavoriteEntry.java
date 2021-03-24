@@ -29,15 +29,15 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.favorites.FavoriteEntry;
-import me.shedaniel.rei.api.favorites.FavoriteEntryType;
-import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
-import me.shedaniel.rei.api.gui.AbstractRenderer;
-import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.util.CollectionUtils;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
+import me.shedaniel.rei.api.client.gui.AbstractRenderer;
+import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -49,7 +49,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -177,7 +176,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
     }
     
     @Override
-    public @NotNull Optional<Supplier<Collection<@NotNull FavoriteMenuEntry>>> getMenuEntries() {
+    public Optional<Supplier<Collection<FavoriteMenuEntry>>> getMenuEntries() {
         if (weather == null)
             return Optional.of(this::_getMenuEntries);
         return Optional.empty();
@@ -213,19 +212,19 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
         INSTANCE;
         
         @Override
-        public @NotNull WeatherFavoriteEntry fromJson(@NotNull JsonObject object) {
+        public WeatherFavoriteEntry fromJson(JsonObject object) {
             String stringValue = GsonHelper.getAsString(object, KEY);
             Weather type = stringValue.equals("NOT_SET") ? null : Weather.valueOf(stringValue);
             return new WeatherFavoriteEntry(type);
         }
         
         @Override
-        public @NotNull WeatherFavoriteEntry fromArgs(Object... args) {
+        public WeatherFavoriteEntry fromArgs(Object... args) {
             return new WeatherFavoriteEntry((Weather) args[0]);
         }
         
         @Override
-        public @NotNull JsonObject toJson(@NotNull WeatherFavoriteEntry entry, @NotNull JsonObject object) {
+        public JsonObject toJson(WeatherFavoriteEntry entry, JsonObject object) {
             object.addProperty(KEY, entry.weather == null ? "NOT_SET" : entry.weather.name());
             return object;
         }

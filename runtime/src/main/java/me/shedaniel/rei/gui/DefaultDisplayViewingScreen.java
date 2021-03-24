@@ -33,28 +33,29 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.registry.category.ButtonArea;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.widgets.Button;
-import me.shedaniel.rei.api.gui.widgets.Panel;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.registry.category.CategoryRegistry;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.util.CollectionUtils;
-import me.shedaniel.rei.api.util.ImmutableLiteralText;
-import me.shedaniel.rei.api.view.ViewSearchBuilder;
-import me.shedaniel.rei.gui.widget.EntryWidget;
+import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.widgets.Button;
+import me.shedaniel.rei.api.client.gui.widgets.Panel;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.registry.category.ButtonArea;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.gui.widget.DefaultDisplayChoosePageWidget;
+import me.shedaniel.rei.gui.widget.EntryWidget;
 import me.shedaniel.rei.gui.widget.TabWidget;
-import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.InternalWidgets;
 import me.shedaniel.rei.impl.REIHelperImpl;
+import me.shedaniel.rei.impl.registry.ClientHelperImpl;
 import me.shedaniel.rei.impl.widgets.PanelWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -94,7 +95,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     private EntryStack<?> ingredientStackToNotice = EntryStack.empty();
     private EntryStack<?> resultStackToNotice = EntryStack.empty();
     
-    public DefaultDisplayViewingScreen(Map<DisplayCategory<?>, List<Display>> categoriesMap, @Nullable ResourceLocation category) {
+    public DefaultDisplayViewingScreen(Map<DisplayCategory<?>, List<Display>> categoriesMap, @Nullable CategoryIdentifier<?> category) {
         super(categoriesMap, category, 5);
         this.bounds = new Rectangle(0, 0, 176, 150);
     }
@@ -191,12 +192,12 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 })
                 .enabled(categories.size() > tabsPerPage));
         widgets.add(categoryBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.left_arrow"))
-                .onClick(button -> previousCategory()).tooltipLine(I18n.get("text.rei.previous_category")));
+                .onClick(button -> previousCategory()).tooltipLine(new TranslatableComponent("text.rei.previous_category")));
         widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), getSelectedCategory().getTitle(), clickableLabelWidget -> {
             ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addAllCategories().fillPreferredOpenedCategory());
         }).tooltipLine(I18n.get("text.rei.view_all_categories")));
         widgets.add(categoryNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
-                .onClick(button -> nextCategory()).tooltipLine(I18n.get("text.rei.next_category")));
+                .onClick(button -> nextCategory()).tooltipLine(new TranslatableComponent("text.rei.next_category")));
         categoryBack.setEnabled(categories.size() > 1);
         categoryNext.setEnabled(categories.size() > 1);
         
@@ -206,12 +207,12 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                     if (page < 0)
                         page = getCurrentTotalPages() - 1;
                     DefaultDisplayViewingScreen.this.init();
-                }).tooltipLine(I18n.get("text.rei.previous_page")));
+                }).tooltipLine(new TranslatableComponent("text.rei.previous_page")));
         widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 21), NarratorChatListener.NO_TITLE, label -> {
             DefaultDisplayViewingScreen.this.choosePageActivated = true;
             DefaultDisplayViewingScreen.this.init();
         }).onRender((matrices, label) -> {
-            label.setText(new ImmutableLiteralText(String.format("%d/%d", page + 1, getCurrentTotalPages())));
+            label.setMessage(new ImmutableTextComponent(String.format("%d/%d", page + 1, getCurrentTotalPages())));
             label.setClickable(getCurrentTotalPages() > 1);
         }).tooltipSupplier(label -> label.isClickable() ? I18n.get("text.rei.choose_page") : null));
         widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
@@ -220,7 +221,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                     if (page >= getCurrentTotalPages())
                         page = 0;
                     DefaultDisplayViewingScreen.this.init();
-                }).tooltipLine(I18n.get("text.rei.next_page")));
+                }).tooltipLine(new TranslatableComponent("text.rei.next_page")));
         recipeBack.setEnabled(getCurrentTotalPages() > 1);
         recipeNext.setEnabled(getCurrentTotalPages() > 1);
         int tabV = isCompactTabs ? 166 : 192;
@@ -232,7 +233,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     if (widget.getId() + categoryPages * tabsPerPage == selectedCategoryIndex)
                         return false;
-                    ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(widget.getId() + categoryPages * tabsPerPage).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
+                    ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(widget.getId() + categoryPages * tabsPerPage).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
                     return true;
                 }));
                 tab.setRenderer(categories.get(j), categories.get(j).getIcon(), categories.get(j).getTitle(), tab.getId() + categoryPages * tabsPerPage == selectedCategoryIndex);

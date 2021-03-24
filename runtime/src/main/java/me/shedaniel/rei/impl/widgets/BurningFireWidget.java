@@ -25,23 +25,21 @@ package me.shedaniel.rei.impl.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.widgets.BurningFire;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.gui.widgets.BurningFire;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 public final class BurningFireWidget extends BurningFire {
-    @NotNull
     private Rectangle bounds;
     private double animationDuration = -1;
     
-    public BurningFireWidget(@NotNull me.shedaniel.math.Rectangle bounds) {
+    public BurningFireWidget(me.shedaniel.math.Rectangle bounds) {
         this.bounds = new Rectangle(Objects.requireNonNull(bounds));
     }
     
@@ -58,7 +56,6 @@ public final class BurningFireWidget extends BurningFire {
     }
     
     @Override
-    @NotNull
     public Rectangle getBounds() {
         return bounds;
     }

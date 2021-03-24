@@ -33,16 +33,16 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.config.DisplayScreenType;
-import me.shedaniel.rei.api.gui.widgets.Button;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
-import me.shedaniel.rei.api.util.ImmutableLiteralText;
+import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
+import me.shedaniel.rei.api.client.gui.widgets.Button;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.Animator;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.ClientInternals;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -56,7 +56,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,7 +82,7 @@ public class UncertainDisplayViewingScreen extends Screen {
     private List<String> allModsUsingJEI = new ArrayList<>();
     
     public UncertainDisplayViewingScreen(Screen parent, DisplayScreenType type, boolean showTips, BooleanConsumer callback) {
-        super(ImmutableLiteralText.EMPTY);
+        super(ImmutableTextComponent.EMPTY);
         this.widgets = Lists.newArrayList();
         if (type == DisplayScreenType.UNSET) {
             this.isSet = false;
@@ -98,7 +97,7 @@ public class UncertainDisplayViewingScreen extends Screen {
         this.parent = parent;
         this.showTips = showTips;
         if (showTips && Platform.isForge()) {
-            allModsUsingJEI = Internals.getJeiCompatMods().stream()
+            allModsUsingJEI = ClientInternals.getJeiCompatMods().stream()
                     .distinct()
                     .map(ClientHelper.getInstance()::getModFromModId)
                     .collect(Collectors.toList());
@@ -260,8 +259,7 @@ public class UncertainDisplayViewingScreen extends Screen {
             this.bounds = new Rectangle(x - 4 + 16, y - 4, 176 + 8, 120 + 8);
         }
         
-        @NotNull
-        @Override
+            @Override
         public Rectangle getBounds() {
             return bounds;
         }

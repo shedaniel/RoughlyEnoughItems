@@ -24,14 +24,14 @@
 package me.shedaniel.rei.impl.registry;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.registry.display.visibility.DisplayVisibilityPredicate;
-import me.shedaniel.rei.api.registry.display.LiveDisplayGenerator;
-import me.shedaniel.rei.api.plugins.REIPlugin;
-import me.shedaniel.rei.api.registry.category.CategoryRegistry;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.registry.display.DisplayRegistry;
-import net.minecraft.resources.ResourceLocation;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.registry.display.LiveDisplayGenerator;
+import me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibilityPredicate;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.crafting.Recipe;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -42,16 +42,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class DisplayRegistryImpl extends RecipeManagerContextImpl implements DisplayRegistry {
-    private final Map<ResourceLocation, List<Display>> displays = new ConcurrentHashMap<>();
-    private final Map<ResourceLocation, List<LiveDisplayGenerator<?>>> displayGenerators = new ConcurrentHashMap<>();
+public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugin> implements DisplayRegistry {
+    private final Map<CategoryIdentifier<?>, List<Display>> displays = new ConcurrentHashMap<>();
+    private final Map<CategoryIdentifier<?>, List<LiveDisplayGenerator<?>>> displayGenerators = new ConcurrentHashMap<>();
     private final List<LiveDisplayGenerator<?>> globalDisplayGenerators = new ArrayList<>();
     private final List<DisplayVisibilityPredicate> visibilityPredicates = new ArrayList<>();
     private final List<DisplayFiller<?, ?>> fillers = new ArrayList<>();
     private final MutableInt displayCount = new MutableInt(0);
     
     @Override
-    public void acceptPlugin(REIPlugin plugin) {
+    public void acceptPlugin(REIClientPlugin plugin) {
         plugin.registerDisplays(this);
     }
     
@@ -74,7 +74,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl implements Dis
     }
     
     @Override
-    public Map<ResourceLocation, List<Display>> getAllDisplays() {
+    public Map<CategoryIdentifier<?>, List<Display>> getAllDisplays() {
         return Collections.unmodifiableMap(displays);
     }
     
@@ -84,13 +84,13 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl implements Dis
     }
     
     @Override
-    public <A extends Display> void registerDisplayGenerator(ResourceLocation categoryId, LiveDisplayGenerator<A> generator) {
+    public <A extends Display> void registerDisplayGenerator(CategoryIdentifier<A> categoryId, LiveDisplayGenerator<A> generator) {
         displayGenerators.computeIfAbsent(categoryId, location -> new ArrayList<>())
                 .add(generator);
     }
     
     @Override
-    public Map<ResourceLocation, List<LiveDisplayGenerator<?>>> getCategoryDisplayGenerators() {
+    public Map<CategoryIdentifier<?>, List<LiveDisplayGenerator<?>>> getCategoryDisplayGenerators() {
         return Collections.unmodifiableMap(displayGenerators);
     }
     
@@ -107,7 +107,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl implements Dis
     
     @Override
     public boolean isDisplayVisible(Display display) {
-        DisplayCategory<Display> category = CategoryRegistry.getInstance().get(display.getCategoryIdentifier()).getCategory();
+        DisplayCategory<Display> category = (DisplayCategory<Display>) CategoryRegistry.getInstance().get(display.getCategoryIdentifier()).getCategory();
         for (DisplayVisibilityPredicate predicate : visibilityPredicates) {
             try {
                 InteractionResult result = predicate.handleDisplay(category, display);

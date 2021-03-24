@@ -28,18 +28,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.widgets.Button;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.util.CollectionUtils;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.gui.widgets.Button;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -54,10 +51,8 @@ import java.util.function.Function;
 public class ButtonWidget extends Button {
     private static final ResourceLocation BUTTON_LOCATION = new ResourceLocation("roughlyenoughitems", "textures/gui/button.png");
     private static final ResourceLocation BUTTON_LOCATION_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/button_dark.png");
-    @NotNull
     private Rectangle bounds;
     private boolean enabled = true;
-    @NotNull
     private Component text;
     @Nullable
     private Integer tint;
@@ -68,11 +63,11 @@ public class ButtonWidget extends Button {
     private boolean focusable = false;
     private boolean focused = false;
     @Nullable
-    private Function<@NotNull Button, @Nullable String> tooltipFunction;
+    private Function<Button, @Nullable Component[]> tooltipFunction;
     @Nullable
-    private BiFunction<@NotNull Button, @NotNull Point, @NotNull Integer> textColorFunction;
+    private BiFunction<Button, Point, Integer> textColorFunction;
     @Nullable
-    private BiFunction<@NotNull Button, @NotNull Point, @NotNull Integer> textureIdFunction;
+    private BiFunction<Button, Point, Integer> textureIdFunction;
     
     public ButtonWidget(Rectangle rectangle, Component text) {
         this.bounds = new Rectangle(Objects.requireNonNull(rectangle));
@@ -110,13 +105,12 @@ public class ButtonWidget extends Button {
     }
     
     @Override
-    @NotNull
     public final Component getText() {
         return text;
     }
     
     @Override
-    public final void setText(@NotNull Component text) {
+    public final void setText(Component text) {
         this.text = text;
     }
     
@@ -152,24 +146,25 @@ public class ButtonWidget extends Button {
     }
     
     @Override
-    public final @Nullable String getTooltip() {
+    @Nullable
+    public final Component[] getTooltip() {
         if (tooltipFunction == null)
             return null;
         return tooltipFunction.apply(this);
     }
     
     @Override
-    public final void setTooltip(@Nullable Function<@NotNull Button, @Nullable String> tooltip) {
+    public final void setTooltip(@Nullable Function<Button, @Nullable Component[]> tooltip) {
         this.tooltipFunction = tooltip;
     }
     
     @Override
-    public final void setTextColor(@Nullable BiFunction<@NotNull Button, @NotNull Point, @NotNull Integer> textColorFunction) {
+    public final void setTextColor(@Nullable BiFunction<Button, Point, Integer> textColorFunction) {
         this.textColorFunction = textColorFunction;
     }
     
     @Override
-    public final void setTextureId(@Nullable BiFunction<@NotNull Button, @NotNull Point, @NotNull Integer> textureIdFunction) {
+    public final void setTextureId(@Nullable BiFunction<Button, Point, Integer> textureIdFunction) {
         this.textureIdFunction = textureIdFunction;
     }
     
@@ -189,7 +184,7 @@ public class ButtonWidget extends Button {
     }
     
     @Override
-    public final @NotNull Rectangle getBounds() {
+    public final Rectangle getBounds() {
         return bounds;
     }
     
@@ -213,12 +208,14 @@ public class ButtonWidget extends Button {
         
         drawCenteredString(matrices, font, getText(), x + width / 2, y + (height - 8) / 2, color);
         
-        String tooltip = getTooltip();
-        if (tooltip != null)
-            if (!focused && containsMouse(mouseX, mouseY))
-                Tooltip.create(CollectionUtils.map(tooltip.split("\n"), TextComponent::new)).queue();
-            else if (focused)
-                Tooltip.create(new Point(x + width / 2, y + height / 2), CollectionUtils.map(tooltip.split("\n"), TextComponent::new)).queue();
+        Component[] tooltip = getTooltip();
+        if (tooltip != null) {
+            if (!focused && containsMouse(mouseX, mouseY)) {
+                Tooltip.create(tooltip).queue();
+            } else if (focused) {
+                Tooltip.create(new Point(x + width / 2, y + height / 2), tooltip).queue();
+            }
+        }
     }
     
     protected boolean isFocused(int mouseX, int mouseY) {

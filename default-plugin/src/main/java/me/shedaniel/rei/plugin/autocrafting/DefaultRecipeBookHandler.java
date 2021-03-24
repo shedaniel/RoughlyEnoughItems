@@ -23,34 +23,32 @@
 
 package me.shedaniel.rei.plugin.autocrafting;
 
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.registry.display.TransferDisplay;
-import me.shedaniel.rei.api.registry.transfer.TransferHandler;
-import me.shedaniel.rei.plugin.cooking.DefaultCookingDisplay;
-import me.shedaniel.rei.plugin.crafting.DefaultCraftingDisplay;
+import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.display.SimpleMenuDisplay;
+import me.shedaniel.rei.plugin.common.cooking.DefaultCookingDisplay;
+import me.shedaniel.rei.plugin.common.crafting.DefaultCraftingDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.crafting.Recipe;
-import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
 public class DefaultRecipeBookHandler implements TransferHandler {
-    @NotNull
     @Override
-    public Result handle(@NotNull Context context) {
-        if (context.getDisplay() instanceof TransferDisplay && ClientHelper.getInstance().canUseMovePackets())
+    public Result handle(Context context) {
+        if (context.getDisplay() instanceof SimpleMenuDisplay && ClientHelper.getInstance().canUseMovePackets())
             return Result.createNotApplicable();
         Display display = context.getDisplay();
-        if (!(context.getContainer() instanceof RecipeBookMenu))
+        if (!(context.getMenu() instanceof RecipeBookMenu))
             return Result.createNotApplicable();
-        RecipeBookMenu<?> container = (RecipeBookMenu<?>) context.getContainer();
+        RecipeBookMenu<?> container = (RecipeBookMenu<?>) context.getMenu();
         if (container == null)
             return Result.createNotApplicable();
         if (display instanceof DefaultCraftingDisplay) {
@@ -68,9 +66,9 @@ public class DefaultRecipeBookHandler implements TransferHandler {
                     return Result.createNotApplicable();
                 Recipe<?> recipe = (craftingDisplay).getOptionalRecipe().get();
                 if (craftingDisplay.getHeight() > h || craftingDisplay.getWidth() > w)
-                    return Result.createFailed(I18n.get("error.rei.transfer.too_small", h, w));
+                    return Result.createFailed(new TranslatableComponent("error.rei.transfer.too_small", h, w));
                 if (!context.getMinecraft().player.getRecipeBook().contains(recipe))
-                    return Result.createFailed(I18n.get("error.rei.recipe.not.unlocked"));
+                    return Result.createFailed(new TranslatableComponent("error.rei.recipe.not.unlocked"));
                 if (!context.isActuallyCrafting())
                     return Result.createSuccessful();
                 context.getMinecraft().setScreen(context.getContainerScreen());
@@ -84,7 +82,7 @@ public class DefaultRecipeBookHandler implements TransferHandler {
             if (defaultDisplay.getOptionalRecipe().isPresent()) {
                 Recipe<?> recipe = (defaultDisplay).getOptionalRecipe().get();
                 if (!context.getMinecraft().player.getRecipeBook().contains(recipe))
-                    return Result.createFailed(I18n.get("error.rei.recipe.not.unlocked"));
+                    return Result.createFailed(new TranslatableComponent("error.rei.recipe.not.unlocked"));
                 if (!context.isActuallyCrafting())
                     return Result.createSuccessful();
                 context.getMinecraft().setScreen(context.getContainerScreen());

@@ -23,27 +23,27 @@
 
 package me.shedaniel.rei.impl.registry;
 
-import me.shedaniel.rei.api.registry.category.ButtonArea;
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.plugins.REIPlugin;
-import me.shedaniel.rei.api.registry.Reloadable;
-import me.shedaniel.rei.api.registry.category.CategoryRegistry;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import net.minecraft.resources.ResourceLocation;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.category.ButtonArea;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Consumer;
 
 @ApiStatus.Internal
-public class CategoryRegistryImpl implements CategoryRegistry, Reloadable {
-    private final Map<ResourceLocation, Configuration<?>> categories = new LinkedHashMap<>();
-    private final Map<ResourceLocation, List<Consumer<CategoryConfiguration<?>>>> listeners = new HashMap<>();
+public class CategoryRegistryImpl implements CategoryRegistry {
+    private final Map<CategoryIdentifier<?>, Configuration<?>> categories = new LinkedHashMap<>();
+    private final Map<CategoryIdentifier<?>, List<Consumer<CategoryConfiguration<?>>>> listeners = new HashMap<>();
     
     @Override
-    public void acceptPlugin(REIPlugin plugin) {
+    public void acceptPlugin(REIClientPlugin plugin) {
         plugin.registerCategories(this);
     }
     
@@ -53,14 +53,28 @@ public class CategoryRegistryImpl implements CategoryRegistry, Reloadable {
     }
     
     @Override
+    public void endReload() {
+        List<CategoryIdentifier<?>> notRegisteredSerializers = new ArrayList<>();
+        for (CategoryIdentifier<?> identifier : this.categories.keySet()) {
+            if (!DisplaySerializerRegistry.getInstance().hasRegistered(identifier)) {
+                notRegisteredSerializers.add(identifier);
+            }
+        }
+        if (!notRegisteredSerializers.isEmpty()) {
+            throw new IllegalStateException(notRegisteredSerializers.size() + " categories did not register their serializers! " +
+                                            CollectionUtils.mapAndJoinToString(notRegisteredSerializers, Object::toString, ", "));
+        }
+    }
+    
+    @Override
     public <T extends Display> void register(DisplayCategory<T> category, Consumer<CategoryConfiguration<T>> configurator) {
         Configuration<T> configuration = new Configuration<>(category);
-        this.categories.put(category.getIdentifier(), configuration);
+        this.categories.put(category.getCategoryIdentifier(), configuration);
         configurator.accept(configuration);
         
-        List<Consumer<CategoryConfiguration<?>>> listeners = this.listeners.get(category.getIdentifier());
+        List<Consumer<CategoryConfiguration<?>>> listeners = this.listeners.get(category.getCategoryIdentifier());
         if (listeners != null) {
-            this.listeners.remove(category.getIdentifier());
+            this.listeners.remove(category.getCategoryIdentifier());
             for (Consumer<CategoryConfiguration<?>> listener : listeners) {
                 listener.accept(configuration);
             }
@@ -68,12 +82,12 @@ public class CategoryRegistryImpl implements CategoryRegistry, Reloadable {
     }
     
     @Override
-    public <T extends Display> CategoryConfiguration<T> get(ResourceLocation category) {
+    public <T extends Display> CategoryConfiguration<T> get(CategoryIdentifier<T> category) {
         return (CategoryConfiguration<T>) Objects.requireNonNull(this.categories.get(category), category.toString());
     }
     
     @Override
-    public <T extends Display> void configure(ResourceLocation category, Consumer<CategoryConfiguration<T>> action) {
+    public <T extends Display> void configure(CategoryIdentifier<T> category, Consumer<CategoryConfiguration<T>> action) {
         if (this.categories.containsKey(category)) {
             action.accept(get(category));
         } else {
@@ -82,7 +96,6 @@ public class CategoryRegistryImpl implements CategoryRegistry, Reloadable {
         }
     }
     
-    @NotNull
     @Override
     public Iterator<CategoryConfiguration<?>> iterator() {
         return (Iterator) categories.values().iterator();
@@ -129,8 +142,8 @@ public class CategoryRegistryImpl implements CategoryRegistry, Reloadable {
         }
         
         @Override
-        public ResourceLocation getIdentifier() {
-            return this.category.getIdentifier();
+        public CategoryIdentifier<?> getCategoryIdentifier() {
+            return this.category.getCategoryIdentifier();
         }
     }
 }

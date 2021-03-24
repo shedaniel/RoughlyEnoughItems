@@ -25,26 +25,22 @@ package me.shedaniel.rei.fabric;
 
 import com.google.common.collect.Iterables;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.plugins.PluginManager;
-import me.shedaniel.rei.api.plugins.REIPlugin;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.common.plugins.PluginView;
+import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 
 public class PluginDetectorImpl {
     public static void detectServerPlugins() {
-        FabricLoader.getInstance().getEntrypoints("rei_containers", Runnable.class).forEach(Runnable::run);
-    }
-    
-    @Environment(EnvType.CLIENT)
-    public static void detectClientPlugins() {
-        for (REIPlugin plugin : Iterables.concat(
-                FabricLoader.getInstance().getEntrypoints("rei", REIPlugin.class),
-                FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPlugin.class),
-                FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIPlugin.class)
+        for (REIServerPlugin plugin : Iterables.concat(
+                FabricLoader.getInstance().getEntrypoints("rei_containers", REIServerPlugin.class),
+                FabricLoader.getInstance().getEntrypoints("rei_server", REIServerPlugin.class)
         )) {
             try {
-                PluginManager.getInstance().registerPlugin(plugin);
+                PluginView.getServerInstance().registerPlugin(plugin);
             } catch (Exception e) {
                 e.printStackTrace();
                 RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", plugin.getClass(), e.getLocalizedMessage());
@@ -52,9 +48,38 @@ public class PluginDetectorImpl {
         }
         if (FabricLoader.getInstance().isModLoaded("libblockattributes-fluids")) {
             try {
-                PluginManager.getInstance().registerPlugin((REIPlugin) Class.forName("me.shedaniel.rei.compat.LBASupportPlugin").getConstructor().newInstance());
+                PluginView.getServerInstance().registerPlugin((REIServerPlugin) Class.forName("me.shedaniel.rei.compat.LBASupportPlugin").getConstructor().newInstance());
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
+            }
+        }
+    }
+    
+    public static void detectCommonPlugins() {
+        for (REIPlugin<?> plugin : Iterables.concat(
+                FabricLoader.getInstance().getEntrypoints("rei_common", REIPlugin.class)
+        )) {
+            try {
+                PluginView.getInstance().registerPlugin(plugin);
+            } catch (Exception e) {
+                e.printStackTrace();
+                RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", plugin.getClass(), e.getLocalizedMessage());
+            }
+        }
+    }
+    
+    @Environment(EnvType.CLIENT)
+    public static void detectClientPlugins() {
+        for (REIClientPlugin plugin : Iterables.concat(
+                FabricLoader.getInstance().getEntrypoints("rei", REIClientPlugin.class),
+                FabricLoader.getInstance().getEntrypoints("rei_plugins", REIClientPlugin.class),
+                FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIClientPlugin.class)
+        )) {
+            try {
+                PluginView.getClientInstance().registerPlugin(plugin);
+            } catch (Exception e) {
+                e.printStackTrace();
+                RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", plugin.getClass(), e.getLocalizedMessage());
             }
         }
     }

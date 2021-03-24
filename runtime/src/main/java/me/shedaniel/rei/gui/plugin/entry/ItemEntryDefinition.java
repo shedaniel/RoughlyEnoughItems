@@ -32,18 +32,18 @@ import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.*;
-import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
-import me.shedaniel.rei.api.ingredient.entry.comparison.ItemComparatorRegistry;
-import me.shedaniel.rei.api.ingredient.entry.renderer.AbstractEntryRenderer;
-import me.shedaniel.rei.api.ingredient.entry.renderer.BatchEntryRenderer;
-import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
-import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
-import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
-import me.shedaniel.rei.api.ingredient.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.util.ImmutableLiteralText;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.ingredient.entry.renderer.AbstractEntryRenderer;
+import me.shedaniel.rei.api.client.ingredient.entry.renderer.BatchEntryRenderer;
+import me.shedaniel.rei.api.client.ingredient.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.ingredient.entry.EntrySerializer;
+import me.shedaniel.rei.api.common.ingredient.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.common.ingredient.entry.comparison.ItemComparatorRegistry;
+import me.shedaniel.rei.api.common.ingredient.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.ingredient.entry.type.EntryType;
+import me.shedaniel.rei.api.common.ingredient.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -59,29 +59,27 @@ import net.minecraft.tags.TagCollection;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySerializer<ItemStack> {
     private final EntryRenderer<ItemStack> renderer = new ItemEntryRenderer();
     
     @Override
-    public @NotNull Class<ItemStack> getValueType() {
+    public Class<ItemStack> getValueType() {
         return ItemStack.class;
     }
     
     @Override
-    public @NotNull EntryType<ItemStack> getType() {
+    public EntryType<ItemStack> getType() {
         return VanillaEntryTypes.ITEM;
     }
     
     @Override
-    public @NotNull EntryRenderer<ItemStack> getRenderer() {
+    public EntryRenderer<ItemStack> getRenderer() {
         return renderer;
     }
     
@@ -152,7 +150,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     private static final ReferenceSet<Item> SEARCH_BLACKLISTED = new ReferenceOpenHashSet<>();
     
     @Override
-    public @NotNull Component asFormattedText(EntryStack<ItemStack> entry, ItemStack value) {
+    public Component asFormattedText(EntryStack<ItemStack> entry, ItemStack value) {
         if (!SEARCH_BLACKLISTED.contains(value.getItem()))
             try {
                 return value.getHoverName();
@@ -161,15 +159,15 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
                 SEARCH_BLACKLISTED.add(value.getItem());
             }
         try {
-            return new ImmutableLiteralText(I18n.get("item." + Registry.ITEM.getKey(value.getItem()).toString().replace(":", ".")));
+            return new ImmutableTextComponent(I18n.get("item." + Registry.ITEM.getKey(value.getItem()).toString().replace(":", ".")));
         } catch (Throwable e) {
             e.printStackTrace();
         }
-        return new ImmutableLiteralText("ERROR");
+        return new ImmutableTextComponent("ERROR");
     }
     
     @Override
-    public @NotNull Collection<ResourceLocation> getTagsFor(EntryStack<ItemStack> entry, ItemStack value) {
+    public Collection<ResourceLocation> getTagsFor(EntryStack<ItemStack> entry, ItemStack value) {
         TagCollection<Item> collection = Minecraft.getInstance().getConnection().getTags().getItems();
         return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getItem());
     }

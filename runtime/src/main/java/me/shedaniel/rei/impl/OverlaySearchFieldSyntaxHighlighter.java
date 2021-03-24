@@ -24,8 +24,8 @@
 package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.gui.OverlaySearchField;
-import me.shedaniel.rei.impl.search.ArgumentTypesRegistry;
 import me.shedaniel.rei.impl.search.Argument;
+import me.shedaniel.rei.impl.search.ArgumentTypesRegistry;
 import net.minecraft.util.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 

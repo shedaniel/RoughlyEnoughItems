@@ -31,9 +31,9 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.gui.widgets.TextField;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.client.gui.widgets.TextField;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.gui.components.TickableWidget;
@@ -42,7 +42,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -100,7 +99,6 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
         this.suggestion = suggestion;
     }
     
-    @NotNull
     @Override
     public Rectangle getBounds() {
         return bounds;

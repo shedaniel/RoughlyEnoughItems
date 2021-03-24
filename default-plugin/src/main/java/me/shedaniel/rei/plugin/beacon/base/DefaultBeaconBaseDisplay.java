@@ -23,15 +23,14 @@
 
 package me.shedaniel.rei.plugin.beacon.base;
 
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.ingredient.util.EntryIngredients;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -54,12 +53,12 @@ public class DefaultBeaconBaseDisplay implements Display {
     }
     
     @Override
-    public List<EntryIngredient> getResultingEntries() {
+    public List<EntryIngredient> getOutputEntries() {
         return Collections.emptyList();
     }
     
     @Override
-    public @NotNull ResourceLocation getCategoryIdentifier() {
-        return DefaultPlugin.BEACON;
+    public CategoryIdentifier<?> getCategoryIdentifier() {
+        return BuiltinPlugin.BEACON_BASE;
     }
 }

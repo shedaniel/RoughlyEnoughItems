@@ -26,20 +26,18 @@ package me.shedaniel.rei.impl.widgets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
-import me.shedaniel.rei.api.gui.DrawableConsumer;
+import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
 
 public final class TexturedDrawableConsumer implements DrawableConsumer {
     
-    @NotNull
     private ResourceLocation identifier;
     private int x, y, width, height, uWidth, vHeight, textureWidth, textureHeight;
     private float u, v;
     
-    public TexturedDrawableConsumer(@NotNull ResourceLocation identifier, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
+    public TexturedDrawableConsumer(ResourceLocation identifier, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
         this.identifier = identifier;
         this.x = x;
         this.y = y;
@@ -54,7 +52,7 @@ public final class TexturedDrawableConsumer implements DrawableConsumer {
     }
     
     @Override
-    public void render(@NotNull GuiComponent helper, @NotNull PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiComponent helper, PoseStack matrices, int mouseX, int mouseY, float delta) {
         Minecraft.getInstance().getTextureManager().bind(identifier);
         innerBlit(matrices.last().pose(), x, x + width, y, y + height, helper.getBlitOffset(), uWidth, vHeight, u, v, textureWidth, textureHeight);
     }

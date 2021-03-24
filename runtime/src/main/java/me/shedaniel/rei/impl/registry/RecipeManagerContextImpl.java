@@ -23,7 +23,8 @@
 
 package me.shedaniel.rei.impl.registry;
 
-import me.shedaniel.rei.api.registry.RecipeManagerContext;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.common.registry.RecipeManagerContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -33,7 +34,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RecipeManagerContextImpl implements RecipeManagerContext {
+public class RecipeManagerContextImpl<P extends REIClientPlugin> implements RecipeManagerContext<P> {
     private static final Comparator<Recipe<?>> RECIPE_COMPARATOR = Comparator.comparing((Recipe<?> o) -> o.getId().getNamespace()).thenComparing(o -> o.getId().getPath());
     private List<Recipe<?>> sortedRecipes = null;
     

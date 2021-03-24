@@ -28,73 +28,73 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.registry.display.TransferDisplay;
-import me.shedaniel.rei.api.registry.transfer.TransferHandler;
-import me.shedaniel.rei.api.server.ContainerContext;
-import me.shedaniel.rei.api.server.ContainerInfo;
-import me.shedaniel.rei.api.server.ContainerInfoHandler;
-import me.shedaniel.rei.api.server.RecipeFinder;
+import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.display.SimpleMenuDisplay;
+import me.shedaniel.rei.api.common.transfer.RecipeFinder;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
+import me.shedaniel.rei.api.common.transfer.info.MenuTransferException;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class DefaultCategoryHandler implements TransferHandler {
-    @NotNull
     @Override
-    public Result handle(@NotNull Context context) {
-        if (!(context.getDisplay() instanceof TransferDisplay))
+    public Result handle(Context context) {
+        if (!(context.getDisplay() instanceof SimpleMenuDisplay))
             return Result.createNotApplicable();
-        TransferDisplay recipe = (TransferDisplay) context.getDisplay();
+        SimpleMenuDisplay display = (SimpleMenuDisplay) context.getDisplay();
         AbstractContainerScreen<?> containerScreen = context.getContainerScreen();
-        if (containerScreen == null)
+        if (containerScreen == null) {
             return Result.createNotApplicable();
-        AbstractContainerMenu container = context.getContainer();
-        ContainerInfo<AbstractContainerMenu> containerInfo = (ContainerInfo<AbstractContainerMenu>) ContainerInfoHandler.getContainerInfo(recipe.getCategoryIdentifier(), container.getClass());
-        if (containerInfo == null)
+        }
+        AbstractContainerMenu menu = context.getMenu();
+        MenuInfo<AbstractContainerMenu, Display> menuInfo = MenuInfoRegistry.getInstance().get((CategoryIdentifier<Display>) display.getCategoryIdentifier(), (Class<AbstractContainerMenu>) menu.getClass());
+        if (menuInfo == null) {
             return Result.createNotApplicable();
-        if (recipe.getHeight() > containerInfo.getCraftingHeight(container) || recipe.getWidth() > containerInfo.getCraftingWidth(container))
-            return Result.createFailed(I18n.get("error.rei.transfer.too_small", containerInfo.getCraftingWidth(container), containerInfo.getCraftingHeight(container)));
-        List<? extends List<? extends EntryStack<?>>> input = recipe.getOrganisedInputEntries(containerInfo, container);
-        IntList intList = hasItems(container, containerInfo, input);
-        if (!intList.isEmpty())
-            return Result.createFailed("error.rei.not.enough.materials", intList);
-        if (!ClientHelper.getInstance().canUseMovePackets())
-            return Result.createFailed("error.rei.not.on.server");
-        if (!context.isActuallyCrafting())
+        }
+        MenuInfoContext<AbstractContainerMenu, Player, Display> menuInfoContext = ofContext(menu, menuInfo, display);
+        try {
+            menuInfo.validate(menuInfoContext);
+        } catch (MenuTransferException e) {
+            return Result.createFailed(e.getError());
+        }
+        List<List<ItemStack>> input = menuInfo.getDisplayInputs(menuInfoContext);
+        IntList intList = hasItems(menu, menuInfo, display, input);
+        if (!intList.isEmpty()) {
+            return Result.createFailed(new TranslatableComponent("error.rei.not.enough.materials"), intList);
+        }
+        if (!ClientHelper.getInstance().canUseMovePackets()) {
+            return Result.createFailed(new TranslatableComponent("error.rei.not.on.server"));
+        }
+        if (!context.isActuallyCrafting()) {
             return Result.createSuccessful();
+        }
         
         context.getMinecraft().setScreen(containerScreen);
-        if (containerScreen instanceof RecipeUpdateListener)
+        if (containerScreen instanceof RecipeUpdateListener) {
             ((RecipeUpdateListener) containerScreen).getRecipeBookComponent().ghostRecipe.clear();
+        }
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeResourceLocation(recipe.getCategoryIdentifier());
+        buf.writeResourceLocation(display.getCategoryIdentifier().getIdentifier());
         buf.writeBoolean(Screen.hasShiftDown());
         
-        buf.writeInt(input.size());
-        for (List<? extends EntryStack<?>> stacks : input) {
-            buf.writeInt(stacks.size());
-            for (EntryStack<?> stack : stacks) {
-                if (stack.getValueType() == ItemStack.class)
-                    buf.writeItem((ItemStack) stack.getValue());
-                else
-                    buf.writeItem(ItemStack.EMPTY);
-            }
-        }
+        buf.writeNbt(menuInfo.save(menuInfoContext, display));
         NetworkManager.sendToServer(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET, buf);
         return Result.createSuccessful();
     }
@@ -104,13 +104,11 @@ public class DefaultCategoryHandler implements TransferHandler {
         return -10;
     }
     
-    public IntList hasItems(AbstractContainerMenu container, ContainerInfo<AbstractContainerMenu> containerInfo, List<? extends List<? extends EntryStack<?>>> inputs) {
-        // Create a clone of player's inventory, and count
-        RecipeFinder recipeFinder = new RecipeFinder();
-        containerInfo.getRecipeFinderPopulator().populate(new ContainerContext<AbstractContainerMenu>() {
+    private static MenuInfoContext<AbstractContainerMenu, Player, Display> ofContext(AbstractContainerMenu menu, MenuInfo<AbstractContainerMenu, Display> info, Display display) {
+        return new MenuInfoContext<AbstractContainerMenu, Player, Display>() {
             @Override
-            public AbstractContainerMenu getContainer() {
-                return container;
+            public AbstractContainerMenu getMenu() {
+                return menu;
             }
             
             @Override
@@ -119,27 +117,41 @@ public class DefaultCategoryHandler implements TransferHandler {
             }
             
             @Override
-            public ContainerInfo<AbstractContainerMenu> getContainerInfo() {
-                return containerInfo;
+            public MenuInfo<AbstractContainerMenu, Display> getContainerInfo() {
+                return info;
             }
-        }).accept(recipeFinder);
+            
+            @Override
+            public CategoryIdentifier<Display> getCategoryIdentifier() {
+                return (CategoryIdentifier<Display>) display.getCategoryIdentifier();
+            }
+            
+            @Override
+            public Display getDisplay() {
+                return display;
+            }
+        };
+    }
+    
+    public IntList hasItems(AbstractContainerMenu menu, MenuInfo<AbstractContainerMenu, Display> info, Display display, List<List<ItemStack>> inputs) {
+        // Create a clone of player's inventory, and count
+        RecipeFinder recipeFinder = new RecipeFinder();
+        info.getRecipeFinderPopulator().populate(ofContext(menu, info, display), recipeFinder);
         IntList intList = new IntArrayList();
         for (int i = 0; i < inputs.size(); i++) {
-            List<? extends EntryStack<?>> possibleStacks = inputs.get(i);
+            List<ItemStack> possibleStacks = inputs.get(i);
             boolean done = possibleStacks.isEmpty();
-            for (EntryStack<?> possibleStack : possibleStacks) {
+            for (ItemStack possibleStack : possibleStacks) {
                 if (!done) {
-                    if (possibleStack.getType() == VanillaEntryTypes.ITEM) {
-                        int invRequiredCount = possibleStack.<ItemStack>cast().getValue().getCount();
-                        int key = RecipeFinder.getItemId((ItemStack) possibleStack.getValue());
-                        while (invRequiredCount > 0 && recipeFinder.contains(key)) {
-                            invRequiredCount--;
-                            recipeFinder.take(key, 1);
-                        }
-                        if (invRequiredCount <= 0) {
-                            done = true;
-                            break;
-                        }
+                    int invRequiredCount = possibleStack.getCount();
+                    int key = RecipeFinder.getItemId(possibleStack);
+                    while (invRequiredCount > 0 && recipeFinder.contains(key)) {
+                        invRequiredCount--;
+                        recipeFinder.take(key, 1);
+                    }
+                    if (invRequiredCount <= 0) {
+                        done = true;
+                        break;
                     }
                 }
             }

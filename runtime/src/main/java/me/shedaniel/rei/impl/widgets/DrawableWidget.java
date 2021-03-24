@@ -24,19 +24,17 @@
 package me.shedaniel.rei.impl.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.rei.api.gui.DrawableConsumer;
-import me.shedaniel.rei.api.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.DrawableConsumer;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 
 public final class DrawableWidget extends Widget {
-    @NotNull
     private DrawableConsumer drawable;
     
-    public DrawableWidget(@NotNull DrawableConsumer drawable) {
+    public DrawableWidget(DrawableConsumer drawable) {
         this.drawable = drawable;
     }
     

@@ -28,11 +28,11 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.gui.drag.DraggableStack;
-import me.shedaniel.rei.api.gui.drag.DraggableStackProvider;
-import me.shedaniel.rei.api.gui.drag.DraggableStackVisitor;
-import me.shedaniel.rei.api.gui.drag.DraggingContext;
-import me.shedaniel.rei.api.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
+import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.gui.widget.LateRenderable;
 import me.shedaniel.rei.impl.Animator;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -40,8 +40,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
-
-import static me.shedaniel.rei.gui.widget.EntryListWidget.entrySize;
 
 public class CurrentDraggingStack extends Widget implements LateRenderable, DraggingContext {
     private DraggableStackProvider provider;

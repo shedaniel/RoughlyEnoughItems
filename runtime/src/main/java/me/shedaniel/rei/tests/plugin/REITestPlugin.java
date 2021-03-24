@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.tests.plugin;
 
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.plugins.REIPlugin;
-import me.shedaniel.rei.api.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.ingredient.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.Registry;
@@ -40,8 +40,7 @@ import java.util.Random;
 
 @TestOnly
 @Environment(EnvType.CLIENT)
-public class REITestPlugin implements REIPlugin {
-    
+public class REITestPlugin implements REIClientPlugin {
     private Random random = new Random();
     
     @Override

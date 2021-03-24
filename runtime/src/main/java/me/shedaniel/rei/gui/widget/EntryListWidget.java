@@ -42,30 +42,30 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.*;
-import me.shedaniel.rei.api.config.ConfigManager;
-import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.gui.config.EntryPanelOrdering;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.renderer.BatchEntryRenderer;
-import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
-import me.shedaniel.rei.api.ingredient.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.registry.entry.EntryRegistry;
-import me.shedaniel.rei.api.registry.screen.OverlayDecider;
-import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.api.search.SearchFilter;
-import me.shedaniel.rei.api.search.SearchProvider;
-import me.shedaniel.rei.api.util.CollectionUtils;
-import me.shedaniel.rei.api.view.Views;
+import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIOverlay;
+import me.shedaniel.rei.api.client.config.ConfigManager;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.config.EntryPanelOrdering;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.client.ingredient.entry.renderer.BatchEntryRenderer;
+import me.shedaniel.rei.api.client.ingredient.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
+import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.client.search.SearchFilter;
+import me.shedaniel.rei.api.client.search.SearchProvider;
+import me.shedaniel.rei.api.client.view.Views;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.ingredient.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.impl.ConfigManagerImpl;
-import me.shedaniel.rei.impl.ConfigObjectImpl;
-import me.shedaniel.rei.impl.search.Argument;
-import me.shedaniel.rei.impl.search.CompoundArgument;
+import me.shedaniel.rei.impl.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.config.ConfigObjectImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
@@ -81,7 +81,6 @@ import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -201,7 +200,6 @@ public class EntryListWidget extends WidgetWithBounds {
         return super.mouseScrolled(double_1, double_2, double_3);
     }
     
-    @NotNull
     @Override
     public Rectangle getBounds() {
         return bounds;
@@ -444,7 +442,7 @@ public class EntryListWidget extends WidgetWithBounds {
         return false;
     }
     
-    public void updateArea(@NotNull String searchTerm) {
+    public void updateArea(String searchTerm) {
         this.bounds = REIHelper.getInstance().calculateEntryListArea();
         FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
         if (favoritesListWidget != null)

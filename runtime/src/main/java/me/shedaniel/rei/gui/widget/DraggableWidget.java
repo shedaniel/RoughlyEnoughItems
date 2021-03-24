@@ -27,7 +27,7 @@ import com.mojang.blaze3d.platform.Window;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.ApiStatus;

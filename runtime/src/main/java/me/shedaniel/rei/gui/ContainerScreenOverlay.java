@@ -35,39 +35,40 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.REIOverlay;
-import me.shedaniel.rei.api.config.ConfigManager;
-import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.favorites.FavoriteEntry;
-import me.shedaniel.rei.api.gui.config.SearchFieldLocation;
-import me.shedaniel.rei.api.gui.drag.DraggableStackProvider;
-import me.shedaniel.rei.api.gui.drag.DraggableStackVisitor;
-import me.shedaniel.rei.api.gui.drag.DraggingContext;
-import me.shedaniel.rei.api.gui.widgets.Button;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.registry.category.CategoryRegistry;
-import me.shedaniel.rei.api.registry.screen.ClickArea;
-import me.shedaniel.rei.api.registry.screen.OverlayDecider;
-import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.api.util.CollectionUtils;
-import me.shedaniel.rei.api.util.ImmutableLiteralText;
-import me.shedaniel.rei.api.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIOverlay;
+import me.shedaniel.rei.api.client.config.ConfigManager;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
+import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.widgets.Button;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.screen.ClickArea;
+import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
+import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.entries.GameModeMenuEntry;
 import me.shedaniel.rei.gui.modules.entries.WeatherMenuEntry;
 import me.shedaniel.rei.gui.widget.EntryListWidget;
 import me.shedaniel.rei.gui.widget.FavoritesListWidget;
 import me.shedaniel.rei.gui.widget.LateRenderable;
-import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.InternalWidgets;
 import me.shedaniel.rei.impl.REIHelperImpl;
 import me.shedaniel.rei.impl.Weather;
+import me.shedaniel.rei.impl.registry.ClientHelperImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
@@ -91,7 +92,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -131,16 +131,12 @@ public class ContainerScreenOverlay extends REIOverlay {
     }
     
     private static class OverlayMenu {
-        @NotNull
-        private UUID uuid;
-        @NotNull
-        private Menu menu;
-        @NotNull
-        private Widget wrappedMenu;
-        @NotNull
-        private Predicate<Point> inBounds;
+            private UUID uuid;
+            private Menu menu;
+            private Widget wrappedMenu;
+            private Predicate<Point> inBounds;
         
-        public OverlayMenu(@NotNull UUID uuid, @NotNull Menu menu, @NotNull Widget wrappedMenu, @NotNull Predicate<Point> inBounds) {
+        public OverlayMenu(UUID uuid, Menu menu, Widget wrappedMenu, Predicate<Point> inBounds) {
             this.uuid = uuid;
             this.menu = menu;
             this.wrappedMenu = wrappedMenu;
@@ -271,7 +267,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                         ENTRY_LIST_WIDGET.updateEntriesPosition();
                     })
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
-                    .tooltipLine(I18n.get("text.rei.previous_page"))
+                    .tooltipLine(new TranslatableComponent("text.rei.previous_page"))
                     .focusable(false));
             widgets.add(rightButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent("text.rei.right_arrow"))
                     .onClick(button -> {
@@ -281,7 +277,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                         ENTRY_LIST_WIDGET.updateEntriesPosition();
                     })
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
-                    .tooltipLine(I18n.get("text.rei.next_page"))
+                    .tooltipLine(new TranslatableComponent("text.rei.next_page"))
                     .focusable(false));
         }
         
@@ -306,19 +302,20 @@ public class ContainerScreenOverlay extends REIOverlay {
                         .focusable(false)
                         .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
                         .tooltipSupplier(button -> {
-                            String tooltips = I18n.get("text.rei.config_tooltip");
-                            tooltips += "\n  ";
+                            List<Component> tooltips =new ArrayList<>();
+                            tooltips.add(new TranslatableComponent("text.rei.config_tooltip"));
+                            tooltips.add(new ImmutableTextComponent("  "));
                             if (!ClientHelper.getInstance().isCheating())
-                                tooltips += "\n" + I18n.get("text.rei.cheating_disabled");
+                                tooltips.add(new TranslatableComponent("text.rei.cheating_disabled"));
                             else if (!RoughlyEnoughItemsCore.hasOperatorPermission()) {
                                 if (minecraft.gameMode.hasInfiniteItems())
-                                    tooltips += "\n" + I18n.get("text.rei.cheating_limited_creative_enabled");
-                                else tooltips += "\n" + I18n.get("text.rei.cheating_enabled_no_perms");
+                                    tooltips.add(new TranslatableComponent("text.rei.cheating_limited_creative_enabled"));
+                                else tooltips.add(new TranslatableComponent("text.rei.cheating_enabled_no_perms"));
                             } else if (RoughlyEnoughItemsCore.hasPermissionToUsePackets())
-                                tooltips += "\n" + I18n.get("text.rei.cheating_enabled");
+                                tooltips.add(new TranslatableComponent("text.rei.cheating_enabled"));
                             else
-                                tooltips += "\n" + I18n.get("text.rei.cheating_limited_enabled");
-                            return tooltips;
+                                tooltips.add(new TranslatableComponent("text.rei.cheating_limited_enabled"));
+                            return tooltips.toArray(new Component[0]);
                         }),
                 Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
                     helper.setBlitOffset(helper.getBlitOffset() + 1);
@@ -349,7 +346,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                         button.setText(new TextComponent(getGameModeShortText(getCurrentGameMode())));
                     })
                     .focusable(false)
-                    .tooltipLine(I18n.get("text.rei.gamemode_button.tooltip.all"))
+                    .tooltipLine(new TranslatableComponent("text.rei.gamemode_button.tooltip.all"))
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)));
             Button weatherButton;
             widgets.add(weatherButton = Widgets.createButton(new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getGuiScaledWidth() - 30 : 10, 35, 20, 20), NarratorChatListener.NO_TITLE)
@@ -370,7 +367,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                             }
                         }
                     })
-                    .tooltipLine(I18n.get("text.rei.weather_button.tooltip.all"))
+                    .tooltipLine(new TranslatableComponent("text.rei.weather_button.tooltip.all"))
                     .focusable(false)
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)));
             widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
@@ -396,7 +393,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                 ENTRY_LIST_WIDGET.updateEntriesPosition();
             }).tooltipLine(I18n.get("text.rei.go_back_first_page")).focusable(false).onRender((matrices, label) -> {
                 label.setClickable(ENTRY_LIST_WIDGET.getTotalPages() > 1);
-                label.setText(new TextComponent(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, Math.max(ENTRY_LIST_WIDGET.getTotalPages(), 1))));
+                label.setMessage(new TextComponent(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, Math.max(ENTRY_LIST_WIDGET.getTotalPages(), 1))));
             }).rainbow(new Random().nextFloat() < 1.0E-4D || ClientHelperImpl.getInstance().isAprilFools.get()));
         }
         if (ConfigObject.getInstance().isCraftableFilterEnabled()) {
@@ -412,7 +409,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                             })
                             .onRender((matrices, button) -> button.setTint(ConfigManager.getInstance().isCraftableOnlyEnabled() ? 939579655 : 956235776))
                             .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
-                            .tooltipSupplier(button -> I18n.get(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all")),
+                            .tooltipLineSupplier(button -> new TranslatableComponent(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all")),
                     Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
                         Vector4f vector = new Vector4f(area.x + 2, area.y + 2, helper.getBlitOffset() - 10, 1.0F);
                         vector.transform(matrices.last().pose());
@@ -524,7 +521,6 @@ public class ContainerScreenOverlay extends REIOverlay {
         return I18n.get(String.format("%s%s", "text.rei.", ClientHelper.getInstance().isCheating() ? "cheat" : "nocheat"));
     }
     
-    @NotNull
     @Override
     public Rectangle getBounds() {
         return bounds;
@@ -577,9 +573,9 @@ public class ContainerScreenOverlay extends REIOverlay {
                     return new Point(mouseX, mouseY);
                 }
             };
-            Set<ResourceLocation> categories = ScreenRegistry.getInstance().handleClickArea((Class<Screen>) screen.getClass(), context);
+            Set<CategoryIdentifier<?>> categories = ScreenRegistry.getInstance().handleClickArea((Class<Screen>) screen.getClass(), context);
             if (categories != null && !categories.isEmpty()) {
-                Component collect = CollectionUtils.mapAndJoinToComponent(categories, identifier -> CategoryRegistry.getInstance().get(identifier).getCategory().getTitle(), new ImmutableLiteralText(", "));
+                Component collect = CollectionUtils.mapAndJoinToComponent(categories, identifier -> CategoryRegistry.getInstance().get(identifier).getCategory().getTitle(), new ImmutableTextComponent(", "));
                 Tooltip.create(new TranslatableComponent("text.rei.view_recipes_for", collect)).queue();
             }
         }
@@ -796,7 +792,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                     return new Point(mouseX, mouseY);
                 }
             };
-            Set<ResourceLocation> categories = ScreenRegistry.getInstance().handleClickArea((Class<Screen>) screen.getClass(), context);
+            Set<CategoryIdentifier<?>> categories = ScreenRegistry.getInstance().handleClickArea((Class<Screen>) screen.getClass(), context);
             if (categories != null && !categories.isEmpty()) {
                 ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addCategories(categories).fillPreferredOpenedCategory());
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));

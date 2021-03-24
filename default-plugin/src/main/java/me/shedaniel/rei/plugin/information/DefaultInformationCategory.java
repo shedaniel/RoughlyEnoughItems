@@ -32,15 +32,16 @@ import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.AbstractRenderer;
-import me.shedaniel.rei.api.gui.DisplayRenderer;
-import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.gui.AbstractRenderer;
+import me.shedaniel.rei.api.client.gui.DisplayRenderer;
+import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -48,9 +49,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -71,8 +70,8 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
     }
     
     @Override
-    public ResourceLocation getIdentifier() {
-        return DefaultPlugin.INFO;
+    public CategoryIdentifier<? extends DefaultInformationDisplay> getCategoryIdentifier() {
+        return BuiltinPlugin.INFO;
     }
     
     @Override
@@ -81,7 +80,7 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
     }
     
     @Override
-    public @NotNull DisplayRenderer getDisplayRenderer(DefaultInformationDisplay display) {
+    public DisplayRenderer getDisplayRenderer(DefaultInformationDisplay display) {
         FormattedCharSequence name = display.getName().getVisualOrderText();
         return new DisplayRenderer() {
             @Override
@@ -97,7 +96,6 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
     }
     
     @Override
-    @NotNull
     public Renderer getIcon() {
         return new AbstractRenderer() {
             @Override
@@ -186,7 +184,6 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
             return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
         }
         
-        @NotNull
         @Override
         public Rectangle getBounds() {
             return bounds;

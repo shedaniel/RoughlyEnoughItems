@@ -24,15 +24,14 @@
 package me.shedaniel.rei.plugin.information;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -60,12 +59,12 @@ public class DefaultInformationDisplay implements Display {
     }
     
     @Override
-    public @NotNull List<EntryIngredient> getInputEntries() {
+    public List<EntryIngredient> getInputEntries() {
         return Collections.singletonList(entryStacks);
     }
     
     @Override
-    public @NotNull List<EntryIngredient> getResultingEntries() {
+    public List<EntryIngredient> getOutputEntries() {
         return Collections.singletonList(entryStacks);
     }
     
@@ -97,7 +96,7 @@ public class DefaultInformationDisplay implements Display {
     }
     
     @Override
-    public @NotNull ResourceLocation getCategoryIdentifier() {
-        return DefaultPlugin.INFO;
+    public CategoryIdentifier<?> getCategoryIdentifier() {
+        return BuiltinPlugin.INFO;
     }
 }

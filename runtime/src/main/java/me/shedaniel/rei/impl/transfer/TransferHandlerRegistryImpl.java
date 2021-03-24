@@ -24,11 +24,10 @@
 package me.shedaniel.rei.impl.transfer;
 
 import com.google.common.collect.Iterators;
-import me.shedaniel.rei.api.plugins.REIPlugin;
-import me.shedaniel.rei.api.registry.transfer.TransferHandler;
-import me.shedaniel.rei.api.registry.transfer.TransferHandlerRegistry;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -40,7 +39,7 @@ public class TransferHandlerRegistryImpl implements TransferHandlerRegistry {
     private final List<TransferHandler> handlers = new ArrayList<>();
     
     @Override
-    public void acceptPlugin(REIPlugin plugin) {
+    public void acceptPlugin(REIClientPlugin plugin) {
         plugin.registerTransferHandlers(this);
     }
     
@@ -55,7 +54,6 @@ public class TransferHandlerRegistryImpl implements TransferHandlerRegistry {
         handlers.sort(Comparator.reverseOrder());
     }
     
-    @NotNull
     @Override
     public Iterator<TransferHandler> iterator() {
         return Iterators.unmodifiableIterator(handlers.iterator());

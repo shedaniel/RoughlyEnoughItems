@@ -28,15 +28,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.config.RecipeBorderType;
-import me.shedaniel.rei.api.gui.config.DisplayScreenType;
-import me.shedaniel.rei.api.gui.widgets.Panel;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
+import me.shedaniel.rei.api.client.gui.config.RecipeBorderType;
+import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,18 +51,17 @@ public final class PanelWidget extends Panel {
     private int color = -1;
     private int xTextureOffset = 0;
     private int yTextureOffset = RecipeBorderType.DEFAULT.getYOffset();
-    @NotNull
     private Predicate<Panel> rendering = Predicates.alwaysTrue();
     
     public static boolean isRendering(Panel panel) {
         return ConfigObject.getInstance().getRecipeScreenType() != DisplayScreenType.COMPOSITE;
     }
     
-    public PanelWidget(@NotNull Rectangle bounds) {
+    public PanelWidget(Rectangle bounds) {
         this.bounds = Objects.requireNonNull(bounds);
     }
     
-    public static void render(PoseStack matrices, @NotNull Rectangle bounds, int color) {
+    public static void render(PoseStack matrices, Rectangle bounds, int color) {
         TEMP.bounds.setBounds(Objects.requireNonNull(bounds));
         TEMP.color = color;
         TEMP.render(matrices, 0, 0, 0);
@@ -100,16 +98,15 @@ public final class PanelWidget extends Panel {
     }
     
     @Override
-    public @NotNull Predicate<Panel> getRendering() {
+    public Predicate<Panel> getRendering() {
         return rendering;
     }
     
     @Override
-    public void setRendering(@NotNull Predicate<Panel> rendering) {
+    public void setRendering(Predicate<Panel> rendering) {
         this.rendering = Objects.requireNonNull(rendering);
     }
     
-    @NotNull
     @Override
     public Rectangle getBounds() {
         return bounds;

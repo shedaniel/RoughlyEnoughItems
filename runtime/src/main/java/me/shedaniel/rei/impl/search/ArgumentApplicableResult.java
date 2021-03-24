@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.search;
 
 import net.minecraft.util.IntRange;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -52,23 +51,23 @@ public final class ArgumentApplicableResult {
         return UNMATCHED;
     }
     
-    public static ArgumentApplicableResult applyInverted(@NotNull String text) {
+    public static ArgumentApplicableResult applyInverted(String text) {
         return apply(text, false).invert();
     }
     
-    public static ArgumentApplicableResult applyInverted(@NotNull String text, boolean preserveCasing) {
+    public static ArgumentApplicableResult applyInverted(String text, boolean preserveCasing) {
         return apply(text, preserveCasing).invert();
     }
     
-    public static ArgumentApplicableResult apply(@NotNull String text) {
+    public static ArgumentApplicableResult apply(String text) {
         return apply(text, false);
     }
     
-    public static ArgumentApplicableResult apply(@NotNull String text, boolean preserveCasing) {
+    public static ArgumentApplicableResult apply(String text, boolean preserveCasing) {
         return new ArgumentApplicableResult(MatchType.MATCHED, Objects.requireNonNull(text), preserveCasing);
     }
     
-    public static ArgumentApplicableResult result(@NotNull String text, boolean preserveCasing, boolean inverted) {
+    public static ArgumentApplicableResult result(String text, boolean preserveCasing, boolean inverted) {
         return new ArgumentApplicableResult(!inverted ? MatchType.MATCHED : MatchType.INVERT_MATCHED, Objects.requireNonNull(text), preserveCasing);
     }
     
