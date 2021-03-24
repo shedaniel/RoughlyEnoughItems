@@ -25,10 +25,10 @@ package me.shedaniel.rei.impl;
 
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.common.ingredient.EntryStack;
-import me.shedaniel.rei.api.common.ingredient.entry.type.EntryDefinition;
-import me.shedaniel.rei.api.common.ingredient.entry.type.EntryType;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
@@ -58,10 +58,14 @@ public final class Internals {
     
     @ApiStatus.Internal
     public static <T> void attachInstance(T instance, Class<T> clazz) {
-        attachInstance((Supplier<T>) () -> instance, clazz.getSimpleName());
+        attachInstanceSupplier(instance, clazz.getSimpleName());
     }
     
     @ApiStatus.Internal
+    public static <T> void attachInstanceSupplier(T instance, String name) {
+        attachInstance((Supplier<T>) () -> instance, name);
+    }
+    
     public static <T> void attachInstance(T instance, String name) {
         try {
             for (Field field : Internals.class.getDeclaredFields()) {

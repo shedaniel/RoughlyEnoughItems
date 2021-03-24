@@ -25,7 +25,6 @@ package me.shedaniel.rei.api.common.plugins;
 
 import java.util.Collection;
 
-@FunctionalInterface
 public interface REIPluginProvider<P extends REIPlugin<?>> {
     default String getPluginProviderName() {
         Class<?> self = getClass();
@@ -34,4 +33,6 @@ public interface REIPluginProvider<P extends REIPlugin<?>> {
     }
     
     Collection<P> provide();
+    
+    Class<P> getPluginProviderClass();
 }

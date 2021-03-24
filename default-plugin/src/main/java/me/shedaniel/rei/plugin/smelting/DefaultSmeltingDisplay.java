@@ -24,7 +24,7 @@
 package me.shedaniel.rei.plugin.smelting;
 
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.cooking.DefaultCookingDisplay;
 import net.fabricmc.api.EnvType;

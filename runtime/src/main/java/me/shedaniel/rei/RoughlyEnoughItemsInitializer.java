@@ -40,35 +40,39 @@ public class RoughlyEnoughItemsInitializer {
         }
         
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
-            initializeEntryPoint("me.shedaniel.rei.RoughlyEnoughItemsNetwork");
+            initializeEntryPoint(false, "me.shedaniel.rei.RoughlyEnoughItemsCore");
         }
     }
     
     public static void onInitializeClient() {
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
-            initializeEntryPoint("me.shedaniel.rei.RoughlyEnoughItemsCore");
-            initializeEntryPoint("me.shedaniel.rei.REIModMenuEntryPoint");
-            initializeEntryPoint("me.shedaniel.rei.impl.ClientHelperImpl");
-            initializeEntryPoint("me.shedaniel.rei.impl.REIHelperImpl");
+            initializeEntryPoint(true, "me.shedaniel.rei.RoughlyEnoughItemsCore");
+            initializeEntryPoint(true, "me.shedaniel.rei.REIModMenuEntryPoint");
+            initializeEntryPoint(true, "me.shedaniel.rei.impl.client.ClientHelperImpl");
+            initializeEntryPoint(true, "me.shedaniel.rei.impl.client.REIHelperImpl");
         }
         
-        initializeEntryPoint("me.shedaniel.rei.impl.ErrorDisplayer");
+        initializeEntryPoint(true, "me.shedaniel.rei.impl.client.ErrorDisplayer");
     }
     
-    public static void initializeEntryPoint(String className) {
+    public static void initializeEntryPoint(boolean client, String className) {
         try {
             Class<?> name = Class.forName(className);
             Object instance = name.getConstructor().newInstance();
             Method method = null;
-            try {
-                method = name.getDeclaredMethod("onInitialize");
-            } catch (NoSuchMethodException ignored) {
-            }
-            if (method != null) {
-                method.invoke(instance);
-            } else if (Platform.getEnv() == EnvType.CLIENT) {
+            if (client) {
+                if (Platform.getEnv() == EnvType.CLIENT) {
+                    try {
+                        method = name.getDeclaredMethod("onInitializeClient");
+                    } catch (NoSuchMethodException ignored) {
+                    }
+                    if (method != null) {
+                        method.invoke(instance);
+                    }
+                }
+            } else {
                 try {
-                    method = name.getDeclaredMethod("onInitializeClient");
+                    method = name.getDeclaredMethod("onInitialize");
                 } catch (NoSuchMethodException ignored) {
                 }
                 if (method != null) {

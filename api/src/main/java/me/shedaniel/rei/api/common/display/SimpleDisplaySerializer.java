@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.common.display;
 
-import me.shedaniel.rei.api.common.ingredient.util.EntryIngredients;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
 import net.minecraft.nbt.CompoundTag;
 
 public interface SimpleDisplaySerializer<D extends Display> extends DisplaySerializer<D> {

@@ -24,63 +24,48 @@
 package me.shedaniel.rei.fabric;
 
 import com.google.common.collect.Iterables;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
-import me.shedaniel.rei.api.common.plugins.PluginView;
-import me.shedaniel.rei.api.common.plugins.REIPlugin;
-import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
+import me.shedaniel.rei.api.common.plugins.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 
+import java.util.function.Consumer;
+
 public class PluginDetectorImpl {
-    public static void detectServerPlugins() {
-        for (REIServerPlugin plugin : Iterables.concat(
-                FabricLoader.getInstance().getEntrypoints("rei_containers", REIServerPlugin.class),
-                FabricLoader.getInstance().getEntrypoints("rei_server", REIServerPlugin.class)
+    private static <P extends REIPlugin<?>> void loadPlugin(Class<? extends P> pluginClass, Consumer<? super REIPluginProvider<P>> consumer) {
+        for (REIPluginProvider<?> plugin : Iterables.concat(
+                FabricLoader.getInstance().getEntrypoints("rei_containers", REIPluginProvider.class),
+                FabricLoader.getInstance().getEntrypoints("rei_server", REIPluginProvider.class),
+                FabricLoader.getInstance().getEntrypoints("rei", REIPluginProvider.class),
+                FabricLoader.getInstance().getEntrypoints("rei_common", REIPluginProvider.class),
+                FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPluginProvider.class),
+                FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIPluginProvider.class)
         )) {
-            try {
-                PluginView.getServerInstance().registerPlugin(plugin);
-            } catch (Exception e) {
-                e.printStackTrace();
-                RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", plugin.getClass(), e.getLocalizedMessage());
+            if (pluginClass.isAssignableFrom(plugin.getPluginProviderClass())) {
+                consumer.accept((REIPluginProvider<P>) plugin);
             }
         }
+    }
+    
+    public static void detectServerPlugins() {
+        loadPlugin(REIServerPlugin.class, ((PluginView<REIServerPlugin>) PluginManager.getServerInstance())::registerPlugin);
         if (FabricLoader.getInstance().isModLoaded("libblockattributes-fluids")) {
             try {
-                PluginView.getServerInstance().registerPlugin((REIServerPlugin) Class.forName("me.shedaniel.rei.compat.LBASupportPlugin").getConstructor().newInstance());
+                PluginView.getServerInstance().registerPlugin((REIServerPlugin) Class.forName("me.shedaniel.rei.impl.common.compat.LBASupportPlugin").getConstructor().newInstance());
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
             }
         }
     }
     
+    @SuppressWarnings({"RedundantCast", "rawtypes"})
     public static void detectCommonPlugins() {
-        for (REIPlugin<?> plugin : Iterables.concat(
-                FabricLoader.getInstance().getEntrypoints("rei_common", REIPlugin.class)
-        )) {
-            try {
-                PluginView.getInstance().registerPlugin(plugin);
-            } catch (Exception e) {
-                e.printStackTrace();
-                RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", plugin.getClass(), e.getLocalizedMessage());
-            }
-        }
+        loadPlugin((Class<? extends REIPlugin<?>>) (Class) REIPlugin.class, ((PluginView<REIPlugin<?>>) PluginManager.getInstance())::registerPlugin);
     }
     
     @Environment(EnvType.CLIENT)
     public static void detectClientPlugins() {
-        for (REIClientPlugin plugin : Iterables.concat(
-                FabricLoader.getInstance().getEntrypoints("rei", REIClientPlugin.class),
-                FabricLoader.getInstance().getEntrypoints("rei_plugins", REIClientPlugin.class),
-                FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIClientPlugin.class)
-        )) {
-            try {
-                PluginView.getClientInstance().registerPlugin(plugin);
-            } catch (Exception e) {
-                e.printStackTrace();
-                RoughlyEnoughItemsCore.LOGGER.error("Can't load REI plugins from %s: %s", plugin.getClass(), e.getLocalizedMessage());
-            }
-        }
+        loadPlugin(REIClientPlugin.class, ((PluginView<REIClientPlugin>) PluginManager.getClientInstance())::registerPlugin);
     }
 }

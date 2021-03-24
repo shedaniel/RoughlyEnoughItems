@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.fabric;
 
-import me.shedaniel.rei.impl.IssuesDetector;
+import me.shedaniel.rei.impl.common.util.IssuesDetector;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.apache.logging.log4j.Logger;

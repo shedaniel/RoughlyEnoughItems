@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api.client.registry.screen;
 
 import me.shedaniel.math.Point;
-import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.InteractionResultHolder;
 

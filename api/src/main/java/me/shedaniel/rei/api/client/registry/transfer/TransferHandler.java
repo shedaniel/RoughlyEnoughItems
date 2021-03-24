@@ -38,6 +38,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
+/**
+ * Handler for display transfer, only executed on the client, implementations of this handler should sync recipes to the server to transfer recipes themselves.
+ * <p>
+ * REI provides a {@link TransferHandler} that handles displays that are provided with {@link me.shedaniel.rei.api.common.transfer.info.MenuInfo},
+ * as a lightweight and simple way to implement recipe transfers.
+ *
+ * @see TransferHandlerRegistry
+ * @see me.shedaniel.rei.api.common.transfer.info.MenuInfo
+ */
 @Environment(EnvType.CLIENT)
 public interface TransferHandler extends Comparable<TransferHandler> {
     /**
