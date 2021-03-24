@@ -23,12 +23,11 @@
 
 package me.shedaniel.rei.plugin.pathing;
 
-import me.shedaniel.rei.api.client.ingredient.util.ClientEntryIngredients;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.common.ingredient.EntryStack;
-import me.shedaniel.rei.api.common.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -61,12 +60,12 @@ public class DefaultPathingDisplay implements Display {
     
     @Override
     public List<EntryIngredient> getInputEntries() {
-        return Collections.singletonList(ClientEntryIngredients.of(in));
+        return Collections.singletonList(EntryIngredient.of(in));
     }
     
     @Override
     public List<EntryIngredient> getOutputEntries() {
-        return Collections.singletonList(ClientEntryIngredients.of(out));
+        return Collections.singletonList(EntryIngredient.of(out));
     }
     
     @Override

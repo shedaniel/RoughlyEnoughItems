@@ -25,7 +25,7 @@ package me.shedaniel.rei.jeicompat.wrap;
 
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.ingredients.IIngredientType;

@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api.common.display;
 
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;

@@ -106,4 +106,9 @@ public interface REIClientPlugin extends REIPlugin<REIClientPlugin> {
     @ApiStatus.OverrideOnly
     default void registerTransferHandlers(TransferHandlerRegistry registry) {
     }
+    
+    @Override
+    default Class<REIClientPlugin> getPluginProviderClass() {
+        return REIClientPlugin.class;
+    }
 }

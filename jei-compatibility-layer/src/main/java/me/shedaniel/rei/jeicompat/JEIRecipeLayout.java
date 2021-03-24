@@ -28,7 +28,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupFluid;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupItem;

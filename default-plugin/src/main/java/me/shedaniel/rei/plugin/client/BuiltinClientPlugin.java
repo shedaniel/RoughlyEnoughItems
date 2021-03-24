@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.plugin.client;
 
-import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.network.chat.Component;

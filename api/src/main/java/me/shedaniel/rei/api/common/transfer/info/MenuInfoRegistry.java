@@ -30,6 +30,8 @@ import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
+import java.util.function.Predicate;
+
 /**
  * Registry for {@link MenuInfo}, for the default REI {@link me.shedaniel.rei.api.client.registry.transfer.TransferHandler}.
  */
@@ -39,6 +41,8 @@ public interface MenuInfoRegistry extends Reloadable<REIServerPlugin> {
     }
     
     <D extends Display> void register(CategoryIdentifier<D> category, MenuInfo<?, D> menuInfo);
+    
+    <D extends Display> void registerGeneric(Predicate<CategoryIdentifier<?>> categoryPredicate, MenuInfo<?, D> menuInfo);
     
     <T extends AbstractContainerMenu, D extends Display> MenuInfo<T, D> get(CategoryIdentifier<D> category, Class<T> menuClass);
 }

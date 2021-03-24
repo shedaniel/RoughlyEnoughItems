@@ -27,7 +27,7 @@ import io.netty.buffer.Unpooled;
 import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.server.InputSlotCrafter;
+import me.shedaniel.rei.impl.common.transfer.InputSlotCrafter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
@@ -50,9 +50,7 @@ public class RoughlyEnoughItemsNetwork {
     public static final ResourceLocation MOVE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "move_items");
     public static final ResourceLocation NOT_ENOUGH_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "og_not_enough");
     
-    public void onInitialize() {
-        PluginDetector.detectCommonPlugins();
-        PluginDetector.detectServerPlugins();
+    public static void onInitialize() {
         NetworkManager.registerReceiver(NetworkManager.c2s(), DELETE_ITEMS_PACKET, (buf, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
             if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {

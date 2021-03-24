@@ -27,6 +27,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializer;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
+import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashMap;
@@ -71,6 +72,11 @@ public class DisplaySerializerRegistryImpl implements DisplaySerializerRegistry 
     @Override
     public void startReload() {
         serializers.clear();
+    }
+    
+    @Override
+    public void acceptPlugin(REIPlugin<?> plugin) {
+        plugin.registerDisplaySerializer(this);
     }
     
     private static class Holder<D extends Display> {

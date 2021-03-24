@@ -28,7 +28,7 @@ import me.shedaniel.clothconfig2.forge.api.PointHelper;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import mezz.jei.api.gui.ITickTimer;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.drawable.IDrawableAnimated;

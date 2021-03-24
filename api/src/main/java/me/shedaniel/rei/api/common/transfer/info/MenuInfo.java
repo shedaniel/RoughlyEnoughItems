@@ -25,7 +25,7 @@ package me.shedaniel.rei.api.common.transfer.info;
 
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
-import me.shedaniel.rei.api.common.ingredient.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.transfer.RecipeFinder;
 import me.shedaniel.rei.api.common.transfer.RecipeFinderPopulator;
 import me.shedaniel.rei.api.common.transfer.info.clean.InputCleanHandler;

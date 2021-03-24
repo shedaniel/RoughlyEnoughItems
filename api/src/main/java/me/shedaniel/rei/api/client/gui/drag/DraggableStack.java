@@ -25,7 +25,7 @@ package me.shedaniel.rei.api.client.gui.drag;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 
 public interface DraggableStack {
     EntryStack<?> getStack();

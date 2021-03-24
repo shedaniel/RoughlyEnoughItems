@@ -25,7 +25,7 @@ package me.shedaniel.rei.api.client.gui.widgets;
 
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;

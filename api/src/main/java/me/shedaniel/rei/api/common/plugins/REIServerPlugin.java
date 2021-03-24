@@ -30,4 +30,9 @@ public interface REIServerPlugin extends REIPlugin<REIServerPlugin> {
     @ApiStatus.NonExtendable
     default void registerMenuInfo(MenuInfoRegistry registry) {
     }
+    
+    @Override
+    default Class<REIServerPlugin> getPluginProviderClass() {
+        return REIServerPlugin.class;
+    }
 }

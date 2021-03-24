@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api.client.subsets;
 
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
-import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import net.fabricmc.api.EnvType;

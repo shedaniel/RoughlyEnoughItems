@@ -27,10 +27,10 @@ import com.google.gson.JsonObject;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
-import me.shedaniel.rei.api.client.ingredient.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
@@ -70,10 +70,14 @@ public final class ClientInternals {
     
     @ApiStatus.Internal
     public static <T> void attachInstance(T instance, Class<T> clazz) {
-        attachInstance((Supplier<T>) () -> instance, clazz.getSimpleName());
+        attachInstanceSupplier(instance, clazz.getSimpleName());
     }
     
     @ApiStatus.Internal
+    public static <T> void attachInstanceSupplier(T instance, String name) {
+        attachInstance((Supplier<T>) () -> instance, name);
+    }
+    
     public static <T> void attachInstance(T instance, String name) {
         try {
             for (Field field : ClientInternals.class.getDeclaredFields()) {

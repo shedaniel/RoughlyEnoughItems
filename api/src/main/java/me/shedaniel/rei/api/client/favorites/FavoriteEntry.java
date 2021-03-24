@@ -25,7 +25,7 @@ package me.shedaniel.rei.api.client.favorites;
 
 import com.google.gson.JsonObject;
 import me.shedaniel.rei.api.client.gui.Renderer;
-import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.ClientInternals;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;

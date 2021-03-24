@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.plugin.common.crafting;
 
-import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.common.ingredient.util.EntryIngredients;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;

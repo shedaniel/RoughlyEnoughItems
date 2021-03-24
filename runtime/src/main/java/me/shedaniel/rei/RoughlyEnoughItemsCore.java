@@ -33,59 +33,59 @@ import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.math.Point;
-import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.api.client.REIOverlay;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
-import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
-import me.shedaniel.rei.api.client.ingredient.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.ingredient.EntryStack;
-import me.shedaniel.rei.api.common.ingredient.entry.type.BuiltinEntryTypes;
-import me.shedaniel.rei.api.common.ingredient.entry.type.EntryDefinition;
-import me.shedaniel.rei.api.common.ingredient.entry.type.EntryType;
-import me.shedaniel.rei.api.common.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
+import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
-import me.shedaniel.rei.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.gui.widget.EntryWidget;
-import me.shedaniel.rei.gui.widget.QueuedTooltip;
+import me.shedaniel.rei.impl.client.REIHelperImpl;
+import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
+import me.shedaniel.rei.impl.client.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.*;
 import me.shedaniel.rei.impl.common.category.CategoryIdentifierImpl;
+import me.shedaniel.rei.impl.common.display.DisplaySerializerRegistryImpl;
+import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
 import me.shedaniel.rei.impl.common.transfer.MenuInfoRegistryImpl;
-import me.shedaniel.rei.impl.config.ConfigManagerImpl;
-import me.shedaniel.rei.impl.entry.EntryIngredientImpl;
-import me.shedaniel.rei.impl.entry.FavoriteEntryTypeRegistryImpl;
-import me.shedaniel.rei.impl.entry.ItemComparatorRegistryImpl;
-import me.shedaniel.rei.impl.entry.NbtHasherProviderImpl;
-import me.shedaniel.rei.impl.entry.stack.TypedEntryStack;
-import me.shedaniel.rei.impl.entry.type.EntryRegistryImpl;
-import me.shedaniel.rei.impl.entry.type.EntryTypeDeferred;
-import me.shedaniel.rei.impl.entry.type.EntryTypeRegistryImpl;
-import me.shedaniel.rei.impl.entry.type.types.EmptyEntryDefinition;
-import me.shedaniel.rei.impl.entry.type.types.RenderingEntryDefinition;
-import me.shedaniel.rei.impl.fluid.FluidSupportProviderImpl;
-import me.shedaniel.rei.impl.registry.CategoryRegistryImpl;
-import me.shedaniel.rei.impl.registry.DisplayRegistryImpl;
-import me.shedaniel.rei.impl.registry.screen.ScreenRegistryImpl;
-import me.shedaniel.rei.impl.search.SearchProviderImpl;
-import me.shedaniel.rei.impl.subsets.SubsetsRegistryImpl;
-import me.shedaniel.rei.impl.transfer.TransferHandlerRegistryImpl;
-import me.shedaniel.rei.impl.view.ViewsImpl;
-import me.shedaniel.rei.impl.widgets.*;
-import me.shedaniel.rei.tests.plugin.REITestPlugin;
+import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.common.entry.EntryIngredientImpl;
+import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
+import me.shedaniel.rei.impl.common.entry.comparison.ItemComparatorRegistryImpl;
+import me.shedaniel.rei.impl.common.entry.comparison.NbtHasherProviderImpl;
+import me.shedaniel.rei.impl.common.entry.TypedEntryStack;
+import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
+import me.shedaniel.rei.impl.common.entry.type.EntryTypeDeferred;
+import me.shedaniel.rei.impl.common.entry.type.EntryTypeRegistryImpl;
+import me.shedaniel.rei.impl.common.entry.type.types.EmptyEntryDefinition;
+import me.shedaniel.rei.impl.client.entry.type.types.RenderingEntryDefinition;
+import me.shedaniel.rei.impl.common.fluid.FluidSupportProviderImpl;
+import me.shedaniel.rei.impl.client.registry.category.CategoryRegistryImpl;
+import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
+import me.shedaniel.rei.impl.client.registry.screen.ScreenRegistryImpl;
+import me.shedaniel.rei.impl.client.search.SearchProviderImpl;
+import me.shedaniel.rei.impl.client.subsets.SubsetsRegistryImpl;
+import me.shedaniel.rei.impl.common.util.IssuesDetector;
+import me.shedaniel.rei.impl.client.transfer.TransferHandlerRegistryImpl;
+import me.shedaniel.rei.impl.client.view.ViewsImpl;
+import me.shedaniel.rei.plugin.test.REITestPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -99,7 +99,6 @@ import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -133,7 +132,7 @@ public class RoughlyEnoughItemsCore {
     @ApiStatus.Internal public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
     private static final ExecutorService SYNC_RECIPES = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "REI-SyncRecipes"));
     @ApiStatus.Experimental
-    public static boolean isLeftModePressed = false;
+    public static boolean isLeftMousePressed = false;
     
     static {
         attachCommonInternals();
@@ -144,12 +143,15 @@ public class RoughlyEnoughItemsCore {
     
     public static void attachCommonInternals() {
         CategoryIdentifierImpl.attach();
-        Internals.attachInstance(new PluginManagerImpl<REIPlugin<?>>(
+        Internals.attachInstanceSupplier(new PluginManagerImpl<>(
+                REIPlugin.class,
                 UnaryOperator.identity(),
                 new EntryTypeRegistryImpl(),
                 new ItemComparatorRegistryImpl(),
+                new DisplaySerializerRegistryImpl(),
                 new FluidSupportProviderImpl()), "commonPluginManager");
-        Internals.attachInstance(new PluginManagerImpl<REIServerPlugin>(
+        Internals.attachInstanceSupplier(new PluginManagerImpl<>(
+                REIServerPlugin.class,
                 view -> view.then(PluginView.getInstance()),
                 new MenuInfoRegistryImpl()), "serverPluginManager");
         Internals.attachInstance((Function<ResourceLocation, EntryType<?>>) new Function<ResourceLocation, EntryType<?>>() {
@@ -195,7 +197,6 @@ public class RoughlyEnoughItemsCore {
                             return id;
                         }
                         
-                        @SuppressWarnings("rawtypes")
                         @Override
                         public EntryDefinition<Renderer> getDefinition() {
                             return RenderingEntryDefinition.RENDERING;
@@ -226,7 +227,8 @@ public class RoughlyEnoughItemsCore {
     
     @Environment(EnvType.CLIENT)
     public static void attachClientInternals() {
-        ClientInternals.attachInstance(new PluginManagerImpl<REIClientPlugin>(
+        ClientInternals.attachInstanceSupplier(new PluginManagerImpl<>(
+                REIClientPlugin.class,
                 view -> view.then(PluginView.getInstance()),
                 new ViewsImpl(),
                 new SearchProviderImpl(),
@@ -239,63 +241,7 @@ public class RoughlyEnoughItemsCore {
                 new SubsetsRegistryImpl(),
                 new TransferHandlerRegistryImpl(),
                 new REIHelperImpl()), "clientPluginManager");
-        ClientInternals.attachInstance(new ClientInternals.WidgetsProvider() {
-            @Override
-            public boolean isRenderingPanel(Panel panel) {
-                return PanelWidget.isRendering(panel);
-            }
-            
-            @Override
-            public Widget createDrawableWidget(DrawableConsumer drawable) {
-                return new DrawableWidget(drawable);
-            }
-            
-            @Override
-            public me.shedaniel.rei.api.client.gui.widgets.Slot createSlot(Point point) {
-                return new EntryWidget(point);
-            }
-            
-            @Override
-            public me.shedaniel.rei.api.client.gui.widgets.Slot createSlot(Rectangle bounds) {
-                return new EntryWidget(bounds);
-            }
-            
-            @Override
-            public Button createButton(Rectangle bounds, Component text) {
-                return new ButtonWidget(bounds, text);
-            }
-            
-            @Override
-            public Panel createPanelWidget(Rectangle bounds) {
-                return new PanelWidget(bounds);
-            }
-            
-            @Override
-            public Label createLabel(Point point, FormattedText text) {
-                return new LabelWidget(point, text);
-            }
-            
-            @Override
-            public Arrow createArrow(Rectangle rectangle) {
-                return new ArrowWidget(rectangle);
-            }
-            
-            @Override
-            public BurningFire createBurningFire(Rectangle rectangle) {
-                return new BurningFireWidget(rectangle);
-            }
-            
-            @Override
-            public DrawableConsumer createTexturedConsumer(ResourceLocation texture, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
-                return new TexturedDrawableConsumer(texture, x, y, width, height, u, v, uWidth, vHeight, textureWidth, textureHeight);
-            }
-            
-            @Override
-            public DrawableConsumer createFillRectangleConsumer(Rectangle rectangle, int color) {
-                return new FillRectangleDrawableConsumer(rectangle, color);
-            }
-        }, ClientInternals.WidgetsProvider.class);
-        ClientInternals.attachInstance(new ViewsImpl(), Views.class);
+        InternalWidgets.attach();
         ClientInternals.attachInstance((Supplier<EntryRenderer<?>>) () -> EmptyEntryDefinition.EmptyRenderer.INSTANCE, "emptyEntryRenderer");
         ClientInternals.attachInstance((BiFunction<Supplier<FavoriteEntry>, Supplier<JsonObject>, FavoriteEntry>) (supplier, toJson) -> new FavoriteEntry() {
             FavoriteEntry value = null;
@@ -405,27 +351,6 @@ public class RoughlyEnoughItemsCore {
         }, "clickAreaHandlerResult");
     }
     
-    public static boolean hasPermissionToUsePackets() {
-        try {
-            Minecraft.getInstance().getConnection().getSuggestionsProvider().hasPermission(0);
-            return hasOperatorPermission() && canUsePackets();
-        } catch (NullPointerException e) {
-            return true;
-        }
-    }
-    
-    public static boolean hasOperatorPermission() {
-        try {
-            return Minecraft.getInstance().getConnection().getSuggestionsProvider().hasPermission(1);
-        } catch (NullPointerException e) {
-            return true;
-        }
-    }
-    
-    public static boolean canUsePackets() {
-        return NetworkManager.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET) && NetworkManager.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET) && NetworkManager.canServerReceive(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET);
-    }
-    
     @ApiStatus.Internal
     public static void reloadPlugins(MutableLong lastReload) {
         if (lastReload != null) {
@@ -448,15 +373,13 @@ public class RoughlyEnoughItemsCore {
         }
     }
     
-    @ApiStatus.Internal
-    public static boolean isDebugModeEnabled() {
-        return System.getProperty("rei.test", "false").equals("true");
+    public void onInitialize() {
+        PluginDetector.detectCommonPlugins();
+        PluginDetector.detectServerPlugins();
+        RoughlyEnoughItemsNetwork.onInitialize();
     }
     
-    public static boolean canDeleteItems() {
-        return hasPermissionToUsePackets() || Minecraft.getInstance().gameMode.hasInfiniteItems();
-    }
-    
+    @Environment(EnvType.CLIENT)
     public void onInitializeClient() {
         IssuesDetector.detect();
         registerClothEvents();
@@ -502,12 +425,14 @@ public class RoughlyEnoughItemsCore {
         });
     }
     
+    @Environment(EnvType.CLIENT)
     private void loadTestPlugins() {
-        if (isDebugModeEnabled()) {
+        if ( System.getProperty("rei.test", "false").equals("true")) {
             PluginView.getClientInstance().registerPlugin(new REITestPlugin());
         }
     }
     
+    @Environment(EnvType.CLIENT)
     private boolean shouldReturn(Screen screen) {
         if (!REIHelper.getInstance().getOverlay().isPresent()) return true;
         if (screen == null) return true;
@@ -515,6 +440,7 @@ public class RoughlyEnoughItemsCore {
         return _shouldReturn(screen);
     }
     
+    @Environment(EnvType.CLIENT)
     private boolean _shouldReturn(Screen screen) {
         try {
             Class<? extends Screen> screenClass = screen.getClass();
@@ -531,6 +457,7 @@ public class RoughlyEnoughItemsCore {
         return true;
     }
     
+    @Environment(EnvType.CLIENT)
     private void registerClothEvents() {
         Minecraft client = Minecraft.getInstance();
         final ResourceLocation recipeButtonTex = new ResourceLocation("textures/gui/recipe_button.png");
@@ -543,7 +470,7 @@ public class RoughlyEnoughItemsCore {
             }
         });
         ClientScreenInputEvent.MOUSE_CLICKED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
-            isLeftModePressed = true;
+            isLeftMousePressed = true;
             if (shouldReturn(screen))
                 return InteractionResult.PASS;
             resetFocused(screen);
@@ -557,7 +484,7 @@ public class RoughlyEnoughItemsCore {
             return InteractionResult.PASS;
         });
         ClientScreenInputEvent.MOUSE_RELEASED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
-            isLeftModePressed = false;
+            isLeftMousePressed = false;
             if (shouldReturn(screen))
                 return InteractionResult.PASS;
             resetFocused(screen);
@@ -621,6 +548,7 @@ public class RoughlyEnoughItemsCore {
         });
     }
     
+    @Environment(EnvType.CLIENT)
     private boolean resetFocused(Screen screen) {
         if (screen.getFocused() instanceof REIOverlay || screen.getFocused() == screen) {
             screen.setFocused(null);

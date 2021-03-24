@@ -25,7 +25,7 @@ package me.shedaniel.rei.api.client.registry.display;
 
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 
 import java.util.List;
 import java.util.Optional;

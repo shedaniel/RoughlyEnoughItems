@@ -45,17 +45,17 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializer;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
-import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.common.ingredient.EntryStack;
-import me.shedaniel.rei.api.common.ingredient.entry.comparison.ComparisonContext;
-import me.shedaniel.rei.api.common.ingredient.entry.comparison.ItemComparator;
-import me.shedaniel.rei.api.common.ingredient.entry.comparison.ItemComparatorRegistry;
-import me.shedaniel.rei.api.common.ingredient.entry.type.EntryDefinition;
-import me.shedaniel.rei.api.common.ingredient.entry.type.EntryType;
-import me.shedaniel.rei.api.common.ingredient.entry.type.EntryTypeRegistry;
-import me.shedaniel.rei.api.common.ingredient.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.common.ingredient.util.EntryIngredients;
-import me.shedaniel.rei.api.common.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.common.entry.comparison.ItemComparator;
+import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
+import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
+import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
@@ -698,6 +698,11 @@ public class JEIPluginDetector {
             }
             
             return Collections.emptyList();
+        }
+    
+        @Override
+        public Class<REIClientPlugin> getPluginProviderClass() {
+            return REIClientPlugin.class;
         }
     }
     
