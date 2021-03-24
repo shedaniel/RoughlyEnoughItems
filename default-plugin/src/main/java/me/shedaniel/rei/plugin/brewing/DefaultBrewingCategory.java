@@ -26,19 +26,19 @@ package me.shedaniel.rei.plugin.brewing;
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.ingredient.util.EntryStacks;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -48,8 +48,8 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public class DefaultBrewingCategory implements DisplayCategory<DefaultBrewingDisplay> {
     @Override
-    public ResourceLocation getIdentifier() {
-        return DefaultPlugin.BREWING;
+    public CategoryIdentifier<? extends DefaultBrewingDisplay> getCategoryIdentifier() {
+        return BuiltinPlugin.BREWING;
     }
     
     @Override

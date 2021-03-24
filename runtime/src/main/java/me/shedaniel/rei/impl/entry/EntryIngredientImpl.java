@@ -24,10 +24,10 @@
 package me.shedaniel.rei.impl.entry;
 
 import com.google.common.collect.Iterators;
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
 import me.shedaniel.rei.impl.Internals;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.nbt.ListTag;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -76,13 +76,11 @@ public class EntryIngredientImpl {
     
     private static class EmptyEntryIngredient extends AbstractList<EntryStack<?>> implements EntryIngredient, RandomAccess {
         @Override
-        @NotNull
         public Iterator<EntryStack<?>> iterator() {
             return Collections.emptyIterator();
         }
         
         @Override
-        @NotNull
         public ListIterator<EntryStack<?>> listIterator() {
             return Collections.emptyListIterator();
         }
@@ -158,6 +156,11 @@ public class EntryIngredientImpl {
         public Spliterator<EntryStack<?>> spliterator() {
             return Spliterators.emptySpliterator();
         }
+    
+        @Override
+        public ListTag save() {
+            return new ListTag();
+        }
     }
     
     private static class SingletonEntryIngredient extends AbstractList<EntryStack<?>> implements EntryIngredient, RandomAccess {
@@ -168,7 +171,6 @@ public class EntryIngredientImpl {
         }
         
         @Override
-        @NotNull
         public Iterator<EntryStack<?>> iterator() {
             return Iterators.singletonIterator(stack);
         }
@@ -263,6 +265,13 @@ public class EntryIngredientImpl {
                 }
             };
         }
+    
+        @Override
+        public ListTag save() {
+            ListTag listTag = new ListTag();
+            listTag.add(stack.save());
+            return listTag;
+        }
     }
     
     private static class ArrayIngredient extends AbstractList<EntryStack<?>> implements EntryIngredient, RandomAccess {
@@ -278,7 +287,6 @@ public class EntryIngredientImpl {
             return array.length;
         }
         
-        @NotNull
         @Override
         public Object[] toArray() {
             return toArray(new Object[0]);
@@ -348,6 +356,15 @@ public class EntryIngredientImpl {
         @Override
         public void sort(Comparator<? super EntryStack<?>> c) {
             throw new UnsupportedOperationException();
+        }
+    
+        @Override
+        public ListTag save() {
+            ListTag listTag = new ListTag();
+            for (EntryStack<?> stack : array) {
+                listTag.add(stack.save());
+            }
+            return listTag;
         }
     }
 }

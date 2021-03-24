@@ -37,32 +37,32 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.config.ConfigManager;
-import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.REIOverlay;
-import me.shedaniel.rei.api.favorites.FavoriteEntry;
-import me.shedaniel.rei.api.favorites.FavoriteEntryType;
-import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
-import me.shedaniel.rei.api.gui.AbstractContainerEventHandler;
-import me.shedaniel.rei.api.gui.drag.DraggableStack;
-import me.shedaniel.rei.api.gui.drag.DraggableStackProvider;
-import me.shedaniel.rei.api.gui.drag.DraggableStackVisitor;
-import me.shedaniel.rei.api.gui.drag.DraggingContext;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.renderer.BatchEntryRenderer;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.util.CollectionUtils;
-import me.shedaniel.rei.api.util.ImmutableLiteralText;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIOverlay;
+import me.shedaniel.rei.api.client.config.ConfigManager;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
+import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
+import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.client.ingredient.entry.renderer.BatchEntryRenderer;
+import me.shedaniel.rei.api.client.ingredient.util.ClientEntryStacks;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.gui.modules.Menu;
 import me.shedaniel.rei.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.Animator;
-import me.shedaniel.rei.impl.ConfigManagerImpl;
-import me.shedaniel.rei.impl.ConfigObjectImpl;
+import me.shedaniel.rei.impl.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.config.ConfigObjectImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -72,7 +72,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -143,7 +142,6 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         return super.mouseScrolled(double_1, double_2, double_3);
     }
     
-    @NotNull
     @Override
     public Rectangle getBounds() {
         return fullBounds;
@@ -154,7 +152,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     public DraggableStack getHoveredStack(DraggingContext context, double mouseX, double mouseY) {
         Function<Entry, DraggableStack> apply = entry -> new DraggableStack() {
             private FavoriteEntry favoriteEntry = entry.getEntry();
-            private EntryStack<?> stack = EntryStacks.of(favoriteEntry.getRenderer(false)).copy();
+            private EntryStack<?> stack = ClientEntryStacks.of(favoriteEntry.getRenderer(false)).copy();
             
             @Override
             public EntryStack<?> getStack() {
@@ -580,7 +578,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             super(new Point(x, y), entrySize);
             this.entry = entry;
             this.favoriteEntry = favoriteEntry;
-            this.clearEntries().entry(EntryStacks.of(this.favoriteEntry.getRenderer(false)));
+            this.clearEntries().entry(ClientEntryStacks.of(this.favoriteEntry.getRenderer(false)));
         }
         
         @Override
@@ -601,7 +599,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             Optional<REIOverlay> overlayOptional = REIHelper.getInstance().getOverlay();
-            Optional<Supplier<Collection<@NotNull FavoriteMenuEntry>>> menuEntries = favoriteEntry.getMenuEntries();
+            Optional<Supplier<Collection<FavoriteMenuEntry>>> menuEntries = favoriteEntry.getMenuEntries();
             if (Math.abs(entry.x.doubleValue() - entry.x.target()) < 1 && Math.abs(entry.y.doubleValue() - entry.y.target()) < 1 && overlayOptional.isPresent() && menuEntries.isPresent()) {
                 ContainerScreenOverlay overlay = (ContainerScreenOverlay) overlayOptional.get();
                 UUID uuid = favoriteEntry.getUuid();
@@ -705,8 +703,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             }
         }
         
-        @NotNull
-        @Override
+            @Override
         public Rectangle getBounds() {
             return bounds;
         }
@@ -822,8 +819,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             return rows.get();
         }
         
-        @NotNull
-        @Override
+            @Override
         public Rectangle getBounds() {
             return bounds;
         }
@@ -913,7 +909,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 protected SectionFavoriteWidget(Point point, int entrySize, FavoriteEntry entry) {
                     super(point, entrySize);
                     this.entry = entry;
-                    entry(EntryStacks.of(entry.getRenderer(true)));
+                    entry(ClientEntryStacks.of(entry.getRenderer(true)));
                     noBackground();
                 }
                 
@@ -941,7 +937,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 public @Nullable Tooltip getCurrentTooltip(Point point) {
                     Tooltip tooltip = super.getCurrentTooltip(point);
                     if (tooltip != null) {
-                        tooltip.getText().add(ImmutableLiteralText.EMPTY);
+                        tooltip.getText().add(ImmutableTextComponent.EMPTY);
                         tooltip.getText().add(new TranslatableComponent("tooltip.rei.drag_to_add_favorites"));
                     }
                     return tooltip;

@@ -28,17 +28,18 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.widgets.*;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.registry.display.TransferDisplayCategory;
-import me.shedaniel.rei.api.registry.transfer.TransferHandler;
-import me.shedaniel.rei.api.registry.transfer.TransferHandlerRegistry;
-import me.shedaniel.rei.api.util.CollectionUtils;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.widgets.*;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.registry.display.TransferDisplayCategory;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.gui.toast.CopyRecipeIdentifierToast;
 import me.shedaniel.rei.gui.widget.LateRenderable;
+import me.shedaniel.rei.impl.registry.ClientHelperImpl;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -47,9 +48,11 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -62,7 +65,7 @@ public final class InternalWidgets {
     public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Component text, Supplier<Display> displaySupplier, List<Widget> setupDisplay, DisplayCategory<?> category) {
         AbstractContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
         boolean[] visible = {false};
-        List<String>[] errorTooltip = new List[]{null};
+        List<Component>[] errorTooltip = new List[]{null};
         Button autoCraftingButton = Widgets.createButton(rectangle, text)
                 .focusable(false)
                 .onClick(button -> {
@@ -88,7 +91,7 @@ public final class InternalWidgets {
                         button.setTint(0);
                         return;
                     }
-                    List<String> error = null;
+                    List<Component> error = null;
                     int color = 0;
                     visible[0] = false;
                     IntList redSlots = null;
@@ -107,7 +110,7 @@ public final class InternalWidgets {
                                 if (error == null) {
                                     error = Lists.newArrayList();
                                 }
-                                error.add(result.getErrorKey());
+                                error.add(result.getError());
                                 color = result.getColor();
                                 if (result.getIntegers() != null && !result.getIntegers().isEmpty())
                                     redSlots = result.getIntegers();
@@ -125,16 +128,17 @@ public final class InternalWidgets {
                         } else {
                             error.clear();
                         }
-                        error.add("error.rei.no.handlers.applicable");
+                        error.add(new TranslatableComponent("error.rei.no.handlers.applicable"));
                     }
                     if ((button.containsMouse(PointHelper.ofMouse()) || button.isFocused()) && category instanceof TransferDisplayCategory && redSlots != null) {
                         ((TransferDisplayCategory<Display>) category).renderRedSlots(matrices, setupDisplay, displayBounds, displaySupplier.get(), redSlots);
                     }
                     errorTooltip[0] = error == null || error.isEmpty() ? null : Lists.newArrayList();
                     if (errorTooltip[0] != null) {
-                        for (String s : error) {
-                            if (errorTooltip[0].stream().noneMatch(ss -> ss.equalsIgnoreCase(s)))
+                        for (Component s : error) {
+                            if (!CollectionUtils.anyMatch(errorTooltip[0], ss -> ss.getString().equalsIgnoreCase(s.getString()))) {
                                 errorTooltip[0].add(s);
+                            }
                         }
                     }
                     button.setTint(color);
@@ -149,21 +153,27 @@ public final class InternalWidgets {
                 })
                 .textureId((button, mouse) -> !visible[0] ? 0 : (button.containsMouse(mouse) || button.isFocused()) && button.isEnabled() ? 4 : 1)
                 .tooltipSupplier(button -> {
-                    String str = "";
+                    List<Component> str = new ArrayList<>();
                     if (errorTooltip[0] == null) {
-                        if (ClientHelperImpl.getInstance().isYog.get())
-                            str += I18n.get("text.auto_craft.move_items.yog");
-                        else
-                            str += I18n.get("text.auto_craft.move_items");
+                        if (ClientHelperImpl.getInstance().isYog.get()) {
+                            str.add(new TranslatableComponent("text.auto_craft.move_items.yog"));
+                        } else {
+                            str.add(new TranslatableComponent("text.auto_craft.move_items"));
+                        }
                     } else {
-                        if (errorTooltip[0].size() > 1)
-                            str += ChatFormatting.RED.toString() + I18n.get("error.rei.multi.errors") + "\n";
-                        str += CollectionUtils.mapAndJoinToString(errorTooltip[0], s -> ChatFormatting.RED.toString() + (errorTooltip[0].size() > 1 ? "- " : "") + I18n.get(s), "\n");
+                        if (errorTooltip[0].size() > 1) {
+                            str.add(new TranslatableComponent("error.rei.multi.errors").withStyle(ChatFormatting.RED));
+                            for (Component component : errorTooltip[0]) {
+                                str.add(new TranslatableComponent("- ").withStyle(ChatFormatting.RED).append(component.copy().withStyle(ChatFormatting.RED)));
+                            }
+                        } else if (errorTooltip[0].size() == 1) {
+                            str.add(errorTooltip[0].get(0).copy().withStyle(ChatFormatting.RED));
+                        }
                     }
-                    if (Minecraft.getInstance().options.advancedItemTooltips) {
-                        str += displaySupplier.get().getDisplayLocation().isPresent() ? I18n.get("text.rei.recipe_id", ChatFormatting.GRAY.toString(), displaySupplier.get().getDisplayLocation().get().toString()) : "";
+                    if (Minecraft.getInstance().options.advancedItemTooltips && displaySupplier.get().getDisplayLocation().isPresent()) {
+                        str.add(new TranslatableComponent("text.rei.recipe_id", new TextComponent(displaySupplier.get().getDisplayLocation().get().toString()).withStyle(ChatFormatting.GRAY)).withStyle(ChatFormatting.GRAY));
                     }
-                    return str;
+                    return str.toArray(new Component[0]);
                 });
         return new DelegateWidget(autoCraftingButton) {
             @Override

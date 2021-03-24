@@ -30,47 +30,46 @@ import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.DisplayRenderer;
-import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.gui.widgets.Slot;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.util.CollectionUtils;
-import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.gui.DisplayRenderer;
+import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
 
 public class DefaultBeaconPaymentCategory implements DisplayCategory<DefaultBeaconPaymentDisplay> {
     @Override
-    public @NotNull ResourceLocation getIdentifier() {
-        return DefaultPlugin.BEACON_PAYMENT;
+    public CategoryIdentifier<? extends DefaultBeaconPaymentDisplay> getCategoryIdentifier() {
+        return BuiltinPlugin.BEACON_PAYMENT;
     }
     
     @Override
-    public @NotNull Component getTitle() {
+    public Component getTitle() {
         return new TranslatableComponent("category.rei.beacon_payment");
     }
     
     @Override
-    public @NotNull Renderer getIcon() {
+    public Renderer getIcon() {
         return EntryStacks.of(Blocks.BEACON);
     }
     
     @Override
-    public @NotNull DisplayRenderer getDisplayRenderer(DefaultBeaconPaymentDisplay display) {
+    public DisplayRenderer getDisplayRenderer(DefaultBeaconPaymentDisplay display) {
         Component name = getTitle();
         return new DisplayRenderer() {
             @Override
@@ -86,7 +85,7 @@ public class DefaultBeaconPaymentCategory implements DisplayCategory<DefaultBeac
     }
     
     @Override
-    public @NotNull List<Widget> setupDisplay(DefaultBeaconPaymentDisplay display, Rectangle bounds) {
+    public List<Widget> setupDisplay(DefaultBeaconPaymentDisplay display, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 3)).entry(EntryStacks.of(Blocks.BEACON)));
         Rectangle rectangle = new Rectangle(bounds.getCenterX() - (bounds.width / 2) - 1, bounds.y + 23, bounds.width + 2, bounds.height - 28);
@@ -135,7 +134,6 @@ public class DefaultBeaconPaymentCategory implements DisplayCategory<DefaultBeac
             return false;
         }
         
-        @NotNull
         @Override
         public Rectangle getBounds() {
             return bounds;

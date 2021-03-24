@@ -27,8 +27,8 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.clothconfig2.impl.EasingMethod;
-import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.util.ImmutableLiteralText;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.gui.TransformingScreen;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TextCreditsItem;
 import me.shedaniel.rei.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
@@ -103,20 +103,20 @@ public class CreditsScreen extends Screen {
         for (String line : String.format("§lRoughly Enough Items (v%s)\n§7Originally a fork for Almost Enough Items.\n\n§lLanguage Translation\n%s\n\n§lLicense\n§7Roughly Enough Items is licensed under MIT.", Platform.getMod("roughlyenoughitems").getVersion(), "%translators%").split("\n"))
             if (line.equalsIgnoreCase("%translators%")) {
                 if (exception[0] != null) {
-                    entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableLiteralText("Failed to get translators: " + exception[0].toString())));
+                    entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableTextComponent("Failed to get translators: " + exception[0].toString())));
                     for (StackTraceElement traceElement : exception[0].getStackTrace())
-                        entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableLiteralText("  at " + traceElement)));
+                        entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableTextComponent("  at " + traceElement)));
                 } else {
                     int maxWidth = translatorsMapped.stream().mapToInt(pair -> font.width(pair.getA())).max().orElse(0) + 5;
                     for (Tuple<String, String> pair : translatorsMapped) {
                         entryListWidget.creditsAddEntry(new TranslationCreditsItem(new TranslatableComponent(pair.getA()), new TranslatableComponent(pair.getB()), i - maxWidth - 10, maxWidth));
                     }
                 }
-            } else entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableLiteralText(line)));
+            } else entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableTextComponent(line)));
         entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorChatListener.NO_TITLE));
-        entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableLiteralText("Visit the project at GitHub."), "https://www.github.com/shedaniel/RoughlyEnoughItems", entryListWidget.getItemWidth(), false));
-        entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableLiteralText("Visit the project page at CurseForge."), "https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items", entryListWidget.getItemWidth(), false));
-        entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableLiteralText("Support the project via Patreon!"), "https://patreon.com/shedaniel", entryListWidget.getItemWidth(), true));
+        entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableTextComponent("Visit the project at GitHub."), "https://www.github.com/shedaniel/RoughlyEnoughItems", entryListWidget.getItemWidth(), false));
+        entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableTextComponent("Visit the project page at CurseForge."), "https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items", entryListWidget.getItemWidth(), false));
+        entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableTextComponent("Support the project via Patreon!"), "https://patreon.com/shedaniel", entryListWidget.getItemWidth(), true));
         entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorChatListener.NO_TITLE));
         children.add(buttonDone = new Button(width / 2 - 100, height - 26, 200, 20, new TranslatableComponent("gui.done"), button -> openPrevious()));
     }

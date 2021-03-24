@@ -26,38 +26,37 @@ package me.shedaniel.rei.plugin.smithing;
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.ingredient.util.EntryStacks;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Blocks;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public class DefaultSmithingCategory implements DisplayCategory<DefaultSmithingDisplay> {
     @Override
-    public @NotNull ResourceLocation getIdentifier() {
-        return DefaultPlugin.SMITHING;
+    public CategoryIdentifier<? extends DefaultSmithingDisplay> getCategoryIdentifier() {
+        return BuiltinPlugin.SMITHING;
     }
     
     @Override
-    public @NotNull Component getTitle() {
+    public Component getTitle() {
         return new TranslatableComponent("category.rei.smithing");
     }
     
     @Override
-    public @NotNull Renderer getIcon() {
+    public Renderer getIcon() {
         return EntryStacks.of(Blocks.SMITHING_TABLE);
     }
     
     @Override
-    public @NotNull List<Widget> setupDisplay(DefaultSmithingDisplay display, Rectangle bounds) {
+    public List<Widget> setupDisplay(DefaultSmithingDisplay display, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 31, bounds.getCenterY() - 13);
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));
@@ -65,7 +64,7 @@ public class DefaultSmithingCategory implements DisplayCategory<DefaultSmithingD
         widgets.add(Widgets.createResultSlotBackground(new Point(startPoint.x + 61, startPoint.y + 5)));
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 4 - 22, startPoint.y + 5)).entries(display.getInputEntries().get(0)).markInput());
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 4, startPoint.y + 5)).entries(display.getInputEntries().get(1)).markInput());
-        widgets.add(Widgets.createSlot(new Point(startPoint.x + 61, startPoint.y + 5)).entries(display.getResultingEntries().get(0)).disableBackground().markOutput());
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 61, startPoint.y + 5)).entries(display.getOutputEntries().get(0)).disableBackground().markOutput());
         return widgets;
     }
     

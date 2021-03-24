@@ -23,96 +23,37 @@
 
 package me.shedaniel.rei.impl;
 
-import com.google.gson.JsonObject;
-import me.shedaniel.math.Point;
-import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.favorites.FavoriteEntry;
-import me.shedaniel.rei.api.gui.DrawableConsumer;
-import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.gui.widgets.*;
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
-import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
-import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
-import me.shedaniel.rei.api.plugins.BuiltinPlugin;
-import me.shedaniel.rei.api.plugins.PluginManager;
-import me.shedaniel.rei.api.registry.screen.ClickArea;
-import me.shedaniel.rei.api.view.ViewSearchBuilder;
-import me.shedaniel.rei.api.view.Views;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.ingredient.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.ingredient.entry.type.EntryType;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
 
 @ApiStatus.Internal
 public final class Internals {
-    private static Supplier<ClientHelper> clientHelper = Internals::throwNotSetup;
     private static Supplier<EntryStackProvider> entryStackProvider = Internals::throwNotSetup;
     private static Supplier<EntryIngredientProvider> entryIngredientProvider = Internals::throwNotSetup;
-    private static Supplier<WidgetsProvider> widgetsProvider = Internals::throwNotSetup;
-    private static Supplier<ViewSearchBuilder> viewSearchBuilder = Internals::throwNotSetup;
     private static Function<ResourceLocation, EntryType<?>> entryTypeDeferred = (object) -> throwNotSetup();
-    private static Supplier<Views> views = Internals::throwNotSetup;
-    private static Supplier<PluginManager> pluginManager = Internals::throwNotSetup;
+    private static Supplier<PluginManager<REIPlugin<?>>> commonPluginManager = Internals::throwNotSetup;
+    private static Supplier<PluginManager<REIServerPlugin>> serverPluginManager = Internals::throwNotSetup;
     private static Supplier<NbtHasherProvider> nbtHasherProvider = Internals::throwNotSetup;
-    private static Supplier<EntryRenderer<?>> emptyEntryRenderer = Internals::throwNotSetup;
-    private static BiFunction<Supplier<FavoriteEntry>, Supplier<JsonObject>, FavoriteEntry> delegateFavoriteEntry = (supplier, toJson) -> throwNotSetup();
-    private static Function<JsonObject, FavoriteEntry> favoriteEntryFromJson = (object) -> throwNotSetup();
-    private static Function<@NotNull Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
-    private static BiFunction<@Nullable Point, Collection<Component>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
-    private static Supplier<BuiltinPlugin> builtinPlugin = Internals::throwNotSetup;
-    private static Supplier<List<String>> jeiCompatMods = Internals::throwNotSetup;
+    private static Function<ResourceLocation, CategoryIdentifier<?>> categoryIdentifier = (object) -> throwNotSetup();
     
     private static <T> T throwNotSetup() {
         throw new AssertionError("REI Internals have not been initialized!");
-    }
-    
-    public static ClientHelper getClientHelper() {
-        return clientHelper.get();
-    }
-    
-    public static EntryStackProvider getEntryStackProvider() {
-        return entryStackProvider.get();
-    }
-    
-    public static EntryIngredientProvider getEntryIngredientProvider() {
-        return entryIngredientProvider.get();
-    }
-    
-    public static WidgetsProvider getWidgetsProvider() {
-        return widgetsProvider.get();
-    }
-    
-    public static ViewSearchBuilder createViewSearchBuilder() {
-        return viewSearchBuilder.get();
-    }
-    
-    public static ClickArea.Result createClickAreaHandlerResult(boolean applicable) {
-        return clickAreaHandlerResult.apply(applicable);
-    }
-    
-    public static Tooltip createTooltip(@Nullable Point point, Collection<Component> texts) {
-        return tooltipProvider.apply(point, texts);
-    }
-    
-    public static BuiltinPlugin getBuiltinPlugin() {
-        return builtinPlugin.get();
     }
     
     @ApiStatus.Internal
@@ -136,46 +77,38 @@ public final class Internals {
         }
     }
     
-    public static FavoriteEntry delegateFavoriteEntry(Supplier<FavoriteEntry> supplier, Supplier<JsonObject> toJoin) {
-        return delegateFavoriteEntry.apply(supplier, toJoin);
+    public static EntryStackProvider getEntryStackProvider() {
+        return entryStackProvider.get();
     }
     
-    public static FavoriteEntry favoriteEntryFromJson(JsonObject object) {
-        return favoriteEntryFromJson.apply(object);
+    public static EntryIngredientProvider getEntryIngredientProvider() {
+        return entryIngredientProvider.get();
     }
     
     public static EntryType<?> deferEntryType(ResourceLocation id) {
         return entryTypeDeferred.apply(id);
     }
     
-    public static Views getViews() {
-        return views.get();
+    public static PluginManager<REIPlugin<?>> getPluginManager() {
+        return commonPluginManager.get();
     }
     
-    public static PluginManager getPluginManager() {
-        return pluginManager.get();
+    public static PluginManager<REIServerPlugin> getServerPluginManager() {
+        return serverPluginManager.get();
     }
     
     public static ToLongFunction<Tag> getNbtHasher(String[] ignoredKeys) {
         return nbtHasherProvider.get().provide(ignoredKeys);
     }
     
-    public static <T> EntryRenderer<T> getEmptyEntryRenderer() {
-        return emptyEntryRenderer.get().cast();
-    }
-    
-    public static List<String> getJeiCompatMods() {
-        return jeiCompatMods.get();
+    public static <T extends Display> CategoryIdentifier<T> getCategoryIdentifier(ResourceLocation location) {
+        return (CategoryIdentifier<T>) categoryIdentifier.apply(location);
     }
     
     public interface EntryStackProvider {
         EntryStack<Unit> empty();
         
         <T> EntryStack<T> of(EntryDefinition<T> definition, T value);
-        
-        EntryType<Unit> emptyType(ResourceLocation id);
-        
-        EntryType<Renderer> renderingType(ResourceLocation id);
     }
     
     public interface EntryIngredientProvider {
@@ -186,29 +119,6 @@ public final class Internals {
         EntryIngredient of(EntryStack<?>... stacks);
         
         EntryIngredient of(Iterable<EntryStack<?>> stacks);
-    }
-    
-    @Environment(EnvType.CLIENT)
-    public interface WidgetsProvider {
-        boolean isRenderingPanel(Panel panel);
-        
-        Widget createDrawableWidget(DrawableConsumer drawable);
-        
-        Slot createSlot(Point point);
-        
-        Button createButton(Rectangle bounds, Component text);
-        
-        Panel createPanelWidget(Rectangle bounds);
-        
-        Label createLabel(Point point, FormattedText text);
-        
-        Arrow createArrow(Rectangle rectangle);
-        
-        BurningFire createBurningFire(Rectangle rectangle);
-        
-        DrawableConsumer createTexturedConsumer(ResourceLocation texture, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight);
-        
-        DrawableConsumer createFillRectangleConsumer(Rectangle rectangle, int color);
     }
     
     public interface NbtHasherProvider {

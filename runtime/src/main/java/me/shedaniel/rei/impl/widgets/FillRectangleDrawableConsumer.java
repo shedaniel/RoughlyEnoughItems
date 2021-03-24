@@ -29,22 +29,20 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.gui.DrawableConsumer;
+import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import net.minecraft.client.gui.GuiComponent;
-import org.jetbrains.annotations.NotNull;
 
 public final class FillRectangleDrawableConsumer implements DrawableConsumer {
-    @NotNull
     private Rectangle rectangle;
     private int color;
     
-    public FillRectangleDrawableConsumer(@NotNull Rectangle rectangle, int color) {
+    public FillRectangleDrawableConsumer(Rectangle rectangle, int color) {
         this.rectangle = rectangle;
         this.color = color;
     }
     
     @Override
-    public void render(@NotNull GuiComponent helper, @NotNull PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiComponent helper, PoseStack matrices, int mouseX, int mouseY, float delta) {
         float a = (color >> 24 & 255) / 255.0F;
         float r = (color >> 16 & 255) / 255.0F;
         float g = (color >> 8 & 255) / 255.0F;

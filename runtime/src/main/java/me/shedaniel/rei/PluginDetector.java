@@ -33,6 +33,11 @@ public class PluginDetector {
         throw new AssertionError();
     }
     
+    @ExpectPlatform
+    public static void detectCommonPlugins() {
+        throw new AssertionError();
+    }
+    
     @Environment(EnvType.CLIENT)
     @ExpectPlatform
     public static void detectClientPlugins() {

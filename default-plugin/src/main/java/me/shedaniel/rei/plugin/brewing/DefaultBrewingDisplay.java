@@ -24,16 +24,16 @@
 package me.shedaniel.rei.plugin.brewing;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.ingredient.util.EntryStacks;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.ApiStatus;
@@ -70,13 +70,13 @@ public class DefaultBrewingDisplay implements Display {
     }
     
     @Override
-    public List<EntryIngredient> getResultingEntries() {
+    public List<EntryIngredient> getOutputEntries() {
         return Collections.singletonList(EntryIngredient.of(output));
     }
     
     @Override
-    public ResourceLocation getCategoryIdentifier() {
-        return DefaultPlugin.BREWING;
+    public CategoryIdentifier<?> getCategoryIdentifier() {
+        return BuiltinPlugin.BREWING;
     }
     
     public List<EntryStack<?>> getOutput(int slot) {

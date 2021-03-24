@@ -29,10 +29,9 @@ import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -61,32 +60,26 @@ public class QueuedTooltip implements Tooltip {
         this.location = PointHelper.ofMouse();
     }
     
-    @NotNull
     public static QueuedTooltip create(Point location, List<Component> text) {
         return new QueuedTooltip(location, text);
     }
     
-    @NotNull
     public static QueuedTooltip create(Point location, Collection<Component> text) {
         return new QueuedTooltip(location, text);
     }
     
-    @NotNull
     public static QueuedTooltip create(Point location, Component... text) {
         return QueuedTooltip.create(location, Arrays.asList(text));
     }
     
-    @NotNull
     public static QueuedTooltip create(List<Component> text) {
         return QueuedTooltip.create(null, text);
     }
     
-    @NotNull
     public static QueuedTooltip create(Collection<Component> text) {
         return QueuedTooltip.create(null, text);
     }
     
-    @NotNull
     public static QueuedTooltip create(Component... text) {
         return QueuedTooltip.create(null, text);
     }

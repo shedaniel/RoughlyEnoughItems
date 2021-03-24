@@ -24,7 +24,7 @@
 package me.shedaniel.rei.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.rei.api.util.ImmutableLiteralText;
+import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -52,7 +52,7 @@ public class DelegateScreen extends Screen {
     
     @Override
     public Component getTitle() {
-        return parent == null ? ImmutableLiteralText.EMPTY : parent.getTitle();
+        return parent == null ? ImmutableTextComponent.EMPTY : parent.getTitle();
     }
     
     @Override

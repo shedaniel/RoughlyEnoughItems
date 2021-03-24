@@ -23,53 +23,41 @@
 
 package me.shedaniel.rei.plugin.stripping;
 
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public class DefaultStrippingDisplay implements Display {
-    private EntryStack<?> in, out;
-    
+public class DefaultStrippingDisplay extends BasicDisplay {
     public DefaultStrippingDisplay(EntryStack<?> in, EntryStack<?> out) {
-        this.in = in;
-        this.out = out;
+        this(Collections.singletonList(EntryIngredient.of(in)), Collections.singletonList(EntryIngredient.of(out)));
     }
     
-    public DefaultStrippingDisplay(ItemStack in, ItemStack out) {
-        this.in = EntryStacks.of(in);
-        this.out = EntryStacks.of(out);
+    public DefaultStrippingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs) {
+        super(inputs, outputs);
     }
     
-    public final EntryStack<?> getIn() {
-        return in;
+    public final EntryIngredient getIn() {
+        return getInputEntries().get(0);
     }
     
-    public final EntryStack<?> getOut() {
-        return out;
-    }
-    
-    @Override
-    public List<EntryIngredient> getInputEntries() {
-        return Collections.singletonList(EntryIngredient.of(in));
+    public final EntryIngredient getOut() {
+        return getOutputEntries().get(0);
     }
     
     @Override
-    public List<EntryIngredient> getResultingEntries() {
-        return Collections.singletonList(EntryIngredient.of(out));
+    public CategoryIdentifier<?> getCategoryIdentifier() {
+        return BuiltinPlugin.STRIPPING;
     }
     
-    @Override
-    public ResourceLocation getCategoryIdentifier() {
-        return DefaultPlugin.STRIPPING;
+    public static BasicDisplay.Serializer<DefaultStrippingDisplay> serializer() {
+        return BasicDisplay.Serializer.ofSimpleRecipeLess(DefaultStrippingDisplay::new);
     }
 }

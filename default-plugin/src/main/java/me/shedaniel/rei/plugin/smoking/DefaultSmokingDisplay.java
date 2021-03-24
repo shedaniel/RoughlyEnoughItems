@@ -23,19 +23,26 @@
 
 package me.shedaniel.rei.plugin.smoking;
 
-import me.shedaniel.rei.plugin.DefaultPlugin;
-import me.shedaniel.rei.plugin.cooking.DefaultCookingDisplay;
-import net.minecraft.resources.ResourceLocation;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
+import me.shedaniel.rei.plugin.common.cooking.DefaultCookingDisplay;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.crafting.SmokingRecipe;
-import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class DefaultSmokingDisplay extends DefaultCookingDisplay {
     public DefaultSmokingDisplay(SmokingRecipe recipe) {
         super(recipe);
     }
     
+    public DefaultSmokingDisplay(List<EntryIngredient> input, List<EntryIngredient> output, CompoundTag tag) {
+        super(input, output, tag);
+    }
+    
     @Override
-    public @NotNull ResourceLocation getCategoryIdentifier() {
-        return DefaultPlugin.SMOKING;
+    public CategoryIdentifier<?> getCategoryIdentifier() {
+        return BuiltinPlugin.SMOKING;
     }
 }

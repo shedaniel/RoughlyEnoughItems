@@ -23,65 +23,44 @@
 
 package me.shedaniel.rei.plugin.smithing;
 
-import com.google.common.collect.Lists;
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.ingredient.util.EntryIngredients;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.UpgradeRecipe;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
-public class DefaultSmithingDisplay implements Display {
-    private List<EntryIngredient> input;
-    private List<EntryIngredient> output;
-    @Nullable
-    private ResourceLocation location;
-    
-    public DefaultSmithingDisplay(@NotNull UpgradeRecipe recipe) {
+public class DefaultSmithingDisplay extends BasicDisplay {
+    public DefaultSmithingDisplay(UpgradeRecipe recipe) {
         this(
-                Lists.newArrayList(
+                Arrays.asList(
                         EntryIngredients.ofIngredient(recipe.base),
                         EntryIngredients.ofIngredient(recipe.addition)
                 ),
-                EntryIngredient.of(EntryStacks.of(recipe.getResultItem())),
-                recipe.getId()
+                Collections.singletonList(EntryIngredients.of(recipe.getResultItem())),
+                Optional.ofNullable(recipe.getId())
         );
     }
     
-    public DefaultSmithingDisplay(List<EntryIngredient> input, EntryIngredient output, @Nullable ResourceLocation location) {
-        this.input = input;
-        if (this.input.size() != 2) throw new IllegalArgumentException("input must have 2 entries.");
-        this.output = Collections.singletonList(output);
-        this.location = location;
+    public DefaultSmithingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location) {
+        super(inputs, outputs, location);
     }
     
     @Override
-    public List<EntryIngredient> getInputEntries() {
-        return input;
+    public CategoryIdentifier<?> getCategoryIdentifier() {
+        return BuiltinPlugin.SMITHING;
     }
     
-    @Override
-    public List<EntryIngredient> getResultingEntries() {
-        return output;
-    }
-    
-    @Override
-    public @NotNull ResourceLocation getCategoryIdentifier() {
-        return DefaultPlugin.SMITHING;
-    }
-    
-    @Override
-    public @NotNull Optional<ResourceLocation> getDisplayLocation() {
-        return Optional.ofNullable(location);
+    public static BasicDisplay.Serializer<DefaultSmithingDisplay> serializer() {
+        return BasicDisplay.Serializer.ofSimple(DefaultSmithingDisplay::new);
     }
 }

@@ -27,18 +27,18 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.util.ImmutableLiteralText;
+import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.jeicompat.JEIRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.LazyLoadedValue;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,10 +51,12 @@ import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapDrawable;
 public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<T>> {
     private final IRecipeCategory<T> backingCategory;
     private final LazyLoadedValue<IDrawable> background;
+    private final CategoryIdentifier<? extends JEIWrappedDisplay<T>> identifier;
     
     public JEIWrappedCategory(IRecipeCategory<T> backingCategory) {
         this.backingCategory = backingCategory;
         this.background = new LazyLoadedValue<>(backingCategory::getBackground);
+        this.identifier = CategoryIdentifier.of(backingCategory.getUid());
     }
     
     public Class<? extends T> getRecipeClass() {
@@ -72,17 +74,17 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
     
     @Override
     public Component getTitle() {
-        return new ImmutableLiteralText(backingCategory.getTitle());
-    }
-    
-    @Override
-    public ResourceLocation getIdentifier() {
-        return backingCategory.getUid();
+        return new ImmutableTextComponent(backingCategory.getTitle());
     }
     
     @Override
     public int getDisplayWidth(JEIWrappedDisplay<T> display) {
         return this.background.get().getWidth() + 8;
+    }
+    
+    @Override
+    public CategoryIdentifier<? extends JEIWrappedDisplay<T>> getCategoryIdentifier() {
+        return identifier;
     }
     
     @Override

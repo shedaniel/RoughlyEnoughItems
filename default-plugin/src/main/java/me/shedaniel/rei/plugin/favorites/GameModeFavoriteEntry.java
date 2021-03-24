@@ -28,15 +28,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.favorites.FavoriteEntry;
-import me.shedaniel.rei.api.favorites.FavoriteEntryType;
-import me.shedaniel.rei.api.favorites.FavoriteMenuEntry;
-import me.shedaniel.rei.api.gui.AbstractRenderer;
-import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.util.CollectionUtils;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
+import me.shedaniel.rei.api.client.gui.AbstractRenderer;
+import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -49,7 +49,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.GameType;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -160,7 +159,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
     }
     
     @Override
-    public @NotNull Optional<Supplier<Collection<@NotNull FavoriteMenuEntry>>> getMenuEntries() {
+    public Optional<Supplier<Collection<FavoriteMenuEntry>>> getMenuEntries() {
         if (gameMode == null)
             return Optional.of(this::_getMenuEntries);
         return Optional.empty();
@@ -196,19 +195,19 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         INSTANCE;
         
         @Override
-        public @NotNull GameModeFavoriteEntry fromJson(@NotNull JsonObject object) {
+        public GameModeFavoriteEntry fromJson(JsonObject object) {
             String stringValue = GsonHelper.getAsString(object, KEY);
             GameType type = stringValue.equals("NOT_SET") ? null : GameType.valueOf(stringValue);
             return new GameModeFavoriteEntry(type);
         }
         
         @Override
-        public @NotNull GameModeFavoriteEntry fromArgs(Object... args) {
+        public GameModeFavoriteEntry fromArgs(Object... args) {
             return new GameModeFavoriteEntry((GameType) args[0]);
         }
         
         @Override
-        public @NotNull JsonObject toJson(@NotNull GameModeFavoriteEntry entry, @NotNull JsonObject object) {
+        public JsonObject toJson(GameModeFavoriteEntry entry, JsonObject object) {
             object.addProperty(KEY, entry.gameMode == null ? "NOT_SET" : entry.gameMode.name());
             return object;
         }

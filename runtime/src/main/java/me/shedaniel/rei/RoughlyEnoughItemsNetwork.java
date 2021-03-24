@@ -23,25 +23,24 @@
 
 package me.shedaniel.rei;
 
-import com.google.common.collect.Lists;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.architectury.networking.NetworkManager;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.server.InputSlotCrafter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
-
-import java.util.List;
 
 public class RoughlyEnoughItemsNetwork {
     public static final ResourceLocation DELETE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "delete_item");
@@ -52,6 +51,7 @@ public class RoughlyEnoughItemsNetwork {
     public static final ResourceLocation NOT_ENOUGH_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "og_not_enough");
     
     public void onInitialize() {
+        PluginDetector.detectCommonPlugins();
         PluginDetector.detectServerPlugins();
         NetworkManager.registerReceiver(NetworkManager.c2s(), DELETE_ITEMS_PACKET, (buf, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
@@ -98,27 +98,19 @@ public class RoughlyEnoughItemsNetwork {
         });
         NetworkManager.registerReceiver(NetworkManager.c2s(), MOVE_ITEMS_PACKET, (packetByteBuf, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
-            ResourceLocation category = packetByteBuf.readResourceLocation();
+            CategoryIdentifier<Display> category = CategoryIdentifier.of(packetByteBuf.readResourceLocation());
             AbstractContainerMenu container = player.containerMenu;
             InventoryMenu playerContainer = player.inventoryMenu;
             try {
                 boolean shift = packetByteBuf.readBoolean();
-                NonNullList<List<ItemStack>> input = NonNullList.create();
-                int mapSize = packetByteBuf.readInt();
-                for (int i = 0; i < mapSize; i++) {
-                    List<ItemStack> list = Lists.newArrayList();
-                    int count = packetByteBuf.readInt();
-                    for (int j = 0; j < count; j++) {
-                        list.add(packetByteBuf.readItem());
-                    }
-                    input.add(list);
-                }
                 try {
-                    InputSlotCrafter.start(category, container, player, input, shift);
+                    InputSlotCrafter<AbstractContainerMenu, Container, Display> crafter = InputSlotCrafter.start(category, container, player, packetByteBuf.readNbt(), shift);
                 } catch (InputSlotCrafter.NotEnoughMaterialsException e) {
-                    if (!(container instanceof RecipeBookMenu))
+                    if (!(container instanceof RecipeBookMenu)) {
                         return;
-                    FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+                    }
+                    // TODO Implement Ghost Recipes
+                    /*FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
                     buf.writeInt(input.size());
                     for (List<ItemStack> stacks : input) {
                         buf.writeInt(stacks.size());
@@ -126,7 +118,7 @@ public class RoughlyEnoughItemsNetwork {
                             buf.writeItem(stack);
                         }
                     }
-                    NetworkManager.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);
+                    NetworkManager.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);*/
                 } catch (IllegalStateException e) {
                     player.sendMessage(new TranslatableComponent(e.getMessage()).withStyle(ChatFormatting.RED), Util.NIL_UUID);
                 } catch (Exception e) {

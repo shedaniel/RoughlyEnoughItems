@@ -27,17 +27,16 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.widgets.Label;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.gui.widgets.Label;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.TextTransformations;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.FormattedCharSequence;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -58,15 +57,15 @@ public final class LabelWidget extends Label {
     private boolean focusable = true;
     private int color = REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : -1;
     private int hoveredColor = REIHelper.getInstance().isDarkThemeEnabled() ? -1 : 0xFF66FFCC;
-    @NotNull private Point point;
+    private Point point;
     @Nullable private Function<Label, @Nullable String> tooltip;
     @Nullable private Consumer<Label> onClick;
     @Nullable private BiConsumer<PoseStack, Label> onRender;
-    @NotNull private FormattedText text;
+    private FormattedText text;
     private boolean rainbow;
-    @NotNull private final LazyResettable<FormattedCharSequence> orderedText = new LazyResettable<>(() -> Language.getInstance().getVisualOrder(getMessage()));
+    private final LazyResettable<FormattedCharSequence> orderedText = new LazyResettable<>(() -> Language.getInstance().getVisualOrder(getMessage()));
     
-    public LabelWidget(@NotNull Point point, @NotNull FormattedText text) {
+    public LabelWidget(Point point, FormattedText text) {
         Objects.requireNonNull(this.point = point);
         Objects.requireNonNull(this.text = text);
     }
@@ -167,12 +166,12 @@ public final class LabelWidget extends Label {
     }
     
     @Override
-    public final @NotNull Point getPoint() {
+    public final Point getPoint() {
         return point;
     }
     
     @Override
-    public final void setPoint(@NotNull Point point) {
+    public final void setPoint(Point point) {
         this.point = Objects.requireNonNull(point);
     }
     
@@ -182,7 +181,7 @@ public final class LabelWidget extends Label {
     }
     
     @Override
-    public void setMessage(@NotNull FormattedText message) {
+    public void setMessage(FormattedText message) {
         this.text = Objects.requireNonNull(message);
         this.orderedText.reset();
     }
@@ -192,7 +191,6 @@ public final class LabelWidget extends Label {
         this.rainbow = rainbow;
     }
     
-    @NotNull
     @Override
     public final Rectangle getBounds() {
         int width = font.width(text);

@@ -23,13 +23,13 @@
 
 package me.shedaniel.rei.plugin.beacon.payment;
 
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.plugin.DefaultPlugin;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.ingredient.util.EntryIngredients;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
@@ -53,12 +53,12 @@ public class DefaultBeaconPaymentDisplay implements Display {
     }
     
     @Override
-    public List<EntryIngredient> getResultingEntries() {
+    public List<EntryIngredient> getOutputEntries() {
         return Collections.emptyList();
     }
     
     @Override
-    public ResourceLocation getCategoryIdentifier() {
-        return DefaultPlugin.BEACON_PAYMENT;
+    public CategoryIdentifier<?> getCategoryIdentifier() {
+        return BuiltinPlugin.BEACON_PAYMENT;
     }
 }

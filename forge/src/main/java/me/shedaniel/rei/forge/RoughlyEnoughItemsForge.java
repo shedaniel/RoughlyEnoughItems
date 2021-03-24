@@ -42,6 +42,7 @@ import org.objectweb.asm.Type;
 
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Mod("roughlyenoughitems")
@@ -55,11 +56,11 @@ public class RoughlyEnoughItemsForge {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> RoughlyEnoughItemsInitializer::onInitializeClient);
     }
     
-    public static <T> void scanAnnotation(Class<T> clazz, BiConsumer<List<String>, T> consumer) {
-        scanAnnotation(Type.getType(clazz), consumer);
+    public static <A, T> void scanAnnotation(Class<A> clazz, Predicate<Class<T>> predicate, BiConsumer<List<String>, T> consumer) {
+        scanAnnotation(Type.getType(clazz), predicate, consumer);
     }
     
-    public static <T> void scanAnnotation(Type annotationType, BiConsumer<List<String>, T> consumer) {
+    public static <T> void scanAnnotation(Type annotationType, Predicate<Class<T>> predicate, BiConsumer<List<String>, T> consumer) {
         List<Pair<List<String>, T>> instances = Lists.newArrayList();
         for (ModFileScanData data : ModList.get().getAllScanData()) {
             List<String> modIds = data.getIModInfoData().stream()
@@ -69,8 +70,11 @@ public class RoughlyEnoughItemsForge {
             for (ModFileScanData.AnnotationData annotation : data.getAnnotations()) {
                 if (annotationType.equals(annotation.getAnnotationType())) {
                     try {
-                        T instance = (T) Class.forName(annotation.getMemberName()).getDeclaredConstructor().newInstance();
-                        instances.add(new ImmutablePair<>(modIds, instance));
+                        Class<T> clazz = (Class<T>) Class.forName(annotation.getMemberName());
+                        if (predicate.test(clazz)) {
+                            T instance = clazz.getDeclaredConstructor().newInstance();
+                            instances.add(new ImmutablePair<>(modIds, instance));
+                        }
                     } catch (Throwable throwable) {
                         LOGGER.error("Failed to load plugin: " + annotation.getMemberName(), throwable);
                     }

@@ -25,40 +25,45 @@ package me.shedaniel.rei.jeicompat;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.netty.buffer.Unpooled;
 import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.gui.AbstractRenderer;
-import me.shedaniel.rei.api.gui.Renderer;
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
-import me.shedaniel.rei.api.ingredient.entry.comparison.ItemComparator;
-import me.shedaniel.rei.api.ingredient.entry.comparison.ItemComparatorRegistry;
-import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
-import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
-import me.shedaniel.rei.api.ingredient.entry.type.EntryTypeRegistry;
-import me.shedaniel.rei.api.ingredient.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.ingredient.util.EntryIngredients;
-import me.shedaniel.rei.api.ingredient.util.EntryStacks;
-import me.shedaniel.rei.api.plugins.BuiltinPlugin;
-import me.shedaniel.rei.api.plugins.REIPlugin;
-import me.shedaniel.rei.api.registry.category.CategoryRegistry;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.registry.display.DisplayRegistry;
-import me.shedaniel.rei.api.registry.display.LiveDisplayGenerator;
-import me.shedaniel.rei.api.registry.entry.EntryRegistry;
-import me.shedaniel.rei.api.registry.screen.DisplayBoundsProvider;
-import me.shedaniel.rei.api.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.api.util.CollectionUtils;
-import me.shedaniel.rei.api.util.ImmutableLiteralText;
+import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.AbstractRenderer;
+import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.registry.display.LiveDisplayGenerator;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.client.registry.screen.DisplayBoundsProvider;
+import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.display.DisplaySerializer;
+import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.ingredient.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.common.ingredient.entry.comparison.ItemComparator;
+import me.shedaniel.rei.api.common.ingredient.entry.comparison.ItemComparatorRegistry;
+import me.shedaniel.rei.api.common.ingredient.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.ingredient.entry.type.EntryType;
+import me.shedaniel.rei.api.common.ingredient.entry.type.EntryTypeRegistry;
+import me.shedaniel.rei.api.common.ingredient.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.ingredient.util.EntryIngredients;
+import me.shedaniel.rei.api.common.ingredient.util.EntryStacks;
+import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
 import me.shedaniel.rei.jeicompat.wrap.JEIEntryDefinition;
 import me.shedaniel.rei.jeicompat.wrap.JEIWrappedCategory;
 import me.shedaniel.rei.jeicompat.wrap.JEIWrappedDisplay;
+import me.shedaniel.rei.plugin.client.BuiltinClientPlugin;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -83,7 +88,10 @@ import mezz.jei.api.runtime.*;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.core.Registry;
 import net.minecraft.data.models.blockstates.PropertyDispatch;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -93,9 +101,10 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.fluids.FluidStack;
+import org.apache.commons.codec.binary.Base64;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -121,9 +130,9 @@ public class JEIPluginDetector {
         }
     };
     
-    public static void detect(BiConsumer<Class<?>, BiConsumer<List<String>, ?>> annotationScanner, Consumer<REIPlugin> pluginAdder) {
+    public static void detect(BiConsumer<Class<?>, BiConsumer<List<String>, ?>> annotationScanner, Consumer<REIPluginProvider> pluginAdder) {
         annotationScanner.accept(JeiPlugin.class, (modIds, plugin) -> {
-            pluginAdder.accept(new JEIPluginWrapper(modIds, (IModPlugin) plugin));
+            pluginAdder.accept(new JEIPluginProvider(new JEIPluginWrapper(modIds, (IModPlugin) plugin)));
         });
     }
     
@@ -290,8 +299,9 @@ public class JEIPluginDetector {
             @Override
             @NotNull
             public <T> List<T> getRecipes(@NotNull IRecipeCategory<T> recipeCategory) {
-                boolean isWrappedCategory = CategoryRegistry.getInstance().get(recipeCategory.getUid()).getCategory() instanceof JEIWrappedCategory;
-                List<Display> displays = DisplayRegistry.getInstance().getDisplays(recipeCategory.getUid());
+                CategoryIdentifier<Display> categoryId = CategoryIdentifier.of(recipeCategory.getUid());
+                boolean isWrappedCategory = CategoryRegistry.getInstance().get(categoryId).getCategory() instanceof JEIWrappedCategory;
+                List<Display> displays = DisplayRegistry.getInstance().getDisplays(categoryId);
                 if (isWrappedCategory) {
                     return CollectionUtils.map(displays, display -> ((JEIWrappedDisplay<T>) display).getBackingRecipe());
                 } else {
@@ -326,7 +336,7 @@ public class JEIPluginDetector {
                 }
                 List<Display> displays = null;
                 for (ResourceLocation categoryId : categoryIds) {
-                    IRecipeCategory<Object> category = (IRecipeCategory<Object>) unwrapCategory(CategoryRegistry.getInstance().get(categoryId).getCategory());
+                    IRecipeCategory<Object> category = (IRecipeCategory<Object>) unwrapCategory(CategoryRegistry.getInstance().get(CategoryIdentifier.of(categoryId)).getCategory());
                     List<Object> recipes = plugin.getRecipes(category, focus);
                     if (recipes != null && !recipes.isEmpty()) {
                         if (displays == null) displays = CollectionUtils.map(recipes, JEIPluginDetector::createDisplayFrom);
@@ -434,7 +444,7 @@ public class JEIPluginDetector {
     public static IRecipeCatalystRegistration wrapCatalyst(CategoryRegistry registry) {
         return (ingredient, categoryIds) -> {
             for (ResourceLocation id : categoryIds) {
-                registry.addWorkstations(id, wrap(ingredient));
+                registry.addWorkstations(CategoryIdentifier.of(id), wrap(ingredient));
             }
         };
     }
@@ -528,7 +538,7 @@ public class JEIPluginDetector {
             
             @Override
             public void addRecipes(@NotNull Collection<?> recipes, @NotNull ResourceLocation categoryId) {
-                CategoryRegistry.CategoryConfiguration<Display> config = CategoryRegistry.getInstance().get(categoryId);
+                CategoryRegistry.CategoryConfiguration<Display> config = CategoryRegistry.getInstance().get(CategoryIdentifier.of(categoryId));
                 DisplayCategory<?> category = config.getCategory();
                 if (category instanceof JEIWrappedCategory) {
                     for (Object recipe : recipes) {
@@ -544,7 +554,7 @@ public class JEIPluginDetector {
             @Override
             public <T> void addIngredientInfo(@NotNull T ingredient, @NotNull IIngredientType<T> ingredientType, @NotNull String @NotNull ... descriptionKeys) {
                 EntryStack<T> stack = wrap(ingredientType, ingredient);
-                BuiltinPlugin.getInstance().registerInformation(stack, stack.asFormattedText(), components -> {
+                BuiltinClientPlugin.getInstance().registerInformation(stack, stack.asFormattedText(), components -> {
                     for (String key : descriptionKeys) {
                         components.add(new TranslatableComponent(key));
                     }
@@ -555,7 +565,7 @@ public class JEIPluginDetector {
             @Override
             public <T> void addIngredientInfo(@NotNull List<T> ingredients, @NotNull IIngredientType<T> ingredientType, @NotNull String @NotNull ... descriptionKeys) {
                 EntryIngredient ingredient = wrapList(ingredientType, ingredients);
-                BuiltinPlugin.getInstance().registerInformation(ingredient, ImmutableLiteralText.EMPTY, components -> {
+                BuiltinClientPlugin.getInstance().registerInformation(ingredient, ImmutableTextComponent.EMPTY, components -> {
                     for (String key : descriptionKeys) {
                         components.add(new TranslatableComponent(key));
                     }
@@ -615,7 +625,7 @@ public class JEIPluginDetector {
             @Override
             public <T extends AbstractContainerScreen<?>> void addRecipeClickArea(@NotNull Class<? extends T> guiContainerClass, int xPos, int yPos, int width, int height, @NotNull ResourceLocation @NotNull ... recipeCategoryUids) {
                 registry.registerContainerClickArea(new Rectangle(xPos, yPos, width, height), (Class<? extends AbstractContainerScreen<AbstractContainerMenu>>) guiContainerClass,
-                        (ResourceLocation[]) recipeCategoryUids);
+                        (CategoryIdentifier[]) Arrays.stream(recipeCategoryUids).map(CategoryIdentifier::of).toArray(CategoryIdentifier[]::new));
             }
             
             @Override
@@ -669,7 +679,29 @@ public class JEIPluginDetector {
         return stack -> interpreter.apply(stack).hashCode();
     }
     
-    public static class JEIPluginWrapper implements REIPlugin {
+    public static class JEIPluginProvider implements REIPluginProvider<REIClientPlugin> {
+        public final JEIPluginWrapper wrapper;
+        
+        public JEIPluginProvider(JEIPluginWrapper wrapper) {
+            this.wrapper = wrapper;
+        }
+        
+        @Override
+        public String getPluginProviderName() {
+            return wrapper.getPluginName();
+        }
+        
+        @Override
+        public Collection<REIClientPlugin> provide() {
+            if (ConfigObject.getInstance().isJEICompatibilityLayerEnabled()) {
+                return Collections.singletonList(wrapper);
+            }
+            
+            return Collections.emptyList();
+        }
+    }
+    
+    public static class JEIPluginWrapper implements REIClientPlugin {
         public final List<String> modIds;
         private final IModPlugin backingPlugin;
         
@@ -693,7 +725,39 @@ public class JEIPluginDetector {
         @Override
         public void registerCategories(CategoryRegistry registry) {
             this.categories.clear();
-            backingPlugin.registerCategories(wrapCategoryRegistration(registry, categories::add));
+            backingPlugin.registerCategories(wrapCategoryRegistration(registry, category -> {
+                categories.add(category);
+                
+                if (Recipe.class.isAssignableFrom(category.getRecipeClass())) {
+                    DisplaySerializerRegistry.getInstance().register(category.getCategoryIdentifier(), new DisplaySerializer<JEIWrappedDisplay<?>>() {
+                        @Override
+                        public CompoundTag save(CompoundTag tag, JEIWrappedDisplay<?> display) {
+                            Recipe<?> recipe = (Recipe<?>) display.getBackingRecipe();
+                            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+                            ((RecipeSerializer<Recipe<?>>) recipe.getSerializer()).toNetwork(buf, recipe);
+                            tag.putString("serializer", Registry.RECIPE_SERIALIZER.getKey(recipe.getSerializer()).toString());
+                            tag.putString("data", Base64.encodeBase64String(buf.array()));
+                            tag.putString("id", recipe.getId().toString());
+                            return null;
+                        }
+                        
+                        @Override
+                        public JEIWrappedDisplay<?> read(CompoundTag tag) {
+                            RecipeSerializer<?> serializer = Registry.RECIPE_SERIALIZER.get(new ResourceLocation(tag.getString("serializer")));
+                            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.copiedBuffer(Base64.decodeBase64(tag.getString("data"))));
+                            Recipe<?> recipe = serializer.fromNetwork(new ResourceLocation(tag.getString("id")), buf);
+                            return new JEIWrappedDisplay<>((JEIWrappedCategory<? super Recipe<?>>) category, recipe);
+                        }
+    
+                        @Override
+                        public boolean isPersistent() {
+                            return false;
+                        }
+                    });
+                } else {
+                    DisplaySerializerRegistry.getInstance().registerNotSerializable(category.getCategoryIdentifier());
+                }
+            }));
             backingPlugin.registerRecipeCatalysts(wrapCatalyst(registry));
         }
         

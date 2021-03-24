@@ -32,24 +32,25 @@ import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.registry.category.ButtonArea;
-import me.shedaniel.rei.api.ClientHelper;
-import me.shedaniel.rei.api.config.ConfigObject;
-import me.shedaniel.rei.api.REIHelper;
-import me.shedaniel.rei.api.gui.DisplayRenderer;
-import me.shedaniel.rei.api.gui.widgets.Button;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.gui.widgets.Widget;
-import me.shedaniel.rei.api.gui.widgets.Widgets;
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.registry.category.CategoryRegistry;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.DisplayRenderer;
+import me.shedaniel.rei.api.client.gui.widgets.Button;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.registry.category.ButtonArea;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
 import me.shedaniel.rei.gui.widget.TabWidget;
-import me.shedaniel.rei.impl.ClientHelperImpl;
 import me.shedaniel.rei.impl.InternalWidgets;
 import me.shedaniel.rei.impl.REIHelperImpl;
+import me.shedaniel.rei.impl.registry.ClientHelperImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -57,7 +58,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
@@ -95,7 +95,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
     private long scrollBarAlphaFutureTime = -1;
     private int tabsPage = -1;
     
-    public CompositeDisplayViewingScreen(Map<DisplayCategory<?>, List<Display>> categoryMap, @Nullable ResourceLocation category) {
+    public CompositeDisplayViewingScreen(Map<DisplayCategory<?>, List<Display>> categoryMap, @Nullable CategoryIdentifier<?> category) {
         super(categoryMap, category, 8);
     }
     
@@ -127,7 +127,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         }
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         
-        List<EntryIngredient> workstations = CategoryRegistry.getInstance().get(category.getIdentifier()).getWorkstations();
+        List<EntryIngredient> workstations = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getWorkstations();
         if (!workstations.isEmpty()) {
             int ww = Mth.floor((bounds.width - 16) / 18f);
             int w = Math.min(ww, workstations.size());
@@ -158,7 +158,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         transformIngredientNotice(setupDisplay, ingredientStackToNotice);
         transformResultNotice(setupDisplay, resultStackToNotice);
         this.widgets.addAll(setupDisplay);
-        Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(category.getIdentifier()).getPlusButtonArea();
+        Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getPlusButtonArea();
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
             this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), new TextComponent(supplier.get().getButtonText()), () -> display, setupDisplay, category));
         
@@ -188,7 +188,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     if (widget.selected)
                         return false;
-                    ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, tabCategory.getIdentifier(), ingredientStackToNotice, resultStackToNotice);
+                    ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, tabCategory.getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
                     return true;
                 }));
                 tab.setRenderer(tabCategory, tabCategory.getIcon(), tabCategory.getTitle(), j == selectedCategoryIndex);
@@ -282,7 +282,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             else if (amount > 0) selectedCategoryIndex--;
             if (selectedCategoryIndex < 0) selectedCategoryIndex = categories.size() - 1;
             else if (selectedCategoryIndex >= categories.size()) selectedCategoryIndex = 0;
-            ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(selectedCategoryIndex).getIdentifier(), ingredientStackToNotice, resultStackToNotice);
+            ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(selectedCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
             return true;
         }
         if (bounds.contains(PointHelper.ofMouse())) {

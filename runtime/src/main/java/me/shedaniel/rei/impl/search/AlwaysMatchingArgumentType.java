@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.impl.search;
 
-import me.shedaniel.rei.api.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Unit;

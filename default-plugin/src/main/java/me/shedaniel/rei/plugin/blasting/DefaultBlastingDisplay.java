@@ -23,13 +23,16 @@
 
 package me.shedaniel.rei.plugin.blasting;
 
-import me.shedaniel.rei.plugin.DefaultPlugin;
-import me.shedaniel.rei.plugin.cooking.DefaultCookingDisplay;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
+import me.shedaniel.rei.plugin.common.cooking.DefaultCookingDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.crafting.BlastingRecipe;
-import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class DefaultBlastingDisplay extends DefaultCookingDisplay {
@@ -37,8 +40,12 @@ public class DefaultBlastingDisplay extends DefaultCookingDisplay {
         super(recipe);
     }
     
+    public DefaultBlastingDisplay(List<EntryIngredient> input, List<EntryIngredient> output, CompoundTag tag) {
+        super(input, output, tag);
+    }
+    
     @Override
-    public @NotNull ResourceLocation getCategoryIdentifier() {
-        return DefaultPlugin.BLASTING;
+    public CategoryIdentifier<?> getCategoryIdentifier() {
+        return BuiltinPlugin.BLASTING;
     }
 }

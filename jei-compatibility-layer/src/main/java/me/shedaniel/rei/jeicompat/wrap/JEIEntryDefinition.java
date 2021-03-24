@@ -26,14 +26,14 @@ package me.shedaniel.rei.jeicompat.wrap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.ingredient.EntryStack;
-import me.shedaniel.rei.api.ingredient.entry.EntrySerializer;
-import me.shedaniel.rei.api.ingredient.entry.comparison.ComparisonContext;
-import me.shedaniel.rei.api.ingredient.entry.renderer.EntryRenderer;
-import me.shedaniel.rei.api.ingredient.entry.type.EntryDefinition;
-import me.shedaniel.rei.api.ingredient.entry.type.EntryType;
-import me.shedaniel.rei.api.util.ImmutableLiteralText;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.ingredient.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.common.ingredient.EntryStack;
+import me.shedaniel.rei.api.common.ingredient.entry.EntrySerializer;
+import me.shedaniel.rei.api.common.ingredient.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.common.ingredient.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.ingredient.entry.type.EntryType;
+import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
@@ -119,7 +119,7 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
     
     @Override
     public Component asFormattedText(EntryStack<T> entry, T value) {
-        return new ImmutableLiteralText(ingredientHelper.getDisplayName(value));
+        return new ImmutableTextComponent(ingredientHelper.getDisplayName(value));
     }
     
     @Override

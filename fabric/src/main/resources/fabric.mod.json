@@ -23,8 +23,8 @@
       "me.shedaniel.rei.RoughlyEnoughItemsInitializer::onInitializeClient"
     ],
     "rei": [
-      "me.shedaniel.rei.plugin.DefaultPlugin",
-      "me.shedaniel.rei.gui.plugin.DefaultRuntimePlugin"
+      "me.shedaniel.rei.plugin.client.DefaultClientPlugin",
+      "me.shedaniel.rei.gui.plugin.DefaultClientRuntimePlugin"
     ]
   },
   "accessWidener": "roughlyenoughitems.accessWidener",

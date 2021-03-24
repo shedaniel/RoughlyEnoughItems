@@ -23,13 +23,13 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.rei.api.ingredient.EntryIngredient;
-import me.shedaniel.rei.api.registry.display.Display;
-import me.shedaniel.rei.api.util.CollectionUtils;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.ingredient.EntryIngredient;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.IIngredients;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.NotNull;
 
@@ -138,8 +138,8 @@ public class JEIWrappedDisplay<T> implements Display {
     }
     
     @Override
-    public ResourceLocation getCategoryIdentifier() {
-        return this.backingCategory.getIdentifier();
+    public CategoryIdentifier<?> getCategoryIdentifier() {
+        return this.backingCategory.getCategoryIdentifier();
     }
     
     @Override
@@ -148,7 +148,7 @@ public class JEIWrappedDisplay<T> implements Display {
     }
     
     @Override
-    public List<EntryIngredient> getResultingEntries() {
+    public List<EntryIngredient> getOutputEntries() {
         return compiledOutputs;
     }
 }
