@@ -41,13 +41,13 @@ public class MenuInfoRegistryImpl implements MenuInfoRegistry {
     @Override
     public <D extends Display> void register(CategoryIdentifier<D> category, MenuInfo<?, D> menuInfo) {
         map.computeIfAbsent(category, id -> Maps.newLinkedHashMap())
-                .put(menuInfo.getContainerClass(), menuInfo);
+                .put(menuInfo.getMenuClass(), menuInfo);
     }
     
     @Override
     public <D extends Display> void registerGeneric(Predicate<CategoryIdentifier<?>> categoryPredicate, MenuInfo<?, D> menuInfo) {
         mapGeneric.computeIfAbsent(categoryPredicate, id -> Maps.newLinkedHashMap())
-                .put(menuInfo.getContainerClass(), menuInfo);
+                .put(menuInfo.getMenuClass(), menuInfo);
     }
     
     @Override

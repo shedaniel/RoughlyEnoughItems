@@ -33,8 +33,8 @@ import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.common.util.Animator;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
-import me.shedaniel.rei.impl.common.util.Animator;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,17 +55,28 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (entry != null && entry.dragging) {
+        if (entry != null) {
+            if (!entry.dragging) {
+                Point startPoint = entry.start;
+                double xDistance = Math.abs(startPoint.x - mouseX);
+                double yDistance = Math.abs(startPoint.y - mouseY);
+                double requiredDistance = 8;
+                
+                if (xDistance * xDistance + yDistance * yDistance > requiredDistance * requiredDistance) {
+                    entry.dragging = true;
+                    entry.stack.drag();
+                }
+            }
             if (!RoughlyEnoughItemsCore.isLeftMousePressed) {
                 drop();
-                return;
+            } else if (entry.dragging) {
+                matrices.pushPose();
+                matrices.translate(0, 0, 600);
+                entry.stack.render(matrices, new Rectangle(mouseX - 8, mouseY - 8, 16, 16), mouseX, mouseY, delta);
+                matrices.popPose();
             }
-            matrices.pushPose();
-            matrices.translate(0, 0, 600);
-            entry.stack.render(matrices, new Rectangle(mouseX - 8, mouseY - 8, 16, 16), mouseX, mouseY, delta);
-            matrices.popPose();
         }
-    
+        
         Iterator<RenderBackEntry> iterator = backToOriginals.iterator();
         while (iterator.hasNext()) {
             RenderBackEntry renderBackEntry = iterator.next();
@@ -92,7 +103,6 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
         DraggableStack hoveredStack = provider.getHoveredStack(this, mouseX, mouseY);
         if (hoveredStack != null) {
             entry = new DraggableEntry(hoveredStack, new Point(mouseX, mouseY));
-            return true;
         }
         return false;
     }
@@ -104,19 +114,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     @Override
     public boolean mouseDragged(double mouseX1, double mouseY1, int button, double mouseX2, double mouseY2) {
-        if (entry != null && !entry.dragging) {
-            Point startPoint = entry.start;
-            double xDistance = Math.abs(startPoint.x - mouseX1);
-            double yDistance = Math.abs(startPoint.y - mouseY1);
-            double requiredDistance = 4;
-            
-            if (xDistance * xDistance + yDistance * yDistance > requiredDistance * requiredDistance) {
-                entry.dragging = true;
-                entry.stack.drag();
-            }
-        }
-        
-        return entry != null;
+        return entry != null && entry.dragging;
     }
     
     private boolean drop() {

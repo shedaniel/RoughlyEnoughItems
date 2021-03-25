@@ -40,8 +40,8 @@ import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.common.util.Animator;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
-import me.shedaniel.rei.impl.common.util.Animator;
 import me.shedaniel.rei.impl.ClientInternals;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -79,7 +79,7 @@ public class UncertainDisplayViewingScreen extends Screen {
     private Widget slider;
     private boolean showTips;
     private Animator scroll = new Animator();
-    private List<String> allModsUsingJEI = new ArrayList<>();
+    private List<String> allModsUsingJEI = null;
     
     public UncertainDisplayViewingScreen(Screen parent, DisplayScreenType type, boolean showTips, BooleanConsumer callback) {
         super(ImmutableTextComponent.EMPTY);

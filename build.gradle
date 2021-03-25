@@ -217,3 +217,13 @@ publishing {
         }
     }
 }*/
+
+allprojects {
+    repositories {
+        mavenLocal()
+    }
+    
+    architectury {
+        transformerVersion = "2.1.9999"
+    }
+}

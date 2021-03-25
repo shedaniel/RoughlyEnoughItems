@@ -27,7 +27,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ScissorsScreen;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.impl.client.gui.screen.DelegateScreen;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;

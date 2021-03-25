@@ -123,6 +123,10 @@ public final class Internals {
         EntryIngredient of(EntryStack<?>... stacks);
         
         EntryIngredient of(Iterable<EntryStack<?>> stacks);
+        
+        EntryIngredient.Builder builder();
+        
+        EntryIngredient.Builder builder(int initialCapacity);
     }
     
     public interface NbtHasherProvider {

@@ -160,13 +160,14 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         try {
             long startTime = Util.getMillis();
             MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
-            
-            try (SectionClosable startReload = section(sectionData, "start-reload")) {
-                for (Reloadable<P> reloadable : reloadables) {
+    
+            for (Reloadable<P> reloadable : reloadables) {
+                Class<?> reloadableClass = reloadable.getClass();
+                try (SectionClosable startReload = section(sectionData, "start-reload-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()))) {
                     reloadable.startReload();
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
                 }
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
             }
             
             arePluginsLoading = true;
@@ -181,13 +182,14 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
                 pluginSection(sectionData, "reloadable-plugin-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()), plugins, reloadable::acceptPlugin);
             }
             pluginSection(sectionData, "post-register", plugins, REIPlugin::postRegister);
-            
-            try (SectionClosable endReload = section(sectionData, "end-reload")) {
-                for (Reloadable<P> reloadable : reloadables) {
+    
+            for (Reloadable<P> reloadable : reloadables) {
+                Class<?> reloadableClass = reloadable.getClass();
+                try (SectionClosable endReload = section(sectionData, "end-reload-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()))) {
                     reloadable.endReload();
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
                 }
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
             }
             
             arePluginsLoading = false;

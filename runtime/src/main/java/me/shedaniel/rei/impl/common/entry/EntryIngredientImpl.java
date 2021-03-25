@@ -71,7 +71,78 @@ public class EntryIngredientImpl {
             private EntryIngredient _of(EntryStack<?>... stacks) {
                 return new ArrayIngredient(stacks);
             }
+    
+            @Override
+            public EntryIngredient.Builder builder() {
+                return new EntryIngredientBuilder(0);
+            }
+    
+            @Override
+            public EntryIngredient.Builder builder(int initialCapacity) {
+                return new EntryIngredientBuilder(initialCapacity);
+            }
         };
+    }
+    
+    private static class EntryIngredientBuilder implements EntryIngredient.Builder {
+        private EntryStack<?>[] contents;
+        private int size = 0;
+    
+        public EntryIngredientBuilder(int initialCapacity) {
+            this.contents = new EntryStack[initialCapacity];
+        }
+    
+        private void ensureCapacity(int minCapacity) {
+            if (contents.length < minCapacity) {
+                this.contents = Arrays.copyOf(this.contents, expandedCapacity(contents.length, minCapacity));
+            }
+        }
+    
+        static int expandedCapacity(int oldCapacity, int minCapacity) {
+            int newCapacity = oldCapacity + (oldCapacity >> 1) + 1;
+            if (newCapacity < minCapacity) {
+                newCapacity = Integer.highestOneBit(minCapacity - 1) << 1;
+            }
+            if (newCapacity < 0) {
+                newCapacity = Integer.MAX_VALUE;
+            }
+            return newCapacity;
+        }
+    
+        @Override
+        public EntryIngredient.Builder add(EntryStack<?> stack) {
+            ensureCapacity(size + 1);
+            contents[size++] = stack;
+            return this;
+        }
+    
+        @Override
+        public EntryIngredient.Builder add(EntryStack<?>... stacks) {
+            ensureCapacity(size + stacks.length);
+            System.arraycopy(stacks, 0, contents, size, stacks.length);
+            size += stacks.length;
+            return this;
+        }
+    
+        @Override
+        public EntryIngredient.Builder addAll(Iterable<? extends EntryStack<?>> stacks) {
+            if (stacks instanceof Collection) {
+                Collection<?> collection = (Collection<?>) stacks;
+                ensureCapacity(size + collection.size());
+            }
+            for (EntryStack<?> stack : stacks) {
+                add(stack);
+            }
+            return this;
+        }
+    
+        @Override
+        public EntryIngredient build() {
+            if (contents.length > size) {
+                return EntryIngredient.of((EntryStack<Object>[]) Arrays.copyOf(contents, size));
+            }
+            return EntryIngredient.of((EntryStack<Object>[]) contents);
+        }
     }
     
     private static class EmptyEntryIngredient extends AbstractList<EntryStack<?>> implements EntryIngredient, RandomAccess {

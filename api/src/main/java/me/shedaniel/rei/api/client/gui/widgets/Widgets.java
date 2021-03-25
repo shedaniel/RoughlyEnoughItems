@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.client.gui.widgets;
 
+import com.google.common.collect.AbstractIterator;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Dimension;
@@ -44,11 +45,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
@@ -300,5 +300,41 @@ public final class Widgets {
     
     public static void produceClickSound() {
         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+    }
+    
+    public static <T> Iterable<T> walk(Iterable<? extends GuiEventListener> listeners, Predicate<GuiEventListener> predicate) {
+        return () -> new AbstractIterator<T>() {
+            Stack<Iterator<? extends GuiEventListener>> stack;
+            
+            {
+                stack = new Stack<>();
+                stack.push(listeners.iterator());
+            }
+            
+            @Override
+            protected T computeNext() {
+                while (!stack.empty()) {
+                    Iterator<? extends GuiEventListener> peek = stack.peek();
+                    GuiEventListener listener = peek.next();
+                    if (!peek.hasNext())
+                        stack.pop();
+                    if (predicate.test(listener)) {
+                        return (T) listener;
+                    }
+                    if (listener instanceof ContainerEventHandler) {
+                        List<? extends GuiEventListener> children = ((ContainerEventHandler) listener).children();
+                        if (!children.isEmpty()) {
+                            stack.push(children.iterator());
+                        }
+                    } else if (listener instanceof WidgetHolder) {
+                        List<? extends GuiEventListener> children = ((WidgetHolder) listener).children();
+                        if (!children.isEmpty()) {
+                            stack.push(children.iterator());
+                        }
+                    }
+                }
+                return endOfData();
+            }
+        };
     }
 }
