@@ -24,8 +24,8 @@
 package me.shedaniel.rei.impl.common.entry.type.types;
 
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
-import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;

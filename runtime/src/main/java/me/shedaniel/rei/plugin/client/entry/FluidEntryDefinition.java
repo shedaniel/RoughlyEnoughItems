@@ -35,11 +35,11 @@ import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.entry.renderer.AbstractEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
-import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
@@ -197,8 +197,9 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
             Fraction amount = entry.getValue().getAmount();
             if (!amount.isLessThan(Fraction.zero())) {
                 String amountTooltip = I18n.get(FLUID_AMOUNT, EntryStacks.simplifyAmount(entry).getValue().getAmount());
-                if (amountTooltip != null)
+                if (amountTooltip != null) {
                     toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList()));
+                }
             }
             if (Minecraft.getInstance().options.advancedItemTooltips) {
                 ResourceLocation fluidId = Registry.FLUID.getKey(entry.getValue().getFluid());

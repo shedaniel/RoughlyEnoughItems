@@ -28,8 +28,8 @@ import alexiil.mc.lib.attributes.fluid.GroupedFluidInvView;
 import alexiil.mc.lib.attributes.fluid.amount.FluidAmount;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
-import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.world.InteractionResultHolder;
 
 import java.util.stream.Stream;

@@ -42,51 +42,31 @@ import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.plugin.autocrafting.DefaultRecipeBookHandler;
-import me.shedaniel.rei.plugin.beacon.base.DefaultBeaconBaseCategory;
-import me.shedaniel.rei.plugin.beacon.base.DefaultBeaconBaseDisplay;
-import me.shedaniel.rei.plugin.beacon.payment.DefaultBeaconPaymentCategory;
-import me.shedaniel.rei.plugin.beacon.payment.DefaultBeaconPaymentDisplay;
-import me.shedaniel.rei.plugin.blasting.DefaultBlastingDisplay;
-import me.shedaniel.rei.plugin.brewing.DefaultBrewingCategory;
-import me.shedaniel.rei.plugin.brewing.DefaultBrewingDisplay;
-import me.shedaniel.rei.plugin.brewing.RegisteredBrewingRecipe;
+import me.shedaniel.rei.plugin.client.categories.*;
+import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconBaseCategory;
+import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconPaymentCategory;
+import me.shedaniel.rei.plugin.client.categories.cooking.DefaultCookingCategory;
+import me.shedaniel.rei.plugin.client.categories.crafting.DefaultCraftingCategory;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultPotionEffectExclusionZones;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultRecipeBookExclusionZones;
-import me.shedaniel.rei.plugin.common.campfire.DefaultCampfireCategory;
-import me.shedaniel.rei.plugin.common.campfire.DefaultCampfireDisplay;
-import me.shedaniel.rei.plugin.common.composting.DefaultCompostingCategory;
-import me.shedaniel.rei.plugin.common.composting.DefaultCompostingDisplay;
-import me.shedaniel.rei.plugin.common.cooking.DefaultCookingCategory;
-import me.shedaniel.rei.plugin.common.crafting.DefaultCraftingCategory;
-import me.shedaniel.rei.plugin.common.crafting.DefaultCustomDisplay;
-import me.shedaniel.rei.plugin.common.crafting.DefaultShapedDisplay;
-import me.shedaniel.rei.plugin.common.crafting.DefaultShapelessDisplay;
-import me.shedaniel.rei.plugin.common.stonecutting.DefaultStoneCuttingCategory;
-import me.shedaniel.rei.plugin.common.stonecutting.DefaultStoneCuttingDisplay;
-import me.shedaniel.rei.plugin.favorites.GameModeFavoriteEntry;
-import me.shedaniel.rei.plugin.favorites.WeatherFavoriteEntry;
-import me.shedaniel.rei.plugin.fuel.DefaultFuelCategory;
-import me.shedaniel.rei.plugin.fuel.DefaultFuelDisplay;
-import me.shedaniel.rei.plugin.information.DefaultInformationCategory;
-import me.shedaniel.rei.plugin.information.DefaultInformationDisplay;
-import me.shedaniel.rei.plugin.pathing.DefaultPathingCategory;
-import me.shedaniel.rei.plugin.pathing.DefaultPathingDisplay;
-import me.shedaniel.rei.plugin.pathing.DummyShovelItem;
-import me.shedaniel.rei.plugin.smelting.DefaultSmeltingDisplay;
-import me.shedaniel.rei.plugin.smithing.DefaultSmithingCategory;
-import me.shedaniel.rei.plugin.smithing.DefaultSmithingDisplay;
-import me.shedaniel.rei.plugin.smoking.DefaultSmokingDisplay;
-import me.shedaniel.rei.plugin.stripping.DefaultStrippingCategory;
-import me.shedaniel.rei.plugin.stripping.DefaultStrippingDisplay;
-import me.shedaniel.rei.plugin.stripping.DummyAxeItem;
-import me.shedaniel.rei.plugin.tilling.DefaultTillingCategory;
-import me.shedaniel.rei.plugin.tilling.DefaultTillingDisplay;
-import me.shedaniel.rei.plugin.tilling.DummyHoeItem;
+import me.shedaniel.rei.plugin.client.favorites.GameModeFavoriteEntry;
+import me.shedaniel.rei.plugin.client.favorites.WeatherFavoriteEntry;
+import me.shedaniel.rei.plugin.common.displays.*;
+import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconBaseDisplay;
+import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconPaymentDisplay;
+import me.shedaniel.rei.plugin.common.displays.brewing.BrewingRecipe;
+import me.shedaniel.rei.plugin.common.displays.brewing.DefaultBrewingDisplay;
+import me.shedaniel.rei.plugin.common.displays.cooking.DefaultBlastingDisplay;
+import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmeltingDisplay;
+import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
+import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomDisplay;
+import me.shedaniel.rei.plugin.common.displays.crafting.DefaultShapedDisplay;
+import me.shedaniel.rei.plugin.common.displays.crafting.DefaultShapelessDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -108,8 +88,10 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.ApiStatus;
@@ -123,10 +105,10 @@ import java.util.stream.Stream;
 @ApiStatus.Internal
 public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin {
     public DefaultClientPlugin() {
-        ClientInternals.attachInstance((Supplier<Object>) () ->this, "builtinClientPlugin");
+        ClientInternals.attachInstance((Supplier<Object>) () -> this, "builtinClientPlugin");
     }
     
-    public static void registerBrewingRecipe(RegisteredBrewingRecipe recipe) {
+    public static void registerBrewingRecipe(BrewingRecipe recipe) {
         DisplayRegistry.getInstance().registerDisplay(new DefaultBrewingDisplay(recipe.input, recipe.ingredient, recipe.output));
     }
     
@@ -136,7 +118,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerBrewingRecipe(Ingredient input, Ingredient ingredient, ItemStack output) {
-        registerBrewingRecipe(new RegisteredBrewingRecipe(input, ingredient, output));
+        registerBrewingRecipe(new BrewingRecipe(input, ingredient, output));
     }
     
     @Override
@@ -148,7 +130,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     public void registerEntries(EntryRegistry registry) {
         for (Item item : Registry.ITEM) {
             try {
-                registry.registerEntries(EntryStacks.ofItemStacks(registry.appendStacksForItem(item)));
+                registry.registerEntries(EntryIngredients.ofItemStacks(registry.appendStacksForItem(item)));
             } catch (Exception ignored) {
                 registry.registerEntry(EntryStacks.of(item));
             }
@@ -359,7 +341,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.getOrCrateSection(new TranslatableComponent(GameModeFavoriteEntry.TRANSLATION_KEY))
                 .add(Stream.concat(
                         Arrays.stream(GameType.values())
-                                .filter(type -> type != GameType.NOT_SET),
+                                .filter(type -> type.getId() >= 0),
                         Stream.of((GameType) null)
                 ).<FavoriteEntry>map(GameModeFavoriteEntry.Type.INSTANCE::fromArgs).toArray(FavoriteEntry[]::new));
         registry.register(WeatherFavoriteEntry.ID, WeatherFavoriteEntry.Type.INSTANCE);
@@ -374,4 +356,35 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     public int getPriority() {
         return -100;
     }
+    
+    public static class DummyShovelItem extends ShovelItem {
+        public DummyShovelItem(Tier tier, float f, float g, Properties properties) {
+            super(tier, f, g, properties);
+        }
+        
+        public static Map<Block, BlockState> getPathBlocksMap() {
+            return FLATTENABLES;
+        }
+    }
+    
+    public static class DummyAxeItem extends AxeItem {
+        public DummyAxeItem(Tier tier, float f, float g, Properties properties) {
+            super(tier, f, g, properties);
+        }
+        
+        public static Map<Block, Block> getStrippedBlocksMap() {
+            return STRIPABLES;
+        }
+    }
+    
+    public static class DummyHoeItem extends HoeItem {
+        public DummyHoeItem(Tier tier, int i, float f, Properties properties) {
+            super(tier, i, f, properties);
+        }
+        
+        public static Map<Block, BlockState> getTilledBlocksMap() {
+            return TILLABLES;
+        }
+    }
+    
 }

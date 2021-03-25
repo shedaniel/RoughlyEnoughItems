@@ -51,6 +51,14 @@ public interface EntryIngredient extends List<EntryStack<?>> {
         return Internals.getEntryIngredientProvider().of((Iterable<EntryStack<?>>) (Iterable) stacks);
     }
     
+    static Builder builder() {
+        return Internals.getEntryIngredientProvider().builder();
+    }
+    
+    static Builder builder(int initialCapacity) {
+        return Internals.getEntryIngredientProvider().builder(initialCapacity);
+    }
+    
     static EntryIngredient from(ListTag tag) {
         if (tag.isEmpty()) return empty();
         EntryStack<?>[] stacks = new EntryStack[tag.size()];
@@ -61,4 +69,19 @@ public interface EntryIngredient extends List<EntryStack<?>> {
     }
     
     ListTag save();
+    
+    @SuppressWarnings("rawtypes")
+    default <T> List<EntryStack<T>> cast() {
+        return (List<EntryStack<T>>) (List) this;
+    }
+    
+    interface Builder {
+        Builder add(EntryStack<?> stack);
+        
+        Builder add(EntryStack<?>... stacks);
+        
+        Builder addAll(Iterable<? extends EntryStack<?>> stacks);
+        
+        EntryIngredient build();
+    }
 }

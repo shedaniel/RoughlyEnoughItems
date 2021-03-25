@@ -49,7 +49,7 @@ import java.util.List;
  * @see me.shedaniel.rei.api.common.transfer.info.simple.SimpleGridMenuInfo
  */
 public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> {
-    Class<? extends T> getContainerClass();
+    Class<? extends T> getMenuClass();
     
     default RecipeFinderPopulator<T, D> getRecipeFinderPopulator() {
         return (context, recipeFinder) -> {

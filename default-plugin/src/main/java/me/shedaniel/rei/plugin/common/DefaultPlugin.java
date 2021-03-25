@@ -26,26 +26,23 @@ package me.shedaniel.rei.plugin.common;
 import me.shedaniel.architectury.hooks.FluidStackHooks;
 import me.shedaniel.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
-import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparator;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
-import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
-import me.shedaniel.rei.plugin.blasting.DefaultBlastingDisplay;
-import me.shedaniel.rei.plugin.common.campfire.DefaultCampfireDisplay;
-import me.shedaniel.rei.plugin.common.composting.DefaultCompostingDisplay;
-import me.shedaniel.rei.plugin.common.cooking.DefaultCookingDisplay;
-import me.shedaniel.rei.plugin.common.crafting.DefaultCraftingDisplay;
-import me.shedaniel.rei.plugin.common.stonecutting.DefaultStoneCuttingDisplay;
-import me.shedaniel.rei.plugin.containers.CraftingGridMenuInfoWrapper;
-import me.shedaniel.rei.plugin.fuel.DefaultFuelDisplay;
-import me.shedaniel.rei.plugin.smelting.DefaultSmeltingDisplay;
-import me.shedaniel.rei.plugin.smithing.DefaultSmithingDisplay;
-import me.shedaniel.rei.plugin.smoking.DefaultSmokingDisplay;
-import me.shedaniel.rei.plugin.stripping.DefaultStrippingDisplay;
-import me.shedaniel.rei.plugin.tilling.DefaultTillingDisplay;
+import me.shedaniel.rei.api.common.transfer.info.simple.RecipeBookGridMenuInfo;
+import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.plugin.common.displays.*;
+import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconBaseDisplay;
+import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconDisplay;
+import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconPaymentDisplay;
+import me.shedaniel.rei.plugin.common.displays.cooking.DefaultBlastingDisplay;
+import me.shedaniel.rei.plugin.common.displays.cooking.DefaultCookingDisplay;
+import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmeltingDisplay;
+import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
+import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -100,26 +97,30 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
         registry.register(COMPOSTING, DefaultCompostingDisplay.serializer());
         registry.register(FUEL, DefaultFuelDisplay.serializer());
         registry.register(SMITHING, DefaultSmithingDisplay.serializer());
+        registry.register(BEACON_BASE, DefaultBeaconDisplay.serializer(DefaultBeaconBaseDisplay::new));
+        registry.register(BEACON_PAYMENT, DefaultBeaconDisplay.serializer(DefaultBeaconPaymentDisplay::new));
         registry.register(TILLING, DefaultTillingDisplay.serializer());
+        registry.register(PATHING, DefaultPathingDisplay.serializer());
+        registry.register(INFO, DefaultInformationDisplay.serializer());
     }
     
     @Override
     public void registerMenuInfo(MenuInfoRegistry registry) {
-        registry.register(BuiltinPlugin.CRAFTING, new CraftingGridMenuInfoWrapper<CraftingMenu, DefaultCraftingDisplay>(CraftingMenu.class) {
+        registry.register(BuiltinPlugin.CRAFTING, new RecipeBookGridMenuInfo<CraftingMenu, DefaultCraftingDisplay>(CraftingMenu.class) {
             @Override
             public List<List<ItemStack>> getDisplayInputs(MenuInfoContext<CraftingMenu, ?, DefaultCraftingDisplay> context) {
                 return context.getDisplay().getOrganisedInputEntries(this, context.getMenu());
             }
         });
-        registry.register(BuiltinPlugin.CRAFTING, new CraftingGridMenuInfoWrapper<InventoryMenu, DefaultCraftingDisplay>(InventoryMenu.class) {
+        registry.register(BuiltinPlugin.CRAFTING, new RecipeBookGridMenuInfo<InventoryMenu, DefaultCraftingDisplay>(InventoryMenu.class) {
             @Override
             public List<List<ItemStack>> getDisplayInputs(MenuInfoContext<InventoryMenu, ?, DefaultCraftingDisplay> context) {
                 return context.getDisplay().getOrganisedInputEntries(this, context.getMenu());
             }
         });
-        registry.register(BuiltinPlugin.SMELTING, new CraftingGridMenuInfoWrapper<>(FurnaceMenu.class));
-        registry.register(BuiltinPlugin.SMOKING, new CraftingGridMenuInfoWrapper<>(SmokerMenu.class));
-        registry.register(BuiltinPlugin.BLASTING, new CraftingGridMenuInfoWrapper<>(BlastFurnaceMenu.class));
+        registry.register(BuiltinPlugin.SMELTING, new RecipeBookGridMenuInfo<>(FurnaceMenu.class));
+        registry.register(BuiltinPlugin.SMOKING, new RecipeBookGridMenuInfo<>(SmokerMenu.class));
+        registry.register(BuiltinPlugin.BLASTING, new RecipeBookGridMenuInfo<>(BlastFurnaceMenu.class));
     }
     
     @Override

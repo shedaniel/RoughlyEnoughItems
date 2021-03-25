@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIHelper;

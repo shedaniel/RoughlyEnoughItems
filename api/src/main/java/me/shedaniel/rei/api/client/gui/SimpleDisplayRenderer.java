@@ -30,12 +30,14 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.WidgetHolder;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
@@ -46,18 +48,21 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class SimpleDisplayRenderer extends DisplayRenderer {
+public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHolder {
     private static final Comparator<EntryStack<?>> ENTRY_COMPARATOR = Comparator.comparingLong(EntryStacks::hashExact);
     private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private List<Slot> inputWidgets;
     private List<Slot> outputWidgets;
+    private List<GuiEventListener> widgets;
     
     @ApiStatus.Internal
     private SimpleDisplayRenderer(List<EntryIngredient> input, List<EntryIngredient> output) {
         this.inputWidgets = simplify(input).stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> Widgets.createSlot(new Point(0, 0)).entries(stacks).disableBackground().disableHighlight().disableTooltips()).collect(Collectors.toList());
         this.outputWidgets = CollectionUtils.map(simplify(output), outputStacks ->
                 Widgets.createSlot(new Point(0, 0)).entries(CollectionUtils.filterToList(outputStacks, stack -> !stack.isEmpty())).disableBackground().disableHighlight().disableTooltips());
+        this.widgets = Stream.concat(inputWidgets.stream(), outputWidgets.stream()).collect(Collectors.toList());
     }
     
     private static List<EntryIngredient> simplify(List<EntryIngredient> original) {
@@ -148,5 +153,10 @@ public class SimpleDisplayRenderer extends DisplayRenderer {
     
     public int getItemsPerLine() {
         return Mth.floor((getWidth() - 4f) / 18f);
+    }
+    
+    @Override
+    public List<? extends GuiEventListener> children() {
+        return widgets;
     }
 }

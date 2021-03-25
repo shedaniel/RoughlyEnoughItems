@@ -24,12 +24,12 @@
 package me.shedaniel.rei.impl.client.entry.filtering.rules;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.impl.client.config.entries.FilteringEntry;
-import me.shedaniel.rei.impl.client.config.entries.FilteringRuleOptionsScreen;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.client.config.entries.FilteringEntry;
+import me.shedaniel.rei.impl.client.config.entries.FilteringRuleOptionsScreen;
 import me.shedaniel.rei.impl.client.entry.filtering.AbstractFilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringContext;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringResult;

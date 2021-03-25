@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
@@ -80,35 +81,25 @@ public final class EntryIngredients {
     public static <T> EntryIngredient of(EntryDefinition<T> definition, Collection<T> values) {
         if (values.size() == 0) return EntryIngredient.empty();
         if (values.size() == 1) return EntryIngredient.of(EntryStack.of(definition, values.iterator().next()));
-        List<EntryStack<T>> result = new ArrayList<>(values.size());
+        EntryIngredient.Builder result = EntryIngredient.builder(values.size());
         for (T value : values) {
             result.add(EntryStack.of(definition, value));
         }
-        return EntryIngredient.of(result);
+        return result.build();
     }
     
     public static EntryIngredient ofItems(Collection<ItemLike> stacks) {
         if (stacks.size() == 0) return EntryIngredient.empty();
         if (stacks.size() == 1) return EntryIngredient.of(EntryStacks.of(stacks.iterator().next()));
-        List<EntryStack<ItemStack>> result = new ArrayList<>(stacks.size());
+        EntryIngredient.Builder result = EntryIngredient.builder(stacks.size());
         for (ItemLike stack : stacks) {
             result.add(EntryStacks.of(stack));
         }
-        return EntryIngredient.of(result);
+        return result.build();
     }
     
     public static EntryIngredient ofItemStacks(Collection<ItemStack> stacks) {
-        if (stacks.size() == 0) return EntryIngredient.empty();
-        if (stacks.size() == 1) {
-            ItemStack stack = stacks.iterator().next();
-            if (stack.isEmpty()) return EntryIngredient.empty();
-            return EntryIngredient.of(EntryStacks.of(stack));
-        }
-        List<EntryStack<ItemStack>> result = new ArrayList<>(stacks.size());
-        for (ItemStack stack : stacks) {
-            result.add(EntryStacks.of(stack));
-        }
-        return EntryIngredient.of(result);
+        return of(VanillaEntryTypes.ITEM, stacks);
     }
     
     public static EntryIngredient ofIngredient(Ingredient ingredient) {
@@ -116,12 +107,13 @@ public final class EntryIngredients {
         ItemStack[] matchingStacks = ingredient.getItems();
         if (matchingStacks.length == 0) return EntryIngredient.empty();
         if (matchingStacks.length == 1) return EntryIngredient.of(EntryStacks.of(matchingStacks[0]));
-        List<EntryStack<ItemStack>> result = new ArrayList<>(matchingStacks.length);
+        EntryIngredient.Builder result = EntryIngredient.builder(matchingStacks.length);
         for (ItemStack matchingStack : matchingStacks) {
-            if (!matchingStack.isEmpty())
+            if (!matchingStack.isEmpty()) {
                 result.add(EntryStacks.of(matchingStack));
+            }
         }
-        return EntryIngredient.of(result);
+        return result.build();
     }
     
     public static List<EntryIngredient> ofIngredients(List<Ingredient> ingredients) {

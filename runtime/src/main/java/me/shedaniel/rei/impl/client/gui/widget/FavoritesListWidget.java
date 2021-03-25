@@ -41,6 +41,7 @@ import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.api.client.REIOverlay;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.entry.renderer.BatchEntryRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
@@ -52,17 +53,16 @@ import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.client.entry.renderer.BatchEntryRenderer;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.Animator;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
+import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
-import me.shedaniel.rei.impl.common.util.Animator;
-import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
-import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -150,34 +150,10 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     @Override
     @Nullable
     public DraggableStack getHoveredStack(DraggingContext context, double mouseX, double mouseY) {
-        Function<Entry, DraggableStack> apply = entry -> new DraggableStack() {
-            private FavoriteEntry favoriteEntry = entry.getEntry();
-            private EntryStack<?> stack = ClientEntryStacks.of(favoriteEntry.getRenderer(false)).copy();
-            
-            @Override
-            public EntryStack<?> getStack() {
-                return stack;
-            }
-            
-            @Override
-            public void drag() {
-                entries.remove(entry.hashIgnoreAmount());
-                applyNewFavorites(entries.values().stream()
-                        .map(Entry::getEntry)
-                        .collect(Collectors.toList()));
-            }
-            
-            @Override
-            public void release(boolean accepted) {
-                if (!accepted) {
-                    drop(entry, this, favoriteEntry);
-                }
-            }
-        };
         if (innerBounds.contains(mouseX, mouseY)) {
             for (Entry entry : entries.values()) {
                 if (entry.getWidget().containsMouse(mouseX, mouseY)) {
-                    return apply.apply(entry);
+                    return new FavoriteDraggableStack(entry);
                 }
             }
         }
@@ -188,13 +164,45 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                         if (widget.containsMouse(mouseX, mouseY)) {
                             Entry entry = new Entry(widget.entry.copy(), entrySize());
                             entry.size.setAs(entrySize() * 100);
-                            return apply.apply(entry);
+                            return new FavoriteDraggableStack(entry);
                         }
                     }
                 }
             }
         }
         return null;
+    }
+    
+    public class FavoriteDraggableStack implements DraggableStack {
+        private Entry entry;
+        private FavoriteEntry favoriteEntry;
+        private EntryStack<?> stack;
+        
+        public FavoriteDraggableStack(Entry entry) {
+            this.entry = entry;
+            this.favoriteEntry = entry.getEntry();
+            this.stack = ClientEntryStacks.of(favoriteEntry.getRenderer(false)).copy();
+        }
+        
+        @Override
+        public EntryStack<?> getStack() {
+            return stack;
+        }
+        
+        @Override
+        public void drag() {
+            entries.remove(entry.hashIgnoreAmount());
+            applyNewFavorites(entries.values().stream()
+                    .map(Entry::getEntry)
+                    .collect(Collectors.toList()));
+        }
+        
+        @Override
+        public void release(boolean accepted) {
+            if (!accepted) {
+                drop(entry, this, favoriteEntry);
+            }
+        }
     }
     
     @Override
@@ -206,7 +214,8 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     }
     
     private void acceptDraggedStack(DraggableStack stack) {
-        FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack.getStack().copy());
+        FavoriteEntry favoriteEntry = stack instanceof FavoriteDraggableStack ? ((FavoriteDraggableStack) stack).favoriteEntry.copy()
+                : FavoriteEntry.fromEntryStack(stack.getStack().copy());
         Entry entry = new Entry(favoriteEntry, entrySize());
         entry.size.setAs(entrySize() * 100);
         drop(entry, stack, favoriteEntry);
@@ -456,7 +465,11 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         int newIndex = contains ? getReleaseIndex() : Iterables.indexOf(entries.values(), e -> e == entry);
         
         if (entries.size() - 1 <= newIndex) {
-            this.entries.remove(entry.hashIgnoreAmount());
+            Entry remove = this.entries.remove(entry.hashIgnoreAmount());
+            if (remove != null) {
+                remove.remove();
+                this.removedEntries.put(remove.hashIgnoreAmount(), remove);
+            }
             this.entries.put(entry.hashIgnoreAmount(), entry);
         } else {
             Int2ObjectMap<Entry> prevEntries = new Int2ObjectLinkedOpenHashMap<>(entries);
@@ -464,11 +477,11 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             
             int index = 0;
             for (Int2ObjectMap.Entry<Entry> entryEntry : prevEntries.int2ObjectEntrySet()) {
-                if (index == newIndex)
+                if (index == newIndex) {
                     this.entries.put(entry.hashIgnoreAmount(), entry);
+                }
                 if (entryEntry.getIntKey() != entry.hashIgnoreAmount()) {
                     this.entries.put(entryEntry.getIntKey(), entryEntry.getValue());
-                    
                     index++;
                 }
             }
@@ -529,7 +542,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             if (!hidden) {
                 this.hidden = true;
                 if (!ConfigObject.getInstance().isFavoritesAnimated()) this.size.setAs(0);
-                else this.size.setTo(0, 300);
+                else this.size.setTo(0, 1000);
             }
         }
         
@@ -647,9 +660,10 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                                             entry.setZ(z);
                                         }
                                     }));
-                            if (ConfigObject.getInstance().isLeftHandSidePanel())
+                            if (ConfigObject.getInstance().isLeftHandSidePanel()) {
                                 menu.menuStartPoint.x -= menu.getBounds().width - getBounds().width;
-                            overlay.openMenu(uuid, menu, this::containsMouse);
+                            }
+                            overlay.openMenu(uuid, menu, this::containsMouse, point -> entries.containsKey(entry.hashIgnoreAmount()) && !removedEntries.containsKey(entry.hashIgnoreAmount()));
                         } else {
                             overlay.closeOverlayMenu();
                         }
@@ -665,45 +679,80 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         }
     }
     
-    public static class ToggleAddFavoritePanelButton extends WidgetWithBounds {
-        private final FavoritesListWidget widget;
+    public static class ToggleAddFavoritePanelButton extends FadingFavoritePanelButton {
+        public ToggleAddFavoritePanelButton(FavoritesListWidget widget) {
+            super(widget);
+        }
+    
+        @Override
+        protected void onClick() {
+            widget.favoritePanel.expendState.setTo(widget.favoritePanel.expendState.target() == 1 ? 0 : 1, 1500);
+            widget.favoritePanel.resetRows();
+        }
+    
+        @Override
+        protected void queueTooltip() {
+            Tooltip.create(new TranslatableComponent("text.rei.add_favorite_widget")).queue();
+        }
+    
+        @Override
+        protected Rectangle updateArea(Rectangle fullArea) {
+            return new Rectangle(fullArea.x + 4, fullArea.getMaxY() - 16 - 4, 16, 16);
+        }
+    
+        @Override
+        protected boolean isAvailable(int mouseX, int mouseY) {
+            float expendProgress = widget.favoritePanel.expendState.floatValue();
+            return widget.fullBounds.contains(mouseX, mouseY) || expendProgress > .1f;
+        }
+    
+        @Override
+        protected void renderButtonText(PoseStack matrices, MultiBufferSource.BufferSource bufferSource) {
+            float expendProgress = widget.favoritePanel.expendState.floatValue();
+            if (expendProgress < .9f) {
+                int textColor = 0xFFFFFF | (Math.round(0xef * alpha.floatValue() * (1 - expendProgress)) << 24);
+                font.drawInBatch("+", bounds.getCenterX() - 2.5f, bounds.getCenterY() - 3, textColor, false, matrices.last().pose(), bufferSource, false, 0, 15728880);
+            }
+            if (expendProgress > .1f) {
+                int textColor = 0xFFFFFF | (Math.round(0xef * alpha.floatValue() * expendProgress) << 24);
+                font.drawInBatch("-", bounds.getCenterX() - 2.5f, bounds.getCenterY() - 3, textColor, false, matrices.last().pose(), bufferSource, false, 0, 15728880);
+            }
+        }
+    }
+    public abstract static class FadingFavoritePanelButton extends WidgetWithBounds {
+        protected final FavoritesListWidget widget;
         public boolean wasClicked = false;
         public final Animator alpha = new Animator(0);
         
         public final Rectangle bounds = new Rectangle();
         
-        public ToggleAddFavoritePanelButton(FavoritesListWidget widget) {
+        public FadingFavoritePanelButton(FavoritesListWidget widget) {
             this.widget = widget;
         }
         
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            float expendProgress = widget.favoritePanel.expendState.floatValue();
-            this.bounds.setBounds(updateAddFavoriteButtonArea(widget.fullBounds));
-            
-            boolean isHoveringAddFavoriteButton = containsMouse(mouseX, mouseY);
-            this.alpha.setTo(isHoveringAddFavoriteButton ? 1f : widget.fullBounds.contains(mouseX, mouseY) || expendProgress > .1f ? 0.3f : 0f, 260);
+            this.bounds.setBounds(updateArea(widget.fullBounds));
+            boolean hovered = containsMouse(mouseX, mouseY);
+            this.alpha.setTo(hovered ? 1f : isAvailable(mouseX, mouseY) ? 0.3f : 0f, 260);
             this.alpha.update(delta);
             int buttonColor = 0xFFFFFF | (Math.round(0x34 * alpha.floatValue()) << 24);
             fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), buttonColor, buttonColor);
             if (isVisible()) {
                 MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-                if (expendProgress < .9f) {
-                    int textColor = 0xFFFFFF | (Math.round(0xef * alpha.floatValue() * (1 - expendProgress)) << 24);
-                    font.drawInBatch("+", bounds.getCenterX() - 2.5f, bounds.getCenterY() - 3, textColor, false, matrices.last().pose(), bufferSource, false, 0, 15728880);
-                }
-                if (expendProgress > .1f) {
-                    int textColor = 0xFFFFFF | (Math.round(0xef * alpha.floatValue() * expendProgress) << 24);
-                    font.drawInBatch("-", bounds.getCenterX() - 2.5f, bounds.getCenterY() - 3, textColor, false, matrices.last().pose(), bufferSource, false, 0, 15728880);
-                }
+                renderButtonText(matrices, bufferSource);
                 bufferSource.endBatch();
             }
-            if (isHoveringAddFavoriteButton) {
-                Tooltip.create(new TranslatableComponent("text.rei.add_favorite_widget")).queue();
+            if (hovered) {
+                queueTooltip();
             }
         }
         
-            @Override
+        protected abstract boolean isAvailable(int mouseX, int mouseY);
+        
+        protected abstract void renderButtonText(PoseStack matrices, MultiBufferSource.BufferSource bufferSource);
+        
+        @Override
         public Rectangle getBounds() {
             return bounds;
         }
@@ -712,14 +761,10 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             return Math.round(0x12 * alpha.floatValue()) > 0;
         }
         
-        private Rectangle updateAddFavoriteButtonArea(Rectangle fullArea) {
-            return new Rectangle(fullArea.x + 4, fullArea.getMaxY() - 16 - 4, 16, 16);
-        }
-        
         protected boolean wasClicked() {
-            boolean b = this.wasClicked;
+            boolean tmp = this.wasClicked;
             this.wasClicked = false;
-            return b;
+            return tmp;
         }
         
         @Override
@@ -729,20 +774,25 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (isVisible() && containsMouse(mouseX, mouseY))
+            if (isVisible() && containsMouse(mouseX, mouseY)) {
                 this.wasClicked = true;
+            }
             return false;
         }
         
         @Override
         public boolean mouseReleased(double mouseX, double mouseY, int button) {
             if (wasClicked() && isVisible() && containsMouse(mouseX, mouseY)) {
-                widget.favoritePanel.expendState.setTo(widget.favoritePanel.expendState.target() == 1 ? 0 : 1, 1500);
-                widget.favoritePanel.resetRows();
+                onClick();
                 return true;
             }
             return false;
         }
+        
+        protected abstract void onClick();
+        protected abstract void queueTooltip();
+    
+        protected abstract Rectangle updateArea(Rectangle fullArea);
     }
     
     public static class AddFavoritePanel extends WidgetWithBounds {
@@ -753,7 +803,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         private final LazyResettable<List<Row>> rows = new LazyResettable<>(() -> {
             List<Row> rows = new ArrayList<>();
             for (FavoriteEntryType.Section section : FavoriteEntryType.registry().sections()) {
-                rows.add(new SectionRow(section.getText().copy().withStyle(style -> style.withBold(true))));
+                rows.add(new SectionRow(section.getText().copy().withStyle(style -> style.withUnderlined(true))));
                 rows.add(new SectionEntriesRow(CollectionUtils.map(section.getEntries(), FavoriteEntry::copy)));
             }
             return rows;
@@ -819,7 +869,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             return rows.get();
         }
         
-            @Override
+        @Override
         public Rectangle getBounds() {
             return bounds;
         }
@@ -954,7 +1004,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 int slotIndex = 0;
                 for (SectionFavoriteWidget widget : this.widgets) {
                     while (true) {
-                        int xPos = currentX * entrySize + scrollBounds.x;
+                        int xPos = currentX * entrySize + scrollBounds.x - 1;
                         int yPos = currentY * entrySize + lastY + (int) scroller.scrollAmount;
                         
                         currentX++;

@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.api.common.util;
 
-import com.google.common.collect.ImmutableList;
 import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -35,11 +34,10 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
 
-import java.util.*;
+import java.util.Iterator;
 import java.util.stream.Stream;
 
 public final class EntryStacks {
@@ -73,61 +71,18 @@ public final class EntryStacks {
         return of(new ItemStack(item));
     }
     
-    public static List<EntryStack<ItemStack>> ofItems(Collection<ItemLike> stacks) {
-        if (stacks.size() == 0) return Collections.emptyList();
-        if (stacks.size() == 1) return Collections.singletonList(of(stacks.iterator().next()));
-        List<EntryStack<ItemStack>> result = new ArrayList<>(stacks.size());
-        for (ItemLike stack : stacks) {
-            result.add(of(stack));
-        }
-        return ImmutableList.copyOf(result);
-    }
-    
-    public static List<EntryStack<ItemStack>> ofItemStacks(Collection<ItemStack> stacks) {
-        if (stacks.size() == 0) return Collections.emptyList();
-        if (stacks.size() == 1) {
-            ItemStack stack = stacks.iterator().next();
-            if (stack.isEmpty()) return Collections.emptyList();
-            return Collections.singletonList(of(stack));
-        }
-        List<EntryStack<ItemStack>> result = new ArrayList<>(stacks.size());
-        for (ItemStack stack : stacks) {
-            result.add(of(stack));
-        }
-        return ImmutableList.copyOf(result);
-    }
-    
-    public static List<EntryStack<ItemStack>> ofIngredient(Ingredient ingredient) {
-        if (ingredient.isEmpty()) return Collections.emptyList();
-        ItemStack[] matchingStacks = ingredient.getItems();
-        if (matchingStacks.length == 0) return Collections.emptyList();
-        if (matchingStacks.length == 1) return Collections.singletonList(of(matchingStacks[0]));
-        List<EntryStack<ItemStack>> result = new ArrayList<>(matchingStacks.length);
-        for (ItemStack matchingStack : matchingStacks) {
-            if (!matchingStack.isEmpty())
-                result.add(of(matchingStack));
-        }
-        return ImmutableList.copyOf(result);
-    }
-    
-    public static List<List<EntryStack<ItemStack>>> ofIngredients(List<Ingredient> ingredients) {
-        if (ingredients.size() == 0) return Collections.emptyList();
-        if (ingredients.size() == 1) {
-            Ingredient ingredient = ingredients.get(0);
-            if (ingredient.isEmpty()) return Collections.emptyList();
-            return Collections.singletonList(ofIngredient(ingredient));
-        }
-        boolean emptyFlag = true;
-        List<List<EntryStack<ItemStack>>> result = new ArrayList<>(ingredients.size());
-        for (int i = ingredients.size() - 1; i >= 0; i--) {
-            Ingredient ingredient = ingredients.get(i);
-            if (emptyFlag && ingredient.isEmpty()) continue;
-            result.add(0, ofIngredient(ingredient));
-            emptyFlag = false;
-        }
-        return ImmutableList.copyOf(result);
-    }
-    
+    /**
+     * Compares equality under the provided {@code context}.
+     * Prioritizes {@link me.shedaniel.rei.api.common.entry.type.EntryDefinition#equals(Object, Object, ComparisonContext)} then compares
+     * with {@link EntryTypeBridge} for differing {@link EntryType}.
+     * <p>
+     * For example, a lava bucket should still be equals to a lava fluid.
+     *
+     * @param left    the first stack to compare
+     * @param right   the second stack to compare
+     * @param context the context of the equality check
+     * @return the equality under the provided {@code context}
+     */
     public static <A, B> boolean equals(EntryStack<A> left, EntryStack<B> right, ComparisonContext context) {
         if (left == null) return right == null;
         if (right == null) return left == null;
@@ -164,10 +119,30 @@ public final class EntryStacks {
         return false;
     }
     
+    /**
+     * Compares equality for the {@link ComparisonContext#EXACT} context, stacks that equal should share the same normalized stack.
+     * <p>
+     * For example, enchantment books of different enchantments will not be equal under this context.
+     * However, difference between the amount of objects in a stack will not affect the result.
+     *
+     * @param left  the first stack to compare
+     * @param right the second stack to compare
+     * @return the equality for the {@link ComparisonContext#EXACT} context
+     */
     public static <A, B> boolean equalsExact(EntryStack<A> left, EntryStack<B> right) {
         return equals(left, right, ComparisonContext.EXACT);
     }
     
+    /**
+     * Compares equality for the {@link ComparisonContext#FUZZY} context, stacks that equal may not share the same normalized stack.
+     * This result is less specific, mainly used for fuzzy matching between different stacks.
+     * <p>
+     * For example, enchantment books of different enchantments should still be equal under this context.
+     *
+     * @param left  the first stack to compare
+     * @param right the second stack to compare
+     * @return the equality for the {@link ComparisonContext#EXACT} context
+     */
     public static <A, B> boolean equalsFuzzy(EntryStack<A> left, EntryStack<B> right) {
         return equals(left, right, ComparisonContext.FUZZY);
     }

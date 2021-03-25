@@ -27,15 +27,15 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
+import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
@@ -123,18 +123,13 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Rec
     private static void transformNotice(int marker, List<? extends GuiEventListener> setupDisplay, EntryStack<?> noticeStack) {
         if (noticeStack.isEmpty())
             return;
-        for (GuiEventListener widget : setupDisplay) {
-            if (widget instanceof EntryWidget) {
-                EntryWidget entry = (EntryWidget) widget;
-                if (entry.getNoticeMark() == marker && entry.getEntries().size() > 1) {
-                    EntryStack<?> stack = CollectionUtils.findFirstOrNullEqualsExact(entry.getEntries(), noticeStack);
-                    if (stack != null) {
-                        entry.clearStacks();
-                        entry.entry(stack);
-                    }
+        for (EntryWidget widget : Widgets.<EntryWidget>walk(setupDisplay, EntryWidget.class::isInstance)) {
+            if (widget.getNoticeMark() == marker && widget.getEntries().size() > 1) {
+                EntryStack<?> stack = CollectionUtils.findFirstOrNullEqualsExact(widget.getEntries(), noticeStack);
+                if (stack != null) {
+                    widget.clearStacks();
+                    widget.entry(stack);
                 }
-            } else if (widget instanceof ContainerEventHandler) {
-                transformNotice(marker, ((ContainerEventHandler) widget).children(), noticeStack);
             }
         }
     }

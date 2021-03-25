@@ -24,22 +24,14 @@
 package me.shedaniel.rei.plugin.common;
 
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.plugin.beacon.base.DefaultBeaconBaseDisplay;
-import me.shedaniel.rei.plugin.beacon.payment.DefaultBeaconPaymentDisplay;
-import me.shedaniel.rei.plugin.blasting.DefaultBlastingDisplay;
-import me.shedaniel.rei.plugin.brewing.DefaultBrewingDisplay;
-import me.shedaniel.rei.plugin.common.campfire.DefaultCampfireDisplay;
-import me.shedaniel.rei.plugin.common.composting.DefaultCompostingDisplay;
-import me.shedaniel.rei.plugin.common.crafting.DefaultCraftingDisplay;
-import me.shedaniel.rei.plugin.common.stonecutting.DefaultStoneCuttingDisplay;
-import me.shedaniel.rei.plugin.fuel.DefaultFuelDisplay;
-import me.shedaniel.rei.plugin.information.DefaultInformationDisplay;
-import me.shedaniel.rei.plugin.pathing.DefaultPathingDisplay;
-import me.shedaniel.rei.plugin.smelting.DefaultSmeltingDisplay;
-import me.shedaniel.rei.plugin.smithing.DefaultSmithingDisplay;
-import me.shedaniel.rei.plugin.smoking.DefaultSmokingDisplay;
-import me.shedaniel.rei.plugin.stripping.DefaultStrippingDisplay;
-import me.shedaniel.rei.plugin.tilling.DefaultTillingDisplay;
+import me.shedaniel.rei.plugin.common.displays.*;
+import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconBaseDisplay;
+import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconPaymentDisplay;
+import me.shedaniel.rei.plugin.common.displays.brewing.DefaultBrewingDisplay;
+import me.shedaniel.rei.plugin.common.displays.cooking.DefaultBlastingDisplay;
+import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmeltingDisplay;
+import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
+import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 
 public interface BuiltinPlugin {
     CategoryIdentifier<DefaultCraftingDisplay> CRAFTING = CategoryIdentifier.of("minecraft", "plugins/crafting");
