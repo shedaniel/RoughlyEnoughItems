@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.search.argument.type;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchMode;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Style;
@@ -70,7 +69,7 @@ public final class TagArgumentType extends ArgumentType<Unit, String[]> {
     @Override
     public boolean matches(Mutable<String[]> data, EntryStack<?> stack, String searchText, Unit filterData) {
         if (data.getValue() == null) {
-            Collection<ResourceLocation> tags = ((EntryDefinition<Object>) stack.getDefinition()).getTagsFor((EntryStack<Object>) stack, stack.getValue());
+            Collection<ResourceLocation> tags = stack.getTagsFor();
             if (tags.isEmpty()) {
                 data.setValue(EMPTY_ARRAY);
             } else {

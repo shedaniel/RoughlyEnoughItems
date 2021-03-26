@@ -37,11 +37,10 @@ import java.util.stream.StreamSupport;
 
 public class EntryIngredientImpl {
     public static Internals.EntryIngredientProvider provide() {
-        EmptyEntryIngredient empty = new EmptyEntryIngredient();
         return new Internals.EntryIngredientProvider() {
             @Override
             public EntryIngredient empty() {
-                return empty;
+                return EmptyEntryIngredient.EMPTY;
             }
             
             @Override
@@ -51,7 +50,7 @@ public class EntryIngredientImpl {
             
             @Override
             public EntryIngredient of(EntryStack<?>... stacks) {
-                if (stacks.length == 0) return empty;
+                if (stacks.length == 0) return empty();
                 if (stacks.length == 1) return of(stacks[0]);
                 return _of(stacks);
             }
@@ -61,7 +60,7 @@ public class EntryIngredientImpl {
                 if (stacks instanceof EntryIngredient) return (EntryIngredient) stacks;
                 if (stacks instanceof Collection) {
                     int size = ((Collection<EntryStack<?>>) stacks).size();
-                    if (size == 0) return empty;
+                    if (size == 0) return empty();
                     if (size == 1) return of(stacks.iterator().next());
                     return _of(((Collection<EntryStack<?>>) stacks).toArray(new EntryStack[0]));
                 }
@@ -146,6 +145,7 @@ public class EntryIngredientImpl {
     }
     
     private static class EmptyEntryIngredient extends AbstractList<EntryStack<?>> implements EntryIngredient, RandomAccess {
+        private static final EmptyEntryIngredient EMPTY = new EmptyEntryIngredient();
         @Override
         public Iterator<EntryStack<?>> iterator() {
             return Collections.emptyIterator();
@@ -231,6 +231,16 @@ public class EntryIngredientImpl {
         @Override
         public ListTag save() {
             return new ListTag();
+        }
+    
+        @Override
+        public EntryIngredient filter(Predicate<EntryStack<?>> filter) {
+            return this;
+        }
+    
+        @Override
+        public EntryIngredient map(UnaryOperator<EntryStack<?>> transformer) {
+            return this;
         }
     }
     
@@ -343,6 +353,19 @@ public class EntryIngredientImpl {
             listTag.add(stack.save());
             return listTag;
         }
+    
+        @Override
+        public EntryIngredient filter(Predicate<EntryStack<?>> filter) {
+            if (filter.test(stack)) {
+                return this;
+            }
+            return EmptyEntryIngredient.EMPTY;
+        }
+    
+        @Override
+        public EntryIngredient map(UnaryOperator<EntryStack<?>> transformer) {
+            return new SingletonEntryIngredient(transformer.apply(stack));
+        }
     }
     
     private static class ArrayIngredient extends AbstractList<EntryStack<?>> implements EntryIngredient, RandomAccess {
@@ -436,6 +459,20 @@ public class EntryIngredientImpl {
                 listTag.add(stack.save());
             }
             return listTag;
+        }
+    
+        @Override
+        public EntryIngredient filter(Predicate<EntryStack<?>> filter) {
+            return EntryIngredient.of(stream().filter(filter).toArray(EntryStack[]::new));
+        }
+    
+        @Override
+        public EntryIngredient map(UnaryOperator<EntryStack<?>> transformer) {
+            EntryStack<?>[] out = new EntryStack[array.length];
+            for (int i = 0; i < array.length; i++) {
+                out[i] = transformer.apply(array[i]);
+            }
+            return new ArrayIngredient(out);
         }
     }
 }

@@ -32,6 +32,7 @@ import me.shedaniel.architectury.event.events.client.ClientScreenInputEvent;
 import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Env;
+import me.shedaniel.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.api.client.REIOverlay;
@@ -74,6 +75,7 @@ import me.shedaniel.rei.impl.client.transfer.TransferHandlerRegistryImpl;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import me.shedaniel.rei.impl.common.category.CategoryIdentifierImpl;
 import me.shedaniel.rei.impl.common.display.DisplaySerializerRegistryImpl;
+import me.shedaniel.rei.impl.common.entry.EmptyEntryStack;
 import me.shedaniel.rei.impl.common.entry.EntryIngredientImpl;
 import me.shedaniel.rei.impl.common.entry.TypedEntryStack;
 import me.shedaniel.rei.impl.common.entry.comparison.ItemComparatorRegistryImpl;
@@ -84,6 +86,7 @@ import me.shedaniel.rei.impl.common.entry.type.EntryTypeRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.types.EmptyEntryDefinition;
 import me.shedaniel.rei.impl.common.fluid.FluidSupportProviderImpl;
 import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
+import me.shedaniel.rei.impl.common.registry.RecipeManagerContextImpl;
 import me.shedaniel.rei.impl.common.transfer.MenuInfoRegistryImpl;
 import me.shedaniel.rei.impl.common.util.IssuesDetector;
 import me.shedaniel.rei.plugin.test.REITestPlugin;
@@ -148,6 +151,7 @@ public class RoughlyEnoughItemsCore {
                 REIPlugin.class,
                 UnaryOperator.identity(),
                 new EntryTypeRegistryImpl(),
+                new RecipeManagerContextImpl<>(RecipeManagerContextImpl.supplier()),
                 new ItemComparatorRegistryImpl(),
                 new DisplaySerializerRegistryImpl(),
                 new FluidSupportProviderImpl()), "commonPluginManager");
@@ -210,7 +214,7 @@ public class RoughlyEnoughItemsCore {
         Internals.attachInstance(new Internals.EntryStackProvider() {
             @Override
             public EntryStack<Unit> empty() {
-                return TypedEntryStack.EMPTY;
+                return EmptyEntryStack.EMPTY;
             }
             
             @Override
@@ -428,7 +432,7 @@ public class RoughlyEnoughItemsCore {
     
     @Environment(EnvType.CLIENT)
     private void loadTestPlugins() {
-        if ( System.getProperty("rei.test", "false").equals("true")) {
+        if (System.getProperty("rei.test", "false").equals("true")) {
             PluginView.getClientInstance().registerPlugin(new REITestPlugin());
         }
     }

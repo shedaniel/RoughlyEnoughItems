@@ -101,11 +101,12 @@ public final class InternalWidgets {
                     visible[0] = false;
                     IntList redSlots = null;
                     TransferHandler.Context context = TransferHandler.Context.create(false, containerScreen, displaySupplier.get());
-                    for (TransferHandler autoTransferHandler : TransferHandlerRegistry.getInstance()) {
+                    for (TransferHandler transferHandler : TransferHandlerRegistry.getInstance()) {
                         try {
-                            TransferHandler.Result result = autoTransferHandler.handle(context);
-                            if (result.isApplicable())
+                            TransferHandler.Result result = transferHandler.handle(context);
+                            if (result.isApplicable()) {
                                 visible[0] = true;
+                            }
                             if (result.isSuccessful()) {
                                 button.setEnabled(true);
                                 error = null;

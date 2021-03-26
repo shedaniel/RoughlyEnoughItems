@@ -56,6 +56,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagCollection;
+import net.minecraft.tags.TagContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -167,8 +168,8 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     }
     
     @Override
-    public Collection<ResourceLocation> getTagsFor(EntryStack<ItemStack> entry, ItemStack value) {
-        TagCollection<Item> collection = Minecraft.getInstance().getConnection().getTags().getItems();
+    public Collection<ResourceLocation> getTagsFor(TagContainer tagContainer, EntryStack<ItemStack> entry, ItemStack value) {
+        TagCollection<Item> collection = tagContainer.getItems();
         return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getItem());
     }
     

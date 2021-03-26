@@ -55,7 +55,7 @@ public interface PluginManager<P extends REIPlugin<?>> extends ParentReloadable<
     }
     
     static List<PluginManager<? extends REIPlugin<?>>> getActiveInstances() {
-        return EnvExecutor.getEnvSpecific(() -> () -> Arrays.asList(getInstance(), getClientInstance()),
+        return EnvExecutor.getEnvSpecific(() -> () -> Arrays.asList(getInstance(), getClientInstance(), getServerInstance()),
                 () -> () -> Arrays.asList(getInstance(), getServerInstance()));
     }
     

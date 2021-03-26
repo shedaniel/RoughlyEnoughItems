@@ -23,26 +23,23 @@
 
 package me.shedaniel.rei.impl.common.entry;
 
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
+import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
-public class TypedEntryStack<T> extends AbstractEntryStack<T> {
-    private final EntryDefinition<T> definition;
-    private T value;
+public class EmptyEntryStack extends AbstractEntryStack<Unit> {
+    public static final EntryStack<Unit> EMPTY = new EmptyEntryStack();
     
-    public TypedEntryStack(EntryDefinition<T> definition, T value) {
-        this.definition = definition;
-        this.value = value;
+    @Override
+    public EntryDefinition<Unit> getDefinition() {
+        return BuiltinEntryTypes.EMPTY.getDefinition();
     }
     
     @Override
-    public EntryDefinition<T> getDefinition() {
-        return definition;
-    }
-    
-    @Override
-    public T getValue() {
-        return value;
+    public Unit getValue() {
+        return Unit.INSTANCE;
     }
 }

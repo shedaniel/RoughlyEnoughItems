@@ -27,6 +27,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
@@ -35,11 +37,19 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.SerializationTags;
+import net.minecraft.tags.TagContainer;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
 
 @ApiStatus.Internal
 public abstract class AbstractEntryStack<A> extends AbstractRenderer implements EntryStack<A> {
@@ -93,6 +103,40 @@ public abstract class AbstractEntryStack<A> extends AbstractRenderer implements 
     }
     
     @Override
+    @Nullable
+    public ResourceLocation getIdentifier() {
+        return getDefinition().getIdentifier(this, getValue());
+    }
+    
+    @Override
+    public boolean isEmpty() {
+        return getDefinition().isEmpty(this, getValue());
+    }
+    
+    @Override
+    public EntryStack<A> copy() {
+        return wrap(getDefinition().copy(this, getValue()));
+    }
+    
+    @Override
+    public EntryStack<A> rewrap() {
+        return wrap(getValue());
+    }
+    
+    @Override
+    public EntryStack<A> normalize() {
+        return wrap(getDefinition().normalize(this, getValue()));
+    }
+    
+    public EntryStack<A> wrap(A value) {
+        TypedEntryStack<A> stack = new TypedEntryStack<>(getDefinition(), value);
+        for (Short2ObjectMap.Entry<Object> entry : getSettings().short2ObjectEntrySet()) {
+            stack.setting(EntryStack.Settings.getById(entry.getShortKey()), entry.getValue());
+        }
+        return stack;
+    }
+    
+    @Override
     public <T> T get(Settings<T> settings) {
         Object o = this.settings == null ? null : this.settings.get(settings.getId());
         if (o == null) {
@@ -132,7 +176,33 @@ public abstract class AbstractEntryStack<A> extends AbstractRenderer implements 
     }
     
     @Override
+    public int hash(ComparisonContext context) {
+        return getDefinition().hash(this, getValue(), context);
+    }
+    
+    @Override
     public int hashCode() {
         return hash(ComparisonContext.EXACT);
+    }
+    
+    @Override
+    public Collection<ResourceLocation> getTagsFor() {
+        TagContainer container;
+        if (Platform.getEnvironment() == Env.CLIENT) {
+            container = getClientTagContainer();
+        } else {
+            container = SerializationTags.getInstance();
+        }
+        return getDefinition().getTagsFor(container, this, getValue());
+    }
+    
+    @Environment(EnvType.CLIENT)
+    private static TagContainer getClientTagContainer() {
+        return Minecraft.getInstance().getConnection().getTags();
+    }
+    
+    @Override
+    public Component asFormattedText() {
+        return getDefinition().asFormattedText(this, getValue());
     }
 }

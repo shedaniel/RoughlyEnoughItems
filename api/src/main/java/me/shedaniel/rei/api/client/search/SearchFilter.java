@@ -27,6 +27,11 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 
 import java.util.function.Predicate;
 
+/**
+ * A search filter that respects different prefixes, matches a {@link EntryStack}.
+ *
+ * @see SearchProvider
+ */
 public interface SearchFilter extends Predicate<EntryStack<?>> {
     static SearchFilter matchAll() {
         return new SearchFilter() {
