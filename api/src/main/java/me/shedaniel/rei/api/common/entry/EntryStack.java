@@ -50,10 +50,7 @@ import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -108,7 +105,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         EntryDefinition<?> definition = EntryTypeRegistry.getInstance().get(new ResourceLocation(tag.getString("type")));
         EntrySerializer<?> serializer = definition.getSerializer();
         if (serializer != null && serializer.supportReading()) {
-            return EntryStack.of((EntryType<Object>) definition, serializer.read(tag));
+            return EntryStack.of((EntryDefinition<Object>) definition, serializer.read(tag));
         }
         throw new UnsupportedOperationException(definition.getType().getId() + " does not support deserialization!");
     }
@@ -162,6 +159,8 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     }
     
     EntryStack<T> normalize();
+    
+    Collection<ResourceLocation> getTagsFor();
     
     @Deprecated
     int hashCode();

@@ -51,7 +51,7 @@ import java.util.regex.Pattern;
 @Environment(EnvType.CLIENT)
 public class Argument<T, R> {
     public static final String SPACE = " ", EMPTY = "";
-    static final Argument<Unit, Unit> ALWAYS = new Argument<>(AlwaysMatchingArgumentType.INSTANCE, EMPTY, true, -1, -1);
+    static final Argument<Unit, Unit> ALWAYS = new Argument<>(AlwaysMatchingArgumentType.INSTANCE, EMPTY, true, -1, -1, true);
     private ArgumentType<T, R> argumentType;
     private String text;
     private T filterData;
@@ -59,10 +59,6 @@ public class Argument<T, R> {
     private final int start;
     private final int end;
     private static final Pattern SPLIT_PATTERN = Pattern.compile("(?:\"([^\"]*)\")|([^\\s]+)");
-    
-    public Argument(ArgumentType<T, R> argumentType, String text, boolean regular, int start, int end) {
-        this(argumentType, text, regular, start, end, true);
-    }
     
     public Argument(ArgumentType<T, R> argumentType, String text, boolean regular, int start, int end, boolean lowercase) {
         this.argumentType = argumentType;

@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagContainer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -115,7 +116,7 @@ public class BuiltinEntryDefinition<T> implements EntryDefinition<T>, EntrySeria
     }
     
     @Override
-    public Collection<ResourceLocation> getTagsFor(EntryStack<T> entry, T value) {
+    public Collection<ResourceLocation> getTagsFor(TagContainer tagContainer, EntryStack<T> entry, T value) {
         return Collections.emptyList();
     }
     

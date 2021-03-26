@@ -119,7 +119,7 @@ public class DefaultInformationDisplay implements Display {
             
             @Override
             public DefaultInformationDisplay read(CompoundTag tag) {
-                EntryIngredient stacks = EntryIngredient.from(tag.getList("stacks", NbtType.COMPOUND));
+                EntryIngredient stacks = EntryIngredient.read(tag.getList("stacks", NbtType.COMPOUND));
                 Component name = Component.Serializer.fromJson(tag.getString("name"));
                 List<Component> descriptions = new ArrayList<>();
                 for (Tag descriptionTag : tag.getList("descriptions", NbtType.STRING)) {

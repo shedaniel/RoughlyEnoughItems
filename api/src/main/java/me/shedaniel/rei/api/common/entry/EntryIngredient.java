@@ -28,6 +28,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 /**
  * An immutable representation of a list of {@link EntryStack}.
@@ -59,7 +61,7 @@ public interface EntryIngredient extends List<EntryStack<?>> {
         return Internals.getEntryIngredientProvider().builder(initialCapacity);
     }
     
-    static EntryIngredient from(ListTag tag) {
+    static EntryIngredient read(ListTag tag) {
         if (tag.isEmpty()) return empty();
         EntryStack<?>[] stacks = new EntryStack[tag.size()];
         for (int i = 0; i < tag.size(); i++) {
@@ -74,6 +76,10 @@ public interface EntryIngredient extends List<EntryStack<?>> {
     default <T> List<EntryStack<T>> cast() {
         return (List<EntryStack<T>>) (List) this;
     }
+    
+    EntryIngredient filter(Predicate<EntryStack<?>> filter);
+    
+    EntryIngredient map(UnaryOperator<EntryStack<?>> transformer);
     
     interface Builder {
         Builder add(EntryStack<?> stack);

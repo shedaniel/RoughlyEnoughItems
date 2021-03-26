@@ -54,8 +54,11 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagCollection;
+import net.minecraft.tags.TagContainer;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 
@@ -157,12 +160,13 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     
     @Override
     public Component asFormattedText(EntryStack<FluidStack> entry, FluidStack value) {
-        return value.getFluid().defaultFluidState().createLegacyBlock().getBlock().getName();
+        Block block = value.getFluid().defaultFluidState().createLegacyBlock().getBlock();
+        return new TranslatableComponent(block.getDescriptionId());
     }
     
     @Override
-    public Collection<ResourceLocation> getTagsFor(EntryStack<FluidStack> entry, FluidStack value) {
-        TagCollection<Fluid> collection = Minecraft.getInstance().getConnection().getTags().getFluids();
+    public Collection<ResourceLocation> getTagsFor(TagContainer tagContainer, EntryStack<FluidStack> entry, FluidStack value) {
+        TagCollection<Fluid> collection = tagContainer.getFluids();
         return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getFluid());
     }
     

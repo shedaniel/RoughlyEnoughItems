@@ -31,6 +31,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagContainer;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,7 +68,7 @@ public interface EntryDefinition<T> {
     
     Component asFormattedText(EntryStack<T> entry, T value);
     
-    Collection<ResourceLocation> getTagsFor(EntryStack<T> entry, T value);
+    Collection<ResourceLocation> getTagsFor(TagContainer tagContainer, EntryStack<T> entry, T value);
     
     @ApiStatus.NonExtendable
     default <O> EntryDefinition<O> cast() {

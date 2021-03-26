@@ -51,6 +51,10 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     private final List<DisplayFiller<?, ?>> fillers = new ArrayList<>();
     private final MutableInt displayCount = new MutableInt(0);
     
+    public DisplayRegistryImpl() {
+        super(RecipeManagerContextImpl.supplier());
+    }
+    
     @Override
     public void acceptPlugin(REIClientPlugin plugin) {
         plugin.registerDisplays(this);

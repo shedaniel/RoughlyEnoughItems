@@ -38,6 +38,7 @@ import me.shedaniel.rei.plugin.common.displays.*;
 import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconBaseDisplay;
 import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconDisplay;
 import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconPaymentDisplay;
+import me.shedaniel.rei.plugin.common.displays.brewing.DefaultBrewingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultBlastingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultCookingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmeltingDisplay;
@@ -94,6 +95,7 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
         registry.register(CAMPFIRE, DefaultCampfireDisplay.serializer());
         registry.register(STONE_CUTTING, DefaultStoneCuttingDisplay.serializer());
         registry.register(STRIPPING, DefaultStrippingDisplay.serializer());
+        registry.register(BREWING, DefaultBrewingDisplay.serializer());
         registry.register(COMPOSTING, DefaultCompostingDisplay.serializer());
         registry.register(FUEL, DefaultFuelDisplay.serializer());
         registry.register(SMITHING, DefaultSmithingDisplay.serializer());
@@ -106,13 +108,13 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
     
     @Override
     public void registerMenuInfo(MenuInfoRegistry registry) {
-        registry.register(BuiltinPlugin.CRAFTING, CraftingMenu.class,new RecipeBookGridMenuInfo<CraftingMenu, DefaultCraftingDisplay>() {
+        registry.register(BuiltinPlugin.CRAFTING, CraftingMenu.class, new RecipeBookGridMenuInfo<CraftingMenu, DefaultCraftingDisplay>() {
             @Override
             public List<List<ItemStack>> getDisplayInputs(MenuInfoContext<CraftingMenu, ?, DefaultCraftingDisplay> context) {
                 return context.getDisplay().getOrganisedInputEntries(this, context.getMenu());
             }
         });
-        registry.register(BuiltinPlugin.CRAFTING, InventoryMenu.class,new RecipeBookGridMenuInfo<InventoryMenu, DefaultCraftingDisplay>() {
+        registry.register(BuiltinPlugin.CRAFTING, InventoryMenu.class, new RecipeBookGridMenuInfo<InventoryMenu, DefaultCraftingDisplay>() {
             @Override
             public List<List<ItemStack>> getDisplayInputs(MenuInfoContext<InventoryMenu, ?, DefaultCraftingDisplay> context) {
                 return context.getDisplay().getOrganisedInputEntries(this, context.getMenu());

@@ -61,12 +61,12 @@ public class DisplaySerializerRegistryImpl implements DisplaySerializerRegistry 
     
     @Override
     public <D extends Display> CompoundTag save(CategoryIdentifier<? extends D> categoryId, D display, CompoundTag tag) {
-        return null;
+        return ((DisplaySerializer<D>) serializers.get(categoryId).serializer.get()).save(tag, display);
     }
     
     @Override
     public <D extends Display> D read(CategoryIdentifier<? extends D> categoryId, CompoundTag tag) {
-        return null;
+        return ((DisplaySerializer<D>) serializers.get(categoryId).serializer.get()).read(tag);
     }
     
     @Override

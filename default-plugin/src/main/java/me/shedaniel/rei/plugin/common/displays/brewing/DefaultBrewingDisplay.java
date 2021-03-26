@@ -24,8 +24,10 @@
 package me.shedaniel.rei.plugin.common.displays.brewing;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.display.DisplaySerializer;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
@@ -34,6 +36,7 @@ import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -54,17 +57,9 @@ public class DefaultBrewingDisplay implements Display {
     }
     
     @ApiStatus.Internal
-    public DefaultBrewingDisplay(EntryIngredient inputs, EntryIngredient reactants, EntryStack<?> output) {
-        EntryIngredient.Builder inputBuilder = EntryIngredient.builder(inputs.size());
-        for (EntryStack<?> input : inputs) {
-            inputBuilder.add(input.copy().tooltip(new TranslatableComponent("category.rei.brewing.input").withStyle(ChatFormatting.YELLOW)));
-        }
-        this.input = inputBuilder.build();
-        EntryIngredient.Builder reactantBuilder = EntryIngredient.builder(reactants.size());
-        for (EntryStack<?> reactant : reactants) {
-            reactantBuilder.add(reactant.copy().tooltip(new TranslatableComponent("category.rei.brewing.reactant").withStyle(ChatFormatting.YELLOW)));
-        }
-        this.reactant = reactantBuilder.build();
+    public DefaultBrewingDisplay(EntryIngredient input, EntryIngredient reactant, EntryStack<?> output) {
+        this.input = input.map(stack -> stack.copy().tooltip(new TranslatableComponent("category.rei.brewing.input").withStyle(ChatFormatting.YELLOW)));
+        this.reactant = reactant.map(stack -> stack.copy().tooltip(new TranslatableComponent("category.rei.brewing.reactant").withStyle(ChatFormatting.YELLOW)));
         this.output = output.copy().tooltip(new TranslatableComponent("category.rei.brewing.result").withStyle(ChatFormatting.YELLOW));
     }
     
@@ -90,5 +85,25 @@ public class DefaultBrewingDisplay implements Display {
         for (int i = 0; i < 6 - slot * 2; i++)
             stack.add(output);
         return stack;
+    }
+    
+    public static DisplaySerializer<DefaultBrewingDisplay> serializer() {
+        return new DisplaySerializer<DefaultBrewingDisplay>() {
+            @Override
+            public CompoundTag save(CompoundTag tag, DefaultBrewingDisplay display) {
+                tag.put("input", display.input.save());
+                tag.put("reactant", display.reactant.save());
+                tag.put("output", display.output.save());
+                return tag;
+            }
+            
+            @Override
+            public DefaultBrewingDisplay read(CompoundTag tag) {
+                EntryIngredient input = EntryIngredient.read(tag.getList("input", NbtType.COMPOUND));
+                EntryIngredient reactant = EntryIngredient.read(tag.getList("reactant", NbtType.COMPOUND));
+                EntryStack<?> output = EntryStack.read(tag.getCompound("output"));
+                return new DefaultBrewingDisplay(input, reactant, output);
+            }
+        };
     }
 }

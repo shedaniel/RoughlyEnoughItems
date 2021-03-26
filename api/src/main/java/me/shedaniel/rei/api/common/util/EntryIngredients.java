@@ -158,7 +158,7 @@ public final class EntryIngredients {
         }
         ImmutableList.Builder<EntryIngredient> ingredients = ImmutableList.builder();
         for (Tag tag : listTag) {
-            ingredients.add(EntryIngredient.from((ListTag) tag));
+            ingredients.add(EntryIngredient.read((ListTag) tag));
         }
         return ingredients.build();
     }
