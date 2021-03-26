@@ -25,18 +25,14 @@ package me.shedaniel.rei.impl.client.search.argument;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
-import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.config.SearchMode;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.search.argument.type.AlwaysMatchingArgumentType;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentTypesRegistry;
 import me.shedaniel.rei.impl.client.search.result.ArgumentApplicableResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.chat.Component;
 import net.minecraft.util.IntRange;
 import net.minecraft.util.Unit;
 import org.apache.commons.lang3.StringUtils;
@@ -102,33 +98,23 @@ public class Argument<T, R> {
     public static List<CompoundArgument> bakeArguments(String searchTerm, @Nullable ProcessedSink sink) {
         List<CompoundArgument> compoundArguments = Lists.newArrayList();
         int tokenStartIndex = 0;
-        String[] allTokens = StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|");
         
-        for (String token : allTokens) {
+        for (String token : StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|")) {
             Matcher terms = SPLIT_PATTERN.matcher(token);
             CompoundArgument.Builder builder = CompoundArgument.builder();
             while (terms.find()) {
-                String term = MoreObjects.firstNonNull(terms.group(1), terms.group(2));
                 AlternativeArgument.Builder alternativeBuilder = AlternativeArgument.builder();
                 
                 for (ArgumentType<?, ?> type : ArgumentTypesRegistry.ARGUMENT_TYPE_LIST) {
-                    if (type.getSearchMode() == SearchMode.NEVER) continue;
-                    ArgumentApplicableResult result = type.checkApplicable(term);
-                    
-                    if (result.isApplicable()) {
-                        int group = terms.group(1) != null ? 1 : 2;
-                        Argument<?, ?> argument = new Argument<>(type, result.getText(), !result.isInverted(),
-                                terms.start(group) + tokenStartIndex, terms.end(group) + tokenStartIndex, !result.shouldPreserveCasing());
-                        alternativeBuilder.add(argument);
-                        if (sink != null) {
-                            if (group == 1) {
-                                sink.addQuote(terms.start() + tokenStartIndex);
-                                if (terms.end() - 1 + tokenStartIndex < searchTerm.length()) {
-                                    sink.addQuote(terms.end() - 1 + tokenStartIndex);
-                                }
-                            }
-                            sink.addPart(argument, result.isUsingGrammar(), result.grammarRanges(), terms.start() + tokenStartIndex);
-                        }
+                    applyArgument(type, searchTerm, terms, tokenStartIndex, alternativeBuilder, true, sink);
+                    if (!alternativeBuilder.isEmpty()) {
+                        break;
+                    }
+                }
+                
+                if (alternativeBuilder.isEmpty()) {
+                    for (ArgumentType<?, ?> type : ArgumentTypesRegistry.ARGUMENT_TYPE_LIST) {
+                        applyArgument(type, searchTerm, terms, tokenStartIndex, alternativeBuilder, false, sink);
                     }
                 }
                 
@@ -140,6 +126,11 @@ public class Argument<T, R> {
                 sink.addSplitter(tokenStartIndex - 1);
             }
         }
+        prepareSearchFilter(compoundArguments);
+        return compoundArguments;
+    }
+    
+    private static void prepareSearchFilter(List<CompoundArgument> compoundArguments) {
         for (CompoundArgument arguments : compoundArguments) {
             for (AlternativeArgument alternativeArgument : arguments) {
                 for (Argument<?, ?> argument : alternativeArgument) {
@@ -148,14 +139,35 @@ public class Argument<T, R> {
                 }
             }
         }
-        return compoundArguments;
+    }
+    
+    private static void applyArgument(ArgumentType<?, ?> type, String searchTerm, Matcher terms, int tokenStartIndex, AlternativeArgument.Builder alternativeBuilder, boolean forceGrammar, @Nullable ProcessedSink sink) {
+        String term = MoreObjects.firstNonNull(terms.group(1), terms.group(2));
+        if (type.getSearchMode() == SearchMode.NEVER) return;
+        ArgumentApplicableResult result = type.checkApplicable(term, forceGrammar);
+        
+        if (result.isApplicable()) {
+            int group = terms.group(1) != null ? 1 : 2;
+            Argument<?, ?> argument = new Argument<>(type, result.getText(), !result.isInverted(),
+                    terms.start(group) + tokenStartIndex, terms.end(group) + tokenStartIndex, !result.shouldPreserveCasing());
+            alternativeBuilder.add(argument);
+            if (sink != null) {
+                if (group == 1) {
+                    sink.addQuote(terms.start() + tokenStartIndex);
+                    if (terms.end() - 1 + tokenStartIndex < searchTerm.length()) {
+                        sink.addQuote(terms.end() - 1 + tokenStartIndex);
+                    }
+                }
+                sink.addPart(argument, result.isUsingGrammar(), result.grammarRanges(), terms.start() + tokenStartIndex);
+            }
+        }
     }
     
     @ApiStatus.Internal
     public static boolean matches(EntryStack<?> stack, List<CompoundArgument> compoundArguments) {
         if (compoundArguments.isEmpty()) return true;
         Mutable<?> mutable = new MutableObject<>();
-    
+        
         a:
         for (CompoundArgument arguments : compoundArguments) {
             for (AlternativeArgument argument : arguments) {
@@ -186,13 +198,6 @@ public class Argument<T, R> {
     
     private static <T, R, Z, B> boolean matches(ArgumentType<T, B> argumentType, Mutable<Z> data, EntryStack<?> stack, String filter, R filterData) {
         return argumentType.matches((Mutable<B>) data, stack, filter, (T) filterData);
-    }
-    
-    public static String tryGetEntryStackTooltip(EntryStack<?> stack) {
-        Tooltip tooltip = stack.getTooltip(new Point());
-        if (tooltip != null)
-            return CollectionUtils.mapAndJoinToString(tooltip.getText(), Component::getString, "\n");
-        return "";
     }
     
     public ArgumentType<?, ?> getArgument() {

@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.common.transfer;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
@@ -31,23 +32,22 @@ import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
 public class MenuInfoRegistryImpl implements MenuInfoRegistry {
     private final Map<CategoryIdentifier<?>, Map<Class<? extends AbstractContainerMenu>, MenuInfo<?, ?>>> map = Maps.newLinkedHashMap();
-    private final Map<Predicate<CategoryIdentifier<?>>, Map<Class<? extends AbstractContainerMenu>, MenuInfo<?, ?>>> mapGeneric = Maps.newLinkedHashMap();
+    private final Map<Predicate<CategoryIdentifier<?>>, List<MenuInfo<?, ?>>> mapGeneric = Maps.newLinkedHashMap();
     
     @Override
-    public <D extends Display> void register(CategoryIdentifier<D> category, MenuInfo<?, D> menuInfo) {
-        map.computeIfAbsent(category, id -> Maps.newLinkedHashMap())
-                .put(menuInfo.getMenuClass(), menuInfo);
+    public <C extends AbstractContainerMenu, D extends Display> void register(CategoryIdentifier<D> category, Class<C> menuClass, MenuInfo<C, D> menuInfo) {
+        map.computeIfAbsent(category, id -> Maps.newLinkedHashMap()).put(menuClass, menuInfo);
     }
     
     @Override
     public <D extends Display> void registerGeneric(Predicate<CategoryIdentifier<?>> categoryPredicate, MenuInfo<?, D> menuInfo) {
-        mapGeneric.computeIfAbsent(categoryPredicate, id -> Maps.newLinkedHashMap())
-                .put(menuInfo.getMenuClass(), menuInfo);
+        mapGeneric.computeIfAbsent(categoryPredicate, id -> Lists.newArrayList()).add(menuInfo);
     }
     
     @Override
@@ -64,16 +64,11 @@ public class MenuInfoRegistryImpl implements MenuInfoRegistry {
             }
         }
         
-        for (Map.Entry<Predicate<CategoryIdentifier<?>>, Map<Class<? extends AbstractContainerMenu>, MenuInfo<?, ?>>> entry : mapGeneric.entrySet()) {
+        for (Map.Entry<Predicate<CategoryIdentifier<?>>, List<MenuInfo<?, ?>>> entry : mapGeneric.entrySet()) {
             if (entry.getKey().test(category) && !entry.getValue().isEmpty()) {
-                infoMap = entry.getValue();
-                if (infoMap.containsKey(menuClass)) {
-                    return (MenuInfo<T, D>) infoMap.get(menuClass);
-                }
-                for (Map.Entry<Class<? extends AbstractContainerMenu>, MenuInfo<?, ?>> infoEntry : infoMap.entrySet()) {
-                    if (infoEntry.getKey().isAssignableFrom(menuClass)) {
-                        return (MenuInfo<T, D>) infoEntry.getValue();
-                    }
+                List<MenuInfo<?, ?>> infoList = entry.getValue();
+                if (!infoList.isEmpty()) {
+                    return (MenuInfo<T, D>) infoList.get(0);
                 }
             }
         }

@@ -71,7 +71,7 @@ public final class IdentifierArgumentType extends ArgumentType<Unit, String> {
             if (identifier == null) {
                 data.setValue(EMPTY);
             } else {
-                String s = identifier.toString();
+                String s = identifier.getPath();
                 if (s.isEmpty()) {
                     data.setValue(EMPTY);
                 } else {

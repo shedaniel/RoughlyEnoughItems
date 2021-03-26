@@ -54,12 +54,16 @@ public abstract class ArgumentType<T, R> {
         return SearchMode.PREFIX;
     }
     
-    public ArgumentApplicableResult checkApplicable(String text) {
-        ArgumentApplicableResult status = checkApplicable(text, getPrefix());
-        if (status.isApplicable()) {
-            return status;
-        } else if (getSearchMode() == SearchMode.ALWAYS) {
-            status = checkApplicable(text, "");
+    public ArgumentApplicableResult checkApplicable(String text, boolean forceGrammar) {
+        String prefix = getPrefix();
+        if (forceGrammar && !prefix.isEmpty()) {
+            ArgumentApplicableResult status = checkApplicable(text, prefix);
+            if (status.isApplicable()) {
+                return status;
+            }
+        }
+        if (!forceGrammar && getSearchMode() == SearchMode.ALWAYS) {
+            ArgumentApplicableResult status = checkApplicable(text, "");
             if (status.isApplicable()) {
                 status.notUsingGrammar();
             }
@@ -71,7 +75,7 @@ public abstract class ArgumentType<T, R> {
     private ArgumentApplicableResult checkApplicable(String text, String prefix) {
         if (prefix == null) return ArgumentApplicableResult.notApplicable();
         if (text.startsWith("-" + prefix)) return ArgumentApplicableResult.applyInverted(text.substring(1 + prefix.length())).grammar(0, prefix.length() + 1);
-        if (text.startsWith(prefix + "-")) return ArgumentApplicableResult.applyInverted(text.substring(1 + prefix.length())).grammar(0, prefix.length() + 1);
+        if (!prefix.isEmpty() && text.startsWith(prefix + "-")) return ArgumentApplicableResult.applyInverted(text.substring(1 + prefix.length())).grammar(0, prefix.length() + 1);
         if (text.startsWith(prefix)) return ArgumentApplicableResult.apply(text.substring(prefix.length())).grammar(0, prefix.length());
         return ArgumentApplicableResult.notApplicable();
     }

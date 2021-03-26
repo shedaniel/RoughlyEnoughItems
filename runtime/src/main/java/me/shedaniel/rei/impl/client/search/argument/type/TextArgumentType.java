@@ -44,7 +44,8 @@ public final class TextArgumentType extends ArgumentType<Unit, String> {
     }
     
     @Override
-    public @Nullable String getPrefix() {
+    @Nullable
+    public String getPrefix() {
         return "";
     }
     

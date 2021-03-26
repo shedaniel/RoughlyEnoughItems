@@ -106,21 +106,21 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
     
     @Override
     public void registerMenuInfo(MenuInfoRegistry registry) {
-        registry.register(BuiltinPlugin.CRAFTING, new RecipeBookGridMenuInfo<CraftingMenu, DefaultCraftingDisplay>(CraftingMenu.class) {
+        registry.register(BuiltinPlugin.CRAFTING, CraftingMenu.class,new RecipeBookGridMenuInfo<CraftingMenu, DefaultCraftingDisplay>() {
             @Override
             public List<List<ItemStack>> getDisplayInputs(MenuInfoContext<CraftingMenu, ?, DefaultCraftingDisplay> context) {
                 return context.getDisplay().getOrganisedInputEntries(this, context.getMenu());
             }
         });
-        registry.register(BuiltinPlugin.CRAFTING, new RecipeBookGridMenuInfo<InventoryMenu, DefaultCraftingDisplay>(InventoryMenu.class) {
+        registry.register(BuiltinPlugin.CRAFTING, InventoryMenu.class,new RecipeBookGridMenuInfo<InventoryMenu, DefaultCraftingDisplay>() {
             @Override
             public List<List<ItemStack>> getDisplayInputs(MenuInfoContext<InventoryMenu, ?, DefaultCraftingDisplay> context) {
                 return context.getDisplay().getOrganisedInputEntries(this, context.getMenu());
             }
         });
-        registry.register(BuiltinPlugin.SMELTING, new RecipeBookGridMenuInfo<>(FurnaceMenu.class));
-        registry.register(BuiltinPlugin.SMOKING, new RecipeBookGridMenuInfo<>(SmokerMenu.class));
-        registry.register(BuiltinPlugin.BLASTING, new RecipeBookGridMenuInfo<>(BlastFurnaceMenu.class));
+        registry.register(BuiltinPlugin.SMELTING, FurnaceMenu.class, new RecipeBookGridMenuInfo<>());
+        registry.register(BuiltinPlugin.SMOKING, SmokerMenu.class, new RecipeBookGridMenuInfo<>());
+        registry.register(BuiltinPlugin.BLASTING, BlastFurnaceMenu.class, new RecipeBookGridMenuInfo<>());
     }
     
     @Override

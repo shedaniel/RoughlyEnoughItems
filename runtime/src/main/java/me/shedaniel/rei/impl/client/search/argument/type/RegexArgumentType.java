@@ -50,7 +50,7 @@ public final class RegexArgumentType extends ArgumentType<@Nullable Pattern, Str
     }
     
     @Override
-    public ArgumentApplicableResult checkApplicable(String text) {
+    public ArgumentApplicableResult checkApplicable(String text, boolean forceGrammar) {
         boolean inverted = false;
         String matchText = text;
         if (matchText.startsWith("-")) {
