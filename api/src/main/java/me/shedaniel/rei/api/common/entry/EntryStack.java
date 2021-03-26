@@ -27,9 +27,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
+import me.shedaniel.math.Point;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
@@ -122,6 +124,16 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         throw new UnsupportedOperationException(getType().getId() + " does not support serialization!");
     }
     
+    @Nullable
+    @Environment(EnvType.CLIENT)
+    Tooltip getTooltip(Point mouse, boolean appendModName);
+    
+    @Override
+    @Nullable
+    default Tooltip getTooltip(Point mouse) {
+        return getTooltip(mouse, ConfigObject.getInstance().shouldAppendModNames());
+    }
+    
     EntryDefinition<T> getDefinition();
     
     default EntryType<T> getType() {
@@ -132,6 +144,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         return getDefinition().getValueType();
     }
     
+    @Environment(EnvType.CLIENT)
     default EntryRenderer<T> getRenderer() {
         EntryRenderer<?> renderer = get(Settings.RENDER).apply(this);
         return renderer == null ? EntryRenderer.empty() : renderer.cast();
@@ -144,7 +157,6 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     
     EntryStack<T> copy();
     
-    @ApiStatus.Internal
     default EntryStack<T> rewrap() {
         return copy();
     }
@@ -187,8 +199,10 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         
         public static final Supplier<Boolean> TRUE = () -> true;
         public static final Supplier<Boolean> FALSE = () -> false;
+        @Environment(EnvType.CLIENT)
         public static final Function<EntryStack<?>, EntryRenderer<?>> DEFAULT_RENDERER = stack -> stack.getDefinition().getRenderer();
         public static final BiFunction<EntryStack<?>, Tooltip, Tooltip> DEFAULT_TOOLTIP_PROCESSOR = (stack, tooltip) -> tooltip;
+        @Environment(EnvType.CLIENT)
         public static final Settings<Function<EntryStack<?>, EntryRenderer<?>>> RENDER = new Settings<>(DEFAULT_RENDERER);
         @Deprecated
         public static final Settings<BiFunction<EntryStack<?>, Tooltip, Tooltip>> TOOLTIP_PROCESSOR = new Settings<>(DEFAULT_TOOLTIP_PROCESSOR);

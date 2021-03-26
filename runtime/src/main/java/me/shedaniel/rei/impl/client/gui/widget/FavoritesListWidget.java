@@ -462,7 +462,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         entry.y.setAs(y - 8);
         
         boolean contains = currentBounds.contains(PointHelper.ofMouse());
-        int newIndex = contains ? getReleaseIndex() : Iterables.indexOf(entries.values(), e -> e == entry);
+        int newIndex = contains ? getReleaseIndex() : Math.max(0, Iterables.indexOf(entries.values(), e -> e == entry));
         
         if (entries.size() - 1 <= newIndex) {
             Entry remove = this.entries.remove(entry.hashIgnoreAmount());

@@ -24,8 +24,8 @@
 package me.shedaniel.rei.api.common.entry.type;
 
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
-import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -36,6 +36,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
+/**
+ * A definition of an {@link EntryType}, an interface to provide information from an object type.
+ *
+ * @param <T> the type of entry
+ */
 public interface EntryDefinition<T> {
     Class<T> getValueType();
     
@@ -44,7 +49,8 @@ public interface EntryDefinition<T> {
     @Environment(EnvType.CLIENT)
     EntryRenderer<T> getRenderer();
     
-    @Nullable ResourceLocation getIdentifier(EntryStack<T> entry, T value);
+    @Nullable
+    ResourceLocation getIdentifier(EntryStack<T> entry, T value);
     
     boolean isEmpty(EntryStack<T> entry, T value);
     

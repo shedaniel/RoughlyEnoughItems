@@ -23,12 +23,15 @@
 
 package me.shedaniel.rei.impl.client.search.argument.type;
 
+import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchMode;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.client.search.argument.Argument;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.Unit;
@@ -68,10 +71,18 @@ public final class TooltipArgumentType extends ArgumentType<Unit, String> {
     @Override
     public boolean matches(Mutable<String> data, EntryStack<?> stack, String searchText, Unit filterData) {
         if (data.getValue() == null) {
-            data.setValue(Argument.tryGetEntryStackTooltip(stack).toLowerCase(Locale.ROOT));
+            data.setValue(tryGetEntryStackTooltip(stack).toLowerCase(Locale.ROOT));
         }
         String tooltip = data.getValue();
         return tooltip.isEmpty() || tooltip.contains(searchText);
+    }
+    
+    public static String tryGetEntryStackTooltip(EntryStack<?> stack) {
+        Tooltip tooltip = stack.getTooltip(new Point(), false);
+        if (tooltip != null) {
+            return CollectionUtils.mapAndJoinToString(tooltip.getText(), Component::getString, "\n");
+        }
+        return "";
     }
     
     @Override

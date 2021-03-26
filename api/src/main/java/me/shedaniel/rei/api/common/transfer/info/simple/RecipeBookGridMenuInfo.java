@@ -29,17 +29,6 @@ import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 
 public class RecipeBookGridMenuInfo<T extends RecipeBookMenu<?>, D extends SimpleMenuDisplay> implements SimpleGridMenuInfo<T, D> {
-    private final Class<? extends RecipeBookMenu<?>> menuClass;
-    
-    public RecipeBookGridMenuInfo(Class<T> menuClass) {
-        this.menuClass = menuClass;
-    }
-    
-    @Override
-    public Class<? extends T> getMenuClass() {
-        return (Class<? extends T>) menuClass;
-    }
-    
     @Override
     public int getCraftingResultSlotIndex(T menu) {
         return menu.getResultSlotIndex();

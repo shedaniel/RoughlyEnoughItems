@@ -59,6 +59,10 @@ public class AlternativeArgument extends ForwardingList<Argument<?, ?>> {
             return this;
         }
         
+        public boolean isEmpty() {
+            return arguments == null;
+        }
+        
         public AlternativeArgument build() {
             if (arguments == null) return AlternativeArgument.EMPTY;
             if (arguments.size() == 1) return new AlternativeArgument(Collections.singletonList(arguments.get(0)));

@@ -29,6 +29,8 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.ClientInternals;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,9 +39,11 @@ public interface EntryRenderer<T> {
         return ClientInternals.getEmptyEntryRenderer();
     }
     
+    @Environment(EnvType.CLIENT)
     void render(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta);
     
     @Nullable
+    @Environment(EnvType.CLIENT)
     Tooltip getTooltip(EntryStack<T> entry, Point mouse);
     
     @ApiStatus.NonExtendable

@@ -52,7 +52,7 @@ public final class AlwaysMatchingArgumentType extends ArgumentType<Unit, Unit> {
     }
     
     @Override
-    public ArgumentApplicableResult checkApplicable(String text) {
+    public ArgumentApplicableResult checkApplicable(String text, boolean forceGrammar) {
         return ArgumentApplicableResult.notApplicable();
     }
     

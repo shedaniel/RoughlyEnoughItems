@@ -27,12 +27,16 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.Nullable;
 
 public interface Renderer {
+    @Environment(EnvType.CLIENT)
     void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta);
     
     @Nullable
+    @Environment(EnvType.CLIENT)
     default Tooltip getTooltip(Point mouse) {
         return null;
     }

@@ -30,13 +30,14 @@ import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
-import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.resources.ResourceLocation;
+import org.apache.commons.lang3.mutable.Mutable;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -107,19 +108,19 @@ public abstract class AbstractEntryStack<A> extends AbstractRenderer implements 
     
     @Override
     @Nullable
-    public Tooltip getTooltip(Point mouse) {
-        Tooltip[] tooltip = {this.get(Settings.RENDER).apply(this).<A>cast().getTooltip(this, mouse)};
-        if (tooltip[0] == null) return null;
-        tooltip[0].getText().addAll(get(EntryStack.Settings.TOOLTIP_APPEND_EXTRA).apply(this));
-        tooltip[0] = get(EntryStack.Settings.TOOLTIP_PROCESSOR).apply(this, tooltip[0]);
-        if (tooltip[0] == null) return null;
-        if (ConfigObject.getInstance().shouldAppendModNames()) {
+    public Tooltip getTooltip(Point mouse, boolean appendModName) {
+        Mutable<Tooltip> tooltip = new MutableObject<>(this.get(Settings.RENDER).apply(this).<A>cast().getTooltip(this, mouse));
+        if (tooltip.getValue() == null) return null;
+        tooltip.getValue().getText().addAll(get(EntryStack.Settings.TOOLTIP_APPEND_EXTRA).apply(this));
+        tooltip.setValue(get(Settings.TOOLTIP_PROCESSOR).apply(this, tooltip.getValue()));
+        if (tooltip.getValue() == null) return null;
+        if (appendModName) {
             ResourceLocation location = getIdentifier();
             if (location != null) {
-                ClientHelper.getInstance().appendModIdToTooltips(tooltip[0].getText(), location.getNamespace());
+                ClientHelper.getInstance().appendModIdToTooltips(tooltip.getValue().getText(), location.getNamespace());
             }
         }
-        return tooltip[0];
+        return tooltip.getValue();
     }
     
     @Override

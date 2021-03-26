@@ -182,6 +182,7 @@
   "config.roughlyenoughitems.accessibility.displayPanelLocation.right": "Right Side",
   "config.roughlyenoughitems.search.tooltipSearch": "Tooltip Search (#):",
   "config.roughlyenoughitems.search.tagSearch": "Tag Search ($):",
+  "config.roughlyenoughitems.search.identifierSearch": "Identifier Search (*):",
   "config.roughlyenoughitems.search.modSearch": "Mod Search (@):",
   "config.roughlyenoughitems.search_mode.always": "Always Enabled",
   "config.roughlyenoughitems.search_mode.prefix": "While Using Prefix",
