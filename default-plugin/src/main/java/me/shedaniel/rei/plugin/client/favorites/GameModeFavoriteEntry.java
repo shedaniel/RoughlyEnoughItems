@@ -24,22 +24,19 @@
 package me.shedaniel.rei.plugin.client.favorites;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector4f;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.favorites.CompoundFavoriteRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.common.util.Animator;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -54,6 +51,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class GameModeFavoriteEntry extends FavoriteEntry {
     public static final ResourceLocation ID = new ResourceLocation("roughlyenoughitems", "gamemode");
@@ -73,51 +72,39 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
     
     @Override
     public Renderer getRenderer(boolean showcase) {
-        return new AbstractRenderer() {
-            private Animator notSetOffset = new Animator(0);
-            private Rectangle notSetScissorArea = new Rectangle();
-            private long nextSwitch = -1;
+        if (gameMode == null) {
+            List<Renderer> renderers = IntStream.range(0, 4).mapToObj(GameModeFavoriteEntry::getRenderer).collect(Collectors.toList());
+            return new CompoundFavoriteRenderer(showcase, renderers, () -> Minecraft.getInstance().gameMode.getPlayerMode().getId()) {
+                @Override
+                @Nullable
+                public Tooltip getTooltip(Point mouse) {
+                    return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.dropdown"));
+                }
             
+                @Override
+                public boolean equals(Object o) {
+                    if (this == o) return true;
+                    if (o == null || getClass() != o.getClass()) return false;
+                    return hashCode() == o.hashCode();
+                }
+            
+                @Override
+                public int hashCode() {
+                    return Objects.hash(getClass(), showcase);
+                }
+            };
+        }
+        return getRenderer(gameMode.getId());
+    }
+    
+    private static Renderer getRenderer(int id) {
+        GameType type = GameType.byId(id);
+        return new AbstractRenderer() {
             @Override
             public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 int color = bounds.contains(mouseX, mouseY) ? 0xFFEEEEEE : 0xFFAAAAAA;
-//                fillGradient(matrices, bounds.getX(), bounds.getY(), bounds.getMaxX(), bounds.getY() + 1, color, color);
-//                fillGradient(matrices, bounds.getX(), bounds.getMaxY() - 1, bounds.getMaxX(), bounds.getMaxY(), color, color);
-//                fillGradient(matrices, bounds.getX(), bounds.getY(), bounds.getX() + 1, bounds.getMaxY(), color, color);
-//                fillGradient(matrices, bounds.getMaxX() - 1, bounds.getY(), bounds.getMaxX(), bounds.getMaxY(), color, color);
                 if (bounds.width > 4 && bounds.height > 4) {
-                    if (gameMode == null) {
-                        updateAnimator(delta);
-                        Vector4f vector4f = new Vector4f(bounds.x + 2, bounds.y + 2, 0, 1.0F);
-                        vector4f.transform(matrices.last().pose());
-                        Vector4f vector4f2 = new Vector4f(bounds.getMaxX() - 2, bounds.getMaxY() - 2, 0, 1.0F);
-                        vector4f2.transform(matrices.last().pose());
-                        notSetScissorArea.setBounds((int) vector4f.x(), (int) vector4f.y(), (int) vector4f2.x() - (int) vector4f.x(), (int) vector4f2.y() - (int) vector4f.y());
-                        ScissorsHandler.INSTANCE.scissor(notSetScissorArea);
-                        int offset = Math.round(notSetOffset.floatValue() * bounds.getHeight());
-                        for (int i = 0; i <= 3; i++) {
-                            GameType type = GameType.byId(i);
-                            renderGameModeText(matrices, type, bounds.getCenterX(), bounds.getCenterY() + bounds.getHeight() * i - offset, color);
-                        }
-                        ScissorsHandler.INSTANCE.removeLastScissor();
-                    } else {
-                        renderGameModeText(matrices, gameMode, bounds.getCenterX(), bounds.getCenterY(), color);
-                    }
-                }
-            }
-            
-            private void updateAnimator(float delta) {
-                notSetOffset.update(delta);
-                if (showcase) {
-                    if (nextSwitch == -1) {
-                        nextSwitch = Util.getMillis();
-                    }
-                    if (Util.getMillis() - nextSwitch > 1000) {
-                        nextSwitch = Util.getMillis();
-                        notSetOffset.setTo(((int) notSetOffset.target() + 1) % 4, 500);
-                    }
-                } else {
-                    notSetOffset.setTo((Minecraft.getInstance().gameMode.getPlayerMode().getId() + 1) % 4, 500);
+                    renderGameModeText(matrices, type, bounds.getCenterX(), bounds.getCenterY(), color);
                 }
             }
             
@@ -130,9 +117,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             @Override
             @Nullable
             public Tooltip getTooltip(Point mouse) {
-                if (gameMode == null)
-                    return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.dropdown"));
-                return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", gameMode.getDisplayName().getString()));
+                return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", type.getDisplayName().getString()));
             }
             
             @Override
@@ -144,7 +129,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             
             @Override
             public int hashCode() {
-                return Objects.hash(getClass(), showcase, gameMode);
+                return Objects.hash(getClass(), false, type);
             }
         };
     }
