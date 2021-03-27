@@ -48,7 +48,8 @@ public class EmptyEntryDefinition {
         }
         
         @Override
-        public @Nullable Tooltip getTooltip(EntryStack<Unit> entry, Point mouse) {
+        @Nullable
+        public Tooltip getTooltip(EntryStack<Unit> entry, Point mouse) {
             return null;
         }
     }

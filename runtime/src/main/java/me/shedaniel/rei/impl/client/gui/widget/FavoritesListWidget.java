@@ -191,10 +191,6 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         
         @Override
         public void drag() {
-            entries.remove(entry.hashIgnoreAmount());
-            applyNewFavorites(entries.values().stream()
-                    .map(Entry::getEntry)
-                    .collect(Collectors.toList()));
         }
         
         @Override
@@ -310,7 +306,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         newFavorites.removeIf(FavoriteEntry::isEntryInvalid);
         
         int entrySize = entrySize();
-        IntSet newFavoritesHash = new IntOpenHashSet(CollectionUtils.mapToInt(newFavorites, FavoriteEntry::hashIgnoreAmount));
+        IntSet newFavoritesHash = new IntOpenHashSet(CollectionUtils.mapToInt(newFavorites, FavoriteEntry::hashCode));
         List<Entry> removedEntries = Lists.newArrayList(this.entries.values());
         removedEntries.removeIf(entry -> newFavoritesHash.contains(entry.hashIgnoreAmount()));
         
@@ -323,7 +319,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         this.entries.clear();
         
         for (FavoriteEntry favorite : newFavorites) {
-            Entry entry = prevEntries.get(favorite.hashIgnoreAmount());
+            Entry entry = prevEntries.get(favorite.hashCode());
             
             if (entry == null) {
                 entry = new Entry(favorite, entrySize);
@@ -565,7 +561,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         }
         
         public int hashIgnoreAmount() {
-            return entry.hashIgnoreAmount();
+            return entry.hashCode();
         }
         
         public FavoriteEntry getEntry() {
@@ -803,9 +799,11 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         private final LazyResettable<List<Row>> rows = new LazyResettable<>(() -> {
             List<Row> rows = new ArrayList<>();
             for (FavoriteEntryType.Section section : FavoriteEntryType.registry().sections()) {
-                rows.add(new SectionRow(section.getText().copy().withStyle(style -> style.withUnderlined(true))));
+                rows.add(new SectionRow(section.getText(), section.getText().copy().withStyle(style -> style.withUnderlined(true))));
                 rows.add(new SectionEntriesRow(CollectionUtils.map(section.getEntries(), FavoriteEntry::copy)));
+                rows.add(new SectionSeparatorRow());
             }
+            if (!rows.isEmpty()) rows.remove(rows.size() - 1);
             return rows;
         });
         private final ScrollingContainer scroller = new ScrollingContainer() {
@@ -839,18 +837,20 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             
             if (expendState.floatValue() > 0.1f) {
                 ScissorsHandler.INSTANCE.scissor(scrollBounds);
-                int y = scrollBounds.y - (int) scroller.scrollAmount;
+                matrices.pushPose();
+                matrices.translate(0, scroller.scrollAmount, 0);
+                int y = scrollBounds.y;
                 for (Row row : rows.get()) {
                     row.render(matrices, scrollBounds.x, y, scrollBounds.width, row.getRowHeight(), mouseX, mouseY, delta);
                     y += row.getRowHeight();
                 }
-                scroller.renderScrollBar(0, 1, 1f);
+                matrices.popPose();
                 ScissorsHandler.INSTANCE.removeLastScissor();
             }
         }
         
         private Rectangle updatePanelArea(Rectangle fullArea) {
-            int currentWidth = 16 + Math.round(Math.min(expendState.floatValue(), 1) * (fullArea.getWidth() - 16 - 12));
+            int currentWidth = 16 + Math.round(Math.min(expendState.floatValue(), 1) * (fullArea.getWidth() - 16 - 8));
             int currentHeight = 16 + Math.round(expendState.floatValue() * (fullArea.getHeight() * 0.4f - 16 - 8));
             return new Rectangle(fullArea.x + 4, fullArea.getMaxY() - currentHeight - 4, currentWidth, currentHeight);
         }
@@ -858,7 +858,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         @Override
         public boolean mouseScrolled(double d, double e, double f) {
             if (scrollBounds.contains(d, e)) {
-                scroller.offset(ClothConfigInitializer.getScrollStep() * -f, true);
+                scroller.offset(ClothConfigInitializer.getScrollStep() * f, true);
                 return true;
             }
             return super.mouseScrolled(d, e, f);
@@ -879,36 +879,58 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             
             public abstract void render(PoseStack matrices, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta);
         }
-        
+    
         private static class SectionRow extends Row {
-            private final Component text;
-            
-            public SectionRow(Component text) {
-                this.text = text;
+            private final Component sectionText;
+            private final Component styledText;
+        
+            public SectionRow(Component sectionText, Component styledText) {
+                this.sectionText = sectionText;
+                this.styledText = styledText;
             }
-            
+        
             @Override
             public int getRowHeight() {
                 return 11;
             }
-            
+        
             @Override
             public void render(PoseStack matrices, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
-                Minecraft.getInstance().font.draw(matrices, text, x, y + 1, 0xFFFFFFFF);
+                if (mouseX >= x && mouseY >= y && mouseX <= x + rowWidth && mouseY <= y + rowHeight) {
+                    Tooltip.create(sectionText).queue();
+                }
+                Minecraft.getInstance().font.draw(matrices, styledText, x, y + 1, 0xFFFFFFFF);
             }
-            
+        
             @Override
             public List<? extends GuiEventListener> children() {
                 return Collections.emptyList();
             }
         }
+    
+        private static class SectionSeparatorRow extends Row {
+            @Override
+            public int getRowHeight() {
+                return 5;
+            }
         
+            @Override
+            public void render(PoseStack matrices, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
+                fillGradient(matrices, x, y + 2, x + rowWidth, y + 3, -571806998, -571806998);
+            }
+        
+            @Override
+            public List<? extends GuiEventListener> children() {
+                return Collections.emptyList();
+            }
+        }
+    
         private class SectionEntriesRow extends Row {
             private final List<FavoriteEntry> entries;
             private final List<SectionFavoriteWidget> widgets;
             private int blockedCount;
             private int lastY;
-            
+        
             public SectionEntriesRow(List<FavoriteEntry> entries) {
                 this.entries = entries;
                 int entrySize = entrySize();
@@ -925,7 +947,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             
             @Override
             public int getRowHeight() {
-                return Mth.ceil((entries.size() + blockedCount) / (scrollBounds.width / (float) entrySize())) * entrySize() + 5;
+                return Mth.ceil((entries.size() + blockedCount) / (scrollBounds.width / (float) entrySize())) * entrySize();
             }
             
             @Override
@@ -980,11 +1002,13 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                     this.getBounds().width = this.getBounds().height = (int) Math.round(this.size.doubleValue() / 100);
                     double offsetSize = (entrySize() - this.size.doubleValue() / 100) / 2;
                     this.getBounds().x = (int) Math.round(x.doubleValue() + offsetSize);
-                    this.getBounds().y = (int) Math.round(y.doubleValue() + offsetSize) - (int) scroller.scrollAmount;
+                    this.getBounds().y = (int) Math.round(y.doubleValue() + offsetSize) + lastY;
                 }
-                
+    
                 @Override
-                public @Nullable Tooltip getCurrentTooltip(Point point) {
+                @Nullable
+                public Tooltip getCurrentTooltip(Point point) {
+                    if (!scrollBounds.contains(point)) return null;
                     Tooltip tooltip = super.getCurrentTooltip(point);
                     if (tooltip != null) {
                         tooltip.getText().add(ImmutableTextComponent.EMPTY);
@@ -1005,15 +1029,15 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 for (SectionFavoriteWidget widget : this.widgets) {
                     while (true) {
                         int xPos = currentX * entrySize + scrollBounds.x - 1;
-                        int yPos = currentY * entrySize + lastY + (int) scroller.scrollAmount;
+                        int yPos = currentY * entrySize;
                         
                         currentX++;
                         if (currentX >= width) {
                             currentX = 0;
                             currentY++;
                         }
-                        
-                        if (notSteppingOnExclusionZones(xPos, yPos, entrySize, entrySize, scrollBounds)) {
+    
+                        if (notSteppingOnExclusionZones(xPos, yPos + lastY + (int) scroller.scrollAmount, entrySize, entrySize, scrollBounds)) {
                             widget.moveTo(animated.test(widget), xPos, yPos);
                             break;
                         } else {

@@ -194,7 +194,8 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
         }
         
         @Override
-        public @Nullable Tooltip getTooltip(EntryStack<FluidStack> entry, Point mouse) {
+        @Nullable
+        public Tooltip getTooltip(EntryStack<FluidStack> entry, Point mouse) {
             if (entry.isEmpty())
                 return null;
             List<Component> toolTip = Lists.newArrayList(entry.asFormattedText());

@@ -23,10 +23,9 @@
 
 package me.shedaniel.rei.plugin.client.favorites;
 
-import com.google.gson.JsonObject;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector4f;
+import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIHelper;
@@ -42,13 +41,12 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,7 +57,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
     public static final ResourceLocation ID = new ResourceLocation("roughlyenoughitems", "weather");
     public static final String TRANSLATION_KEY = "favorite.section.weather";
     private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    public static final String KEY = "type";
+    public static final String KEY = "weather";
     @Nullable
     private final Weather weather;
     
@@ -86,19 +84,27 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
                     if (weather == null) {
                         matrices.pushPose();
                         updateAnimator(delta);
-                        notSetScissorArea.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
-//                        ScissorsHandler.INSTANCE.scissor(notSetScissorArea);
+                        Vector4f vector4f = new Vector4f(bounds.x, bounds.y, 0, 1.0F);
+                        vector4f.transform(matrices.last().pose());
+                        Vector4f vector4f2 = new Vector4f(bounds.getMaxX(), bounds.getMaxY(), 0, 1.0F);
+                        vector4f2.transform(matrices.last().pose());
+                        notSetScissorArea.setBounds((int) vector4f.x(), (int) vector4f.y(), (int) vector4f2.x() - (int) vector4f.x(), (int) vector4f2.y() - (int) vector4f.y());
+                        ScissorsHandler.INSTANCE.scissor(notSetScissorArea);
                         int offset = Math.round(notSetOffset.floatValue() * bounds.getHeight());
                         for (int i = 0; i <= 2; i++) {
                             Weather type = Weather.byId(i);
                             renderWeatherIcon(matrices, type, bounds.getCenterX(), bounds.getCenterY() + bounds.getHeight() * i - offset, color);
                         }
-//                        ScissorsHandler.INSTANCE.removeLastScissor();
+                        ScissorsHandler.INSTANCE.removeLastScissor();
                         matrices.popPose();
                     } else {
                         renderWeatherIcon(matrices, weather, bounds.getCenterX(), bounds.getCenterY(), color);
                     }
                 }
+//                fillGradient(matrices, bounds.getX(), bounds.getY(), bounds.getMaxX(), bounds.getY() + 1, color, color);
+//                fillGradient(matrices, bounds.getX(), bounds.getMaxY() - 1, bounds.getMaxX(), bounds.getMaxY(), color, color);
+//                fillGradient(matrices, bounds.getX(), bounds.getY(), bounds.getX() + 1, bounds.getMaxY(), color, color);
+//                fillGradient(matrices, bounds.getMaxX() - 1, bounds.getY(), bounds.getMaxX(), bounds.getMaxY(), color, color);
             }
             
             private void updateAnimator(float delta) {
@@ -118,28 +124,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
             
             private void renderWeatherIcon(PoseStack matrices, Weather type, int centerX, int centerY, int color) {
                 Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
-                Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                Matrix4f matrix = matrices.last().pose();
-                float j = centerX - 6.5f;
-                float i = j + 14;
-                float k = centerY - 6.5f;
-                float l = k + 14;
-                float m = getZ();
-                float f = type.getId() * 14 / 256f;
-                float g = f + 14 / 256f;
-                float h = 14 / 256f;
-                float n = h + 14 / 256f;
-                
-                BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-                bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
-                bufferBuilder.vertex(matrix, i, l, m).uv(f, n).endVertex();
-                bufferBuilder.vertex(matrix, j, l, m).uv(g, n).endVertex();
-                bufferBuilder.vertex(matrix, j, k, m).uv(g, h).endVertex();
-                bufferBuilder.vertex(matrix, i, k, m).uv(f, h).endVertex();
-                bufferBuilder.end();
-                RenderSystem.enableAlphaTest();
-                BufferUploader.end(bufferBuilder);
+                blit(matrices, centerX - 7, centerY - 7, type.getId() * 14, 14, 14, 14, 256, 256);
             }
             
             @Override
@@ -211,10 +196,10 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
     
     public enum Type implements FavoriteEntryType<WeatherFavoriteEntry> {
         INSTANCE;
-        
+    
         @Override
-        public WeatherFavoriteEntry fromJson(JsonObject object) {
-            String stringValue = GsonHelper.getAsString(object, KEY);
+        public WeatherFavoriteEntry read(CompoundTag object) {
+            String stringValue = object.getString(KEY);
             Weather type = stringValue.equals("NOT_SET") ? null : Weather.valueOf(stringValue);
             return new WeatherFavoriteEntry(type);
         }
@@ -223,11 +208,11 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
         public WeatherFavoriteEntry fromArgs(Object... args) {
             return new WeatherFavoriteEntry((Weather) args[0]);
         }
-        
+    
         @Override
-        public JsonObject toJson(WeatherFavoriteEntry entry, JsonObject object) {
-            object.addProperty(KEY, entry.weather == null ? "NOT_SET" : entry.weather.name());
-            return object;
+        public CompoundTag save(WeatherFavoriteEntry entry, CompoundTag tag) {
+            tag.putString(KEY, entry.weather == null ? "NOT_SET" : entry.weather.name());
+            return tag;
         }
     }
     

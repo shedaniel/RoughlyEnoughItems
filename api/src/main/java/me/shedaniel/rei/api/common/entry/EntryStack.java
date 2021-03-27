@@ -23,10 +23,6 @@
 
 package me.shedaniel.rei.api.common.entry;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.mojang.serialization.Dynamic;
-import com.mojang.serialization.JsonOps;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
@@ -41,11 +37,8 @@ import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -67,38 +60,6 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     
     static <T> EntryStack<T> of(EntryType<T> type, T value) {
         return of(type.getDefinition(), value);
-    }
-    
-    @ApiStatus.Internal
-    static EntryStack<?> readFromJson(JsonElement jsonElement) {
-        try {
-            JsonObject obj = jsonElement.getAsJsonObject();
-            EntryType<Object> type = EntryType.deferred(new ResourceLocation(GsonHelper.getAsString(obj, "type")));
-            EntrySerializer<Object> serializer = type.getDefinition().getSerializer();
-            if (serializer != null && serializer.supportReading()) {
-                Object o = serializer.read(TagParser.parseTag(obj.toString()));
-                return EntryStack.of(type, o);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return EntryStack.empty();
-    }
-    
-    @ApiStatus.Internal
-    @Nullable
-    default JsonElement toJson() {
-        try {
-            EntrySerializer<T> serializer = getDefinition().getSerializer();
-            if (serializer != null && serializer.supportSaving()) {
-                JsonObject object = Dynamic.convert(NbtOps.INSTANCE, JsonOps.INSTANCE, serializer.save(this, getValue())).getAsJsonObject();
-                object.addProperty("type", getType().getId().toString());
-                return object;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
     }
     
     static EntryStack<?> read(CompoundTag tag) {

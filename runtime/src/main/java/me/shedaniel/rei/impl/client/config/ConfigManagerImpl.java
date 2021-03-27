@@ -26,9 +26,9 @@ package me.shedaniel.rei.impl.client.config;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.architectury.hooks.ScreenHooks;
 import me.shedaniel.architectury.platform.Platform;
@@ -42,7 +42,7 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Jankson;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonNull;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonObject;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonPrimitive;
-import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.api.SyntaxError;
+import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.api.DeserializationException;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
@@ -76,6 +76,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -99,60 +100,13 @@ import static me.shedaniel.autoconfig.util.Utils.setUnsafely;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class ConfigManagerImpl implements ConfigManager {
-    private boolean craftableOnly;
+    private boolean craftableOnly = false;
     private final Gson gson = new GsonBuilder().create();
     private ConfigObjectImpl object;
     
     public ConfigManagerImpl() {
-        this.craftableOnly = false;
         Jankson jankson = Jankson.builder().build();
-        AutoConfig.register(ConfigObjectImpl.class, (definition, configClass) -> new JanksonConfigSerializer<>(definition, configClass, Jankson.builder().registerPrimitiveTypeAdapter(InputConstants.Key.class, it -> {
-            return it instanceof String ? InputConstants.getKey((String) it) : null;
-        }).registerSerializer(InputConstants.Key.class, (it, marshaller) -> new JsonPrimitive(it.getName())).registerTypeAdapter(ModifierKeyCode.class, o -> {
-            String code = ((JsonPrimitive) o.get("keyCode")).asString();
-            if (code.endsWith(".unknown")) return ModifierKeyCode.unknown();
-            InputConstants.Key keyCode = InputConstants.getKey(code);
-            Modifier modifier = Modifier.of(((Number) ((JsonPrimitive) o.get("modifier")).getValue()).shortValue());
-            return ModifierKeyCode.of(keyCode, modifier);
-        }).registerSerializer(ModifierKeyCode.class, (keyCode, marshaller) -> {
-            JsonObject object = new JsonObject();
-            object.put("keyCode", new JsonPrimitive(keyCode.getKeyCode().getName()));
-            object.put("modifier", new JsonPrimitive(keyCode.getModifier().getValue()));
-            return object;
-        }).registerSerializer(EntryStack.class, (stack, marshaller) -> {
-            try {
-                return jankson.load(gson.toJson(stack.toJson()));
-            } catch (SyntaxError syntaxError) {
-                syntaxError.printStackTrace();
-                return JsonNull.INSTANCE;
-            }
-        }).registerPrimitiveTypeAdapter(EntryStack.class, it -> {
-            return it instanceof String ? EntryStack.readFromJson(gson.fromJson((String) it, JsonElement.class)) : null;
-        }).registerTypeAdapter(EntryStack.class, it -> {
-            return EntryStack.readFromJson(gson.fromJson(it.toString(), JsonElement.class));
-        }).registerSerializer(FavoriteEntry.class, (favoriteEntry, marshaller) -> {
-            try {
-                return jankson.load(favoriteEntry.toJson(new com.google.gson.JsonObject()).toString());
-            } catch (SyntaxError syntaxError) {
-                syntaxError.printStackTrace();
-                return JsonNull.INSTANCE;
-            }
-        }).registerTypeAdapter(FavoriteEntry.class, it -> {
-            com.google.gson.JsonObject object = gson.fromJson(it.toString(), com.google.gson.JsonObject.class);
-            return FavoriteEntry.delegate(() -> FavoriteEntry.fromJson(object), () -> object);
-        }).registerPrimitiveTypeAdapter(FavoriteEntry.class, it -> {
-            com.google.gson.JsonObject object = gson.fromJson(it.toString(), com.google.gson.JsonObject.class);
-            return FavoriteEntry.delegate(() -> FavoriteEntry.fromJson(object), () -> object);
-        }).registerSerializer(FilteringRule.class, (rule, marshaller) -> {
-            return new JsonPrimitive(FilteringRule.toTag(rule, new CompoundTag()).toString());
-        }).registerPrimitiveTypeAdapter(FilteringRule.class, it -> {
-            try {
-                return it instanceof String ? FilteringRule.fromTag(TagParser.parseTag((String) it)) : null;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }).build()));
+        AutoConfig.register(ConfigObjectImpl.class, (definition, configClass) -> new JanksonConfigSerializer<>(definition, configClass, buildJankson(Jankson.builder())));
         GuiRegistry guiRegistry = AutoConfig.getGuiRegistry(ConfigObjectImpl.class);
         guiRegistry.registerPredicateProvider((i13n, field, config, defaults, guiProvider) -> {
             if (field.isAnnotationPresent(ConfigEntry.Gui.Excluded.class))
@@ -183,6 +137,127 @@ public class ConfigManagerImpl implements ConfigManager {
         RoughlyEnoughItemsCore.LOGGER.info("Config loaded.");
     }
     
+    private static Jankson buildJankson(Jankson.Builder builder) {
+        // InputConstants.Key
+        builder.registerSerializer(InputConstants.Key.class, (value, marshaller) -> {
+            return new JsonPrimitive(value.getName());
+        });
+        builder.registerDeserializer(String.class, InputConstants.Key.class, (value, marshaller) -> {
+            return InputConstants.getKey(value);
+        });
+        
+        // ModifierKeyCode
+        builder.registerSerializer(ModifierKeyCode.class, (value, marshaller) -> {
+            JsonObject object = new JsonObject();
+            object.put("keyCode", new JsonPrimitive(value.getKeyCode().getName()));
+            object.put("modifier", new JsonPrimitive(value.getModifier().getValue()));
+            return object;
+        });
+        builder.registerDeserializer(JsonObject.class, ModifierKeyCode.class, (value, marshaller) -> {
+            String code = value.get(String.class, "keyCode");
+            if (code.endsWith(".unknown")) {
+                return ModifierKeyCode.unknown();
+            } else {
+                InputConstants.Key keyCode = InputConstants.getKey(code);
+                Modifier modifier = Modifier.of(value.getShort("modifier", (short) 0));
+                return ModifierKeyCode.of(keyCode, modifier);
+            }
+        });
+        
+        // Tag
+        builder.registerSerializer(Tag.class, (value, marshaller) -> {
+            return marshaller.serialize(value.toString());
+        });
+        builder.registerDeserializer(String.class, Tag.class, (value, marshaller) -> {
+            try {
+                return TagParser.parseTag(value);
+            } catch (CommandSyntaxException e) {
+                throw new DeserializationException(e);
+            }
+        });
+        
+        // EntryStack
+        builder.registerSerializer(EntryStack.class, (stack, marshaller) -> {
+            try {
+                return marshaller.serialize(stack.save());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return JsonNull.INSTANCE;
+            }
+        });
+        builder.registerDeserializer(Tag.class, EntryStack.class, (value, marshaller) -> {
+            try {
+                return EntryStack.read((CompoundTag) value);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return EntryStack.empty();
+            }
+        });
+        builder.registerDeserializer(String.class, EntryStack.class, (value, marshaller) -> {
+            try {
+                return EntryStack.read(TagParser.parseTag(value));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return EntryStack.empty();
+            }
+        });
+        
+        // FilteringRule
+        builder.registerSerializer(FilteringRule.class, (value, marshaller) -> {
+            try {
+                return marshaller.serialize(FilteringRule.save(value, new CompoundTag()));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return JsonNull.INSTANCE;
+            }
+        });
+        builder.registerDeserializer(Tag.class, FilteringRule.class, (value, marshaller) -> {
+            try {
+                return FilteringRule.read((CompoundTag) value);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+        builder.registerDeserializer(String.class, FilteringRule.class, (value, marshaller) -> {
+            try {
+                return FilteringRule.read(TagParser.parseTag(value));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+        
+        // FavoriteEntry
+        builder.registerSerializer(FavoriteEntry.class, (value, marshaller) -> {
+            try {
+                return marshaller.serialize(value.save(new CompoundTag()));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return JsonNull.INSTANCE;
+            }
+        });
+        builder.registerDeserializer(Tag.class, FavoriteEntry.class, (value, marshaller) -> {
+            try {
+                return FavoriteEntry.delegate(() -> FavoriteEntry.read((CompoundTag) value), () -> (CompoundTag) value);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+        builder.registerDeserializer(String.class, FavoriteEntry.class, (value, marshaller) -> {
+            try {
+                CompoundTag tag = TagParser.parseTag(value);
+                return FavoriteEntry.delegate(() -> FavoriteEntry.read(tag), () -> tag);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
+        
+        return builder.build();
+    }
+    
     @Override
     public void startReload() {
     }
@@ -193,8 +268,9 @@ public class ConfigManagerImpl implements ConfigManager {
     
     @Override
     public void saveConfig() {
-        if (getConfig().getFavoriteEntries() != null)
+        if (getConfig().getFavoriteEntries() != null) {
             getConfig().getFavoriteEntries().removeIf(Objects::isNull);
+        }
         if (getConfig().getFilteredStacks() != null) {
             getConfig().getFilteredStacks().removeIf(EntryStack::isEmpty);
             List<EntryStack<?>> normalizedFilteredStacks = CollectionUtils.map(getConfig().getFilteredStacks(), EntryStack::normalize);
@@ -204,11 +280,11 @@ public class ConfigManagerImpl implements ConfigManager {
         if (getConfig().getFilteringRules().stream().noneMatch(filteringRule -> filteringRule instanceof ManualFilteringRule)) {
             getConfig().getFilteringRules().add(new ManualFilteringRule());
         }
-        AutoConfig.getConfigHolder(ConfigObjectImpl.class).save();
         AutoConfig.getConfigHolder(ConfigObjectImpl.class).registerLoadListener((configHolder, configObject) -> {
             object = configObject;
             return InteractionResult.PASS;
         });
+        AutoConfig.getConfigHolder(ConfigObjectImpl.class).save();
     }
     
     @Override

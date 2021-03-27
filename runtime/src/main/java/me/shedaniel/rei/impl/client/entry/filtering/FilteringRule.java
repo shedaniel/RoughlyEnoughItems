@@ -56,17 +56,17 @@ public interface FilteringRule<T extends FilteringRule<?>> {
         return registry;
     }
     
-    static CompoundTag toTag(FilteringRule<?> rule, CompoundTag tag) {
+    static CompoundTag save(FilteringRule<?> rule, CompoundTag tag) {
         tag.putString("id", REGISTRY.getKey(rule).toString());
-        tag.put("rule", rule.toTag(new CompoundTag()));
+        tag.put("rule", rule.save(new CompoundTag()));
         return tag;
     }
     
-    static FilteringRule<?> fromTag(CompoundTag tag) {
+    static FilteringRule<?> read(CompoundTag tag) {
         return REGISTRY.get(ResourceLocation.tryParse(tag.getString("id"))).createFromTag(tag.getCompound("rule"));
     }
     
-    CompoundTag toTag(CompoundTag tag);
+    CompoundTag save(CompoundTag tag);
     
     T createFromTag(CompoundTag tag);
     

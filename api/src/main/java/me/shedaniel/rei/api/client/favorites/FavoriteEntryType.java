@@ -23,11 +23,11 @@
 
 package me.shedaniel.rei.api.client.favorites;
 
-import com.google.gson.JsonObject;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
@@ -45,11 +45,11 @@ public interface FavoriteEntryType<T extends FavoriteEntry> {
         return PluginManager.getClientInstance().get(FavoriteEntryType.Registry.class);
     }
     
-    T fromJson(JsonObject object);
+    T read(CompoundTag object);
     
     T fromArgs(Object... args);
     
-    JsonObject toJson(T entry, JsonObject object);
+    CompoundTag save(T entry, CompoundTag tag);
     
     @ApiStatus.NonExtendable
     interface Registry extends Reloadable<REIClientPlugin> {

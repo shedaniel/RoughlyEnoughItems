@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.plugin.client;
 
-import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.math.Point;
@@ -59,9 +58,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.Item;
@@ -104,9 +103,10 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                     Minecraft.getInstance().getTextureManager().bind(id);
                     innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), 0, 1, 0, 1);
                 }
-                
+    
                 @Override
-                public @Nullable Tooltip getTooltip(Point point) {
+                @Nullable
+                public Tooltip getTooltip(Point point) {
                     return Tooltip.create(new TextComponent("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
                 }
             }));
@@ -168,21 +168,21 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         EntryStackFavoriteType(ResourceLocation id) {
             this.id = id;
         }
-        
+    
         @Override
-        public EntryStackFavoriteEntry fromJson(JsonObject object) {
-            return new EntryStackFavoriteEntry(EntryStack.readFromJson(GsonHelper.getAsJsonObject(object, key)));
+        public EntryStackFavoriteEntry read(CompoundTag object) {
+            return new EntryStackFavoriteEntry(EntryStack.read(object.getCompound(key)));
         }
         
         @Override
         public EntryStackFavoriteEntry fromArgs(Object... args) {
             return new EntryStackFavoriteEntry((EntryStack<?>) args[0]);
         }
-        
+    
         @Override
-        public JsonObject toJson(EntryStackFavoriteEntry entry, JsonObject object) {
-            object.add(key, entry.stack.toJson());
-            return object;
+        public CompoundTag save(EntryStackFavoriteEntry entry, CompoundTag tag) {
+            tag.put(key, entry.stack.save());
+            return tag;
         }
     }
     

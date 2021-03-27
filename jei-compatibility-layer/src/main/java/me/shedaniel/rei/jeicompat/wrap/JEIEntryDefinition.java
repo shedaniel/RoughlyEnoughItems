@@ -144,7 +144,8 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
         }
         
         @Override
-        public @Nullable Tooltip getTooltip(EntryStack<T> entry, Point mouse) {
+        @Nullable
+        public Tooltip getTooltip(EntryStack<T> entry, Point mouse) {
             List<Component> components = ingredientRenderer.getTooltip(entry.getValue(), Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
             if (components != null && !components.isEmpty()) {
                 return Tooltip.create(mouse, components);

@@ -37,7 +37,8 @@ public abstract class DisplayRenderer extends AbstractRenderer {
     }
     
     @Override
-    public @Nullable Tooltip getTooltip(Point mouse) {
+    @Nullable
+    public Tooltip getTooltip(Point mouse) {
         return null;
     }
 }

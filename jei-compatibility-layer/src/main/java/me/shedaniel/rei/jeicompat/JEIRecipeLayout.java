@@ -88,12 +88,14 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
     }
     
     @Override
-    public @Nullable IFocus<?> getFocus() {
+    @Nullable
+    public IFocus<?> getFocus() {
         throw TODO();
     }
     
     @Override
-    public @Nullable <V> IFocus<V> getFocus(@NotNull IIngredientType<V> ingredientType) {
+    @Nullable
+    public <V> IFocus<V> getFocus(@NotNull IIngredientType<V> ingredientType) {
         throw TODO();
     }
     

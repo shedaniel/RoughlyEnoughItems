@@ -320,7 +320,8 @@ public class EntryWidget extends Slot implements DraggableStackProvider {
     }
     
     @Override
-    public @Nullable Tooltip getCurrentTooltip(me.shedaniel.math.Point point) {
+    @Nullable
+    public Tooltip getCurrentTooltip(me.shedaniel.math.Point point) {
         return getCurrentEntry().getTooltip(point);
     }
     
