@@ -30,6 +30,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.favorites.CompoundFavoriteRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
@@ -40,18 +41,24 @@ import me.shedaniel.rei.api.common.util.Animator;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class WeatherFavoriteEntry extends FavoriteEntry {
     public static final ResourceLocation ID = new ResourceLocation("roughlyenoughitems", "weather");
@@ -72,56 +79,51 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
     
     @Override
     public Renderer getRenderer(boolean showcase) {
+        if (weather == null) {
+            List<Renderer> renderers = IntStream.range(0, 3).mapToObj(WeatherFavoriteEntry::getRenderer).collect(Collectors.toList());
+            return new CompoundFavoriteRenderer(showcase, renderers, () -> getCurrentWeather().getId()) {
+                @Override
+                @Nullable
+                public Tooltip getTooltip(Point mouse) {
+                    return Tooltip.create(mouse, new TranslatableComponent("text.rei.weather_button.tooltip.dropdown"));
+                }
+                
+                @Override
+                public boolean equals(Object o) {
+                    if (this == o) return true;
+                    if (o == null || getClass() != o.getClass()) return false;
+                    return hashCode() == o.hashCode();
+                }
+                
+                @Override
+                public int hashCode() {
+                    return Objects.hash(getClass(), showcase);
+                }
+            };
+        }
+        return getRenderer(weather.getId());
+    }
+    
+    private static Weather getCurrentWeather() {
+        ClientLevel world = Minecraft.getInstance().level;
+        if (world.isThundering())
+            return Weather.THUNDER;
+        if (world.getLevelData().isRaining())
+            return Weather.RAIN;
+        return Weather.CLEAR;
+    }
+    
+    private static Renderer getRenderer(int id) {
+        Weather weather = Weather.byId(id);
         return new AbstractRenderer() {
-            private Animator notSetOffset = new Animator(0);
-            private Rectangle notSetScissorArea = new Rectangle();
-            private long nextSwitch = -1;
-            
             @Override
             public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 int color = bounds.contains(mouseX, mouseY) ? 0xFFEEEEEE : 0xFFAAAAAA;
                 if (bounds.width > 4 && bounds.height > 4) {
-                    if (weather == null) {
-                        matrices.pushPose();
-                        updateAnimator(delta);
-                        Vector4f vector4f = new Vector4f(bounds.x, bounds.y, 0, 1.0F);
-                        vector4f.transform(matrices.last().pose());
-                        Vector4f vector4f2 = new Vector4f(bounds.getMaxX(), bounds.getMaxY(), 0, 1.0F);
-                        vector4f2.transform(matrices.last().pose());
-                        notSetScissorArea.setBounds((int) vector4f.x(), (int) vector4f.y(), (int) vector4f2.x() - (int) vector4f.x(), (int) vector4f2.y() - (int) vector4f.y());
-                        ScissorsHandler.INSTANCE.scissor(notSetScissorArea);
-                        int offset = Math.round(notSetOffset.floatValue() * bounds.getHeight());
-                        for (int i = 0; i <= 2; i++) {
-                            Weather type = Weather.byId(i);
-                            renderWeatherIcon(matrices, type, bounds.getCenterX(), bounds.getCenterY() + bounds.getHeight() * i - offset, color);
-                        }
-                        ScissorsHandler.INSTANCE.removeLastScissor();
-                        matrices.popPose();
-                    } else {
-                        renderWeatherIcon(matrices, weather, bounds.getCenterX(), bounds.getCenterY(), color);
-                    }
-                }
-//                fillGradient(matrices, bounds.getX(), bounds.getY(), bounds.getMaxX(), bounds.getY() + 1, color, color);
-//                fillGradient(matrices, bounds.getX(), bounds.getMaxY() - 1, bounds.getMaxX(), bounds.getMaxY(), color, color);
-//                fillGradient(matrices, bounds.getX(), bounds.getY(), bounds.getX() + 1, bounds.getMaxY(), color, color);
-//                fillGradient(matrices, bounds.getMaxX() - 1, bounds.getY(), bounds.getMaxX(), bounds.getMaxY(), color, color);
-            }
-            
-            private void updateAnimator(float delta) {
-                notSetOffset.update(delta);
-                if (showcase) {
-                    if (nextSwitch == -1) {
-                        nextSwitch = Util.getMillis();
-                    }
-                    if (Util.getMillis() - nextSwitch > 1000) {
-                        nextSwitch = Util.getMillis();
-                        notSetOffset.setTo(((int) notSetOffset.target() + 1) % 3, 500);
-                    }
-                } else {
-                    notSetOffset.setTo((Minecraft.getInstance().gameMode.getPlayerMode().getId() + 1) % 3, 500);
+                    renderWeatherIcon(matrices, weather, bounds.getCenterX(), bounds.getCenterY(), color);
                 }
             }
-            
+    
             private void renderWeatherIcon(PoseStack matrices, Weather type, int centerX, int centerY, int color) {
                 Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
                 blit(matrices, centerX - 7, centerY - 7, type.getId() * 14, 14, 14, 14, 256, 256);
@@ -130,8 +132,6 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
             @Override
             @Nullable
             public Tooltip getTooltip(Point mouse) {
-                if (weather == null)
-                    return Tooltip.create(mouse, new TranslatableComponent("text.rei.weather_button.tooltip.dropdown"));
                 return Tooltip.create(mouse, new TranslatableComponent("text.rei.weather_button.tooltip.entry", new TranslatableComponent(weather.getTranslateKey())));
             }
             
@@ -144,7 +144,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
             
             @Override
             public int hashCode() {
-                return Objects.hash(getClass(), showcase, weather);
+                return Objects.hash(getClass(), false, weather);
             }
         };
     }
