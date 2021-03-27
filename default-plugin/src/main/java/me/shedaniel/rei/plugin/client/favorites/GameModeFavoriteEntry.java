@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.plugin.client.favorites;
 
-import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector4f;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -44,11 +44,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.Nullable;
 
@@ -81,14 +81,18 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             @Override
             public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 int color = bounds.contains(mouseX, mouseY) ? 0xFFEEEEEE : 0xFFAAAAAA;
-                fillGradient(matrices, bounds.getX(), bounds.getY(), bounds.getMaxX(), bounds.getY() + 1, color, color);
-                fillGradient(matrices, bounds.getX(), bounds.getMaxY() - 1, bounds.getMaxX(), bounds.getMaxY(), color, color);
-                fillGradient(matrices, bounds.getX(), bounds.getY(), bounds.getX() + 1, bounds.getMaxY(), color, color);
-                fillGradient(matrices, bounds.getMaxX() - 1, bounds.getY(), bounds.getMaxX(), bounds.getMaxY(), color, color);
+//                fillGradient(matrices, bounds.getX(), bounds.getY(), bounds.getMaxX(), bounds.getY() + 1, color, color);
+//                fillGradient(matrices, bounds.getX(), bounds.getMaxY() - 1, bounds.getMaxX(), bounds.getMaxY(), color, color);
+//                fillGradient(matrices, bounds.getX(), bounds.getY(), bounds.getX() + 1, bounds.getMaxY(), color, color);
+//                fillGradient(matrices, bounds.getMaxX() - 1, bounds.getY(), bounds.getMaxX(), bounds.getMaxY(), color, color);
                 if (bounds.width > 4 && bounds.height > 4) {
                     if (gameMode == null) {
                         updateAnimator(delta);
-                        notSetScissorArea.setBounds(bounds.x + 2, bounds.y + 2, bounds.width - 4, bounds.height - 4);
+                        Vector4f vector4f = new Vector4f(bounds.x + 2, bounds.y + 2, 0, 1.0F);
+                        vector4f.transform(matrices.last().pose());
+                        Vector4f vector4f2 = new Vector4f(bounds.getMaxX() - 2, bounds.getMaxY() - 2, 0, 1.0F);
+                        vector4f2.transform(matrices.last().pose());
+                        notSetScissorArea.setBounds((int) vector4f.x(), (int) vector4f.y(), (int) vector4f2.x() - (int) vector4f.x(), (int) vector4f2.y() - (int) vector4f.y());
                         ScissorsHandler.INSTANCE.scissor(notSetScissorArea);
                         int offset = Math.round(notSetOffset.floatValue() * bounds.getHeight());
                         for (int i = 0; i <= 3; i++) {
@@ -120,7 +124,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             private void renderGameModeText(PoseStack matrices, GameType type, int centerX, int centerY, int color) {
                 Component s = new TranslatableComponent("text.rei.short_gamemode." + type.getName());
                 Font font = Minecraft.getInstance().font;
-                font.draw(matrices, s, centerX - font.width(s) / 2f + 1, centerY - 3.5f, color);
+                font.draw(matrices, s, centerX - font.width(s) / 2f + 0.5f, centerY - 3.5f, color);
             }
             
             @Override
@@ -194,10 +198,10 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
     
     public enum Type implements FavoriteEntryType<GameModeFavoriteEntry> {
         INSTANCE;
-        
+    
         @Override
-        public GameModeFavoriteEntry fromJson(JsonObject object) {
-            String stringValue = GsonHelper.getAsString(object, KEY);
+        public GameModeFavoriteEntry read(CompoundTag object) {
+            String stringValue = object.getString(KEY);
             GameType type = stringValue.equals("NOT_SET") ? null : GameType.valueOf(stringValue);
             return new GameModeFavoriteEntry(type);
         }
@@ -206,11 +210,11 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         public GameModeFavoriteEntry fromArgs(Object... args) {
             return new GameModeFavoriteEntry((GameType) args[0]);
         }
-        
+    
         @Override
-        public JsonObject toJson(GameModeFavoriteEntry entry, JsonObject object) {
-            object.addProperty(KEY, entry.gameMode == null ? "NOT_SET" : entry.gameMode.name());
-            return object;
+        public CompoundTag save(GameModeFavoriteEntry entry, CompoundTag tag) {
+            tag.putString(KEY, entry.gameMode == null ? "NOT_SET" : entry.gameMode.name());
+            return tag;
         }
     }
     

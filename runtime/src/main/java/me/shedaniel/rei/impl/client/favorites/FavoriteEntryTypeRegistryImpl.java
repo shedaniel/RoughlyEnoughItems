@@ -60,7 +60,8 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
     }
     
     @Override
-    public @Nullable ResourceLocation getId(FavoriteEntryType<?> type) {
+    @Nullable
+    public ResourceLocation getId(FavoriteEntryType<?> type) {
         return this.registry.inverse().get(type);
     }
     

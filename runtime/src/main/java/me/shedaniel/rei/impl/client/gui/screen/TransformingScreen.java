@@ -142,7 +142,8 @@ public class TransformingScreen extends DelegateScreen implements ScissorsScreen
     }
     
     @Override
-    public @Nullable Rectangle handleScissor(@Nullable Rectangle rectangle) {
+    @Nullable
+    public Rectangle handleScissor(@Nullable Rectangle rectangle) {
         if (renderingLastScreen == translatingLast && rectangle != null)
             rectangle.translate((int) xTransformer.getAsDouble(), (int) yTransformer.getAsDouble());
         return rectangle;

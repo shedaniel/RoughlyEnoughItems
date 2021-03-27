@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.api.client.favorites;
 
-import com.google.gson.JsonObject;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.ClientInternals;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,12 +40,12 @@ public abstract class FavoriteEntry {
     public static final String TYPE_KEY = "type";
     private final UUID uuid = UUID.randomUUID();
     
-    public static FavoriteEntry delegate(Supplier<FavoriteEntry> supplier, @Nullable Supplier<JsonObject> toJson) {
+    public static FavoriteEntry delegate(Supplier<FavoriteEntry> supplier, @Nullable Supplier<CompoundTag> toJson) {
         return ClientInternals.delegateFavoriteEntry(supplier, toJson);
     }
     
     @Nullable
-    public static FavoriteEntry fromJson(JsonObject object) {
+    public static FavoriteEntry read(CompoundTag object) {
         return ClientInternals.favoriteEntryFromJson(object);
     }
     
@@ -57,9 +57,9 @@ public abstract class FavoriteEntry {
         return entry == null || entry.isInvalid();
     }
     
-    public JsonObject toJson(JsonObject object) {
-        object.addProperty(TYPE_KEY, getType().toString());
-        return Objects.requireNonNull(Objects.requireNonNull(FavoriteEntryType.registry().get(getType())).toJson(this, object));
+    public CompoundTag save(CompoundTag tag) {
+        tag.putString(TYPE_KEY, getType().toString());
+        return Objects.requireNonNull(Objects.requireNonNull(FavoriteEntryType.registry().get(getType())).save(this, tag));
     }
     
     public UUID getUuid() {
@@ -94,7 +94,10 @@ public abstract class FavoriteEntry {
     
     @Override
     public int hashCode() {
-        return hashIgnoreAmount();
+        int result = 1;
+        result = 31 * result + getType().hashCode();
+        result = 31 * result + hashIgnoreAmount();
+        return result;
     }
     
     public abstract boolean isSame(FavoriteEntry other);

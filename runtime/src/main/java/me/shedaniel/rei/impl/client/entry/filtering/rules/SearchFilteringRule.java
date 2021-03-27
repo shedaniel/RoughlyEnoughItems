@@ -65,7 +65,7 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
     }
     
     @Override
-    public CompoundTag toTag(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag) {
         tag.putString("filter", filter.getFilter());
         tag.putBoolean("show", show);
         return tag;

@@ -330,7 +330,8 @@ public class ClientHelperImpl implements ClientHelper {
         }
         
         @Override
-        public @Nullable CategoryIdentifier<?> getPreferredOpenedCategory() {
+        @Nullable
+        public CategoryIdentifier<?> getPreferredOpenedCategory() {
             return this.preferredOpenedCategory;
         }
         
@@ -414,9 +415,10 @@ public class ClientHelperImpl implements ClientHelper {
             this.preferredOpenedCategory = category;
             return this;
         }
-        
+    
         @Override
-        public @Nullable CategoryIdentifier<?> getPreferredOpenedCategory() {
+        @Nullable
+        public CategoryIdentifier<?> getPreferredOpenedCategory() {
             return this.preferredOpenedCategory;
         }
         

@@ -244,7 +244,8 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         }
         
         @Override
-        public @Nullable Tooltip getTooltip(EntryStack<ItemStack> entry, Point mouse) {
+        @Nullable
+        public Tooltip getTooltip(EntryStack<ItemStack> entry, Point mouse) {
             if (entry.isEmpty())
                 return null;
             return Tooltip.create(tryGetItemStackToolTip(entry, entry.getValue(), true));

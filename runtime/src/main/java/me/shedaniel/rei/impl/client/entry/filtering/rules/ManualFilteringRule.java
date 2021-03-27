@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 
 public class ManualFilteringRule extends AbstractFilteringRule<ManualFilteringRule> {
     @Override
-    public CompoundTag toTag(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag) {
         return tag;
     }
     

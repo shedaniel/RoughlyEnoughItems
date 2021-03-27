@@ -96,7 +96,7 @@ public class BuiltinEntryDefinition<T> implements EntryDefinition<T>, EntrySeria
     
     @Override
     public int hash(EntryStack<T> entry, T value, ComparisonContext context) {
-        return empty ? 0 : Objects.hashCode(value);
+        return empty ? 0 : Objects.hash(value.getClass().getName(), value);
     }
     
     @Override

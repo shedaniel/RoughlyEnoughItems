@@ -67,7 +67,8 @@ public class RenderingEntryDefinition {
         }
         
         @Override
-        public @Nullable Tooltip getTooltip(EntryStack<Renderer> entry, Point mouse) {
+        @Nullable
+        public Tooltip getTooltip(EntryStack<Renderer> entry, Point mouse) {
             return entry.getValue().getTooltip(mouse);
         }
     }

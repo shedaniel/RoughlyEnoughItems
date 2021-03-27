@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl;
 
-import com.google.gson.JsonObject;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
@@ -37,6 +36,7 @@ import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
@@ -57,8 +57,8 @@ public final class ClientInternals {
     private static Supplier<ViewSearchBuilder> viewSearchBuilder = ClientInternals::throwNotSetup;
     private static Supplier<PluginManager<REIClientPlugin>> clientPluginManager = ClientInternals::throwNotSetup;
     private static Supplier<EntryRenderer<?>> emptyEntryRenderer = ClientInternals::throwNotSetup;
-    private static BiFunction<Supplier<FavoriteEntry>, Supplier<JsonObject>, FavoriteEntry> delegateFavoriteEntry = (supplier, toJson) -> throwNotSetup();
-    private static Function<JsonObject, FavoriteEntry> favoriteEntryFromJson = (object) -> throwNotSetup();
+    private static BiFunction<Supplier<FavoriteEntry>, Supplier<CompoundTag>, FavoriteEntry> delegateFavoriteEntry = (supplier, toJson) -> throwNotSetup();
+    private static Function<CompoundTag, FavoriteEntry> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
     private static BiFunction<@Nullable Point, Collection<Component>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
     private static Supplier<List<String>> jeiCompatMods = ClientInternals::throwNotSetup;
@@ -117,12 +117,12 @@ public final class ClientInternals {
         return tooltipProvider.apply(point, texts);
     }
     
-    public static FavoriteEntry delegateFavoriteEntry(Supplier<FavoriteEntry> supplier, Supplier<JsonObject> toJoin) {
+    public static FavoriteEntry delegateFavoriteEntry(Supplier<FavoriteEntry> supplier, Supplier<CompoundTag> toJoin) {
         return delegateFavoriteEntry.apply(supplier, toJoin);
     }
     
-    public static FavoriteEntry favoriteEntryFromJson(JsonObject object) {
-        return favoriteEntryFromJson.apply(object);
+    public static FavoriteEntry favoriteEntryFromJson(CompoundTag tag) {
+        return favoriteEntryFromJson.apply(tag);
     }
     
     public static <T> EntryRenderer<T> getEmptyEntryRenderer() {

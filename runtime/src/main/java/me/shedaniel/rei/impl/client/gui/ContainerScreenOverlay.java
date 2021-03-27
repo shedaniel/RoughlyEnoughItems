@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui;
 
-import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -44,7 +43,10 @@ import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
-import me.shedaniel.rei.api.client.gui.widgets.*;
+import me.shedaniel.rei.api.client.gui.widgets.Button;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
@@ -70,7 +72,6 @@ import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import me.shedaniel.rei.impl.common.util.Weather;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -109,6 +110,7 @@ public class ContainerScreenOverlay extends REIOverlay {
     private Rectangle bounds;
     private Window window;
     private Button leftButton, rightButton;
+    private Widget configButton;
     private CurrentDraggingStack draggingStack = new CurrentDraggingStack();
     
     @Nullable
@@ -171,6 +173,7 @@ public class ContainerScreenOverlay extends REIOverlay {
     public void openMenu(UUID uuid, Menu menu) {
         openMenu(uuid, menu, point -> false, point -> true);
     }
+    
     public void openMenu(UUID uuid, Menu menu, Predicate<Point> or, Predicate<Point> and) {
         this.overlayMenu = new OverlayMenu(uuid, menu, Widgets.withTranslate(menu, 0, 0, 400), or, and);
     }
@@ -255,51 +258,53 @@ public class ContainerScreenOverlay extends REIOverlay {
                     .tooltipLine(new TranslatableComponent("text.rei.next_page"))
                     .focusable(false));
         }
-        
+    
         final Rectangle configButtonArea = getConfigButtonArea();
-        Widget tmp;
-        widgets.add(tmp = InternalWidgets.wrapLateRenderable(InternalWidgets.concatWidgets(
-                Widgets.createButton(configButtonArea, NarratorChatListener.NO_TITLE)
-                        .onClick(button -> {
-                            if (Screen.hasShiftDown() || Screen.hasControlDown()) {
-                                ClientHelper.getInstance().setCheating(!ClientHelper.getInstance().isCheating());
-                                return;
-                            }
-                            ConfigManager.getInstance().openConfigScreen(REIHelper.getInstance().getPreviousScreen());
-                        })
-                        .onRender((matrices, button) -> {
-                            if (ClientHelper.getInstance().isCheating() && ClientHelperImpl.getInstance().hasOperatorPermission()) {
-                                button.setTint(ClientHelperImpl.getInstance().hasPermissionToUsePackets() ? 721354752 : 1476440063);
-                            } else {
-                                button.removeTint();
-                            }
-                        })
-                        .focusable(false)
-                        .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
-                        .tooltipSupplier(button -> {
-                            List<Component> tooltips = new ArrayList<>();
-                            tooltips.add(new TranslatableComponent("text.rei.config_tooltip"));
-                            tooltips.add(new ImmutableTextComponent("  "));
-                            if (!ClientHelper.getInstance().isCheating())
-                                tooltips.add(new TranslatableComponent("text.rei.cheating_disabled"));
-                            else if (!ClientHelperImpl.getInstance().hasOperatorPermission()) {
-                                if (minecraft.gameMode.hasInfiniteItems())
-                                    tooltips.add(new TranslatableComponent("text.rei.cheating_limited_creative_enabled"));
-                                else tooltips.add(new TranslatableComponent("text.rei.cheating_enabled_no_perms"));
-                            } else if (ClientHelperImpl.getInstance().hasPermissionToUsePackets())
-                                tooltips.add(new TranslatableComponent("text.rei.cheating_enabled"));
-                            else
-                                tooltips.add(new TranslatableComponent("text.rei.cheating_limited_enabled"));
-                            return tooltips.toArray(new Component[0]);
-                        }),
-                Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-                    helper.setBlitOffset(helper.getBlitOffset() + 1);
-                    Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
-                    helper.blit(matrices, configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
-                })
+        widgets.add(configButton = InternalWidgets.wrapLateRenderable(
+                Widgets.withTranslate(
+                        InternalWidgets.concatWidgets(
+                                Widgets.createButton(configButtonArea, NarratorChatListener.NO_TITLE)
+                                        .onClick(button -> {
+                                            if (Screen.hasShiftDown() || Screen.hasControlDown()) {
+                                                ClientHelper.getInstance().setCheating(!ClientHelper.getInstance().isCheating());
+                                                return;
+                                            }
+                                            ConfigManager.getInstance().openConfigScreen(REIHelper.getInstance().getPreviousScreen());
+                                        })
+                                        .onRender((matrices, button) -> {
+                                            if (ClientHelper.getInstance().isCheating() && ClientHelperImpl.getInstance().hasOperatorPermission()) {
+                                                button.setTint(ClientHelperImpl.getInstance().hasPermissionToUsePackets() ? 721354752 : 1476440063);
+                                            } else {
+                                                button.removeTint();
+                                            }
+                                        })
+                                        .focusable(false)
+                                        .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
+                                        .tooltipSupplier(button -> {
+                                            List<Component> tooltips = new ArrayList<>();
+                                            tooltips.add(new TranslatableComponent("text.rei.config_tooltip"));
+                                            tooltips.add(new ImmutableTextComponent("  "));
+                                            if (!ClientHelper.getInstance().isCheating())
+                                                tooltips.add(new TranslatableComponent("text.rei.cheating_disabled"));
+                                            else if (!ClientHelperImpl.getInstance().hasOperatorPermission()) {
+                                                if (minecraft.gameMode.hasInfiniteItems())
+                                                    tooltips.add(new TranslatableComponent("text.rei.cheating_limited_creative_enabled"));
+                                                else tooltips.add(new TranslatableComponent("text.rei.cheating_enabled_no_perms"));
+                                            } else if (ClientHelperImpl.getInstance().hasPermissionToUsePackets())
+                                                tooltips.add(new TranslatableComponent("text.rei.cheating_enabled"));
+                                            else
+                                                tooltips.add(new TranslatableComponent("text.rei.cheating_limited_enabled"));
+                                            return tooltips.toArray(new Component[0]);
+                                        }),
+                                Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+                                    helper.setBlitOffset(helper.getBlitOffset() + 1);
+                                    Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
+                                    helper.blit(matrices, configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
+                                })
+                        ),
+                        0, 0, 600
                 )
         ));
-        tmp.setZ(600);
         if (ConfigObject.getInstance().doesShowUtilsButtons()) {
             widgets.add(Widgets.createButton(ConfigObject.getInstance().isLowerConfigButton() ? new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getGuiScaledWidth() - 30 : 10, 10, 20, 20) : new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getGuiScaledWidth() - 55 : 35, 10, 20, 20), NarratorChatListener.NO_TITLE)
                     .onRender((matrices, button) -> {
@@ -375,7 +380,7 @@ public class ContainerScreenOverlay extends REIOverlay {
             Rectangle area = getCraftableToggleArea();
             ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
             ItemStack icon = new ItemStack(Blocks.CRAFTING_TABLE);
-            this.widgets.add(tmp = InternalWidgets.wrapLateRenderable(InternalWidgets.concatWidgets(
+            this.widgets.add(Widgets.withTranslate(InternalWidgets.wrapLateRenderable(InternalWidgets.concatWidgets(
                     Widgets.createButton(area, NarratorChatListener.NO_TITLE)
                             .focusable(false)
                             .onClick(button -> {
@@ -392,8 +397,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                         itemRenderer.renderGuiItem(icon, (int) vector.x(), (int) vector.y());
                         itemRenderer.blitOffset = 0.0F;
                     }))
-            ));
-            tmp.setZ(600);
+            ), 0, 0, 600));
         }
         
         widgets.add(draggingStack);
@@ -727,9 +731,16 @@ public class ContainerScreenOverlay extends REIOverlay {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        boolean visible = REIHelper.getInstance().isOverlayVisible();
+        if (visible && configButton.mouseClicked(mouseX, mouseY, button)) {
+            this.setFocused(configButton);
+            if (button == 0)
+                this.setDragging(true);
+            return true;
+        }
         if (ConfigObject.getInstance().getHideKeybind().matchesMouse(button)) {
             REIHelper.getInstance().toggleOverlayVisible();
-            return true;
+            return REIHelper.getInstance().isOverlayVisible();
         }
         EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen, PointHelper.ofMouse());
         if (stack != null && !stack.isEmpty()) {
@@ -738,7 +749,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                 return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addRecipesFor(stack).setOutputNotice(stack).fillPreferredOpenedCategory());
             } else if (ConfigObject.getInstance().getUsageKeybind().matchesMouse(button)) {
                 return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addUsagesFor(stack).setInputNotice(stack).fillPreferredOpenedCategory());
-            } else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
+            } else if (visible && ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
                 FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack);
                 if (!ConfigObject.getInstance().getFavoriteEntries().contains(favoriteEntry)) {
                     ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
@@ -750,9 +761,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                 return true;
             }
         }
-        if (!REIHelper.getInstance().isOverlayVisible())
-            return false;
-        if (overlayMenu != null) {
+        if (visible && overlayMenu != null) {
             if (overlayMenu.wrappedMenu.mouseClicked(mouseX, mouseY, button)) {
                 if (overlayMenu != null) this.setFocused(overlayMenu.wrappedMenu);
                 else this.setFocused(null);
@@ -782,8 +791,11 @@ public class ContainerScreenOverlay extends REIOverlay {
                 return true;
             }
         }
-        for (GuiEventListener element : widgets)
-            if ((overlayMenu == null || element != overlayMenu.wrappedMenu) && element.mouseClicked(mouseX, mouseY, button)) {
+        if (!visible) {
+            return false;
+        }
+        for (GuiEventListener element : widgets) {
+            if (element != configButton && (overlayMenu == null || element != overlayMenu.wrappedMenu) && element.mouseClicked(mouseX, mouseY, button)) {
                 this.setFocused(element);
                 if (button == 0)
                     this.setDragging(true);
@@ -791,6 +803,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                     REIHelperImpl.getSearchField().setFocused(false);
                 return true;
             }
+        }
         if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesMouse(button)) {
             REIHelperImpl.getSearchField().setFocused(true);
             setFocused(REIHelperImpl.getSearchField());

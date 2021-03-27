@@ -24,15 +24,12 @@
 package me.shedaniel.rei;
 
 import com.google.common.collect.Lists;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import me.shedaniel.architectury.event.events.GuiEvent;
 import me.shedaniel.architectury.event.events.RecipeUpdateEvent;
 import me.shedaniel.architectury.event.events.client.ClientScreenInputEvent;
 import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.Env;
-import me.shedaniel.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.api.client.REIOverlay;
@@ -102,10 +99,10 @@ import net.minecraft.client.gui.screens.recipebook.GhostRecipe;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.CraftingMenu;
@@ -147,18 +144,6 @@ public class RoughlyEnoughItemsCore {
     
     public static void attachCommonInternals() {
         CategoryIdentifierImpl.attach();
-        Internals.attachInstanceSupplier(new PluginManagerImpl<>(
-                REIPlugin.class,
-                UnaryOperator.identity(),
-                new EntryTypeRegistryImpl(),
-                new RecipeManagerContextImpl<>(RecipeManagerContextImpl.supplier()),
-                new ItemComparatorRegistryImpl(),
-                new DisplaySerializerRegistryImpl(),
-                new FluidSupportProviderImpl()), "commonPluginManager");
-        Internals.attachInstanceSupplier(new PluginManagerImpl<>(
-                REIServerPlugin.class,
-                view -> view.then(PluginView.getInstance()),
-                new MenuInfoRegistryImpl()), "serverPluginManager");
         Internals.attachInstance((Function<ResourceLocation, EntryType<?>>) new Function<ResourceLocation, EntryType<?>>() {
             ResourceLocation RENDERING_ID = new ResourceLocation("rendering");
             private Map<ResourceLocation, EntryType<?>> typeCache = new ConcurrentHashMap<>();
@@ -222,35 +207,33 @@ public class RoughlyEnoughItemsCore {
                 if (Objects.equals(definition.getType().getId(), BuiltinEntryTypes.EMPTY_ID)) {
                     return empty().cast();
                 }
-                
+    
                 return new TypedEntryStack<>(definition, value);
             }
         }, Internals.EntryStackProvider.class);
         Internals.attachInstance(new NbtHasherProviderImpl(), Internals.NbtHasherProvider.class);
         Internals.attachInstance(EntryIngredientImpl.provide(), Internals.EntryIngredientProvider.class);
+        Internals.attachInstanceSupplier(new PluginManagerImpl<>(
+                REIPlugin.class,
+                UnaryOperator.identity(),
+                new EntryTypeRegistryImpl(),
+                new RecipeManagerContextImpl<>(RecipeManagerContextImpl.supplier()),
+                new ItemComparatorRegistryImpl(),
+                new DisplaySerializerRegistryImpl(),
+                new FluidSupportProviderImpl()), "commonPluginManager");
+        Internals.attachInstanceSupplier(new PluginManagerImpl<>(
+                REIServerPlugin.class,
+                view -> view.then(PluginView.getInstance()),
+                new MenuInfoRegistryImpl()), "serverPluginManager");
     }
     
     @Environment(EnvType.CLIENT)
     public static void attachClientInternals() {
-        ClientInternals.attachInstanceSupplier(new PluginManagerImpl<>(
-                REIClientPlugin.class,
-                view -> view.then(PluginView.getInstance()),
-                new ViewsImpl(),
-                new SearchProviderImpl(),
-                new ConfigManagerImpl(),
-                new CategoryRegistryImpl(),
-                new DisplayRegistryImpl(),
-                new ScreenRegistryImpl(),
-                new EntryRegistryImpl(),
-                new FavoriteEntryTypeRegistryImpl(),
-                new SubsetsRegistryImpl(),
-                new TransferHandlerRegistryImpl(),
-                new REIHelperImpl()), "clientPluginManager");
         InternalWidgets.attach();
         ClientInternals.attachInstance((Supplier<EntryRenderer<?>>) () -> EmptyEntryDefinition.EmptyRenderer.INSTANCE, "emptyEntryRenderer");
-        ClientInternals.attachInstance((BiFunction<Supplier<FavoriteEntry>, Supplier<JsonObject>, FavoriteEntry>) (supplier, toJson) -> new FavoriteEntry() {
+        ClientInternals.attachInstance((BiFunction<Supplier<FavoriteEntry>, Supplier<CompoundTag>, FavoriteEntry>) (supplier, toJson) -> new FavoriteEntry() {
             FavoriteEntry value = null;
-            
+        
             @Override
             public FavoriteEntry getUnwrapped() {
                 if (this.value == null) {
@@ -258,7 +241,7 @@ public class RoughlyEnoughItemsCore {
                 }
                 return Objects.requireNonNull(value).getUnwrapped();
             }
-            
+        
             @Override
             public UUID getUuid() {
                 return getUnwrapped().getUuid();
@@ -302,58 +285,60 @@ public class RoughlyEnoughItemsCore {
             public ResourceLocation getType() {
                 return getUnwrapped().getType();
             }
-            
+        
             @Override
-            public JsonObject toJson(JsonObject to) {
+            public CompoundTag save(CompoundTag tag) {
                 if (toJson == null) {
-                    return getUnwrapped().toJson(to);
+                    return getUnwrapped().save(tag);
                 }
-                
-                JsonObject object = toJson.get();
-                for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
-                    to.add(entry.getKey(), entry.getValue());
-                }
-                return to;
-            }
             
+                return tag.merge(toJson.get());
+            }
+        
             @Override
             public boolean isSame(FavoriteEntry other) {
                 return getUnwrapped().isSame(other.getUnwrapped());
             }
         }, "delegateFavoriteEntry");
-        ClientInternals.attachInstance((Function<JsonObject, FavoriteEntry>) (object) -> {
-            String type = GsonHelper.getAsString(object, FavoriteEntry.TYPE_KEY);
-            switch (type) {
-                case "stack":
-                case "item":
-                case "fluid":
-                case "empty":
-                    return FavoriteEntry.fromEntryStack(EntryStack.readFromJson(object));
-                default:
-                    ResourceLocation id = new ResourceLocation(type);
-                    return Objects.requireNonNull(Objects.requireNonNull(FavoriteEntryType.registry().get(id)).fromJson(object));
-            }
+        ClientInternals.attachInstance((Function<CompoundTag, FavoriteEntry>) (object) -> {
+            String type = object.getString(FavoriteEntry.TYPE_KEY);
+            ResourceLocation id = new ResourceLocation(type);
+            return Objects.requireNonNull(Objects.requireNonNull(FavoriteEntryType.registry().get(id)).read(object));
         }, "favoriteEntryFromJson");
         ClientInternals.attachInstance((BiFunction<@Nullable Point, Collection<Component>, Tooltip>) QueuedTooltip::create, "tooltipProvider");
         ClientInternals.attachInstance((Function<@Nullable Boolean, ClickArea.Result>) successful -> new ClickArea.Result() {
             private List<CategoryIdentifier<?>> categories = Lists.newArrayList();
-            
+        
             @Override
             public ClickArea.Result category(CategoryIdentifier<?> category) {
                 this.categories.add(category);
                 return this;
             }
-            
+        
             @Override
             public boolean isSuccessful() {
                 return successful;
             }
-            
+        
             @Override
             public Stream<CategoryIdentifier<?>> getCategories() {
                 return categories.stream();
             }
         }, "clickAreaHandlerResult");
+        ClientInternals.attachInstanceSupplier(new PluginManagerImpl<>(
+                REIClientPlugin.class,
+                view -> view.then(PluginView.getInstance()),
+                new ViewsImpl(),
+                new SearchProviderImpl(),
+                new ConfigManagerImpl(),
+                new CategoryRegistryImpl(),
+                new DisplayRegistryImpl(),
+                new ScreenRegistryImpl(),
+                new EntryRegistryImpl(),
+                new FavoriteEntryTypeRegistryImpl(),
+                new SubsetsRegistryImpl(),
+                new TransferHandlerRegistryImpl(),
+                new REIHelperImpl()), "clientPluginManager");
     }
     
     @ApiStatus.Internal
@@ -479,7 +464,7 @@ public class RoughlyEnoughItemsCore {
             if (shouldReturn(screen))
                 return InteractionResult.PASS;
             resetFocused(screen);
-            if (REIHelper.getInstance().isOverlayVisible() && REIHelper.getInstance().getOverlay().get().mouseClicked(mouseX, mouseY, button)) {
+            if (REIHelper.getInstance().getOverlay().get().mouseClicked(mouseX, mouseY, button)) {
                 if (button == 0) {
                     screen.setDragging(true);
                 }
