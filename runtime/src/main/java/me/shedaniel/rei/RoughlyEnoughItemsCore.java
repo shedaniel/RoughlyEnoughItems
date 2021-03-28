@@ -272,7 +272,7 @@ public class RoughlyEnoughItemsCore {
             }
             
             @Override
-            public int hashIgnoreAmount() {
+            public long hashIgnoreAmount() {
                 return getUnwrapped().hashIgnoreAmount();
             }
             

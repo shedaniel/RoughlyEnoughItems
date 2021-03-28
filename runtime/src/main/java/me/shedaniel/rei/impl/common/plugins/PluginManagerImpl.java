@@ -158,6 +158,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     @Override
     public void startReload() {
         try {
+            arePluginsLoading = true;
             long startTime = Util.getMillis();
             MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
     
@@ -170,7 +171,6 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
                 }
             }
             
-            arePluginsLoading = true;
             List<P> plugins = new ArrayList<>(getPlugins().toList());
             plugins.sort(Comparator.comparingInt(P::getPriority).reversed());
             RoughlyEnoughItemsCore.LOGGER.info("Reloading Plugin Manager [%s], registered %d plugins: %s", pluginClass.getSimpleName(), plugins.size(), CollectionUtils.mapAndJoinToString(plugins, REIPlugin::getPluginName, ", "));
@@ -191,8 +191,6 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
                     throwable.printStackTrace();
                 }
             }
-            
-            arePluginsLoading = false;
             
             try (SectionClosable refilter = section(sectionData, "entry-registry-refilter")) {
                 EntryRegistry.getInstance().refilter();

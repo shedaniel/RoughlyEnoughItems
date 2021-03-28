@@ -70,8 +70,9 @@ public class EntryRegistryImpl implements EntryRegistry {
     @Override
     public void startReload() {
         entries.clear();
-        if (reloadingRegistry != null)
+        if (reloadingRegistry != null) {
             reloadingRegistry.clear();
+        }
         reloadingRegistry = Lists.newArrayListWithCapacity(Registry.ITEM.keySet().size() + 100);
         preFilteredList.clear();
         reloading = true;
@@ -132,7 +133,7 @@ public class EntryRegistryImpl implements EntryRegistry {
         RoughlyEnoughItemsCore.LOGGER.debug("Refiltered %d entries with %d rules in %s.", entries.size() - preFilteredList.size(), rules.size(), stopwatch.stop().toString());
     }
     
-    static <T> Predicate<T> not(Predicate<? super T> target) {
+    private static <T> Predicate<T> not(Predicate<? super T> target) {
         Objects.requireNonNull(target);
         return (Predicate<T>) target.negate();
     }

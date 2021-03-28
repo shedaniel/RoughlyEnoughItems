@@ -41,15 +41,15 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 @ApiStatus.Internal
-public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
+public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>>> {
     private int width;
-    private Consumer<List<EntryStack>> saveConsumer;
-    private List<EntryStack> defaultValue;
-    private List<EntryStack> configFiltered;
+    private Consumer<List<EntryStack<?>>> saveConsumer;
+    private List<EntryStack<?>> defaultValue;
+    private List<EntryStack<?>> configFiltered;
     private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, new TranslatableComponent("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {});
     private final List<GuiEventListener> children = ImmutableList.of(buttonWidget);
     
-    public NoFilteringEntry(int width, List<EntryStack> configFiltered, List<EntryStack> defaultValue, Consumer<List<EntryStack>> saveConsumer) {
+    public NoFilteringEntry(int width, List<EntryStack<?>> configFiltered, List<EntryStack<?>> defaultValue, Consumer<List<EntryStack<?>>> saveConsumer) {
         super(NarratorChatListener.NO_TITLE, false);
         this.width = width;
         this.configFiltered = configFiltered;
@@ -58,12 +58,12 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack>> 
     }
     
     @Override
-    public List<EntryStack> getValue() {
+    public List<EntryStack<?>> getValue() {
         return configFiltered;
     }
     
     @Override
-    public Optional<List<EntryStack>> getDefaultValue() {
+    public Optional<List<EntryStack<?>>> getDefaultValue() {
         return Optional.ofNullable(defaultValue);
     }
     

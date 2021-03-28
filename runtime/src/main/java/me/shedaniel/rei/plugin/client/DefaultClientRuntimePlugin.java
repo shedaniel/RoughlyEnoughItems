@@ -189,7 +189,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
     private static class EntryStackFavoriteEntry extends FavoriteEntry {
         private static final Function<EntryStack<?>, String> CANCEL_FLUID_AMOUNT = s -> null;
         private final EntryStack<?> stack;
-        private final int hashIgnoreAmount;
+        private final long hashIgnoreAmount;
         
         public EntryStackFavoriteEntry(EntryStack<?> stack) {
             this.stack = stack.normalize();
@@ -226,7 +226,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         }
         
         @Override
-        public int hashIgnoreAmount() {
+        public long hashIgnoreAmount() {
             return hashIgnoreAmount;
         }
         

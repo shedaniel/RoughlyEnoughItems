@@ -112,7 +112,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     }
     
     @Override
-    public int hash(EntryStack<FluidStack> entry, FluidStack value, ComparisonContext context) {
+    public long hash(EntryStack<FluidStack> entry, FluidStack value, ComparisonContext context) {
         int code = 1;
         code = 31 * code + value.getFluid().hashCode();
         code = 31 * code + (context.isFuzzy() || !value.hasTag() ? 0 : value.getTag().hashCode());

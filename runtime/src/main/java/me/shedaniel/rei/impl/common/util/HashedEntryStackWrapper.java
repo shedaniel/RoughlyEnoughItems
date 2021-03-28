@@ -35,21 +35,23 @@ import java.util.Objects;
 @Environment(EnvType.CLIENT)
 public class HashedEntryStackWrapper {
     private final EntryStack<?> stack;
-    private int hash;
+    private long hash;
+    private int hashInt;
     
     public HashedEntryStackWrapper(EntryStack<?> stack) {
         this.stack = Objects.requireNonNull(stack);
         this.hash = EntryStacks.hashExact(stack);
+        this.hashInt = Long.hashCode(this.hash);
     }
     
     @Override
     public boolean equals(Object o) {
-        return o instanceof HashedEntryStackWrapper && hashCode() == o.hashCode();
+        return o instanceof HashedEntryStackWrapper && hash == ((HashedEntryStackWrapper) o).hash;
     }
     
     @Override
     public int hashCode() {
-        return hash;
+        return hashInt;
     }
     
     public boolean isEmpty() {

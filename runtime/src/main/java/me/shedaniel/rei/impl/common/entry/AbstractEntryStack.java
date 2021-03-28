@@ -176,7 +176,7 @@ public abstract class AbstractEntryStack<A> extends AbstractRenderer implements 
     
     @Override
     public int hashCode() {
-        return EntryStacks.hashExact(this);
+        return Long.hashCode(EntryStacks.hashExact(this));
     }
     
     @Override

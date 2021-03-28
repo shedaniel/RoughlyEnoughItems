@@ -24,8 +24,8 @@
 package me.shedaniel.rei.impl.client.search;
 
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
@@ -65,7 +65,7 @@ public class AsyncSearchManager {
     public static AsyncSearchManager createDefault() {
         return new AsyncSearchManager(EntryRegistry.getInstance()::getPreFilteredList, () -> {
             boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ContainerScreenOverlay.getInstance().inventoryStacks.isEmpty();
-            IntSet workingItems = checkCraftable ? new IntOpenHashSet() : null;
+            LongSet workingItems = checkCraftable ? new LongOpenHashSet() : null;
             if (checkCraftable) {
                 for (EntryStack<?> stack : Views.getInstance().findCraftableEntriesByMaterials(ContainerScreenOverlay.getInstance().inventoryStacks)) {
                     workingItems.add(EntryStacks.hashExact(stack));

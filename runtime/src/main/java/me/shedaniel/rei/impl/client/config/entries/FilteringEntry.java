@@ -43,12 +43,12 @@ import java.util.*;
 import java.util.function.Consumer;
 
 @ApiStatus.Internal
-public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
+public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>>> {
     private int width;
-    Consumer<List<EntryStack>> saveConsumer;
+    Consumer<List<EntryStack<?>>> saveConsumer;
     Consumer<List<FilteringRule<?>>> rulesSaveConsumer;
-    List<EntryStack> defaultValue;
-    Set<EntryStack> configFiltered;
+    List<EntryStack<?>> defaultValue;
+    Set<EntryStack<?>> configFiltered;
     List<FilteringRule<?>> rules;
     boolean edited = false;
     final FilteringScreen filteringScreen = new FilteringScreen(this);
@@ -59,7 +59,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     });
     private final List<GuiEventListener> children = ImmutableList.of(buttonWidget);
     
-    public FilteringEntry(int width, List<EntryStack> configFiltered, List<FilteringRule<?>> rules, List<EntryStack> defaultValue, Consumer<List<EntryStack>> saveConsumer, Consumer<List<FilteringRule<?>>> rulesSaveConsumer) {
+    public FilteringEntry(int width, List<EntryStack<?>> configFiltered, List<FilteringRule<?>> rules, List<EntryStack<?>> defaultValue, Consumer<List<EntryStack<?>>> saveConsumer, Consumer<List<FilteringRule<?>>> rulesSaveConsumer) {
         super(NarratorChatListener.NO_TITLE, false);
         this.width = width;
         this.configFiltered = new TreeSet<>(Comparator.comparing(EntryStacks::hashExact));
@@ -71,12 +71,12 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack>> {
     }
     
     @Override
-    public List<EntryStack> getValue() {
+    public List<EntryStack<?>> getValue() {
         return Lists.newArrayList(configFiltered);
     }
     
     @Override
-    public Optional<List<EntryStack>> getDefaultValue() {
+    public Optional<List<EntryStack<?>>> getDefaultValue() {
         return Optional.ofNullable(defaultValue);
     }
     
