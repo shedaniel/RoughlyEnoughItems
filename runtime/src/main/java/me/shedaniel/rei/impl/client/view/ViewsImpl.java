@@ -182,9 +182,9 @@ public class ViewsImpl implements Views {
     }
     
     @Override
-    public Collection<EntryStack<?>> findCraftableEntriesByItems(Iterable<? extends EntryStack<?>> inventoryItems) {
+    public Collection<EntryStack<?>> findCraftableEntriesByMaterials(Iterable<? extends EntryStack<?>> inventoryItems) {
         Set<EntryStack<?>> craftables = new HashSet<>();
-        for (List<Display> displays : DisplayRegistry.getInstance().getAllDisplays().values())
+        for (List<Display> displays : DisplayRegistry.getInstance().getAllDisplays().values()) {
             for (Display display : displays) {
                 int slotsCraftable = 0;
                 List<EntryIngredient> requiredInput = display.getRequiredEntries();
@@ -195,16 +195,19 @@ public class ViewsImpl implements Views {
                     }
                     back:
                     for (EntryStack<?> possibleType : inventoryItems) {
-                        for (EntryStack<?> slotPossible : slot)
+                        for (EntryStack<?> slotPossible : slot) {
                             if (EntryStacks.equalsExact(possibleType, slotPossible)) {
                                 slotsCraftable++;
                                 break back;
                             }
+                        }
                     }
                 }
-                if (slotsCraftable == display.getRequiredEntries().size())
+                if (slotsCraftable == display.getRequiredEntries().size()) {
                     display.getOutputEntries().stream().flatMap(Collection::stream).collect(Collectors.toCollection(() -> craftables));
+                }
             }
+        }
         return craftables;
     }
     

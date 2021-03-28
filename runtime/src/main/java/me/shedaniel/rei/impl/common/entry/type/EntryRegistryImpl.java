@@ -171,8 +171,8 @@ public class EntryRegistryImpl implements EntryRegistry {
         if (reloading) {
             int index = afterEntry != null ? reloadingRegistry.lastIndexOf(new HashedEntryStackWrapper(afterEntry)) : -1;
             if (index >= 0) {
-                reloadingRegistry.addAll(index, CollectionUtils.map(stacks, HashedEntryStackWrapper::new));
-            } else reloadingRegistry.addAll(CollectionUtils.map(stacks, HashedEntryStackWrapper::new));
+                reloadingRegistry.addAll(index, CollectionUtils.mapParallel(stacks, HashedEntryStackWrapper::new));
+            } else reloadingRegistry.addAll(CollectionUtils.mapParallel(stacks, HashedEntryStackWrapper::new));
         } else {
             if (afterEntry != null) {
                 int index = entries.lastIndexOf(afterEntry);

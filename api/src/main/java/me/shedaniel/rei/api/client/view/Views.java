@@ -47,7 +47,7 @@ public interface Views extends Reloadable<REIClientPlugin> {
      * @param inventoryItems the materials
      * @return the list of craftable entries
      */
-    Collection<EntryStack<?>> findCraftableEntriesByItems(Iterable<? extends EntryStack<?>> inventoryItems);
+    Collection<EntryStack<?>> findCraftableEntriesByMaterials(Iterable<? extends EntryStack<?>> inventoryItems);
     
     /**
      * Returns a map of recipes for an entry

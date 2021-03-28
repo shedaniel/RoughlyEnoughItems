@@ -35,7 +35,6 @@ import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -176,13 +175,8 @@ public abstract class AbstractEntryStack<A> extends AbstractRenderer implements 
     }
     
     @Override
-    public int hash(ComparisonContext context) {
-        return getDefinition().hash(this, getValue(), context);
-    }
-    
-    @Override
     public int hashCode() {
-        return hash(ComparisonContext.EXACT);
+        return EntryStacks.hashExact(this);
     }
     
     @Override

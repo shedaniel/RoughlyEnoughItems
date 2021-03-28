@@ -28,10 +28,10 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
-import me.shedaniel.rei.plugin.client.DefaultClientRuntimePlugin;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.plugin.client.DefaultClientPlugin;
+import me.shedaniel.rei.plugin.client.DefaultClientRuntimePlugin;
 import me.shedaniel.rei.plugin.common.DefaultPlugin;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -62,7 +62,7 @@ public class PluginDetectorImpl {
         RoughlyEnoughItemsForge.<REIPlugin, REIClientPlugin>scanAnnotation(REIPlugin.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin) -> {
             ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(plugin);
         });
-        Internals.attachInstance((Supplier<List<String>>) () -> {
+        ClientInternals.attachInstance((Supplier<List<String>>) () -> {
             List<String> modIds = new ArrayList<>();
             for (REIPluginProvider<REIClientPlugin> plugin : PluginManager.getClientInstance().getPluginProviders()) {
                 if (plugin instanceof JEIPluginDetector.JEIPluginProvider) {

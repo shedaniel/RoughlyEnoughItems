@@ -531,9 +531,11 @@ public class ContainerScreenOverlay extends REIOverlay {
             if (Minecraft.getInstance().screen instanceof AbstractContainerScreen) {
                 AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) Minecraft.getInstance().screen;
                 int x = containerScreen.leftPos, y = containerScreen.topPos;
-                for (Slot slot : containerScreen.getMenu().slots)
-                    if (!slot.hasItem() || !ENTRY_LIST_WIDGET.matches(EntryStacks.of(slot.getItem())))
+                for (Slot slot : containerScreen.getMenu().slots) {
+                    if (!slot.hasItem() || !ENTRY_LIST_WIDGET.matches(EntryStacks.of(slot.getItem()))) {
                         fillGradient(matrices, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, -601874400, -601874400);
+                    }
+                }
             }
             matrices.popPose();
         }
@@ -696,7 +698,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                 ConfigManager.getInstance().saveConfig();
                 FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
                 if (favoritesListWidget != null)
-                    favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), REIHelperImpl.getSearchField().getText());
+                    favoritesListWidget.updateSearch();
                 return true;
             }
         }
@@ -757,7 +759,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                 ConfigManager.getInstance().saveConfig();
                 FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
                 if (favoritesListWidget != null)
-                    favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), REIHelper.getInstance().getSearchTextField().getText());
+                    favoritesListWidget.updateSearch();
                 return true;
             }
         }

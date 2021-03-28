@@ -352,8 +352,9 @@ public class ConfigManagerImpl implements ConfigManager {
                 }).setSavingRunnable(() -> {
                     saveConfig();
                     EntryRegistry.getInstance().refilter();
-                    if (REIHelperImpl.getSearchField() != null)
+                    if (REIHelperImpl.getSearchField() != null) {
                         ContainerScreenOverlay.getEntryListWidget().updateSearch(REIHelperImpl.getSearchField().getText(), true);
+                    }
                 }).build();
             });
             Screen configScreen = provider.get();

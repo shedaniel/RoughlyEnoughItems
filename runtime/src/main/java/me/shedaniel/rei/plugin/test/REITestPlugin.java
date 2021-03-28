@@ -26,6 +26,7 @@ package me.shedaniel.rei.plugin.test;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -37,6 +38,8 @@ import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.TestOnly;
 
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @TestOnly
 @Environment(EnvType.CLIENT)
@@ -50,18 +53,22 @@ public class REITestPlugin implements REIClientPlugin {
     
     @Override
     public void registerEntries(EntryRegistry registry) {
-        int times = 10;
+        int times = 1000;
         for (Item item : Registry.ITEM) {
-            for (int i = 0; i < times; i++)
-                registry.registerEntryAfter(EntryStacks.of(item), transformStack(EntryStacks.of(item)));
+            EntryStack<ItemStack> base = EntryStacks.of(item);
+            registry.registerEntriesAfter(base, IntStream.range(0, times).mapToObj(value -> transformStack(EntryStacks.of(item))).collect(Collectors.toList()));
             try {
                 for (ItemStack stack : registry.appendStacksForItem(item)) {
-                    for (int i = 0; i < times; i++)
-                        registry.registerEntry(transformStack(EntryStacks.of(stack)));
+                    registry.registerEntries(IntStream.range(0, times).mapToObj(value -> transformStack(EntryStacks.of(stack))).collect(Collectors.toList()));
                 }
             } catch (Exception ignored) {
             }
         }
+    }
+    
+    @Override
+    public void registerItemComparators(ItemComparatorRegistry registry) {
+        registry.registerNbt(Registry.ITEM.stream().toArray(Item[]::new));
     }
     
     public EntryStack<ItemStack> transformStack(EntryStack<ItemStack> stack) {
@@ -69,5 +76,4 @@ public class REITestPlugin implements REIClientPlugin {
         tag.putInt("Whatever", random.nextInt(Integer.MAX_VALUE));
         return stack;
     }
-    
 }

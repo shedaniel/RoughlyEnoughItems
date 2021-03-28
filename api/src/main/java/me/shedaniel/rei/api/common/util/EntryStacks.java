@@ -158,7 +158,7 @@ public final class EntryStacks {
      * @return the hash code of the {@link ComparisonContext#EXACT} context
      */
     public static <T> int hashExact(EntryStack<T> stack) {
-        return stack.hash(ComparisonContext.EXACT);
+        return stack.getDefinition().hash(stack, stack.getValue(), ComparisonContext.EXACT);
     }
     
     /**
@@ -172,7 +172,7 @@ public final class EntryStacks {
      * @return the hash code of the {@link ComparisonContext#FUZZY} context
      */
     public static <T> int hashFuzzy(EntryStack<T> stack) {
-        return stack.hash(ComparisonContext.FUZZY);
+        return stack.getDefinition().hash(stack, stack.getValue(), ComparisonContext.FUZZY);
     }
     
     public static EntryStack<FluidStack> simplifyAmount(EntryStack<FluidStack> stack) {

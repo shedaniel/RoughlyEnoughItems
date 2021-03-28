@@ -157,8 +157,9 @@ public class SubSubsetsMenuEntry extends MenuEntry {
                 setFiltered(filteredStacks, overlay, this, !(getFilteredRatio() > 0));
                 ConfigManager.getInstance().saveConfig();
                 EntryRegistry.getInstance().refilter();
-                if (REIHelperImpl.getSearchField() != null)
+                if (REIHelperImpl.getSearchField() != null) {
                     ContainerScreenOverlay.getEntryListWidget().updateSearch(REIHelperImpl.getSearchField().getText(), true);
+                }
             } else {
                 clickedBefore = true;
             }

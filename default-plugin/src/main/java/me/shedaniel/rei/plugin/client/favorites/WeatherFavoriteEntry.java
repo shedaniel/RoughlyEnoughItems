@@ -24,8 +24,6 @@
 package me.shedaniel.rei.plugin.client.favorites;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector4f;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIHelper;
@@ -37,21 +35,16 @@ import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.common.util.Animator;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -120,10 +113,14 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
             public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 int color = bounds.contains(mouseX, mouseY) ? 0xFFEEEEEE : 0xFFAAAAAA;
                 if (bounds.width > 4 && bounds.height > 4) {
-                    renderWeatherIcon(matrices, weather, bounds.getCenterX(), bounds.getCenterY(), color);
+                    matrices.pushPose();
+                    matrices.translate(bounds.getCenterX(), bounds.getCenterY(), 0);
+                    matrices.scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f, 1);
+                    renderWeatherIcon(matrices, weather, 0, 0, color);
+                    matrices.popPose();
                 }
             }
-    
+            
             private void renderWeatherIcon(PoseStack matrices, Weather type, int centerX, int centerY, int color) {
                 Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
                 blit(matrices, centerX - 7, centerY - 7, type.getId() * 14, 14, 14, 14, 256, 256);
@@ -196,7 +193,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
     
     public enum Type implements FavoriteEntryType<WeatherFavoriteEntry> {
         INSTANCE;
-    
+        
         @Override
         public WeatherFavoriteEntry read(CompoundTag object) {
             String stringValue = object.getString(KEY);
@@ -208,7 +205,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
         public WeatherFavoriteEntry fromArgs(Object... args) {
             return new WeatherFavoriteEntry((Weather) args[0]);
         }
-    
+        
         @Override
         public CompoundTag save(WeatherFavoriteEntry entry, CompoundTag tag) {
             tag.putString(KEY, entry.weather == null ? "NOT_SET" : entry.weather.name());
