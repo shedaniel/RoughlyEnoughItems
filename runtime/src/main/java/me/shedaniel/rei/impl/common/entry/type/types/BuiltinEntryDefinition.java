@@ -122,12 +122,12 @@ public class BuiltinEntryDefinition<T> implements EntryDefinition<T>, EntrySeria
     
     @Override
     public boolean supportReading() {
-        return true;
+        return empty;
     }
     
     @Override
     public boolean supportSaving() {
-        return true;
+        return empty;
     }
     
     @Override

@@ -24,13 +24,11 @@
 package me.shedaniel.rei.forge;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.architectury.platform.forge.EventBuses;
 import me.shedaniel.rei.RoughlyEnoughItemsInitializer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -51,7 +49,6 @@ public class RoughlyEnoughItemsForge {
     public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
     
     public RoughlyEnoughItemsForge() {
-        EventBuses.registerModEventBus("roughlyenoughitems", FMLJavaModLoadingContext.get().getModEventBus());
         RoughlyEnoughItemsInitializer.onInitialize();
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> RoughlyEnoughItemsInitializer::onInitializeClient);
     }

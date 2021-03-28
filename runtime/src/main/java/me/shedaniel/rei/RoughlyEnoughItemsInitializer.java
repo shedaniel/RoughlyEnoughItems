@@ -23,21 +23,14 @@
 
 package me.shedaniel.rei;
 
-import com.google.common.collect.ImmutableSet;
-import me.shedaniel.architectury.platform.Platform;
-import net.fabricmc.api.EnvType;
+import me.shedaniel.architectury.annotations.ExpectPlatform;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class RoughlyEnoughItemsInitializer {
     public static void onInitialize() {
-        if (Platform.isFabric()) {
-            checkRequiredFabricModules();
-        }
-        if (Platform.getEnv() == EnvType.CLIENT) {
-            checkClothConfig();
-        }
+        checkMods();
         
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
             initializeEntryPoint(false, "me.shedaniel.rei.RoughlyEnoughItemsCore");
@@ -61,7 +54,7 @@ public class RoughlyEnoughItemsInitializer {
             Object instance = name.getConstructor().newInstance();
             Method method = null;
             if (client) {
-                if (Platform.getEnv() == EnvType.CLIENT) {
+                if (isClient()) {
                     try {
                         method = name.getDeclaredMethod("onInitializeClient");
                     } catch (NoSuchMethodException ignored) {
@@ -84,43 +77,13 @@ public class RoughlyEnoughItemsInitializer {
         }
     }
     
-    public static void checkRequiredFabricModules() {
-        ImmutableSet<String> requiredModules = Platform.getEnv() == EnvType.CLIENT ?
-                ImmutableSet.<String>builder()
-                        .add("fabric-api-base")
-                        .add("fabric-resource-loader-v0")
-                        .add("fabric-networking-v0")
-                        .add("fabric-lifecycle-events-v1")
-                        .add("fabric-rendering-fluids-v1")
-                        .build() :
-                ImmutableSet.<String>builder()
-                        .add("fabric-api-base")
-                        .add("fabric-resource-loader-v0")
-                        .add("fabric-networking-v0")
-                        .add("fabric-lifecycle-events-v1")
-                        .build();
-        for (String module : requiredModules) {
-            boolean moduleLoaded = Platform.isModLoaded(module);
-            if (!moduleLoaded) {
-                RoughlyEnoughItemsState.error("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
-                break;
-            }
-        }
+    @ExpectPlatform
+    public static boolean isClient() {
+        throw new AssertionError();
     }
     
-    public static void checkClothConfig() {
-        if (!Platform.isModLoaded(Platform.isFabric() ? "cloth-config2" : "cloth-config")) {
-            RoughlyEnoughItemsState.error("Cloth Config is not installed!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
-        }
-        /*try {
-            if (!Platform.isModLoaded("cloth-config2")) {
-                RoughlyEnoughItemsState.error("Cloth Config is not installed!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
-            } else if (SemanticVersion.parse(Platform.getMod("cloth-config2").getVersion()).compareTo(SemanticVersion.parse("4.10.9")) < 0) {
-                RoughlyEnoughItemsState.error("Your Cloth Config version is too old!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
-            }
-        } catch (VersionParsingException e) {
-            RoughlyEnoughItemsState.error("Failed to parse Cloth Config version: " + e.getMessage());
-            e.printStackTrace();
-        }*/
+    @ExpectPlatform
+    public static void checkMods() {
+        throw new AssertionError();
     }
 }

@@ -85,4 +85,9 @@ public class DelegateWidget extends WidgetWithBounds {
     public boolean containsMouse(double mouseX, double mouseY) {
         return widget.containsMouse(mouseX, mouseY);
     }
+    
+    @Override
+    public boolean isDragging() {
+        return true;
+    }
 }

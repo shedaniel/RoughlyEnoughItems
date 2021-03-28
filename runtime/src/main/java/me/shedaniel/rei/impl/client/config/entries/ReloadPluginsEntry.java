@@ -35,6 +35,7 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
@@ -49,7 +50,8 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             if (PluginManager.areAnyPluginsReloading()) {
-                Minecraft.getInstance().setScreen(new ConfigReloadingScreen(Minecraft.getInstance().screen));
+                Screen screen = Minecraft.getInstance().screen;
+                Minecraft.getInstance().setScreen(new ConfigReloadingScreen(() -> Minecraft.getInstance().setScreen(screen)));
             } else {
                 super.render(matrices, mouseX, mouseY, delta);
             }
