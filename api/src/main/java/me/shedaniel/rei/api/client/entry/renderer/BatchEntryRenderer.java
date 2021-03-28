@@ -44,7 +44,7 @@ public interface BatchEntryRenderer<T> extends EntryRenderer<T> {
     
     void renderBase(EntryStack<T> entry, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta);
     
-    void renderOverlay(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta);
+    void renderOverlay(EntryStack<T> entry, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta);
     
     void endBatch(EntryStack<T> entry, PoseStack matrices, float delta);
     
@@ -55,7 +55,8 @@ public interface BatchEntryRenderer<T> extends EntryRenderer<T> {
         MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
         renderBase(entry, matrices, immediate, bounds, mouseX, mouseY, delta);
         immediate.endBatch();
-        renderOverlay(entry, matrices, bounds, mouseX, mouseY, delta);
+        renderOverlay(entry, matrices, immediate, bounds, mouseX, mouseY, delta);
+        immediate.endBatch();
         endBatch(entry, matrices, delta);
     }
 }

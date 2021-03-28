@@ -126,8 +126,6 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     @Deprecated
     int hashCode();
     
-    int hash(ComparisonContext context);
-    
     @Deprecated
     boolean equals(Object o);
     

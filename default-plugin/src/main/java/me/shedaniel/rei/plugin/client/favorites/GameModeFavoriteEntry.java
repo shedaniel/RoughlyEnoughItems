@@ -104,7 +104,11 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 int color = bounds.contains(mouseX, mouseY) ? 0xFFEEEEEE : 0xFFAAAAAA;
                 if (bounds.width > 4 && bounds.height > 4) {
-                    renderGameModeText(matrices, type, bounds.getCenterX(), bounds.getCenterY(), color);
+                    matrices.pushPose();
+                    matrices.translate(bounds.getCenterX(), bounds.getCenterY(), 0);
+                    matrices.scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f, 1);
+                    renderGameModeText(matrices, type, 0, 0, color);
+                    matrices.popPose();
                 }
             }
             

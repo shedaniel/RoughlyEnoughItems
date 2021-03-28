@@ -30,6 +30,7 @@ import me.shedaniel.rei.impl.client.search.argument.Argument;
 import me.shedaniel.rei.impl.client.search.argument.CompoundArgument;
 
 import java.util.List;
+import java.util.Objects;
 
 public class SearchProviderImpl implements SearchProvider {
     @Override
@@ -59,6 +60,19 @@ public class SearchProviderImpl implements SearchProvider {
         @Override
         public String getFilter() {
             return filter;
+        }
+    
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SearchFilterImpl that = (SearchFilterImpl) o;
+            return Objects.equals(filter, that.filter);
+        }
+    
+        @Override
+        public int hashCode() {
+            return Objects.hash(filter);
         }
     }
 }

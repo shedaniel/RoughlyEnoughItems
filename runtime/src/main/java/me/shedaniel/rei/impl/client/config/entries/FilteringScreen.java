@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.client.config.entries;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -46,6 +47,7 @@ import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.client.gui.widget.BatchEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import net.minecraft.client.Minecraft;
@@ -221,16 +223,18 @@ public class FilteringScreen extends Screen {
         int skip = Math.max(0, Mth.floor(scrolling.scrollAmount / (float) entrySize()));
         int nextIndex = skip * innerBounds.width / entrySize();
         int i = nextIndex;
+        BatchEntryRendererManager manager = new BatchEntryRendererManager();
         for (; i < entryStacks.size(); i++) {
-            EntryStack stack = entryStacks.get(i);
+            EntryStack<?> stack = entryStacks.get(i);
             EntryListEntry entry = entries.get(nextIndex);
             entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
             if (entry.getBounds().y > bounds.getMaxY())
                 break;
             entry.entry(stack);
-            entry.render(matrices, mouseX, mouseY, delta);
+            manager.add(entry);
             nextIndex++;
         }
+        manager.render(matrices, mouseX, mouseY, delta);
         updatePosition(delta);
         scrolling.renderScrollBar(0xff000000, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
         matrices.pushPose();
@@ -243,8 +247,8 @@ public class FilteringScreen extends Screen {
         matrices.popPose();
         
         ScissorsHandler.INSTANCE.removeLastScissor();
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder buffer = tessellator.getBuilder();
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder buffer = tesselator.getBuilder();
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 0, 1);
         RenderSystem.disableAlphaTest();
@@ -256,7 +260,7 @@ public class FilteringScreen extends Screen {
         buffer.vertex(matrix, width, bounds.y + 4, 0.0F).uv(1.0F, 1.0F).color(0, 0, 0, 0).endVertex();
         buffer.vertex(matrix, width, bounds.y, 0.0F).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
         buffer.vertex(matrix, 0, bounds.y, 0.0F).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
-        tessellator.end();
+        tesselator.end();
         RenderSystem.enableTexture();
         RenderSystem.shadeModel(7424);
         RenderSystem.enableAlphaTest();
@@ -314,11 +318,7 @@ public class FilteringScreen extends Screen {
     public void updateSearch(String searchTerm) {
         lastFilter = SearchProvider.getInstance().createFilter(searchTerm);
         Set<EntryStack<?>> list = Sets.newLinkedHashSet();
-        EntryRegistry.getInstance().getEntryStacks().forEach(stack -> {
-            if (matches(stack)) {
-                list.add(stack.normalize());
-            }
-        });
+        EntryRegistry.getInstance().getEntryStacks().parallel().filter(this::matches).map(EntryStack::normalize).forEachOrdered(list::add);
         
         entryStacks = Lists.newArrayList(list);
         updateEntriesPosition();

@@ -24,15 +24,10 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
@@ -47,26 +42,20 @@ import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.api.client.REIOverlay;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
-import me.shedaniel.rei.api.client.entry.renderer.BatchEntryRenderer;
-import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.config.EntryPanelOrdering;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.api.client.search.SearchFilter;
-import me.shedaniel.rei.api.client.search.SearchProvider;
-import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
@@ -83,15 +72,9 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
@@ -121,24 +104,19 @@ public class EntryListWidget extends WidgetWithBounds {
     };
     protected int blockedCount;
     private boolean debugTime;
-    private double lastAverageDebugTime;
-    private double averageDebugTime;
-    private double lastTotalDebugTime;
-    private double totalDebugTime;
-    private float totalDebugTimeDelta;
+    private double lastAverageDebugTime, averageDebugTime, lastTotalDebugTime, totalDebugTime, totalDebugTimeDelta;
     private Rectangle bounds, innerBounds;
     private List<EntryStack<?>> allStacks = null;
     private List<EntryListEntry> entries = Collections.emptyList();
     private List<Widget> renders = Collections.emptyList();
     private List<Widget> widgets = Collections.emptyList();
-    private SearchFilter lastFilter = SearchFilter.matchAll();
-    private String lastSearchTerm = null;
+    private AsyncSearchManager searchManager = AsyncSearchManager.createDefault();
     
     public static int entrySize() {
         return Mth.ceil(SIZE * ConfigObject.getInstance().getEntrySize());
     }
     
-    static boolean notSteppingOnExclusionZones(int left, int top, int width, int height, Rectangle listArea) {
+    public static boolean notSteppingOnExclusionZones(int left, int top, int width, int height, Rectangle listArea) {
         Minecraft instance = Minecraft.getInstance();
         for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(instance.screen)) {
             InteractionResult fit = canItemSlotWidgetFit(left, top, width, height, decider);
@@ -174,31 +152,33 @@ public class EntryListWidget extends WidgetWithBounds {
         int entrySize = entrySize();
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             int width = Math.max(Mth.floor((bounds.width - 2 - 6) / (float) entrySize), 1);
-            if (ConfigObject.getInstance().isLeftHandSidePanel())
+            if (ConfigObject.getInstance().isLeftHandSidePanel()) {
                 return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f) + 3), bounds.y, width * entrySize, bounds.height);
+            }
             return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f) - 3), bounds.y, width * entrySize, bounds.height);
+        } else {
+            int width = Math.max(Mth.floor((bounds.width - 2) / (float) entrySize), 1);
+            int height = Math.max(Mth.floor((bounds.height - 2) / (float) entrySize), 1);
+            return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f)), (int) (bounds.getCenterY() - height * (entrySize / 2f)), width * entrySize, height * entrySize);
         }
-        int width = Math.max(Mth.floor((bounds.width - 2) / (float) entrySize), 1);
-        int height = Math.max(Mth.floor((bounds.height - 2) / (float) entrySize), 1);
-        return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f)), (int) (bounds.getCenterY() - height * (entrySize / 2f)), width * entrySize, height * entrySize);
     }
     
     @Override
-    public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        if (bounds.contains(double_1, double_2)) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (bounds.contains(mouseX, mouseY)) {
             if (Screen.hasControlDown()) {
                 ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
-                if (config.setEntrySize(config.getEntrySize() + double_3 * 0.075)) {
+                if (config.setEntrySize(config.getEntrySize() + amount * 0.075)) {
                     ConfigManager.getInstance().saveConfig();
                     REIHelper.getInstance().getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
                     return true;
                 }
             } else if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-                scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
+                scrolling.offset(ClothConfigInitializer.getScrollStep() * -amount, true);
                 return true;
             }
         }
-        return super.mouseScrolled(double_1, double_2, double_3);
+        return super.mouseScrolled(mouseX, mouseY, amount);
     }
     
     @Override
@@ -228,59 +208,6 @@ public class EntryListWidget extends WidgetWithBounds {
         return Mth.ceil(allStacks.size() / (float) entries.size());
     }
     
-    public static <T extends EntryListEntryWidget> void renderEntries(MutableInt size, MutableLong time, boolean fastEntryRendering, PoseStack matrices, int mouseX, int mouseY, float delta, Iterable<T> entries) {
-        renderEntries(true, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, entries);
-    }
-    
-    public static <T extends EntryListEntryWidget> void renderEntries(boolean fastEntryRendering, PoseStack matrices, int mouseX, int mouseY, float delta, Iterable<T> entries) {
-        renderEntries(false, null, null, fastEntryRendering, matrices, mouseX, mouseY, delta, entries);
-    }
-    
-    public static <T extends EntryListEntryWidget> void renderEntries(boolean debugTime, MutableInt size, MutableLong time, boolean fastEntryRendering, PoseStack matrices, int mouseX, int mouseY, float delta, Iterable<T> entries) {
-        T firstWidget = Iterables.getFirst(entries, null);
-        if (firstWidget == null) return;
-        @SuppressWarnings("rawtypes")
-        EntryStack first = firstWidget.getCurrentEntry();
-        EntryRenderer<?> renderer = first.getRenderer();
-        if (fastEntryRendering && renderer instanceof BatchEntryRenderer) {
-            BatchEntryRenderer<?> firstRenderer = (BatchEntryRenderer<?>) renderer;
-            firstRenderer.startBatch(first, matrices, delta);
-            long l = debugTime ? System.nanoTime() : 0;
-            MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-            for (T listEntry : entries) {
-                @SuppressWarnings("rawtypes")
-                EntryStack currentEntry = listEntry.getCurrentEntry();
-                currentEntry.setZ(100);
-                listEntry.drawBackground(matrices, mouseX, mouseY, delta);
-                firstRenderer.renderBase(currentEntry, matrices, immediate, listEntry.getInnerBounds(), mouseX, mouseY, delta);
-                if (debugTime && !currentEntry.isEmpty()) size.increment();
-            }
-            immediate.endBatch();
-            for (T listEntry : entries) {
-                @SuppressWarnings("rawtypes")
-                EntryStack currentEntry = listEntry.getCurrentEntry();
-                firstRenderer.renderOverlay(currentEntry, matrices, listEntry.getInnerBounds(), mouseX, mouseY, delta);
-                if (listEntry.containsMouse(mouseX, mouseY)) {
-                    listEntry.queueTooltip(matrices, mouseX, mouseY, delta);
-                    listEntry.drawHighlighted(matrices, mouseX, mouseY, delta);
-                }
-            }
-            if (debugTime) time.add(System.nanoTime() - l);
-            firstRenderer.endBatch(first, matrices, delta);
-        } else {
-            for (T entry : entries) {
-                if (entry.getCurrentEntry().isEmpty())
-                    continue;
-                if (debugTime) {
-                    size.increment();
-                    long l = System.nanoTime();
-                    entry.render(matrices, mouseX, mouseY, delta);
-                    time.add(System.nanoTime() - l);
-                } else entry.render(matrices, mouseX, mouseY, delta);
-            }
-        }
-    }
-    
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         MutableInt size = new MutableInt();
@@ -292,56 +219,30 @@ public class EntryListWidget extends WidgetWithBounds {
             
             int skip = Math.max(0, Mth.floor(scrolling.scrollAmount / (float) entrySize()));
             int nextIndex = skip * innerBounds.width / entrySize();
+            this.blockedCount = 0;
+            BatchEntryRendererManager helper = new BatchEntryRendererManager();
+            
             int i = nextIndex;
-            int cont = nextIndex;
-            blockedCount = 0;
-            
-            Int2ObjectMap<List<EntryListEntry>> grouping = new Int2ObjectOpenHashMap<>();
-            List<EntryListEntry> toRender = new ArrayList<>();
-            Consumer<EntryListEntry> add;
-            
-            if (fastEntryRendering) {
-                add = entry -> {
-                    int hash = BatchEntryRenderer.getBatchIdFrom(entry.getCurrentEntry());
-                    List<EntryListEntry> entries = grouping.get(hash);
-                    
-                    if (entries == null) {
-                        grouping.put(hash, entries = new ArrayList<>());
-                    }
-                    
-                    entries.add(entry);
-                };
-            } else {
-                add = toRender::add;
-            }
-            
-            for (; cont < entries.size(); cont++) {
+            for (int cont = nextIndex; cont < entries.size(); cont++) {
                 EntryListEntry entry = entries.get(cont);
-                
                 Rectangle entryBounds = entry.getBounds();
                 
                 entryBounds.y = (int) (entry.backupY - scrolling.scrollAmount);
                 if (entryBounds.y > this.bounds.getMaxY()) break;
                 if (allStacks.size() <= i) break;
                 if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height, innerBounds)) {
-                    EntryStack stack = allStacks.get(i++);
+                    EntryStack<?> stack = allStacks.get(i++);
+                    entry.clearStacks();
                     if (!stack.isEmpty()) {
-                        entry.clearStacks();
                         entry.entry(stack);
-                        add.accept(entry);
+                        helper.add(entry);
                     }
                 } else {
                     blockedCount++;
                 }
             }
             
-            if (fastEntryRendering) {
-                for (List<EntryListEntry> entries : grouping.values()) {
-                    renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, entries);
-                }
-            } else {
-                renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, toRender);
-            }
+            helper.render(debugTime, size, time, matrices, mouseX, mouseY, delta);
             
             updatePosition(delta);
             ScissorsHandler.INSTANCE.removeLastScissor();
@@ -352,13 +253,7 @@ public class EntryListWidget extends WidgetWithBounds {
             for (Widget widget : renders) {
                 widget.render(matrices, mouseX, mouseY, delta);
             }
-            if (fastEntryRendering) {
-                entries.stream().collect(Collectors.groupingBy(entryListEntry -> BatchEntryRenderer.getBatchIdFrom(entryListEntry.getCurrentEntry()))).forEach((integer, entries) -> {
-                    renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, entries);
-                });
-            } else {
-                renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, entries);
-            }
+            new BatchEntryRendererManager(entries).render(debugTime, size, time, matrices, mouseX, mouseY, delta);
         }
         
         if (debugTime) {
@@ -446,12 +341,14 @@ public class EntryListWidget extends WidgetWithBounds {
     public void updateArea(String searchTerm) {
         this.bounds = REIHelper.getInstance().calculateEntryListArea();
         FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
-        if (favoritesListWidget != null)
+        if (favoritesListWidget != null) {
             favoritesListWidget.updateFavoritesBounds(searchTerm);
-        if (searchTerm != null || allStacks == null || (ConfigObject.getInstance().isFavoritesEnabled() && favoritesListWidget == null))
+        }
+        if (allStacks == null || (ConfigObject.getInstance().isFavoritesEnabled() && favoritesListWidget == null)) {
             updateSearch(searchTerm, true);
-        else
+        } else {
             updateEntriesPosition();
+        }
     }
     
     public void updateEntriesPosition() {
@@ -504,8 +401,9 @@ public class EntryListWidget extends WidgetWithBounds {
             this.widgets.addAll(entries);
         }
         FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
-        if (favoritesListWidget != null)
+        if (favoritesListWidget != null) {
             favoritesListWidget.updateEntriesPosition(entry -> true);
+        }
     }
     
     @ApiStatus.Internal
@@ -513,77 +411,35 @@ public class EntryListWidget extends WidgetWithBounds {
         return allStacks;
     }
     
-    public void updateSearch(String searchTerm) {
-        updateSearch(searchTerm, true);
-    }
-    
     public void updateSearch(String searchTerm, boolean ignoreLastSearch) {
         Stopwatch stopwatch = Stopwatch.createStarted();
-        if (ignoreLastSearch || this.lastSearchTerm == null || !this.lastSearchTerm.equals(searchTerm)) {
-            this.lastSearchTerm = searchTerm;
-            this.lastFilter = SearchProvider.getInstance().createFilter(searchTerm);
-            List<EntryStack<?>> list = Lists.newArrayList();
-            boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ContainerScreenOverlay.getInstance().inventoryStacks.isEmpty();
-            IntSet workingItems = checkCraftable ? new IntOpenHashSet() : null;
-            if (checkCraftable)
-                workingItems.addAll(CollectionUtils.map(Views.getInstance().findCraftableEntriesByItems(ContainerScreenOverlay.getInstance().inventoryStacks), EntryStacks::hashExact));
-            List<EntryStack<?>> stacks = EntryRegistry.getInstance().getPreFilteredList();
-            if (!stacks.isEmpty()) {
-                if (ConfigObject.getInstance().shouldAsyncSearch()) {
-                    List<CompletableFuture<List<EntryStack<?>>>> completableFutures = Lists.newArrayList();
-                    for (Iterable<EntryStack<?>> partitionStacks : CollectionUtils.partition(stacks, ConfigObject.getInstance().getAsyncSearchPartitionSize())) {
-                        completableFutures.add(CompletableFuture.supplyAsync(() -> {
-                            List<EntryStack<?>> filtered = Lists.newArrayList();
-                            for (EntryStack<?> stack : partitionStacks) {
-                                if (matches(stack)) {
-                                    if (workingItems != null && !workingItems.contains(EntryStacks.hashExact(stack)))
-                                        continue;
-                                    filtered.add(stack.normalize());
-                                }
-                            }
-                            return filtered;
-                        }));
-                    }
-                    try {
-                        CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(10, TimeUnit.SECONDS);
-                    } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                        e.printStackTrace();
-                    }
-                    for (CompletableFuture<List<EntryStack<?>>> future : completableFutures) {
-                        List<EntryStack<?>> now = future.getNow(null);
-                        if (now != null)
-                            list.addAll(now);
-                    }
-                } else {
-                    for (EntryStack<?> stack : stacks) {
-                        if (matches(stack)) {
-                            if (workingItems != null && !workingItems.contains(EntryStacks.hashExact(stack)))
-                                continue;
-                            list.add(stack.normalize());
-                        }
-                    }
-                }
-            }
+        if (ignoreLastSearch) searchManager.markDirty();
+        searchManager.updateFilter(searchTerm);
+        if (searchManager.isDirty()) {
+            List<EntryStack<?>> list = searchManager.get();
             EntryPanelOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
             if (ordering == EntryPanelOrdering.NAME)
                 list.sort(ENTRY_NAME_COMPARER);
             if (ordering == EntryPanelOrdering.GROUPS)
                 list.sort(ENTRY_GROUP_COMPARER);
-            if (!ConfigObject.getInstance().isItemListAscending())
+            if (!ConfigObject.getInstance().isItemListAscending()) {
                 Collections.reverse(list);
+            }
             allStacks = list;
         }
         debugTime = ConfigObject.getInstance().doDebugRenderTimeRequired();
-        FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
-        if (favoritesListWidget != null)
-            favoritesListWidget.updateSearch(this, searchTerm);
-        if (ConfigObject.getInstance().doDebugSearchTimeRequired())
+        FavoritesListWidget favorites = ContainerScreenOverlay.getFavoritesListWidget();
+        if (favorites != null) {
+            favorites.updateSearch();
+        }
+        if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
             RoughlyEnoughItemsCore.LOGGER.info("Search Used: %s", stopwatch.stop().toString());
+        }
         updateEntriesPosition();
     }
     
     public boolean matches(EntryStack<?> stack) {
-        return lastFilter.test(stack);
+        return searchManager.matches(stack);
     }
     
     @Override

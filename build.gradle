@@ -219,11 +219,7 @@ publishing {
 }*/
 
 allprojects {
-    repositories {
-        mavenLocal()
-    }
-    
     architectury {
-        transformerVersion = "2.1.9999"
+        transformerVersion = "2.1.38"
     }
 }

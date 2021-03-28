@@ -385,7 +385,7 @@ public class EntryWidget extends Slot implements DraggableStackProvider {
                     ConfigManager.getInstance().saveConfig();
                     FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
                     if (favoritesListWidget != null)
-                        favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), REIHelperImpl.getSearchField().getText());
+                        favoritesListWidget.updateSearch();
                     return true;
                 }
             }
@@ -432,7 +432,7 @@ public class EntryWidget extends Slot implements DraggableStackProvider {
                     ConfigManager.getInstance().saveConfig();
                     FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
                     if (favoritesListWidget != null)
-                        favoritesListWidget.updateSearch(ContainerScreenOverlay.getEntryListWidget(), REIHelperImpl.getSearchField().getText());
+                        favoritesListWidget.updateSearch();
                     return true;
                 }
             }

@@ -107,8 +107,9 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
                         recalculateFilter(menu);
                     ConfigManager.getInstance().saveConfig();
                     EntryRegistry.getInstance().refilter();
-                    if (REIHelperImpl.getSearchField() != null)
+                    if (REIHelperImpl.getSearchField() != null) {
                         ContainerScreenOverlay.getEntryListWidget().updateSearch(REIHelperImpl.getSearchField().getText(), true);
+                    }
                 }
             } else if (!RoughlyEnoughItemsCore.isLeftMousePressed) clickedLast = false;
         } else clickedLast = false;
