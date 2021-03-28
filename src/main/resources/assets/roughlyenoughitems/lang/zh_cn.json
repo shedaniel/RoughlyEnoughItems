@@ -182,6 +182,7 @@
   "config.roughlyenoughitems.accessibility.displayPanelLocation.right": "右侧",
   "config.roughlyenoughitems.search.tooltipSearch": "工具提示搜索 (#):",
   "config.roughlyenoughitems.search.tagSearch": "标签搜索 ($):",
+  "config.roughlyenoughitems.search.identifierSearch": "识别号搜索 (*):",
   "config.roughlyenoughitems.search.modSearch": "模组搜索 (@)：",
   "config.roughlyenoughitems.search_mode.always": "总是启用",
   "config.roughlyenoughitems.search_mode.prefix": "使用前缀时",
