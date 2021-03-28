@@ -33,10 +33,9 @@ import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public class ConfigReloadingScreen extends Screen {
+    private Runnable parent;
     
-    private Screen parent;
-    
-    public ConfigReloadingScreen(Screen parent) {
+    public ConfigReloadingScreen(Runnable parent) {
         super(NarratorChatListener.NO_TITLE);
         this.parent = parent;
     }
@@ -50,7 +49,7 @@ public class ConfigReloadingScreen extends Screen {
     public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
         this.renderDirtBackground(0);
         if (!PluginManager.areAnyPluginsReloading()) {
-            minecraft.setScreen(parent);
+            parent.run();
         }
         drawCenteredString(matrices, this.font, I18n.get("text.rei.config.is.reloading"), this.width / 2, this.height / 2 - 50, 16777215);
         String string_3;

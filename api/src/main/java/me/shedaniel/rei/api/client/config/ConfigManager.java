@@ -75,5 +75,4 @@ public interface ConfigManager extends Reloadable<REIClientPlugin> {
     Screen getConfigScreen(Screen parent);
     
     ConfigObject getConfig();
-    
 }

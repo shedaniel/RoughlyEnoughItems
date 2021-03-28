@@ -386,6 +386,10 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return Platform.isForge() && advanced.jeiCompatibilityLayer;
     }
     
+    public void setJEICompatibilityLayerEnabled(boolean value) {
+        advanced.jeiCompatibilityLayer = value;
+    }
+    
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface DontApplyFieldName {}

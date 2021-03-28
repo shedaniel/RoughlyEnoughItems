@@ -55,6 +55,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
+import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.Animator;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -212,7 +213,10 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     @Override
     public Optional<Acceptor> visitDraggedStack(DraggableStack stack) {
         if (innerBounds.contains(PointHelper.ofMouse())) {
-            return Optional.of(this::acceptDraggedStack);
+            EntrySerializer<?> serializer = stack.getStack().getDefinition().getSerializer();
+            if (stack instanceof FavoriteDraggableStack || (serializer.supportReading() && serializer.supportSaving())) {
+                return Optional.of(this::acceptDraggedStack);
+            }
         }
         return Optional.empty();
     }

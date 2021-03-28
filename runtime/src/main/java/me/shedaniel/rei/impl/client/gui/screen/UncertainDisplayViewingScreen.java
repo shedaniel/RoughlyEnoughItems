@@ -33,8 +33,10 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -43,6 +45,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.util.Animator;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -57,7 +60,6 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -80,6 +82,7 @@ public class UncertainDisplayViewingScreen extends Screen {
     private boolean showTips;
     private Animator scroll = new Animator();
     private List<String> allModsUsingJEI = null;
+    private boolean jeiEnabled = false;
     
     public UncertainDisplayViewingScreen(Screen parent, DisplayScreenType type, boolean showTips, BooleanConsumer callback) {
         super(ImmutableTextComponent.EMPTY);
@@ -139,6 +142,11 @@ public class UncertainDisplayViewingScreen extends Screen {
                 .onClick(button -> {
                     if (scroll.target() == 0 && allModsUsingJEI != null) {
                         scroll.setTo(200, 450);
+                    } else if (allModsUsingJEI != null && jeiEnabled) {
+                        ConfigManagerImpl.getInstance().getConfig().setJEICompatibilityLayerEnabled(jeiEnabled);
+                        ConfigManager.getInstance().saveConfig();
+                        RoughlyEnoughItemsCore.reloadPlugins(null);
+                        Minecraft.getInstance().setScreen(new ConfigReloadingScreen(() -> callback.accept(original)));
                     } else {
                         callback.accept(original);
                     }
@@ -150,7 +158,7 @@ public class UncertainDisplayViewingScreen extends Screen {
         this.widgets.add(slider = transformScroll(Widgets.wrapVanillaWidget(new AbstractSliderButton(width / 2 - 100, height * 2 - 64, 200, 20, new TranslatableComponent("text.rei.jei_compat.false"), 0) {
             @Override
             protected void updateMessage() {
-                setMessage(new TranslatableComponent("text.rei.jei_compat." + (value == 1f)));
+                setMessage(new TranslatableComponent("text.rei.jei_compat." + (jeiEnabled = value == 1f)));
             }
             
             @Override
@@ -259,7 +267,7 @@ public class UncertainDisplayViewingScreen extends Screen {
             this.bounds = new Rectangle(x - 4 + 16, y - 4, 176 + 8, 120 + 8);
         }
         
-            @Override
+        @Override
         public Rectangle getBounds() {
             return bounds;
         }

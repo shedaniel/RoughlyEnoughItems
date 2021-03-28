@@ -26,6 +26,7 @@ package me.shedaniel.rei.api.client.gui.widgets;
 import com.google.common.collect.AbstractIterator;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector4f;
 import me.shedaniel.math.Dimension;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -94,8 +95,45 @@ public final class Widgets {
         public void render(PoseStack poseStack, int i, int j, float f) {
             poseStack.pushPose();
             poseStack.last().pose().multiply(translate.get());
-            super.render(poseStack, i, j, f);
+            Vector4f mouse = transformMouse(i, j);
+            super.render(poseStack, (int) mouse.x(), (int) mouse.y(), f);
             poseStack.popPose();
+        }
+        
+        private Vector4f transformMouse(double mouseX, double mouseY) {
+            Vector4f mouse = new Vector4f((float) mouseX, (float) mouseY, 0, 1);
+            mouse.transform(translate.get());
+            return mouse;
+        }
+        
+        @Override
+        public boolean containsMouse(double mouseX, double mouseY) {
+            Vector4f mouse = transformMouse(mouseX, mouseY);
+            return super.containsMouse(mouse.x(), mouse.y());
+        }
+        
+        @Override
+        public boolean mouseClicked(double d, double e, int i) {
+            Vector4f mouse = transformMouse(d, e);
+            return super.mouseClicked(mouse.x(), mouse.y(), i);
+        }
+        
+        @Override
+        public boolean mouseReleased(double d, double e, int i) {
+            Vector4f mouse = transformMouse(d, e);
+            return super.mouseReleased(mouse.x(), mouse.y(), i);
+        }
+        
+        @Override
+        public boolean mouseDragged(double d, double e, int i, double f, double g) {
+            Vector4f mouse = transformMouse(d, e);
+            return super.mouseDragged(mouse.x(), mouse.y(), i, f, g);
+        }
+        
+        @Override
+        public boolean mouseScrolled(double d, double e, double f) {
+            Vector4f mouse = transformMouse(d, e);
+            return super.mouseScrolled(mouse.x(), mouse.y(), f);
         }
     }
     
@@ -134,7 +172,12 @@ public final class Widgets {
                 ((ContainerEventHandler) element).setFocused(guiEventListener);
             }
         }
-        
+    
+        @Override
+        public boolean isDragging() {
+            return true;
+        }
+    
         @Override
         public boolean containsMouse(double mouseX, double mouseY) {
             return element.isMouseOver(mouseX, mouseY);
