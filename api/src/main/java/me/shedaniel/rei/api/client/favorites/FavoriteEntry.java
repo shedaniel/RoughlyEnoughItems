@@ -76,7 +76,7 @@ public abstract class FavoriteEntry {
         return Optional.empty();
     }
     
-    public abstract int hashIgnoreAmount();
+    public abstract long hashIgnoreAmount();
     
     public abstract FavoriteEntry copy();
     
@@ -96,7 +96,7 @@ public abstract class FavoriteEntry {
     public int hashCode() {
         int result = 1;
         result = 31 * result + getType().hashCode();
-        result = 31 * result + hashIgnoreAmount();
+        result = 31 * result + Long.hashCode(hashIgnoreAmount());
         return result;
     }
     

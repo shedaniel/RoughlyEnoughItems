@@ -24,8 +24,8 @@
 package me.shedaniel.rei.api.client.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
@@ -84,12 +84,12 @@ public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHold
     }
     
     public static boolean equalsList(EntryIngredient left, EntryIngredient right) {
-        IntSet leftBytes = new IntOpenHashSet(left.size());
+        LongSet leftBytes = new LongOpenHashSet(left.size());
         for (EntryStack<?> entryStack : left) {
             leftBytes.add(EntryStacks.hashExact(entryStack));
         }
         if (leftBytes.size() > right.size()) return false;
-        IntSet rightBytes = new IntOpenHashSet(right.size());
+        LongSet rightBytes = new LongOpenHashSet(right.size());
         for (EntryStack<?> entryStack : right) {
             rightBytes.add(EntryStacks.hashExact(entryStack));
             

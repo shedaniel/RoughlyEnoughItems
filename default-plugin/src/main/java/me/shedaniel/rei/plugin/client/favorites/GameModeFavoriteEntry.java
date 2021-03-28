@@ -164,7 +164,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
     }
     
     @Override
-    public int hashIgnoreAmount() {
+    public long hashIgnoreAmount() {
         return gameMode == null ? -1 : gameMode.ordinal();
     }
     

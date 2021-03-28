@@ -157,7 +157,7 @@ public final class EntryStacks {
      * @param <T>   the type of the stack
      * @return the hash code of the {@link ComparisonContext#EXACT} context
      */
-    public static <T> int hashExact(EntryStack<T> stack) {
+    public static <T> long hashExact(EntryStack<T> stack) {
         return stack.getDefinition().hash(stack, stack.getValue(), ComparisonContext.EXACT);
     }
     
@@ -171,7 +171,7 @@ public final class EntryStacks {
      * @param <T>   the type of the stack
      * @return the hash code of the {@link ComparisonContext#FUZZY} context
      */
-    public static <T> int hashFuzzy(EntryStack<T> stack) {
+    public static <T> long hashFuzzy(EntryStack<T> stack) {
         return stack.getDefinition().hash(stack, stack.getValue(), ComparisonContext.FUZZY);
     }
     

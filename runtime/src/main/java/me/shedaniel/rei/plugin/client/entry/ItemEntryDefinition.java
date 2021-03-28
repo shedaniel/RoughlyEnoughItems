@@ -108,7 +108,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     }
     
     @Override
-    public int hash(EntryStack<ItemStack> entry, ItemStack value, ComparisonContext context) {
+    public long hash(EntryStack<ItemStack> entry, ItemStack value, ComparisonContext context) {
         int code = 1;
         code = 31 * code + System.identityHashCode(value.getItem());
         code = 31 * code + (context.isFuzzy() ? 0 : Long.hashCode(ItemComparatorRegistry.getInstance().hashOf(value)));

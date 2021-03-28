@@ -107,8 +107,16 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
     }
     
     @Override
-    public int hash(EntryStack<T> entry, T value, ComparisonContext context) {
-        return ingredientHelper.getUniqueId(value, wrapContext(context)).hashCode();
+    public long hash(EntryStack<T> entry, T value, ComparisonContext context) {
+        return hashCode(ingredientHelper.getUniqueId(value, wrapContext(context)));
+    }
+    
+    private static long hashCode(String id) {
+        long h = 0;
+        for (int i = 0; i < id.length(); i++) {
+            h = 31 * h + id.charAt(i);
+        }
+        return h;
     }
     
     @Override
