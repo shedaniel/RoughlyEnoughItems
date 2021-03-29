@@ -174,7 +174,9 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
         @Override
         public void render(EntryStack<FluidStack> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
             FluidStack stack = entry.getValue();
+            if (stack.isEmpty()) return;
             TextureAtlasSprite sprite = FluidStackHooks.getStillTexture(stack);
+            if (sprite == null) return;
             int color = FluidStackHooks.getColor(stack);
             int a = 255;
             int r = (color >> 16 & 255);
