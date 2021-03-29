@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat;
 
+import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.IFocus;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,6 +40,16 @@ public class JEIFocus<T> implements IFocus<T> {
         this.value = value;
     }
     
+    public static <T> IFocus<T> cast(IFocus<?> focus, IIngredientType<T> type) {
+        if (focus != null) {
+            if (type.getIngredientClass().isInstance(focus.getValue())) {
+                return (IFocus<T>) focus;
+            }
+        }
+        
+        return null;
+    }
+    
     @Override
     @NotNull
     public Mode getMode() {
@@ -49,5 +60,9 @@ public class JEIFocus<T> implements IFocus<T> {
     @NotNull
     public T getValue() {
         return value;
+    }
+    
+    public <R> JEIFocus<R> wrap() {
+        return (JEIFocus<R>) this;
     }
 }

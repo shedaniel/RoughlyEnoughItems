@@ -99,7 +99,7 @@ public class UncertainDisplayViewingScreen extends Screen {
         this.callback = callback;
         this.parent = parent;
         this.showTips = showTips;
-        if (showTips && Platform.isForge()) {
+        if (showTips && false && Platform.isForge()) {
             allModsUsingJEI = ClientInternals.getJeiCompatMods().stream()
                     .distinct()
                     .map(ClientHelper.getInstance()::getModFromModId)

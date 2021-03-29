@@ -38,7 +38,7 @@ import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.impl.client.gui.screen.RecipeScreen;
+import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -64,7 +64,7 @@ public class REIHelperImpl implements REIHelper {
     private OverlaySearchField searchField;
     private AbstractContainerScreen<?> previousContainerScreen = null;
     private Screen previousScreen = null;
-    private LinkedHashSet<RecipeScreen> lastRecipeScreen = Sets.newLinkedHashSetWithExpectedSize(10);
+    private LinkedHashSet<DisplayScreen> lastDisplayScreen = Sets.newLinkedHashSetWithExpectedSize(10);
     
     /**
      * @return the instance of screen helper
@@ -97,19 +97,19 @@ public class REIHelperImpl implements REIHelper {
         return (OverlaySearchField) getInstance().getSearchTextField();
     }
     
-    public void storeRecipeScreen(RecipeScreen screen) {
-        while (lastRecipeScreen.size() >= 10)
-            lastRecipeScreen.remove(Iterables.get(lastRecipeScreen, 0));
-        lastRecipeScreen.add(screen);
+    public void storeDisplayScreen(DisplayScreen screen) {
+        while (lastDisplayScreen.size() >= 10)
+            lastDisplayScreen.remove(Iterables.get(lastDisplayScreen, 0));
+        lastDisplayScreen.add(screen);
     }
     
-    public boolean hasLastRecipeScreen() {
-        return !lastRecipeScreen.isEmpty();
+    public boolean hasLastDisplayScreen() {
+        return !lastDisplayScreen.isEmpty();
     }
     
-    public Screen getLastRecipeScreen() {
-        RecipeScreen screen = Iterables.getLast(lastRecipeScreen);
-        lastRecipeScreen.remove(screen);
+    public Screen getLastDisplayScreen() {
+        DisplayScreen screen = Iterables.getLast(lastDisplayScreen);
+        lastDisplayScreen.remove(screen);
         screen.recalculateCategoryPage();
         return (Screen) screen;
     }
@@ -208,7 +208,7 @@ public class REIHelperImpl implements REIHelper {
     @Override
     public void startReload() {
         getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
-        lastRecipeScreen.clear();
+        lastDisplayScreen.clear();
     }
     
     @Override

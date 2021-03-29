@@ -1,5 +1,3 @@
-archivesBaseName = "runtime"
-
 architectury {
     common()
 }

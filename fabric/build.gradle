@@ -1,4 +1,10 @@
-archivesBaseName = "fabric"
+plugins {
+    id "com.github.johnrengelman.shadow" version "5.0.0"
+}
+
+configurations {
+    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+}
 
 architectury {
     platformSetupLoomIde()
@@ -36,4 +42,23 @@ dependencies {
     developmentFabric(project(path: ":api")) { transitive = false }
     developmentFabric(project(path: ":default-plugin")) { transitive = false }
     developmentFabric(project(path: ":runtime")) { transitive = false }
+
+    shadowCommon(project(path: ":api", configuration: "transformProductionFabric")) { transitive = false }
+    shadowCommon(project(path: ":default-plugin", configuration: "transformProductionFabric")) { transitive = false }
+    shadowCommon(project(path: ":runtime", configuration: "transformProductionFabric")) { transitive = false }
+}
+
+shadowJar {
+    configurations = [project.configurations.shadowCommon]
+    classifier "dev-shadow"
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    classifier "fabric"
+}
+
+jar {
+    classifier "dev"
 }

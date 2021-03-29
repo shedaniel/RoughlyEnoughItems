@@ -43,7 +43,7 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.gui.screen.CompositeDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
-import me.shedaniel.rei.impl.client.gui.screen.RecipeScreen;
+import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.impl.client.gui.screen.UncertainDisplayViewingScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -242,14 +242,17 @@ public class ClientHelperImpl implements ClientHelper {
         } else {
             screen = new DefaultDisplayViewingScreen(map, builder.getPreferredOpenedCategory());
         }
-        if (screen instanceof RecipeScreen) {
-            if (builder.getInputNotice() != null)
-                ((RecipeScreen) screen).addIngredientStackToNotice(builder.getInputNotice());
-            if (builder.getOutputNotice() != null)
-                ((RecipeScreen) screen).addResultStackToNotice(builder.getOutputNotice());
+        if (screen instanceof DisplayScreen) {
+            if (builder.getInputNotice() != null) {
+                ((DisplayScreen) screen).setIngredientStackToNotice(builder.getInputNotice());
+            }
+            if (builder.getOutputNotice() != null) {
+                ((DisplayScreen) screen).setResultStackToNotice(builder.getOutputNotice());
+            }
         }
-        if (Minecraft.getInstance().screen instanceof RecipeScreen)
-            REIHelperImpl.getInstance().storeRecipeScreen((RecipeScreen) Minecraft.getInstance().screen);
+        if (Minecraft.getInstance().screen instanceof DisplayScreen) {
+            REIHelperImpl.getInstance().storeDisplayScreen((DisplayScreen) Minecraft.getInstance().screen);
+        }
         Minecraft.getInstance().setScreen(screen);
         return true;
     }
@@ -269,8 +272,8 @@ public class ClientHelperImpl implements ClientHelper {
         public ViewSearchBuilder fillPreferredOpenedCategory() {
             if (getPreferredOpenedCategory() == null) {
                 Screen currentScreen = Minecraft.getInstance().screen;
-                if (currentScreen instanceof RecipeScreen) {
-                    setPreferredOpenedCategory(((RecipeScreen) currentScreen).getCurrentCategory());
+                if (currentScreen instanceof DisplayScreen) {
+                    setPreferredOpenedCategory(((DisplayScreen) currentScreen).getCurrentCategoryId());
                 }
             }
             return this;

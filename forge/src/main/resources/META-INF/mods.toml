@@ -13,8 +13,8 @@ To allow players to view items and recipes.
 '''
 
 [[dependencies.roughlyenoughitems]]
-modId = "cloth-config"
+modId = "architectury"
 mandatory = true
-versionRange = "[4.0.1,)"
+versionRange = "[1.9.136,)"
 ordering = "NONE"
-side = "CLIENT"
+side = "BOTH"

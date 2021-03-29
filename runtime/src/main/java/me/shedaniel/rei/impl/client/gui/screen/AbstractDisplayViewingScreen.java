@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -43,7 +44,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Map;
 
-public abstract class AbstractDisplayViewingScreen extends Screen implements RecipeScreen {
+public abstract class AbstractDisplayViewingScreen extends Screen implements DisplayScreen {
     protected final Map<DisplayCategory<?>, List<Display>> categoryMap;
     protected final List<DisplayCategory<?>> categories;
     protected EntryStack<?> ingredientStackToNotice = EntryStack.empty();
@@ -68,35 +69,42 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Rec
     }
     
     @Override
-    public Rectangle getBounds() {
-        return bounds;
-    }
-    
-    @Override
-    public void addIngredientStackToNotice(EntryStack<?> stack) {
-        this.ingredientStackToNotice = stack;
-    }
-    
-    @Override
-    public void addResultStackToNotice(EntryStack<?> stack) {
-        this.resultStackToNotice = stack;
-    }
-    
-    @Override
     public boolean isPauseScreen() {
         return false;
     }
     
     @Override
-    public CategoryIdentifier<?> getCurrentCategory() {
-        return getSelectedCategory().getCategoryIdentifier();
+    public Rectangle getBounds() {
+        return bounds;
     }
     
-    public DisplayCategory<Display> getSelectedCategory() {
+    @Override
+    public void setIngredientStackToNotice(EntryStack<?> stack) {
+        this.ingredientStackToNotice = stack;
+    }
+    
+    @Override
+    public void setResultStackToNotice(EntryStack<?> stack) {
+        this.resultStackToNotice = stack;
+    }
+    
+    @Override
+    public EntryStack<?> getIngredientStackToNotice() {
+        return ingredientStackToNotice;
+    }
+    
+    @Override
+    public EntryStack<?> getResultStackToNotice() {
+        return resultStackToNotice;
+    }
+    
+    @Override
+    public DisplayCategory<Display> getCurrentCategory() {
         return (DisplayCategory<Display>) categories.get(selectedCategoryIndex);
     }
     
-    protected void previousCategory() {
+    @Override
+    public void previousCategory() {
         int currentCategoryIndex = selectedCategoryIndex;
         currentCategoryIndex--;
         if (currentCategoryIndex < 0)
@@ -104,7 +112,8 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Rec
         ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
     }
     
-    protected void nextCategory() {
+    @Override
+    public void nextCategory() {
         int currentCategoryIndex = selectedCategoryIndex;
         currentCategoryIndex++;
         if (currentCategoryIndex >= categories.size())

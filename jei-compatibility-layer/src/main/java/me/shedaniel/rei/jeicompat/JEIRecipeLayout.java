@@ -26,6 +26,7 @@ package me.shedaniel.rei.jeicompat;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -43,6 +44,7 @@ import mezz.jei.api.gui.ingredient.ITooltipCallback;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
@@ -90,13 +92,22 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
     @Override
     @Nullable
     public IFocus<?> getFocus() {
-        throw TODO();
+        DisplayScreen screen = (DisplayScreen) Minecraft.getInstance().screen;
+        EntryStack<?> notice = screen.getIngredientStackToNotice();
+        if (!notice.isEmpty()) {
+            return new JEIFocus<Object>(unwrap(notice.cast()), IFocus.Mode.INPUT).wrap();
+        }
+        notice = screen.getResultStackToNotice();
+        if (!notice.isEmpty()) {
+            return new JEIFocus<Object>(unwrap(notice.cast()), IFocus.Mode.OUTPUT).wrap();
+        }
+        return null;
     }
     
     @Override
     @Nullable
     public <V> IFocus<V> getFocus(@NotNull IIngredientType<V> ingredientType) {
-        throw TODO();
+        return JEIFocus.cast(getFocus(), ingredientType);
     }
     
     @Override

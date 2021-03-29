@@ -34,6 +34,9 @@ public class RoughlyEnoughItemsInitializerImpl {
     }
     
     public static void checkMods() {
+        if (ModList.get().isLoaded("jei")) {
+            RoughlyEnoughItemsState.error("JEI is installed! REI is an replacement of JEI, we can't co-exist!");
+        }
         if (isClient()) {
             if (!ModList.get().isLoaded("cloth-config")) {
                 RoughlyEnoughItemsState.error("Cloth Config is not installed!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");

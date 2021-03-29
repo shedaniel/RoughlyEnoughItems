@@ -11,8 +11,8 @@ import java.text.SimpleDateFormat
 
 archivesBaseName = "RoughlyEnoughItems"
 
-def runNumber = (System.getenv("GITHUB_RUN_NUMBER") == null ? "9999" : System.getenv("GITHUB_RUN_NUMBER"))
-version = rootProject.base_version + "." + runNumber
+def runNumber = System.getenv("GITHUB_RUN_NUMBER") ?: "9999"
+version = rootProject.base_version + "." + runNumber + "-alpha"
 
 group = "me.shedaniel"
 
@@ -66,6 +66,7 @@ subprojects {
     
     group = rootProject.group
     version = rootProject.version
+    archivesBaseName = rootProject.name
 
 //    loom {
 //        silentMojangMappingsLicense()
@@ -147,10 +148,10 @@ task releaseOnCf {
     dependsOn tasks.getByName("curseforge")
 }
 
-/*curseforge {
+curseforge {
     if (project.hasProperty('danielshe_curse_api_key') || System.getenv('danielshe_curse_api_key') != null) {
         apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
-        project {
+        /*project {
             id = "310111"
             releaseType = "release"
             changelogType = "html"
@@ -175,6 +176,26 @@ task releaseOnCf {
             afterEvaluate {
                 uploadTask.dependsOn("build")
             }
+        }*/
+        project {
+            id = "392060"
+            releaseType = "beta"
+            changelogType = "html"
+            changelog = releaseChangelog
+            addGameVersion "1.16.4"
+            addGameVersion "1.16.5"
+            addGameVersion "Java 8"
+            addGameVersion "Forge"
+            relations {
+                requiredDependency "architectury-forge"
+                requiredDependency "cloth-config-forge"
+            }
+            addArtifact(project("forge").tasks.getByName("remapJar")) {
+                displayName = "[Forge $project.supported_version] v$project.version"
+            }
+            afterEvaluate {
+                uploadTask.dependsOn("forge:build")
+            }
         }
     }
     options {
@@ -183,7 +204,7 @@ task releaseOnCf {
     }
 }
 
-publishing {
+/*publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact(jar) {

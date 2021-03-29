@@ -54,10 +54,10 @@ import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.common.util.EntryIngredients;
-import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
 import me.shedaniel.rei.jeicompat.wrap.JEIEntryDefinition;
@@ -105,6 +105,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.fluids.FluidStack;
 import org.apache.commons.codec.binary.Base64;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -241,11 +242,20 @@ public class JEIPluginDetector {
     }
     
     public static IStackHelper wrapStackHelper() {
-        return (lhs, rhs, context) -> {
-            if (context == UidContext.Ingredient) {
-                return EntryStacks.equalsExact(wrap(lhs), wrap(rhs));
+        return new IStackHelper() {
+            @Override
+            public boolean isEquivalent(@Nullable ItemStack lhs, @Nullable ItemStack rhs, @NotNull UidContext context) {
+                if (context == UidContext.Ingredient) {
+                    return EntryStacks.equalsExact(wrap(lhs), wrap(rhs));
+                }
+                return EntryStacks.equalsFuzzy(wrap(lhs), wrap(rhs));
             }
-            return EntryStacks.equalsFuzzy(wrap(lhs), wrap(rhs));
+    
+            @Override
+            @NotNull
+            public String getUniqueIdentifierForStack(@NotNull ItemStack stack, @NotNull UidContext context) {
+                return String.valueOf(ItemComparatorRegistry.getInstance().hashOf(stack));
+            }
         };
     }
     

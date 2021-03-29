@@ -1,5 +1,3 @@
-archivesBaseName = "jei-compatibility-layer"
-
 dependencies {
     forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
     modCompileOnly("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
