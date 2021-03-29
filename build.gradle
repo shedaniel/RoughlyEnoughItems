@@ -118,7 +118,9 @@ subprojects { licenseFormatAll.dependsOn("${path}:licenseFormat") }
 //    }
 //}
 
-def releaseChangelog = "No changelog"
+ext {
+    releaseChangelog = "No changelog"
+}
 
 /* Thank you modmenu & fablabs */
 task releaseOnCf {
