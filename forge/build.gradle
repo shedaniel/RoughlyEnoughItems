@@ -90,9 +90,6 @@ curseforge {
             mainArtifact(tasks.getByName("remapJar")) {
                 displayName = "[Forge $project.supported_version] v$project.version"
             }
-            afterEvaluate {
-                uploadTask.dependsOn("forge:build")
-            }
         }
     }
     options {
