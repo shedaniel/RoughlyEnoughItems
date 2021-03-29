@@ -190,7 +190,7 @@ curseforge {
                 requiredDependency "architectury-forge"
                 requiredDependency "cloth-config-forge"
             }
-            addArtifact(project("forge").tasks.getByName("remapJar")) {
+            mainArtifact(tasks.getByName("forge:remapJar")) {
                 displayName = "[Forge $project.supported_version] v$project.version"
             }
             afterEvaluate {
