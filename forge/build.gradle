@@ -78,7 +78,7 @@ curseforge {
             id = "392060"
             releaseType = "beta"
             changelogType = "html"
-            changelog = releaseChangelog
+            changelog = rootProject.releaseChangelog
             addGameVersion "1.16.4"
             addGameVersion "1.16.5"
             addGameVersion "Java 8"
