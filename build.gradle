@@ -17,6 +17,7 @@ version = rootProject.base_version + "." + runNumber + "-alpha"
 group = "me.shedaniel"
 
 subprojects {
+    apply plugin: "com.matthewprenger.cursegradle"
     apply plugin: "forgified-fabric-loom"
 
     loom {
@@ -40,7 +41,7 @@ allprojects {
         maven { url "https://maven.shedaniel.me" }
         maven { url "https://maven.terraformersmc.com/releases" }
     }
-    
+
     license {
         header rootProject.file("HEADER")
         include "**/*.java"
@@ -63,7 +64,7 @@ allprojects {
 
 subprojects {
 //    apply plugin: "forgified-fabric-loom"
-    
+
     group = rootProject.group
     version = rootProject.version
     archivesBaseName = rootProject.name
@@ -145,64 +146,35 @@ task releaseOnCf {
     }
     proc.waitFor()
     releaseChangelog = changes.toString()
-    dependsOn tasks.getByName("curseforge")
+    dependsOn project("forge").tasks.getByName("curseforge")
 }
 
-curseforge {
-    if (project.hasProperty('danielshe_curse_api_key') || System.getenv('danielshe_curse_api_key') != null) {
-        apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
-        /*project {
-            id = "310111"
-            releaseType = "release"
-            changelogType = "html"
-            changelog = releaseChangelog
-            addGameVersion "1.16-Snapshot"
-            addGameVersion "1.16.2"
-            addGameVersion "1.16.3"
-            addGameVersion "1.16.4"
-            addGameVersion "Java 8"
-            addGameVersion "Fabric"
-            relations {
-                requiredDependency "fabric-api"
-                requiredDependency "cloth-config"
-                embeddedLibrary "cloth-api"
-            }
-            mainArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {
-                displayName = "[Fabric $project.supported_version] v$project.version"
-            }
-            addArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}-sources.jar")) {
-                displayName = "[Fabric $project.supported_version] v$project.version Sources"
-            }
-            afterEvaluate {
-                uploadTask.dependsOn("build")
-            }
-        }*/
-        project {
-            id = "392060"
-            releaseType = "beta"
-            changelogType = "html"
-            changelog = releaseChangelog
-            addGameVersion "1.16.4"
-            addGameVersion "1.16.5"
-            addGameVersion "Java 8"
-            addGameVersion "Forge"
-            relations {
-                requiredDependency "architectury-forge"
-                requiredDependency "cloth-config-forge"
-            }
-            mainArtifact(tasks.getByName("forge:remapJar")) {
-                displayName = "[Forge $project.supported_version] v$project.version"
-            }
-            afterEvaluate {
-                uploadTask.dependsOn("forge:build")
-            }
-        }
-    }
-    options {
-        forgeGradleIntegration = false
-        javaVersionAutoDetect = false
-    }
-}
+/*project {                                                                                                      
+    id = "310111"                                                                                                
+    releaseType = "release"                                                                                      
+    changelogType = "html"                                                                                       
+    changelog = releaseChangelog                                                                                 
+    addGameVersion "1.16-Snapshot"                                                                               
+    addGameVersion "1.16.2"                                                                                      
+    addGameVersion "1.16.3"                                                                                      
+    addGameVersion "1.16.4"                                                                                      
+    addGameVersion "Java 8"                                                                                      
+    addGameVersion "Fabric"                                                                                      
+    relations {                                                                                                  
+        requiredDependency "fabric-api"                                                                          
+        requiredDependency "cloth-config"                                                                        
+        embeddedLibrary "cloth-api"                                                                              
+    }                                                                                                            
+    mainArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {          
+        displayName = "[Fabric $project.supported_version] v$project.version"                                    
+    }                                                                                                            
+    addArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}-sources.jar")) {   
+        displayName = "[Fabric $project.supported_version] v$project.version Sources"                            
+    }                                                                                                            
+    afterEvaluate {                                                                                              
+        uploadTask.dependsOn("build")                                                                            
+    }                                                                                                            
+}*/
 
 /*publishing {
     publications {

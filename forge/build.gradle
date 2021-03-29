@@ -70,3 +70,33 @@ remapJar {
 jar {
     classifier "dev"
 }
+
+curseforge {
+    if (project.hasProperty('danielshe_curse_api_key') || System.getenv('danielshe_curse_api_key') != null) {
+        apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
+        project {
+            id = "392060"
+            releaseType = "beta"
+            changelogType = "html"
+            changelog = releaseChangelog
+            addGameVersion "1.16.4"
+            addGameVersion "1.16.5"
+            addGameVersion "Java 8"
+            addGameVersion "Forge"
+            relations {
+                requiredDependency "architectury-forge"
+                requiredDependency "cloth-config-forge"
+            }
+            mainArtifact(tasks.getByName("remapJar")) {
+                displayName = "[Forge $project.supported_version] v$project.version"
+            }
+            afterEvaluate {
+                uploadTask.dependsOn("forge:build")
+            }
+        }
+    }
+    options {
+        forgeGradleIntegration = false
+        javaVersionAutoDetect = false
+    }
+}
