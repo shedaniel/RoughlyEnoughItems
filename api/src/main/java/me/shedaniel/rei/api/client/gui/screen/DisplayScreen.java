@@ -21,22 +21,34 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.screen;
+package me.shedaniel.rei.api.client.gui.screen;
 
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.Internal
-public interface RecipeScreen {
+public interface DisplayScreen {
     Rectangle getBounds();
     
-    void addIngredientStackToNotice(EntryStack<?> stack);
+    void setIngredientStackToNotice(EntryStack<?> stack);
     
-    void addResultStackToNotice(EntryStack<?> stack);
+    void setResultStackToNotice(EntryStack<?> stack);
     
-    CategoryIdentifier<?> getCurrentCategory();
+    EntryStack<?> getIngredientStackToNotice();
+    
+    EntryStack<?> getResultStackToNotice();
+    
+    default CategoryIdentifier<?> getCurrentCategoryId() {
+        return getCurrentCategory().getCategoryIdentifier();
+    }
+    
+    DisplayCategory<Display> getCurrentCategory();
     
     void recalculateCategoryPage();
+    
+    void previousCategory();
+    
+    void nextCategory();
 }

@@ -411,10 +411,11 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             return true;
         }
         if (keyCode == 259) {
-            if (REIHelperImpl.getInstance().hasLastRecipeScreen())
-                minecraft.setScreen(REIHelperImpl.getInstance().getLastRecipeScreen());
-            else
+            if (REIHelperImpl.getInstance().hasLastDisplayScreen()) {
+                minecraft.setScreen(REIHelperImpl.getInstance().getLastDisplayScreen());
+            } else {
                 minecraft.setScreen(REIHelper.getInstance().getPreviousScreen());
+            }
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);

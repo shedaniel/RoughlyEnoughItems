@@ -1,5 +1,3 @@
-archivesBaseName = "default-plugin"
-
 loom {
     accessWidener = gradle.rootProject.project("fabric").file("src/main/resources/roughlyenoughitems.accessWidener")
 }

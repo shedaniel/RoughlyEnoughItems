@@ -1,4 +1,10 @@
-archivesBaseName = "forge"
+plugins {
+    id "com.github.johnrengelman.shadow" version "5.0.0"
+}
+
+configurations {
+    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+}
 
 architectury {
     platformSetupLoomIde()
@@ -38,9 +44,29 @@ dependencies {
     developmentForge(project(path: ":runtime")) { transitive = false }
     developmentForge(project(path: ":jei-compatibility-layer")) { transitive = false }
 
+    shadowCommon(project(path: ":api", configuration: "transformProductionForge")) { transitive = false }
+    shadowCommon(project(path: ":default-plugin", configuration: "transformProductionForge")) { transitive = false }
+    shadowCommon(project(path: ":runtime", configuration: "transformProductionForge")) { transitive = false }
+    shadowCommon(project(path: ":jei-compatibility-layer")) { transitive = false }
+
     modRuntime("curse.maven:chiselsbits-231095:3176033")
     modRuntime("curse.maven:jumbofurnace-390880:3120970")
     modRuntime("curse.maven:cyclic-239286:3221427")
     modRuntime("curse.maven:mekanism-268560:3206392")
     modRuntime("appeng:appliedenergistics2:8.2.0")
+}
+
+shadowJar {
+    configurations = [project.configurations.shadowCommon]
+    classifier "dev-shadow"
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    classifier "forge"
+}
+
+jar {
+    classifier "dev"
 }

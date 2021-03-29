@@ -47,16 +47,18 @@ import java.util.stream.StreamSupport;
 public class CollectionUtils {
     public static <A, B> List<B> getOrPutEmptyList(Map<A, List<B>> map, A key) {
         List<B> b = map.get(key);
-        if (b != null)
+        if (b != null) {
             return b;
+        }
         map.put(key, new ArrayList<>());
         return map.get(key);
     }
     
     public static <T> T findFirstOrNullEquals(Iterable<T> list, T obj) {
         for (T t : list) {
-            if (t.equals(obj))
+            if (t.equals(obj)) {
                 return t;
+            }
         }
         return null;
     }
@@ -64,26 +66,24 @@ public class CollectionUtils {
     public static <T, R> List<R> castAndMap(Iterable<T> list, Class<R> castClass) {
         List<R> l = new ArrayList<>();
         for (T t : list) {
-            if (castClass.isAssignableFrom(t.getClass()))
+            if (castClass.isAssignableFrom(t.getClass())) {
                 l.add((R) t);
+            }
         }
         return l;
     }
     
     public static <T> T findFirstOrNull(Iterable<T> list, Predicate<T> predicate) {
         for (T t : list) {
-            if (predicate.test(t))
+            if (predicate.test(t)) {
                 return t;
+            }
         }
         return null;
     }
     
     public static <T> boolean anyMatch(Iterable<T> list, Predicate<T> predicate) {
-        for (T t : list) {
-            if (predicate.test(t))
-                return true;
-        }
-        return false;
+        return findFirstOrNull(list, predicate) != null;
     }
     
     public static EntryStack<?> findFirstOrNullEqualsExact(Iterable<? extends EntryStack<?>> list, EntryStack<?> stack) {
@@ -155,8 +155,9 @@ public class CollectionUtils {
     }
     
     public static <T, R> Optional<R> mapAndMax(Collection<T> list, Function<T, R> function, Comparator<R> comparator) {
-        if (list.isEmpty())
+        if (list.isEmpty()) {
             return Optional.empty();
+        }
         return list.stream().max(Comparator.comparing(function, comparator)).map(function);
     }
     
@@ -167,34 +168,28 @@ public class CollectionUtils {
     }
     
     public static <T> Optional<T> max(Collection<T> list, Comparator<T> comparator) {
-        if (list.isEmpty())
+        if (list.isEmpty()) {
             return Optional.empty();
+        }
         return list.stream().max(comparator);
     }
     
     public static <T> Optional<T> max(T[] list, Comparator<T> comparator) {
-        if (list.length <= 0)
+        if (list.length <= 0) {
             return Optional.empty();
+        }
         return Stream.of(list).max(comparator);
     }
     
-    public static String joinToString(Iterable<String> list, String separator) {
-        StringJoiner joiner = new StringJoiner(separator);
-        for (String t : list) {
-            joiner.add(t);
-        }
-        return joiner.toString();
+    public static String joinToString(Iterable<CharSequence> list, CharSequence separator) {
+        return String.join(separator, list);
     }
     
-    public static String joinToString(String[] list, String separator) {
-        StringJoiner joiner = new StringJoiner(separator);
-        for (String t : list) {
-            joiner.add(t);
-        }
-        return joiner.toString();
+    public static String joinToString(CharSequence[] list, CharSequence separator) {
+        return String.join(separator, list);
     }
     
-    public static <T> String mapAndJoinToString(Iterable<T> list, Function<T, String> function, String separator) {
+    public static <T> String mapAndJoinToString(Iterable<T> list, Function<T, CharSequence> function, CharSequence separator) {
         StringJoiner joiner = new StringJoiner(separator);
         for (T t : list) {
             joiner.add(function.apply(t));
@@ -202,7 +197,7 @@ public class CollectionUtils {
         return joiner.toString();
     }
     
-    public static <T> String mapAndJoinToString(T[] list, Function<T, String> function, String separator) {
+    public static <T> String mapAndJoinToString(T[] list, Function<T, CharSequence> function, CharSequence separator) {
         StringJoiner joiner = new StringJoiner(separator);
         for (T t : list) {
             joiner.add(function.apply(t));
@@ -282,8 +277,8 @@ public class CollectionUtils {
         return sum;
     }
     
-    public static <T> Iterable<Iterable<T>> partition(List<T> list, int size) {
-        return () -> new UnmodifiableIterator<Iterable<T>>() {
+    public static <T> Iterable<List<T>> partition(List<T> list, int size) {
+        return () -> new UnmodifiableIterator<List<T>>() {
             int i = 0;
             int partitionSize = Mth.ceil(list.size() / (float) size);
             
@@ -293,22 +288,9 @@ public class CollectionUtils {
             }
             
             @Override
-            public Iterable<T> next() {
-                UnmodifiableIterator<T> iterator = new UnmodifiableIterator<T>() {
-                    int cursor = i++ * size;
-                    int curSize = cursor + Math.min(list.size() - cursor, size);
-                    
-                    @Override
-                    public boolean hasNext() {
-                        return cursor < curSize;
-                    }
-                    
-                    @Override
-                    public T next() {
-                        return list.get(cursor++);
-                    }
-                };
-                return () -> iterator;
+            public List<T> next() {
+                int cursor = i++ * size;
+                return list.subList(cursor, cursor + Math.min(list.size() - cursor, size));
             }
         };
     }
