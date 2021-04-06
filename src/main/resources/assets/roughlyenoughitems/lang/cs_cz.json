@@ -182,6 +182,7 @@
   "config.roughlyenoughitems.accessibility.displayPanelLocation.right": "Vpravo",
   "config.roughlyenoughitems.search.tooltipSearch": "Vyhledávání v popisku (#):",
   "config.roughlyenoughitems.search.tagSearch": "Vyhledávání značek ($):",
+  "config.roughlyenoughitems.search.identifierSearch": "Identifikátor vyhledávání (*):",
   "config.roughlyenoughitems.search.modSearch": "Vyhledávání módů (@):",
   "config.roughlyenoughitems.search_mode.always": "Vždy povoleno",
   "config.roughlyenoughitems.search_mode.prefix": "Při použití prefixu",
