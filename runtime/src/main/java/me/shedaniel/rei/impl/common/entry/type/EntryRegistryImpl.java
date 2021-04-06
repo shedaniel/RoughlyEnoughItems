@@ -49,6 +49,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.LongPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -153,7 +154,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     }
     
     @Override
-    public void registerEntryAfter(@Nullable EntryStack<?> afterEntry, EntryStack<?> stack) {
+    public void addEntryAfter(@Nullable EntryStack<?> afterEntry, EntryStack<?> stack) {
         if (reloading) {
             int index = afterEntry != null ? reloadingRegistry.lastIndexOf(new HashedEntryStackWrapper(afterEntry)) : -1;
             if (index >= 0) {
@@ -168,7 +169,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     }
     
     @Override
-    public void registerEntriesAfter(@Nullable EntryStack<?> afterEntry, Collection<? extends EntryStack<?>> stacks) {
+    public void addEntriesAfter(@Nullable EntryStack<?> afterEntry, Collection<? extends EntryStack<?>> stacks) {
         if (reloading) {
             int index = afterEntry != null ? reloadingRegistry.lastIndexOf(new HashedEntryStackWrapper(afterEntry)) : -1;
             if (index >= 0) {
@@ -205,6 +206,15 @@ public class EntryRegistryImpl implements EntryRegistry {
             return reloadingRegistry.removeIf(wrapper -> ((Predicate<EntryStack<?>>) predicate).test(wrapper.unwrap()));
         } else {
             return entries.removeIf((Predicate<EntryStack<?>>) predicate);
+        }
+    }
+    
+    @Override
+    public boolean removeEntryExactHashIf(LongPredicate predicate) {
+        if (reloading) {
+            return reloadingRegistry.removeIf(wrapper -> predicate.test(wrapper.hashExact()));
+        } else {
+            return entries.removeIf(stack -> predicate.test(EntryStacks.hashExact(stack)));
         }
     }
 }

@@ -32,13 +32,14 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
  * A registry to provide support for getting fluids from items.
  */
-public interface FluidSupportProvider extends Reloadable<REIPlugin<?>> {
+public interface FluidSupportProvider extends Reloadable<REIPlugin<?>>, List<FluidSupportProvider.Provider> {
     static FluidSupportProvider getInstance() {
         return PluginManager.getInstance().get(FluidSupportProvider.class);
     }

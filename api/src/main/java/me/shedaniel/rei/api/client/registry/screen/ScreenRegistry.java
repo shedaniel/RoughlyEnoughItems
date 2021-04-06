@@ -26,6 +26,10 @@ package me.shedaniel.rei.api.client.registry.screen;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -35,7 +39,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.Nullable;
 
@@ -79,6 +82,30 @@ public interface ScreenRegistry extends Reloadable<REIClientPlugin> {
      * @param provider the provider to register
      */
     void registerFocusedStack(FocusedStackProvider provider);
+    
+    <T extends Screen> void registerDraggableStackVisitor(DraggableStackVisitor<T> visitor);
+    
+    <T extends Screen> void registerDraggableStackProvider(DraggableStackProvider<T> provider);
+    
+    default <T extends Screen> void registerDraggableStackVisitor(DraggableStackVisitorWidget visitor) {
+        registerDraggableStackVisitor(DraggableStackVisitorWidget.toVisitor(visitor));
+    }
+    
+    default <T extends Screen> void registerDraggableStackProvider(DraggableStackProviderWidget provider) {
+        registerDraggableStackProvider(DraggableStackProviderWidget.toProvider(provider));
+    }
+    
+    default <T extends Screen> void registerDraggableStackVisitor(double priority, DraggableStackVisitorWidget visitor) {
+        registerDraggableStackVisitor(DraggableStackVisitorWidget.toVisitor(visitor, priority));
+    }
+    
+    default <T extends Screen> void registerDraggableStackProvider(double priority, DraggableStackProviderWidget provider) {
+        registerDraggableStackProvider(DraggableStackProviderWidget.toProvider(provider, priority));
+    }
+    
+    Iterable<DraggableStackProvider<Screen>> getDraggableProviders();
+    
+    Iterable<DraggableStackVisitor<Screen>> getDraggableVisitors();
     
     /**
      * Returns the main center screen bounds returned, provided by deciders.
@@ -143,7 +170,7 @@ public interface ScreenRegistry extends Reloadable<REIClientPlugin> {
      * @param screenClass The class of the screen.
      * @param area        The click area that is offset to the window's top left corner.
      * @param <T>         The screen type to be registered to.
-     * @see #registerClickArea(SimpleClickArea, Class, ResourceLocation...) for a simpler way to handle areas without custom categories.
+     * @see #registerClickArea(SimpleClickArea, Class, CategoryIdentifier...) for a simpler way to handle areas without custom categories.
      */
     <T extends Screen> void registerClickArea(Class<? extends T> screenClass, ClickArea<T> area);
     

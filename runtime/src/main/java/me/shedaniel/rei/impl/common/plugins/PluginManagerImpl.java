@@ -28,11 +28,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
-import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
-import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
@@ -42,7 +38,6 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
-import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -50,8 +45,8 @@ import java.io.Closeable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.function.LongConsumer;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
@@ -62,11 +57,13 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     private final UnaryOperator<PluginView<P>> view;
     private boolean arePluginsLoading = false;
     private final List<REIPluginProvider<P>> plugins = new ArrayList<>();
+    private final LongConsumer reloadDoneListener;
     
     @SafeVarargs
-    public PluginManagerImpl(Class<P> pluginClass, UnaryOperator<PluginView<P>> view, Reloadable<? extends P>... reloadables) {
+    public PluginManagerImpl(Class<P> pluginClass, UnaryOperator<PluginView<P>> view, LongConsumer reloadDoneListener, Reloadable<? extends P>... reloadables) {
         this.pluginClass = pluginClass;
         this.view = view;
+        this.reloadDoneListener = reloadDoneListener;
         for (Reloadable<? extends P> reloadable : reloadables) {
             registerReloadable(reloadable);
         }
@@ -161,7 +158,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
             arePluginsLoading = true;
             long startTime = Util.getMillis();
             MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
-    
+            
             for (Reloadable<P> reloadable : reloadables) {
                 Class<?> reloadableClass = reloadable.getClass();
                 try (SectionClosable startReload = section(sectionData, "start-reload-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()))) {
@@ -182,7 +179,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
                 pluginSection(sectionData, "reloadable-plugin-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()), plugins, reloadable::acceptPlugin);
             }
             pluginSection(sectionData, "post-register", plugins, REIPlugin::postRegister);
-    
+            
             for (Reloadable<P> reloadable : reloadables) {
                 Class<?> reloadableClass = reloadable.getClass();
                 try (SectionClosable endReload = section(sectionData, "end-reload-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()))) {
@@ -197,19 +194,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
             }
             
             long usedTime = Util.getMillis() - startTime;
-            RoughlyEnoughItemsCore.LOGGER.info("Reloaded %d stack entries, %d displays, %d exclusion zones suppliers, %d overlay deciders, %d visibility predicates and %d categories (%s) in %dms.",
-                    EntryRegistry.getInstance().size(),
-                    DisplayRegistry.getInstance().getDisplayCount(),
-                    ScreenRegistry.getInstance().exclusionZones().getZonesCount(),
-                    ScreenRegistry.getInstance().getDeciders().size(),
-                    DisplayRegistry.getInstance().getVisibilityPredicates().size(),
-                    CategoryRegistry.getInstance().size(),
-                    CategoryRegistry.getInstance().stream()
-                            .map(CategoryRegistry.CategoryConfiguration::getCategory)
-                            .map(DisplayCategory::getTitle)
-                            .map(Component::getString).collect(Collectors.joining(", ")),
-                    usedTime
-            );
+            reloadDoneListener.accept(usedTime);
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         } finally {

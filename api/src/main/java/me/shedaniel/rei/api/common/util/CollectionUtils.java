@@ -130,6 +130,14 @@ public class CollectionUtils {
         return l;
     }
     
+    public static <T, R> List<R> flatMap(Iterable<T> list, Function<T, Collection<R>> function) {
+        List<R> l = new ArrayList<>();
+        for (T t : list) {
+            l.addAll(function.apply(t));
+        }
+        return l;
+    }
+    
     public static <T> IntList mapToInt(Collection<T> list, ToIntFunction<T> function) {
         IntList l = new IntArrayList(list.size() + 1);
         for (T t : list) {

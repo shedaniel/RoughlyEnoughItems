@@ -29,6 +29,11 @@ import com.mojang.blaze3d.platform.Window;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.*;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -55,6 +60,8 @@ import java.util.stream.Collectors;
 @Environment(EnvType.CLIENT)
 public class ScreenRegistryImpl implements ScreenRegistry {
     private Multimap<Class<? extends Screen>, ClickArea<?>> clickAreas = HashMultimap.create();
+    private List<DraggableStackProvider<Screen>> draggableStacksProviders = new ArrayList<>();
+    private List<DraggableStackVisitor<Screen>> draggableStacksVisitors = new ArrayList<>();
     private List<FocusedStackProvider> focusedStackProviders = new ArrayList<>();
     private List<OverlayDecider> deciders = new ArrayList<>();
     private Map<Class<?>, List<OverlayDecider>> cache = new HashMap<>();
@@ -138,14 +145,42 @@ public class ScreenRegistryImpl implements ScreenRegistry {
         deciders.add(decider);
         deciders.sort(Comparator.reverseOrder());
         clickAreas.clear();
+        draggableStacksProviders.clear();
+        draggableStacksVisitors.clear();
         cache.clear();
         tmpScreen = null;
+        registerDraggableStackProvider(DraggableStackProviderWidget.from(context ->
+                Widgets.walk(context.getScreen().children(), DraggableStackProviderWidget.class::isInstance)));
+        registerDraggableStackVisitor(DraggableStackVisitorWidget.from(context ->
+                Widgets.walk(context.getScreen().children(), DraggableStackVisitorWidget.class::isInstance)));
     }
     
     @Override
     public void registerFocusedStack(FocusedStackProvider provider) {
         focusedStackProviders.add(provider);
         focusedStackProviders.sort(Comparator.reverseOrder());
+    }
+    
+    @Override
+    public <T extends Screen> void registerDraggableStackProvider(DraggableStackProvider<T> provider) {
+        draggableStacksProviders.add((DraggableStackProvider<Screen>) provider);
+        draggableStacksProviders.sort(Comparator.reverseOrder());
+    }
+    
+    @Override
+    public <T extends Screen> void registerDraggableStackVisitor(DraggableStackVisitor<T> visitor) {
+        draggableStacksVisitors.add((DraggableStackVisitor<Screen>) visitor);
+        draggableStacksVisitors.sort(Comparator.reverseOrder());
+    }
+    
+    @Override
+    public Iterable<DraggableStackProvider<Screen>> getDraggableProviders() {
+        return Collections.unmodifiableList(draggableStacksProviders);
+    }
+    
+    @Override
+    public Iterable<DraggableStackVisitor<Screen>> getDraggableVisitors() {
+        return Collections.unmodifiableList(draggableStacksVisitors);
     }
     
     @Override
@@ -209,8 +244,8 @@ public class ScreenRegistryImpl implements ScreenRegistry {
             }
             
             @Override
-            public float getPriority() {
-                return -10;
+            public double getPriority() {
+                return -10.0;
             }
         });
         registerFocusedStack(new FocusedStackProvider() {

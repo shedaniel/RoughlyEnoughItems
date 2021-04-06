@@ -42,15 +42,11 @@ import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.api.client.REIOverlay;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
-import me.shedaniel.rei.api.client.entry.renderer.BatchEntryRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
-import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.drag.*;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
@@ -87,7 +83,7 @@ import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.entrySize;
 import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.notSteppingOnExclusionZones;
 
 @ApiStatus.Internal
-public class FavoritesListWidget extends WidgetWithBounds implements DraggableStackProvider, DraggableStackVisitor {
+public class FavoritesListWidget extends WidgetWithBounds implements DraggableStackProviderWidget, DraggableStackVisitorWidget {
     protected final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
         public Rectangle getBounds() {
@@ -152,7 +148,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     
     @Override
     @Nullable
-    public DraggableStack getHoveredStack(DraggingContext context, double mouseX, double mouseY) {
+    public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
         if (innerBounds.contains(mouseX, mouseY)) {
             for (Entry entry : entries.values()) {
                 if (entry.getWidget().containsMouse(mouseX, mouseY)) {
@@ -211,7 +207,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     }
     
     @Override
-    public Optional<Acceptor> visitDraggedStack(DraggableStack stack) {
+    public Optional<DraggableStackVisitor.Acceptor> visitDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
         if (innerBounds.contains(PointHelper.ofMouse())) {
             EntrySerializer<?> serializer = stack.getStack().getDefinition().getSerializer();
             if (stack instanceof FavoriteDraggableStack || (serializer.supportReading() && serializer.supportSaving())) {
@@ -393,7 +389,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     }
     
     public int getReleaseIndex() {
-        DraggingContext context = DraggingContext.getInstance();
+        DraggingContext<?> context = DraggingContext.getInstance();
         Point position = context.getCurrentPosition();
         if (context.isDraggingStack() && currentBounds.contains(position)) {
             int entrySize = entrySize();
@@ -455,7 +451,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     }
     
     public void drop(Entry entry, DraggableStack stack, FavoriteEntry favoriteEntry) {
-        DraggingContext context = DraggingContext.getInstance();
+        DraggingContext<?> context = DraggingContext.getInstance();
         double x = context.getCurrentPosition().x;
         double y = context.getCurrentPosition().y;
         entry.startedDraggingPosition = null;
@@ -544,7 +540,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             if (!hidden) {
                 this.hidden = true;
                 if (!ConfigObject.getInstance().isFavoritesAnimated()) this.size.setAs(0);
-                else this.size.setTo(0, 1000);
+                else this.size.setTo(0, 400);
             }
         }
         

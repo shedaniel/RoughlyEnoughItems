@@ -61,4 +61,8 @@ public class HashedEntryStackWrapper {
     public EntryStack<?> unwrap() {
         return stack;
     }
+    
+    public long hashExact() {
+        return hash;
+    }
 }

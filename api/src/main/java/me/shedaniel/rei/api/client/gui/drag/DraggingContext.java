@@ -25,6 +25,7 @@ package me.shedaniel.rei.api.client.gui.drag;
 
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIHelper;
+import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
@@ -32,17 +33,27 @@ import java.util.function.Supplier;
 /**
  * The context of the current dragged stack on the overlay.
  * <p>
- * Widgets should implement {@link DraggableStackProvider} to submit applicable stacks to drag.
- * Widgets should implement {@link DraggableStackVisitor} to accept incoming dragged stacks.
+ * Widgets should implement {@link DraggableStackProviderWidget} to submit applicable stacks to drag.
+ * Widgets should implement {@link DraggableStackVisitorWidget} to accept incoming dragged stacks.
+ * <p>
+ * External providers should use {@link me.shedaniel.rei.api.client.registry.screen.ScreenRegistry#registerDraggableStackProvider(DraggableStackProvider)},
+ * and {@link me.shedaniel.rei.api.client.registry.screen.ScreenRegistry#registerDraggableStackVisitor(DraggableStackVisitor)}.
  */
-public interface DraggingContext {
-    static DraggingContext getInstance() {
+public interface DraggingContext<S extends Screen> {
+    static DraggingContext<?> getInstance() {
         return REIHelper.getInstance().getOverlay().get().getDraggingContext();
     }
     
+    /**
+     * Returns whether a draggable stack is present.
+     *
+     * @return whether a draggable stack is present
+     */
     default boolean isDraggingStack() {
         return getCurrentStack() != null;
     }
+    
+    S getScreen();
     
     /**
      * Returns the current dragged stack, may be null.
@@ -70,4 +81,8 @@ public interface DraggingContext {
      * @param position        the position supplier of the destination
      */
     void renderBackToPosition(DraggableStack stack, Point initialPosition, Supplier<Point> position);
+    
+    default <T extends Screen> DraggingContext<T> cast() {
+        return (DraggingContext<T>) this;
+    }
 }

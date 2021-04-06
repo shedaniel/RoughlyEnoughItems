@@ -36,6 +36,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.LongPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -79,56 +80,56 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
     List<ItemStack> appendStacksForItem(Item item);
     
     /**
-     * Registers an new stack to the entry list.
+     * Adds an new stack to the entry list.
      *
-     * @param stack the stack to register
+     * @param stack the stack to add
      */
-    default void registerEntry(EntryStack<?> stack) {
-        registerEntryAfter(null, stack);
+    default void addEntry(EntryStack<?> stack) {
+        addEntryAfter(null, stack);
     }
     
     /**
-     * Registers an new stack to the entry list, after a certain stack.
+     * Adds an new stack to the entry list, after a certain stack.
      *
      * @param afterEntry the stack to put after
-     * @param stack      the stack to register
+     * @param stack      the stack to add
      */
-    void registerEntryAfter(@Nullable EntryStack<?> afterEntry, EntryStack<?> stack);
+    void addEntryAfter(@Nullable EntryStack<?> afterEntry, EntryStack<?> stack);
     
     /**
-     * Registers multiple stacks to the item list, after a certain stack.
+     * Adds multiple stacks to the item list, after a certain stack.
      *
      * @param afterStack the stack to put after
-     * @param stacks     the stacks to register
+     * @param stacks     the stacks to add
      */
-    default void registerEntriesAfter(@Nullable EntryStack<?> afterStack, EntryStack<?>... stacks) {
-        registerEntriesAfter(afterStack, Arrays.asList(stacks));
+    default void addEntriesAfter(@Nullable EntryStack<?> afterStack, EntryStack<?>... stacks) {
+        addEntriesAfter(afterStack, Arrays.asList(stacks));
     }
     
     /**
-     * Registers multiple stacks to the item list, after a certain stack.
+     * Adds multiple stacks to the item list, after a certain stack.
      *
      * @param afterStack the stack to put after
-     * @param stacks     the stacks to register
+     * @param stacks     the stacks to add
      */
-    void registerEntriesAfter(@Nullable EntryStack<?> afterStack, Collection<? extends EntryStack<?>> stacks);
+    void addEntriesAfter(@Nullable EntryStack<?> afterStack, Collection<? extends EntryStack<?>> stacks);
     
     /**
-     * Registers multiple stacks to the item list.
+     * Adds multiple stacks to the item list.
      *
-     * @param stacks the stacks to register
+     * @param stacks the stacks to add
      */
-    default void registerEntries(EntryStack<?>... stacks) {
-        registerEntries(Arrays.asList(stacks));
+    default void addEntries(EntryStack<?>... stacks) {
+        addEntries(Arrays.asList(stacks));
     }
     
     /**
-     * Registers multiple stacks to the item list.
+     * Adds multiple stacks to the item list.
      *
-     * @param stacks the stacks to register
+     * @param stacks the stacks to add
      */
-    default void registerEntries(Collection<? extends EntryStack<?>> stacks) {
-        registerEntriesAfter(null, stacks);
+    default void addEntries(Collection<? extends EntryStack<?>> stacks) {
+        addEntriesAfter(null, stacks);
     }
     
     /**
@@ -150,8 +151,18 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
     /**
      * Removes entries from the entry list, if it matches the predicate.
      *
-     * @param filter a predicate which returns {@code true} for the entries to be removed
+     * @param predicate a predicate which returns {@code true} for the entries to be removed
      * @return whether it was successful to remove any entry
      */
-    boolean removeEntryIf(Predicate<? extends EntryStack<?>> filter);
+    boolean removeEntryIf(Predicate<? extends EntryStack<?>> predicate);
+    
+    /**
+     * Removes entries from the entry list, if it matches the predicate.
+     * This method is usually faster than {@link #removeEntryIf(Predicate)}
+     * due to its fast comparison.
+     *
+     * @param predicate a predicate which returns {@code true} for the entries to be removed
+     * @return whether it was successful to remove any entry
+     */
+    boolean removeEntryExactHashIf(LongPredicate predicate);
 }

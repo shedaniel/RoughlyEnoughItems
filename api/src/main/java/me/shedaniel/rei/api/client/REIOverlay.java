@@ -33,7 +33,7 @@ public abstract class REIOverlay extends WidgetWithBounds {
     
     public abstract void queueReloadOverlay();
     
-    public abstract DraggingContext getDraggingContext();
+    public abstract DraggingContext<?> getDraggingContext();
     
     public abstract boolean isNotInExclusionZones(double mouseX, double mouseY);
 }

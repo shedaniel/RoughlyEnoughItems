@@ -25,9 +25,7 @@ package me.shedaniel.rei.api.common.util;
 
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import net.minecraft.Util;
-import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.Internal
 public final class Animator extends Number {
     private double amount;
     private double target;

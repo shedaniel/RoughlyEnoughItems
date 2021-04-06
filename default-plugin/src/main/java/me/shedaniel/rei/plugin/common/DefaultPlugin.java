@@ -68,7 +68,7 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
             if (!tag.contains("Enchantments", NbtType.LIST)) return null;
             return tag.getList("Enchantments", NbtType.COMPOUND);
         };
-        registry.register(stack -> nbtHasher.applyAsLong(enchantmentTag.apply(stack)), Items.ENCHANTED_BOOK);
+        registry.register((context, stack) -> nbtHasher.applyAsLong(enchantmentTag.apply(stack)), Items.ENCHANTED_BOOK);
         registry.registerNbt(Items.POTION);
         registry.registerNbt(Items.SPLASH_POTION);
         registry.registerNbt(Items.LINGERING_POTION);

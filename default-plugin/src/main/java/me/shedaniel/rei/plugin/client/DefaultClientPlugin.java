@@ -130,15 +130,15 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     public void registerEntries(EntryRegistry registry) {
         for (Item item : Registry.ITEM) {
             try {
-                registry.registerEntries(EntryIngredients.ofItemStacks(registry.appendStacksForItem(item)));
+                registry.addEntries(EntryIngredients.ofItemStacks(registry.appendStacksForItem(item)));
             } catch (Exception ignored) {
-                registry.registerEntry(EntryStacks.of(item));
+                registry.addEntry(EntryStacks.of(item));
             }
         }
         for (Fluid fluid : Registry.FLUID) {
             FluidState state = fluid.defaultFluidState();
             if (!state.isEmpty() && state.isSource()) {
-                registry.registerEntry(EntryStacks.of(fluid));
+                registry.addEntry(EntryStacks.of(fluid));
             }
         }
     }

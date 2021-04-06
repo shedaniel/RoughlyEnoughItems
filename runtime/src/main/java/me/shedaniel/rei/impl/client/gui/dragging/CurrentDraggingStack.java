@@ -35,20 +35,22 @@ import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.common.util.Animator;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
 
-public class CurrentDraggingStack extends Widget implements LateRenderable, DraggingContext {
-    private DraggableStackProvider provider;
-    private DraggableStackVisitor visitor;
+public class CurrentDraggingStack extends Widget implements LateRenderable, DraggingContext<Screen> {
+    private DraggableStackProvider<Screen> provider;
+    private DraggableStackVisitor<Screen> visitor;
     @Nullable
     private DraggableEntry entry;
     private final List<RenderBackEntry> backToOriginals = new ArrayList<>();
     
-    public void set(DraggableStackProvider provider, DraggableStackVisitor visitor) {
+    public void set(DraggableStackProvider<Screen> provider, DraggableStackVisitor<Screen> visitor) {
         this.provider = provider;
         this.visitor = visitor;
     }
@@ -119,7 +121,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     private boolean drop() {
         if (entry != null && entry.dragging) {
-            Optional<DraggableStackVisitor.Acceptor> acceptor = visitor.visitDraggedStack(entry.stack);
+            Optional<DraggableStackVisitor.Acceptor> acceptor = visitor.visitDraggedStack(this, entry.stack);
             entry.stack.release(acceptor.isPresent());
             acceptor.ifPresent(a -> a.accept(entry.stack));
             entry = null;
@@ -128,6 +130,11 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
         
         entry = null;
         return false;
+    }
+    
+    @Override
+    public Screen getScreen() {
+        return Minecraft.getInstance().screen;
     }
     
     @Override
@@ -147,7 +154,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
         backToOriginals.add(new RenderBackEntry(stack, initialPosition, position));
     }
     
-    private class DraggableEntry {
+    private static class DraggableEntry {
         private final DraggableStack stack;
         private final Point start;
         private boolean dragging = false;

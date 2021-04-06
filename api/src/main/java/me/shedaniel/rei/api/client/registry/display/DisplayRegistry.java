@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.client.registry.display;
 
+import com.google.common.base.Predicates;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibilityPredicate;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -31,8 +32,8 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.RecipeManagerContext;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +55,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      *
      * @return the recipe count
      */
-    int getDisplayCount();
+    int displaySize();
     
     /**
      * Registers a recipe display
@@ -149,11 +150,41 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      */
     List<DisplayVisibilityPredicate> getVisibilityPredicates();
     
-    default <T, D extends Display> void registerFiller(Class<T> typeClass, Function<T, D> mappingFunction) {
-        registerFiller(typeClass, typeClass::isInstance, mappingFunction);
+    /**
+     * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
+     * <p>
+     * Vanilla {@link net.minecraft.world.item.crafting.Recipe} are by default filled, display filters
+     * can be used to automatically generate displaies for vanilla {@link net.minecraft.world.item.crafting.Recipe}.
+     *
+     * @param typeClass the type of {@code T}
+     * @param filler    the filler, taking a {@code T} and returning a {@code D}
+     * @param <T>       the type of object
+     * @param <D>       the type of display
+     */
+    default <T, D extends Display> void registerFiller(Class<T> typeClass, Function<T, D> filler) {
+        registerFiller(typeClass, Predicates.alwaysTrue(), filler);
     }
     
-    <T, D extends Display> void registerFiller(Class<T> typeClass, Predicate<? extends T> predicate, Function<T, D> mappingFunction);
+    /**
+     * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
+     * <p>
+     * Vanilla {@link net.minecraft.world.item.crafting.Recipe} are by default filled, display filters
+     * can be used to automatically generate displaies for vanilla {@link net.minecraft.world.item.crafting.Recipe}.
+     *
+     * @param typeClass the type of {@code T}
+     * @param predicate the predicate of {@code T}
+     * @param filler    the filler, taking a {@code T} and returning a {@code D}
+     * @param <T>       the type of object
+     * @param <D>       the type of display
+     */
+    <T, D extends Display> void registerFiller(Class<T> typeClass, Predicate<? extends T> predicate, Function<T, D> filler);
     
-    @Nullable <T> Display tryFillDisplay(T value);
+    /**
+     * Tries to fill displays from {@code T}.
+     *
+     * @param value the object
+     * @param <T>   the type of object
+     * @return the collection of displays
+     */
+    <T> Collection<Display> tryFillDisplay(T value);
 }

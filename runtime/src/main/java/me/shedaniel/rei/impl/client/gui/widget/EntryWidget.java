@@ -36,7 +36,7 @@ import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -45,6 +45,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.REIHelperImpl;
 import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -59,7 +60,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class EntryWidget extends Slot implements DraggableStackProvider {
+public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     @ApiStatus.Internal
     public static long stackDisplayOffset = 0;
     protected static final ResourceLocation RECIPE_GUI = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
@@ -446,7 +447,7 @@ public class EntryWidget extends Slot implements DraggableStackProvider {
     
     @Override
     @Nullable
-    public DraggableStack getHoveredStack(DraggingContext context, double mouseX, double mouseY) {
+    public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
         if (!getCurrentEntry().isEmpty() && containsMouse(mouseX, mouseY)) {
             return new DraggableStack() {
                 EntryStack<?> stack = getCurrentEntry().copy();

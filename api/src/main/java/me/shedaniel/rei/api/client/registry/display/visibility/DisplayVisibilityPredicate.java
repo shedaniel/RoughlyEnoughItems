@@ -28,14 +28,13 @@ import me.shedaniel.rei.api.common.display.Display;
 import net.minecraft.world.InteractionResult;
 
 public interface DisplayVisibilityPredicate extends Comparable<DisplayVisibilityPredicate> {
-    
     /**
      * Gets the priority of the handler, the higher the priority, the earlier this is called.
      *
      * @return the priority
      */
-    default float getPriority() {
-        return 0f;
+    default double getPriority() {
+        return 0.0;
     }
     
     /**

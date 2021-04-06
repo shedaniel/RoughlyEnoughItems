@@ -36,7 +36,6 @@ import me.shedaniel.rei.impl.common.registry.RecipeManagerContextImpl;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.crafting.Recipe;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,7 +60,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     }
     
     @Override
-    public int getDisplayCount() {
+    public int displaySize() {
         return displayCount.getValue();
     }
     
@@ -133,8 +132,8 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     }
     
     @Override
-    public <T, D extends Display> void registerFiller(Class<T> typeClass, Predicate<? extends T> predicate, Function<T, D> mappingFunction) {
-        fillers.add(new DisplayFiller<>(typeClass, (Predicate<T>) predicate, mappingFunction));
+    public <T, D extends Display> void registerFiller(Class<T> typeClass, Predicate<? extends T> predicate, Function<T, D> filler) {
+        fillers.add(new DisplayFiller<>(typeClass, (Predicate<T>) predicate, filler));
     }
     
     @Override
@@ -153,8 +152,8 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
             List<Recipe<?>> allSortedRecipes = getAllSortedRecipes();
             for (int i = allSortedRecipes.size() - 1; i >= 0; i--) {
                 Recipe<?> recipe = allSortedRecipes.get(i);
-                Display display = tryFillDisplay(recipe);
-                if (display != null) {
+                Collection<Display> displays = tryFillDisplay(recipe);
+                for (Display display : displays) {
                     registerDisplay(0, display);
                 }
             }
@@ -162,14 +161,23 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     }
     
     @Override
-    @Nullable
-    public <T> Display tryFillDisplay(T value) {
-        if (value instanceof Display) return (Display) value;
+    public <T> Collection<Display> tryFillDisplay(T value) {
+        if (value instanceof Display) return Collections.singleton((Display) value);
+        List<Display> displays = null;
         for (DisplayFiller<?, ?> filler : fillers) {
             Display display = tryFillDisplayGenerics(filler, value);
-            if (display != null) return display;
+            if (display != null) {
+                if (displays == null) displays = Collections.singletonList(display);
+                else {
+                    if (!(displays instanceof ArrayList)) displays = new ArrayList<>(displays);
+                    displays.add(display);
+                }
+            }
         }
-        return null;
+        if (displays != null) {
+            return displays;
+        }
+        return Collections.emptyList();
     }
     
     private <T, D extends Display> D tryFillDisplayGenerics(DisplayFiller<T, D> filler, Object value) {

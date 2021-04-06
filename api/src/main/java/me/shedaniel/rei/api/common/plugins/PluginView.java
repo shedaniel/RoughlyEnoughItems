@@ -30,6 +30,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 @FunctionalInterface
 public interface PluginView<P extends REIPlugin<?>> {
     @Environment(EnvType.CLIENT)
@@ -49,9 +50,7 @@ public interface PluginView<P extends REIPlugin<?>> {
      * Registers a REI plugin
      *
      * @param plugin the plugin instance
-     * @return the plugin instance
      */
-    @ApiStatus.Internal
     void registerPlugin(REIPluginProvider<? extends P> plugin);
     
     default PluginView<P> then(PluginView<? super P> view) {
