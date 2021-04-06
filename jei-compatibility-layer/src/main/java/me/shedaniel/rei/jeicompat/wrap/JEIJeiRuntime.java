@@ -21,36 +21,50 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.registry.display.visibility;
+package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.common.display.Display;
-import net.minecraft.world.InteractionResult;
+import mezz.jei.api.recipe.IRecipeManager;
+import mezz.jei.api.runtime.*;
+import org.jetbrains.annotations.NotNull;
 
-public interface DisplayVisibilityPredicate extends Comparable<DisplayVisibilityPredicate> {
-    /**
-     * Gets the priority of the handler, the higher the priority, the earlier this is called.
-     *
-     * @return the priority
-     */
-    default double getPriority() {
-        return 0.0;
-    }
-    
-    /**
-     * Handles the visibility of the display.
-     * {@link ActionResult#PASS} to pass the handling to another handler
-     * {@link ActionResult#SUCCESS} to always display it
-     * {@link ActionResult#FAIL} to never display it
-     *
-     * @param category the category of the display
-     * @param display  the display of the recipe
-     * @return the visibility
-     */
-    InteractionResult handleDisplay(DisplayCategory<?> category, Display display);
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
+
+public enum JEIJeiRuntime implements IJeiRuntime {
+    INSTANCE;
     
     @Override
-    default int compareTo(DisplayVisibilityPredicate o) {
-        return Double.compare(getPriority(), o.getPriority());
+    @NotNull
+    public IRecipeManager getRecipeManager() {
+        throw TODO();
+    }
+    
+    @Override
+    @NotNull
+    public IRecipesGui getRecipesGui() {
+        throw TODO();
+    }
+    
+    @Override
+    @NotNull
+    public IIngredientFilter getIngredientFilter() {
+        return JEIIngredientFilter.INSTANCE;
+    }
+    
+    @Override
+    @NotNull
+    public IIngredientListOverlay getIngredientListOverlay() {
+        throw TODO();
+    }
+    
+    @Override
+    @NotNull
+    public IBookmarkOverlay getBookmarkOverlay() {
+        throw TODO();
+    }
+    
+    @Override
+    @NotNull
+    public IIngredientManager getIngredientManager() {
+        return JEIIngredientManager.INSTANCE;
     }
 }

@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.api.client.util;
 
-import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.entry.type.BuiltinClientEntryTypes;
+import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 
 public final class ClientEntryStacks {

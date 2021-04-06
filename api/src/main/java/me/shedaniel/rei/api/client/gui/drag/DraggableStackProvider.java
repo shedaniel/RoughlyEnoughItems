@@ -23,22 +23,61 @@
 
 package me.shedaniel.rei.api.client.gui.drag;
 
+import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
-@FunctionalInterface
-public interface DraggableStackProvider {
-    static DraggableStackProvider from(Supplier<Iterable<DraggableStackProvider>> providers) {
-        return (context, mouseX, mouseY) -> {
-            for (DraggableStackProvider provider : providers.get()) {
-                DraggableStack stack = provider.getHoveredStack(context, mouseX, mouseY);
-                if (stack != null) return stack;
+/**
+ * A provider for supplying {@link DraggableStack} to the screen.
+ */
+public interface DraggableStackProvider<T extends Screen> extends Comparable<DraggableStackProvider<T>> {
+    static <T extends Screen> DraggableStackProvider<T> from(Supplier<Iterable<DraggableStackProvider<T>>> providers) {
+        return new DraggableStackProvider<T>() {
+            @Override
+            public <R extends Screen> boolean isHandingScreen(R screen) {
+                for (DraggableStackProvider<T> provider : providers.get()) {
+                    if (provider.isHandingScreen(screen)) {
+                        return true;
+                    }
+                }
+                return false;
             }
-            return null;
+    
+            @Override
+            @Nullable
+            public DraggableStack getHoveredStack(DraggingContext<T> context, double mouseX, double mouseY) {
+                for (DraggableStackProvider<T> provider : providers.get()) {
+                    if (provider.isHandingScreen(context.getScreen())) {
+                        DraggableStack stack = provider.getHoveredStack(context, mouseX, mouseY);
+                        if (stack != null) return stack;
+                    }
+                }
+                return null;
+            }
         };
     }
     
     @Nullable
-    DraggableStack getHoveredStack(DraggingContext context, double mouseX, double mouseY);
+    DraggableStack getHoveredStack(DraggingContext<T> context, double mouseX, double mouseY);
+    
+    <R extends Screen> boolean isHandingScreen(R screen);
+    
+    default DraggingContext<T> getContext() {
+        return DraggingContext.getInstance().cast();
+    }
+    
+    /**
+     * Gets the priority of the handler, the higher the priority, the earlier this is called.
+     *
+     * @return the priority
+     */
+    default double getPriority() {
+        return 0f;
+    }
+    
+    @Override
+    default int compareTo(DraggableStackProvider<T> o) {
+        return Double.compare(getPriority(), o.getPriority());
+    }
 }

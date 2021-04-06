@@ -21,48 +21,37 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.common.util;
+package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.EntryStacks;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import org.jetbrains.annotations.ApiStatus;
+import me.shedaniel.rei.api.common.entry.comparison.ItemComparator;
+import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
+import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
+import mezz.jei.api.registration.ISubtypeRegistration;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapContext;
 
-@ApiStatus.Internal
-@Environment(EnvType.CLIENT)
-public class HashedEntryStackWrapper {
-    private final EntryStack<?> stack;
-    private long hash;
-    private int hashInt;
+public enum JEISubtypeRegistration implements ISubtypeRegistration {
+    INSTANCE;
     
-    public HashedEntryStackWrapper(EntryStack<?> stack) {
-        this.stack = Objects.requireNonNull(stack);
-        this.hash = EntryStacks.hashExact(stack);
-        this.hashInt = Long.hashCode(this.hash);
+    @Override
+    public void registerSubtypeInterpreter(@NotNull Item item, @NotNull ISubtypeInterpreter interpreter) {
+        ItemComparatorRegistry.getInstance().register(wrapItemComparator(interpreter), item);
     }
     
     @Override
-    public boolean equals(Object o) {
-        return o instanceof HashedEntryStackWrapper && hash == ((HashedEntryStackWrapper) o).hash;
+    public void useNbtForSubtypes(@NotNull Item @NotNull ... items) {
+        ItemComparatorRegistry.getInstance().registerNbt(items);
     }
     
     @Override
-    public int hashCode() {
-        return hashInt;
+    public boolean hasSubtypeInterpreter(@NotNull ItemStack itemStack) {
+        return ItemComparatorRegistry.getInstance().containsComparator(itemStack.getItem());
     }
     
-    public boolean isEmpty() {
-        return stack.isEmpty();
-    }
-    
-    public EntryStack<?> unwrap() {
-        return stack;
-    }
-    
-    public long hashExact() {
-        return hash;
+    private static ItemComparator wrapItemComparator(ISubtypeInterpreter interpreter) {
+        return (context, stack) -> interpreter.apply(stack, wrapContext(context)).hashCode();
     }
 }

@@ -59,5 +59,9 @@ public interface ItemComparatorRegistry extends Reloadable<REIPlugin<?>> {
         register(ItemComparator.itemNbt(), items);
     }
     
-    long hashOf(ItemStack stack);
+    long hashOf(ComparisonContext context, ItemStack stack);
+    
+    boolean containsComparator(Item item);
+    
+    int comparatorSize();
 }

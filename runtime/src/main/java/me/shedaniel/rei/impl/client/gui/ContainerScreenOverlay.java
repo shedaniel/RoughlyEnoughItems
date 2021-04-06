@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.Window;
@@ -201,12 +200,8 @@ public class ContainerScreenOverlay extends REIOverlay {
     }
     
     @Override
-    public DraggingContext getDraggingContext() {
+    public DraggingContext<?> getDraggingContext() {
         return draggingStack;
-    }
-    
-    private static <T> Iterable<T> buildWidgetsTree(Iterable<? extends GuiEventListener> listeners, Class<T> type) {
-        return Widgets.walk(listeners, type::isInstance);
     }
     
     public void init(boolean useless) {
@@ -214,9 +209,8 @@ public class ContainerScreenOverlay extends REIOverlay {
     }
     
     public void init() {
-        Iterable<DraggableStackProvider> stackProviders = buildWidgetsTree(Iterables.concat(widgets, Minecraft.getInstance().screen.children()), DraggableStackProvider.class);
-        Iterable<DraggableStackVisitor> stackVisitors = buildWidgetsTree(Iterables.concat(widgets, Minecraft.getInstance().screen.children()), DraggableStackVisitor.class);
-        draggingStack.set(DraggableStackProvider.from(() -> stackProviders), DraggableStackVisitor.from(() -> stackVisitors));
+        draggingStack.set(DraggableStackProvider.from(() -> ScreenRegistry.getInstance().getDraggableProviders()), 
+                DraggableStackVisitor.from(() -> ScreenRegistry.getInstance().getDraggableVisitors()));
         
         this.shouldReload = false;
         //Update Variables

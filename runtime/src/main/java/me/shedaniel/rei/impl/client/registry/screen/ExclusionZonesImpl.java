@@ -58,8 +58,8 @@ public class ExclusionZonesImpl implements ExclusionZones {
     }
     
     @Override
-    public float getPriority() {
-        return -5f;
+    public double getPriority() {
+        return -5.0;
     }
     
     @Override

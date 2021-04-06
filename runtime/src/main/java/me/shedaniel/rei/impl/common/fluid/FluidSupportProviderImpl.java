@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.common.fluid;
 
+import com.google.common.collect.ForwardingList;
 import com.google.common.collect.Lists;
 import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -34,14 +35,16 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 @ApiStatus.Internal
-public class FluidSupportProviderImpl implements FluidSupportProvider {
+public class FluidSupportProviderImpl extends ForwardingList<FluidSupportProvider.Provider> implements FluidSupportProvider {
     private final List<Provider> providers = Lists.newCopyOnWriteArrayList();
+    private final List<Provider> immutable = Collections.unmodifiableList(providers);
     
     @Override
     public void acceptPlugin(REIPlugin<?> plugin) {
@@ -73,5 +76,10 @@ public class FluidSupportProviderImpl implements FluidSupportProvider {
             }
         }
         return Optional.empty();
+    }
+    
+    @Override
+    protected List<Provider> delegate() {
+        return immutable;
     }
 }

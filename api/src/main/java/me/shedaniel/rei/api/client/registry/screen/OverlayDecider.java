@@ -40,10 +40,10 @@ public interface OverlayDecider extends Comparable<OverlayDecider> {
     /**
      * Gets the priority of the handler, the higher it is, the earlier it is called.
      *
-     * @return the priority in float
+     * @return the priority
      */
-    default float getPriority() {
-        return 0f;
+    default double getPriority() {
+        return 0.0;
     }
     
     /**

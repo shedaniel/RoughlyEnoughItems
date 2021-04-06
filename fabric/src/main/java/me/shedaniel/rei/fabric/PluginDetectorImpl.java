@@ -29,21 +29,39 @@ import me.shedaniel.rei.api.common.plugins.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 
+import java.util.Collection;
 import java.util.function.Consumer;
 
 public class PluginDetectorImpl {
     private static <P extends REIPlugin<?>> void loadPlugin(Class<? extends P> pluginClass, Consumer<? super REIPluginProvider<P>> consumer) {
-        for (REIPluginProvider<?> plugin : Iterables.concat(
-                FabricLoader.getInstance().getEntrypoints("rei_containers", REIPluginProvider.class),
-                FabricLoader.getInstance().getEntrypoints("rei_server", REIPluginProvider.class),
-                FabricLoader.getInstance().getEntrypoints("rei", REIPluginProvider.class),
-                FabricLoader.getInstance().getEntrypoints("rei_common", REIPluginProvider.class),
-                FabricLoader.getInstance().getEntrypoints("rei_plugins", REIPluginProvider.class),
-                FabricLoader.getInstance().getEntrypoints("rei_plugins_v0", REIPluginProvider.class)
+        for (EntrypointContainer<REIPluginProvider> container : Iterables.concat(
+                FabricLoader.getInstance().getEntrypointContainers("rei_containers", REIPluginProvider.class),
+                FabricLoader.getInstance().getEntrypointContainers("rei_server", REIPluginProvider.class),
+                FabricLoader.getInstance().getEntrypointContainers("rei", REIPluginProvider.class),
+                FabricLoader.getInstance().getEntrypointContainers("rei_common", REIPluginProvider.class),
+                FabricLoader.getInstance().getEntrypointContainers("rei_plugins", REIPluginProvider.class),
+                FabricLoader.getInstance().getEntrypointContainers("rei_plugins_v0", REIPluginProvider.class)
         )) {
+            REIPluginProvider<P> plugin = container.getEntrypoint();
             if (pluginClass.isAssignableFrom(plugin.getPluginProviderClass())) {
-                consumer.accept((REIPluginProvider<P>) plugin);
+                consumer.accept(new REIPluginProvider<P>() {
+                    @Override
+                    public Collection<P> provide() {
+                        return plugin.provide();
+                    }
+    
+                    @Override
+                    public Class<P> getPluginProviderClass() {
+                        return plugin.getPluginProviderClass();
+                    }
+    
+                    @Override
+                    public String getPluginProviderName() {
+                        return plugin.getPluginProviderName() + " [" + container.getProvider().getMetadata().getId() + "]";
+                    }
+                });
             }
         }
     }

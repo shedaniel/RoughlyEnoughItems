@@ -23,23 +23,63 @@
 
 package me.shedaniel.rei.api.client.gui.drag;
 
+import net.minecraft.client.gui.screens.Screen;
+
 import java.util.Optional;
 import java.util.function.Supplier;
 
-@FunctionalInterface
-public interface DraggableStackVisitor {
-    static DraggableStackVisitor from(Supplier<Iterable<DraggableStackVisitor>> visitors) {
-        return (stack) -> {
-            for (DraggableStackVisitor visitor : visitors.get()) {
-                Optional<Acceptor> acceptor = visitor.visitDraggedStack(stack);
-                if (acceptor.isPresent()) return acceptor;
+/**
+ * A visitor for accepting {@link DraggableStack} to the screen.
+ */
+public interface DraggableStackVisitor<T extends Screen> extends Comparable<DraggableStackVisitor<T>> {
+    static <T extends Screen> DraggableStackVisitor<T> from(Supplier<Iterable<DraggableStackVisitor<T>>> visitors) {
+        return new DraggableStackVisitor<T>() {
+            @Override
+            public <R extends Screen> boolean isHandingScreen(R screen) {
+                for (DraggableStackVisitor<T> visitor : visitors.get()) {
+                    if (visitor.isHandingScreen(screen)) {
+                        return true;
+                    }
+                }
+                return false;
             }
-            return Optional.empty();
+            
+            @Override
+            public Optional<Acceptor> visitDraggedStack(DraggingContext<T> context, DraggableStack stack) {
+                for (DraggableStackVisitor<T> visitor : visitors.get()) {
+                    if (visitor.isHandingScreen(context.getScreen())) {
+                        Optional<Acceptor> acceptor = visitor.visitDraggedStack(context, stack);
+                        if (acceptor.isPresent()) return acceptor;
+                    }
+                }
+                return Optional.empty();
+            }
         };
     }
     
-    Optional<Acceptor> visitDraggedStack(DraggableStack stack);
+    Optional<Acceptor> visitDraggedStack(DraggingContext<T> context, DraggableStack stack);
     
+    <R extends Screen> boolean isHandingScreen(R screen);
+    
+    default DraggingContext<T> getContext() {
+        return DraggingContext.getInstance().cast();
+    }
+    
+    /**
+     * Gets the priority of the handler, the higher the priority, the earlier this is called.
+     *
+     * @return the priority
+     */
+    default double getPriority() {
+        return 0.0;
+    }
+    
+    @Override
+    default int compareTo(DraggableStackVisitor<T> o) {
+        return Double.compare(getPriority(), o.getPriority());
+    }
+    
+    @FunctionalInterface
     interface Acceptor {
         void accept(DraggableStack stack);
     }

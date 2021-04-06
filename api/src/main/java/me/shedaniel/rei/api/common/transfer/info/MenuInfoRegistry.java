@@ -45,4 +45,6 @@ public interface MenuInfoRegistry extends Reloadable<REIServerPlugin> {
     <D extends Display> void registerGeneric(Predicate<CategoryIdentifier<?>> categoryPredicate, MenuInfo<?, D> menuInfo);
     
     <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> get(CategoryIdentifier<D> category, Class<C> menuClass);
+    
+    int infoSize();
 }

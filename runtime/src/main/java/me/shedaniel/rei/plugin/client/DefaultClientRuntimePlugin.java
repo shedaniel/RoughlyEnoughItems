@@ -27,13 +27,18 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.DisplayBoundsProvider;
@@ -95,7 +100,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
     @Override
     public void registerEntries(EntryRegistry registry) {
         if (ClientHelperImpl.getInstance().isAprilFools.get()) {
-            registry.registerEntry(ClientEntryStacks.of(new AbstractRenderer() {
+            registry.addEntry(ClientEntryStacks.of(new AbstractRenderer() {
                 private ResourceLocation id = new ResourceLocation("roughlyenoughitems", "textures/gui/kirb.png");
                 
                 @Override
@@ -147,6 +152,14 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                 return InteractionResult.SUCCESS;
             }
         });
+        registry.registerDraggableStackProvider(DraggableStackProviderWidget.from(context -> {
+            if (RoughlyEnoughItemsCore.shouldReturn(context.getScreen()) || !REIHelper.getInstance().isOverlayVisible()) return Collections.emptyList();
+            return Widgets.walk(REIHelper.getInstance().getOverlay().get().children(), DraggableStackProviderWidget.class::isInstance);
+        }));
+        registry.registerDraggableStackVisitor(DraggableStackVisitorWidget.from(context -> {
+            if (RoughlyEnoughItemsCore.shouldReturn(context.getScreen()) || !REIHelper.getInstance().isOverlayVisible()) return Collections.emptyList();
+            return Widgets.walk(REIHelper.getInstance().getOverlay().get().children(), DraggableStackVisitorWidget.class::isInstance);
+        }));
     }
     
     @Override

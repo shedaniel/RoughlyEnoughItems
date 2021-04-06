@@ -21,36 +21,26 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.registry.display.visibility;
+package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.common.display.Display;
-import net.minecraft.world.InteractionResult;
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.jeicompat.unwrap.JEILiveDisplayGenerator;
+import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.recipe.advanced.IRecipeManagerPlugin;
+import mezz.jei.api.registration.IAdvancedRegistration;
+import org.jetbrains.annotations.NotNull;
 
-public interface DisplayVisibilityPredicate extends Comparable<DisplayVisibilityPredicate> {
-    /**
-     * Gets the priority of the handler, the higher the priority, the earlier this is called.
-     *
-     * @return the priority
-     */
-    default double getPriority() {
-        return 0.0;
-    }
-    
-    /**
-     * Handles the visibility of the display.
-     * {@link ActionResult#PASS} to pass the handling to another handler
-     * {@link ActionResult#SUCCESS} to always display it
-     * {@link ActionResult#FAIL} to never display it
-     *
-     * @param category the category of the display
-     * @param display  the display of the recipe
-     * @return the visibility
-     */
-    InteractionResult handleDisplay(DisplayCategory<?> category, Display display);
+public enum JEIAdvancedRegistration implements IAdvancedRegistration {
+    INSTANCE;
     
     @Override
-    default int compareTo(DisplayVisibilityPredicate o) {
-        return Double.compare(getPriority(), o.getPriority());
+    @NotNull
+    public IJeiHelpers getJeiHelpers() {
+        return JEIJeiHelpers.INSTANCE;
+    }
+    
+    @Override
+    public void addRecipeManagerPlugin(@NotNull IRecipeManagerPlugin plugin) {
+        DisplayRegistry.getInstance().registerGlobalDisplayGenerator(new JEILiveDisplayGenerator(plugin));
     }
 }

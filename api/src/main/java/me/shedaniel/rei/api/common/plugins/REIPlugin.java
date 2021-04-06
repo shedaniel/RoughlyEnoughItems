@@ -24,9 +24,9 @@
 package me.shedaniel.rei.api.common.plugins;
 
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
-import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
+import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;

@@ -33,7 +33,7 @@ public enum ComparisonContext {
      */
     EXACT(true);
     
-    boolean exact;
+    private final boolean exact;
     
     ComparisonContext(boolean exact) {
         this.exact = exact;

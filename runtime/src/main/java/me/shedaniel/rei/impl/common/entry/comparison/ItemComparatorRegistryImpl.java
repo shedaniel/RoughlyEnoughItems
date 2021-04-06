@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.common.entry.comparison;
 
+import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparator;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
@@ -60,11 +61,21 @@ public class ItemComparatorRegistryImpl implements ItemComparatorRegistry {
     }
     
     @Override
-    public long hashOf(ItemStack stack) {
+    public long hashOf(ComparisonContext context, ItemStack stack) {
         ItemComparator comparator = comparators.get(stack.getItem());
         if (comparator != null) {
-            return comparator.hash(stack);
+            return comparator.hash(context, stack);
         }
         return 1;
+    }
+    
+    @Override
+    public boolean containsComparator(Item item) {
+        return comparators.containsKey(item);
+    }
+    
+    @Override
+    public int comparatorSize() {
+        return this.comparators.size();
     }
 }

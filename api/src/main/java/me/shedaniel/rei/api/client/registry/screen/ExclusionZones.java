@@ -32,7 +32,7 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public interface ExclusionZones extends OverlayDecider {
     /**
-     * Gets the exclusion zones by the screen class
+     * Returns the exclusion zones by the screen class
      *
      * @param currentScreenClass the current screen class
      * @return the list of exclusion zones
@@ -41,6 +41,12 @@ public interface ExclusionZones extends OverlayDecider {
         return getExclusionZones(currentScreenClass, false);
     }
     
+    /**
+     * Returns the exclusion zones by the screen class
+     *
+     * @param currentScreenClass the current screen class
+     * @return the list of exclusion zones
+     */
     List<Rectangle> getExclusionZones(Class<?> currentScreenClass, boolean sort);
     
     int getZonesCount();

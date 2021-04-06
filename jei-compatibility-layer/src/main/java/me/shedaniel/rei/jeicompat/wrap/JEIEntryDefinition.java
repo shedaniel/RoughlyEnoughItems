@@ -58,14 +58,13 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
     private final EntryType<T> type;
     private final IIngredientType<T> ingredientType;
     private final IIngredientHelper<T> ingredientHelper;
-    private final IIngredientRenderer<T> ingredientRenderer;
-    private final Renderer renderer = new Renderer();
+    private final Renderer<T> renderer;
     
     public JEIEntryDefinition(EntryType<T> type, IIngredientType<T> ingredientType, IIngredientHelper<T> ingredientHelper, IIngredientRenderer<T> ingredientRenderer) {
         this.type = type;
         this.ingredientType = ingredientType;
         this.ingredientHelper = ingredientHelper;
-        this.ingredientRenderer = ingredientRenderer;
+        this.renderer = new Renderer<>(ingredientRenderer);
     }
     
     @Override
@@ -145,7 +144,14 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
         return ingredientHelper.getTags(value);
     }
     
-    private class Renderer implements EntryRenderer<T> {
+    @OnlyIn(Dist.CLIENT)
+    private static class Renderer<T> implements EntryRenderer<T> {
+        private final IIngredientRenderer<T> ingredientRenderer;
+        
+        public Renderer(IIngredientRenderer<T> ingredientRenderer) {
+            this.ingredientRenderer = ingredientRenderer;
+        }
+        
         @Override
         public void render(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
             ingredientRenderer.render(matrices, bounds.x, bounds.y, entry.getValue());

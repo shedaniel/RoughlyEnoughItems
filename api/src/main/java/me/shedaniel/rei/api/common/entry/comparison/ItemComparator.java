@@ -37,12 +37,12 @@ import java.util.function.ToLongFunction;
 @FunctionalInterface
 public interface ItemComparator {
     static ItemComparator noop() {
-        return stack -> 1;
+        return (context, stack) -> 1;
     }
     
     static ItemComparator itemNbt() {
         ToLongFunction<Tag> nbtHasher = nbtHasher("Count");
-        return stack -> {
+        return (context, stack) -> {
             CompoundTag tag = stack.getTag();
             return tag == null ? 0L : nbtHasher.applyAsLong(tag);
         };
@@ -52,15 +52,24 @@ public interface ItemComparator {
         return Internals.getNbtHasher(ignoredKeys);
     }
     
-    long hash(ItemStack stack);
+    long hash(ComparisonContext context, ItemStack stack);
+    
+    default ItemComparator onlyExact() {
+        ItemComparator self = this;
+        
+        return (context, stack) -> {
+            return context.isExact() ? self.hash(context, stack) : 1;
+        };
+    }
     
     default ItemComparator then(ItemComparator other) {
         Objects.requireNonNull(other);
+        ItemComparator self = this;
         
-        return stack -> {
+        return (context, stack) -> {
             long hash = 1L;
-            hash = hash * 31 + hash(stack);
-            hash = hash * 31 + other.hash(stack);
+            hash = hash * 31 + self.hash(context, stack);
+            hash = hash * 31 + other.hash(context, stack);
             return hash;
         };
     }

@@ -76,8 +76,14 @@ public class MenuInfoRegistryImpl implements MenuInfoRegistry {
     }
     
     @Override
+    public int infoSize() {
+        return map.size() + mapGeneric.size();
+    }
+    
+    @Override
     public void startReload() {
         map.clear();
+        mapGeneric.clear();
     }
     
     @Override

@@ -65,7 +65,7 @@ public interface DisplayCategory<T extends Display> extends Identifiable {
      */
     @ApiStatus.OverrideOnly
     default DisplayRenderer getDisplayRenderer(T display) {
-        return SimpleDisplayRenderer.from(display::getInputEntries, display::getOutputEntries);
+        return SimpleDisplayRenderer.from(display.getInputEntries(), display.getOutputEntries());
     }
     
     /**

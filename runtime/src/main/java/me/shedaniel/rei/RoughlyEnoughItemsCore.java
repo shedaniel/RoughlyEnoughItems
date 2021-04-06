@@ -41,18 +41,26 @@ import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
+import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
+import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.Internals;
@@ -125,6 +133,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ApiStatus.Internal
@@ -207,7 +216,7 @@ public class RoughlyEnoughItemsCore {
                 if (Objects.equals(definition.getType().getId(), BuiltinEntryTypes.EMPTY_ID)) {
                     return empty().cast();
                 }
-    
+                
                 return new TypedEntryStack<>(definition, value);
             }
         }, Internals.EntryStackProvider.class);
@@ -216,6 +225,15 @@ public class RoughlyEnoughItemsCore {
         Internals.attachInstanceSupplier(new PluginManagerImpl<>(
                 REIPlugin.class,
                 UnaryOperator.identity(),
+                usedTime -> {
+                    RoughlyEnoughItemsCore.LOGGER.info("Reloaded Plugin Manager [%s] with %d entry types, %d item comparators and %d fluid support providers in %dms.",
+                            REIPlugin.class.getSimpleName(),
+                            EntryTypeRegistry.getInstance().values().size(),
+                            ItemComparatorRegistry.getInstance().comparatorSize(),
+                            FluidSupportProvider.getInstance().size(),
+                            usedTime
+                    );
+                },
                 new EntryTypeRegistryImpl(),
                 new RecipeManagerContextImpl<>(RecipeManagerContextImpl.supplier()),
                 new ItemComparatorRegistryImpl(),
@@ -224,6 +242,13 @@ public class RoughlyEnoughItemsCore {
         Internals.attachInstanceSupplier(new PluginManagerImpl<>(
                 REIServerPlugin.class,
                 view -> view.then(PluginView.getInstance()),
+                usedTime -> {
+                    RoughlyEnoughItemsCore.LOGGER.info("Reloaded Plugin Manager [%s] with %d menu infos in %dms.",
+                            REIServerPlugin.class.getSimpleName(),
+                            MenuInfoRegistry.getInstance().infoSize(),
+                            usedTime
+                    );
+                },
                 new MenuInfoRegistryImpl()), "serverPluginManager");
     }
     
@@ -233,7 +258,7 @@ public class RoughlyEnoughItemsCore {
         ClientInternals.attachInstance((Supplier<EntryRenderer<?>>) () -> EmptyEntryDefinition.EmptyRenderer.INSTANCE, "emptyEntryRenderer");
         ClientInternals.attachInstance((BiFunction<Supplier<FavoriteEntry>, Supplier<CompoundTag>, FavoriteEntry>) (supplier, toJson) -> new FavoriteEntry() {
             FavoriteEntry value = null;
-        
+            
             @Override
             public FavoriteEntry getUnwrapped() {
                 if (this.value == null) {
@@ -241,7 +266,7 @@ public class RoughlyEnoughItemsCore {
                 }
                 return Objects.requireNonNull(value).getUnwrapped();
             }
-        
+            
             @Override
             public UUID getUuid() {
                 return getUnwrapped().getUuid();
@@ -285,16 +310,16 @@ public class RoughlyEnoughItemsCore {
             public ResourceLocation getType() {
                 return getUnwrapped().getType();
             }
-        
+            
             @Override
             public CompoundTag save(CompoundTag tag) {
                 if (toJson == null) {
                     return getUnwrapped().save(tag);
                 }
-            
+                
                 return tag.merge(toJson.get());
             }
-        
+            
             @Override
             public boolean isSame(FavoriteEntry other) {
                 return getUnwrapped().isSame(other.getUnwrapped());
@@ -308,18 +333,18 @@ public class RoughlyEnoughItemsCore {
         ClientInternals.attachInstance((BiFunction<@Nullable Point, Collection<Component>, Tooltip>) QueuedTooltip::create, "tooltipProvider");
         ClientInternals.attachInstance((Function<@Nullable Boolean, ClickArea.Result>) successful -> new ClickArea.Result() {
             private List<CategoryIdentifier<?>> categories = Lists.newArrayList();
-        
+            
             @Override
             public ClickArea.Result category(CategoryIdentifier<?> category) {
                 this.categories.add(category);
                 return this;
             }
-        
+            
             @Override
             public boolean isSuccessful() {
                 return successful;
             }
-        
+            
             @Override
             public Stream<CategoryIdentifier<?>> getCategories() {
                 return categories.stream();
@@ -328,6 +353,22 @@ public class RoughlyEnoughItemsCore {
         ClientInternals.attachInstanceSupplier(new PluginManagerImpl<>(
                 REIClientPlugin.class,
                 view -> view.then(PluginView.getInstance()),
+                usedTime -> {
+                    RoughlyEnoughItemsCore.LOGGER.info("Reloaded Plugin Manager [%s] with %d entries, %d displays, %d display visibility predicates, %d categories (%s), %d exclusion zones and %d overlay deciders in %dms.",
+                            REIClientPlugin.class.getSimpleName(),
+                            EntryRegistry.getInstance().size(),
+                            DisplayRegistry.getInstance().displaySize(),
+                            DisplayRegistry.getInstance().getVisibilityPredicates().size(),
+                            CategoryRegistry.getInstance().size(),
+                            CategoryRegistry.getInstance().stream()
+                                    .map(CategoryRegistry.CategoryConfiguration::getCategory)
+                                    .map(DisplayCategory::getTitle)
+                                    .map(Component::getString).collect(Collectors.joining(", ")),
+                            ScreenRegistry.getInstance().exclusionZones().getZonesCount(),
+                            ScreenRegistry.getInstance().getDeciders().size(),
+                            usedTime
+                    );
+                },
                 new ViewsImpl(),
                 new SearchProviderImpl(),
                 new ConfigManagerImpl(),
@@ -423,7 +464,7 @@ public class RoughlyEnoughItemsCore {
     }
     
     @Environment(EnvType.CLIENT)
-    private boolean shouldReturn(Screen screen) {
+    public static boolean shouldReturn(Screen screen) {
         if (!REIHelper.getInstance().getOverlay().isPresent()) return true;
         if (screen == null) return true;
         if (screen != Minecraft.getInstance().screen) return true;
@@ -431,7 +472,7 @@ public class RoughlyEnoughItemsCore {
     }
     
     @Environment(EnvType.CLIENT)
-    private boolean _shouldReturn(Screen screen) {
+    private static boolean _shouldReturn(Screen screen) {
         try {
             Class<? extends Screen> screenClass = screen.getClass();
             for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders()) {

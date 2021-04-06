@@ -56,10 +56,10 @@ public class REITestPlugin implements REIClientPlugin {
         int times = 1000;
         for (Item item : Registry.ITEM) {
             EntryStack<ItemStack> base = EntryStacks.of(item);
-            registry.registerEntriesAfter(base, IntStream.range(0, times).mapToObj(value -> transformStack(EntryStacks.of(item))).collect(Collectors.toList()));
+            registry.addEntriesAfter(base, IntStream.range(0, times).mapToObj(value -> transformStack(EntryStacks.of(item))).collect(Collectors.toList()));
             try {
                 for (ItemStack stack : registry.appendStacksForItem(item)) {
-                    registry.registerEntries(IntStream.range(0, times).mapToObj(value -> transformStack(EntryStacks.of(stack))).collect(Collectors.toList()));
+                    registry.addEntries(IntStream.range(0, times).mapToObj(value -> transformStack(EntryStacks.of(stack))).collect(Collectors.toList()));
                 }
             } catch (Exception ignored) {
             }

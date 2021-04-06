@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.client.gui;
 
+import com.google.common.base.Predicates;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -46,37 +47,40 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHolder {
-    private static final Comparator<EntryStack<?>> ENTRY_COMPARATOR = Comparator.comparingLong(EntryStacks::hashExact);
-    private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    private List<Slot> inputWidgets;
-    private List<Slot> outputWidgets;
-    private List<GuiEventListener> widgets;
+    protected static final Comparator<EntryStack<?>> ENTRY_COMPARATOR = Comparator.comparingLong(EntryStacks::hashExact);
+    protected static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    protected List<Slot> inputWidgets;
+    protected List<Slot> outputWidgets;
+    protected List<GuiEventListener> widgets;
     
     @ApiStatus.Internal
-    private SimpleDisplayRenderer(List<EntryIngredient> input, List<EntryIngredient> output) {
-        this.inputWidgets = simplify(input).stream().filter(stacks -> !stacks.isEmpty()).map(stacks -> Widgets.createSlot(new Point(0, 0)).entries(stacks).disableBackground().disableHighlight().disableTooltips()).collect(Collectors.toList());
-        this.outputWidgets = CollectionUtils.map(simplify(output), outputStacks ->
-                Widgets.createSlot(new Point(0, 0)).entries(CollectionUtils.filterToList(outputStacks, stack -> !stack.isEmpty())).disableBackground().disableHighlight().disableTooltips());
+    protected SimpleDisplayRenderer(List<EntryIngredient> input, List<EntryIngredient> output) {
+        this.inputWidgets = CollectionUtils.map(simplify(input), this::createSlot);
+        this.outputWidgets = CollectionUtils.map(simplify(output), this::createSlot);
         this.widgets = Stream.concat(inputWidgets.stream(), outputWidgets.stream()).collect(Collectors.toList());
+    }
+    
+    private Slot createSlot(EntryIngredient ingredient) {
+        return Widgets.createSlot(new Point(0, 0))
+                .entries(CollectionUtils.filterToList(ingredient, stack -> !stack.isEmpty()))
+                .disableBackground()
+                .disableHighlight()
+                .disableTooltips();
     }
     
     private static List<EntryIngredient> simplify(List<EntryIngredient> original) {
         List<EntryIngredient> out = new ArrayList<>();
         for (EntryIngredient ingredient : original) {
-            if (out.stream().noneMatch(s -> equalsList(ingredient, s))) {
-                out.add(ingredient);
+            EntryIngredient filter = ingredient.filter(Predicates.not(EntryStack::isEmpty));
+            if (!filter.isEmpty() && out.stream().noneMatch(s -> equalsList(filter, s))) {
+                out.add(filter);
             }
         }
         return out;
-    }
-    
-    public static DisplayRenderer from(Supplier<List<EntryIngredient>> input, Supplier<List<EntryIngredient>> output) {
-        return from(input.get(), output.get());
     }
     
     public static DisplayRenderer from(List<EntryIngredient> input, List<EntryIngredient> output) {
@@ -148,7 +152,7 @@ public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHold
     }
     
     public int getItemsHeight() {
-        return Mth.ceil(((float) inputWidgets.size()) / (getItemsPerLine() - 2));
+        return Math.max(Mth.ceil(((float) inputWidgets.size()) / (getItemsPerLine() - 2)), outputWidgets.size());
     }
     
     public int getItemsPerLine() {

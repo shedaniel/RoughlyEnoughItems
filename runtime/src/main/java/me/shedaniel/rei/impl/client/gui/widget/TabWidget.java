@@ -30,7 +30,7 @@ import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -38,6 +38,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -49,7 +50,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 @ApiStatus.Internal
-public class TabWidget extends WidgetWithBounds implements DraggableStackProvider {
+public class TabWidget extends WidgetWithBounds implements DraggableStackProviderWidget {
     
     public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final ResourceLocation CHEST_GUI_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
@@ -139,7 +140,7 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     
     @Override
     @Nullable
-    public DraggableStack getHoveredStack(DraggingContext context, double mouseX, double mouseY) {
+    public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
         if (isShown() && renderer instanceof EntryStack && containsMouse(mouseX, mouseY)) {
             return new DraggableStack() {
                 EntryStack<?> stack = ((EntryStack<?>) renderer).copy();

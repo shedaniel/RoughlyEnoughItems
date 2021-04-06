@@ -111,7 +111,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     public long hash(EntryStack<ItemStack> entry, ItemStack value, ComparisonContext context) {
         int code = 1;
         code = 31 * code + System.identityHashCode(value.getItem());
-        code = 31 * code + (context.isFuzzy() ? 0 : Long.hashCode(ItemComparatorRegistry.getInstance().hashOf(value)));
+        code = 31 * code + Long.hashCode(ItemComparatorRegistry.getInstance().hashOf(context, value));
         return code;
     }
     
@@ -119,7 +119,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     public boolean equals(ItemStack o1, ItemStack o2, ComparisonContext context) {
         if (o1.getItem() != o2.getItem())
             return false;
-        return context.isFuzzy() || ItemComparatorRegistry.getInstance().hashOf(o1) == ItemComparatorRegistry.getInstance().hashOf(o2);
+        return ItemComparatorRegistry.getInstance().hashOf(context, o1) == ItemComparatorRegistry.getInstance().hashOf(context, o2);
     }
     
     @Override
