@@ -24,11 +24,7 @@
 package me.shedaniel.rei.plugin.client.entry;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.architectury.hooks.FluidStackHooks;
 import me.shedaniel.architectury.platform.Platform;
@@ -51,19 +47,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagCollection;
 import net.minecraft.tags.TagContainer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 
@@ -165,8 +159,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     
     @Override
     public Component asFormattedText(EntryStack<FluidStack> entry, FluidStack value) {
-        Block block = value.getFluid().defaultFluidState().createLegacyBlock().getBlock();
-        return new TranslatableComponent(block.getDescriptionId());
+        return value.getName();
     }
     
     @Override
@@ -194,7 +187,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
                     .overlay(OverlayTexture.NO_OVERLAY)
                     .alpha(0xff)
                     .normal(matrices.last().normal(), 0, 0, 0)
-                    .position(matrices.last().pose(), bounds.x, bounds.getMaxY() - bounds.height * entry.get(EntryStack.Settings.FLUID_RENDER_RATIO), bounds.getMaxX(), bounds.getMaxY(), entry.getZ())
+                    .position(matrices.last().pose(), bounds.x, bounds.getMaxY() - bounds.height * Mth.clamp(entry.get(EntryStack.Settings.FLUID_RENDER_RATIO), 0, 1), bounds.getMaxX(), bounds.getMaxY(), entry.getZ())
                     .next(InventoryMenu.BLOCK_ATLAS);
             
             immediate.endBatch();
