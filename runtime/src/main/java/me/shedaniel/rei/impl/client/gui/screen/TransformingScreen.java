@@ -96,27 +96,27 @@ public class TransformingScreen extends DelegateScreen implements ScissorsScreen
         if (!translatingLast) {
             renderingLastScreen = true;
             if (lastScreen != null) {
-                RenderSystem.pushMatrix();
-                RenderSystem.translated(0, 0, -400);
+                poseStack.pushPose();
+                poseStack.translate(0, 0, -400);
                 lastScreen.render(poseStack, -1, -1, 0);
-                RenderSystem.popMatrix();
+                poseStack.popPose();
             }
             renderingLastScreen = false;
-            RenderSystem.pushMatrix();
-            RenderSystem.translated(xTransformer.getAsDouble(), yTransformer.getAsDouble(), 0);
+            poseStack.pushPose();
+            poseStack.translate(xTransformer.getAsDouble(), yTransformer.getAsDouble(), 0);
             super.render(poseStack, i, j, f);
-            RenderSystem.popMatrix();
+            poseStack.popPose();
         } else {
-            RenderSystem.pushMatrix();
-            RenderSystem.translated(0, 0, -400);
+            poseStack.pushPose();
+            poseStack.translate(0, 0, -400);
             super.render(poseStack, i, j, f);
-            RenderSystem.popMatrix();
+            poseStack.popPose();
             renderingLastScreen = true;
             if (lastScreen != null) {
-                RenderSystem.pushMatrix();
-                RenderSystem.translated(xTransformer.getAsDouble(), yTransformer.getAsDouble(), 0);
+                poseStack.pushPose();
+                poseStack.translate(xTransformer.getAsDouble(), yTransformer.getAsDouble(), 0);
                 lastScreen.render(poseStack, -1, -1, 0);
-                RenderSystem.popMatrix();
+                poseStack.popPose();
             }
             renderingLastScreen = false;
         }

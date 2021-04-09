@@ -24,10 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.*;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import net.minecraft.client.gui.GuiComponent;
@@ -49,20 +46,16 @@ public final class FillRectangleDrawableConsumer implements DrawableConsumer {
         float b = (color & 255) / 255.0F;
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
-        RenderSystem.disableAlphaTest();
         RenderSystem.defaultBlendFunc();
-        RenderSystem.shadeModel(7425);
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tessellator.getBuilder();
-        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         bufferBuilder.vertex(rectangle.getMaxX(), rectangle.getMinY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
         bufferBuilder.vertex(rectangle.getMinX(), rectangle.getMinY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
         bufferBuilder.vertex(rectangle.getMinX(), rectangle.getMaxY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
         bufferBuilder.vertex(rectangle.getMaxX(), rectangle.getMaxY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
         tessellator.end();
-        RenderSystem.shadeModel(7424);
         RenderSystem.disableBlend();
-        RenderSystem.enableAlphaTest();
         RenderSystem.enableTexture();
     }
 }

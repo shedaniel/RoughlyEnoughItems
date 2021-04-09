@@ -189,7 +189,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 registry.addWorkstations(PATHING, EntryStacks.of(item));
             }
         });
-        TagCollection<Item> itemTagCollection = Minecraft.getInstance().getConnection().getTags().getItems();
+        TagCollection<Item> itemTagCollection = Minecraft.getInstance().getConnection().getTags().getOrEmpty(Registry.ITEM_REGISTRY);
         Tag<Item> axesTag = itemTagCollection.getTag(new ResourceLocation("c", "axes"));
         if (axesTag != null) {
             for (Item item : axesTag.getValues()) {
@@ -366,7 +366,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         }
         
         public static Map<Block, Block> getStrippedBlocksMap() {
-            return STRIPABLES;
+            return STRIPPABLES;
         }
     }
     

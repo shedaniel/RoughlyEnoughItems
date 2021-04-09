@@ -23,11 +23,11 @@
 
 package me.shedaniel.rei.api.client.util;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -212,7 +212,7 @@ public class SpriteRenderer {
             float sX = sprite.getWidth();
             float sY = sprite.getHeight();
             
-            Minecraft.getInstance().getTextureManager().bind(texture);
+            RenderSystem.setShaderTexture(0, texture);
             
             for (float y = y1; y < y2; y += Math.min(y2 - y, sY)) {
                 for (float x = x1; x < x2; x += Math.min(x2 - x, sX)) {

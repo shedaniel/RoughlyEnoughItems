@@ -121,7 +121,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             @Override
             @Nullable
             public Tooltip getTooltip(Point mouse) {
-                return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", type.getDisplayName().getString()));
+                return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", type.getLongDisplayName().getString()));
             }
             
             @Override
@@ -215,7 +215,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         private int textWidth = -69;
         
         public GameModeMenuEntry(GameType gameMode) {
-            this.text = gameMode.getDisplayName().getString();
+            this.text = gameMode.getLongDisplayName().getString();
             this.gameMode = gameMode;
         }
         

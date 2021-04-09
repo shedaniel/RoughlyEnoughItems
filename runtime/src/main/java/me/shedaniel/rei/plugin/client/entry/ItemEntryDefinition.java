@@ -33,7 +33,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.AbstractEntryRenderer;
-import me.shedaniel.rei.api.client.entry.renderer.BatchEntryRenderer;
+import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
@@ -169,7 +169,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     
     @Override
     public Collection<ResourceLocation> getTagsFor(TagContainer tagContainer, EntryStack<ItemStack> entry, ItemStack value) {
-        TagCollection<Item> collection = tagContainer.getItems();
+        TagCollection<Item> collection = tagContainer.getOrEmpty(Registry.ITEM_REGISTRY);
         return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getItem());
     }
     
@@ -185,41 +185,53 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     }
     
     @SuppressWarnings("deprecation")
-    public class ItemEntryRenderer extends AbstractEntryRenderer<ItemStack> implements BatchEntryRenderer<ItemStack> {
+    public class ItemEntryRenderer extends AbstractEntryRenderer<ItemStack> implements BatchedEntryRenderer<ItemStack> {
+        private static final float scale = 20.0F;
         @Override
-        public int getBatchId(EntryStack<ItemStack> entry) {
+        public int getBatchIdentifier(EntryStack<ItemStack> entry, Rectangle bounds) {
             return 1738923 + (getModelFromStack(entry.getValue()).usesBlockLight() ? 1 : 0);
         }
         
         private BakedModel getModelFromStack(ItemStack stack) {
-            return Minecraft.getInstance().getItemRenderer().getModel(stack, null, null);
+            return Minecraft.getInstance().getItemRenderer().getModel(stack, null, null, 0);
         }
         
         @Override
         public void startBatch(EntryStack<ItemStack> entry, PoseStack matrices, float delta) {
-            Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
             Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
-            RenderSystem.pushMatrix();
-            RenderSystem.enableRescaleNormal();
-            RenderSystem.enableAlphaTest();
-            RenderSystem.defaultAlphaFunc();
+            RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             boolean sideLit = getModelFromStack(entry.getValue()).usesBlockLight();
-            if (!sideLit)
-                Lighting.setupForFlatItems();
+            if (!sideLit) Lighting.setupForFlatItems();
+            PoseStack modelViewStack = RenderSystem.getModelViewStack();
+            modelViewStack.pushPose();
+            modelViewStack.scale(scale, -scale, 1.0F);
+            RenderSystem.applyModelViewMatrix();
         }
         
         @Override
         public void renderBase(EntryStack<ItemStack> entry, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
             if (!entry.isEmpty()) {
-                ItemStack stack = entry.getValue();
+                ItemStack value = entry.getValue();
                 matrices.pushPose();
-                matrices.translate(bounds.getCenterX(), bounds.getCenterY(), 100.0F + entry.getZ());
-                matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, bounds.getHeight());
-                Minecraft.getInstance().getItemRenderer().render(stack, ItemTransforms.TransformType.GUI, false, matrices, immediate, 15728880, OverlayTexture.NO_OVERLAY, getModelFromStack(stack));
+                matrices.translate(bounds.getCenterX() / scale, bounds.getCenterY() / -scale, 100.0F + entry.getZ());
+                matrices.scale(bounds.getWidth() / scale, (bounds.getWidth() + bounds.getHeight()) / 2f / scale, 1.0F);
+                Minecraft.getInstance().getItemRenderer().render(value, ItemTransforms.TransformType.GUI, false, matrices, immediate,
+                        0xf000f0, OverlayTexture.NO_OVERLAY, getModelFromStack(value));
                 matrices.popPose();
+                
+                /*ItemStack value = entry.getValue();
+                matrices.pushPose();
+                matrices.last().pose().load(RenderSystem.getModelViewStack().last().pose());
+                matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, 1.0F);
+                RenderSystem.modelViewMatrix = matrices.last().pose();
+                PoseStack stack = new PoseStack();
+                stack.translate(bounds.getCenterX() / (double) bounds.getWidth(),bounds.getCenterY() * -2.0 / (bounds.getWidth() + bounds.getHeight()),100.0F + entry.getZ());
+                Minecraft.getInstance().getItemRenderer().render(value, ItemTransforms.TransformType.GUI, false, stack, immediate,
+                        0xf000f0, OverlayTexture.NO_OVERLAY, getModelFromStack(value));
+                matrices.popPose();*/
             }
         }
         
@@ -235,12 +247,10 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         @Override
         public void endBatch(EntryStack<ItemStack> entry, PoseStack matrices, float delta) {
             RenderSystem.enableDepthTest();
-            RenderSystem.disableAlphaTest();
-            RenderSystem.disableRescaleNormal();
             boolean sideLit = getModelFromStack(entry.getValue()).usesBlockLight();
-            if (!sideLit)
-                Lighting.setupFor3DItems();
-            RenderSystem.popMatrix();
+            if (!sideLit) Lighting.setupFor3DItems();
+            RenderSystem.getModelViewStack().popPose();
+            RenderSystem.applyModelViewMatrix();
         }
         
         @Override

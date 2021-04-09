@@ -345,7 +345,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         for (Widget widget : widgets) {
             widget.render(matrices, mouseX, mouseY, delta);
         }
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         for (TabWidget tab : tabs) {
             if (tab.isSelected())
                 tab.render(matrices, mouseX, mouseY, delta);

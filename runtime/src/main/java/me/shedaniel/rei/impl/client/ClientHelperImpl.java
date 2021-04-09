@@ -56,14 +56,13 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -103,7 +102,7 @@ public class ClientHelperImpl implements ClientHelper {
         return (ClientHelperImpl) ClientHelper.getInstance();
     }
     
-    public  boolean hasPermissionToUsePackets() {
+    public boolean hasPermissionToUsePackets() {
         try {
             Minecraft.getInstance().getConnection().getSuggestionsProvider().hasPermission(0);
             return hasOperatorPermission() && canUsePackets();
@@ -157,7 +156,7 @@ public class ClientHelperImpl implements ClientHelper {
     @Override
     public void sendDeletePacket() {
         if (Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
-            Minecraft.getInstance().player.inventory.setCarried(ItemStack.EMPTY);
+            Minecraft.getInstance().player.containerMenu.setCarried(ItemStack.EMPTY);
             ((CreativeModeInventoryScreen) Minecraft.getInstance().screen).isQuickCrafting = false;
             return;
         }
@@ -173,22 +172,22 @@ public class ClientHelperImpl implements ClientHelper {
             return false;
         EntryStack<ItemStack> entry = (EntryStack<ItemStack>) e;
         if (Minecraft.getInstance().player == null) return false;
-        if (Minecraft.getInstance().player.inventory == null) return false;
+        if (Minecraft.getInstance().player.getInventory() == null) return false;
         ItemStack cheatedStack = entry.getValue().copy();
         if (ConfigObject.getInstance().isGrabbingItems() && Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
-            Inventory inventory = Minecraft.getInstance().player.inventory;
+            AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
             EntryStack<ItemStack> stack = entry.copy();
-            if (!inventory.getCarried().isEmpty() && EntryStacks.equalsExact(EntryStacks.of(inventory.getCarried()), stack)) {
-                stack.getValue().setCount(Mth.clamp(stack.getValue().getCount() + inventory.getCarried().getCount(), 1, stack.getValue().getMaxStackSize()));
-            } else if (!inventory.getCarried().isEmpty()) {
+            if (!menu.getCarried().isEmpty() && EntryStacks.equalsExact(EntryStacks.of(menu.getCarried()), stack)) {
+                stack.getValue().setCount(Mth.clamp(stack.getValue().getCount() + menu.getCarried().getCount(), 1, stack.getValue().getMaxStackSize()));
+            } else if (!menu.getCarried().isEmpty()) {
                 return false;
             }
-            inventory.setCarried(stack.getValue().copy());
+            menu.setCarried(stack.getValue().copy());
             return true;
         } else if (ClientHelperImpl.getInstance().canUsePackets()) {
-            Inventory inventory = Minecraft.getInstance().player.inventory;
+            AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
             EntryStack<ItemStack> stack = entry.copy();
-            if (!inventory.getCarried().isEmpty() && !EntryStacks.equalsExact(EntryStacks.of(inventory.getCarried()), stack)) {
+            if (!menu.getCarried().isEmpty() && !EntryStacks.equalsExact(EntryStacks.of(menu.getCarried()), stack)) {
                 return false;
             }
             try {
@@ -216,7 +215,7 @@ public class ClientHelperImpl implements ClientHelper {
     
     @ApiStatus.Internal
     public Set<EntryStack<?>> _getInventoryItemsTypes() {
-        return Minecraft.getInstance().player.inventory.compartments.stream()
+        return Minecraft.getInstance().player.getInventory().compartments.stream()
                 .flatMap(Collection::stream)
                 .map(EntryStacks::of)
                 .collect(Collectors.toSet());
@@ -421,7 +420,7 @@ public class ClientHelperImpl implements ClientHelper {
             this.preferredOpenedCategory = category;
             return this;
         }
-    
+        
         @Override
         @Nullable
         public CategoryIdentifier<?> getPreferredOpenedCategory() {

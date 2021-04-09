@@ -25,7 +25,6 @@ package me.shedaniel.rei.api.common.util;
 
 import com.google.common.collect.ImmutableList;
 import me.shedaniel.architectury.fluid.FluidStack;
-import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
@@ -58,15 +57,7 @@ public final class EntryIngredients {
         return EntryIngredient.of(EntryStacks.of(fluid));
     }
     
-    public static EntryIngredient of(Fluid fluid, int amount) {
-        return EntryIngredient.of(EntryStacks.of(fluid, amount));
-    }
-    
-    public static EntryIngredient of(Fluid fluid, double amount) {
-        return EntryIngredient.of(EntryStacks.of(fluid, amount));
-    }
-    
-    public static EntryIngredient of(Fluid fluid, Fraction amount) {
+    public static EntryIngredient of(Fluid fluid, long amount) {
         return EntryIngredient.of(EntryStacks.of(fluid, amount));
     }
     

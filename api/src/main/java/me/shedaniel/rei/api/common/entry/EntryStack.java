@@ -103,7 +103,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     
     @Environment(EnvType.CLIENT)
     default EntryRenderer<T> getRenderer() {
-        EntryRenderer<?> renderer = get(Settings.RENDER).apply(this);
+        EntryRenderer<?> renderer = get(Settings.RENDERER).apply(this);
         return renderer == null ? EntryRenderer.empty() : renderer.cast();
     }
     
@@ -162,7 +162,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         public static final Function<EntryStack<?>, EntryRenderer<?>> EMPTY_RENDERER = stack -> EntryRenderer.empty();
         public static final BiFunction<EntryStack<?>, Tooltip, Tooltip> DEFAULT_TOOLTIP_PROCESSOR = (stack, tooltip) -> tooltip;
         @Environment(EnvType.CLIENT)
-        public static final Settings<Function<EntryStack<?>, EntryRenderer<?>>> RENDER = new Settings<>(DEFAULT_RENDERER);
+        public static final Settings<Function<EntryStack<?>, EntryRenderer<?>>> RENDERER = new Settings<>(DEFAULT_RENDERER);
         @Deprecated
         public static final Settings<BiFunction<EntryStack<?>, Tooltip, Tooltip>> TOOLTIP_PROCESSOR = new Settings<>(DEFAULT_TOOLTIP_PROCESSOR);
         @Deprecated

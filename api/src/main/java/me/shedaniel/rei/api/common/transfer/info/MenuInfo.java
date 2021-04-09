@@ -65,11 +65,8 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> {
     Iterable<StackAccessor> getInventoryStacks(MenuInfoContext<T, ?, D> context);
     
     default void markDirty(MenuInfoContext<T, ? extends ServerPlayer, D> context) {
-        context.getPlayerEntity().inventory.setChanged();
+        context.getPlayerEntity().getInventory().setChanged();
         context.getMenu().broadcastChanges();
-        
-        AbstractContainerMenu containerMenu = context.getPlayerEntity().containerMenu;
-        context.getPlayerEntity().refreshContainer(containerMenu, containerMenu.getItems());
     }
     
     default void populateRecipeFinder(T container, RecipeFinder finder) {}

@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.plugin.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.math.Point;
@@ -105,10 +106,10 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                 
                 @Override
                 public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                    Minecraft.getInstance().getTextureManager().bind(id);
+                    RenderSystem.setShaderTexture(0, id);
                     innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), 0, 1, 0, 1);
                 }
-    
+                
                 @Override
                 @Nullable
                 public Tooltip getTooltip(Point point) {
@@ -141,12 +142,12 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
             public Rectangle getScreenBounds(AbstractDisplayViewingScreen screen) {
                 return screen.getBounds();
             }
-    
+            
             @Override
             public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
-                return  AbstractDisplayViewingScreen.class.isAssignableFrom(screen);
+                return AbstractDisplayViewingScreen.class.isAssignableFrom(screen);
             }
-    
+            
             @Override
             public InteractionResult shouldScreenBeOverlaid(Class<?> screen) {
                 return InteractionResult.SUCCESS;
@@ -181,7 +182,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         EntryStackFavoriteType(ResourceLocation id) {
             this.id = id;
         }
-    
+        
         @Override
         public EntryStackFavoriteEntry read(CompoundTag object) {
             return new EntryStackFavoriteEntry(EntryStack.read(object.getCompound(key)));
@@ -191,7 +192,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         public EntryStackFavoriteEntry fromArgs(Object... args) {
             return new EntryStackFavoriteEntry((EntryStack<?>) args[0]);
         }
-    
+        
         @Override
         public CompoundTag save(EntryStackFavoriteEntry entry, CompoundTag tag) {
             tag.put(key, entry.stack.save());

@@ -29,6 +29,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.impl.client.gui.toast.ExportRecipeIdentifierToast;
@@ -70,30 +71,26 @@ public final class RecipeDisplayExporter extends Widget {
         }
     }
     
-    @SuppressWarnings("deprecation")
     private void exportRecipe(Rectangle rectangle, List<Widget> widgets) {
-        RenderSystem.pushMatrix();
         Minecraft client = Minecraft.getInstance();
         Window window = client.getWindow();
-        RenderTarget framebuffer = new RenderTarget(window.getWidth(), window.getHeight(), true, false);
-        framebuffer.bindWrite(true);
-        RenderSystem.viewport(0, 0, window.getWidth(), window.getHeight());
+        RenderTarget renderTarget = new RenderTarget(window.getWidth(), window.getHeight(), true, false);
+        renderTarget.bindWrite(true);
         RenderSystem.clear(256, Minecraft.ON_OSX);
-        RenderSystem.matrixMode(5889);
-        RenderSystem.loadIdentity();
-        RenderSystem.ortho(0.0D, (double) window.getWidth() / window.getGuiScale(), (double) window.getHeight() / window.getGuiScale(), 0.0D, 1000.0D, 3000.0D);
-        RenderSystem.matrixMode(5888);
-        RenderSystem.loadIdentity();
-        RenderSystem.translatef(0.0F, 0.0F, -2000.0F);
+        Matrix4f matrix4f = Matrix4f.orthographic(0.0F, (float) ((double) window.getWidth() / window.getGuiScale()), 0.0F, (float) ((double) window.getHeight() / window.getGuiScale()), 1000.0F, 3000.0F);
+        RenderSystem.setProjectionMatrix(matrix4f);
+        PoseStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.setIdentity();
+        poseStack.translate(0.0D, 0.0D, -2000.0D);
+        RenderSystem.applyModelViewMatrix();
         Lighting.setupFor3DItems();
         PoseStack matrices = new PoseStack();
         for (Widget widget : widgets) {
             widget.render(matrices, -1, -1, 0);
         }
-        RenderSystem.popMatrix();
         
-        NativeImage nativeImage = new NativeImage(framebuffer.width, framebuffer.height, false);
-        RenderSystem.bindTexture(framebuffer.getColorTextureId());
+        NativeImage nativeImage = new NativeImage(renderTarget.width, renderTarget.height, false);
+        RenderSystem.bindTexture(renderTarget.getColorTextureId());
         nativeImage.downloadTexture(0, false);
         nativeImage.flipY();
         int outWidth = (int) (rectangle.width * window.getGuiScale());
@@ -114,9 +111,12 @@ public final class RecipeDisplayExporter extends Widget {
             } finally {
                 nativeImage.close();
                 strippedImage.close();
-                RenderSystem.recordRenderCall(framebuffer::destroyBuffers);
             }
         });
+        
+        renderTarget.destroyBuffers();
+        Minecraft.getInstance().levelRenderer.graphicsChanged();
+        Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
     }
     
     @Override

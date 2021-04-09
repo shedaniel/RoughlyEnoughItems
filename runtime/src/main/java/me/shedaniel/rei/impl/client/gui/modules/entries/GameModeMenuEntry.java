@@ -47,7 +47,7 @@ public class GameModeMenuEntry extends MenuEntry {
     private int textWidth = -69;
     
     public GameModeMenuEntry(GameType gameMode) {
-        this.text = gameMode.getDisplayName().getString();
+        this.text = gameMode.getLongDisplayName().getString();
         this.gameMode = gameMode;
     }
     

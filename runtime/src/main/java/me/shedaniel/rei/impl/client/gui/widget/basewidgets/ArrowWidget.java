@@ -23,11 +23,11 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.api.client.gui.widgets.Arrow;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.util.Mth;
 
@@ -62,7 +62,7 @@ public final class ArrowWidget extends Arrow {
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        Minecraft.getInstance().getTextureManager().bind(REIHelper.getInstance().getDefaultDisplayTexture());
+        RenderSystem.setShaderTexture(0, REIHelper.getInstance().getDefaultDisplayTexture());
         blit(matrices, getX(), getY(), 106, 91, 24, 17);
         if (getAnimationDuration() > 0) {
             int width = Mth.ceil((System.currentTimeMillis() / (animationDuration / 24) % 24d));

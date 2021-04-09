@@ -282,8 +282,8 @@ public class ButtonWidget extends Button {
     }
     
     protected void renderBackground(PoseStack matrices, int x, int y, int width, int height, int textureOffset) {
-        minecraft.getTextureManager().bind(REIHelper.getInstance().isDarkThemeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, REIHelper.getInstance().isDarkThemeEnabled() ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
         RenderSystem.blendFunc(770, 771);

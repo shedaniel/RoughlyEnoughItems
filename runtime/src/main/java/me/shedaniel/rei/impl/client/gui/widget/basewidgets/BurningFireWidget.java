@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIHelper;
@@ -62,7 +63,7 @@ public final class BurningFireWidget extends BurningFire {
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        Minecraft.getInstance().getTextureManager().bind(REIHelper.getInstance().getDefaultDisplayTexture());
+        RenderSystem.setShaderTexture(0, REIHelper.getInstance().getDefaultDisplayTexture());
         blit(matrices, getX(), getY(), 1, 74, 14, 14);
         if (getAnimationDuration() > 0) {
             int height = 14 - Mth.ceil((System.currentTimeMillis() / (animationDuration / 14) % 14d));

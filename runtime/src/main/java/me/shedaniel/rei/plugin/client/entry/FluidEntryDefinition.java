@@ -28,7 +28,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.architectury.hooks.FluidStackHooks;
 import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.AbstractEntryRenderer;
@@ -41,7 +40,6 @@ import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -164,7 +162,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     
     @Override
     public Collection<ResourceLocation> getTagsFor(TagContainer tagContainer, EntryStack<FluidStack> entry, FluidStack value) {
-        TagCollection<Fluid> collection = tagContainer.getFluids();
+        TagCollection<Fluid> collection = tagContainer.getOrEmpty(Registry.FLUID_REGISTRY);
         return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getFluid());
     }
     
@@ -199,9 +197,9 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
             if (entry.isEmpty())
                 return null;
             List<Component> toolTip = Lists.newArrayList(entry.asFormattedText());
-            Fraction amount = entry.getValue().getAmount();
-            if (!amount.isLessThan(Fraction.zero())) {
-                String amountTooltip = I18n.get(FLUID_AMOUNT, EntryStacks.simplifyAmount(entry).getValue().getAmount());
+            long amount = entry.getValue().getAmount();
+            if (amount >= 0) {
+                String amountTooltip = I18n.get(FLUID_AMOUNT, entry.getValue().getAmount());
                 if (amountTooltip != null) {
                     toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList()));
                 }

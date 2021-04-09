@@ -334,7 +334,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             widget.render(matrices, mouseX, mouseY, delta);
         }
         super.render(matrices, mouseX, mouseY, delta);
-        RenderSystem.pushMatrix();
+        matrices.pushPose();
         ScissorsHandler.INSTANCE.scissor(scrolling.getBounds());
         for (Button button : buttonList) {
             button.getBounds().y = scrollListBounds.y + 1 + yOffset - (int) scrolling.scrollAmount;
@@ -352,7 +352,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         }
         scrolling.renderScrollBar(0, scrollBarAlpha, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
         ScissorsHandler.INSTANCE.removeLastScissor();
-        RenderSystem.popMatrix();
+        matrices.popPose();
     }
     
     @Override

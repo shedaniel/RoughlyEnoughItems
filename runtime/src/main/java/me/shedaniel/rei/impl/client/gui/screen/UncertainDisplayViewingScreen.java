@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
@@ -274,7 +275,7 @@ public class UncertainDisplayViewingScreen extends Screen {
         
         @Override
         public void render(PoseStack matrices, int i, int i1, float delta) {
-            Minecraft.getInstance().getTextureManager().bind(type == DisplayScreenType.ORIGINAL ? DEFAULT : COMPOSITE);
+            RenderSystem.setShaderTexture(0, type == DisplayScreenType.ORIGINAL ? DEFAULT : COMPOSITE);
             blit(matrices, bounds.x + (type == DisplayScreenType.ORIGINAL ? 8 : 4), bounds.y + 4, bounds.width - 8, bounds.height - 8, 113, type == DisplayScreenType.ORIGINAL ? 16 : 27, 854 - 113 * 2, 480 - 27 * 2, 854, 480);
         }
         
