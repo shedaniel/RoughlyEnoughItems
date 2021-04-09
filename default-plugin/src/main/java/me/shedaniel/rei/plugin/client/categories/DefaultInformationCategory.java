@@ -114,9 +114,8 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
     @Override
     public List<Widget> setupDisplay(DefaultInformationDisplay display, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
-        widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.y + 3), display.getName()).noShadow().color(0xFF404040, 0xFFBBBBBB));
-        widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 15)).entries(display.getEntryStacks()));
-        Rectangle rectangle = new Rectangle(bounds.getCenterX() - (bounds.width / 2), bounds.y + 35, bounds.width, bounds.height - 40);
+        widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 15 - 9)).entries(display.getEntryStacks()));
+        Rectangle rectangle = new Rectangle(bounds.getCenterX() - (bounds.width / 2), bounds.y + 35 - 9, bounds.width, bounds.height - 40 + 9);
         widgets.add(Widgets.createSlotBase(rectangle));
         widgets.add(new ScrollableTextWidget(rectangle, display.getTexts()));
         return widgets;

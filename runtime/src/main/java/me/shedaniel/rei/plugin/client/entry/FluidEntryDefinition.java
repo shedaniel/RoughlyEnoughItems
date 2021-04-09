@@ -38,6 +38,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.AbstractEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.util.SpriteRenderer;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
@@ -47,6 +48,9 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.language.I18n;
@@ -58,6 +62,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagCollection;
 import net.minecraft.tags.TagContainer;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
@@ -178,21 +183,21 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
             TextureAtlasSprite sprite = FluidStackHooks.getStillTexture(stack);
             if (sprite == null) return;
             int color = FluidStackHooks.getColor(stack);
-            int a = 255;
-            int r = (color >> 16 & 255);
-            int g = (color >> 8 & 255);
-            int b = (color & 255);
-            Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
-            Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder builder = tesselator.getBuilder();
-            Matrix4f matrix = matrices.last().pose();
-            builder.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
-            int z = entry.getZ();
-            builder.vertex(matrix, bounds.getMaxX(), bounds.y, z).uv(sprite.getU1(), sprite.getV0()).color(r, g, b, a).endVertex();
-            builder.vertex(matrix, bounds.x, bounds.y, z).uv(sprite.getU0(), sprite.getV0()).color(r, g, b, a).endVertex();
-            builder.vertex(matrix, bounds.x, bounds.getMaxY(), z).uv(sprite.getU0(), sprite.getV1()).color(r, g, b, a).endVertex();
-            builder.vertex(matrix, bounds.getMaxX(), bounds.getMaxY(), z).uv(sprite.getU1(), sprite.getV1()).color(r, g, b, a).endVertex();
-            tesselator.end();
+            
+            MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
+            
+            SpriteRenderer.beginPass()
+                    .setup(immediate, RenderType.solid())
+                    .sprite(sprite)
+                    .color(color)
+                    .light(0x00f000f0)
+                    .overlay(OverlayTexture.NO_OVERLAY)
+                    .alpha(0xff)
+                    .normal(matrices.last().normal(), 0, 0, 0)
+                    .position(matrices.last().pose(), bounds.x, bounds.getMaxY() - bounds.height * entry.get(EntryStack.Settings.FLUID_RENDER_RATIO), bounds.getMaxX(), bounds.getMaxY(), entry.getZ())
+                    .next(InventoryMenu.BLOCK_ATLAS);
+            
+            immediate.endBatch();
         }
         
         @Override

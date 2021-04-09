@@ -53,6 +53,7 @@ dependencies {
     modRuntime("curse.maven:jumbofurnace-390880:3120970")
     modRuntime("curse.maven:cyclic-239286:3221427")
     modRuntime("curse.maven:mekanism-268560:3206392")
+    modRuntime("curse.maven:refined-storage-243076:3196167")
     modRuntime("appeng:appliedenergistics2:8.2.0")
 }
 

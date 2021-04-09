@@ -78,4 +78,6 @@ public interface ViewSearchBuilder {
     EntryStack<?> getOutputNotice();
     
     Map<DisplayCategory<?>, List<Display>> buildMap();
+    
+    
 }

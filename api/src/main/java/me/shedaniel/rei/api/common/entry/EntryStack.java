@@ -158,6 +158,8 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         public static final Supplier<Boolean> FALSE = () -> false;
         @Environment(EnvType.CLIENT)
         public static final Function<EntryStack<?>, EntryRenderer<?>> DEFAULT_RENDERER = stack -> stack.getDefinition().getRenderer();
+        @Environment(EnvType.CLIENT)
+        public static final Function<EntryStack<?>, EntryRenderer<?>> EMPTY_RENDERER = stack -> EntryRenderer.empty();
         public static final BiFunction<EntryStack<?>, Tooltip, Tooltip> DEFAULT_TOOLTIP_PROCESSOR = (stack, tooltip) -> tooltip;
         @Environment(EnvType.CLIENT)
         public static final Settings<Function<EntryStack<?>, EntryRenderer<?>>> RENDER = new Settings<>(DEFAULT_RENDERER);
@@ -165,6 +167,10 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         public static final Settings<BiFunction<EntryStack<?>, Tooltip, Tooltip>> TOOLTIP_PROCESSOR = new Settings<>(DEFAULT_TOOLTIP_PROCESSOR);
         @Deprecated
         public static final Settings<Function<EntryStack<?>, List<Component>>> TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
+        @Environment(EnvType.CLIENT)
+        public static final Float DEFAULT_RENDER_RATIO = 1.0F;
+        @Environment(EnvType.CLIENT)
+        public static final Settings<Float> FLUID_RENDER_RATIO = new Settings<>(DEFAULT_RENDER_RATIO);
         
         private R defaultValue;
         private short id;

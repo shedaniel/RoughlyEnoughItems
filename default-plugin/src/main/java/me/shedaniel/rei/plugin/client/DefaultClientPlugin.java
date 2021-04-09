@@ -108,22 +108,14 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         ClientInternals.attachInstance((Supplier<Object>) () -> this, "builtinClientPlugin");
     }
     
-    public static void registerBrewingRecipe(BrewingRecipe recipe) {
-        DisplayRegistry.getInstance().registerDisplay(new DefaultBrewingDisplay(recipe.input, recipe.ingredient, recipe.output));
-    }
-    
-    public static void registerInfoDisplay(DefaultInformationDisplay display) {
-        DisplayRegistry.getInstance().registerDisplay(display);
-    }
-    
     @Override
     public void registerBrewingRecipe(Ingredient input, Ingredient ingredient, ItemStack output) {
-        registerBrewingRecipe(new BrewingRecipe(input, ingredient, output));
+        DisplayRegistry.getInstance().registerDisplay(new DefaultBrewingDisplay(new BrewingRecipe(input, ingredient, output)));
     }
     
     @Override
     public void registerInformation(EntryIngredient ingredient, Component name, UnaryOperator<List<Component>> textBuilder) {
-        registerInfoDisplay(DefaultInformationDisplay.createFromEntries(ingredient, name).lines(textBuilder.apply(Lists.newArrayList())));
+        DisplayRegistry.getInstance().registerDisplay(DefaultInformationDisplay.createFromEntries(ingredient, name).lines(textBuilder.apply(Lists.newArrayList())));
     }
     
     @Override
@@ -228,6 +220,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.registerFiller(CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
         registry.registerFiller(StonecutterRecipe.class, DefaultStoneCuttingDisplay::new);
         registry.registerFiller(UpgradeRecipe.class, DefaultSmithingDisplay::new);
+        registry.registerFiller(BrewingRecipe.class, DefaultBrewingDisplay::new);
         for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.getFuel().entrySet()) {
             registry.registerDisplay(new DefaultFuelDisplay(Collections.singletonList(EntryIngredients.of(entry.getKey())), Collections.emptyList(), entry.getValue()));
         }
