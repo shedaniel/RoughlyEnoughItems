@@ -344,7 +344,7 @@ public class JEIPluginDetector {
                     registry.registerFiller((Class<Recipe<Container>>) category.getRecipeClass(), ((JEIWrappedCategory<Recipe<Container>>) category)::handlesRecipe,
                             recipe -> new JEIWrappedDisplay(category, recipe));
                 }
-                registry.registerFiller(JEIWrappedDisplay.class, display -> display.getCategoryIdentifier().equals(category.getIdentifier()), Function.identity());
+                registry.registerFiller(JEIWrappedDisplay.class, display -> display.getCategoryIdentifier().getIdentifier().equals(category.getIdentifier()), Function.identity());
             }
             backingPlugin.registerAdvanced(JEIAdvancedRegistration.INSTANCE);
         }
