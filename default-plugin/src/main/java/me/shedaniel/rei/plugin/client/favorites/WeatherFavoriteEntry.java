@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.plugin.client.favorites;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -122,7 +123,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
             }
             
             private void renderWeatherIcon(PoseStack matrices, Weather type, int centerX, int centerY, int color) {
-                Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
+                RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
                 blit(matrices, centerX - 7, centerY - 7, type.getId() * 14, 14, 14, 14, 256, 256);
             }
             

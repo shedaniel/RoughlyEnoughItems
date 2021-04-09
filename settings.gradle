@@ -13,6 +13,6 @@ include "api"
 include "default-plugin"
 include "runtime"
 include "fabric"
-include "forge"
+//include "forge"
 
-include "jei-compatibility-layer"
+//include "jei-compatibility-layer"

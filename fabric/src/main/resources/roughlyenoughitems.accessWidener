@@ -31,3 +31,5 @@ accessible    method net/minecraft/client/gui/screens/Screen                    
 accessible    method net/minecraft/client/gui/screens/Screen                                   init                    ()V
 accessible    method net/minecraft/client/gui/screens/Screen                                   insertText              (Ljava/lang/String;Z)V
 accessible    method net/minecraft/client/gui/screens/Screen                                   isValidCharacterForName (Ljava/lang/String;CI)Z
+accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        draggingItem            Lnet/minecraft/world/item/ItemStack;
+mutable       field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        draggingItem            Lnet/minecraft/world/item/ItemStack;

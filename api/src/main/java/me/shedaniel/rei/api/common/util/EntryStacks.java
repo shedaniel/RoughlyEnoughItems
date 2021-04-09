@@ -24,7 +24,6 @@
 package me.shedaniel.rei.api.common.util;
 
 import me.shedaniel.architectury.fluid.FluidStack;
-import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
@@ -47,15 +46,7 @@ public final class EntryStacks {
         return of(fluid, FluidStack.bucketAmount());
     }
     
-    public static EntryStack<FluidStack> of(Fluid fluid, int amount) {
-        return of(fluid, Fraction.ofWhole(amount));
-    }
-    
-    public static EntryStack<FluidStack> of(Fluid fluid, double amount) {
-        return of(fluid, Fraction.from(amount));
-    }
-    
-    public static EntryStack<FluidStack> of(Fluid fluid, Fraction amount) {
+    public static EntryStack<FluidStack> of(Fluid fluid, long amount) {
         return EntryStack.of(VanillaEntryTypes.FLUID, FluidStack.create(fluid, amount));
     }
     
@@ -173,10 +164,5 @@ public final class EntryStacks {
      */
     public static <T> long hashFuzzy(EntryStack<T> stack) {
         return stack.getDefinition().hash(stack, stack.getValue(), ComparisonContext.FUZZY);
-    }
-    
-    public static EntryStack<FluidStack> simplifyAmount(EntryStack<FluidStack> stack) {
-        stack.getValue().setAmount(stack.getValue().getAmount().simplify());
-        return stack;
     }
 }

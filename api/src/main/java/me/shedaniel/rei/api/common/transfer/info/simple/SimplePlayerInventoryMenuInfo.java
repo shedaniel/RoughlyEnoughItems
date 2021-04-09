@@ -77,7 +77,7 @@ public interface SimplePlayerInventoryMenuInfo<T extends AbstractContainerMenu, 
     }
     
     default Iterable<StackAccessor> getInventoryStacks(MenuInfoContext<T, ?, D> context) {
-        Inventory inventory = context.getPlayerEntity().inventory;
+        Inventory inventory = context.getPlayerEntity().getInventory();
         return IntStream.range(0, inventory.items.size())
                 .mapToObj(index -> StackAccessor.fromContainer(inventory, index))
                 .collect(Collectors.toList());

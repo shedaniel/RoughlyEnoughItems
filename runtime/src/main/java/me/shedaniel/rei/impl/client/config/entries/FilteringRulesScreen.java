@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.config.entries;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
@@ -191,7 +192,7 @@ public class FilteringRulesScreen extends Screen {
                 @Override
                 protected void renderBg(PoseStack matrices, Minecraft client, int mouseX, int mouseY) {
                     super.renderBg(matrices, client, mouseX, mouseY);
-                    Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
+                    RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
                     blit(matrices, x + 3, y + 3, 0, 0, 14, 14);
                 }
             };

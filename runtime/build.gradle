@@ -1,5 +1,5 @@
 architectury {
-    common()
+    common(forgeEnabled.toBoolean())
 }
 
 repositories {

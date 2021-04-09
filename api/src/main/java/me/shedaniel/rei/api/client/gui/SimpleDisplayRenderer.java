@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.client.gui;
 
 import com.google.common.base.Predicates;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -37,7 +38,6 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -121,7 +121,7 @@ public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHold
         }
         xx = bounds.x + 4 + 18 * (getItemsPerLine() - 2);
         yy = bounds.y + getHeight() / 2 - 8;
-        Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
+        RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
         blit(matrices, xx, yy, 0, 28, 18, 18);
         xx += 18;
         yy += outputWidgets.size() * -9 + 9;

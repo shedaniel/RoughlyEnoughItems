@@ -74,7 +74,6 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
         this.inventoryStacks = this.menuInfo.getInventoryStacks(this);
         this.inputStacks = this.menuInfo.getInputStacks(this);
         
-        player.ignoreSlotUpdateHack = true;
         // Return the already placed items on the grid
         this.cleanInputs();
         
@@ -89,12 +88,10 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
             this.fillInputSlots(recipeFinder, ingredients, hasShift);
         } else {
             this.cleanInputs();
-            player.ignoreSlotUpdateHack = false;
             this.menuInfo.markDirty(this);
             throw new NotEnoughMaterialsException();
         }
         
-        player.ignoreSlotUpdateHack = false;
         this.menuInfo.markDirty(this);
     }
     

@@ -220,7 +220,7 @@ public class EntryListWidget extends WidgetWithBounds {
             int skip = Math.max(0, Mth.floor(scrolling.scrollAmount / (float) entrySize()));
             int nextIndex = skip * innerBounds.width / entrySize();
             this.blockedCount = 0;
-            BatchEntryRendererManager helper = new BatchEntryRendererManager();
+            BatchedEntryRendererManager helper = new BatchedEntryRendererManager();
             
             int i = nextIndex;
             for (int cont = nextIndex; cont < entries.size(); cont++) {
@@ -253,7 +253,7 @@ public class EntryListWidget extends WidgetWithBounds {
             for (Widget widget : renders) {
                 widget.render(matrices, mouseX, mouseY, delta);
             }
-            new BatchEntryRendererManager(entries).render(debugTime, size, time, matrices, mouseX, mouseY, delta);
+            new BatchedEntryRendererManager(entries).render(debugTime, size, time, matrices, mouseX, mouseY, delta);
         }
         
         if (debugTime) {
@@ -286,8 +286,8 @@ public class EntryListWidget extends WidgetWithBounds {
             matrices.popPose();
         }
         
-        if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
-            EntryStack<?> stack = EntryStacks.of(minecraft.player.inventory.getCarried().copy());
+        if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
+            EntryStack<?> stack = EntryStacks.of(minecraft.player.containerMenu.getCarried().copy());
             if (stack.getValueType() == FluidStack.class) {
                 Item bucketItem = ((FluidStack) stack.getValue()).getFluid().getBucket();
                 if (bucketItem != null) {
@@ -463,7 +463,7 @@ public class EntryListWidget extends WidgetWithBounds {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (containsMouse(mouseX, mouseY)) {
             LocalPlayer player = minecraft.player;
-            if (ClientHelper.getInstance().isCheating() && player != null && player.inventory != null && !player.inventory.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
+            if (ClientHelper.getInstance().isCheating() && player != null && player.containerMenu != null && !player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
                 ClientHelper.getInstance().sendDeletePacket();
                 return true;
             }

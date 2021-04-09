@@ -120,8 +120,8 @@ public final class PanelWidget extends Panel {
         float red = ((color >> 16) & 0xFF) / 255f;
         float green = ((color >> 8) & 0xFF) / 255f;
         float blue = (color & 0xFF) / 255f;
-        RenderSystem.color4f(red, green, blue, alpha);
-        minecraft.getTextureManager().bind(REIHelper.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
+        RenderSystem.setShaderColor(red, green, blue, alpha);
+        RenderSystem.setShaderTexture(0, REIHelper.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
         int xTextureOffset = getXTextureOffset();
         int yTextureOffset = getYTextureOffset();

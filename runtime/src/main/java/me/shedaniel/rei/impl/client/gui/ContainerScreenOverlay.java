@@ -209,7 +209,7 @@ public class ContainerScreenOverlay extends REIOverlay {
     }
     
     public void init() {
-        draggingStack.set(DraggableStackProvider.from(() -> ScreenRegistry.getInstance().getDraggableProviders()), 
+        draggingStack.set(DraggableStackProvider.from(() -> ScreenRegistry.getInstance().getDraggableProviders()),
                 DraggableStackVisitor.from(() -> ScreenRegistry.getInstance().getDraggableVisitors()));
         
         this.shouldReload = false;
@@ -252,7 +252,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                     .tooltipLine(new TranslatableComponent("text.rei.next_page"))
                     .focusable(false));
         }
-    
+        
         final Rectangle configButtonArea = getConfigButtonArea();
         widgets.add(configButton = InternalWidgets.wrapLateRenderable(
                 Widgets.withTranslate(
@@ -292,7 +292,7 @@ public class ContainerScreenOverlay extends REIOverlay {
                                         }),
                                 Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
                                     helper.setBlitOffset(helper.getBlitOffset() + 1);
-                                    Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
+                                    RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
                                     helper.blit(matrices, configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
                                 })
                         ),
@@ -345,8 +345,8 @@ public class ContainerScreenOverlay extends REIOverlay {
                     .focusable(false)
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)));
             widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-                Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 helper.blit(matrices, weatherButton.getBounds().x + 3, weatherButton.getBounds().y + 3, getCurrentWeather().getId() * 14, 14, 14, 14);
             }));
         }
@@ -533,7 +533,7 @@ public class ContainerScreenOverlay extends REIOverlay {
             }
             matrices.popPose();
         }
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         this.renderWidgets(matrices, mouseX, mouseY, delta);
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             Screen screen = Minecraft.getInstance().screen;

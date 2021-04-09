@@ -293,7 +293,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (background) {
-            minecraft.getTextureManager().bind(REIHelper.getInstance().isDarkThemeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
+            RenderSystem.setShaderTexture(0, REIHelper.getInstance().isDarkThemeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
             blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
         }
     }
