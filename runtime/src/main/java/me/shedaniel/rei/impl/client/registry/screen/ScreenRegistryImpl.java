@@ -144,9 +144,6 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     public void registerDecider(OverlayDecider decider) {
         deciders.add(decider);
         deciders.sort(Comparator.reverseOrder());
-        clickAreas.clear();
-        draggableStacksProviders.clear();
-        draggableStacksVisitors.clear();
         cache.clear();
         tmpScreen = null;
         registerDraggableStackProvider(DraggableStackProviderWidget.from(context ->
@@ -225,6 +222,8 @@ public class ScreenRegistryImpl implements ScreenRegistry {
         deciders.clear();
         cache.clear();
         focusedStackProviders.clear();
+        draggableStacksProviders.clear();
+        draggableStacksVisitors.clear();
         tmpScreen = null;
         
         registerDefault();

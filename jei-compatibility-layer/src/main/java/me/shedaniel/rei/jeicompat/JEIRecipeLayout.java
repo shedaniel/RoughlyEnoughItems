@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupFluid;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupItem;
@@ -141,6 +142,15 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
                 wrapper.slot.getBounds().translate(bounds.x + 4, bounds.y + 4);
                 wrapper.slot.highlightEnabled(!wrapper.isEmpty());
                 widgets.add(Widgets.withTranslate(wrapper.slot, 0, 0, 10));
+                
+                if (wrapper.fluidCapacity == wrapper.fluidCapacity) {
+                    for (EntryStack<?> entry : wrapper.slot.getEntries()) {
+                        if (entry.getType() == VanillaEntryTypes.FLUID) {
+                            entry.setting(EntryStack.Settings.FLUID_RENDER_RATIO,
+                                    entry.<me.shedaniel.architectury.fluid.FluidStack>cast().getValue().getAmount().floatValue() / wrapper.fluidCapacity);
+                        }
+                    }
+                }
                 
                 List<ITooltipCallback<Object>> tooltipCallbacks = (List<ITooltipCallback<Object>>) (List) group.tooltipCallbacks;
                 for (EntryStack<?> entry : wrapper.slot.getEntries()) {

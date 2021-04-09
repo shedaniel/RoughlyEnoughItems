@@ -29,16 +29,19 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface Views extends Reloadable<REIClientPlugin> {
     static Views getInstance() {
         return PluginManager.getClientInstance().get(Views.class);
     }
     
+    @ApiStatus.Internal
     Map<DisplayCategory<?>, List<Display>> buildMapFor(ViewSearchBuilder builder);
     
     /**
@@ -56,7 +59,7 @@ public interface Views extends Reloadable<REIClientPlugin> {
      * @return the map of recipes
      */
     default <T> Map<DisplayCategory<?>, List<Display>> getRecipesFor(EntryStack<T> stack) {
-        return buildMapFor(ViewSearchBuilder.builder().addRecipesFor(stack).setInputNotice(stack));
+        return ViewSearchBuilder.builder().addRecipesFor(stack).setInputNotice(stack).buildMap();
     }
     
     /**
@@ -66,10 +69,10 @@ public interface Views extends Reloadable<REIClientPlugin> {
      * @return the map of recipes
      */
     default <T> Map<DisplayCategory<?>, List<Display>> getUsagesFor(EntryStack<T> stack) {
-        return buildMapFor(ViewSearchBuilder.builder().addUsagesFor(stack).setInputNotice(stack));
+        return ViewSearchBuilder.builder().addUsagesFor(stack).setInputNotice(stack).buildMap();
     }
     
     default Map<DisplayCategory<?>, List<Display>> getAllRecipes() {
-        return buildMapFor(ViewSearchBuilder.builder().addAllCategories());
+        return ViewSearchBuilder.builder().addAllCategories().buildMap();
     }
 }

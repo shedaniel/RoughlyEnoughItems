@@ -114,23 +114,25 @@ public abstract class AbstractEntryStack<A> extends AbstractRenderer implements 
     
     @Override
     public EntryStack<A> copy() {
-        return wrap(getDefinition().copy(this, getValue()));
+        return wrap(getDefinition().copy(this, getValue()), true);
     }
     
     @Override
     public EntryStack<A> rewrap() {
-        return wrap(getValue());
+        return wrap(getValue(), true);
     }
     
     @Override
     public EntryStack<A> normalize() {
-        return wrap(getDefinition().normalize(this, getValue()));
+        return wrap(getDefinition().normalize(this, getValue()), false);
     }
     
-    public EntryStack<A> wrap(A value) {
+    protected EntryStack<A> wrap(A value, boolean copySettings) {
         TypedEntryStack<A> stack = new TypedEntryStack<>(getDefinition(), value);
-        for (Short2ObjectMap.Entry<Object> entry : getSettings().short2ObjectEntrySet()) {
-            stack.setting(EntryStack.Settings.getById(entry.getShortKey()), entry.getValue());
+        if (copySettings) {
+            for (Short2ObjectMap.Entry<Object> entry : getSettings().short2ObjectEntrySet()) {
+                stack.setting(EntryStack.Settings.getById(entry.getShortKey()), entry.getValue());
+            }
         }
         return stack;
     }

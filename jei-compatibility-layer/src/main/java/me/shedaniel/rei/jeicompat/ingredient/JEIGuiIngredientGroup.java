@@ -142,6 +142,7 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     
     public class SlotWrapper extends AbstractList<T> implements IGuiIngredient<T> {
         public final Slot slot;
+        public float fluidCapacity = Float.NaN;
         
         public SlotWrapper(Slot slot) {
             this.slot = slot;

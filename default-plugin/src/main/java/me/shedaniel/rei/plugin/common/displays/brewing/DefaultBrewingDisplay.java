@@ -51,12 +51,14 @@ public class DefaultBrewingDisplay implements Display {
     private EntryStack<?> output;
     private EntryIngredient reactant, input;
     
-    @ApiStatus.Internal
+    public DefaultBrewingDisplay(BrewingRecipe recipe) {
+        this(recipe.input, recipe.ingredient, recipe.output);
+    }
+    
     public DefaultBrewingDisplay(Ingredient input, Ingredient reactant, ItemStack output) {
         this(EntryIngredients.ofIngredient(input), EntryIngredients.ofIngredient(reactant), EntryStacks.of(output));
     }
     
-    @ApiStatus.Internal
     public DefaultBrewingDisplay(EntryIngredient input, EntryIngredient reactant, EntryStack<?> output) {
         this.input = input.map(stack -> stack.copy().tooltip(new TranslatableComponent("category.rei.brewing.input").withStyle(ChatFormatting.YELLOW)));
         this.reactant = reactant.map(stack -> stack.copy().tooltip(new TranslatableComponent("category.rei.brewing.reactant").withStyle(ChatFormatting.YELLOW)));
