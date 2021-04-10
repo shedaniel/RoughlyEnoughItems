@@ -23,9 +23,15 @@
 
 package me.shedaniel.rei.api.client.util;
 
+import me.shedaniel.architectury.fluid.FluidStack;
+import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.entry.type.BuiltinClientEntryTypes;
 import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public final class ClientEntryStacks {
     private ClientEntryStacks() {}
@@ -36,5 +42,27 @@ public final class ClientEntryStacks {
         }
         
         return EntryStack.of(BuiltinClientEntryTypes.RENDERING, renderer);
+    }
+    
+    public static <T> EntryStack<T> setNotRenderer(EntryStack<T> stack) {
+        return setRenderer(stack, EntryRenderer.empty());
+    }
+    
+    public static <T> EntryStack<T> setRenderer(EntryStack<T> stack, EntryRenderer<T> renderer) {
+        return stack.setting(EntryStack.Settings.RENDERER, s -> renderer);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public static <T> EntryStack<T> setRenderer(EntryStack<T> stack, Function<EntryStack<T>, EntryRenderer<T>> rendererProvider) {
+        return stack.setting(EntryStack.Settings.RENDERER, (Function) rendererProvider);
+    }
+    
+    @SuppressWarnings("rawtypes")
+    public static <T> EntryStack<T> setTooltipProcessor(EntryStack<T> stack, BiFunction<EntryStack<T>, Tooltip, Tooltip> processor) {
+        return stack.setting(EntryStack.Settings.TOOLTIP_PROCESSOR, (BiFunction) processor);
+    }
+    
+    public static EntryStack<FluidStack> setFluidRenderRatio(EntryStack<FluidStack> stack, float ratio) {
+        return stack.setting(EntryStack.Settings.FLUID_RENDER_RATIO, ratio);
     }
 }
