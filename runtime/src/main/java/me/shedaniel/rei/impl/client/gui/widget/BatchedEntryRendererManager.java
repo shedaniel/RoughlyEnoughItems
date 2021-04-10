@@ -63,7 +63,7 @@ public class BatchedEntryRendererManager {
     }
     
     public void add(EntryWidget widget) {
-        if (fastEntryRendering) {
+        if (fastEntryRendering && false) {
             EntryStack<?> currentEntry = widget.getCurrentEntry();
             EntryRenderer<?> renderer = currentEntry.getRenderer();
             if (renderer instanceof BatchedEntryRenderer) {
