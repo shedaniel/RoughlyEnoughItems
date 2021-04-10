@@ -46,7 +46,7 @@ import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
-import me.shedaniel.rei.impl.client.gui.widget.BatchEntryRendererManager;
+import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import net.minecraft.client.Minecraft;
@@ -222,7 +222,7 @@ public class FilteringScreen extends Screen {
         int skip = Math.max(0, Mth.floor(scrolling.scrollAmount / (float) entrySize()));
         int nextIndex = skip * innerBounds.width / entrySize();
         int i = nextIndex;
-        BatchEntryRendererManager manager = new BatchEntryRendererManager();
+        BatchedEntryRendererManager manager = new BatchedEntryRendererManager();
         for (; i < entryStacks.size(); i++) {
             EntryStack<?> stack = entryStacks.get(i);
             EntryListEntry entry = entries.get(nextIndex);

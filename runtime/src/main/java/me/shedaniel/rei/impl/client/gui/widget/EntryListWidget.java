@@ -220,7 +220,7 @@ public class EntryListWidget extends WidgetWithBounds {
             int skip = Math.max(0, Mth.floor(scrolling.scrollAmount / (float) entrySize()));
             int nextIndex = skip * innerBounds.width / entrySize();
             this.blockedCount = 0;
-            BatchEntryRendererManager helper = new BatchEntryRendererManager();
+            BatchedEntryRendererManager helper = new BatchedEntryRendererManager();
             
             int i = nextIndex;
             for (int cont = nextIndex; cont < entries.size(); cont++) {
@@ -253,7 +253,7 @@ public class EntryListWidget extends WidgetWithBounds {
             for (Widget widget : renders) {
                 widget.render(matrices, mouseX, mouseY, delta);
             }
-            new BatchEntryRendererManager(entries).render(debugTime, size, time, matrices, mouseX, mouseY, delta);
+            new BatchedEntryRendererManager(entries).render(debugTime, size, time, matrices, mouseX, mouseY, delta);
         }
         
         if (debugTime) {

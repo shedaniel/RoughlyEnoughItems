@@ -28,7 +28,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import me.shedaniel.rei.api.client.config.ConfigObject;
-import me.shedaniel.rei.api.client.entry.renderer.BatchEntryRenderer;
+import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.client.Minecraft;
@@ -40,15 +40,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class BatchEntryRendererManager {
+public class BatchedEntryRendererManager {
     private boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
     private Int2ObjectMap<List<EntryWidget>> grouping = new Int2ObjectOpenHashMap<>();
     private List<EntryWidget> toRender = new ArrayList<>();
     
-    public BatchEntryRendererManager() {
+    public BatchedEntryRendererManager() {
     }
     
-    public BatchEntryRendererManager(Collection<? extends EntryWidget> widgets) {
+    public BatchedEntryRendererManager(Collection<? extends EntryWidget> widgets) {
         addAll(widgets);
     }
     
@@ -66,8 +66,8 @@ public class BatchEntryRendererManager {
         if (fastEntryRendering) {
             EntryStack<?> currentEntry = widget.getCurrentEntry();
             EntryRenderer<?> renderer = currentEntry.getRenderer();
-            if (renderer instanceof BatchEntryRenderer) {
-                int hash = ((BatchEntryRenderer<Object>) renderer).getBatchId(currentEntry.cast());
+            if (renderer instanceof BatchedEntryRenderer) {
+                int hash = ((BatchedEntryRenderer<Object>) renderer).getBatchIdentifier(currentEntry.cast(), widget.getBounds());
                 List<EntryWidget> entries = grouping.get(hash);
                 if (entries == null) {
                     grouping.put(hash, entries = new ArrayList<>());
@@ -101,8 +101,9 @@ public class BatchEntryRendererManager {
         @SuppressWarnings("rawtypes")
         EntryStack first = firstWidget.getCurrentEntry();
         EntryRenderer<?> renderer = first.getRenderer();
-        if (fastEntryRendering && renderer instanceof BatchEntryRenderer) {
-            BatchEntryRenderer<?> firstRenderer = (BatchEntryRenderer<?>) renderer;
+        if (fastEntryRendering && renderer instanceof BatchedEntryRenderer) {
+            BatchedEntryRenderer<?> firstRenderer = (BatchedEntryRenderer<?>) renderer;
+            matrices = firstRenderer.batchModifyMatrices(matrices);
             firstRenderer.startBatch(first, matrices, delta);
             long l = debugTime ? System.nanoTime() : 0;
             MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();

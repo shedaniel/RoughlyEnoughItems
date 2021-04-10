@@ -148,7 +148,9 @@ task releaseOnCf {
     }
     proc.waitFor()
     releaseChangelog = changes.toString()
-    dependsOn project("forge").tasks.getByName("curseforge")
+    if (subprojects.any { it.name == "forge" }) {
+        dependsOn project("forge").tasks.getByName("curseforge")
+    }
 }
 
 /*project {                                                                                                      
