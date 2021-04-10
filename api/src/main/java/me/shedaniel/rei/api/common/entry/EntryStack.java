@@ -23,6 +23,8 @@
 
 package me.shedaniel.rei.api.common.entry;
 
+import me.shedaniel.architectury.utils.Env;
+import me.shedaniel.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
@@ -103,7 +105,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     
     @Environment(EnvType.CLIENT)
     default EntryRenderer<T> getRenderer() {
-        EntryRenderer<?> renderer = get(Settings.RENDER).apply(this);
+        EntryRenderer<?> renderer = get(Settings.RENDERER).apply(this);
         return renderer == null ? EntryRenderer.empty() : renderer.cast();
     }
     
@@ -138,39 +140,43 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     
     <R> R get(Settings<R> settings);
     
+    @Environment(EnvType.CLIENT)
     default EntryStack<T> tooltip(Component... tooltips) {
         return tooltip(Arrays.asList(tooltips));
     }
     
+    @Environment(EnvType.CLIENT)
     default EntryStack<T> tooltip(List<Component> tooltips) {
         return tooltip(stack -> tooltips);
     }
     
+    @Environment(EnvType.CLIENT)
     default EntryStack<T> tooltip(Function<EntryStack<?>, List<Component>> tooltipProvider) {
         return setting(Settings.TOOLTIP_APPEND_EXTRA, tooltipProvider);
     }
     
+    @Deprecated
     class Settings<R> {
         @ApiStatus.Internal
         private static final List<Settings<?>> SETTINGS = new ArrayList<>();
         
-        public static final Supplier<Boolean> TRUE = () -> true;
-        public static final Supplier<Boolean> FALSE = () -> false;
         @Environment(EnvType.CLIENT)
-        public static final Function<EntryStack<?>, EntryRenderer<?>> DEFAULT_RENDERER = stack -> stack.getDefinition().getRenderer();
+        public static Settings<Function<EntryStack<?>, EntryRenderer<?>>> RENDERER;
         @Environment(EnvType.CLIENT)
-        public static final Function<EntryStack<?>, EntryRenderer<?>> EMPTY_RENDERER = stack -> EntryRenderer.empty();
-        public static final BiFunction<EntryStack<?>, Tooltip, Tooltip> DEFAULT_TOOLTIP_PROCESSOR = (stack, tooltip) -> tooltip;
+        public static Settings<BiFunction<EntryStack<?>, Tooltip, Tooltip>> TOOLTIP_PROCESSOR;
         @Environment(EnvType.CLIENT)
-        public static final Settings<Function<EntryStack<?>, EntryRenderer<?>>> RENDER = new Settings<>(DEFAULT_RENDERER);
-        @Deprecated
-        public static final Settings<BiFunction<EntryStack<?>, Tooltip, Tooltip>> TOOLTIP_PROCESSOR = new Settings<>(DEFAULT_TOOLTIP_PROCESSOR);
-        @Deprecated
-        public static final Settings<Function<EntryStack<?>, List<Component>>> TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
+        public static Settings<Function<EntryStack<?>, List<Component>>> TOOLTIP_APPEND_EXTRA;
         @Environment(EnvType.CLIENT)
-        public static final Float DEFAULT_RENDER_RATIO = 1.0F;
-        @Environment(EnvType.CLIENT)
-        public static final Settings<Float> FLUID_RENDER_RATIO = new Settings<>(DEFAULT_RENDER_RATIO);
+        public static Settings<Float> FLUID_RENDER_RATIO;
+        
+        static {
+            EnvExecutor.runInEnv(Env.CLIENT, () -> () -> {
+                RENDERER = new Settings<>(stack -> stack.getDefinition().getRenderer());
+                TOOLTIP_PROCESSOR = new Settings<>((stack, tooltip) -> tooltip);
+                TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
+                FLUID_RENDER_RATIO = new Settings<>(1.0F);
+            });
+        }
         
         private R defaultValue;
         private short id;

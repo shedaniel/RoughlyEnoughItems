@@ -154,7 +154,7 @@ public abstract class AbstractEntryStack<A> extends AbstractRenderer implements 
     @Override
     @Nullable
     public Tooltip getTooltip(Point mouse, boolean appendModName) {
-        Mutable<Tooltip> tooltip = new MutableObject<>(this.get(Settings.RENDERER).apply(this).<A>cast().getTooltip(this, mouse));
+        Mutable<Tooltip> tooltip = new MutableObject<>(getRenderer().<A>cast().getTooltip(this, mouse));
         if (tooltip.getValue() == null) return null;
         tooltip.getValue().getText().addAll(get(EntryStack.Settings.TOOLTIP_APPEND_EXTRA).apply(this));
         tooltip.setValue(get(Settings.TOOLTIP_PROCESSOR).apply(this, tooltip.getValue()));
