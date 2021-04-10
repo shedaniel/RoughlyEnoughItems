@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.impl.client.search.result;
 
+import me.shedaniel.rei.impl.client.search.IntRange;
 import me.shedaniel.rei.impl.client.search.argument.type.MatchType;
-import net.minecraft.util.IntRange;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 

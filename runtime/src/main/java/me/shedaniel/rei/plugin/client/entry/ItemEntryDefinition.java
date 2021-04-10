@@ -33,7 +33,7 @@ import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.AbstractEntryRenderer;
-import me.shedaniel.rei.api.client.entry.renderer.BatchEntryRenderer;
+import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
@@ -185,9 +185,9 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     }
     
     @SuppressWarnings("deprecation")
-    public class ItemEntryRenderer extends AbstractEntryRenderer<ItemStack> implements BatchEntryRenderer<ItemStack> {
+    public class ItemEntryRenderer extends AbstractEntryRenderer<ItemStack> implements BatchedEntryRenderer<ItemStack> {
         @Override
-        public int getBatchId(EntryStack<ItemStack> entry) {
+        public int getBatchIdentifier(EntryStack<ItemStack> entry, Rectangle bounds) {
             return 1738923 + (getModelFromStack(entry.getValue()).usesBlockLight() ? 1 : 0);
         }
         

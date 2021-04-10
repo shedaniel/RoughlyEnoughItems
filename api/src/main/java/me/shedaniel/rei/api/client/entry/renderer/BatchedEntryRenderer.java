@@ -29,28 +29,54 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 
-public interface BatchEntryRenderer<T> extends EntryRenderer<T> {
-    static <T> int getBatchIdFrom(EntryStack<T> entry) {
-        EntryRenderer<T> renderer = entry.getRenderer();
-        if (renderer instanceof BatchEntryRenderer) return ((BatchEntryRenderer<T>) renderer).getBatchId(entry);
-        return renderer.getClass().hashCode();
-    }
-    
-    default int getBatchId(EntryStack<T> entry) {
+public interface BatchedEntryRenderer<T> extends EntryRenderer<T> {
+    /**
+     * Returns a batch identifier, stacks with the same batch identifier will be grouped together
+     * into a batch.
+     *
+     * @param entry  the stack
+     * @param bounds the bounds of the entry
+     * @return the batch identifier
+     */
+    default int getBatchIdentifier(EntryStack<T> entry, Rectangle bounds) {
         return getClass().hashCode();
     }
     
+    /**
+     * Modifies the {@link PoseStack} passed tp various batch rendering methods.
+     *
+     * @param matrices the matrix stack
+     * @return the modified matrix stack, could be an entirely different stack
+     */
+    default PoseStack batchModifyMatrices(PoseStack matrices) {
+        return matrices;
+    }
+    
+    /**
+     * Starts the batch rendering, used to setup states, only called once with every batch.
+     *
+     * @param entry    the first entry in the batch
+     * @param matrices the matrix stack
+     * @param delta    the tick delta
+     */
     void startBatch(EntryStack<T> entry, PoseStack matrices, float delta);
     
     void renderBase(EntryStack<T> entry, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta);
     
     void renderOverlay(EntryStack<T> entry, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta);
     
+    /**
+     * Ends the batch rendering, used to setup states, only called once with every batch.
+     *
+     * @param entry    the first entry in the batch
+     * @param matrices the matrix stack
+     * @param delta    the tick delta
+     */
     void endBatch(EntryStack<T> entry, PoseStack matrices, float delta);
     
-    @Deprecated
     @Override
     default void render(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        matrices = batchModifyMatrices(matrices);
         startBatch(entry, matrices, delta);
         MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
         renderBase(entry, matrices, immediate, bounds, mouseX, mouseY, delta);

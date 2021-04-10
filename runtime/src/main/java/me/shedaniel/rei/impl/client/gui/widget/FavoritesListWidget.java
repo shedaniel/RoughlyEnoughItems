@@ -251,7 +251,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         Stream<EntryListEntry> entryStream = this.entriesList.stream()
                 .filter(entry -> entry.getBounds().getMaxY() >= this.currentBounds.getY() && entry.getBounds().y <= this.currentBounds.getMaxY());
         
-        new BatchEntryRendererManager(entryStream.collect(Collectors.toList()))
+        new BatchedEntryRendererManager(entryStream.collect(Collectors.toList()))
                 .render(matrices, mouseX, mouseY, delta);
         
         updatePosition(delta);
