@@ -116,7 +116,6 @@ public class RoughlyEnoughItemsInitializer implements ModInitializer, ClientModI
                 }
             }
         } catch (VersionParsingException e) {
-            RoughlyEnoughItemsState.error("Failed to parse Mod Menu version: " + e.getMessage());
             e.printStackTrace();
         }
     }
