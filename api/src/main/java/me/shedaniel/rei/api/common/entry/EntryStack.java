@@ -49,7 +49,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@Environment(EnvType.CLIENT)
 public interface EntryStack<T> extends TextRepresentable, Renderer {
     static EntryStack<Unit> empty() {
         return Internals.getEntryStackProvider().empty();

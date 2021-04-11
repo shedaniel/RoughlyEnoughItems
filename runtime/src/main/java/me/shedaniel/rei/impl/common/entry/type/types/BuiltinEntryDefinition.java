@@ -23,6 +23,8 @@
 
 package me.shedaniel.rei.impl.common.entry.type.types;
 
+import me.shedaniel.architectury.utils.Env;
+import me.shedaniel.architectury.utils.EnvExecutor;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -30,6 +32,8 @@ import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -48,14 +52,15 @@ public class BuiltinEntryDefinition<T> implements EntryDefinition<T>, EntrySeria
     private final EntryType<T> type;
     private final boolean empty;
     private final Supplier<T> defaultValue;
-    private final EntryRenderer<T> renderer;
+    @Environment(EnvType.CLIENT)
+    private EntryRenderer<T> renderer;
     
-    protected BuiltinEntryDefinition(Class<T> clazz, EntryType<T> type, boolean empty, Supplier<T> defaultValue, EntryRenderer<T> renderer) {
+    protected BuiltinEntryDefinition(Class<T> clazz, EntryType<T> type, boolean empty, Supplier<T> defaultValue, Supplier<Supplier<EntryRenderer<T>>> renderer) {
         this.clazz = clazz;
         this.type = type;
         this.empty = empty;
         this.defaultValue = defaultValue;
-        this.renderer = renderer;
+        EnvExecutor.runInEnv(Env.CLIENT, () -> () -> this.renderer = renderer.get().get());
     }
     
     @Override
@@ -69,6 +74,7 @@ public class BuiltinEntryDefinition<T> implements EntryDefinition<T>, EntrySeria
     }
     
     @Override
+    @Environment(EnvType.CLIENT)
     public EntryRenderer<T> getRenderer() {
         return renderer;
     }

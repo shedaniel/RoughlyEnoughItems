@@ -28,13 +28,10 @@ import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import java.util.Collections;
 import java.util.List;
 
-@Environment(EnvType.CLIENT)
 public class DefaultTillingDisplay extends BasicDisplay {
     public DefaultTillingDisplay(EntryStack<?> in, EntryStack<?> out) {
         this(Collections.singletonList(EntryIngredient.of(in)), Collections.singletonList(EntryIngredient.of(out)));

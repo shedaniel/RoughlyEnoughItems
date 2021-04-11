@@ -43,7 +43,7 @@ import org.jetbrains.annotations.Nullable;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class RenderingEntryDefinition {
-    public static final EntryDefinition<Renderer> RENDERING = new BuiltinEntryDefinition<Renderer>(Renderer.class, BuiltinClientEntryTypes.RENDERING, false, RenderingEntryDefinition::throwRendering, DeferredRenderer.INSTANCE) {
+    public static final EntryDefinition<Renderer> RENDERING = new BuiltinEntryDefinition<Renderer>(Renderer.class, BuiltinClientEntryTypes.RENDERING, false, RenderingEntryDefinition::throwRendering, () -> () -> DeferredRenderer.INSTANCE) {
         @Override
         public Component asFormattedText(EntryStack<Renderer> entry, Renderer value) {
             Tooltip tooltip = value.getTooltip(PointHelper.ofMouse());

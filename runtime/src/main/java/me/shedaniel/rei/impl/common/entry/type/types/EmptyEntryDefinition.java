@@ -31,17 +31,18 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
 public class EmptyEntryDefinition {
-    public static final EntryDefinition<Unit> EMPTY = new BuiltinEntryDefinition<>(Unit.class, BuiltinEntryTypes.EMPTY, true, () -> Unit.INSTANCE, EmptyRenderer.INSTANCE);
+    public static final EntryDefinition<Unit> EMPTY = new BuiltinEntryDefinition<>(Unit.class, BuiltinEntryTypes.EMPTY, true, () -> Unit.INSTANCE, () -> () -> new EmptyRenderer());
     
-    public enum EmptyRenderer implements EntryRenderer<Unit> {
-        INSTANCE;
-        
+    @Environment(EnvType.CLIENT)
+    public static class EmptyRenderer implements EntryRenderer<Unit> {
         @Override
         public void render(EntryStack<Unit> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
             
