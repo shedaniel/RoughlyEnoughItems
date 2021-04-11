@@ -28,6 +28,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.architectury.hooks.FluidStackHooks;
 import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.utils.Env;
+import me.shedaniel.architectury.utils.EnvExecutor;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -42,6 +44,8 @@ import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -58,6 +62,7 @@ import net.minecraft.tags.TagCollection;
 import net.minecraft.tags.TagContainer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,7 +75,12 @@ import java.util.stream.Stream;
 
 public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntrySerializer<FluidStack> {
     private static final String FLUID_AMOUNT = Platform.isForge() ? "tooltip.rei.fluid_amount.forge" : "tooltip.rei.fluid_amount";
-    private final EntryRenderer<FluidStack> renderer = new FluidEntryRenderer();
+    @Environment(EnvType.CLIENT)
+    private EntryRenderer<FluidStack> renderer;
+    
+    public FluidEntryDefinition() {
+        EnvExecutor.runInEnv(Env.CLIENT, () -> () -> renderer = new FluidEntryRenderer());
+    }
     
     @Override
     public Class<FluidStack> getValueType() {
@@ -83,6 +93,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     }
     
     @Override
+    @Environment(EnvType.CLIENT)
     public EntryRenderer<FluidStack> getRenderer() {
         return renderer;
     }
