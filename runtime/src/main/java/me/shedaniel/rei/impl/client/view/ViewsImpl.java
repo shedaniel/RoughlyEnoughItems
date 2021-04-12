@@ -60,7 +60,7 @@ public class ViewsImpl implements Views {
         for (CategoryRegistry.CategoryConfiguration<?> categoryConfiguration : CategoryRegistry.getInstance()) {
             DisplayCategory<?> category = categoryConfiguration.getCategory();
             CategoryIdentifier<?> categoryId = categoryConfiguration.getCategoryIdentifier();
-            List<Display> allRecipesFromCategory = DisplayRegistry.getInstance().getDisplays((CategoryIdentifier<Display>) categoryId);
+            List<Display> allRecipesFromCategory = DisplayRegistry.getInstance().get((CategoryIdentifier<Display>) categoryId);
             
             Set<Display> set = Sets.newLinkedHashSet();
             if (categories.contains(categoryId)) {
@@ -184,7 +184,7 @@ public class ViewsImpl implements Views {
     @Override
     public Collection<EntryStack<?>> findCraftableEntriesByMaterials(Iterable<? extends EntryStack<?>> inventoryItems) {
         Set<EntryStack<?>> craftables = new HashSet<>();
-        for (List<Display> displays : DisplayRegistry.getInstance().getAllDisplays().values()) {
+        for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
             for (Display display : displays) {
                 int slotsCraftable = 0;
                 List<EntryIngredient> requiredInput = display.getRequiredEntries();

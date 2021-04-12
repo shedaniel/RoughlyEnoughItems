@@ -212,7 +212,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
             List<Component> toolTip = Lists.newArrayList(entry.asFormattedText());
             Fraction amount = entry.getValue().getAmount();
             if (!amount.isLessThan(Fraction.zero())) {
-                String amountTooltip = I18n.get(FLUID_AMOUNT, EntryStacks.simplifyAmount(entry).getValue().getAmount());
+                String amountTooltip = I18n.get(FLUID_AMOUNT, simplifyAmount(entry).getValue().getAmount());
                 if (amountTooltip != null) {
                     toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList()));
                 }
@@ -223,5 +223,10 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
             }
             return Tooltip.create(toolTip);
         }
+    }
+    
+    public static EntryStack<FluidStack> simplifyAmount(EntryStack<FluidStack> stack) {
+        stack.getValue().setAmount(stack.getValue().getAmount().simplify());
+        return stack;
     }
 }
