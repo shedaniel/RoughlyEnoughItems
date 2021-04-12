@@ -62,22 +62,22 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      *
      * @param display the recipe display
      */
-    void registerDisplay(Display display);
+    void add(Display display);
     
     /**
      * Returns an unmodifiable map of displays visible to the player
      *
      * @return an unmodifiable map of displays
      */
-    Map<CategoryIdentifier<?>, List<Display>> getAllDisplays();
+    Map<CategoryIdentifier<?>, List<Display>> getAll();
     
     /**
      * Returns the list of displays visible to the player for a category
      *
      * @return the list of displays
      */
-    default <D extends Display> List<D> getDisplays(CategoryIdentifier<D> categoryId) {
-        return (List<D>) getAllDisplays().getOrDefault(categoryId, Collections.emptyList());
+    default <D extends Display> List<D> get(CategoryIdentifier<D> categoryId) {
+        return (List<D>) getAll().getOrDefault(categoryId, Collections.emptyList());
     }
     
     /**

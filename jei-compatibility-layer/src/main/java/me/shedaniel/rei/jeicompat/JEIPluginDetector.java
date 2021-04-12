@@ -35,7 +35,6 @@ import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializer;
@@ -107,6 +106,10 @@ public class JEIPluginDetector {
         return new UnsupportedOperationException("This operation has not been implemented yet!");
     }
     
+    public static RuntimeException WILL_NOT_BE_IMPLEMENTED() {
+        return new UnsupportedOperationException("This operation will not be implemented in REI's JEI Compatibility Layer!");
+    }
+    
     public static Renderer wrapDrawable(IDrawable drawable) {
         if (drawable == null) return emptyRenderer();
         return new AbstractRenderer() {
@@ -142,15 +145,22 @@ public class JEIPluginDetector {
             @NotNull
             public <T> List<T> getRecipes(@NotNull IRecipeCategory<T> recipeCategory) {
                 CategoryIdentifier<Display> categoryId = CategoryIdentifier.of(recipeCategory.getUid());
-                boolean isWrappedCategory = CategoryRegistry.getInstance().get(categoryId).getCategory() instanceof JEIWrappedCategory;
-                List<Display> displays = DisplayRegistry.getInstance().getDisplays(categoryId);
-                if (isWrappedCategory) {
-                    return CollectionUtils.map(displays, display -> ((JEIWrappedDisplay<T>) display).getBackingRecipe());
-                } else {
-                    return (List<T>) displays;
-                }
+                return wrapRecipes(categoryId);
             }
         };
+    }
+    
+    public static <T> List<T> wrapRecipes(CategoryIdentifier<?> id) {
+        return wrapRecipes(CategoryRegistry.getInstance().get(id).getCategory(), DisplayRegistry.getInstance().get(id));
+    }
+    
+    public static <T> List<T> wrapRecipes(DisplayCategory<?> category, List<Display> displays) {
+        boolean isWrappedCategory = category instanceof JEIWrappedCategory;
+        if (isWrappedCategory) {
+            return CollectionUtils.map(displays, display -> ((JEIWrappedDisplay<T>) display).getBackingRecipe());
+        } else {
+            return (List<T>) displays;
+        }
     }
     
     public static <T> Collection<Display> createDisplayFrom(T object) {
@@ -242,7 +252,7 @@ public class JEIPluginDetector {
             public void addRecipeCategories(@NotNull IRecipeCategory<?> @NotNull ... categories) {
                 for (IRecipeCategory<?> category : categories) {
                     JEIWrappedCategory<?> wrappedCategory = new JEIWrappedCategory<>(category);
-                    registry.register(wrappedCategory);
+                    registry.add(wrappedCategory);
                     added.accept(wrappedCategory);
                 }
             }

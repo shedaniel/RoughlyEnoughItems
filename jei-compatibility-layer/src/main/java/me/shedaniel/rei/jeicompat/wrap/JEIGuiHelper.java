@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat;
+package me.shedaniel.rei.jeicompat.wrap;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.forge.api.PointHelper;
@@ -49,7 +49,7 @@ public enum JEIGuiHelper implements IGuiHelper {
     @Override
     @NotNull
     public IDrawableBuilder drawableBuilder(@NotNull ResourceLocation resourceLocation, int u, int v, int width, int height) {
-        return new DrawableBuilder(resourceLocation, u, v, width, height);
+        return new JEIDrawableBuilder(resourceLocation, u, v, width, height);
     }
     
     @Override
