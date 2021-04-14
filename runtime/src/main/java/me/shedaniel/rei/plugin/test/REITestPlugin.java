@@ -53,7 +53,7 @@ public class REITestPlugin implements REIClientPlugin {
     
     @Override
     public void registerEntries(EntryRegistry registry) {
-        int times = 1000;
+        int times = 100;
         for (Item item : Registry.ITEM) {
             EntryStack<ItemStack> base = EntryStacks.of(item);
             registry.addEntriesAfter(base, IntStream.range(0, times).mapToObj(value -> transformStack(EntryStacks.of(item))).collect(Collectors.toList()));
