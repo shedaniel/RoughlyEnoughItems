@@ -431,7 +431,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public static class Motion {
         private boolean configScreenAnimation = false;
-        private boolean creditsScreenAnimation = true;
+        private boolean creditsScreenAnimation = false;
         private boolean favoritesAnimation = true;
     }
     
