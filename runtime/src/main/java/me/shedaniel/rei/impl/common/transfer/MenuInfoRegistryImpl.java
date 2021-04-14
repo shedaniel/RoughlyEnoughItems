@@ -29,46 +29,63 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfoProvider;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class MenuInfoRegistryImpl implements MenuInfoRegistry {
-    private final Map<CategoryIdentifier<?>, Map<Class<? extends AbstractContainerMenu>, MenuInfo<?, ?>>> map = Maps.newLinkedHashMap();
-    private final Map<Predicate<CategoryIdentifier<?>>, List<MenuInfo<?, ?>>> mapGeneric = Maps.newLinkedHashMap();
+    private final Map<CategoryIdentifier<?>, Map<Class<? extends AbstractContainerMenu>, List<MenuInfoProvider<?, ?>>>> map = Maps.newLinkedHashMap();
+    private final Map<Predicate<CategoryIdentifier<?>>, List<MenuInfoProvider<?, ?>>> mapGeneric = Maps.newLinkedHashMap();
     
     @Override
-    public <C extends AbstractContainerMenu, D extends Display> void register(CategoryIdentifier<D> category, Class<C> menuClass, MenuInfo<C, D> menuInfo) {
-        map.computeIfAbsent(category, id -> Maps.newLinkedHashMap()).put(menuClass, menuInfo);
+    public <C extends AbstractContainerMenu, D extends Display> void register(CategoryIdentifier<D> category, Class<C> menuClass, MenuInfoProvider<C, D> menuInfo) {
+        map.computeIfAbsent(category, id -> Maps.newLinkedHashMap())
+                .computeIfAbsent(menuClass, c -> Lists.newArrayList())
+                .add(menuInfo);
     }
     
     @Override
-    public <D extends Display> void registerGeneric(Predicate<CategoryIdentifier<?>> categoryPredicate, MenuInfo<?, D> menuInfo) {
+    public <D extends Display> void registerGeneric(Predicate<CategoryIdentifier<?>> categoryPredicate, MenuInfoProvider<?, D> menuInfo) {
         mapGeneric.computeIfAbsent(categoryPredicate, id -> Lists.newArrayList()).add(menuInfo);
     }
     
     @Override
     public <T extends AbstractContainerMenu, D extends Display> MenuInfo<T, D> get(CategoryIdentifier<D> category, Class<T> menuClass) {
-        Map<Class<? extends AbstractContainerMenu>, MenuInfo<?, ?>> infoMap = map.get(category);
+        Map<Class<? extends AbstractContainerMenu>, List<MenuInfoProvider<?, ?>>> infoMap = map.get(category);
         if (infoMap != null && !infoMap.isEmpty()) {
             if (infoMap.containsKey(menuClass)) {
-                return (MenuInfo<T, D>) infoMap.get(menuClass);
+                for (MenuInfoProvider<?, ?> provider : infoMap.get(menuClass)) {
+                    Optional<MenuInfo<T, D>> info = ((MenuInfoProvider<T, D>) provider).provide(category, menuClass);
+                    if (info.isPresent()) {
+                        return info.get();
+                    }
+                }
             }
-            for (Map.Entry<Class<? extends AbstractContainerMenu>, MenuInfo<?, ?>> entry : infoMap.entrySet()) {
+            for (Map.Entry<Class<? extends AbstractContainerMenu>, List<MenuInfoProvider<?, ?>>> entry : infoMap.entrySet()) {
                 if (entry.getKey().isAssignableFrom(menuClass)) {
-                    return (MenuInfo<T, D>) entry.getValue();
+                    for (MenuInfoProvider<?, ?> provider : entry.getValue()) {
+                        Optional<MenuInfo<T, D>> info = ((MenuInfoProvider<T, D>) provider).provide(category, menuClass);
+                        if (info.isPresent()) {
+                            return info.get();
+                        }
+                    }
                 }
             }
         }
         
-        for (Map.Entry<Predicate<CategoryIdentifier<?>>, List<MenuInfo<?, ?>>> entry : mapGeneric.entrySet()) {
+        for (Map.Entry<Predicate<CategoryIdentifier<?>>, List<MenuInfoProvider<?, ?>>> entry : mapGeneric.entrySet()) {
             if (entry.getKey().test(category) && !entry.getValue().isEmpty()) {
-                List<MenuInfo<?, ?>> infoList = entry.getValue();
+                List<MenuInfoProvider<?, ?>> infoList = entry.getValue();
                 if (!infoList.isEmpty()) {
-                    return (MenuInfo<T, D>) infoList.get(0);
+                    Optional<MenuInfo<T, D>> info = ((MenuInfoProvider<T, D>) infoList.get(0)).provide(category, menuClass);
+                    if (info.isPresent()) {
+                        return info.get();
+                    }
                 }
             }
         }

@@ -50,8 +50,8 @@ public class RecipeBookGridMenuInfo<T extends RecipeBookMenu<?>, D extends Simpl
     }
     
     @Override
-    public void populateRecipeFinder(T container, RecipeFinder finder) {
-        container.fillCraftSlotsStackedContents(new net.minecraft.world.entity.player.StackedContents() {
+    public void populateRecipeFinder(T menu, RecipeFinder finder) {
+        menu.fillCraftSlotsStackedContents(new net.minecraft.world.entity.player.StackedContents() {
             @Override
             public void accountSimpleStack(ItemStack stack) {
                 finder.addNormalItem(stack);

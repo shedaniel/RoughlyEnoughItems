@@ -27,18 +27,21 @@ import net.minecraft.world.Container;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-public interface StackAccessor {
+/**
+ * A wrapper for accessing {@link Slot}, can be wrapped for non-vanilla {@link Slot} implementations.
+ */
+public interface SlotAccessor {
     ItemStack getItemStack();
     
     void setItemStack(ItemStack stack);
     
     ItemStack takeStack(int amount);
     
-    static StackAccessor fromSlot(Slot slot) {
-        return new SlotStackAccessor(slot);
+    static SlotAccessor fromSlot(Slot slot) {
+        return new VanillaSlotAccessor(slot);
     }
     
-    static StackAccessor fromContainer(Container container, int index) {
-        return new ContainerStackAccessor(container, index);
+    static SlotAccessor fromContainer(Container container, int index) {
+        return new ContainerSlotAccessor(container, index);
     }
 }

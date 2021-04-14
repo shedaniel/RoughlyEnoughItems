@@ -31,7 +31,7 @@ import me.shedaniel.rei.api.common.transfer.RecipeFinder;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
-import me.shedaniel.rei.api.common.transfer.info.stack.StackAccessor;
+import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -51,8 +51,8 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
     protected T container;
     protected D display;
     protected MenuInfo<T, D> menuInfo;
-    private Iterable<StackAccessor> inputStacks;
-    private Iterable<StackAccessor> inventoryStacks;
+    private Iterable<SlotAccessor> inputStacks;
+    private Iterable<SlotAccessor> inventoryStacks;
     private ServerPlayer player;
     
     private InputSlotCrafter(CategoryIdentifier<D> category, T container, CompoundTag display, MenuInfo<T, D> menuInfo) {
@@ -71,8 +71,8 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
     
     private void fillInputSlots(ServerPlayer player, boolean hasShift) {
         this.player = player;
-        this.inventoryStacks = this.menuInfo.getInventoryStacks(this);
-        this.inputStacks = this.menuInfo.getInputStacks(this);
+        this.inventoryStacks = this.menuInfo.getInventorySlots(this);
+        this.inputStacks = this.menuInfo.getInputSlots(this);
         
         player.ignoreSlotUpdateHack = true;
         // Return the already placed items on the grid
@@ -81,7 +81,7 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
         RecipeFinder recipeFinder = new RecipeFinder();
         this.menuInfo.getRecipeFinderPopulator().populate(this, recipeFinder);
         NonNullList<Ingredient> ingredients = NonNullList.create();
-        for (List<ItemStack> itemStacks : this.menuInfo.getDisplayInputs(this)) {
+        for (List<ItemStack> itemStacks : this.menuInfo.getInputs(this)) {
             ingredients.add(CollectionUtils.toIngredient(itemStacks));
         }
         
@@ -98,8 +98,8 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
         this.menuInfo.markDirty(this);
     }
     
-    public void alignRecipeToGrid(Iterable<StackAccessor> inputStacks, Iterator<Integer> recipeItemIds, int craftsAmount) {
-        for (StackAccessor inputStack : inputStacks) {
+    public void alignRecipeToGrid(Iterable<SlotAccessor> inputStacks, Iterator<Integer> recipeItemIds, int craftsAmount) {
+        for (SlotAccessor inputStack : inputStacks) {
             if (!recipeItemIds.hasNext()) {
                 return;
             }
@@ -108,7 +108,7 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
         }
     }
     
-    public void acceptAlignedInput(Integer recipeItemId, StackAccessor inputStack, int craftsAmount) {
+    public void acceptAlignedInput(Integer recipeItemId, SlotAccessor inputStack, int craftsAmount) {
         ItemStack toBeTakenStack = RecipeFinder.getStackFromId(recipeItemId);
         if (!toBeTakenStack.isEmpty()) {
             for (int i = 0; i < craftsAmount; ++i) {
@@ -117,8 +117,8 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
         }
     }
     
-    protected void fillInputSlot(StackAccessor slot, ItemStack toBeTakenStack) {
-        StackAccessor takenSlot = this.takeInventoryStack(toBeTakenStack);
+    protected void fillInputSlot(SlotAccessor slot, ItemStack toBeTakenStack) {
+        SlotAccessor takenSlot = this.takeInventoryStack(toBeTakenStack);
         if (takenSlot != null) {
             ItemStack takenStack = takenSlot.getItemStack().copy();
             if (!takenStack.isEmpty()) {
@@ -161,8 +161,8 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
     }
     
     @Nullable
-    public StackAccessor takeInventoryStack(ItemStack itemStack) {
-        for (StackAccessor inventoryStack : inventoryStacks) {
+    public SlotAccessor takeInventoryStack(ItemStack itemStack) {
+        for (SlotAccessor inventoryStack : inventoryStacks) {
             ItemStack itemStack1 = inventoryStack.getItemStack();
             if (!itemStack1.isEmpty() && areItemsEqual(itemStack, itemStack1) && !itemStack1.isDamaged() && !itemStack1.isEnchanted() && !itemStack1.hasCustomHoverName()) {
                 return inventoryStack;
