@@ -33,6 +33,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.WILL_NOT_BE_IMPLEMENTED;
 
 public class JEIUnwrappedCategory<T extends Display> implements IRecipeCategory<T> {
     private final DisplayCategory<T> backingCategory;
@@ -62,7 +63,7 @@ public class JEIUnwrappedCategory<T extends Display> implements IRecipeCategory<
     @Override
     @NotNull
     public IDrawable getBackground() {
-        throw TODO();
+        throw WILL_NOT_BE_IMPLEMENTED();
     }
     
     @Override
@@ -73,11 +74,11 @@ public class JEIUnwrappedCategory<T extends Display> implements IRecipeCategory<
     
     @Override
     public void setIngredients(@NotNull T recipe, @NotNull IIngredients ingredients) {
-        throw TODO();
+        throw WILL_NOT_BE_IMPLEMENTED();
     }
     
     @Override
     public void setRecipe(@NotNull IRecipeLayout recipeLayout, @NotNull T recipe, @NotNull IIngredients ingredients) {
-        throw TODO();
+        throw WILL_NOT_BE_IMPLEMENTED();
     }
 }

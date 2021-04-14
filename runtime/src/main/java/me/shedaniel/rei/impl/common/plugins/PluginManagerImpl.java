@@ -49,7 +49,6 @@ import java.util.function.LongConsumer;
 import java.util.function.UnaryOperator;
 
 @ApiStatus.Internal
-@Environment(EnvType.CLIENT)
 public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<P>, PluginView<P> {
     private final List<Reloadable<P>> reloadables = new ArrayList<>();
     private final Map<Class<? extends Reloadable<P>>, Reloadable<? super P>> cache = new ConcurrentHashMap<>();
@@ -187,10 +186,6 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                 }
-            }
-            
-            try (SectionClosable refilter = section(sectionData, "entry-registry-refilter")) {
-                EntryRegistry.getInstance().refilter();
             }
             
             long usedTime = Util.getMillis() - startTime;

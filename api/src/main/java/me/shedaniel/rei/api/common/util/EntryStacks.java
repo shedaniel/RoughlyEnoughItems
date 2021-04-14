@@ -139,6 +139,18 @@ public final class EntryStacks {
     }
     
     /**
+     * Hash Code of the {@code context} context.
+     *
+     * @param stack   the stack to hash code
+     * @param context the context to use
+     * @param <T>     the type of the stack
+     * @return the hash code of the {@code context} context
+     */
+    public static <T> long hash(EntryStack<T> stack, ComparisonContext context) {
+        return stack.getDefinition().hash(stack, stack.getValue(), context);
+    }
+    
+    /**
      * Hash Code of the {@link ComparisonContext#EXACT} context, stacks with the same hash code should share the same normalized stack.
      * <p>
      * For example, enchantment books of different enchantments will not receive the same hash code under this context.
@@ -147,9 +159,10 @@ public final class EntryStacks {
      * @param stack the stack to hash code
      * @param <T>   the type of the stack
      * @return the hash code of the {@link ComparisonContext#EXACT} context
+     * @see #hash(EntryStack, ComparisonContext)
      */
     public static <T> long hashExact(EntryStack<T> stack) {
-        return stack.getDefinition().hash(stack, stack.getValue(), ComparisonContext.EXACT);
+        return hash(stack, ComparisonContext.EXACT);
     }
     
     /**
@@ -161,8 +174,9 @@ public final class EntryStacks {
      * @param stack the stack to hash code
      * @param <T>   the type of the stack
      * @return the hash code of the {@link ComparisonContext#FUZZY} context
+     * @see #hash(EntryStack, ComparisonContext)
      */
     public static <T> long hashFuzzy(EntryStack<T> stack) {
-        return stack.getDefinition().hash(stack, stack.getValue(), ComparisonContext.FUZZY);
+        return hash(stack, ComparisonContext.FUZZY);
     }
 }

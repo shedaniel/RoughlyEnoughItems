@@ -29,7 +29,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.jeicompat.JEIFocus;
+import me.shedaniel.rei.jeicompat.wrap.JEIFocus;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.advanced.IRecipeManagerPlugin;

@@ -25,10 +25,15 @@ package me.shedaniel.rei.jeicompat.wrap;
 
 import com.google.common.collect.ImmutableList;
 import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import mezz.jei.api.runtime.IIngredientFilter;
 import org.jetbrains.annotations.NotNull;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
+import java.util.List;
+
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
 
 public enum JEIIngredientFilter implements IIngredientFilter {
     INSTANCE;
@@ -47,6 +52,12 @@ public enum JEIIngredientFilter implements IIngredientFilter {
     @Override
     @NotNull
     public ImmutableList<Object> getFilteredIngredients() {
-        throw TODO();
+        List<EntryStack<?>> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
+        Object[] filtered = new Object[filteredStacks.size()];
+        int i = 0;
+        for (EntryStack<?> stack : filteredStacks) {
+            filtered[i++] = unwrap(stack);
+        }
+        return ImmutableList.copyOf(filtered);
     }
 }

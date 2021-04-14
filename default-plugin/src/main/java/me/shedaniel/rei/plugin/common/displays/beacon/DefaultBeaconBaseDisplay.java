@@ -26,13 +26,10 @@ package me.shedaniel.rei.plugin.common.displays.beacon;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-@Environment(EnvType.CLIENT)
 public class DefaultBeaconBaseDisplay extends DefaultBeaconDisplay {
     public DefaultBeaconBaseDisplay(List<ItemStack> entries) {
         super(entries);

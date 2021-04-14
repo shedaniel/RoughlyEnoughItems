@@ -26,8 +26,6 @@ package me.shedaniel.rei.plugin.common.displays.crafting;
 import com.google.common.collect.ImmutableList;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 
@@ -35,7 +33,6 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
 public class DefaultCustomDisplay extends DefaultCraftingDisplay {
     private List<EntryIngredient> input;
     private List<EntryIngredient> output;

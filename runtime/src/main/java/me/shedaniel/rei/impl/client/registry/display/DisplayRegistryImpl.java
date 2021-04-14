@@ -65,7 +65,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     }
     
     @Override
-    public void registerDisplay(Display display) {
+    public void add(Display display) {
         displays.computeIfAbsent(display.getCategoryIdentifier(), location -> new ArrayList<>())
                 .add(display);
         displayCount.increment();
@@ -78,7 +78,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     }
     
     @Override
-    public Map<CategoryIdentifier<?>, List<Display>> getAllDisplays() {
+    public Map<CategoryIdentifier<?>, List<Display>> getAll() {
         return Collections.unmodifiableMap(displays);
     }
     

@@ -73,13 +73,13 @@ public enum JEIRecipeRegistration implements IRecipeRegistration {
         DisplayCategory<?> category = config.getCategory();
         if (category instanceof JEIWrappedCategory) {
             for (Object recipe : recipes) {
-                DisplayRegistry.getInstance().registerDisplay(new JEIWrappedDisplay<>((JEIWrappedCategory) config.getCategory(), recipe));
+                DisplayRegistry.getInstance().add(new JEIWrappedDisplay<>((JEIWrappedCategory) config.getCategory(), recipe));
             }
         } else {
             for (Object recipe : recipes) {
                 Collection<Display> displays = createDisplayFrom(recipe);
                 for (Display display : displays) {
-                    DisplayRegistry.getInstance().registerDisplay(display);
+                    DisplayRegistry.getInstance().add(display);
                 }
             }
         }

@@ -67,7 +67,7 @@ public class CategoryRegistryImpl implements CategoryRegistry {
     }
     
     @Override
-    public <T extends Display> void register(DisplayCategory<T> category, Consumer<CategoryConfiguration<T>> configurator) {
+    public <T extends Display> void add(DisplayCategory<T> category, Consumer<CategoryConfiguration<T>> configurator) {
         Configuration<T> configuration = new Configuration<>(category);
         this.categories.put(category.getCategoryIdentifier(), configuration);
         configurator.accept(configuration);

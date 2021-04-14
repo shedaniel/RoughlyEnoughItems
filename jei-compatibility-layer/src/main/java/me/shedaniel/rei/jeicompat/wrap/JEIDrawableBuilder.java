@@ -21,12 +21,13 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat;
+package me.shedaniel.rei.jeicompat.wrap;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.forge.api.PointHelper;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.jeicompat.wrap.JEIGuiHelper;
 import mezz.jei.api.gui.ITickTimer;
 import mezz.jei.api.gui.drawable.IDrawableAnimated;
 import mezz.jei.api.gui.drawable.IDrawableBuilder;
@@ -36,7 +37,7 @@ import org.jetbrains.annotations.NotNull;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 
-public class DrawableBuilder implements IDrawableBuilder {
+public class JEIDrawableBuilder implements IDrawableBuilder {
     private ResourceLocation texture;
     private int u;
     private int v;
@@ -49,7 +50,7 @@ public class DrawableBuilder implements IDrawableBuilder {
     private int paddingLeft;
     private int paddingRight;
     
-    public DrawableBuilder(ResourceLocation texture, int u, int v, int width, int height) {
+    public JEIDrawableBuilder(ResourceLocation texture, int u, int v, int width, int height) {
         this.texture = texture;
         this.u = u;
         this.v = v;

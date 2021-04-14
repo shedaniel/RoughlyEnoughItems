@@ -35,7 +35,7 @@ public enum JEIJeiRuntime implements IJeiRuntime {
     @Override
     @NotNull
     public IRecipeManager getRecipeManager() {
-        throw TODO();
+        return JEIRecipeManager.INSTANCE;
     }
     
     @Override

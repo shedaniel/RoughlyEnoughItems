@@ -21,9 +21,8 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat;
+package me.shedaniel.rei.jeicompat.wrap;
 
-import ca.weblite.objc.Client;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import me.shedaniel.math.Rectangle;
@@ -36,6 +35,7 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupFluid;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupItem;
+import me.shedaniel.rei.jeicompat.wrap.JEIFocus;
 import me.shedaniel.rei.jeicompat.wrap.JEIWrappedCategory;
 import me.shedaniel.rei.jeicompat.wrap.JEIWrappedDisplay;
 import mezz.jei.api.constants.VanillaTypes;

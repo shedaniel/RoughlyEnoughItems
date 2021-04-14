@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
+import me.shedaniel.rei.jeicompat.unwrap.JEIIngredientHelper;
 import me.shedaniel.rei.jeicompat.unwrap.JEIIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
@@ -62,13 +63,13 @@ public enum JEIIngredientManager implements IIngredientManager {
     @Override
     @NotNull
     public <V> IIngredientHelper<V> getIngredientHelper(@NotNull V ingredient) {
-        throw TODO();
+        return new JEIIngredientHelper<>(findEntryDefinition(ingredient).cast());
     }
     
     @Override
     @NotNull
     public <V> IIngredientHelper<V> getIngredientHelper(@NotNull IIngredientType<V> ingredientType) {
-        throw TODO();
+        return new JEIIngredientHelper<>(findEntryDefinition(ingredientType).cast());
     }
     
     @Override

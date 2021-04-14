@@ -25,8 +25,6 @@ package me.shedaniel.rei.plugin.common.displays.crafting;
 
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.ShapedRecipe;
@@ -35,7 +33,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
 public class DefaultShapedDisplay extends DefaultCraftingDisplay {
     private ShapedRecipe display;
     private List<EntryIngredient> input;

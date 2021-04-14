@@ -58,8 +58,8 @@ public interface CategoryRegistry extends Reloadable<REIClientPlugin>, Iterable<
      *
      * @param category the category to register
      */
-    default <T extends Display> void register(DisplayCategory<T> category) {
-        register(category, config -> {});
+    default <T extends Display> void add(DisplayCategory<T> category) {
+        add(category, config -> {});
     }
     
     /**
@@ -68,16 +68,16 @@ public interface CategoryRegistry extends Reloadable<REIClientPlugin>, Iterable<
      * @param category     the category to register
      * @param configurator the consumer for configuring the attributes of the category
      */
-    <T extends Display> void register(DisplayCategory<T> category, Consumer<CategoryConfiguration<T>> configurator);
+    <T extends Display> void add(DisplayCategory<T> category, Consumer<CategoryConfiguration<T>> configurator);
     
     /**
      * Registers the categories supplied.
      *
      * @param categories the categories to register
      */
-    default <T extends Display> void register(Iterable<DisplayCategory<? extends T>> categories) {
+    default <T extends Display> void add(Iterable<DisplayCategory<? extends T>> categories) {
         for (DisplayCategory<?> category : categories) {
-            register(category);
+            add(category);
         }
     }
     
@@ -86,9 +86,9 @@ public interface CategoryRegistry extends Reloadable<REIClientPlugin>, Iterable<
      *
      * @param categories the categories to register
      */
-    default <T extends Display> void register(DisplayCategory<? extends T>... categories) {
+    default <T extends Display> void add(DisplayCategory<? extends T>... categories) {
         for (DisplayCategory<?> category : categories) {
-            register(category);
+            add(category);
         }
     }
     

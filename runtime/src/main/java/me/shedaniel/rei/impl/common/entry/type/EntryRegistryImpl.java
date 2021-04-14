@@ -87,6 +87,7 @@ public class EntryRegistryImpl implements EntryRegistry {
         entries.clear();
         entries.addAll(CollectionUtils.map(reloadingRegistry, HashedEntryStackWrapper::unwrap));
         reloadingRegistry = null;
+        refilter();
     }
     
     @Override
