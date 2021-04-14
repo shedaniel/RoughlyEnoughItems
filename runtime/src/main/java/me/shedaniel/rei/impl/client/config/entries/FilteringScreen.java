@@ -234,7 +234,7 @@ public class FilteringScreen extends Screen {
         }
         manager.render(matrices, mouseX, mouseY, delta);
         updatePosition(delta);
-        scrolling.renderScrollBar(0xff000000, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+        scrolling.renderScrollBar(0, 1.0F, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8F : 1F);
         matrices.pushPose();
         matrices.translate(0, 0, 300);
         this.searchField.laterRender(matrices, mouseX, mouseY, delta);
