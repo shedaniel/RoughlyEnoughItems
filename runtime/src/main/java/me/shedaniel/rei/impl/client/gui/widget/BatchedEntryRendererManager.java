@@ -63,17 +63,21 @@ public class BatchedEntryRendererManager {
     }
     
     public void add(EntryWidget widget) {
-        if (fastEntryRendering && false) {
+        if (fastEntryRendering) {
             EntryStack<?> currentEntry = widget.getCurrentEntry();
             EntryRenderer<?> renderer = currentEntry.getRenderer();
             if (renderer instanceof BatchedEntryRenderer) {
-                int hash = ((BatchedEntryRenderer<Object>) renderer).getBatchIdentifier(currentEntry.cast(), widget.getBounds());
-                List<EntryWidget> entries = grouping.get(hash);
-                if (entries == null) {
-                    grouping.put(hash, entries = new ArrayList<>());
+                BatchedEntryRenderer<Object, Object> batchedRenderer = (BatchedEntryRenderer<Object, Object>) renderer;
+                EntryStack<Object> cast = currentEntry.cast();
+                if (batchedRenderer.isBatched(cast)) {
+                    int hash = batchedRenderer.getBatchIdentifier(cast, widget.getBounds(), batchedRenderer.getExtraData(cast));
+                    List<EntryWidget> entries = grouping.get(hash);
+                    if (entries == null) {
+                        grouping.put(hash, entries = new ArrayList<>());
+                    }
+                    entries.add(widget);
+                    return;
                 }
-                entries.add(widget);
-                return;
             }
         }
         toRender.add(widget);
@@ -90,55 +94,76 @@ public class BatchedEntryRendererManager {
             }
         }
         if (!toRender.isEmpty()) {
-            renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, toRender);
+            renderSlow(debugTime, size, time, matrices, mouseX, mouseY, delta, toRender);
         }
     }
     
+    public static <T extends EntryWidget> void renderEntries(boolean debugTime, MutableInt size, MutableLong time, boolean fastEntryRendering, PoseStack matrices, int mouseX, int mouseY, float delta, Collection<T> entries) {
+        if (fastEntryRendering) {
+            T firstWidget = Iterables.getFirst(entries, null);
+            if (firstWidget == null) return;
+            EntryRenderer<?> renderer = firstWidget.getCurrentEntry().getRenderer();
+            if (renderer instanceof BatchedEntryRenderer) {
+                BatchedEntryRenderer<?, Object> firstRenderer = (BatchedEntryRenderer<?, Object>) renderer;
+                Object[] extraData = new Object[entries.size()];
+                int i = 0;
+                for (T entry : entries) {
+                    EntryStack<?> currentEntry = entry.getCurrentEntry();
+                    extraData[i++] = ((BatchedEntryRenderer<Object, Object>) currentEntry.getRenderer()).getExtraData(currentEntry.cast());
+                }
+                renderBatched(debugTime, size, time, matrices, mouseX, mouseY, delta, entries, extraData);
+                return;
+            }
+        }
+        renderSlow(debugTime, size, time, matrices, mouseX, mouseY, delta, entries);
+    }
     
-    public static <T extends EntryWidget> void renderEntries(boolean debugTime, MutableInt size, MutableLong time, boolean fastEntryRendering, PoseStack matrices, int mouseX, int mouseY, float delta, Iterable<T> entries) {
+    private static <T extends EntryWidget> void renderBatched(boolean debugTime, MutableInt size, MutableLong time, PoseStack matrices, int mouseX, int mouseY, float delta, Iterable<T> entries, Object[] extraData) {
         T firstWidget = Iterables.getFirst(entries, null);
         if (firstWidget == null) return;
         @SuppressWarnings("rawtypes")
         EntryStack first = firstWidget.getCurrentEntry();
         EntryRenderer<?> renderer = first.getRenderer();
-        if (fastEntryRendering && renderer instanceof BatchedEntryRenderer) {
-            BatchedEntryRenderer<?> firstRenderer = (BatchedEntryRenderer<?>) renderer;
-            matrices = firstRenderer.batchModifyMatrices(matrices);
-            firstRenderer.startBatch(first, matrices, delta);
-            long l = debugTime ? System.nanoTime() : 0;
-            MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-            for (T listEntry : entries) {
-                @SuppressWarnings("rawtypes")
-                EntryStack currentEntry = listEntry.getCurrentEntry();
-                currentEntry.setZ(100);
-                listEntry.drawBackground(matrices, mouseX, mouseY, delta);
-                firstRenderer.renderBase(currentEntry, matrices, immediate, listEntry.getInnerBounds(), mouseX, mouseY, delta);
-                if (debugTime && !currentEntry.isEmpty()) size.increment();
+        BatchedEntryRenderer<?, Object> firstRenderer = (BatchedEntryRenderer<?, Object>) renderer;
+        matrices = firstRenderer.batchModifyMatrices(matrices);
+        firstRenderer.startBatch(first, extraData[0], matrices, delta);
+        long l = debugTime ? System.nanoTime() : 0;
+        MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
+        int i = 0;
+        for (T listEntry : entries) {
+            @SuppressWarnings("rawtypes")
+            EntryStack currentEntry = listEntry.getCurrentEntry();
+            currentEntry.setZ(100);
+            listEntry.drawBackground(matrices, mouseX, mouseY, delta);
+            firstRenderer.renderBase(currentEntry, extraData[i++], matrices, immediate, listEntry.getInnerBounds(), mouseX, mouseY, delta);
+            if (debugTime && !currentEntry.isEmpty()) size.increment();
+        }
+        immediate.endBatch();
+        i = 0;
+        for (T listEntry : entries) {
+            @SuppressWarnings("rawtypes")
+            EntryStack currentEntry = listEntry.getCurrentEntry();
+            firstRenderer.renderOverlay(currentEntry, extraData[i++], matrices, immediate, listEntry.getInnerBounds(), mouseX, mouseY, delta);
+            if (listEntry.containsMouse(mouseX, mouseY)) {
+                listEntry.queueTooltip(matrices, mouseX, mouseY, delta);
+                listEntry.drawHighlighted(matrices, mouseX, mouseY, delta);
             }
-            immediate.endBatch();
-            for (T listEntry : entries) {
-                @SuppressWarnings("rawtypes")
-                EntryStack currentEntry = listEntry.getCurrentEntry();
-                firstRenderer.renderOverlay(currentEntry, matrices, immediate, listEntry.getInnerBounds(), mouseX, mouseY, delta);
-                if (listEntry.containsMouse(mouseX, mouseY)) {
-                    listEntry.queueTooltip(matrices, mouseX, mouseY, delta);
-                    listEntry.drawHighlighted(matrices, mouseX, mouseY, delta);
-                }
-            }
-            immediate.endBatch();
-            if (debugTime) time.add(System.nanoTime() - l);
-            firstRenderer.endBatch(first, matrices, delta);
-        } else {
-            for (T entry : entries) {
-                if (entry.getCurrentEntry().isEmpty())
-                    continue;
-                if (debugTime) {
-                    size.increment();
-                    long l = System.nanoTime();
-                    entry.render(matrices, mouseX, mouseY, delta);
-                    time.add(System.nanoTime() - l);
-                } else entry.render(matrices, mouseX, mouseY, delta);
-            }
+        }
+        immediate.endBatch();
+        if (debugTime) time.add(System.nanoTime() - l);
+        firstRenderer.endBatch(first, extraData[0], matrices, delta);
+    }
+    
+    private static <T extends EntryWidget> void renderSlow(boolean debugTime, MutableInt size, MutableLong time, PoseStack matrices, int mouseX, int mouseY, float delta, Iterable<T> entries) {
+        for (T entry : entries) {
+            if (entry.getCurrentEntry().isEmpty())
+                continue;
+            if (debugTime) {
+                size.increment();
+                long l = System.nanoTime();
+                entry.render(matrices, mouseX, mouseY, delta);
+                time.add(System.nanoTime() - l);
+            } else entry.render(matrices, mouseX, mouseY, delta);
         }
     }
 }

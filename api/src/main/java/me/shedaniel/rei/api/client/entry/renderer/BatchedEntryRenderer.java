@@ -29,16 +29,35 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 
-public interface BatchedEntryRenderer<T> extends EntryRenderer<T> {
+/**
+ * A batched renderer for rendering a lot of {@link EntryStack} at once with better performance.
+ *
+ * @param <T> the entry type
+ * @param <E> the type of extra data returned in {@link #getExtraData(EntryStack)}
+ */
+public interface BatchedEntryRenderer<T, E> extends EntryRenderer<T> {
+    default boolean isBatched(EntryStack<T> entry) {
+        return true;
+    }
+    
+    /**
+     * Returns extra data to be passed to various rendering methods.
+     *
+     * @param entry the stack
+     * @return the extra data
+     */
+    E getExtraData(EntryStack<T> entry);
+    
     /**
      * Returns a batch identifier, stacks with the same batch identifier will be grouped together
      * into a batch.
      *
-     * @param entry  the stack
-     * @param bounds the bounds of the entry
+     * @param entry     the stack
+     * @param bounds    the bounds of the entry
+     * @param extraData the extra data returned from {@link #getExtraData(EntryStack)}
      * @return the batch identifier
      */
-    default int getBatchIdentifier(EntryStack<T> entry, Rectangle bounds) {
+    default int getBatchIdentifier(EntryStack<T> entry, Rectangle bounds, E extraData) {
         return getClass().hashCode();
     }
     
@@ -55,34 +74,37 @@ public interface BatchedEntryRenderer<T> extends EntryRenderer<T> {
     /**
      * Starts the batch rendering, used to setup states, only called once with every batch.
      *
-     * @param entry    the first entry in the batch
-     * @param matrices the matrix stack
-     * @param delta    the tick delta
+     * @param entry     the first entry in the batch
+     * @param extraData the extra data returned from {@link #getExtraData(EntryStack)}
+     * @param matrices  the matrix stack
+     * @param delta     the tick delta
      */
-    void startBatch(EntryStack<T> entry, PoseStack matrices, float delta);
+    void startBatch(EntryStack<T> entry, E extraData, PoseStack matrices, float delta);
     
-    void renderBase(EntryStack<T> entry, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta);
+    void renderBase(EntryStack<T> entry, E extraData, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta);
     
-    void renderOverlay(EntryStack<T> entry, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta);
+    void renderOverlay(EntryStack<T> entry, E extraData, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta);
     
     /**
      * Ends the batch rendering, used to setup states, only called once with every batch.
      *
-     * @param entry    the first entry in the batch
-     * @param matrices the matrix stack
-     * @param delta    the tick delta
+     * @param entry     the first entry in the batch
+     * @param extraData the extra data returned from {@link #getExtraData(EntryStack)}
+     * @param matrices  the matrix stack
+     * @param delta     the tick delta
      */
-    void endBatch(EntryStack<T> entry, PoseStack matrices, float delta);
+    void endBatch(EntryStack<T> entry, E extraData, PoseStack matrices, float delta);
     
     @Override
     default void render(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         matrices = batchModifyMatrices(matrices);
-        startBatch(entry, matrices, delta);
+        E data = getExtraData(entry);
+        startBatch(entry, data, matrices, delta);
         MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-        renderBase(entry, matrices, immediate, bounds, mouseX, mouseY, delta);
+        renderBase(entry, data, matrices, immediate, bounds, mouseX, mouseY, delta);
         immediate.endBatch();
-        renderOverlay(entry, matrices, immediate, bounds, mouseX, mouseY, delta);
+        renderOverlay(entry, data, matrices, immediate, bounds, mouseX, mouseY, delta);
         immediate.endBatch();
-        endBatch(entry, matrices, delta);
+        endBatch(entry, data, matrices, delta);
     }
 }
