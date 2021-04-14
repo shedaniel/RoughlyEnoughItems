@@ -196,18 +196,21 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     
     @SuppressWarnings("deprecation")
     @Environment(EnvType.CLIENT)
-    public class ItemEntryRenderer extends AbstractEntryRenderer<ItemStack> implements BatchedEntryRenderer<ItemStack> {
-        @Override
-        public int getBatchIdentifier(EntryStack<ItemStack> entry, Rectangle bounds) {
-            return 1738923 + (getModelFromStack(entry.getValue()).usesBlockLight() ? 1 : 0);
-        }
+    public class ItemEntryRenderer extends AbstractEntryRenderer<ItemStack> implements BatchedEntryRenderer<ItemStack, BakedModel> {
+        public static final int ITEM_LIGHT = 0xf000f0;
         
-        private BakedModel getModelFromStack(ItemStack stack) {
-            return Minecraft.getInstance().getItemRenderer().getModel(stack, null, null);
+        @Override
+        public BakedModel getExtraData(EntryStack<ItemStack> entry) {
+            return Minecraft.getInstance().getItemRenderer().getModel(entry.getValue(), null, null);
         }
         
         @Override
-        public void startBatch(EntryStack<ItemStack> entry, PoseStack matrices, float delta) {
+        public int getBatchIdentifier(EntryStack<ItemStack> entry, Rectangle bounds, BakedModel model) {
+            return 1738923 + (model.usesBlockLight() ? 1 : 0);
+        }
+        
+        @Override
+        public void startBatch(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, float delta) {
             Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
             Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
             RenderSystem.pushMatrix();
@@ -217,25 +220,25 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            boolean sideLit = getModelFromStack(entry.getValue()).usesBlockLight();
+            boolean sideLit = model.usesBlockLight();
             if (!sideLit)
                 Lighting.setupForFlatItems();
         }
         
         @Override
-        public void renderBase(EntryStack<ItemStack> entry, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        public void renderBase(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
             if (!entry.isEmpty()) {
                 ItemStack stack = entry.getValue();
                 matrices.pushPose();
                 matrices.translate(bounds.getCenterX(), bounds.getCenterY(), 100.0F + entry.getZ());
                 matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, bounds.getHeight());
-                Minecraft.getInstance().getItemRenderer().render(stack, ItemTransforms.TransformType.GUI, false, matrices, immediate, 15728880, OverlayTexture.NO_OVERLAY, getModelFromStack(stack));
+                Minecraft.getInstance().getItemRenderer().render(stack, ItemTransforms.TransformType.GUI, false, matrices, immediate, ITEM_LIGHT, OverlayTexture.NO_OVERLAY, model);
                 matrices.popPose();
             }
         }
         
         @Override
-        public void renderOverlay(EntryStack<ItemStack> entry, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        public void renderOverlay(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
             if (!entry.isEmpty()) {
                 Minecraft.getInstance().getItemRenderer().blitOffset = entry.getZ();
                 Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, entry.getValue(), bounds.x, bounds.y, null);
@@ -244,11 +247,11 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         }
         
         @Override
-        public void endBatch(EntryStack<ItemStack> entry, PoseStack matrices, float delta) {
+        public void endBatch(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, float delta) {
             RenderSystem.enableDepthTest();
             RenderSystem.disableAlphaTest();
             RenderSystem.disableRescaleNormal();
-            boolean sideLit = getModelFromStack(entry.getValue()).usesBlockLight();
+            boolean sideLit = model.usesBlockLight();
             if (!sideLit)
                 Lighting.setupFor3DItems();
             RenderSystem.popMatrix();
