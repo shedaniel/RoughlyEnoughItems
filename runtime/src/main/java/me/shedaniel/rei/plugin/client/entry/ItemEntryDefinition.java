@@ -30,6 +30,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
+import me.shedaniel.architectury.utils.Env;
+import me.shedaniel.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.AbstractEntryRenderer;
@@ -44,6 +46,8 @@ import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -67,7 +71,12 @@ import java.util.Collections;
 import java.util.List;
 
 public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySerializer<ItemStack> {
-    private final EntryRenderer<ItemStack> renderer = new ItemEntryRenderer();
+    @Environment(EnvType.CLIENT)
+    private EntryRenderer<ItemStack> renderer;
+    
+    public ItemEntryDefinition() {
+        EnvExecutor.runInEnv(Env.CLIENT, () -> () -> renderer = new ItemEntryRenderer());
+    }
     
     @Override
     public Class<ItemStack> getValueType() {
@@ -80,6 +89,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     }
     
     @Override
+    @Environment(EnvType.CLIENT)
     public EntryRenderer<ItemStack> getRenderer() {
         return renderer;
     }
@@ -184,6 +194,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         return Lists.newArrayList(asFormattedText(entry, value));
     }
     
+    @Environment(EnvType.CLIENT)
     public class ItemEntryRenderer extends AbstractEntryRenderer<ItemStack> implements BatchedEntryRenderer<ItemStack, BakedModel> {
         private static final float SCALE = 20.0F;
         public static final int ITEM_LIGHT = 0xf000f0;
@@ -191,11 +202,6 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         @Override
         public BakedModel getExtraData(EntryStack<ItemStack> entry) {
             return Minecraft.getInstance().getItemRenderer().getModel(entry.getValue(), null, null, 0);
-        }
-        
-        @Override
-        public int getBatchIdentifier(EntryStack<ItemStack> entry, Rectangle bounds, BakedModel model) {
-            return 1738923 + (model.usesBlockLight() ? 1 : 0);
         }
         
         @Override
@@ -223,6 +229,11 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
             renderOverlay(entry, bounds);
             endGL(entry, model);
             RenderSystem.applyModelViewMatrix();
+        }
+        
+        @Override
+        public int getBatchIdentifier(EntryStack<ItemStack> entry, Rectangle bounds, BakedModel model) {
+            return 1738923 + (model.usesBlockLight() ? 1 : 0);
         }
         
         @Override

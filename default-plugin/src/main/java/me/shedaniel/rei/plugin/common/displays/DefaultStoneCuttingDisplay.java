@@ -28,8 +28,6 @@ import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 
@@ -37,7 +35,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
 public class DefaultStoneCuttingDisplay extends BasicDisplay {
     public DefaultStoneCuttingDisplay(StonecutterRecipe recipe) {
         this(EntryIngredients.ofIngredients(recipe.getIngredients()), Collections.singletonList(EntryIngredients.of(recipe.getResultItem())),

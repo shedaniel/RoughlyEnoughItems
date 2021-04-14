@@ -31,8 +31,6 @@ import me.shedaniel.rei.api.common.display.DisplaySerializer;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -41,7 +39,6 @@ import net.minecraft.network.chat.Component;
 
 import java.util.*;
 
-@Environment(EnvType.CLIENT)
 public class DefaultInformationDisplay implements Display {
     private EntryIngredient entryStacks;
     private List<Component> texts;

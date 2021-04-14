@@ -29,6 +29,7 @@ import me.shedaniel.architectury.event.events.RecipeUpdateEvent;
 import me.shedaniel.architectury.event.events.client.ClientScreenInputEvent;
 import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.registry.ReloadListeners;
 import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIHelper;
@@ -111,6 +112,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.CraftingMenu;
@@ -137,14 +139,19 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ApiStatus.Internal
-@Environment(EnvType.CLIENT)
 public class RoughlyEnoughItemsCore {
-    @ApiStatus.Internal public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
-    private static final ExecutorService SYNC_RECIPES = Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "REI-SyncRecipes"));
+    @ApiStatus.Internal
+    public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
+    private static final ExecutorService RELOAD_PLUGINS;
     @ApiStatus.Experimental
     public static boolean isLeftMousePressed = false;
     
     static {
+        RELOAD_PLUGINS = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread thread = new Thread(r, "REI-ReloadPlugins");
+            thread.setDaemon(true);
+            return thread;
+        });
         attachCommonInternals();
         if (Platform.getEnvironment() == Env.CLIENT) {
             attachClientInternals();
@@ -255,7 +262,8 @@ public class RoughlyEnoughItemsCore {
     @Environment(EnvType.CLIENT)
     public static void attachClientInternals() {
         InternalWidgets.attach();
-        ClientInternals.attachInstance((Supplier<EntryRenderer<?>>) () -> EmptyEntryDefinition.EmptyRenderer.INSTANCE, "emptyEntryRenderer");
+        EmptyEntryDefinition.EmptyRenderer emptyEntryRenderer = new EmptyEntryDefinition.EmptyRenderer();
+        ClientInternals.attachInstance((Supplier<EntryRenderer<?>>) () -> emptyEntryRenderer, "emptyEntryRenderer");
         ClientInternals.attachInstance((BiFunction<Supplier<FavoriteEntry>, Supplier<CompoundTag>, FavoriteEntry>) (supplier, toJson) -> new FavoriteEntry() {
             FavoriteEntry value = null;
             
@@ -383,6 +391,7 @@ public class RoughlyEnoughItemsCore {
     }
     
     @ApiStatus.Internal
+    @Environment(EnvType.CLIENT)
     public static void reloadPlugins(MutableLong lastReload) {
         if (lastReload != null) {
             if (lastReload.getValue() > 0 && System.currentTimeMillis() - lastReload.getValue() <= 5000) {
@@ -392,7 +401,7 @@ public class RoughlyEnoughItemsCore {
             lastReload.setValue(System.currentTimeMillis());
         }
         if (ConfigObject.getInstance().doesRegisterRecipesInAnotherThread()) {
-            CompletableFuture.runAsync(RoughlyEnoughItemsCore::_reloadPlugins, SYNC_RECIPES);
+            CompletableFuture.runAsync(RoughlyEnoughItemsCore::_reloadPlugins, RELOAD_PLUGINS);
         } else {
             _reloadPlugins();
         }
@@ -408,12 +417,21 @@ public class RoughlyEnoughItemsCore {
         PluginDetector.detectCommonPlugins();
         PluginDetector.detectServerPlugins();
         RoughlyEnoughItemsNetwork.onInitialize();
+        
+        if (Platform.getEnvironment() == Env.SERVER) {
+            MutableLong lastReload = new MutableLong(-1);
+            ReloadListeners.registerReloadListener(PackType.SERVER_DATA, (preparationBarrier, resourceManager, profilerFiller, profilerFiller2, executor, executor2) -> {
+                return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(() -> {
+                    CompletableFuture.runAsync(RoughlyEnoughItemsCore::_reloadPlugins, RELOAD_PLUGINS);
+                }, executor2);
+            });
+        }
     }
     
     @Environment(EnvType.CLIENT)
     public void onInitializeClient() {
         IssuesDetector.detect();
-        registerClothEvents();
+        registerEvents();
         PluginDetector.detectClientPlugins();
         loadTestPlugins();
         
@@ -489,7 +507,7 @@ public class RoughlyEnoughItemsCore {
     }
     
     @Environment(EnvType.CLIENT)
-    private void registerClothEvents() {
+    private void registerEvents() {
         Minecraft client = Minecraft.getInstance();
         final ResourceLocation recipeButtonTex = new ResourceLocation("textures/gui/recipe_button.png");
         MutableLong lastReload = new MutableLong(-1);

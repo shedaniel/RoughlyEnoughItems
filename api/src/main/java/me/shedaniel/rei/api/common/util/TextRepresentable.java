@@ -23,11 +23,11 @@
 
 package me.shedaniel.rei.api.common.util;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 
-@Environment(EnvType.CLIENT)
+/**
+ * A component that can be represented in {@link Component}.
+ */
 public interface TextRepresentable {
     default Component asFormattedText() {
         return ImmutableTextComponent.EMPTY;

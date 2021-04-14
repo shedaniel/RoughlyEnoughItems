@@ -26,14 +26,11 @@ package me.shedaniel.rei.plugin.common.displays.cooking;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.crafting.BlastingRecipe;
 
 import java.util.List;
 
-@Environment(EnvType.CLIENT)
 public class DefaultBlastingDisplay extends DefaultCookingDisplay {
     public DefaultBlastingDisplay(BlastingRecipe recipe) {
         super(recipe);

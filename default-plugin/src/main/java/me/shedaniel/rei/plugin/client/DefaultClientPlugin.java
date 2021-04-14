@@ -110,12 +110,12 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerBrewingRecipe(Ingredient input, Ingredient ingredient, ItemStack output) {
-        DisplayRegistry.getInstance().registerDisplay(new DefaultBrewingDisplay(new BrewingRecipe(input, ingredient, output)));
+        DisplayRegistry.getInstance().add(new DefaultBrewingDisplay(new BrewingRecipe(input, ingredient, output)));
     }
     
     @Override
     public void registerInformation(EntryIngredient ingredient, Component name, UnaryOperator<List<Component>> textBuilder) {
-        DisplayRegistry.getInstance().registerDisplay(DefaultInformationDisplay.createFromEntries(ingredient, name).lines(textBuilder.apply(Lists.newArrayList())));
+        DisplayRegistry.getInstance().add(DefaultInformationDisplay.createFromEntries(ingredient, name).lines(textBuilder.apply(Lists.newArrayList())));
     }
     
     @Override
@@ -137,7 +137,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerCategories(CategoryRegistry registry) {
-        registry.register(
+        registry.add(
                 new DefaultCraftingCategory(),
                 new DefaultCookingCategory(SMELTING, EntryStacks.of(Items.FURNACE), "category.rei.smelting"),
                 new DefaultCookingCategory(SMOKING, EntryStacks.of(Items.SMOKER), "category.rei.smoking"),
@@ -222,7 +222,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.registerFiller(UpgradeRecipe.class, DefaultSmithingDisplay::new);
         registry.registerFiller(BrewingRecipe.class, DefaultBrewingDisplay::new);
         for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.getFuel().entrySet()) {
-            registry.registerDisplay(new DefaultFuelDisplay(Collections.singletonList(EntryIngredients.of(entry.getKey())), Collections.emptyList(), entry.getValue()));
+            registry.add(new DefaultFuelDisplay(Collections.singletonList(EntryIngredients.of(entry.getKey())), Collections.emptyList(), entry.getValue()));
         }
         EntryIngredient arrowStack = EntryIngredient.of(EntryStacks.of(Items.ARROW));
         ReferenceSet<Potion> registeredPotions = new ReferenceOpenHashSet<>();
@@ -240,7 +240,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 PotionUtils.setPotion(outputStack, potion);
                 PotionUtils.setCustomEffects(outputStack, PotionUtils.getCustomEffects(itemStack));
                 EntryIngredient output = EntryIngredients.of(outputStack);
-                registry.registerDisplay(new DefaultCustomDisplay(null, input, Collections.singletonList(output)));
+                registry.add(new DefaultCustomDisplay(null, input, Collections.singletonList(output)));
             }
         });
         if (ComposterBlock.COMPOSTABLES.isEmpty()) {
@@ -250,19 +250,19 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         Iterator<List<Object2FloatMap.Entry<ItemLike>>> iterator = Iterators.partition(ComposterBlock.COMPOSTABLES.object2FloatEntrySet().stream().sorted(Map.Entry.comparingByValue()).iterator(), 48);
         while (iterator.hasNext()) {
             List<Object2FloatMap.Entry<ItemLike>> entries = iterator.next();
-            registry.registerDisplay(DefaultCompostingDisplay.of(entries, Collections.singletonList(EntryIngredients.of(new ItemStack(Items.BONE_MEAL))), page++));
+            registry.add(DefaultCompostingDisplay.of(entries, Collections.singletonList(EntryIngredients.of(new ItemStack(Items.BONE_MEAL))), page++));
         }
         DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
-            registry.registerDisplay(new DefaultStrippingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
+            registry.add(new DefaultStrippingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
         });
         DummyHoeItem.getTilledBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
-            registry.registerDisplay(new DefaultTillingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue().getBlock())));
+            registry.add(new DefaultTillingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue().getBlock())));
         });
         DummyShovelItem.getPathBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
-            registry.registerDisplay(new DefaultPathingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue().getBlock())));
+            registry.add(new DefaultPathingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue().getBlock())));
         });
-        registry.registerDisplay(new DefaultBeaconBaseDisplay(CollectionUtils.map(Lists.newArrayList(BlockTags.BEACON_BASE_BLOCKS.getValues()), ItemStack::new)));
-        registry.registerDisplay(new DefaultBeaconPaymentDisplay(CollectionUtils.map(Lists.newArrayList(ItemTags.BEACON_PAYMENT_ITEMS.getValues()), ItemStack::new)));
+        registry.add(new DefaultBeaconBaseDisplay(CollectionUtils.map(Lists.newArrayList(BlockTags.BEACON_BASE_BLOCKS.getValues()), ItemStack::new)));
+        registry.add(new DefaultBeaconPaymentDisplay(CollectionUtils.map(Lists.newArrayList(ItemTags.BEACON_PAYMENT_ITEMS.getValues()), ItemStack::new)));
         if (Platform.isFabric()) {
             Set<Potion> potions = Sets.newLinkedHashSet();
             for (Ingredient container : PotionBrewing.ALLOWED_CONTAINERS) {
