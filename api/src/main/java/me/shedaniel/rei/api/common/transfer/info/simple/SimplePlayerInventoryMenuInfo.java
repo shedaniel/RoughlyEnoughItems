@@ -25,10 +25,12 @@ package me.shedaniel.rei.api.common.transfer.info.simple;
 
 import com.google.common.base.MoreObjects;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.transfer.RecipeFinder;
+import me.shedaniel.rei.api.common.transfer.RecipeFinderPopulator;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
 import me.shedaniel.rei.api.common.transfer.info.clean.InputCleanHandler;
-import me.shedaniel.rei.api.common.transfer.info.stack.StackAccessor;
+import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
@@ -37,19 +39,33 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * A simple implementation of {@link MenuInfo} that provides {@link StackAccessor} by {@link Inventory} of the player.
+ * A simple implementation of {@link MenuInfo} that provides {@link SlotAccessor} by {@link Inventory} of the player.
  * <p>
  * Provides default implementation for {@link SimplePlayerInventoryMenuInfo#getInputCleanHandler()}, which dumps slots from
- * {@link SimplePlayerInventoryMenuInfo#getInputStacks(MenuInfoContext)} to the {@link SimplePlayerInventoryMenuInfo#getDumpHandler()}.
+ * {@link SimplePlayerInventoryMenuInfo#getInputSlots(MenuInfoContext)} to the {@link SimplePlayerInventoryMenuInfo#getDumpHandler()}.
  *
  * @param <T> the type of the menu
  * @param <D> the type of display
  */
 public interface SimplePlayerInventoryMenuInfo<T extends AbstractContainerMenu, D extends Display> extends MenuInfo<T, D> {
+    default RecipeFinderPopulator<T, D> getRecipeFinderPopulator() {
+        return (context, finder) -> {
+            for (SlotAccessor inventoryStack : getInventorySlots(context)) {
+                finder.addNormalItem(inventoryStack.getItemStack());
+            }
+            populateRecipeFinder(context.getMenu(), finder);
+        };
+    }
+    
+    /**
+     * Returns a simple {@link InputCleanHandler} that returns any stacks on the grid back to the player's inventory.
+     *
+     * @return a simple implementation of {@link InputCleanHandler}
+     */
     default InputCleanHandler<T, D> getInputCleanHandler() {
         return context -> {
             T container = context.getMenu();
-            for (StackAccessor gridStack : getInputStacks(context)) {
+            for (SlotAccessor gridStack : getInputSlots(context)) {
                 InputCleanHandler.returnSlotsToPlayerInventory(context, getDumpHandler(), gridStack);
             }
             
@@ -59,9 +75,9 @@ public interface SimplePlayerInventoryMenuInfo<T extends AbstractContainerMenu, 
     
     default DumpHandler<T, D> getDumpHandler() {
         return (context, stackToDump) -> {
-            Iterable<StackAccessor> inventoryStacks = getInventoryStacks(context);
+            Iterable<SlotAccessor> inventoryStacks = getInventorySlots(context);
             
-            StackAccessor nextSlot = MoreObjects.firstNonNull(
+            SlotAccessor nextSlot = MoreObjects.firstNonNull(
                     DumpHandler.getOccupiedSlotWithRoomForStack(stackToDump, inventoryStacks),
                     DumpHandler.getEmptySlot(inventoryStacks)
             );
@@ -76,12 +92,20 @@ public interface SimplePlayerInventoryMenuInfo<T extends AbstractContainerMenu, 
         };
     }
     
-    default Iterable<StackAccessor> getInventoryStacks(MenuInfoContext<T, ?, D> context) {
+    default Iterable<SlotAccessor> getInventorySlots(MenuInfoContext<T, ?, D> context) {
         Inventory inventory = context.getPlayerEntity().inventory;
         return IntStream.range(0, inventory.items.size())
-                .mapToObj(index -> StackAccessor.fromContainer(inventory, index))
+                .mapToObj(index -> SlotAccessor.fromContainer(inventory, index))
                 .collect(Collectors.toList());
     }
     
+    default void populateRecipeFinder(T menu, RecipeFinder finder) {}
+    
+    /**
+     * Used to forcefully clear the input slots, if things did not dump to the player's inventory successfully.
+     * The default implementation here is to void the items, as with vanilla,
+     *
+     * @param menu the menu to clean
+     */
     default void clearInputSlots(T menu) {}
 }

@@ -23,6 +23,12 @@
 
 package me.shedaniel.rei.api.common.display;
 
+/**
+ * An display to be used alongside {@link me.shedaniel.rei.api.common.transfer.info.simple.SimpleGridMenuInfo},
+ * to provide a {@code width} and {@code height} for the grid of the recipe.
+ *
+ * @see me.shedaniel.rei.api.common.transfer.info.simple.SimpleGridMenuInfo
+ */
 public interface SimpleMenuDisplay extends Display {
     int getWidth();
     

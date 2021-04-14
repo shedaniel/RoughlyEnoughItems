@@ -25,7 +25,7 @@ package me.shedaniel.rei.api.common.transfer.info.simple;
 
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
-import me.shedaniel.rei.api.common.transfer.info.stack.StackAccessor;
+import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 
@@ -33,8 +33,8 @@ import net.minecraft.world.item.ItemStack;
 public interface DumpHandler<T extends AbstractContainerMenu, D extends Display> {
     boolean dump(MenuInfoContext<T, ?, D> context, ItemStack stackToDump);
     
-    static StackAccessor getOccupiedSlotWithRoomForStack(ItemStack stack, Iterable<StackAccessor> inventoryStacks) {
-        for (StackAccessor inventoryStack : inventoryStacks) {
+    static SlotAccessor getOccupiedSlotWithRoomForStack(ItemStack stack, Iterable<SlotAccessor> inventoryStacks) {
+        for (SlotAccessor inventoryStack : inventoryStacks) {
             if (canStackAddMore(inventoryStack.getItemStack(), stack)) {
                 return inventoryStack;
             }
@@ -43,8 +43,8 @@ public interface DumpHandler<T extends AbstractContainerMenu, D extends Display>
         return null;
     }
     
-    static StackAccessor getEmptySlot(Iterable<StackAccessor> inventoryStacks) {
-        for (StackAccessor inventoryStack : inventoryStacks) {
+    static SlotAccessor getEmptySlot(Iterable<SlotAccessor> inventoryStacks) {
+        for (SlotAccessor inventoryStack : inventoryStacks) {
             if (inventoryStack.getItemStack().isEmpty()) {
                 return inventoryStack;
             }

@@ -154,7 +154,7 @@ public class JEIPluginDetector {
         return wrapRecipes(CategoryRegistry.getInstance().get(id).getCategory(), DisplayRegistry.getInstance().get(id));
     }
     
-    public static <T> List<T> wrapRecipes(DisplayCategory<?> category, List<Display> displays) {
+    public static <A extends Display, T> List<T> wrapRecipes(DisplayCategory<?> category, List<A> displays) {
         boolean isWrappedCategory = category instanceof JEIWrappedCategory;
         if (isWrappedCategory) {
             return CollectionUtils.map(displays, display -> ((JEIWrappedDisplay<T>) display).getBackingRecipe());
