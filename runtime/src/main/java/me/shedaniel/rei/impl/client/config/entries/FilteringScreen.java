@@ -250,6 +250,7 @@ public class FilteringScreen extends Screen {
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 0, 1);
         RenderSystem.disableTexture();
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         Matrix4f matrix = matrices.last().pose();
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
         buffer.vertex(matrix, 0, bounds.y + 4, 0.0F).uv(0.0F, 1.0F).color(0, 0, 0, 0).endVertex();

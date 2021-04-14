@@ -28,6 +28,7 @@ import com.mojang.blaze3d.vertex.*;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.renderer.GameRenderer;
 
 public final class FillRectangleDrawableConsumer implements DrawableConsumer {
     private Rectangle rectangle;
@@ -47,14 +48,15 @@ public final class FillRectangleDrawableConsumer implements DrawableConsumer {
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tessellator.getBuilder();
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         bufferBuilder.vertex(rectangle.getMaxX(), rectangle.getMinY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
         bufferBuilder.vertex(rectangle.getMinX(), rectangle.getMinY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
         bufferBuilder.vertex(rectangle.getMinX(), rectangle.getMaxY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
         bufferBuilder.vertex(rectangle.getMaxX(), rectangle.getMaxY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
-        tessellator.end();
+        tesselator.end();
         RenderSystem.disableBlend();
         RenderSystem.enableTexture();
     }
