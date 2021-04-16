@@ -77,6 +77,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class JEIPluginDetector {
     private static final Renderer EMPTY_RENDERER = new Renderer() {
@@ -96,9 +97,10 @@ public class JEIPluginDetector {
         }
     };
     
-    public static void detect(BiConsumer<Class<?>, BiConsumer<List<String>, ?>> annotationScanner, Consumer<REIPluginProvider> pluginAdder) {
+    public static void detect(BiConsumer<Class<?>, BiConsumer<List<String>, Supplier<?>>> annotationScanner, Consumer<REIPluginProvider> pluginAdder) {
         annotationScanner.accept(JeiPlugin.class, (modIds, plugin) -> {
-            pluginAdder.accept(new JEIPluginProvider(new JEIPluginWrapper(modIds, (IModPlugin) plugin)));
+            Supplier<JEIPluginWrapper> value = () -> new JEIPluginWrapper(modIds, (IModPlugin) plugin.get());
+            pluginAdder.accept(new JEIPluginProvider(modIds, value));
         });
     }
     
@@ -260,21 +262,32 @@ public class JEIPluginDetector {
     }
     
     public static class JEIPluginProvider implements REIPluginProvider<REIClientPlugin> {
-        public final JEIPluginWrapper wrapper;
+        private final List<String> modIds;
+        public final Supplier<JEIPluginWrapper> supplier;
+        public JEIPluginWrapper wrapper;
         
-        public JEIPluginProvider(JEIPluginWrapper wrapper) {
-            this.wrapper = wrapper;
+        public JEIPluginProvider(List<String> modIds, Supplier<JEIPluginWrapper> supplier) {
+            this.modIds = modIds;
+            this.supplier = supplier;
         }
         
         @Override
         public String getPluginProviderName() {
-            return wrapper.getPluginName();
+            if (wrapper != null) {
+                return wrapper.getPluginName();
+            }
+            
+            return "JEI Plugin [" + String.join(", ", modIds) + "]";
         }
         
         @Override
         public Collection<REIClientPlugin> provide() {
             if (ConfigObject.getInstance().isJEICompatibilityLayerEnabled()) {
-                return Collections.singletonList(wrapper);
+                if (wrapper != null) {
+                    return Collections.singletonList(wrapper);
+                } else {
+                    return Collections.singletonList(wrapper = supplier.get());
+                }
             }
             
             return Collections.emptyList();
@@ -371,7 +384,7 @@ public class JEIPluginDetector {
         
         @Override
         public String getPluginName() {
-            return "JEI Plugin [" + backingPlugin.getPluginUid().toString() + "]";
+            return "JEI Plugin [" + backingPlugin.getPluginUid() + "]";
         }
     }
 }

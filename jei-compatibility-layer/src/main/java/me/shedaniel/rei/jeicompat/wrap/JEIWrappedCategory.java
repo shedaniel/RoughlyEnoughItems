@@ -24,6 +24,7 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.architectury.utils.Value;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -50,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.emptyRenderer;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapDrawable;
 
 public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<T>> {
@@ -141,8 +141,21 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
     public List<Widget> setupDisplay(JEIWrappedDisplay<T> display, Rectangle bounds) {
         List<Widget> widgets = new ArrayList<>();
         widgets.add(Widgets.createRecipeBase(bounds));
+        IDrawable[] background = {this.background.get()};
+        JEIRecipeLayout<T> layout = new JEIRecipeLayout<>(this, display, new Value<IDrawable>() {
+            @Override
+            public void accept(IDrawable iDrawable) {
+                background[0] = iDrawable;
+            }
+            
+            @Override
+            public IDrawable get() {
+                return background[0];
+            }
+        });
+        backingCategory.setRecipe(layout, display.getBackingRecipe(), display.getIngredients());
         widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            this.background.get().draw(matrices, bounds.x + 4, bounds.y + 4);
+            background[0].draw(matrices, bounds.x + 4, bounds.y + 4);
         }));
         widgets.add(new Widget() {
             @Override
@@ -182,8 +195,6 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
                 return backingCategory.handleClick(display.getBackingRecipe(), d - bounds.x, e - bounds.y, i) || super.mouseClicked(d, e, i);
             }
         });
-        JEIRecipeLayout<T> layout = new JEIRecipeLayout<>(this, display);
-        backingCategory.setRecipe(layout, display.getBackingRecipe(), display.getIngredients());
         layout.addTo(widgets, bounds);
         return widgets;
     }

@@ -27,6 +27,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import me.shedaniel.architectury.utils.Value;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
@@ -57,9 +58,11 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     private final IIngredientType<T> type;
     private final Int2ObjectMap<SlotWrapper> slots = new Int2ObjectOpenHashMap<>();
     public final List<ITooltipCallback<T>> tooltipCallbacks = new ArrayList<>();
+    public final Value<IDrawable> background;
     
-    public JEIGuiIngredientGroup(IIngredientType<T> type) {
+    public JEIGuiIngredientGroup(IIngredientType<T> type, Value<IDrawable> background) {
         this.type = type;
+        this.background = background;
     }
     
     protected SlotWrapper getSlot(int slotIndex) {
@@ -106,7 +109,8 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     
     @Override
     public void setBackground(int slotIndex, @NotNull IDrawable background) {
-        throw TODO();
+        SlotWrapper slot = getSlot(slotIndex);
+        slot.background = background;
     }
     
     @Override
@@ -146,8 +150,10 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
         @Nullable
         public IIngredientRenderer<T> renderer;
         @Nullable
+        public IDrawable background;
+        @Nullable
         public IDrawable overlay;
-    
+        
         public SlotWrapper(Slot slot) {
             this.slot = slot;
         }

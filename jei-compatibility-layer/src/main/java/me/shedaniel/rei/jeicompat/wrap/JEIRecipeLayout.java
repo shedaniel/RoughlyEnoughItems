@@ -25,6 +25,7 @@ package me.shedaniel.rei.jeicompat.wrap;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import me.shedaniel.architectury.utils.Value;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -35,11 +36,9 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupFluid;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupItem;
-import me.shedaniel.rei.jeicompat.wrap.JEIFocus;
-import me.shedaniel.rei.jeicompat.wrap.JEIWrappedCategory;
-import me.shedaniel.rei.jeicompat.wrap.JEIWrappedDisplay;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.IRecipeLayout;
+import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiFluidStackGroup;
 import mezz.jei.api.gui.ingredient.IGuiIngredientGroup;
 import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
@@ -61,10 +60,12 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
     private final JEIWrappedCategory<T> category;
     private final JEIWrappedDisplay<T> display;
     private final Map<IIngredientType<?>, IGuiIngredientGroup<?>> groups = new HashMap<>();
+    public final Value<IDrawable> background;
     
-    public JEIRecipeLayout(JEIWrappedCategory<T> category, JEIWrappedDisplay<T> display) {
+    public JEIRecipeLayout(JEIWrappedCategory<T> category, JEIWrappedDisplay<T> display, Value<IDrawable> background) {
         this.category = category;
         this.display = display;
+        this.background = background;
     }
     
     @Override
@@ -84,10 +85,10 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
     public <T> IGuiIngredientGroup<T> getIngredientsGroup(@NotNull IIngredientType<T> ingredientType) {
         return (IGuiIngredientGroup<T>) groups.computeIfAbsent(ingredientType, type -> {
             if (Objects.equals(type.getIngredientClass(), ItemStack.class))
-                return new JEIGuiIngredientGroupItem(type.cast());
+                return new JEIGuiIngredientGroupItem(type.cast(), background);
             if (Objects.equals(type.getIngredientClass(), FluidStack.class))
-                return new JEIGuiIngredientGroupFluid(type.cast());
-            return new JEIGuiIngredientGroup<>(type);
+                return new JEIGuiIngredientGroupFluid(type.cast(), background);
+            return new JEIGuiIngredientGroup<>(type, background);
         });
     }
     
@@ -97,11 +98,11 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
         DisplayScreen screen = (DisplayScreen) Minecraft.getInstance().screen;
         EntryStack<?> notice = screen.getIngredientStackToNotice();
         if (!notice.isEmpty()) {
-            return new JEIFocus<Object>(unwrap(notice.cast()), IFocus.Mode.INPUT).wrap();
+            return new JEIFocus<>(IFocus.Mode.INPUT, unwrap(notice.cast())).wrap();
         }
         notice = screen.getResultStackToNotice();
         if (!notice.isEmpty()) {
-            return new JEIFocus<Object>(unwrap(notice.cast()), IFocus.Mode.OUTPUT).wrap();
+            return new JEIFocus<>(IFocus.Mode.OUTPUT, unwrap(notice.cast())).wrap();
         }
         return null;
     }
@@ -142,6 +143,11 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
                 JEIGuiIngredientGroup<?>.SlotWrapper wrapper = guiIngredients.get(integer);
                 wrapper.slot.getBounds().translate(bounds.x + 4, bounds.y + 4);
                 wrapper.slot.highlightEnabled(!wrapper.isEmpty());
+                
+                if (wrapper.background != null) {
+                    widgets.add(Widgets.wrapRenderer(wrapper.slot.getInnerBounds().clone(), wrapDrawable(wrapper.background)));
+                }
+                
                 widgets.add(Widgets.withTranslate(wrapper.slot, 0, 0, 10));
                 
                 if (wrapper.renderer != null) {
