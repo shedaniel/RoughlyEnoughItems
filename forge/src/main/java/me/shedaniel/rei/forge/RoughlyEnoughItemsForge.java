@@ -38,9 +38,11 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.objectweb.asm.Type;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Mod("roughlyenoughitems")
@@ -53,12 +55,12 @@ public class RoughlyEnoughItemsForge {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> RoughlyEnoughItemsInitializer::onInitializeClient);
     }
     
-    public static <A, T> void scanAnnotation(Class<A> clazz, Predicate<Class<T>> predicate, BiConsumer<List<String>, T> consumer) {
+    public static <A, T> void scanAnnotation(Class<A> clazz, Predicate<Class<T>> predicate, BiConsumer<List<String>, Supplier<T>> consumer) {
         scanAnnotation(Type.getType(clazz), predicate, consumer);
     }
     
-    public static <T> void scanAnnotation(Type annotationType, Predicate<Class<T>> predicate, BiConsumer<List<String>, T> consumer) {
-        List<Pair<List<String>, T>> instances = Lists.newArrayList();
+    public static <T> void scanAnnotation(Type annotationType, Predicate<Class<T>> predicate, BiConsumer<List<String>, Supplier<T>> consumer) {
+        List<Pair<List<String>, Supplier<T>>> instances = Lists.newArrayList();
         for (ModFileScanData data : ModList.get().getAllScanData()) {
             List<String> modIds = data.getIModInfoData().stream()
                     .flatMap(info -> info.getMods().stream())
@@ -69,8 +71,14 @@ public class RoughlyEnoughItemsForge {
                     try {
                         Class<T> clazz = (Class<T>) Class.forName(annotation.getMemberName());
                         if (predicate.test(clazz)) {
-                            T instance = clazz.getDeclaredConstructor().newInstance();
-                            instances.add(new ImmutablePair<>(modIds, instance));
+                            instances.add(new ImmutablePair<>(modIds, () -> {
+                                try {
+                                    return clazz.getDeclaredConstructor().newInstance();
+                                } catch (Throwable throwable) {
+                                    LOGGER.error("Failed to load plugin: " + annotation.getMemberName(), throwable);
+                                    return null;
+                                }
+                            }));
                         }
                     } catch (Throwable throwable) {
                         LOGGER.error("Failed to load plugin: " + annotation.getMemberName(), throwable);
@@ -79,7 +87,7 @@ public class RoughlyEnoughItemsForge {
             }
         }
         
-        for (Pair<List<String>, T> pair : instances) {
+        for (Pair<List<String>, Supplier<T>> pair : instances) {
             consumer.accept(pair.getLeft(), pair.getRight());
         }
     }
