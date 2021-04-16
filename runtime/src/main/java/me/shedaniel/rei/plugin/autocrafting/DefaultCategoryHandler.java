@@ -74,7 +74,7 @@ public class DefaultCategoryHandler implements TransferHandler {
         } catch (MenuTransferException e) {
             return Result.createFailed(e.getError());
         }
-        List<List<ItemStack>> input = menuInfo.getDisplayInputs(menuInfoContext);
+        List<List<ItemStack>> input = menuInfo.getInputs(menuInfoContext);
         IntList intList = hasItems(menu, menuInfo, display, input);
         if (!intList.isEmpty()) {
             return Result.createFailed(new TranslatableComponent("error.rei.not.enough.materials"), intList);

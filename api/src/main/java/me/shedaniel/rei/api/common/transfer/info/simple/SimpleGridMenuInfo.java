@@ -27,7 +27,7 @@ import me.shedaniel.rei.api.common.display.SimpleMenuDisplay;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
 import me.shedaniel.rei.api.common.transfer.info.MenuTransferException;
-import me.shedaniel.rei.api.common.transfer.info.stack.StackAccessor;
+import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
@@ -35,20 +35,25 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * A simple implementation of {@link MenuInfo} that provides {@link StackAccessor} by {@link net.minecraft.world.inventory.Slot}.
+ * A simple implementation of {@link MenuInfo} that provides {@link SlotAccessor} by {@link net.minecraft.world.inventory.Slot}.
  * <p>
  * Designed to be used for {@link net.minecraft.world.inventory.RecipeBookMenu}, and expects a width and height for a grid for the input.
  * Requires the display to be a implementation of {@link SimpleMenuDisplay}, to provide the width and height of the display.
  *
  * @param <T> the type of the menu
  * @param <D> the type of display
+ * @see SimpleMenuDisplay
  */
 public interface SimpleGridMenuInfo<T extends AbstractContainerMenu, D extends SimpleMenuDisplay> extends SimplePlayerInventoryMenuInfo<T, D> {
-    default Iterable<StackAccessor> getInputStacks(MenuInfoContext<T, ?, D> context) {
-        return IntStream.range(0, getCraftingWidth(context.getMenu()) * getCraftingHeight(context.getMenu()) + 1)
-                .filter(value -> value != getCraftingResultSlotIndex(context.getMenu()))
-                .mapToObj(value -> StackAccessor.fromSlot(context.getMenu().getSlot(value)))
+    default Iterable<SlotAccessor> getInputSlots(MenuInfoContext<T, ?, D> context) {
+        return getInputStackSlotIds(context)
+                .mapToObj(value -> SlotAccessor.fromSlot(context.getMenu().getSlot(value)))
                 .collect(Collectors.toList());
+    }
+    
+    default IntStream getInputStackSlotIds(MenuInfoContext<T, ?, D> context) {
+        return IntStream.range(0, getCraftingWidth(context.getMenu()) * getCraftingHeight(context.getMenu()) + 1)
+                .filter(value -> value != getCraftingResultSlotIndex(context.getMenu()));
     }
     
     int getCraftingResultSlotIndex(T menu);
@@ -62,7 +67,7 @@ public interface SimpleGridMenuInfo<T extends AbstractContainerMenu, D extends S
         int width = getCraftingWidth(context.getMenu());
         int height = getCraftingHeight(context.getMenu());
         SimpleMenuDisplay display = context.getDisplay();
-        if (display.getWidth() > width || display.getHeight() > height) {
+        if (display != null && (display.getWidth() > width || display.getHeight() > height)) {
             throw new MenuTransferException(new TranslatableComponent("error.rei.transfer.too_small", width, height));
         }
     }

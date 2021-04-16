@@ -40,9 +40,9 @@ public interface MenuInfoRegistry extends Reloadable<REIServerPlugin> {
         return PluginManager.getServerInstance().get(MenuInfoRegistry.class);
     }
     
-    <C extends AbstractContainerMenu, D extends Display> void register(CategoryIdentifier<D> category, Class<C> menuClass, MenuInfo<C, D> menuInfo);
+    <C extends AbstractContainerMenu, D extends Display> void register(CategoryIdentifier<D> category, Class<C> menuClass, MenuInfoProvider<C, D> menuInfo);
     
-    <D extends Display> void registerGeneric(Predicate<CategoryIdentifier<?>> categoryPredicate, MenuInfo<?, D> menuInfo);
+    <D extends Display> void registerGeneric(Predicate<CategoryIdentifier<?>> categoryPredicate, MenuInfoProvider<?, D> menuInfo);
     
     <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> get(CategoryIdentifier<D> category, Class<C> menuClass);
     
