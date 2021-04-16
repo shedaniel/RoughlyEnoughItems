@@ -317,15 +317,17 @@ public class ConfigManagerImpl implements ConfigManager {
                 screen.setParent(parent);
                 return screen;
             }
-            TransformingScreen parentTranslated;
-            {
+            Screen parentTranslated;
+            if (!getConfig().isConfigScreenAnimated()) {
+                parentTranslated = parent;
+            } else {
                 MutableLong current = new MutableLong(0);
                 parentTranslated = new TransformingScreen(true, parent,
                         null,
                         () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (!getConfig().isConfigScreenAnimated() ? -3000 : 0) : current.getValue()),
                         () -> 0, () -> (EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
                                        * Minecraft.getInstance().getWindow().getGuiScaledHeight(), () -> Util.getMillis() - current.getValue() > 800);
-                parentTranslated.setInitAfter(true);
+                ((TransformingScreen) parentTranslated).setInitAfter(true);
             }
             ConfigScreenProvider<ConfigObjectImpl> provider = (ConfigScreenProvider<ConfigObjectImpl>) AutoConfig.getConfigScreen(ConfigObjectImpl.class, parentTranslated);
             provider.setI13nFunction(manager -> "config.roughlyenoughitems");
@@ -341,13 +343,17 @@ public class ConfigManagerImpl implements ConfigManager {
                     ScreenHooks.addButton(screen, new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
                         MutableLong current = new MutableLong(0);
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
-                        Minecraft.getInstance().setScreen(new TransformingScreen(false, creditsScreen,
-                                screen,
-                                () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (!getConfig().isCreditsScreenAnimated() ? -3000 : 0) : current.getValue()),
-                                () -> (1 - EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
-                                      * Minecraft.getInstance().getWindow().getGuiScaledWidth() * 1.3,
-                                () -> 0,
-                                () -> Util.getMillis() - current.getValue() > 800));
+                        if (getConfig().isCreditsScreenAnimated()) {
+                            Minecraft.getInstance().setScreen(new TransformingScreen(false, creditsScreen,
+                                    screen,
+                                    () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (!getConfig().isCreditsScreenAnimated() ? -3000 : 0) : current.getValue()),
+                                    () -> (1 - EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
+                                          * Minecraft.getInstance().getWindow().getGuiScaledWidth() * 1.3,
+                                    () -> 0,
+                                    () -> Util.getMillis() - current.getValue() > 800));
+                        } else {
+                            Minecraft.getInstance().setScreen(creditsScreen);
+                        }
                     }));
                 }).setSavingRunnable(() -> {
                     saveConfig();
@@ -358,7 +364,8 @@ public class ConfigManagerImpl implements ConfigManager {
                 }).build();
             });
             Screen configScreen = provider.get();
-            parentTranslated.setLastScreen(configScreen);
+            if (!getConfig().isConfigScreenAnimated()) return configScreen;
+            ((TransformingScreen) parentTranslated).setLastScreen(configScreen);
             MutableLong current = new MutableLong(0);
             return new TransformingScreen(false, configScreen,
                     parent,
