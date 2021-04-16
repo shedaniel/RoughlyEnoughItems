@@ -172,12 +172,12 @@ public final class Widgets {
                 ((ContainerEventHandler) element).setFocused(guiEventListener);
             }
         }
-    
+        
         @Override
         public boolean isDragging() {
             return true;
         }
-    
+        
         @Override
         public boolean containsMouse(double mouseX, double mouseY) {
             return element.isMouseOver(mouseX, mouseY);
@@ -186,22 +186,29 @@ public final class Widgets {
     
     public static WidgetWithBounds wrapRenderer(Rectangle bounds, Renderer renderer) {
         if (renderer instanceof Widget)
-            return wrapWidgetWithBounds((Widget) renderer);
-        return new RendererWrappedWidget(renderer);
+            return wrapWidgetWithBounds((Widget) renderer, bounds);
+        return new RendererWrappedWidget(renderer, bounds);
     }
     
     public static WidgetWithBounds wrapWidgetWithBounds(Widget widget) {
+        return wrapWidgetWithBounds(widget, null);
+    }
+    
+    public static WidgetWithBounds wrapWidgetWithBounds(Widget widget, Rectangle bounds) {
         if (widget instanceof WidgetWithBounds)
             return (WidgetWithBounds) widget;
-        return new DelegateWidget(widget);
+        if (bounds == null)
+            return new DelegateWidget(widget);
+        return new DelegateWidgetWithBounds(widget, bounds);
     }
     
     private static class RendererWrappedWidget extends WidgetWithBounds {
-        private Renderer renderer;
-        private Rectangle bounds;
+        private final Renderer renderer;
+        private final Rectangle bounds;
         
-        public RendererWrappedWidget(Renderer renderer) {
+        public RendererWrappedWidget(Renderer renderer, Rectangle bounds) {
             this.renderer = Objects.requireNonNull(renderer);
+            this.bounds = Objects.requireNonNull(bounds);
         }
         
         @Override
@@ -232,6 +239,19 @@ public final class Widgets {
         }
     }
     
+    private static class DelegateWidgetWithBounds extends DelegateWidget {
+        private final Rectangle bounds;
+        
+        public DelegateWidgetWithBounds(Widget widget, Rectangle bounds) {
+            super(widget);
+            this.bounds = bounds;
+        }
+        
+        @Override
+        public Rectangle getBounds() {
+            return bounds;
+        }
+    }
     
     public static Widget createTexturedWidget(ResourceLocation identifier, Rectangle bounds) {
         return createTexturedWidget(identifier, bounds, 0, 0);
