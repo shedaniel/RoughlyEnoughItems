@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.ingredient;
 
+import me.shedaniel.architectury.utils.Value;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiFluidStackGroup;
 import mezz.jei.api.ingredients.IIngredientType;
@@ -30,8 +31,8 @@ import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 public class JEIGuiIngredientGroupFluid extends JEIGuiIngredientGroup<FluidStack> implements IGuiFluidStackGroup {
-    public JEIGuiIngredientGroupFluid(IIngredientType<FluidStack> type) {
-        super(type);
+    public JEIGuiIngredientGroupFluid(IIngredientType<FluidStack> type, Value<IDrawable> background) {
+        super(type, background);
     }
     
     @Override

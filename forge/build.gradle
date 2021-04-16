@@ -55,6 +55,8 @@ dependencies {
     modRuntime("curse.maven:mekanism-268560:3206392")
     modRuntime("curse.maven:refined-storage-243076:3196167")
     modRuntime("appeng:appliedenergistics2:8.2.0")
+    modRuntime("curse.maven:tcon-74072:3273213")
+    modRuntime("curse.maven:mantle-74924:3273201")
 }
 
 shadowJar {
