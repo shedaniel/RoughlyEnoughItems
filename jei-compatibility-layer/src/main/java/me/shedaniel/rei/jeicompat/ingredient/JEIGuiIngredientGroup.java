@@ -49,8 +49,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
 
 public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     private static final Method func_238468_a_ = ObfuscationReflectionHelper.findMethod(GuiComponent.class, "func_238468_a_",
@@ -107,7 +106,7 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     
     @Override
     public void setBackground(int slotIndex, @NotNull IDrawable background) {
-        
+        throw TODO();
     }
     
     @Override
@@ -133,17 +132,22 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
         init(slotIndex, input, xPosition - 1, yPosition - 1);
         SlotWrapper slot = getSlot(slotIndex);
         slot.slot.getBounds().setSize(width + 2, height + 2);
+        slot.renderer = ingredientRenderer;
     }
     
     @Override
     public void setOverrideDisplayFocus(@Nullable IFocus<T> focus) {
-        
+        throw WILL_NOT_BE_IMPLEMENTED();
     }
     
     public class SlotWrapper extends AbstractList<T> implements IGuiIngredient<T> {
         public final Slot slot;
         public float fluidCapacity = Float.NaN;
-        
+        @Nullable
+        public IIngredientRenderer<T> renderer;
+        @Nullable
+        public IDrawable overlay;
+    
         public SlotWrapper(Slot slot) {
             this.slot = slot;
         }

@@ -40,5 +40,6 @@ public class JEIGuiIngredientGroupFluid extends JEIGuiIngredientGroup<FluidStack
         SlotWrapper slot = getSlot(slotIndex);
         slot.slot.getBounds().setSize(width + 2, height + 2);
         slot.fluidCapacity = capacityMb;
+        slot.overlay = overlay;
     }
 }

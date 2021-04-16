@@ -55,8 +55,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
 
 public class JEIRecipeLayout<T> implements IRecipeLayout {
     private final JEIWrappedCategory<T> category;
@@ -145,13 +144,22 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
                 wrapper.slot.highlightEnabled(!wrapper.isEmpty());
                 widgets.add(Widgets.withTranslate(wrapper.slot, 0, 0, 10));
                 
-                if (wrapper.fluidCapacity == wrapper.fluidCapacity) {
+                if (wrapper.renderer != null) {
+                    JEIEntryDefinition.Renderer<?> renderer = new JEIEntryDefinition.Renderer<>(wrapper.renderer);
+                    for (EntryStack<?> entry : wrapper.slot.getEntries()) {
+                        ClientEntryStacks.setRenderer(entry, renderer);
+                    }
+                } else if (wrapper.fluidCapacity == wrapper.fluidCapacity) {
                     for (EntryStack<?> entry : wrapper.slot.getEntries()) {
                         if (entry.getType() == VanillaEntryTypes.FLUID) {
                             ClientEntryStacks.setFluidRenderRatio(entry.cast(),
                                     entry.<me.shedaniel.architectury.fluid.FluidStack>cast().getValue().getAmount().floatValue() / wrapper.fluidCapacity);
                         }
                     }
+                }
+                
+                if (wrapper.overlay != null) {
+                    widgets.add(Widgets.wrapRenderer(wrapper.slot.getInnerBounds().clone(), wrapDrawable(wrapper.overlay)));
                 }
                 
                 List<ITooltipCallback<Object>> tooltipCallbacks = (List<ITooltipCallback<Object>>) (List) group.tooltipCallbacks;
