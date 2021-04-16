@@ -4,7 +4,7 @@
   "text.rei.cheating_disabled": "§7Читы выключены",
   "text.rei.cheating_enabled": "§cЧиты включены",
   "text.rei.cheating_limited_enabled": "§bЧиты включены (С исползованием комманд)",
-  "text.rei.cheating_enabled_no_perms": "§7Читерство §cвключено §7(Нет прав)",
+  "text.rei.cheating_enabled_no_perms": "§7Читы §cвключены §7(Без прав)",
   "text.rei.cheating_limited_creative_enabled": "§aЧиты включены (Включён Творческий режим)",
   "text.rei.no_permission_cheat": "Для читерства требуются права оператора",
   "text.rei.search.field.suggestion": "Поиск...",
