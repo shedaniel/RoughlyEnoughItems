@@ -145,7 +145,12 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
                 wrapper.slot.highlightEnabled(!wrapper.isEmpty());
                 widgets.add(Widgets.withTranslate(wrapper.slot, 0, 0, 10));
                 
-                if (wrapper.fluidCapacity == wrapper.fluidCapacity) {
+                if (wrapper.renderer != null) {
+                    JEIEntryDefinition.Renderer<?> renderer = new JEIEntryDefinition.Renderer<>(wrapper.renderer);
+                    for (EntryStack<?> entry : wrapper.slot.getEntries()) {
+                        ClientEntryStacks.setRenderer(entry, renderer);
+                    }
+                } else if (wrapper.fluidCapacity == wrapper.fluidCapacity) {
                     for (EntryStack<?> entry : wrapper.slot.getEntries()) {
                         if (entry.getType() == VanillaEntryTypes.FLUID) {
                             ClientEntryStacks.setFluidRenderRatio(entry.cast(),

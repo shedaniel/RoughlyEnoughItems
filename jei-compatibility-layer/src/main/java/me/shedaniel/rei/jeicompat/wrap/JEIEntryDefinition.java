@@ -145,7 +145,7 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
     }
     
     @OnlyIn(Dist.CLIENT)
-    private static class Renderer<T> implements EntryRenderer<T> {
+    public static class Renderer<T> implements EntryRenderer<T> {
         private final IIngredientRenderer<T> ingredientRenderer;
         
         public Renderer(IIngredientRenderer<T> ingredientRenderer) {

@@ -44,22 +44,22 @@ public final class ClientEntryStacks {
         return EntryStack.of(BuiltinClientEntryTypes.RENDERING, renderer);
     }
     
-    public static <T> EntryStack<T> setNotRenderer(EntryStack<T> stack) {
+    public static <T> EntryStack<T> setNotRenderer(EntryStack<? extends T> stack) {
         return setRenderer(stack, EntryRenderer.empty());
     }
     
-    public static <T> EntryStack<T> setRenderer(EntryStack<T> stack, EntryRenderer<T> renderer) {
-        return stack.setting(EntryStack.Settings.RENDERER, s -> renderer);
+    public static <T> EntryStack<T> setRenderer(EntryStack<? extends T> stack, EntryRenderer<? extends T> renderer) {
+        return stack.setting(EntryStack.Settings.RENDERER, s -> renderer).cast();
     }
     
     @SuppressWarnings("rawtypes")
-    public static <T> EntryStack<T> setRenderer(EntryStack<T> stack, Function<EntryStack<T>, EntryRenderer<T>> rendererProvider) {
-        return stack.setting(EntryStack.Settings.RENDERER, (Function) rendererProvider);
+    public static <T> EntryStack<T> setRenderer(EntryStack<? extends T> stack, Function<EntryStack<T>, EntryRenderer<? extends T>> rendererProvider) {
+        return stack.setting(EntryStack.Settings.RENDERER, (Function) rendererProvider).cast();
     }
     
     @SuppressWarnings("rawtypes")
-    public static <T> EntryStack<T> setTooltipProcessor(EntryStack<T> stack, BiFunction<EntryStack<T>, Tooltip, Tooltip> processor) {
-        return stack.setting(EntryStack.Settings.TOOLTIP_PROCESSOR, (BiFunction) processor);
+    public static <T> EntryStack<T> setTooltipProcessor(EntryStack<? extends T> stack, BiFunction<EntryStack<T>, Tooltip, Tooltip> processor) {
+        return stack.setting(EntryStack.Settings.TOOLTIP_PROCESSOR, (BiFunction) processor).cast();
     }
     
     public static EntryStack<FluidStack> setFluidRenderRatio(EntryStack<FluidStack> stack, float ratio) {
