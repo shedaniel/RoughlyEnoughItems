@@ -80,7 +80,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
         }
         
         List<EntryIngredient> workstations = CategoryRegistry.getInstance().get(getCategoryIdentifier()).getWorkstations();
-        if (!workstations.isEmpty() && false) {
+        if (!workstations.isEmpty()) {
             return Widgets.createSlot(new Point(0, 0)).entries(workstations.get(0)).disableBackground().disableHighlight();
         }
         FormattedCharSequence title = getTitle().getVisualOrderText();
