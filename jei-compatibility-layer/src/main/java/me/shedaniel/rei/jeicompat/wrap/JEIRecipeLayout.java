@@ -143,7 +143,6 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
                 JEIGuiIngredientGroup<?>.SlotWrapper wrapper = guiIngredients.get(integer);
                 wrapper.slot.getBounds().translate(bounds.x + 4, bounds.y + 4);
                 wrapper.slot.highlightEnabled(!wrapper.isEmpty());
-                wrapper.slot.backgroundEnabled(wrapper.background == null);
                 
                 if (wrapper.background != null) {
                     widgets.add(Widgets.wrapRenderer(wrapper.slot.getInnerBounds().clone(), wrapDrawable(wrapper.background)));
