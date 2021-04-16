@@ -81,7 +81,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
         
         List<EntryIngredient> workstations = CategoryRegistry.getInstance().get(getCategoryIdentifier()).getWorkstations();
         if (!workstations.isEmpty()) {
-            return Widgets.createSlot(new Point(0, 0)).entries(workstations.get(0)).disableBackground().disableHighlight();
+            return Widgets.createSlot(new Point(0, 0)).entries(workstations.get(0)).disableBackground().disableHighlight().disableTooltips();
         }
         FormattedCharSequence title = getTitle().getVisualOrderText();
         FormattedCharSequence titleTrimmed = sink -> {
