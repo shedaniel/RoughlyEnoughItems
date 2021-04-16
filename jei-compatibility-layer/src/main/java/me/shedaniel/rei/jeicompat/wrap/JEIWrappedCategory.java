@@ -31,13 +31,18 @@ import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.LazyLoadedValue;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.emptyRenderer;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapDrawable;
 
 public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<T>> {
@@ -68,7 +74,43 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
     
     @Override
     public Renderer getIcon() {
-        return wrapDrawable(backingCategory.getIcon());
+        IDrawable icon = backingCategory.getIcon();
+        if (icon != null) {
+            return wrapDrawable(icon);
+        }
+        
+        List<EntryIngredient> workstations = CategoryRegistry.getInstance().get(getCategoryIdentifier()).getWorkstations();
+        if (!workstations.isEmpty() && false) {
+            return Widgets.createSlot(new Point(0, 0)).entries(workstations.get(0)).disableBackground().disableHighlight();
+        }
+        FormattedCharSequence title = getTitle().getVisualOrderText();
+        FormattedCharSequence titleTrimmed = sink -> {
+            return title.accept((index, style, codepoint) -> {
+                if (index == 0 || index == 1) {
+                    sink.accept(index, style, codepoint);
+                    return true;
+                }
+                
+                return false;
+            });
+        };
+        return new Renderer() {
+            @Override
+            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                Font font = Minecraft.getInstance().font;
+                font.drawShadow(matrices, titleTrimmed, bounds.getCenterX() - font.width(titleTrimmed) / 2.0F, bounds.getCenterY() - 4.5F, 0xFFFFFF);
+            }
+            
+            @Override
+            public int getZ() {
+                return 0;
+            }
+            
+            @Override
+            public void setZ(int z) {
+                
+            }
+        };
     }
     
     @Override

@@ -471,4 +471,13 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         }
         return null;
     }
+    
+    @Override
+    @Deprecated
+    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        Rectangle clone = getBounds().clone();
+        getBounds().setBounds(bounds.x - 1, bounds.y - 1, bounds.width + 2, bounds.height + 2);
+        render(matrices, mouseX, mouseY, delta);
+        getBounds().setBounds(clone);
+    }
 }
