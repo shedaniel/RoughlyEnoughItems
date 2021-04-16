@@ -110,13 +110,13 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
     public void registerMenuInfo(MenuInfoRegistry registry) {
         registry.register(BuiltinPlugin.CRAFTING, CraftingMenu.class, new RecipeBookGridMenuInfo<CraftingMenu, DefaultCraftingDisplay>() {
             @Override
-            public List<List<ItemStack>> getDisplayInputs(MenuInfoContext<CraftingMenu, ?, DefaultCraftingDisplay> context) {
+            public List<List<ItemStack>> getInputs(MenuInfoContext<CraftingMenu, ?, DefaultCraftingDisplay> context) {
                 return context.getDisplay().getOrganisedInputEntries(this, context.getMenu());
             }
         });
         registry.register(BuiltinPlugin.CRAFTING, InventoryMenu.class, new RecipeBookGridMenuInfo<InventoryMenu, DefaultCraftingDisplay>() {
             @Override
-            public List<List<ItemStack>> getDisplayInputs(MenuInfoContext<InventoryMenu, ?, DefaultCraftingDisplay> context) {
+            public List<List<ItemStack>> getInputs(MenuInfoContext<InventoryMenu, ?, DefaultCraftingDisplay> context) {
                 return context.getDisplay().getOrganisedInputEntries(this, context.getMenu());
             }
         });

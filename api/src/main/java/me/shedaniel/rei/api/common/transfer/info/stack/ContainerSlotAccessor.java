@@ -23,31 +23,33 @@
 
 package me.shedaniel.rei.api.common.transfer.info.stack;
 
-import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Simple implementation of {@link StackAccessor} that wraps around {@link Slot}.
+ * Simple implementation of {@link SlotAccessor} that wraps around a slot in {@link Container}.
  */
-public class SlotStackAccessor implements StackAccessor {
-    protected Slot slot;
+public class ContainerSlotAccessor implements SlotAccessor {
+    protected Container container;
+    protected int index;
     
-    public SlotStackAccessor(Slot slot) {
-        this.slot = slot;
+    public ContainerSlotAccessor(Container container, int index) {
+        this.container = container;
+        this.index = index;
     }
     
     @Override
     public ItemStack getItemStack() {
-        return slot.getItem();
+        return container.getItem(index);
     }
     
     @Override
     public void setItemStack(ItemStack stack) {
-        this.slot.set(stack);
+        this.container.setItem(index, stack);
     }
     
     @Override
     public ItemStack takeStack(int amount) {
-        return slot.remove(amount);
+        return this.container.removeItem(index, amount);
     }
 }

@@ -142,18 +142,18 @@ import java.util.stream.Stream;
 public class RoughlyEnoughItemsCore {
     @ApiStatus.Internal
     public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
-    private static final ExecutorService RELOAD_PLUGINS;
+    private static ExecutorService reloadPlugins;
     @ApiStatus.Experimental
     public static boolean isLeftMousePressed = false;
     
     static {
-        RELOAD_PLUGINS = Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread thread = new Thread(r, "REI-ReloadPlugins");
-            thread.setDaemon(true);
-            return thread;
-        });
         attachCommonInternals();
         if (Platform.getEnvironment() == Env.CLIENT) {
+            reloadPlugins = Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread thread = new Thread(r, "REI-ReloadPlugins");
+                thread.setDaemon(true);
+                return thread;
+            });
             attachClientInternals();
         }
     }
@@ -401,15 +401,19 @@ public class RoughlyEnoughItemsCore {
             lastReload.setValue(System.currentTimeMillis());
         }
         if (ConfigObject.getInstance().doesRegisterRecipesInAnotherThread()) {
-            CompletableFuture.runAsync(RoughlyEnoughItemsCore::_reloadPlugins, RELOAD_PLUGINS);
+            CompletableFuture.runAsync(RoughlyEnoughItemsCore::_reloadPlugins, reloadPlugins);
         } else {
             _reloadPlugins();
         }
     }
     
     private static void _reloadPlugins() {
-        for (PluginManager<? extends REIPlugin<?>> instance : PluginManager.getActiveInstances()) {
-            instance.startReload();
+        try {
+            for (PluginManager<? extends REIPlugin<?>> instance : PluginManager.getActiveInstances()) {
+                instance.startReload();
+            }
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
         }
     }
     
@@ -421,9 +425,7 @@ public class RoughlyEnoughItemsCore {
         if (Platform.getEnvironment() == Env.SERVER) {
             MutableLong lastReload = new MutableLong(-1);
             ReloadListeners.registerReloadListener(PackType.SERVER_DATA, (preparationBarrier, resourceManager, profilerFiller, profilerFiller2, executor, executor2) -> {
-                return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(() -> {
-                    CompletableFuture.runAsync(RoughlyEnoughItemsCore::_reloadPlugins, RELOAD_PLUGINS);
-                }, executor2);
+                return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(RoughlyEnoughItemsCore::_reloadPlugins, executor2);
             });
         }
     }

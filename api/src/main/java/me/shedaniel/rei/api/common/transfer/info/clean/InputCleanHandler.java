@@ -26,7 +26,7 @@ package me.shedaniel.rei.api.common.transfer.info.clean;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
 import me.shedaniel.rei.api.common.transfer.info.simple.DumpHandler;
-import me.shedaniel.rei.api.common.transfer.info.stack.StackAccessor;
+import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
@@ -40,10 +40,10 @@ public interface InputCleanHandler<T extends AbstractContainerMenu, D extends Di
         throw new IllegalStateException(translationKey);
     }
     
-    static <T extends AbstractContainerMenu> void returnSlotsToPlayerInventory(MenuInfoContext<T, ?, ?> context, DumpHandler<T, ?> dumpHandler, StackAccessor stackAccessor) {
-        ItemStack stackToReturn = stackAccessor.getItemStack();
+    static <T extends AbstractContainerMenu> void returnSlotsToPlayerInventory(MenuInfoContext<T, ?, ?> context, DumpHandler<T, ?> dumpHandler, SlotAccessor slotAccessor) {
+        ItemStack stackToReturn = slotAccessor.getItemStack();
         if (!stackToReturn.isEmpty()) {
-            for (; stackToReturn.getCount() > 0; stackAccessor.takeStack(1)) {
+            for (; stackToReturn.getCount() > 0; slotAccessor.takeStack(1)) {
                 ItemStack stackToInsert = stackToReturn.copy();
                 stackToInsert.setCount(1);
                 if (!dumpGenericsFtw(context, dumpHandler, stackToInsert)) {

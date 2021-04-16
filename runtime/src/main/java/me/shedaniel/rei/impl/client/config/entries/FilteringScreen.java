@@ -66,7 +66,7 @@ import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.entrySize;
 
 @ApiStatus.Internal
 public class FilteringScreen extends Screen {
-    protected List<EntryStack> selected = Lists.newArrayList();
+    protected List<EntryStack<?>> selected = Lists.newArrayList();
     protected final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
         public int getMaxScrollHeight() {
@@ -87,7 +87,7 @@ public class FilteringScreen extends Screen {
     Screen parent;
     private FilteringEntry filteringEntry;
     private Tooltip tooltip = null;
-    private List<EntryStack> entryStacks = null;
+    private List<EntryStack<?>> entryStacks = null;
     private Rectangle innerBounds;
     private List<EntryListEntry> entries = Collections.emptyList();
     private List<GuiEventListener> elements = Collections.emptyList();
@@ -127,7 +127,7 @@ public class FilteringScreen extends Screen {
             Component hideText = new TranslatableComponent("config.roughlyenoughitems.filteredEntries.hide");
             this.hideButton = new Button(0, 0, Minecraft.getInstance().font.width(hideText) + 10, 20, hideText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
-                    EntryStack stack = entryStacks.get(i);
+                    EntryStack<?> stack = entryStacks.get(i);
                     EntryListEntry entry = entries.get(i);
                     entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
                     if (entry.isSelected() && !entry.isFiltered()) {
@@ -142,7 +142,7 @@ public class FilteringScreen extends Screen {
             Component showText = new TranslatableComponent("config.roughlyenoughitems.filteredEntries.show");
             this.showButton = new Button(0, 0, Minecraft.getInstance().font.width(showText) + 10, 20, showText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
-                    EntryStack stack = entryStacks.get(i);
+                    EntryStack<?> stack = entryStacks.get(i);
                     EntryListEntry entry = entries.get(i);
                     entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
                     if (entry.isSelected() && filteringEntry.configFiltered.remove(stack)) {
