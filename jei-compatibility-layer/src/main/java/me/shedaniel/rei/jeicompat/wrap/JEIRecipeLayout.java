@@ -98,11 +98,11 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
         DisplayScreen screen = (DisplayScreen) Minecraft.getInstance().screen;
         EntryStack<?> notice = screen.getIngredientStackToNotice();
         if (!notice.isEmpty()) {
-            return new JEIFocus<Object>(unwrap(notice.cast()), IFocus.Mode.INPUT).wrap();
+            return new JEIFocus<>(IFocus.Mode.INPUT, unwrap(notice.cast())).wrap();
         }
         notice = screen.getResultStackToNotice();
         if (!notice.isEmpty()) {
-            return new JEIFocus<Object>(unwrap(notice.cast()), IFocus.Mode.OUTPUT).wrap();
+            return new JEIFocus<>(IFocus.Mode.OUTPUT, unwrap(notice.cast())).wrap();
         }
         return null;
     }
