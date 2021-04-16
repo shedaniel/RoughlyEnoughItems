@@ -145,7 +145,9 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
         public float fluidCapacity = Float.NaN;
         @Nullable
         public IIngredientRenderer<T> renderer;
-        
+        @Nullable
+        public IDrawable overlay;
+    
         public SlotWrapper(Slot slot) {
             this.slot = slot;
         }

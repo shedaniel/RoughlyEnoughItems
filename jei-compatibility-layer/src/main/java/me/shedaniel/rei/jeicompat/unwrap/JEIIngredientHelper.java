@@ -89,6 +89,11 @@ public class JEIIngredientHelper<T> implements IIngredientHelper<T> {
     
     @Override
     public String getErrorInfo(@Nullable T ingredient) {
-        throw TODO();
+        try {
+            return getResourceId(ingredient);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            return throwable.getClass().getName() + ": " + throwable.getLocalizedMessage();
+        }
     }
 }

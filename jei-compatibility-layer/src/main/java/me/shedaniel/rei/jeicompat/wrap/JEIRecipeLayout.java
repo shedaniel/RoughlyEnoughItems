@@ -55,8 +55,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
 
 public class JEIRecipeLayout<T> implements IRecipeLayout {
     private final JEIWrappedCategory<T> category;
@@ -157,6 +156,10 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
                                     entry.<me.shedaniel.architectury.fluid.FluidStack>cast().getValue().getAmount().floatValue() / wrapper.fluidCapacity);
                         }
                     }
+                }
+                
+                if (wrapper.overlay != null) {
+                    widgets.add(Widgets.wrapRenderer(wrapper.slot.getInnerBounds().clone(), wrapDrawable(wrapper.overlay)));
                 }
                 
                 List<ITooltipCallback<Object>> tooltipCallbacks = (List<ITooltipCallback<Object>>) (List) group.tooltipCallbacks;
