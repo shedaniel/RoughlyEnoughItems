@@ -419,8 +419,12 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
         recipeHelper.registerContainerClickArea(new Rectangle(78, 32, 28, 23), BlastFurnaceScreen.class, BLASTING);
         FluidSupportProvider.getInstance().registerProvider(itemStack -> {
             Item item = itemStack.getItem();
-            if (item instanceof BucketItem)
-                return InteractionResultHolder.success(Stream.of(EntryStack.create(((BucketItem) item).content, Fraction.ofWhole(1))));
+            if (item instanceof BucketItem) {
+                Fluid fluid = ((BucketItem) item).content;
+                if (fluid != null) {
+                    return InteractionResultHolder.success(Stream.of(EntryStack.create(fluid, Fraction.ofWhole(1))));
+                }
+            }
             return InteractionResultHolder.pass(null);
         });
 //        SubsetsRegistry subsetsRegistry = SubsetsRegistry.INSTANCE;
