@@ -216,6 +216,7 @@
   "config.roughlyenoughitems.horizontalEntriesBoundaries": "Bordures d'entrées horizontales",
   "config.roughlyenoughitems.verticalEntriesBoundaries": "Bordures d'entrée verticales",
   "config.roughlyenoughitems.syntaxHighlightingMode.config": "%s",
+  "config.roughlyenoughitems.syntaxHighlightingMode.plain": "Texte brut",
   "config.roughlyenoughitems.syntaxHighlightingMode.colorful": "Coloré",
   "config.roughlyenoughitems.syntaxHighlightingMode.colorful_underscored": "Coloré (souligné)",
   "config.roughlyenoughitems.filteringScreen": "Filtrage personnalisé",
