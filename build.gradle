@@ -46,6 +46,11 @@ allprojects {
         header rootProject.file("HEADER")
         include "**/*.java"
         exclude "mezz/jei/api/**/*.java"
+
+        ext {
+            name = "shedaniel"
+            year = "2018, 2019, 2020, 2021"
+        }
     }
 
     jar {
