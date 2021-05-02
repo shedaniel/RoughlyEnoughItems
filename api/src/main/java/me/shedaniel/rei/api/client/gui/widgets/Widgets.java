@@ -378,6 +378,10 @@ public final class Widgets {
             protected T computeNext() {
                 while (!stack.empty()) {
                     Iterator<? extends GuiEventListener> peek = stack.peek();
+                    if (!peek.hasNext())
+                        stack.pop();
+                    if (stack.isEmpty())
+                        break;
                     GuiEventListener listener = peek.next();
                     if (!peek.hasNext())
                         stack.pop();
