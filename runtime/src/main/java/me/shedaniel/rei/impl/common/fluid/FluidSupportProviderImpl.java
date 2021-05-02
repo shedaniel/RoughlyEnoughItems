@@ -62,10 +62,10 @@ public class FluidSupportProviderImpl extends ForwardingList<FluidSupportProvide
     }
     
     @Override
-    public Optional<Stream<EntryStack<FluidStack>>> itemToFluids(EntryStack<? extends ItemStack> itemStack) {
-        if (itemStack.isEmpty()) return Optional.empty();
+    public Optional<Stream<EntryStack<FluidStack>>> itemToFluids(EntryStack<? extends ItemStack> stack) {
+        if (stack.isEmpty()) return Optional.empty();
         for (Provider provider : providers) {
-            InteractionResultHolder<@Nullable Stream<EntryStack<FluidStack>>> resultHolder = Objects.requireNonNull(provider.itemToFluid(itemStack));
+            InteractionResultHolder<@Nullable Stream<EntryStack<FluidStack>>> resultHolder = Objects.requireNonNull(provider.itemToFluid(stack));
             Stream<EntryStack<FluidStack>> stream = resultHolder.getObject();
             if (stream != null) {
                 if (resultHolder.getResult().consumesAction()) {

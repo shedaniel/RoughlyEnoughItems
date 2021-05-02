@@ -23,7 +23,10 @@
 
 package me.shedaniel.rei.plugin.common;
 
+import me.shedaniel.architectury.annotations.ExpectPlatform;
+import me.shedaniel.architectury.annotations.PlatformOnly;
 import me.shedaniel.architectury.hooks.FluidStackHooks;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparator;
@@ -52,6 +55,7 @@ import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.material.Fluid;
 
 import java.util.List;
 import java.util.function.Function;
@@ -80,10 +84,22 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
         support.register(entry -> {
             ItemStack stack = entry.getValue();
             if (stack.getItem() instanceof BucketItem) {
-                return InteractionResultHolder.success(Stream.of(EntryStacks.of(((BucketItem) stack.getItem()).content, FluidStackHooks.bucketAmount())));
+                Fluid fluid = ((BucketItem) stack.getItem()).content;
+                if (fluid != null) {
+                    return InteractionResultHolder.success(Stream.of(EntryStacks.of(fluid, FluidStackHooks.bucketAmount())));
+                }
             }
             return InteractionResultHolder.pass(null);
         });
+        if (Platform.isForge()) {
+            registerForgeFluidSupport(support);
+        }
+    }
+    
+    @ExpectPlatform
+    @PlatformOnly(PlatformOnly.FORGE)
+    private static void registerForgeFluidSupport(FluidSupportProvider support) {
+        
     }
     
     @Override

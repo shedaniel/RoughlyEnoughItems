@@ -46,10 +46,10 @@ public interface FluidSupportProvider extends Reloadable<REIPlugin<?>>, List<Flu
     
     void register(Provider provider);
     
-    Optional<Stream<EntryStack<FluidStack>>> itemToFluids(EntryStack<? extends ItemStack> itemStack);
+    Optional<Stream<EntryStack<FluidStack>>> itemToFluids(EntryStack<? extends ItemStack> stack);
     
     @FunctionalInterface
     interface Provider {
-        InteractionResultHolder<@Nullable Stream<EntryStack<FluidStack>>> itemToFluid(EntryStack<? extends ItemStack> itemStack);
+        InteractionResultHolder<@Nullable Stream<EntryStack<FluidStack>>> itemToFluid(EntryStack<? extends ItemStack> stack);
     }
 }
