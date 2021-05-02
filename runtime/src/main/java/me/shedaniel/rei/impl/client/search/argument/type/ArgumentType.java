@@ -36,6 +36,8 @@ import org.jetbrains.annotations.Nullable;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public abstract class ArgumentType<T, R> {
+    private int index = -1;
+    
     public ArgumentType() {
     }
     
@@ -83,4 +85,9 @@ public abstract class ArgumentType<T, R> {
     public abstract boolean matches(Mutable<R> data, EntryStack<?> stack, String searchText, T filterData);
     
     public abstract T prepareSearchFilter(String searchText);
+    
+    public int getIndex() {
+        if (index >= 0) return index;
+        return index = ArgumentTypesRegistry.ARGUMENT_TYPE_LIST.indexOf(this);
+    }
 }

@@ -29,6 +29,7 @@ import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.SearchFilteringRule;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
@@ -46,15 +47,10 @@ import java.util.function.BiFunction;
 @Environment(EnvType.CLIENT)
 public interface FilteringRule<T extends FilteringRule<?>> {
     ResourceKey<Registry<FilteringRule<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(new ResourceLocation("roughlyenoughitems", "filtering_rule"));
-    Registry<FilteringRule<?>> REGISTRY = createRegistry();
-    
-    @ApiStatus.Internal
-    static Registry<FilteringRule<?>> createRegistry() {
-        MappedRegistry<FilteringRule<?>> registry = new MappedRegistry<>(REGISTRY_KEY, Lifecycle.stable());
+    Registry<FilteringRule<?>> REGISTRY = Util.make(new MappedRegistry<>(REGISTRY_KEY, Lifecycle.stable()), registry -> {
         Registry.register(registry, new ResourceLocation("roughlyenoughitems", "search"), new SearchFilteringRule());
         Registry.register(registry, new ResourceLocation("roughlyenoughitems", "manual"), new ManualFilteringRule());
-        return registry;
-    }
+    });
     
     static CompoundTag save(FilteringRule<?> rule, CompoundTag tag) {
         tag.putString("id", REGISTRY.getKey(rule).toString());
