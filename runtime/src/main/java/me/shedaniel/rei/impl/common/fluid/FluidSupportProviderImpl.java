@@ -1,6 +1,6 @@
 /*
  * This file is licensed under the MIT License, part of Roughly Enough Items.
- * Copyright (c) 2018, 2019, 2020 shedaniel
+ * Copyright (c) 2018, 2019, 2020, 2021 shedaniel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -62,10 +62,10 @@ public class FluidSupportProviderImpl extends ForwardingList<FluidSupportProvide
     }
     
     @Override
-    public Optional<Stream<EntryStack<FluidStack>>> itemToFluids(EntryStack<? extends ItemStack> itemStack) {
-        if (itemStack.isEmpty()) return Optional.empty();
+    public Optional<Stream<EntryStack<FluidStack>>> itemToFluids(EntryStack<? extends ItemStack> stack) {
+        if (stack.isEmpty()) return Optional.empty();
         for (Provider provider : providers) {
-            InteractionResultHolder<@Nullable Stream<EntryStack<FluidStack>>> resultHolder = Objects.requireNonNull(provider.itemToFluid(itemStack));
+            InteractionResultHolder<@Nullable Stream<EntryStack<FluidStack>>> resultHolder = Objects.requireNonNull(provider.itemToFluid(stack));
             Stream<EntryStack<FluidStack>> stream = resultHolder.getObject();
             if (stream != null) {
                 if (resultHolder.getResult().consumesAction()) {

@@ -1,6 +1,6 @@
 /*
  * This file is licensed under the MIT License, part of Roughly Enough Items.
- * Copyright (c) 2018, 2019, 2020 shedaniel
+ * Copyright (c) 2018, 2019, 2020, 2021 shedaniel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,8 +25,14 @@ package me.shedaniel.rei.impl.client.search.argument;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import me.shedaniel.rei.api.client.gui.config.SearchMode;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.search.IntRange;
 import me.shedaniel.rei.impl.client.search.argument.type.AlwaysMatchingArgumentType;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
@@ -51,6 +57,7 @@ import java.util.regex.Pattern;
 @Environment(EnvType.CLIENT)
 public class Argument<T, R> {
     public static final String SPACE = " ", EMPTY = "";
+    public static final Short2ObjectMap<Long2ObjectMap<Object>> SEARCH_CACHE = new Short2ObjectOpenHashMap<>();
     static final Argument<Unit, Unit> ALWAYS = new Argument<>(AlwaysMatchingArgumentType.INSTANCE, EMPTY, true, -1, -1, true);
     private ArgumentType<T, R> argumentType;
     private String text;
@@ -180,11 +187,10 @@ public class Argument<T, R> {
     
     private static <T, R, Z, B> boolean matches(EntryStack<?> stack, AlternativeArgument alternativeArgument, Mutable<?> mutable) {
         if (alternativeArgument.isEmpty()) return true;
+        long hashExact = EntryStacks.hashExact(stack);
         
         for (Argument<?, ?> argument : alternativeArgument) {
-            mutable.setValue(null);
-            
-            if (matches(argument.getArgument(), mutable, stack, argument.getText(), argument.filterData) == argument.isRegular()) {
+            if (matches((short) argument.getArgument().getIndex(), argument.getArgument(), mutable, stack, hashExact, argument.getText(), argument.filterData) == argument.isRegular()) {
                 return true;
             }
         }
@@ -192,8 +198,18 @@ public class Argument<T, R> {
         return false;
     }
     
-    private static <T, R, Z, B> boolean matches(ArgumentType<T, B> argumentType, Mutable<Z> data, EntryStack<?> stack, String filter, R filterData) {
-        return argumentType.matches((Mutable<B>) data, stack, filter, (T) filterData);
+    private static <T, R, Z, B> boolean matches(short argumentIndex, ArgumentType<T, B> argumentType, Mutable<Z> data, EntryStack<?> stack, long hashExact, String filter, R filterData) {
+        Long2ObjectMap<Object> map = SEARCH_CACHE.get(argumentIndex);
+        if (map == null) {
+            SEARCH_CACHE.put(argumentIndex, map = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>()));
+        }
+        Z value = (Z) map.get(hashExact);
+        data.setValue(value);
+        boolean matches = argumentType.matches((Mutable<B>) data, stack, filter, (T) filterData);
+        if (value == null) {
+            map.put(hashExact, data.getValue());
+        }
+        return matches;
     }
     
     public ArgumentType<?, ?> getArgument() {

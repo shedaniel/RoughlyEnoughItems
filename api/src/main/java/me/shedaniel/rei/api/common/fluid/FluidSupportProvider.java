@@ -1,6 +1,6 @@
 /*
  * This file is licensed under the MIT License, part of Roughly Enough Items.
- * Copyright (c) 2018, 2019, 2020 shedaniel
+ * Copyright (c) 2018, 2019, 2020, 2021 shedaniel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,10 +46,10 @@ public interface FluidSupportProvider extends Reloadable<REIPlugin<?>>, List<Flu
     
     void register(Provider provider);
     
-    Optional<Stream<EntryStack<FluidStack>>> itemToFluids(EntryStack<? extends ItemStack> itemStack);
+    Optional<Stream<EntryStack<FluidStack>>> itemToFluids(EntryStack<? extends ItemStack> stack);
     
     @FunctionalInterface
     interface Provider {
-        InteractionResultHolder<@Nullable Stream<EntryStack<FluidStack>>> itemToFluid(EntryStack<? extends ItemStack> itemStack);
+        InteractionResultHolder<@Nullable Stream<EntryStack<FluidStack>>> itemToFluid(EntryStack<? extends ItemStack> stack);
     }
 }
