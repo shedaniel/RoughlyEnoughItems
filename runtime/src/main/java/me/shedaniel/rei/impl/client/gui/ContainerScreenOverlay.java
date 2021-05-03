@@ -1,6 +1,6 @@
 /*
  * This file is licensed under the MIT License, part of Roughly Enough Items.
- * Copyright (c) 2018, 2019, 2020 shedaniel
+ * Copyright (c) 2018, 2019, 2020, 2021 shedaniel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -68,6 +68,7 @@ import me.shedaniel.rei.impl.client.gui.widget.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
+import me.shedaniel.rei.impl.client.search.argument.Argument;
 import me.shedaniel.rei.impl.common.util.Weather;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -209,6 +210,7 @@ public class ContainerScreenOverlay extends REIOverlay {
     }
     
     public void init() {
+        Argument.SEARCH_CACHE.clear();
         draggingStack.set(DraggableStackProvider.from(() -> ScreenRegistry.getInstance().getDraggableProviders()),
                 DraggableStackVisitor.from(() -> ScreenRegistry.getInstance().getDraggableVisitors()));
         

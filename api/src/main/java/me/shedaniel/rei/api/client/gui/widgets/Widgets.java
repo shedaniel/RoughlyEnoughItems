@@ -1,6 +1,6 @@
 /*
  * This file is licensed under the MIT License, part of Roughly Enough Items.
- * Copyright (c) 2018, 2019, 2020 shedaniel
+ * Copyright (c) 2018, 2019, 2020, 2021 shedaniel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -378,6 +378,10 @@ public final class Widgets {
             protected T computeNext() {
                 while (!stack.empty()) {
                     Iterator<? extends GuiEventListener> peek = stack.peek();
+                    if (!peek.hasNext())
+                        stack.pop();
+                    if (stack.isEmpty())
+                        break;
                     GuiEventListener listener = peek.next();
                     if (!peek.hasNext())
                         stack.pop();
