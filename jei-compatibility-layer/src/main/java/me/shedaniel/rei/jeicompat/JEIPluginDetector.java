@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat;
 
+import com.google.common.base.Predicates;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.netty.buffer.Unpooled;
 import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
@@ -166,6 +167,15 @@ public class JEIPluginDetector {
         }
     }
     
+    public static <A extends Display, T> T wrapRecipe(DisplayCategory<?> category, A display) {
+        boolean isWrappedCategory = category instanceof JEIWrappedCategory;
+        if (isWrappedCategory) {
+            return ((JEIWrappedDisplay<T>) display).getBackingRecipe();
+        } else {
+            return (T) display;
+        }
+    }
+    
     public static <T> Collection<Display> createDisplayFrom(T object) {
         return DisplayRegistry.getInstance().tryFillDisplay(object);
     }
@@ -198,6 +208,7 @@ public class JEIPluginDetector {
     }
     
     public static <T> EntryStack<T> wrap(EntryDefinition<T> definition, T stack) {
+        if (stack == null) return EntryStack.empty().cast();
         if (definition.getType() == VanillaEntryTypes.FLUID)
             return EntryStack.of(definition, (T) FluidStackHooksForge.fromForge((FluidStack) stack));
         return EntryStack.of(definition, stack);
@@ -209,7 +220,7 @@ public class JEIPluginDetector {
     
     public static <T> EntryIngredient wrapList(EntryDefinition<T> definition, List<T> stack) {
         if (definition.getType() == VanillaEntryTypes.FLUID)
-            return EntryIngredients.of(definition, CollectionUtils.map(stack, s -> (T) FluidStackHooksForge.fromForge((FluidStack) s)));
+            return EntryIngredients.of(definition, CollectionUtils.filterAndMap(stack, Predicates.notNull(), s -> (T) FluidStackHooksForge.fromForge((FluidStack) s)));
         return EntryIngredients.of(definition, stack);
     }
     
@@ -376,6 +387,9 @@ public class JEIPluginDetector {
                 registry.registerFiller(JEIWrappedDisplay.class, display -> display.getCategoryIdentifier().getIdentifier().equals(category.getIdentifier()), Function.identity());
             }
             backingPlugin.registerAdvanced(JEIAdvancedRegistration.INSTANCE);
+            if (!registry.getVisibilityPredicates().contains(JEIRecipeManager.INSTANCE.predicate)) {
+                registry.registerVisibilityPredicate(JEIRecipeManager.INSTANCE.predicate);
+            }
         }
         
         @Override

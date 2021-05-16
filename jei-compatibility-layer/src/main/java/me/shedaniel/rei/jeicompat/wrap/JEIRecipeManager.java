@@ -24,7 +24,9 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibilityPredicate;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
@@ -36,17 +38,19 @@ import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
 
 public enum JEIRecipeManager implements IRecipeManager {
     INSTANCE;
+    
+    Set<CategoryIdentifier<?>> hiddenCategories = new HashSet<>();
+    Map<CategoryIdentifier<?>, Set<Object>> hiddenRecipes = new HashMap<>();
+    public Predicate predicate = new Predicate();
     
     @Override
     public List<IRecipeCategory<?>> getRecipeCategories() {
@@ -103,22 +107,28 @@ public enum JEIRecipeManager implements IRecipeManager {
     
     @Override
     public <T> void hideRecipe(T recipe, ResourceLocation recipeCategoryUid) {
-        throw TODO();
+        Set<Object> recipes = hiddenRecipes.computeIfAbsent(CategoryIdentifier.of(recipeCategoryUid), $ -> new HashSet<>());
+        recipes.add(recipe);
     }
     
     @Override
     public <T> void unhideRecipe(T recipe, ResourceLocation recipeCategoryUid) {
-        throw TODO();
+        CategoryIdentifier<Display> categoryIdentifier = CategoryIdentifier.of(recipeCategoryUid);
+        Set<Object> recipes = hiddenRecipes.computeIfAbsent(categoryIdentifier, $ -> new HashSet<>());
+        recipes.remove(recipe);
+        if (recipes.isEmpty()) {
+            hiddenRecipes.remove(categoryIdentifier);
+        }
     }
     
     @Override
     public void hideRecipeCategory(ResourceLocation recipeCategoryUid) {
-        throw TODO();
+        this.hiddenCategories.add(CategoryIdentifier.of(recipeCategoryUid));
     }
     
     @Override
     public void unhideRecipeCategory(ResourceLocation recipeCategoryUid) {
-        throw TODO();
+        this.hiddenCategories.remove(CategoryIdentifier.of(recipeCategoryUid));
     }
     
     @Override
@@ -128,6 +138,20 @@ public enum JEIRecipeManager implements IRecipeManager {
             if (Objects.equals(d.getCategoryIdentifier().getIdentifier(), recipeCategoryUid)) {
                 DisplayRegistry.getInstance().add(d);
             }
+        }
+    }
+    
+    public class Predicate implements DisplayVisibilityPredicate {
+        @Override
+        public InteractionResult handleDisplay(DisplayCategory<?> category, Display display) {
+            if (hiddenCategories.contains(category.getCategoryIdentifier())) {
+                return InteractionResult.FAIL;
+            }
+            Set<Object> hidden = hiddenRecipes.get(category.getCategoryIdentifier());
+            if (hidden != null && hidden.contains(wrapRecipe(category, display))) {
+                return InteractionResult.FAIL;
+            }
+            return InteractionResult.PASS;
         }
     }
 }

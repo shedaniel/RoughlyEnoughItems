@@ -21,38 +21,20 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat.wrap;
+package me.shedaniel.rei.plugin.common.displays.anvil;
 
-import me.shedaniel.rei.plugin.common.displays.anvil.AnvilRecipe;
-import mezz.jei.api.recipe.vanilla.IJeiBrewingRecipe;
-import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.Collections;
 import java.util.List;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
-
-public enum JEIVanillaRecipeFactory implements IVanillaRecipeFactory {
-    INSTANCE;
+public class AnvilRecipe {
+    private final List<ItemStack> leftInput;
+    private final List<ItemStack> rightInputs;
+    private final List<ItemStack> outputs;
     
-    @Override
-    public Object createAnvilRecipe(ItemStack leftInput, List<ItemStack> rightInputs, List<ItemStack> outputs) {
-        return new AnvilRecipe(Collections.singletonList(leftInput), rightInputs, outputs);
-    }
-    
-    @Override
-    public Object createAnvilRecipe(List<ItemStack> leftInputs, List<ItemStack> rightInputs, List<ItemStack> outputs) {
-        return new AnvilRecipe(leftInputs, rightInputs, outputs);
-    }
-    
-    @Override
-    public IJeiBrewingRecipe createBrewingRecipe(List<ItemStack> ingredients, ItemStack potionInput, ItemStack potionOutput) {
-        throw TODO();
-    }
-    
-    @Override
-    public IJeiBrewingRecipe createBrewingRecipe(List<ItemStack> ingredients, List<ItemStack> potionInputs, ItemStack potionOutput) {
-        throw TODO();
+    public AnvilRecipe(List<ItemStack> leftInput, List<ItemStack> rightInputs, List<ItemStack> outputs) {
+        this.leftInput = leftInput;
+        this.rightInputs = rightInputs;
+        this.outputs = outputs;
     }
 }
