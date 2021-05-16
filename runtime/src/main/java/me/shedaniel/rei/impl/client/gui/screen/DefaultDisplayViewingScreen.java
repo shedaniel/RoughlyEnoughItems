@@ -93,8 +93,6 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     @Nullable
     private Panel workingStationsBaseWidget;
     private Button recipeBack, recipeNext, categoryBack, categoryNext;
-    private EntryStack<?> ingredientStackToNotice = EntryStack.empty();
-    private EntryStack<?> resultStackToNotice = EntryStack.empty();
     
     public DefaultDisplayViewingScreen(Map<DisplayCategory<?>, List<Display>> categoriesMap, @Nullable CategoryIdentifier<?> category) {
         super(categoriesMap, category, 5);
@@ -196,7 +194,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         widgets.add(categoryBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.left_arrow"))
                 .onClick(button -> previousCategory()).tooltipLine(new TranslatableComponent("text.rei.previous_category")));
         widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), getCurrentCategory().getTitle(), clickableLabelWidget -> {
-            ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addAllCategories().fillPreferredOpenedCategory());
+            ViewSearchBuilder.builder().addAllCategories().open();
         }).tooltipLine(I18n.get("text.rei.view_all_categories")));
         widgets.add(categoryNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
                 .onClick(button -> nextCategory()).tooltipLine(new TranslatableComponent("text.rei.next_category")));

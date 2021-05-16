@@ -229,7 +229,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         }
         EntryIngredient arrowStack = EntryIngredient.of(EntryStacks.of(Items.ARROW));
         ReferenceSet<Potion> registeredPotions = new ReferenceOpenHashSet<>();
-        EntryRegistry.getInstance().getEntryStacks().filter(entry -> entry.getType() == VanillaEntryTypes.ITEM && entry.<ItemStack>cast().getValue().getItem() == Items.LINGERING_POTION).forEach(entry -> {
+        EntryRegistry.getInstance().getEntryStacks().filter(entry -> entry.getValueType() == ItemStack.class && entry.<ItemStack>cast().getValue().getItem() == Items.LINGERING_POTION).forEach(entry -> {
             ItemStack itemStack = (ItemStack) entry.getValue();
             Potion potion = PotionUtils.getPotion(itemStack);
             if (registeredPotions.add(potion)) {

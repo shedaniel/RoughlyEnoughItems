@@ -39,7 +39,6 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIHelper;
-import me.shedaniel.rei.api.client.REIOverlay;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
@@ -50,6 +49,8 @@ import me.shedaniel.rei.api.client.gui.drag.*;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -83,7 +84,7 @@ import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.entrySize;
 import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.notSteppingOnExclusionZones;
 
 @ApiStatus.Internal
-public class FavoritesListWidget extends WidgetWithBounds implements DraggableStackProviderWidget, DraggableStackVisitorWidget {
+public class FavoritesListWidget extends WidgetWithBounds implements DraggableStackProviderWidget, DraggableStackVisitorWidget, OverlayListWidget {
     protected final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
         public Rectangle getBounds() {
@@ -127,7 +128,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
                 if (config.setEntrySize(config.getEntrySize() + double_3 * 0.075)) {
                     ConfigManager.getInstance().saveConfig();
-                    REIHelper.getInstance().getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
+                    REIHelper.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
                     return true;
                 }
             } else {
@@ -170,6 +171,38 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             }
         }
         return null;
+    }
+    
+    @Override
+    public EntryStack<?> getFocusedStacK() {
+        Point mouse = PointHelper.ofMouse();
+        if (innerBounds.contains(mouse)) {
+            for (Entry entry : entries.values()) {
+                if (entry.getWidget().containsMouse(mouse)) {
+                    return entry.getWidget().getCurrentEntry().copy();
+                }
+            }
+        }
+        if (favoritePanel.bounds.contains(mouse)) {
+            for (AddFavoritePanel.Row row : favoritePanel.rows.get()) {
+                if (row instanceof AddFavoritePanel.SectionEntriesRow) {
+                    for (AddFavoritePanel.SectionEntriesRow.SectionFavoriteWidget widget : ((AddFavoritePanel.SectionEntriesRow) row).widgets) {
+                        if (widget.containsMouse(mouse)) {
+                            return ClientEntryStacks.of(widget.entry.getRenderer(false)).copy();
+                        }
+                    }
+                }
+            }
+        }
+        return EntryStack.empty();
+    }
+    
+    @Override
+    public Stream<EntryStack<?>> getEntries() {
+        return (Stream<EntryStack<?>>) (Stream<? extends EntryStack<?>>) entriesList.stream()
+                .filter(entry -> entry.getBounds().getMaxY() >= this.currentBounds.getY() && entry.getBounds().y <= this.currentBounds.getMaxY())
+                .map(EntryWidget::getCurrentEntry)
+                .filter(entry -> !entry.isEmpty());
     }
     
     public class FavoriteDraggableStack implements DraggableStack {
@@ -609,7 +642,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            Optional<REIOverlay> overlayOptional = REIHelper.getInstance().getOverlay();
+            Optional<ScreenOverlay> overlayOptional = REIHelper.getInstance().getOverlay();
             Optional<Supplier<Collection<FavoriteMenuEntry>>> menuEntries = favoriteEntry.getMenuEntries();
             if (Math.abs(entry.x.doubleValue() - entry.x.target()) < 1 && Math.abs(entry.y.doubleValue() - entry.y.target()) < 1 && overlayOptional.isPresent() && menuEntries.isPresent()) {
                 ContainerScreenOverlay overlay = (ContainerScreenOverlay) overlayOptional.get();

@@ -34,7 +34,7 @@ import me.shedaniel.architectury.registry.ReloadListeners;
 import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIHelper;
-import me.shedaniel.rei.api.client.REIOverlay;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
@@ -52,7 +52,6 @@ import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.entry.comparison.EntryComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
@@ -87,7 +86,6 @@ import me.shedaniel.rei.impl.common.display.DisplaySerializerRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.EmptyEntryStack;
 import me.shedaniel.rei.impl.common.entry.EntryIngredientImpl;
 import me.shedaniel.rei.impl.common.entry.TypedEntryStack;
-import me.shedaniel.rei.impl.common.entry.comparison.EntryComparatorRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.comparison.FluidComparatorRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.comparison.ItemComparatorRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.comparison.NbtHasherProviderImpl;
@@ -609,7 +607,7 @@ public class RoughlyEnoughItemsCore {
     
     @Environment(EnvType.CLIENT)
     private boolean resetFocused(Screen screen) {
-        if (screen.getFocused() instanceof REIOverlay || screen.getFocused() == screen) {
+        if (screen.getFocused() instanceof ScreenOverlay || screen.getFocused() == screen) {
             screen.setFocused(null);
         }
         return true;

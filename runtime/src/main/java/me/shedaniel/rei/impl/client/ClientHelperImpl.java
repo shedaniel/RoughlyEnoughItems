@@ -45,6 +45,7 @@ import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.gui.screen.CompositeDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.UncertainDisplayViewingScreen;
+import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -63,7 +64,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -103,7 +103,7 @@ public class ClientHelperImpl implements ClientHelper {
         return (ClientHelperImpl) ClientHelper.getInstance();
     }
     
-    public  boolean hasPermissionToUsePackets() {
+    public boolean hasPermissionToUsePackets() {
         try {
             Minecraft.getInstance().getConnection().getSuggestionsProvider().hasPermission(0);
             return hasOperatorPermission() && canUsePackets();
@@ -223,8 +223,15 @@ public class ClientHelperImpl implements ClientHelper {
     }
     
     @ApiStatus.Internal
-    public void openRecipeViewingScreen(Map<DisplayCategory<?>, List<Display>> map, @Nullable CategoryIdentifier<?> category, @Nullable EntryStack<?> ingredientNotice, @Nullable EntryStack<?> resultNotice) {
-        openView(new LegacyWrapperViewSearchBuilder(map).setPreferredOpenedCategory(category).setInputNotice(ingredientNotice).setOutputNotice(resultNotice).fillPreferredOpenedCategory());
+    public void openRecipeViewingScreen(Map<DisplayCategory<?>, List<Display>> map, @Nullable CategoryIdentifier<?> category, List<EntryStack<?>> ingredientNotice, List<EntryStack<?>> resultNotice) {
+        LegacyWrapperViewSearchBuilder builder = new LegacyWrapperViewSearchBuilder(map);
+        for (EntryStack<?> stack : ingredientNotice) {
+            builder.addInputNotice(stack);
+        }
+        for (EntryStack<?> stack : resultNotice) {
+            builder.addOutputNotice(stack);
+        }
+        openView(builder.setPreferredOpenedCategory(category));
     }
     
     @Override
@@ -244,11 +251,11 @@ public class ClientHelperImpl implements ClientHelper {
             screen = new DefaultDisplayViewingScreen(map, builder.getPreferredOpenedCategory());
         }
         if (screen instanceof DisplayScreen) {
-            if (builder.getInputNotice() != null) {
-                ((DisplayScreen) screen).setIngredientStackToNotice(builder.getInputNotice());
+            for (EntryStack<?> stack : builder.getUsagesFor()) {
+                ((DisplayScreen) screen).addIngredientToNotice(stack);
             }
-            if (builder.getOutputNotice() != null) {
-                ((DisplayScreen) screen).setResultStackToNotice(builder.getOutputNotice());
+            for (EntryStack<?> stack : builder.getRecipesFor()) {
+                ((DisplayScreen) screen).addResultToNotice(stack);
             }
         }
         if (Minecraft.getInstance().screen instanceof DisplayScreen) {
@@ -269,7 +276,6 @@ public class ClientHelperImpl implements ClientHelper {
     }
     
     private static abstract class AbstractViewSearchBuilder implements ViewSearchBuilder {
-        @Override
         public ViewSearchBuilder fillPreferredOpenedCategory() {
             if (getPreferredOpenedCategory() == null) {
                 Screen currentScreen = Minecraft.getInstance().screen;
@@ -285,10 +291,9 @@ public class ClientHelperImpl implements ClientHelper {
         private final Set<CategoryIdentifier<?>> categories = new HashSet<>();
         private final List<EntryStack<?>> recipesFor = new ArrayList<>();
         private final List<EntryStack<?>> usagesFor = new ArrayList<>();
-        @Nullable private CategoryIdentifier<?> preferredOpenedCategory = null;
-        @Nullable private EntryStack<?> inputNotice;
-        @Nullable private EntryStack<?> outputNotice;
-        private final LazyLoadedValue<Map<DisplayCategory<?>, List<Display>>> map = new LazyLoadedValue<>(() -> Views.getInstance().buildMapFor(this));
+        @Nullable
+        private CategoryIdentifier<?> preferredOpenedCategory = null;
+        private final LazyLoadedValue<Map<DisplayCategory<?>, List<Display>>> map = new LazyLoadedValue<>(() -> ((ViewsImpl) Views.getInstance()).buildMapFor(this));
         
         @Override
         public ViewSearchBuilder addCategory(CategoryIdentifier<?> category) {
@@ -342,40 +347,20 @@ public class ClientHelperImpl implements ClientHelper {
         }
         
         @Override
-        public <T> ViewSearchBuilder setInputNotice(@Nullable EntryStack<T> stack) {
-            this.inputNotice = stack;
-            return this;
-        }
-        
-        @Nullable
-        @Override
-        public EntryStack<?> getInputNotice() {
-            return inputNotice;
-        }
-        
-        @Override
-        public <T> ViewSearchBuilder setOutputNotice(@Nullable EntryStack<T> stack) {
-            this.outputNotice = stack;
-            return this;
-        }
-        
-        @Nullable
-        @Override
-        public EntryStack<?> getOutputNotice() {
-            return outputNotice;
-        }
-        
-        @Override
         public Map<DisplayCategory<?>, List<Display>> buildMap() {
+            fillPreferredOpenedCategory();
             return this.map.get();
         }
     }
     
     public static final class LegacyWrapperViewSearchBuilder extends AbstractViewSearchBuilder {
         private final Map<DisplayCategory<?>, List<Display>> map;
-        @Nullable private CategoryIdentifier<?> preferredOpenedCategory = null;
-        @Nullable private EntryStack<?> inputNotice;
-        @Nullable private EntryStack<?> outputNotice;
+        @Nullable
+        private EntryStack<?> inputNotice;
+        @Nullable
+        private EntryStack<?> outputNotice;
+        @Nullable
+        private CategoryIdentifier<?> preferredOpenedCategory = null;
         
         public LegacyWrapperViewSearchBuilder(Map<DisplayCategory<?>, List<Display>> map) {
             this.map = map;
@@ -403,7 +388,7 @@ public class ClientHelperImpl implements ClientHelper {
         
         @Override
         public List<EntryStack<?>> getRecipesFor() {
-            return Collections.emptyList();
+            return inputNotice == null ? Collections.emptyList() : Collections.singletonList(outputNotice);
         }
         
         @Override
@@ -413,7 +398,7 @@ public class ClientHelperImpl implements ClientHelper {
         
         @Override
         public List<EntryStack<?>> getUsagesFor() {
-            return Collections.emptyList();
+            return inputNotice == null ? Collections.emptyList() : Collections.singletonList(inputNotice);
         }
         
         @Override
@@ -421,39 +406,26 @@ public class ClientHelperImpl implements ClientHelper {
             this.preferredOpenedCategory = category;
             return this;
         }
-    
+        
         @Override
         @Nullable
         public CategoryIdentifier<?> getPreferredOpenedCategory() {
             return this.preferredOpenedCategory;
         }
         
-        @Override
-        public <T> ViewSearchBuilder setInputNotice(@Nullable EntryStack<T> stack) {
+        public <T> LegacyWrapperViewSearchBuilder addInputNotice(@Nullable EntryStack<T> stack) {
             this.inputNotice = stack;
             return this;
         }
         
-        @Nullable
-        @Override
-        public EntryStack<?> getInputNotice() {
-            return inputNotice;
-        }
-        
-        @Override
-        public <T> ViewSearchBuilder setOutputNotice(@Nullable EntryStack<T> stack) {
+        public <T> LegacyWrapperViewSearchBuilder addOutputNotice(@Nullable EntryStack<T> stack) {
             this.outputNotice = stack;
             return this;
         }
         
-        @Nullable
-        @Override
-        public EntryStack<?> getOutputNotice() {
-            return outputNotice;
-        }
-        
         @Override
         public Map<DisplayCategory<?>, List<Display>> buildMap() {
+            fillPreferredOpenedCategory();
             return this.map;
         }
     }

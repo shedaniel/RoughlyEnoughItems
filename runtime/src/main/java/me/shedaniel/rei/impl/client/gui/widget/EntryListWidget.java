@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.google.common.base.Predicates;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -39,7 +40,8 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIHelper;
-import me.shedaniel.rei.api.client.REIOverlay;
+import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.EntryPanelOrdering;
@@ -76,9 +78,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApiStatus.Internal
-public class EntryListWidget extends WidgetWithBounds {
+public class EntryListWidget extends WidgetWithBounds implements OverlayListWidget {
     static final Comparator<? super EntryStack<?>> ENTRY_NAME_COMPARER = Comparator.comparing(stack -> stack.asFormatStrippedText().getString());
     static final Comparator<? super EntryStack<?>> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
         if (stack.getType() == VanillaEntryTypes.ITEM) {
@@ -170,7 +173,7 @@ public class EntryListWidget extends WidgetWithBounds {
                 ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
                 if (config.setEntrySize(config.getEntrySize() + amount * 0.075)) {
                     ConfigManager.getInstance().saveConfig();
-                    REIHelper.getInstance().getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
+                    REIHelper.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
                     return true;
                 }
             } else if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
@@ -472,6 +475,35 @@ public class EntryListWidget extends WidgetWithBounds {
                     return true;
         }
         return false;
+    }
+    
+    @Override
+    public EntryStack<?> getFocusedStacK() {
+        Point mouse = PointHelper.ofMouse();
+        if (containsMouse(mouse)) {
+            for (EntryListEntry entry : entries) {
+                EntryStack<?> currentEntry = entry.getCurrentEntry();
+                if (!currentEntry.isEmpty() && entry.containsMouse(mouse)) {
+                    return currentEntry.copy();
+                }
+            }
+        }
+        return EntryStack.empty();
+    }
+    
+    @Override
+    public Stream<EntryStack<?>> getEntries() {
+        if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
+            int skip = Math.max(0, Mth.floor(scrolling.scrollAmount / (float) entrySize()));
+            int nextIndex = skip * innerBounds.width / entrySize();
+            return (Stream<EntryStack<?>>) (Stream<? extends EntryStack<?>>) entries.stream()
+                    .skip(nextIndex)
+                    .filter(entry -> entry.getBounds().y <= this.bounds.getMaxY())
+                    .map(EntryWidget::getCurrentEntry)
+                    .filter(Predicates.not(EntryStack::isEmpty));
+        } else {
+            return entries.stream().map(EntryWidget::getCurrentEntry);
+        }
     }
     
     private class EntryListEntry extends EntryListEntryWidget {

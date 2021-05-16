@@ -49,7 +49,6 @@ import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class ViewsImpl implements Views {
-    @Override
     public Map<DisplayCategory<?>, List<Display>> buildMapFor(ViewSearchBuilder builder) {
         Stopwatch stopwatch = Stopwatch.createStarted();
         Set<CategoryIdentifier<?>> categories = builder.getCategories();
@@ -121,7 +120,7 @@ public class ViewsImpl implements Views {
             Set<Display> set = new LinkedHashSet<>();
             generatorsCount += entry.getValue().size();
             
-            for (LiveDisplayGenerator<Display> generator : (List<LiveDisplayGenerator<Display>>) (List) entry.getValue()) {
+            for (LiveDisplayGenerator<Display> generator : (List<LiveDisplayGenerator<Display>>) (List<? extends LiveDisplayGenerator<?>>) entry.getValue()) {
                 generateLiveDisplays(generator, builder, set::add);
             }
             
@@ -133,13 +132,13 @@ public class ViewsImpl implements Views {
         Consumer<Display> displayConsumer = display -> {
             CollectionUtils.getOrPutEmptyList(result, CategoryRegistry.getInstance().get(display.getCategoryIdentifier()).getCategory()).add(display);
         };
-        for (LiveDisplayGenerator<Display> generator : (List<LiveDisplayGenerator<Display>>) (List) DisplayRegistry.getInstance().getGlobalDisplayGenerators()) {
+        for (LiveDisplayGenerator<Display> generator : (List<LiveDisplayGenerator<Display>>) (List<? extends LiveDisplayGenerator<?>>) DisplayRegistry.getInstance().getGlobalDisplayGenerators()) {
             generatorsCount++;
             generateLiveDisplays(generator, builder, displayConsumer);
         }
         
         String message = String.format("Built Recipe View in %s for %d categories, %d recipes for, %d usages for and %d live recipe generators.",
-                stopwatch.stop().toString(), categories.size(), recipesFor.size(), usagesFor.size(), generatorsCount);
+                stopwatch.stop(), categories.size(), recipesFor.size(), usagesFor.size(), generatorsCount);
         if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
             RoughlyEnoughItemsCore.LOGGER.info(message);
         } else {
