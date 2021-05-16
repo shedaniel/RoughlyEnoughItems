@@ -59,11 +59,11 @@ public interface PluginManager<P extends REIPlugin<?>> extends ParentReloadable<
                 () -> () -> Arrays.asList(getInstance(), getServerInstance()));
     }
     
-    static boolean areAnyPluginsReloading() {
-        return CollectionUtils.anyMatch(getActiveInstances(), PluginManager::arePluginsReloading);
+    static boolean areAnyReloading() {
+        return CollectionUtils.anyMatch(getActiveInstances(), PluginManager::isReloading);
     }
     
-    boolean arePluginsReloading();
+    boolean isReloading();
     
     <T extends Reloadable<? super P>> T get(Class<T> reloadableClass);
     

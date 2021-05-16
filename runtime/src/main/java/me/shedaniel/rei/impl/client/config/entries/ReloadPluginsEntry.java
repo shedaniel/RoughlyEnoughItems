@@ -49,7 +49,7 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> RoughlyEnoughItemsCore.reloadPlugins(null)) {
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            if (PluginManager.areAnyPluginsReloading()) {
+            if (PluginManager.areAnyReloading()) {
                 Screen screen = Minecraft.getInstance().screen;
                 Minecraft.getInstance().setScreen(new ConfigReloadingScreen(() -> Minecraft.getInstance().setScreen(screen)));
             } else {

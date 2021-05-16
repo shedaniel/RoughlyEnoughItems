@@ -48,7 +48,7 @@ public class ConfigReloadingScreen extends Screen {
     @Override
     public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
         this.renderDirtBackground(0);
-        if (!PluginManager.areAnyPluginsReloading()) {
+        if (!PluginManager.areAnyReloading()) {
             parent.run();
         }
         drawCenteredString(matrices, this.font, I18n.get("text.rei.config.is.reloading"), this.width / 2, this.height / 2 - 50, 16777215);
