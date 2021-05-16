@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.client.gui;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
@@ -74,12 +75,13 @@ public final class RecipeDisplayExporter extends Widget {
     private void exportRecipe(Rectangle rectangle, List<Widget> widgets) {
         Minecraft client = Minecraft.getInstance();
         Window window = client.getWindow();
-        RenderTarget renderTarget = new RenderTarget(window.getWidth(), window.getHeight(), true, false);
+        RenderTarget renderTarget = new TextureTarget(window.getWidth(), window.getHeight(), true, false);
         renderTarget.bindWrite(true);
         RenderSystem.clear(256, Minecraft.ON_OSX);
         Matrix4f matrix4f = Matrix4f.orthographic(0.0F, (float) ((double) window.getWidth() / window.getGuiScale()), 0.0F, (float) ((double) window.getHeight() / window.getGuiScale()), 1000.0F, 3000.0F);
         RenderSystem.setProjectionMatrix(matrix4f);
         PoseStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushPose();
         poseStack.setIdentity();
         poseStack.translate(0.0D, 0.0D, -2000.0D);
         RenderSystem.applyModelViewMatrix();
@@ -117,6 +119,8 @@ public final class RecipeDisplayExporter extends Widget {
         renderTarget.destroyBuffers();
         Minecraft.getInstance().levelRenderer.graphicsChanged();
         Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
+        poseStack.popPose();
+        RenderSystem.applyModelViewMatrix();
     }
     
     @Override
