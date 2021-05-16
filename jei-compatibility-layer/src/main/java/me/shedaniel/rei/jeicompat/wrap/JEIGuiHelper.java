@@ -153,7 +153,7 @@ public enum JEIGuiHelper implements IGuiHelper {
     @Override
     @NotNull
     public ICraftingGridHelper createCraftingGridHelper(int craftInputSlot1) {
-        throw TODO();
+        return JEICraftingGridHelper.INSTANCE;
     }
     
     @Override
