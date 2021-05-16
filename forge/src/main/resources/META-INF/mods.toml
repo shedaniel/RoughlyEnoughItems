@@ -4,10 +4,19 @@ issueTrackerURL = "https://github.com/shedaniel/RoughlyEnoughItems/issues"
 logoFile = "icon.png"
 authors = "shedaniel"
 license = "MIT"
+
 [[mods]]
 modId = "roughlyenoughitems"
 version = "${version}"
 displayName = "Roughly Enough Items"
+description = '''
+To allow players to view items and recipes.
+'''
+
+[[mods]]
+modId = "jei"
+version = "7.9999"
+displayName = "Roughly Enough Items (JEI Stub)"
 description = '''
 To allow players to view items and recipes.
 '''

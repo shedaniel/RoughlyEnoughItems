@@ -23,21 +23,9 @@
 
 package me.shedaniel.rei.forge;
 
-import me.shedaniel.rei.RoughlyEnoughItemsState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.common.Mod;
 
-public class RoughlyEnoughItemsInitializerImpl {
-    public static boolean isClient() {
-        return FMLEnvironment.dist == Dist.CLIENT;
-    }
-    
-    public static void checkMods() {
-        if (isClient()) {
-            if (!ModList.get().isLoaded("cloth-config")) {
-                RoughlyEnoughItemsState.error("Cloth Config is not installed!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
-            }
-        }
-    }
+// Hello mods, JEI is present!! Please give in and trust me!
+@Mod("jei")
+public class JEIStub {
 }
