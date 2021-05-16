@@ -96,13 +96,13 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
     @Nullable
     public IFocus<?> getFocus() {
         DisplayScreen screen = (DisplayScreen) Minecraft.getInstance().screen;
-        EntryStack<?> notice = screen.getIngredientStackToNotice();
+        List<EntryStack<?>> notice = screen.getIngredientsToNotice();
         if (!notice.isEmpty()) {
-            return new JEIFocus<>(IFocus.Mode.INPUT, unwrap(notice.cast())).wrap();
+            return new JEIFocus<>(IFocus.Mode.INPUT, unwrap(notice.get(0).cast())).wrap();
         }
-        notice = screen.getResultStackToNotice();
+        notice = screen.getResultsToNotice();
         if (!notice.isEmpty()) {
-            return new JEIFocus<>(IFocus.Mode.OUTPUT, unwrap(notice.cast())).wrap();
+            return new JEIFocus<>(IFocus.Mode.OUTPUT, unwrap(notice.get(0).cast())).wrap();
         }
         return null;
     }

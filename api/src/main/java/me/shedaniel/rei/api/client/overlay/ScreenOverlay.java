@@ -21,13 +21,15 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client;
+package me.shedaniel.rei.api.client.overlay;
 
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import org.jetbrains.annotations.ApiStatus;
 
-public abstract class REIOverlay extends WidgetWithBounds {
+import java.util.Optional;
+
+public abstract class ScreenOverlay extends WidgetWithBounds {
     @ApiStatus.Internal
     public abstract void closeOverlayMenu();
     
@@ -36,4 +38,8 @@ public abstract class REIOverlay extends WidgetWithBounds {
     public abstract DraggingContext<?> getDraggingContext();
     
     public abstract boolean isNotInExclusionZones(double mouseX, double mouseY);
+    
+    public abstract OverlayListWidget getEntryList();
+    
+    public abstract Optional<OverlayListWidget> getFavoritesList();
 }

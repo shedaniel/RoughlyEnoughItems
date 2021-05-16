@@ -391,9 +391,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 }
             }
             if ((ConfigObject.getInstance().getRecipeKeybind().getType() != InputConstants.Type.MOUSE && button == 0) || ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button))
-                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).setOutputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
+                return ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).open();
             else if ((ConfigObject.getInstance().getUsageKeybind().getType() != InputConstants.Type.MOUSE && button == 1) || ConfigObject.getInstance().getUsageKeybind().matchesMouse(button))
-                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).setInputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
+                return ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).open();
         }
         return false;
     }
@@ -438,9 +438,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 }
             }
             if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(int_1, int_2))
-                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).setOutputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
+                return ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).open();
             else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(int_1, int_2))
-                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).setInputNotice(getCurrentEntry()).fillPreferredOpenedCategory());
+                return ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).open();
         }
         return false;
     }

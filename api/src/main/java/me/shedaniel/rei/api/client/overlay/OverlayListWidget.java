@@ -21,40 +21,19 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.gui.widgets;
+package me.shedaniel.rei.api.client.overlay;
 
-public interface TextField {
-    String getText();
+import me.shedaniel.rei.api.common.entry.EntryStack;
+
+import java.util.stream.Stream;
+
+public interface OverlayListWidget {
+    /**
+     * Returns the mouse hovered stack within the overlay list widget.
+     *
+     * @return the mouse hovered stack, returns {@link EntryStack#empty()} if none is hovered
+     */
+    EntryStack<?> getFocusedStacK();
     
-    void setText(String text);
-    
-    String getSelectedText();
-    
-    void addText(String text);
-    
-    void moveCursorTo(int cursor);
-    
-    void moveCursorToStart();
-    
-    void moveCursorToEnd();
-    
-    int getMaxLength();
-    
-    void setMaxLength(int maxLength);
-    
-    int getCursor();
-    
-    void setCursorPosition(int cursor);
-    
-    boolean hasBorder();
-    
-    void setHasBorder(boolean hasBorder);
-    
-    void setEditableColor(int editableColor);
-    
-    void setNotEditableColor(int notEditableColor);
-    
-    boolean isFocused();
-    
-    void setFocused(boolean focused);
+    Stream<EntryStack<?>> getEntries();
 }

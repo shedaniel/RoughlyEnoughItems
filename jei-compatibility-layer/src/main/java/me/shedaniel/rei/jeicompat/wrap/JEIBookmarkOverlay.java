@@ -21,40 +21,31 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.gui.widgets;
+package me.shedaniel.rei.jeicompat.wrap;
 
-public interface TextField {
-    String getText();
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import mezz.jei.api.runtime.IBookmarkOverlay;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
+
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
+
+public enum JEIBookmarkOverlay implements IBookmarkOverlay {
+    INSTANCE;
     
-    void setText(String text);
-    
-    String getSelectedText();
-    
-    void addText(String text);
-    
-    void moveCursorTo(int cursor);
-    
-    void moveCursorToStart();
-    
-    void moveCursorToEnd();
-    
-    int getMaxLength();
-    
-    void setMaxLength(int maxLength);
-    
-    int getCursor();
-    
-    void setCursorPosition(int cursor);
-    
-    boolean hasBorder();
-    
-    void setHasBorder(boolean hasBorder);
-    
-    void setEditableColor(int editableColor);
-    
-    void setNotEditableColor(int notEditableColor);
-    
-    boolean isFocused();
-    
-    void setFocused(boolean focused);
+    @Override
+    @Nullable
+    public Object getIngredientUnderMouse() {
+        if (!REIHelper.getInstance().isOverlayVisible()) return null;
+        ScreenOverlay overlay = REIHelper.getInstance().getOverlay().get();
+        Optional<OverlayListWidget> favoritesList = overlay.getFavoritesList();
+        if (!favoritesList.isPresent()) return null;
+        EntryStack<?> stack = favoritesList.get().getFocusedStacK();
+        if (stack.isEmpty()) return null;
+        return unwrap(stack);
+    }
 }

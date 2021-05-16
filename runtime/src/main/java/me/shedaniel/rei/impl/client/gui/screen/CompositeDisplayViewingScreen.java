@@ -212,7 +212,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 .enabled(categories.size() > tabsPerPage));
         
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), categories.get(selectedCategoryIndex).getTitle(), label -> {
-            ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addAllCategories().fillPreferredOpenedCategory());
+            ViewSearchBuilder.builder().addAllCategories().open();
         }).tooltipLine(I18n.get("text.rei.view_all_categories")).noShadow().color(0xFF404040, 0xFFBBBBBB).hoveredColor(0xFF0041FF, 0xFFFFBD4D));
         
         this.children.addAll(buttonList);

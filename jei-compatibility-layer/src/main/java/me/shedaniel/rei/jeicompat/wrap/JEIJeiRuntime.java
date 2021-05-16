@@ -27,8 +27,6 @@ import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.runtime.*;
 import org.jetbrains.annotations.NotNull;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
-
 public enum JEIJeiRuntime implements IJeiRuntime {
     INSTANCE;
     
@@ -41,7 +39,7 @@ public enum JEIJeiRuntime implements IJeiRuntime {
     @Override
     @NotNull
     public IRecipesGui getRecipesGui() {
-        throw TODO();
+        return JEIRecipesGui.INSTANCE;
     }
     
     @Override
@@ -53,13 +51,13 @@ public enum JEIJeiRuntime implements IJeiRuntime {
     @Override
     @NotNull
     public IIngredientListOverlay getIngredientListOverlay() {
-        throw TODO();
+        return JEIIngredientListOverlay.INSTANCE;
     }
     
     @Override
     @NotNull
     public IBookmarkOverlay getBookmarkOverlay() {
-        throw TODO();
+        return JEIBookmarkOverlay.INSTANCE;
     }
     
     @Override

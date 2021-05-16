@@ -112,10 +112,10 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     }
     
     @Override
-    public void setFocused(boolean boolean_1) {
-        if (isFocused() != boolean_1 && isMain)
+    public void setFocused(boolean focused) {
+        if (isFocused() != focused && isMain)
             addToHistory(getText());
-        super.setFocused(boolean_1);
+        super.setFocused(focused);
     }
     
     @ApiStatus.Internal

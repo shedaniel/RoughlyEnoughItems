@@ -24,25 +24,16 @@
 package me.shedaniel.rei.api.client.view;
 
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
-import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public interface Views extends Reloadable<REIClientPlugin> {
     static Views getInstance() {
         return PluginManager.getClientInstance().get(Views.class);
     }
-    
-    @ApiStatus.Internal
-    Map<DisplayCategory<?>, List<Display>> buildMapFor(ViewSearchBuilder builder);
     
     /**
      * Returns all craftable items from materials.
@@ -51,28 +42,4 @@ public interface Views extends Reloadable<REIClientPlugin> {
      * @return the list of craftable entries
      */
     Collection<EntryStack<?>> findCraftableEntriesByMaterials(Iterable<? extends EntryStack<?>> inventoryItems);
-    
-    /**
-     * Returns a map of recipes for an entry
-     *
-     * @param stack the stack to be crafted
-     * @return the map of recipes
-     */
-    default <T> Map<DisplayCategory<?>, List<Display>> getRecipesFor(EntryStack<T> stack) {
-        return ViewSearchBuilder.builder().addRecipesFor(stack).setInputNotice(stack).buildMap();
-    }
-    
-    /**
-     * Returns a map of usages for an entry
-     *
-     * @param stack the stack to be used
-     * @return the map of recipes
-     */
-    default <T> Map<DisplayCategory<?>, List<Display>> getUsagesFor(EntryStack<T> stack) {
-        return ViewSearchBuilder.builder().addUsagesFor(stack).setInputNotice(stack).buildMap();
-    }
-    
-    default Map<DisplayCategory<?>, List<Display>> getAllRecipes() {
-        return ViewSearchBuilder.builder().addAllCategories().buildMap();
-    }
 }
