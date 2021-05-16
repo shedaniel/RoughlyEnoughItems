@@ -23,59 +23,19 @@
 
 package me.shedaniel.rei.impl.common.entry.comparison;
 
-import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
-import me.shedaniel.rei.api.common.entry.comparison.ItemComparator;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
-import net.minecraft.core.Registry;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.ApiStatus;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
-
-@ApiStatus.Internal
-public class ItemComparatorRegistryImpl implements ItemComparatorRegistry {
-    private static final Logger LOGGER = LogManager.getLogger(ItemComparatorRegistryImpl.class);
-    private final Map<Item, ItemComparator> comparators = new IdentityHashMap<>();
-    
+public class ItemComparatorRegistryImpl extends EntryComparatorRegistryImpl<ItemStack, Item> implements ItemComparatorRegistry {
     @Override
-    public void register(ItemComparator comparator, Item item) {
-        ItemComparator put = this.comparators.put(item, comparator);
-        if (put != null) {
-            LOGGER.warn("[REI] Overriding " + put + "item comparator with " + comparator + "for " + Registry.ITEM.getKey(item) + "! This may result in unwanted comparisons!");
-        }
-    }
-    
-    @Override
-    public void startReload() {
-        comparators.clear();
+    public Item getEntry(ItemStack stack) {
+        return stack.getItem();
     }
     
     @Override
     public void acceptPlugin(REIPlugin<?> plugin) {
         plugin.registerItemComparators(this);
-    }
-    
-    @Override
-    public long hashOf(ComparisonContext context, ItemStack stack) {
-        ItemComparator comparator = comparators.get(stack.getItem());
-        if (comparator != null) {
-            return comparator.hash(context, stack);
-        }
-        return 1;
-    }
-    
-    @Override
-    public boolean containsComparator(Item item) {
-        return comparators.containsKey(item);
-    }
-    
-    @Override
-    public int comparatorSize() {
-        return this.comparators.size();
     }
 }

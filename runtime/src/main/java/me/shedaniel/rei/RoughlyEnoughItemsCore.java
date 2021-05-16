@@ -52,6 +52,8 @@ import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.comparison.EntryComparatorRegistry;
+import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
@@ -85,6 +87,8 @@ import me.shedaniel.rei.impl.common.display.DisplaySerializerRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.EmptyEntryStack;
 import me.shedaniel.rei.impl.common.entry.EntryIngredientImpl;
 import me.shedaniel.rei.impl.common.entry.TypedEntryStack;
+import me.shedaniel.rei.impl.common.entry.comparison.EntryComparatorRegistryImpl;
+import me.shedaniel.rei.impl.common.entry.comparison.FluidComparatorRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.comparison.ItemComparatorRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.comparison.NbtHasherProviderImpl;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
@@ -234,10 +238,11 @@ public class RoughlyEnoughItemsCore {
                 REIPlugin.class,
                 UnaryOperator.identity(),
                 usedTime -> {
-                    RoughlyEnoughItemsCore.LOGGER.info("Reloaded Plugin Manager [%s] with %d entry types, %d item comparators and %d fluid support providers in %dms.",
+                    RoughlyEnoughItemsCore.LOGGER.info("Reloaded Plugin Manager [%s] with %d entry types, %d item comparators, %d fluid comparators and %d fluid support providers in %dms.",
                             REIPlugin.class.getSimpleName(),
                             EntryTypeRegistry.getInstance().values().size(),
                             ItemComparatorRegistry.getInstance().comparatorSize(),
+                            FluidComparatorRegistry.getInstance().comparatorSize(),
                             FluidSupportProvider.getInstance().size(),
                             usedTime
                     );
@@ -245,6 +250,7 @@ public class RoughlyEnoughItemsCore {
                 new EntryTypeRegistryImpl(),
                 new RecipeManagerContextImpl<>(RecipeManagerContextImpl.supplier()),
                 new ItemComparatorRegistryImpl(),
+                new FluidComparatorRegistryImpl(),
                 new DisplaySerializerRegistryImpl(),
                 new FluidSupportProviderImpl()), "commonPluginManager");
         Internals.attachInstanceSupplier(new PluginManagerImpl<>(
@@ -381,10 +387,10 @@ public class RoughlyEnoughItemsCore {
                 new ViewsImpl(),
                 new SearchProviderImpl(),
                 new ConfigManagerImpl(),
+                new EntryRegistryImpl(),
                 new CategoryRegistryImpl(),
                 new DisplayRegistryImpl(),
                 new ScreenRegistryImpl(),
-                new EntryRegistryImpl(),
                 new FavoriteEntryTypeRegistryImpl(),
                 new SubsetsRegistryImpl(),
                 new TransferHandlerRegistryImpl(),
