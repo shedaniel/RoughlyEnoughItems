@@ -383,11 +383,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public boolean isJEICompatibilityLayerEnabled() {
-        return Platform.isForge() && advanced.jeiCompatibilityLayer;
+        return Platform.isForge() && advanced.enableJeiCompatibilityLayer;
     }
     
     public void setJEICompatibilityLayerEnabled(boolean value) {
-        advanced.jeiCompatibilityLayer = value;
+        advanced.enableJeiCompatibilityLayer = value;
     }
     
     @Retention(RetentionPolicy.RUNTIME)
@@ -493,7 +493,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
         public Filtering filtering = new Filtering();
         @ConfigEntry.Gui.Excluded
-        public boolean jeiCompatibilityLayer = false;
+        public boolean enableJeiCompatibilityLayer = true;
         
         public static class Tooltips {
             @Comment("Declares whether REI should append mod names to entries.") private boolean appendModNames = true;
