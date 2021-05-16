@@ -4,6 +4,7 @@ import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import mezz.jei.api.runtime.IIngredientManager;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collection;
@@ -31,8 +32,24 @@ public interface IRecipeRegistration {
      *                        New lines can be added with "\n" or by giving multiple descriptionKeys.
      *                        Long lines are wrapped automatically.
      *                        Very long entries will span multiple pages automatically.
+     * @deprecated Since JEI 7.6.4, use {@link #addIngredientInfo(Object, IIngredientType, Component...)} instead.
      */
+    @Deprecated
     <T> void addIngredientInfo(T ingredient, IIngredientType<T> ingredientType, String... descriptionKeys);
+    
+    /**
+     * Add an info page for an ingredient.
+     * Description pages show in the recipes for an ingredient and tell the player a little bit about it.
+     *
+     * @param ingredient            The ingredient to describe
+     * @param ingredientType        The type of the ingredient
+     * @param descriptionComponents Text components for info text.
+     *                              New lines can be added with "\n" or by giving multiple descriptions.
+     *                              Long lines are wrapped automatically.
+     *                              Very long entries will span multiple pages automatically.
+     * @since JEI 7.6.4
+     */
+    <T> void addIngredientInfo(T ingredient, IIngredientType<T> ingredientType, Component... descriptionComponents);
     
     /**
      * Add an info page for multiple ingredients together.
@@ -44,6 +61,22 @@ public interface IRecipeRegistration {
      *                        New lines can be added with "\n" or by giving multiple descriptionKeys.
      *                        Long lines are wrapped automatically.
      *                        Very long entries will span multiple pages automatically.
+     * @deprecated Since JEI 7.6.4, use {@link #addIngredientInfo(List, IIngredientType, Component...)} instead.
      */
+    @Deprecated
     <T> void addIngredientInfo(List<T> ingredients, IIngredientType<T> ingredientType, String... descriptionKeys);
+    
+    /**
+     * Add an info page for multiple ingredients together.
+     * Description pages show in the recipes for an ingredient and tell the player a little bit about it.
+     *
+     * @param ingredients           The ingredients to describe
+     * @param ingredientType        The type of the ingredients
+     * @param descriptionComponents Text components for info text.
+     *                              New lines can be added with "\n" or by giving multiple descriptions.
+     *                              Long lines are wrapped automatically.
+     *                              Very long entries will span multiple pages automatically.
+     * @since JEI 7.6.4
+     */
+    <T> void addIngredientInfo(List<T> ingredients, IIngredientType<T> ingredientType, Component... descriptionComponents);
 }

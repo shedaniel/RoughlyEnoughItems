@@ -26,6 +26,7 @@ package me.shedaniel.rei.jeicompat.wrap;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
+import mezz.jei.api.helpers.IColorHelper;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
@@ -36,6 +37,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Locale;
+
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 
 public class JEIModIngredientRegistration implements IModIngredientRegistration {
     private final JEIPluginDetector.JEIPluginWrapper wrapper;
@@ -50,6 +53,12 @@ public class JEIModIngredientRegistration implements IModIngredientRegistration 
     @NotNull
     public ISubtypeManager getSubtypeManager() {
         return JEISubtypeManager.INSTANCE;
+    }
+    
+    @Override
+    @NotNull
+    public IColorHelper getColorHelper() {
+        throw TODO();
     }
     
     @Override

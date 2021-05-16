@@ -42,6 +42,7 @@ import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
@@ -318,6 +319,11 @@ public class JEIPluginDetector {
         @Override
         public void registerItemComparators(ItemComparatorRegistry registry) {
             backingPlugin.registerItemSubtypes(JEISubtypeRegistration.INSTANCE);
+        }
+        
+        @Override
+        public void registerFluidComparators(FluidComparatorRegistry registry) {
+            backingPlugin.registerFluidSubtypes(JEISubtypeRegistration.INSTANCE);
         }
         
         @Override

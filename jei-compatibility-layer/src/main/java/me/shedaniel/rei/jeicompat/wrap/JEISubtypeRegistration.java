@@ -23,12 +23,17 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.rei.api.common.entry.comparison.ItemComparator;
+import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
+import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
+import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
+import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
 import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapContext;
@@ -38,7 +43,17 @@ public enum JEISubtypeRegistration implements ISubtypeRegistration {
     
     @Override
     public void registerSubtypeInterpreter(@NotNull Item item, @NotNull ISubtypeInterpreter interpreter) {
+        registerSubtypeInterpreter(item, (IIngredientSubtypeInterpreter) interpreter);
+    }
+    
+    @Override
+    public void registerSubtypeInterpreter(@NotNull Item item, @NotNull IIngredientSubtypeInterpreter<ItemStack> interpreter) {
         ItemComparatorRegistry.getInstance().register(wrapItemComparator(interpreter), item);
+    }
+    
+    @Override
+    public void registerSubtypeInterpreter(@NotNull Fluid fluid, @NotNull IIngredientSubtypeInterpreter<FluidStack> interpreter) {
+        FluidComparatorRegistry.getInstance().register(wrapFluidComparator(interpreter), fluid);
     }
     
     @Override
@@ -47,11 +62,25 @@ public enum JEISubtypeRegistration implements ISubtypeRegistration {
     }
     
     @Override
+    public void useNbtForSubtypes(@NotNull Fluid @NotNull ... fluids) {
+        FluidComparatorRegistry.getInstance().registerNbt(fluids);
+    }
+    
+    @Override
     public boolean hasSubtypeInterpreter(@NotNull ItemStack itemStack) {
         return ItemComparatorRegistry.getInstance().containsComparator(itemStack.getItem());
     }
     
-    private static ItemComparator wrapItemComparator(ISubtypeInterpreter interpreter) {
+    @Override
+    public boolean hasSubtypeInterpreter(@NotNull FluidStack fluidStack) {
+        return FluidComparatorRegistry.getInstance().containsComparator(fluidStack.getFluid());
+    }
+    
+    private static EntryComparator<ItemStack> wrapItemComparator(IIngredientSubtypeInterpreter<ItemStack> interpreter) {
         return (context, stack) -> interpreter.apply(stack, wrapContext(context)).hashCode();
+    }
+    
+    private static EntryComparator<me.shedaniel.architectury.fluid.FluidStack> wrapFluidComparator(IIngredientSubtypeInterpreter<FluidStack> interpreter) {
+        return (context, stack) -> interpreter.apply(FluidStackHooksForge.toForge(stack), wrapContext(context)).hashCode();
     }
 }

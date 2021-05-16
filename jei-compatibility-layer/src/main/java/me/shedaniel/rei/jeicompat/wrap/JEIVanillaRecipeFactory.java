@@ -21,25 +21,34 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.entry.comparison;
+package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.rei.api.common.plugins.PluginManager;
-import net.minecraft.world.item.Item;
+import mezz.jei.api.recipe.vanilla.IJeiBrewingRecipe;
+import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import net.minecraft.world.item.ItemStack;
 
-public interface ItemComparatorRegistry extends EntryComparatorRegistry<ItemStack, Item> {
-    /**
-     * @return the instance of {@link ItemComparatorRegistry}
-     */
-    static ItemComparatorRegistry getInstance() {
-        return PluginManager.getInstance().get(ItemComparatorRegistry.class);
+import java.util.List;
+
+public enum JEIVanillaRecipeFactory implements IVanillaRecipeFactory {
+    INSTANCE;
+    
+    @Override
+    public Object createAnvilRecipe(ItemStack leftInput, List<ItemStack> rightInputs, List<ItemStack> outputs) {
+        return null;
     }
     
-    default void registerNbt(Item item) {
-        register(EntryComparator.itemNbt(), item);
+    @Override
+    public Object createAnvilRecipe(List<ItemStack> leftInputs, List<ItemStack> rightInputs, List<ItemStack> outputs) {
+        return null;
     }
     
-    default void registerNbt(Item... items) {
-        register(EntryComparator.itemNbt(), items);
+    @Override
+    public IJeiBrewingRecipe createBrewingRecipe(List<ItemStack> ingredients, ItemStack potionInput, ItemStack potionOutput) {
+        return null;
+    }
+    
+    @Override
+    public IJeiBrewingRecipe createBrewingRecipe(List<ItemStack> ingredients, List<ItemStack> potionInputs, ItemStack potionOutput) {
+        return null;
     }
 }

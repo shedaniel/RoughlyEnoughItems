@@ -23,23 +23,23 @@
 
 package me.shedaniel.rei.api.common.entry.comparison;
 
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 
-public interface ItemComparatorRegistry extends EntryComparatorRegistry<ItemStack, Item> {
+public interface FluidComparatorRegistry extends EntryComparatorRegistry<FluidStack, Fluid> {
     /**
-     * @return the instance of {@link ItemComparatorRegistry}
+     * @return the instance of {@link FluidComparatorRegistry}
      */
-    static ItemComparatorRegistry getInstance() {
-        return PluginManager.getInstance().get(ItemComparatorRegistry.class);
+    static FluidComparatorRegistry getInstance() {
+        return PluginManager.getInstance().get(FluidComparatorRegistry.class);
     }
     
-    default void registerNbt(Item item) {
-        register(EntryComparator.itemNbt(), item);
+    default void registerNbt(Fluid fluid) {
+        register(EntryComparator.fluidNbt(), fluid);
     }
     
-    default void registerNbt(Item... items) {
-        register(EntryComparator.itemNbt(), items);
+    default void registerNbt(Fluid... fluids) {
+        register(EntryComparator.fluidNbt(), fluids);
     }
 }

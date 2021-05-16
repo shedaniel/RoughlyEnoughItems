@@ -4,9 +4,17 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Function;
 
+/**
+ * @deprecated since JEI 7.6.2, use {@link IIngredientSubtypeInterpreter} instead
+ */
+@Deprecated
 @FunctionalInterface
-public interface ISubtypeInterpreter extends Function<ItemStack, String> {
-    String NONE = "";
+public interface ISubtypeInterpreter extends IIngredientSubtypeInterpreter<ItemStack>, Function<ItemStack, String> {
+    /**
+     * @deprecated use {@link IIngredientSubtypeInterpreter#NONE}
+     */
+    @Deprecated
+    String NONE = IIngredientSubtypeInterpreter.NONE;
     
     /**
      * Get the data from an itemStack that is relevant to telling subtypes apart.
