@@ -29,6 +29,8 @@ import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
+import me.shedaniel.architectury.annotations.ExpectPlatform;
+import me.shedaniel.architectury.annotations.PlatformOnly;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
@@ -42,6 +44,7 @@ import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -226,14 +229,14 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         }
         EntryIngredient arrowStack = EntryIngredient.of(EntryStacks.of(Items.ARROW));
         ReferenceSet<Potion> registeredPotions = new ReferenceOpenHashSet<>();
-        EntryRegistry.getInstance().getEntryStacks().filter(entry -> entry.getValue() == Items.LINGERING_POTION).forEach(entry -> {
+        EntryRegistry.getInstance().getEntryStacks().filter(entry -> entry.getValueType() == ItemStack.class && entry.<ItemStack>cast().getValue().getItem() == Items.LINGERING_POTION).forEach(entry -> {
             ItemStack itemStack = (ItemStack) entry.getValue();
             Potion potion = PotionUtils.getPotion(itemStack);
             if (registeredPotions.add(potion)) {
                 List<EntryIngredient> input = new ArrayList<>();
                 for (int i = 0; i < 4; i++)
                     input.add(arrowStack);
-                input.add(EntryIngredient.of(EntryStacks.of(itemStack)));
+                input.add(EntryIngredients.of(itemStack));
                 for (int i = 0; i < 4; i++)
                     input.add(arrowStack);
                 ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
@@ -292,7 +295,15 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                     registerBrewingRecipe(base, ingredient, output);
                 }
             }
+        } else {
+            registerForgePotions(registry, this);
         }
+    }
+    
+    @ExpectPlatform
+    @PlatformOnly(PlatformOnly.FORGE)
+    private static void registerForgePotions(DisplayRegistry registry, BuiltinClientPlugin clientPlugin) {
+        
     }
     
     @Override

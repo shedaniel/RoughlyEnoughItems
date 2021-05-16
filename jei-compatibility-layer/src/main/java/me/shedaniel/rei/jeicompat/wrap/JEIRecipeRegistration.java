@@ -37,11 +37,13 @@ import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.runtime.IIngredientManager;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
@@ -97,12 +99,30 @@ public enum JEIRecipeRegistration implements IRecipeRegistration {
     }
     
     @Override
+    public <T> void addIngredientInfo(@NotNull T ingredient, @NotNull IIngredientType<T> ingredientType, @NotNull Component @NotNull ... descriptionComponents) {
+        EntryStack<T> stack = wrap(ingredientType, ingredient);
+        BuiltinClientPlugin.getInstance().registerInformation(stack, stack.asFormattedText(), components -> {
+            Collections.addAll(components, descriptionComponents);
+            return components;
+        });
+    }
+    
+    @Override
     public <T> void addIngredientInfo(@NotNull List<T> ingredients, @NotNull IIngredientType<T> ingredientType, @NotNull String @NotNull ... descriptionKeys) {
         EntryIngredient ingredient = wrapList(ingredientType, ingredients);
         BuiltinClientPlugin.getInstance().registerInformation(ingredient, ImmutableTextComponent.EMPTY, components -> {
             for (String key : descriptionKeys) {
                 components.add(new TranslatableComponent(key));
             }
+            return components;
+        });
+    }
+    
+    @Override
+    public <T> void addIngredientInfo(@NotNull List<T> ingredients, @NotNull IIngredientType<T> ingredientType, @NotNull Component @NotNull ... descriptionComponents) {
+        EntryIngredient ingredient = wrapList(ingredientType, ingredients);
+        BuiltinClientPlugin.getInstance().registerInformation(ingredient, ImmutableTextComponent.EMPTY, components -> {
+            Collections.addAll(components, descriptionComponents);
             return components;
         });
     }

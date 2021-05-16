@@ -27,6 +27,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
@@ -53,11 +54,11 @@ public interface REIHelper extends Reloadable<REIClientPlugin> {
     
     void toggleOverlayVisible();
     
-    default Optional<REIOverlay> getOverlay() {
+    default Optional<ScreenOverlay> getOverlay() {
         return getOverlay(false);
     }
     
-    Optional<REIOverlay> getOverlay(boolean reset);
+    Optional<ScreenOverlay> getOverlay(boolean reset);
     
     @Nullable
     AbstractContainerScreen<?> getPreviousContainerScreen();

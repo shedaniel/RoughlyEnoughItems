@@ -30,7 +30,7 @@ import me.shedaniel.architectury.event.events.GuiEvent;
 import me.shedaniel.architectury.event.events.client.ClientTickEvent;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIHelper;
-import me.shedaniel.rei.api.client.REIOverlay;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
@@ -127,7 +127,7 @@ public class REIHelperImpl implements REIHelper {
     }
     
     @Override
-    public Optional<REIOverlay> getOverlay(boolean reset) {
+    public Optional<ScreenOverlay> getOverlay(boolean reset) {
         if (overlay == null || reset) {
             overlay = new ContainerScreenOverlay();
             overlay.init();
@@ -208,13 +208,13 @@ public class REIHelperImpl implements REIHelper {
     
     @Override
     public void startReload() {
-        getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
+        getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
         lastDisplayScreen.clear();
     }
     
     @Override
     public void endReload() {
-        getOverlay().ifPresent(REIOverlay::queueReloadOverlay);
+        getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
     }
     
     public void onInitializeClient() {

@@ -41,14 +41,16 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractDisplayViewingScreen extends Screen implements DisplayScreen {
     protected final Map<DisplayCategory<?>, List<Display>> categoryMap;
     protected final List<DisplayCategory<?>> categories;
-    protected EntryStack<?> ingredientStackToNotice = EntryStack.empty();
-    protected EntryStack<?> resultStackToNotice = EntryStack.empty();
+    protected List<EntryStack<?>> ingredientStackToNotice = new ArrayList<>();
+    protected List<EntryStack<?>> resultStackToNotice = new ArrayList<>();
     protected int selectedCategoryIndex = 0;
     protected int tabsPerPage;
     protected Rectangle bounds;
@@ -79,23 +81,23 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     }
     
     @Override
-    public void setIngredientStackToNotice(EntryStack<?> stack) {
-        this.ingredientStackToNotice = stack;
+    public void addIngredientToNotice(EntryStack<?> stack) {
+        this.ingredientStackToNotice.add(stack);
     }
     
     @Override
-    public void setResultStackToNotice(EntryStack<?> stack) {
-        this.resultStackToNotice = stack;
+    public void addResultToNotice(EntryStack<?> stack) {
+        this.resultStackToNotice.add(stack);
     }
     
     @Override
-    public EntryStack<?> getIngredientStackToNotice() {
-        return ingredientStackToNotice;
+    public List<EntryStack<?>> getIngredientsToNotice() {
+        return Collections.unmodifiableList(ingredientStackToNotice);
     }
     
     @Override
-    public EntryStack<?> getResultStackToNotice() {
-        return resultStackToNotice;
+    public List<EntryStack<?>> getResultsToNotice() {
+        return Collections.unmodifiableList(resultStackToNotice);
     }
     
     @Override
@@ -121,23 +123,26 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
     }
     
-    protected void transformIngredientNotice(List<Widget> setupDisplay, EntryStack<?> noticeStack) {
-        transformNotice(Slot.INPUT, setupDisplay, noticeStack);
+    protected void transformIngredientNotice(List<Widget> setupDisplay, List<EntryStack<?>> noticeStacks) {
+        transformNotice(Slot.INPUT, setupDisplay, noticeStacks);
     }
     
-    protected void transformResultNotice(List<Widget> setupDisplay, EntryStack<?> noticeStack) {
-        transformNotice(Slot.OUTPUT, setupDisplay, noticeStack);
+    protected void transformResultNotice(List<Widget> setupDisplay, List<EntryStack<?>> noticeStacks) {
+        transformNotice(Slot.OUTPUT, setupDisplay, noticeStacks);
     }
     
-    private static void transformNotice(int marker, List<? extends GuiEventListener> setupDisplay, EntryStack<?> noticeStack) {
-        if (noticeStack.isEmpty())
+    private static void transformNotice(int marker, List<? extends GuiEventListener> setupDisplay, List<EntryStack<?>> noticeStacks) {
+        if (noticeStacks.isEmpty())
             return;
         for (EntryWidget widget : Widgets.<EntryWidget>walk(setupDisplay, EntryWidget.class::isInstance)) {
             if (widget.getNoticeMark() == marker && widget.getEntries().size() > 1) {
-                EntryStack<?> stack = CollectionUtils.findFirstOrNullEqualsExact(widget.getEntries(), noticeStack);
-                if (stack != null) {
-                    widget.clearStacks();
-                    widget.entry(stack);
+                for (EntryStack<?> noticeStack : noticeStacks) {
+                    EntryStack<?> stack = CollectionUtils.findFirstOrNullEqualsExact(widget.getEntries(), noticeStack);
+                    if (stack != null) {
+                        widget.clearStacks();
+                        widget.entry(stack);
+                        break;
+                    }
                 }
             }
         }

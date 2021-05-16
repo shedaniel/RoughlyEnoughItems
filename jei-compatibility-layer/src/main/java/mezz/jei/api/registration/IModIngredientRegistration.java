@@ -1,6 +1,7 @@
 package mezz.jei.api.registration;
 
 import mezz.jei.api.IModPlugin;
+import mezz.jei.api.helpers.IColorHelper;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
@@ -17,6 +18,13 @@ import java.util.Collection;
  */
 public interface IModIngredientRegistration {
     ISubtypeManager getSubtypeManager();
+    
+    /**
+     * Gets an {@link IColorHelper} to help in implementing {@link IIngredientHelper#getColors(Object)} for {@link IIngredientHelper}s that are being registered.
+     *
+     * @since JEI 7.6.3
+     */
+    IColorHelper getColorHelper();
     
     /**
      * Register a new type of ingredient.

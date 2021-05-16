@@ -52,9 +52,9 @@ public interface TextField {
     
     void setEditableColor(int editableColor);
     
-    void setNotEditableColor(int int_1);
+    void setNotEditableColor(int notEditableColor);
     
     boolean isFocused();
     
-    void setFocused(boolean boolean_1);
+    void setFocused(boolean focused);
 }

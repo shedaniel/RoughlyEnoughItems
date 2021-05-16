@@ -34,7 +34,8 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIHelper;
-import me.shedaniel.rei.api.client.REIOverlay;
+import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
@@ -99,7 +100,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
-public class ContainerScreenOverlay extends REIOverlay {
+public class ContainerScreenOverlay extends ScreenOverlay {
     private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final List<Tooltip> TOOLTIPS = Lists.newArrayList();
     private static final List<Runnable> AFTER_RENDER = Lists.newArrayList();
@@ -683,9 +684,9 @@ public class ContainerScreenOverlay extends REIOverlay {
         if (stack != null && !stack.isEmpty()) {
             stack = stack.copy();
             if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(keyCode, scanCode)) {
-                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addRecipesFor(stack).setOutputNotice(stack).fillPreferredOpenedCategory());
+                return ViewSearchBuilder.builder().addRecipesFor(stack).open();
             } else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(keyCode, scanCode)) {
-                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addUsagesFor(stack).setInputNotice(stack).fillPreferredOpenedCategory());
+                return ViewSearchBuilder.builder().addUsagesFor(stack).open();
             } else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
                 FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack);
                 if (!ConfigObject.getInstance().getFavoriteEntries().contains(favoriteEntry)) {
@@ -744,9 +745,9 @@ public class ContainerScreenOverlay extends REIOverlay {
         if (stack != null && !stack.isEmpty()) {
             stack = stack.copy();
             if (ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button)) {
-                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addRecipesFor(stack).setOutputNotice(stack).fillPreferredOpenedCategory());
+                return ViewSearchBuilder.builder().addRecipesFor(stack).open();
             } else if (ConfigObject.getInstance().getUsageKeybind().matchesMouse(button)) {
-                return ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addUsagesFor(stack).setInputNotice(stack).fillPreferredOpenedCategory());
+                return ViewSearchBuilder.builder().addUsagesFor(stack).open();
             } else if (visible && ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
                 FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack);
                 if (!ConfigObject.getInstance().getFavoriteEntries().contains(favoriteEntry)) {
@@ -784,7 +785,7 @@ public class ContainerScreenOverlay extends REIOverlay {
             };
             Set<CategoryIdentifier<?>> categories = ScreenRegistry.getInstance().handleClickArea((Class<Screen>) screen.getClass(), context);
             if (categories != null && !categories.isEmpty()) {
-                ClientHelper.getInstance().openView(ViewSearchBuilder.builder().addCategories(categories).fillPreferredOpenedCategory());
+                ViewSearchBuilder.builder().addCategories(categories).open();
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 return true;
             }
@@ -837,4 +838,13 @@ public class ContainerScreenOverlay extends REIOverlay {
         return isInside(point.getX(), point.getY());
     }
     
+    @Override
+    public OverlayListWidget getEntryList() {
+        return ENTRY_LIST_WIDGET;
+    }
+    
+    @Override
+    public Optional<OverlayListWidget> getFavoritesList() {
+        return Optional.ofNullable(getFavoritesListWidget());
+    }
 }

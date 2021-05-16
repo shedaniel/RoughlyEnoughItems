@@ -98,7 +98,8 @@ public final class VanillaRecipeCategoryUid {
      * The JEI info recipe category shows extra information about ingredients.
      * <p>
      * This is a built-in category, you can add new recipes with
-     * {@link IRecipeRegistration#addIngredientInfo(Object, IIngredientType, String...)}   or {@link IRecipeRegistration#addIngredientInfo(List, IIngredientType, String...)}
+     * {@link IRecipeRegistration#addIngredientInfo(Object, IIngredientType, net.minecraft.network.chat.Component...)} or
+     * {@link IRecipeRegistration#addIngredientInfo(List, IIngredientType, net.minecraft.network.chat.Component...)}
      */
     public static final ResourceLocation INFORMATION = BuiltinClientPlugin.INFO.getIdentifier();
     

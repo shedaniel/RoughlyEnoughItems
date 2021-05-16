@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.client.util.SpriteRenderer;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
@@ -67,7 +68,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -125,7 +125,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     public long hash(EntryStack<FluidStack> entry, FluidStack value, ComparisonContext context) {
         int code = 1;
         code = 31 * code + value.getFluid().hashCode();
-        code = 31 * code + (context.isFuzzy() || !value.hasTag() ? 0 : value.getTag().hashCode());
+        code = 31 * code + Long.hashCode(FluidComparatorRegistry.getInstance().hashOf(context, value));
         return code;
     }
     
@@ -133,13 +133,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     public boolean equals(FluidStack o1, FluidStack o2, ComparisonContext context) {
         if (o1.getFluid() != o2.getFluid())
             return false;
-        return context.isFuzzy() || isTagEqual(o1, o2);
-    }
-    
-    private boolean isTagEqual(FluidStack o1, FluidStack o2) {
-        CompoundTag tag1 = o1.getTag();
-        CompoundTag tag2 = o2.getTag();
-        return Objects.equals(tag1, tag2);
+        return FluidComparatorRegistry.getInstance().hashOf(context, o1) == FluidComparatorRegistry.getInstance().hashOf(context, o2);
     }
     
     @Override

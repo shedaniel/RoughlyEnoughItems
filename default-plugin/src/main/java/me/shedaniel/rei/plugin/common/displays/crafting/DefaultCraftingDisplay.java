@@ -66,9 +66,13 @@ public abstract class DefaultCraftingDisplay implements SimpleMenuDisplay {
         return list;
     }
     
-    public static int getSlotWithSize(DefaultCraftingDisplay recipeDisplay, int num, int craftingGridWidth) {
-        int x = num % recipeDisplay.getWidth();
-        int y = (num - x) / recipeDisplay.getWidth();
+    public static int getSlotWithSize(DefaultCraftingDisplay recipeDisplay, int index, int craftingGridWidth) {
+        return getSlotWithSize(recipeDisplay.getWidth(), index, craftingGridWidth);
+    }
+    
+    public static int getSlotWithSize(int recipeWidth, int index, int craftingGridWidth) {
+        int x = index % recipeWidth;
+        int y = (index - x) / recipeWidth;
         return craftingGridWidth * y + x;
     }
     

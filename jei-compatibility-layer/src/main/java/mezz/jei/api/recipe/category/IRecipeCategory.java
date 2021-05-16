@@ -9,6 +9,7 @@ import mezz.jei.api.gui.ingredient.ITooltipCallback;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.IIngredients;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 
@@ -35,8 +36,23 @@ public interface IRecipeCategory<T> {
     /**
      * Returns the localized name for this recipe type.
      * Drawn at the top of the recipe GUI pages for this category.
+     *
+     * @deprecated Since JEI 7.6.4, prefer calling and using {@link #getTitleAsTextComponent()}.
      */
+    @Deprecated
     String getTitle();
+    
+    /**
+     * Returns a text component representing the name of this recipe type.
+     * Drawn at the top of the recipe GUI pages for this category.
+     *
+     * @since JEI 7.6.4
+     */
+    default Component getTitleAsTextComponent() {
+        //TODO: When getTitle is removed this should just be rename to getTitle and not be defaulted anymore.
+        String title = getTitle();
+        return title == null ? null : new TextComponent(title);
+    }
     
     /**
      * Returns the drawable background for a single recipe in this category.

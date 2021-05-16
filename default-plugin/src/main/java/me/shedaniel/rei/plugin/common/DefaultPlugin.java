@@ -29,7 +29,7 @@ import me.shedaniel.architectury.hooks.FluidStackHooks;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
-import me.shedaniel.rei.api.common.entry.comparison.ItemComparator;
+import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
@@ -65,7 +65,7 @@ import java.util.stream.Stream;
 public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
     @Override
     public void registerItemComparators(ItemComparatorRegistry registry) {
-        ToLongFunction<Tag> nbtHasher = ItemComparator.nbtHasher();
+        ToLongFunction<Tag> nbtHasher = EntryComparator.nbtHasher();
         Function<ItemStack, ListTag> enchantmentTag = stack -> {
             CompoundTag tag = stack.getTag();
             if (tag == null) return null;

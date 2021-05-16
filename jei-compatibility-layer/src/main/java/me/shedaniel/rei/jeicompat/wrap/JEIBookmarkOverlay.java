@@ -21,25 +21,31 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.entry.comparison;
+package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.rei.api.common.plugins.PluginManager;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import mezz.jei.api.runtime.IBookmarkOverlay;
+import org.jetbrains.annotations.Nullable;
 
-public interface ItemComparatorRegistry extends EntryComparatorRegistry<ItemStack, Item> {
-    /**
-     * @return the instance of {@link ItemComparatorRegistry}
-     */
-    static ItemComparatorRegistry getInstance() {
-        return PluginManager.getInstance().get(ItemComparatorRegistry.class);
-    }
+import java.util.Optional;
+
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
+
+public enum JEIBookmarkOverlay implements IBookmarkOverlay {
+    INSTANCE;
     
-    default void registerNbt(Item item) {
-        register(EntryComparator.itemNbt(), item);
-    }
-    
-    default void registerNbt(Item... items) {
-        register(EntryComparator.itemNbt(), items);
+    @Override
+    @Nullable
+    public Object getIngredientUnderMouse() {
+        if (!REIHelper.getInstance().isOverlayVisible()) return null;
+        ScreenOverlay overlay = REIHelper.getInstance().getOverlay().get();
+        Optional<OverlayListWidget> favoritesList = overlay.getFavoritesList();
+        if (!favoritesList.isPresent()) return null;
+        EntryStack<?> stack = favoritesList.get().getFocusedStacK();
+        if (stack.isEmpty()) return null;
+        return unwrap(stack);
     }
 }

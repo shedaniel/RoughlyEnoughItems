@@ -21,25 +21,32 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.entry.comparison;
+package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.rei.api.common.plugins.PluginManager;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
+import mezz.jei.api.gui.ingredient.ICraftingGridHelper;
+import mezz.jei.api.gui.ingredient.IGuiIngredientGroup;
+import org.jetbrains.annotations.NotNull;
 
-public interface ItemComparatorRegistry extends EntryComparatorRegistry<ItemStack, Item> {
-    /**
-     * @return the instance of {@link ItemComparatorRegistry}
-     */
-    static ItemComparatorRegistry getInstance() {
-        return PluginManager.getInstance().get(ItemComparatorRegistry.class);
+import java.util.List;
+
+public enum JEICraftingGridHelper implements ICraftingGridHelper {
+    INSTANCE;
+    
+    @Override
+    public <T> void setInputs(@NotNull IGuiIngredientGroup<T> ingredientGroup, List<List<T>> inputs) {
+        int width = inputs.size() > 4 ? 3 : 2;
+        for (int i = 0; i < inputs.size(); i++) {
+            List<T> stacks = inputs.get(i);
+            ingredientGroup.set(DefaultCraftingDisplay.getSlotWithSize(width, i, 3), stacks);
+        }
     }
     
-    default void registerNbt(Item item) {
-        register(EntryComparator.itemNbt(), item);
-    }
-    
-    default void registerNbt(Item... items) {
-        register(EntryComparator.itemNbt(), items);
+    @Override
+    public <T> void setInputs(@NotNull IGuiIngredientGroup<T> ingredientGroup, List<List<T>> inputs, int width, int height) {
+        for (int i = 0; i < inputs.size(); i++) {
+            List<T> stacks = inputs.get(i);
+            ingredientGroup.set(DefaultCraftingDisplay.getSlotWithSize(width, i, 3), stacks);
+        }
     }
 }

@@ -29,16 +29,18 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 
+import java.util.List;
+
 public interface DisplayScreen {
     Rectangle getBounds();
     
-    void setIngredientStackToNotice(EntryStack<?> stack);
+    void addIngredientToNotice(EntryStack<?> stack);
     
-    void setResultStackToNotice(EntryStack<?> stack);
+    void addResultToNotice(EntryStack<?> stack);
     
-    EntryStack<?> getIngredientStackToNotice();
+    List<EntryStack<?>> getIngredientsToNotice();
     
-    EntryStack<?> getResultStackToNotice();
+    List<EntryStack<?>> getResultsToNotice();
     
     default CategoryIdentifier<?> getCurrentCategoryId() {
         return getCurrentCategory().getCategoryIdentifier();

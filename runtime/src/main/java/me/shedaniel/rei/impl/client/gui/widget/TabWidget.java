@@ -56,7 +56,7 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     public static final ResourceLocation CHEST_GUI_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     
-    public boolean shown = false, selected = false;
+    public boolean selected = false;
     public Renderer renderer;
     public int id;
     public Component categoryName;
@@ -85,13 +85,7 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     }
     
     public void setRenderer(DisplayCategory<?> category, Renderer renderer, Component categoryName, boolean selected) {
-        if (renderer == null) {
-            shown = false;
-            this.renderer = null;
-        } else {
-            shown = true;
-            this.renderer = renderer;
-        }
+        this.renderer = renderer;
         this.category = category;
         this.selected = selected;
         this.categoryName = categoryName;
@@ -106,7 +100,7 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     }
     
     public boolean isShown() {
-        return shown;
+        return renderer != null;
     }
     
     @Override
@@ -116,7 +110,7 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (shown) {
+        if (renderer != null) {
             RenderSystem.setShaderTexture(0, REIHelper.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
             this.blit(matrices, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
             renderer.setZ(100);

@@ -553,8 +553,8 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     }
     
     @Override
-    public void setNotEditableColor(int int_1) {
-        this.notEditableColor = int_1;
+    public void setNotEditableColor(int notEditableColor) {
+        this.notEditableColor = notEditableColor;
     }
     
     @Override
@@ -572,10 +572,10 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     }
     
     @Override
-    public void setFocused(boolean boolean_1) {
-        if (boolean_1 && !this.focused)
+    public void setFocused(boolean focused) {
+        if (focused && !this.focused)
             this.frame = 0;
-        this.focused = boolean_1;
+        this.focused = focused;
     }
     
     public void setIsEditable(boolean boolean_1) {

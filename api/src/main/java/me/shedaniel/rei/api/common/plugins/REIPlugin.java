@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.common.plugins;
 
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
+import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
@@ -66,6 +67,15 @@ public interface REIPlugin<P extends REIPlugin<?>> extends Comparable<REIPlugin<
      */
     @ApiStatus.OverrideOnly
     default void registerItemComparators(ItemComparatorRegistry registry) {
+    }
+    
+    /**
+     * Registers fluid comparators for identifying variants of {@link me.shedaniel.architectury.fluid.FluidStack}.
+     *
+     * @see FluidComparatorRegistry
+     */
+    @ApiStatus.OverrideOnly
+    default void registerFluidComparators(FluidComparatorRegistry registry) {
     }
     
     /**

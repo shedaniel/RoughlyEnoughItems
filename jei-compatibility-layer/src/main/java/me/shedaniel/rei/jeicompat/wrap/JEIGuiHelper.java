@@ -40,7 +40,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
 
 public enum JEIGuiHelper implements IGuiHelper {
@@ -153,7 +152,7 @@ public enum JEIGuiHelper implements IGuiHelper {
     @Override
     @NotNull
     public ICraftingGridHelper createCraftingGridHelper(int craftInputSlot1) {
-        throw TODO();
+        return JEICraftingGridHelper.INSTANCE;
     }
     
     @Override
