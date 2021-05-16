@@ -21,25 +21,19 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.entry.comparison;
+package me.shedaniel.rei.api.client.overlay;
 
-import me.shedaniel.rei.api.common.plugins.PluginManager;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 
-public interface ItemComparatorRegistry extends EntryComparatorRegistry<ItemStack, Item> {
+import java.util.stream.Stream;
+
+public interface OverlayListWidget {
     /**
-     * @return the instance of {@link ItemComparatorRegistry}
+     * Returns the mouse hovered stack within the overlay list widget.
+     *
+     * @return the mouse hovered stack, returns {@link EntryStack#empty()} if none is hovered
      */
-    static ItemComparatorRegistry getInstance() {
-        return PluginManager.getInstance().get(ItemComparatorRegistry.class);
-    }
+    EntryStack<?> getFocusedStacK();
     
-    default void registerNbt(Item item) {
-        register(EntryComparator.itemNbt(), item);
-    }
-    
-    default void registerNbt(Item... items) {
-        register(EntryComparator.itemNbt(), items);
-    }
+    Stream<EntryStack<?>> getEntries();
 }

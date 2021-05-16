@@ -23,23 +23,27 @@
 
 package me.shedaniel.rei.api.common.entry.comparison;
 
-import me.shedaniel.rei.api.common.plugins.PluginManager;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import me.shedaniel.rei.api.common.registry.Reloadable;
 
-public interface ItemComparatorRegistry extends EntryComparatorRegistry<ItemStack, Item> {
-    /**
-     * @return the instance of {@link ItemComparatorRegistry}
-     */
-    static ItemComparatorRegistry getInstance() {
-        return PluginManager.getInstance().get(ItemComparatorRegistry.class);
+/**
+ * Registry for registering custom methods for identifying variants of {@link T}.
+ * The default comparator is {@link EntryComparator#noop()}, which does not compare the NBT of the entries.
+ * <p>
+ * This comparator is used when the comparison context is {@link ComparisonContext#EXACT}.
+ */
+public interface EntryComparatorRegistry<T, S> extends Reloadable<REIPlugin<?>> {
+    void register(EntryComparator<T> comparator, S entry);
+    
+    default void register(EntryComparator<T> comparator, S... entries) {
+        for (S entry : entries) {
+            register(comparator, entry);
+        }
     }
     
-    default void registerNbt(Item item) {
-        register(EntryComparator.itemNbt(), item);
-    }
+    long hashOf(ComparisonContext context, T stack);
     
-    default void registerNbt(Item... items) {
-        register(EntryComparator.itemNbt(), items);
-    }
+    boolean containsComparator(S entry);
+    
+    int comparatorSize();
 }

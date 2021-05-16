@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.client.view;
 
+import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -65,19 +66,9 @@ public interface ViewSearchBuilder {
     @Nullable
     CategoryIdentifier<?> getPreferredOpenedCategory();
     
-    ViewSearchBuilder fillPreferredOpenedCategory();
-    
-    <T> ViewSearchBuilder setInputNotice(@Nullable EntryStack<T> stack);
-    
-    @Nullable
-    EntryStack<?> getInputNotice();
-    
-    <T> ViewSearchBuilder setOutputNotice(@Nullable EntryStack<T> stack);
-    
-    @Nullable
-    EntryStack<?> getOutputNotice();
-    
     Map<DisplayCategory<?>, List<Display>> buildMap();
     
-    
+    default boolean open() {
+        return ClientHelper.getInstance().openView(this);
+    }
 }

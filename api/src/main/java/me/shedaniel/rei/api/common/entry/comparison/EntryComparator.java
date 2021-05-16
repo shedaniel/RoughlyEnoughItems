@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.common.entry.comparison;
 
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -32,16 +33,24 @@ import java.util.Objects;
 import java.util.function.ToLongFunction;
 
 /**
- * Hasher implementation for {@link ItemStack}.
+ * Hasher implementation for {@link T}.
  */
 @FunctionalInterface
-public interface ItemComparator {
-    static ItemComparator noop() {
+public interface EntryComparator<T> {
+    static <T> EntryComparator<T> noop() {
         return (context, stack) -> 1;
     }
     
-    static ItemComparator itemNbt() {
+    static EntryComparator<ItemStack> itemNbt() {
         ToLongFunction<Tag> nbtHasher = nbtHasher("Count");
+        return (context, stack) -> {
+            CompoundTag tag = stack.getTag();
+            return tag == null ? 0L : nbtHasher.applyAsLong(tag);
+        };
+    }
+    
+    static EntryComparator<FluidStack> fluidNbt() {
+        ToLongFunction<Tag> nbtHasher = nbtHasher("Amount");
         return (context, stack) -> {
             CompoundTag tag = stack.getTag();
             return tag == null ? 0L : nbtHasher.applyAsLong(tag);
@@ -52,19 +61,19 @@ public interface ItemComparator {
         return Internals.getNbtHasher(ignoredKeys);
     }
     
-    long hash(ComparisonContext context, ItemStack stack);
+    long hash(ComparisonContext context, T stack);
     
-    default ItemComparator onlyExact() {
-        ItemComparator self = this;
+    default EntryComparator<T> onlyExact() {
+        EntryComparator<T> self = this;
         
         return (context, stack) -> {
             return context.isExact() ? self.hash(context, stack) : 1;
         };
     }
     
-    default ItemComparator then(ItemComparator other) {
+    default EntryComparator<T> then(EntryComparator<T> other) {
         Objects.requireNonNull(other);
-        ItemComparator self = this;
+        EntryComparator<T> self = this;
         
         return (context, stack) -> {
             long hash = 1L;
