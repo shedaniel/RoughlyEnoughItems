@@ -38,7 +38,7 @@ public interface DisplaySerializerRegistry extends Reloadable<REIPlugin<?>> {
      * Registers a {@link DisplaySerializer} for serializing a {@link Display} for syncing across server-client, and
      * for serializing displays to disk for favorites.
      * <p>
-     * Since REI 6, all {@link me.shedaniel.rei.api.client.registry.display.DisplayCategory}s are required to register their serializers,
+     * Since REI 6, all {@link me.shedaniel.rei.api.client.registry.display.DisplayCategory} are required to register their serializers,
      * or mark themselves as unavailable for serialization.
      *
      * @param categoryId the category identifier of the display
@@ -51,7 +51,7 @@ public interface DisplaySerializerRegistry extends Reloadable<REIPlugin<?>> {
      * Marks a {@link Display} as unavailable to sync across server-client, and
      * for serializing displays to disk for favorites.
      * <p>
-     * Since REI 6, all {@link me.shedaniel.rei.api.client.registry.display.DisplayCategory}s are required to register their serializers,
+     * Since REI 6, all {@link me.shedaniel.rei.api.client.registry.display.DisplayCategory} are required to register their serializers,
      * or mark themselves as unavailable for serialization.
      *
      * @param categoryId the category identifier of the display
