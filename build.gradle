@@ -219,9 +219,3 @@ task releaseOnCf {
         }
     }
 }*/
-
-allprojects {
-    architectury {
-        transformerVersion = "2.1.38"
-    }
-}
