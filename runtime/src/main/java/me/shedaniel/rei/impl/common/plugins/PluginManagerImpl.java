@@ -28,15 +28,12 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.ApiStatus;
@@ -54,7 +51,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     private final Map<Class<? extends Reloadable<P>>, Reloadable<? super P>> cache = new ConcurrentHashMap<>();
     private final Class<P> pluginClass;
     private final UnaryOperator<PluginView<P>> view;
-    private boolean arePluginsLoading = false;
+    private boolean reloading = false;
     private final List<REIPluginProvider<P>> plugins = new ArrayList<>();
     private final LongConsumer reloadDoneListener;
     
@@ -74,8 +71,8 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     }
     
     @Override
-    public boolean arePluginsReloading() {
-        return arePluginsLoading;
+    public boolean isReloading() {
+        return reloading;
     }
     
     @Override
@@ -154,7 +151,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     @Override
     public void startReload() {
         try {
-            arePluginsLoading = true;
+            reloading = true;
             long startTime = Util.getMillis();
             MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
             
@@ -193,7 +190,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         } finally {
-            arePluginsLoading = false;
+            reloading = false;
         }
     }
 }

@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 import me.shedaniel.architectury.event.events.GuiEvent;
 import me.shedaniel.architectury.event.events.RecipeUpdateEvent;
 import me.shedaniel.architectury.event.events.client.ClientScreenInputEvent;
+import me.shedaniel.architectury.hooks.ScreenHooks;
 import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.registry.ReloadListeners;
@@ -517,7 +518,8 @@ public class RoughlyEnoughItemsCore {
         GuiEvent.INIT_POST.register((screen, widgets, children) -> {
             REIHelperImpl.getInstance().setPreviousScreen(screen);
             if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen) {
-                widgets.removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
+                ScreenHooks.getButtons(screen).removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
+                children.removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
             }
         });
         ClientScreenInputEvent.MOUSE_CLICKED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
