@@ -21,21 +21,20 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.forge;
+package me.shedaniel.rei.plugin.common.displays.anvil;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraft.world.item.ItemStack;
 
-public class RoughlyEnoughItemsInitializerImpl {
-    public static boolean isClient() {
-        return FMLEnvironment.dist == Dist.CLIENT;
-    }
+import java.util.List;
+
+public class AnvilRecipe {
+    private final List<ItemStack> leftInput;
+    private final List<ItemStack> rightInputs;
+    private final List<ItemStack> outputs;
     
-    public static void checkMods() {
-    }
-    
-    public static boolean isDev() {
-        return !FMLLoader.isProduction();
+    public AnvilRecipe(List<ItemStack> leftInput, List<ItemStack> rightInputs, List<ItemStack> outputs) {
+        this.leftInput = leftInput;
+        this.rightInputs = rightInputs;
+        this.outputs = outputs;
     }
 }

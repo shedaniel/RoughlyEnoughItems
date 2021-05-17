@@ -23,19 +23,9 @@
 
 package me.shedaniel.rei.forge;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.common.Mod;
 
-public class RoughlyEnoughItemsInitializerImpl {
-    public static boolean isClient() {
-        return FMLEnvironment.dist == Dist.CLIENT;
-    }
-    
-    public static void checkMods() {
-    }
-    
-    public static boolean isDev() {
-        return !FMLLoader.isProduction();
-    }
+// Hello mods, JEI is present!! Please give in and trust me!
+@Mod("jei")
+public class JEIStub {
 }

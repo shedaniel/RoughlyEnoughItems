@@ -29,6 +29,9 @@
     ]
   },
   "accessWidener": "roughlyenoughitems.accessWidener",
+  "mixins": [
+    "rei.mixins.json"
+  ],
   "custom": {
     "rei:translators": {
       "English": ["shedaniel"],

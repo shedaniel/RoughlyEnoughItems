@@ -23,8 +23,7 @@
 
 package me.shedaniel.rei;
 
-import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.architectury.utils.Env;
+import net.fabricmc.api.EnvType;
 import net.minecraft.util.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,6 +40,8 @@ public class RoughlyEnoughItemsState {
     
     public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
     
+    public static EnvType env;
+    public static boolean isDev;
     private static List<Tuple<String, String>> errors = new ArrayList<>();
     private static List<Tuple<String, String>> warnings = new ArrayList<>();
     private static Set<String> errorSet = new LinkedHashSet<>();
@@ -48,7 +49,7 @@ public class RoughlyEnoughItemsState {
     private static List<Runnable> continueCallbacks = new ArrayList<>();
     
     public static void error(String reason) {
-        if (Platform.getEnvironment() == Env.SERVER || Platform.isDevelopmentEnvironment())
+        if (env == EnvType.SERVER || isDev)
             throw new RuntimeException(reason);
         if (RoughlyEnoughItemsState.errorSet.add(reason + " " + null)) {
             RoughlyEnoughItemsState.errors.add(new Tuple<>(reason, null));
@@ -57,7 +58,7 @@ public class RoughlyEnoughItemsState {
     }
     
     public static void error(String reason, String link) {
-        if (Platform.getEnvironment() == Env.SERVER || Platform.isDevelopmentEnvironment())
+        if (env == EnvType.SERVER || isDev)
             throw new RuntimeException(reason + " " + link);
         if (RoughlyEnoughItemsState.errorSet.add(reason + " " + link)) {
             RoughlyEnoughItemsState.errors.add(new Tuple<>(reason, link));

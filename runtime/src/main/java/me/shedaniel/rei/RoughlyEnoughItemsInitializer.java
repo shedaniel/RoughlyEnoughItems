@@ -24,12 +24,15 @@
 package me.shedaniel.rei;
 
 import me.shedaniel.architectury.annotations.ExpectPlatform;
+import net.fabricmc.api.EnvType;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class RoughlyEnoughItemsInitializer {
     public static void onInitialize() {
+        RoughlyEnoughItemsState.env = isClient() ? EnvType.CLIENT : EnvType.SERVER;
+        RoughlyEnoughItemsState.isDev = isDev();
         checkMods();
         
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
@@ -79,6 +82,11 @@ public class RoughlyEnoughItemsInitializer {
     
     @ExpectPlatform
     public static boolean isClient() {
+        throw new AssertionError();
+    }
+    
+    @ExpectPlatform
+    public static boolean isDev() {
         throw new AssertionError();
     }
     

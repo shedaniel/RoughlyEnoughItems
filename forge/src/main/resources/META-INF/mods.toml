@@ -4,6 +4,7 @@ issueTrackerURL = "https://github.com/shedaniel/RoughlyEnoughItems/issues"
 logoFile = "icon.png"
 authors = "shedaniel"
 license = "MIT"
+
 [[mods]]
 modId = "roughlyenoughitems"
 version = "${version}"
@@ -12,9 +13,24 @@ description = '''
 To allow players to view items and recipes.
 '''
 
+[[mods]]
+modId = "jei"
+version = "7.9999"
+displayName = "Roughly Enough Items (JEI Stub)"
+description = '''
+To allow players to view items and recipes.
+'''
+
 [[dependencies.roughlyenoughitems]]
 modId = "architectury"
 mandatory = true
 versionRange = "[1.10.139,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.roughlyenoughitems]]
+modId = "cloth-config"
+mandatory = true
+versionRange = "[4.11.18,)"
 ordering = "NONE"
 side = "BOTH"
