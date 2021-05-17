@@ -27,3 +27,10 @@ mandatory = true
 versionRange = "[1.10.139,)"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.roughlyenoughitems]]
+modId = "cloth-config"
+mandatory = true
+versionRange = "[4.11.18,)"
+ordering = "NONE"
+side = "BOTH"
