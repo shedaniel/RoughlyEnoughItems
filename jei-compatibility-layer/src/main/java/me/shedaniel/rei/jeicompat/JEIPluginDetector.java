@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializer;
@@ -374,6 +375,7 @@ public class JEIPluginDetector {
                 }
             }));
             backingPlugin.registerRecipeCatalysts(JEIRecipeCatalystRegistration.INSTANCE);
+            backingPlugin.registerVanillaCategoryExtensions(JEIVanillaCategoryExtensionRegistration.INSTANCE);
         }
         
         @Override
@@ -395,6 +397,11 @@ public class JEIPluginDetector {
         @Override
         public void registerScreens(ScreenRegistry registry) {
             backingPlugin.registerGuiHandlers(JEIGuiHandlerRegistration.INSTANCE);
+        }
+        
+        @Override
+        public void registerTransferHandlers(TransferHandlerRegistry registry) {
+            backingPlugin.registerRecipeTransferHandlers(JEIRecipeTransferRegistration.INSTANCE);
         }
         
         @Override

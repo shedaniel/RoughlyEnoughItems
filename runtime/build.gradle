@@ -1,3 +1,5 @@
+archivesBaseName =  rootProject.name + "-" + project.name
+
 architectury {
     common(forgeEnabled.toBoolean())
 }

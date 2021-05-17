@@ -23,15 +23,19 @@
 
 package me.shedaniel.rei.impl.client;
 
+import me.shedaniel.architectury.annotations.ExpectPlatform;
 import me.shedaniel.architectury.event.events.GuiEvent;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.impl.client.gui.screen.WarningAndErrorScreen;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.InteractionResult;
+
+import java.util.function.Consumer;
 
 public class ErrorDisplayer {
     public void onInitializeClient() {
-        GuiEvent.INIT_PRE.register((screen, widgets, children) -> {
+        registerGuiInit((screen) -> {
             Minecraft minecraft = Minecraft.getInstance();
             if ((!RoughlyEnoughItemsState.getErrors().isEmpty() || !RoughlyEnoughItemsState.getWarnings().isEmpty()) && !(screen instanceof WarningAndErrorScreen)) {
                 WarningAndErrorScreen warningAndErrorScreen = new WarningAndErrorScreen("initialization", RoughlyEnoughItemsState.getWarnings(), RoughlyEnoughItemsState.getErrors(), (parent) -> {
@@ -51,7 +55,11 @@ public class ErrorDisplayer {
                 minecraft.screen = null;
                 minecraft.setScreen(warningAndErrorScreen);
             }
-            return InteractionResult.PASS;
         });
+    }
+    
+    @ExpectPlatform
+    public static void registerGuiInit(Consumer<Screen> consumer) {
+        throw new AssertionError();
     }
 }

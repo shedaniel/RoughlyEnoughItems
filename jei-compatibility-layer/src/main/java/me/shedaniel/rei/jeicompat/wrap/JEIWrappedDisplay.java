@@ -40,8 +40,6 @@ import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapList;
 public class JEIWrappedDisplay<T> implements Display {
     private final JEIWrappedCategory<T> backingCategory;
     private final T backingRecipe;
-    private final Map<IIngredientType<?>, List<? extends List<?>>> inputs = new HashMap<>();
-    private final Map<IIngredientType<?>, List<? extends List<?>>> outputs = new HashMap<>();
     private final List<EntryIngredient> compiledInput = new ArrayList<>();
     private final List<EntryIngredient> compiledOutputs = new ArrayList<>();
     private final IIngredients ingredients;
@@ -49,6 +47,8 @@ public class JEIWrappedDisplay<T> implements Display {
     public JEIWrappedDisplay(JEIWrappedCategory<T> backingCategory, T backingRecipe) {
         this.backingCategory = backingCategory;
         this.backingRecipe = backingRecipe;
+        Map<IIngredientType<?>, List<? extends List<?>>> inputs = new HashMap<>();
+        Map<IIngredientType<?>, List<? extends List<?>>> outputs = new HashMap<>();
         this.ingredients = new IIngredients() {
             @Override
             public void setInputIngredients(@NotNull List<Ingredient> inputs) {
@@ -104,10 +104,10 @@ public class JEIWrappedDisplay<T> implements Display {
             }
         };
         setupIngredients();
-        compileIngredients();
+        compileIngredients(inputs, outputs);
     }
     
-    private void compileIngredients() {
+    private void compileIngredients(Map<IIngredientType<?>, List<? extends List<?>>> inputs, Map<IIngredientType<?>, List<? extends List<?>>> outputs) {
         for (Map.Entry<IIngredientType<?>, List<? extends List<?>>> entry : inputs.entrySet()) {
             for (List<?> slot : entry.getValue()) {
                 compiledInput.add(wrapList((IIngredientType<Object>) entry.getKey(), (List<Object>) slot));
