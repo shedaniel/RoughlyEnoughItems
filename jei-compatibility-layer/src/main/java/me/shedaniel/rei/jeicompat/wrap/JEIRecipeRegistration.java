@@ -66,7 +66,7 @@ public enum JEIRecipeRegistration implements IRecipeRegistration {
     @Override
     @NotNull
     public IVanillaRecipeFactory getVanillaRecipeFactory() {
-        throw TODO();
+        return JEIVanillaRecipeFactory.INSTANCE;
     }
     
     @Override

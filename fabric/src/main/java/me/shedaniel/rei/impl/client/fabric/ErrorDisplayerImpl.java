@@ -21,21 +21,18 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.forge;
+package me.shedaniel.rei.impl.client.fabric;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraft.client.gui.screens.Screen;
 
-public class RoughlyEnoughItemsInitializerImpl {
-    public static boolean isClient() {
-        return FMLEnvironment.dist == Dist.CLIENT;
-    }
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+public class ErrorDisplayerImpl {
+    public static List<Consumer<Screen>> consumerList = new ArrayList<>();
     
-    public static void checkMods() {
-    }
-    
-    public static boolean isDev() {
-        return !FMLLoader.isProduction();
+    public static void registerGuiInit(Consumer<Screen> consumer) {
+        consumerList.add(consumer);
     }
 }

@@ -57,6 +57,9 @@ public class RoughlyEnoughItemsInitializerImpl {
                 break;
             }
         }
+        if (!FabricLoader.getInstance().isModLoaded("architectury")) {
+            RoughlyEnoughItemsState.error("Architectury API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/architectury-fabric/files/all");
+        }
         if (isClient()) {
             try {
                 if (!FabricLoader.getInstance().isModLoaded("cloth-config2")) {
@@ -68,5 +71,9 @@ public class RoughlyEnoughItemsInitializerImpl {
                 e.printStackTrace();
             }
         }
+    }
+    
+    public static boolean isDev() {
+        return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 }

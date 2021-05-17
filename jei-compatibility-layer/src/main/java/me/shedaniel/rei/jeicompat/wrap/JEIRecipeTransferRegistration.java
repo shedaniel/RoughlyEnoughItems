@@ -23,36 +23,49 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.rei.plugin.common.displays.anvil.AnvilRecipe;
-import mezz.jei.api.recipe.vanilla.IJeiBrewingRecipe;
-import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
-import net.minecraft.world.item.ItemStack;
-
-import java.util.Collections;
-import java.util.List;
+import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
+import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
+import mezz.jei.api.recipe.transfer.IRecipeTransferInfo;
+import mezz.jei.api.registration.IRecipeTransferRegistration;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import org.jetbrains.annotations.NotNull;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 
-public enum JEIVanillaRecipeFactory implements IVanillaRecipeFactory {
+public enum JEIRecipeTransferRegistration implements IRecipeTransferRegistration {
     INSTANCE;
     
     @Override
-    public Object createAnvilRecipe(ItemStack leftInput, List<ItemStack> rightInputs, List<ItemStack> outputs) {
-        return new AnvilRecipe(Collections.singletonList(leftInput), rightInputs, outputs);
+    @NotNull
+    public IJeiHelpers getJeiHelpers() {
+        return JEIJeiHelpers.INSTANCE;
     }
     
     @Override
-    public Object createAnvilRecipe(List<ItemStack> leftInputs, List<ItemStack> rightInputs, List<ItemStack> outputs) {
-        return new AnvilRecipe(leftInputs, rightInputs, outputs);
-    }
-    
-    @Override
-    public IJeiBrewingRecipe createBrewingRecipe(List<ItemStack> ingredients, ItemStack potionInput, ItemStack potionOutput) {
+    @NotNull
+    public IRecipeTransferHandlerHelper getTransferHelper() {
         throw TODO();
     }
     
     @Override
-    public IJeiBrewingRecipe createBrewingRecipe(List<ItemStack> ingredients, List<ItemStack> potionInputs, ItemStack potionOutput) {
+    public <C extends AbstractContainerMenu> void addRecipeTransferHandler(Class<C> containerClass, ResourceLocation recipeCategoryUid, int recipeSlotStart, int recipeSlotCount, int inventorySlotStart, int inventorySlotCount) {
+        throw TODO();
+    }
+    
+    @Override
+    public <C extends AbstractContainerMenu> void addRecipeTransferHandler(IRecipeTransferInfo<C> recipeTransferInfo) {
+        throw TODO();
+    }
+    
+    @Override
+    public void addRecipeTransferHandler(IRecipeTransferHandler<?> recipeTransferHandler, ResourceLocation recipeCategoryUid) {
+        throw TODO();
+    }
+    
+    @Override
+    public void addUniversalRecipeTransferHandler(IRecipeTransferHandler<?> recipeTransferHandler) {
         throw TODO();
     }
 }

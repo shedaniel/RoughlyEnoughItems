@@ -21,21 +21,24 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.forge;
+package me.shedaniel.rei.mixin.fabric;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLLoader;
+import me.shedaniel.rei.impl.client.fabric.ErrorDisplayerImpl;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-public class RoughlyEnoughItemsInitializerImpl {
-    public static boolean isClient() {
-        return FMLEnvironment.dist == Dist.CLIENT;
-    }
-    
-    public static void checkMods() {
-    }
-    
-    public static boolean isDev() {
-        return !FMLLoader.isProduction();
+import java.util.function.Consumer;
+
+@Mixin(Screen.class)
+public class MixinScreen {
+    @Inject(method = "init(Lnet/minecraft/client/Minecraft;II)V", at = @At("HEAD"))
+    private void init(Minecraft minecraft, int i, int j, CallbackInfo ci) {
+        for (Consumer<Screen> consumer : ErrorDisplayerImpl.consumerList) {
+            consumer.accept((Screen) (Object) this);
+        }
     }
 }

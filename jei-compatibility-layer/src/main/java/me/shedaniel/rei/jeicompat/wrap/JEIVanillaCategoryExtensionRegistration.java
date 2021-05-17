@@ -21,21 +21,20 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.forge;
+package me.shedaniel.rei.jeicompat.wrap;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.FMLLoader;
+import mezz.jei.api.recipe.category.extensions.IExtendableRecipeCategory;
+import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension;
+import mezz.jei.api.registration.IVanillaCategoryExtensionRegistration;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 
-public class RoughlyEnoughItemsInitializerImpl {
-    public static boolean isClient() {
-        return FMLEnvironment.dist == Dist.CLIENT;
-    }
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
+
+public enum JEIVanillaCategoryExtensionRegistration implements IVanillaCategoryExtensionRegistration {
+    INSTANCE;
     
-    public static void checkMods() {
-    }
-    
-    public static boolean isDev() {
-        return !FMLLoader.isProduction();
+    @Override
+    public IExtendableRecipeCategory<CraftingRecipe, ICraftingCategoryExtension> getCraftingCategory() {
+        throw TODO();
     }
 }

@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "me.shedaniel.rei.mixin.fabric",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "MixinScreen"
+  ],
+  "mixins": [
+  ],
+  "injectors": {
+    "maxShiftBy": 5,
+    "defaultRequire": 1
+  }
+}
