@@ -24,12 +24,10 @@
 package me.shedaniel.rei.impl.client;
 
 import me.shedaniel.architectury.annotations.ExpectPlatform;
-import me.shedaniel.architectury.event.events.GuiEvent;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.impl.client.gui.screen.WarningAndErrorScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.world.InteractionResult;
 
 import java.util.function.Consumer;
 
