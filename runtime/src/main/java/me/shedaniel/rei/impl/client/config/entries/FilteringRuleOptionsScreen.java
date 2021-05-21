@@ -30,6 +30,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -62,7 +63,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         {
             Component doneText = new TranslatableComponent("gui.done");
             int width = Minecraft.getInstance().font.width(doneText);
-            addButton(new Button(this.width - 4 - width - 10, 4, width + 10, 20, doneText, button -> {
+            addRenderableWidget(new Button(this.width - 4 - width - 10, 4, width + 10, 20, doneText, button -> {
                 save();
                 minecraft.setScreen(parent);
             }));
@@ -147,6 +148,11 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         public List<? extends GuiEventListener> children() {
             return Collections.emptyList();
         }
+    
+        @Override
+        public List<? extends NarratableEntry> narratables() {
+            return Collections.emptyList();
+        }
     }
     
     public static class EmptyRuleEntry extends RuleEntry {
@@ -168,6 +174,11 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         
         @Override
         public List<? extends GuiEventListener> children() {
+            return Collections.emptyList();
+        }
+    
+        @Override
+        public List<? extends NarratableEntry> narratables() {
             return Collections.emptyList();
         }
     }
@@ -199,6 +210,11 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         
         @Override
         public List<? extends GuiEventListener> children() {
+            return Collections.singletonList(widget);
+        }
+    
+        @Override
+        public List<? extends NarratableEntry> narratables() {
             return Collections.singletonList(widget);
         }
     }
@@ -234,6 +250,11 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         
         @Override
         public List<? extends GuiEventListener> children() {
+            return Collections.singletonList(widget);
+        }
+    
+        @Override
+        public List<? extends NarratableEntry> narratables() {
             return Collections.singletonList(widget);
         }
     }

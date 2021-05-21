@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.screen;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.impl.client.gui.widget.DynamicErrorFreeEntryListWidget;
@@ -33,7 +34,11 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.controls.ControlList;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -44,6 +49,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -88,7 +94,7 @@ public class WarningAndErrorScreen extends Screen {
     
     @Override
     public void init() {
-        children.add(listWidget = new StringEntryListWidget(minecraft, width, height, 32, height - 32));
+        addWidget(listWidget = new StringEntryListWidget(minecraft, width, height, 32, height - 32));
         listWidget.max = 80;
         listWidget.creditsClearEntries();
         listWidget.creditsAddEntry(new EmptyItem());
@@ -118,7 +124,7 @@ public class WarningAndErrorScreen extends Screen {
         for (StringItem child : listWidget.children()) {
             listWidget.max = Math.max(listWidget.max, child.getWidth());
         }
-        children.add(buttonExit = new Button(width / 2 - 100, height - 26, 200, 20,
+        addRenderableWidget(buttonExit = new Button(width / 2 - 100, height - 26, 200, 20,
                 new TextComponent(errors.isEmpty() ? "Continue" : "Exit"),
                 button -> onContinue.accept(parent)));
     }
@@ -207,6 +213,11 @@ public class WarningAndErrorScreen extends Screen {
         public int getWidth() {
             return 0;
         }
+    
+        @Override
+        public List<? extends NarratableEntry> narratables() {
+            return Collections.emptyList();
+        }
     }
     
     private static class TextItem extends StringItem {
@@ -234,6 +245,24 @@ public class WarningAndErrorScreen extends Screen {
         @Override
         public int getWidth() {
             return Minecraft.getInstance().font.width(text) + 10;
+        }
+    
+        @Override
+        public List<? extends NarratableEntry> narratables() {
+            return ImmutableList.of(new NarratableEntry() {
+                public NarrationPriority narrationPriority() {
+                    return NarrationPriority.HOVERED;
+                }
+            
+                public void updateNarration(NarrationElementOutput narrationElementOutput) {
+                    StringBuilder builder = new StringBuilder();
+                    text.accept((i, style, j) -> {
+                        builder.append(Character.toChars(j));
+                        return false;
+                    });
+                    narrationElementOutput.add(NarratedElementType.TITLE, builder.toString());
+                }
+            });
         }
     }
     
@@ -287,6 +316,24 @@ public class WarningAndErrorScreen extends Screen {
                 }
             }
             return false;
+        }
+    
+        @Override
+        public List<? extends NarratableEntry> narratables() {
+            return ImmutableList.of(new NarratableEntry() {
+                public NarrationPriority narrationPriority() {
+                    return NarrationPriority.HOVERED;
+                }
+            
+                public void updateNarration(NarrationElementOutput narrationElementOutput) {
+                    StringBuilder builder = new StringBuilder();
+                    text.accept((i, style, j) -> {
+                        builder.append(Character.toChars(j));
+                        return false;
+                    });
+                    narrationElementOutput.add(NarratedElementType.TITLE, builder.toString());
+                }
+            });
         }
     }
 }

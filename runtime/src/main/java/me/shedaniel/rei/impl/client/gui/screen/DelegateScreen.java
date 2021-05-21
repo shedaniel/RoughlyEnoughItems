@@ -27,7 +27,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -56,8 +58,8 @@ public class DelegateScreen extends Screen {
     }
     
     @Override
-    public String getNarrationMessage() {
-        return parent == null ? "" : parent.getNarrationMessage();
+    public Component getNarrationMessage() {
+        return parent == null ? ImmutableTextComponent.EMPTY : parent.getNarrationMessage();
     }
     
     @Override
@@ -78,15 +80,23 @@ public class DelegateScreen extends Screen {
     }
     
     @Override
-    public <T extends AbstractWidget> T addButton(T abstractWidget) {
+    public <T extends GuiEventListener & Widget & NarratableEntry> T addRenderableWidget(T abstractWidget) {
         if (parent != null) {
-            return parent.addButton(abstractWidget);
+            return parent.addRenderableWidget(abstractWidget);
         }
         return abstractWidget;
     }
     
     @Override
-    public <T extends GuiEventListener> T addWidget(T guiEventListener) {
+    public <T extends Widget> T addRenderableOnly(T abstractWidget) {
+        if (parent != null) {
+            return parent.addRenderableOnly(abstractWidget);
+        }
+        return abstractWidget;
+    }
+    
+    @Override
+    public <T extends GuiEventListener & NarratableEntry> T addWidget(T guiEventListener) {
         if (parent != null) {
             return parent.addWidget(guiEventListener);
         }

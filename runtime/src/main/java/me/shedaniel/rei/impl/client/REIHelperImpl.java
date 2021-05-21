@@ -218,7 +218,7 @@ public class REIHelperImpl implements REIHelper {
     }
     
     public void onInitializeClient() {
-        GuiEvent.INIT_PRE.register((screen, widgets, children) -> {
+        GuiEvent.INIT_PRE.register((screen, access) -> {
             if (previousContainerScreen != screen && screen instanceof AbstractContainerScreen)
                 previousContainerScreen = (AbstractContainerScreen<?>) screen;
             return InteractionResult.PASS;

@@ -70,6 +70,10 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         }
     }
     
+    public List<GuiEventListener> _children() {
+        return (List<GuiEventListener>) children();
+    }
+    
     @Override
     public boolean isPauseScreen() {
         return false;

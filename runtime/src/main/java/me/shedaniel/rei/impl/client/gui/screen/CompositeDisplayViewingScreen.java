@@ -110,7 +110,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
         int tabSize = isCompactTabs ? 24 : 28;
         scrolling.draggingScrollBar = false;
-        this.children.clear();
+        this.children().clear();
         this.widgets.clear();
         this.buttonList.clear();
         this.displayRenderers.clear();
@@ -215,9 +215,9 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             ViewSearchBuilder.builder().addAllCategories().open();
         }).tooltipLine(I18n.get("text.rei.view_all_categories")).noShadow().color(0xFF404040, 0xFFBBBBBB).hoveredColor(0xFF0041FF, 0xFFFFBD4D));
         
-        this.children.addAll(buttonList);
+        this._children().addAll(buttonList);
         this.widgets.addAll(tabs);
-        this.children.addAll(widgets);
+        this._children().addAll(widgets);
     }
     
     @Override

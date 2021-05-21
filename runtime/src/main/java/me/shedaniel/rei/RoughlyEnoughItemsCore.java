@@ -27,7 +27,6 @@ import com.google.common.collect.Lists;
 import me.shedaniel.architectury.event.events.GuiEvent;
 import me.shedaniel.architectury.event.events.RecipeUpdateEvent;
 import me.shedaniel.architectury.event.events.client.ClientScreenInputEvent;
-import me.shedaniel.architectury.hooks.ScreenHooks;
 import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.registry.ReloadListeners;
@@ -519,11 +518,12 @@ public class RoughlyEnoughItemsCore {
         final ResourceLocation recipeButtonTex = new ResourceLocation("textures/gui/recipe_button.png");
         MutableLong lastReload = new MutableLong(-1);
         RecipeUpdateEvent.EVENT.register(recipeManager -> reloadPlugins(lastReload));
-        GuiEvent.INIT_POST.register((screen, widgets, children) -> {
+        GuiEvent.INIT_POST.register((screen, access) -> {
             REIHelperImpl.getInstance().setPreviousScreen(screen);
             if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen) {
-                ScreenHooks.getButtons(screen).removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
-                children.removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
+                access.getRenderables().removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
+                access.getNarratables().removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
+                screen.children().removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
             }
         });
         ClientScreenInputEvent.MOUSE_CLICKED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {

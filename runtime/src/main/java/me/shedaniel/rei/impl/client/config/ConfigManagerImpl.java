@@ -30,8 +30,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.math.Matrix4f;
-import me.shedaniel.architectury.hooks.ScreenHooks;
-import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.hooks.screen.ScreenHooks;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.gui.ConfigScreenProvider;
@@ -64,7 +63,6 @@ import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
 import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
 import me.shedaniel.rei.impl.client.gui.screen.TransformingScreen;
-import me.shedaniel.rei.impl.client.gui.screen.WarningAndErrorScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
@@ -74,7 +72,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
@@ -83,7 +80,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionResult;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
@@ -309,14 +305,6 @@ public class ConfigManagerImpl implements ConfigManager {
     @Override
     public Screen getConfigScreen(Screen parent) {
         try {
-            if (Platform.isFabric() && !detectWorkingOptifabric()) {
-                List<Tuple<String, String>> warnings = Lists.newArrayList();
-                warnings.add(new Tuple<>(I18n.get("text.rei.config.optifine.title"), null));
-                warnings.add(new Tuple<>(I18n.get("text.rei.config.optifine.description"), null));
-                WarningAndErrorScreen screen = new WarningAndErrorScreen("config screen", warnings, Collections.emptyList(), Minecraft.getInstance()::setScreen);
-                screen.setParent(parent);
-                return screen;
-            }
             Screen parentTranslated;
             if (!getConfig().isConfigScreenAnimated()) {
                 parentTranslated = parent;
@@ -340,7 +328,7 @@ public class ConfigManagerImpl implements ConfigManager {
                     builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new ReloadPluginsEntry(220));
                 }
                 return builder.setAfterInitConsumer(screen -> {
-                    ScreenHooks.addButton(screen, new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
+                    ScreenHooks.addRenderableWidget(screen, new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
                         MutableLong current = new MutableLong(0);
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
                         if (getConfig().isCreditsScreenAnimated()) {
@@ -401,7 +389,7 @@ public class ConfigManagerImpl implements ConfigManager {
         @Override
         public void init() {
             super.init();
-            this.addButton(new Button(this.width / 2 - 100, 140, 200, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(parent)));
+            this.addRenderableWidget(new Button(this.width / 2 - 100, 140, 200, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(parent)));
         }
         
         @Override
