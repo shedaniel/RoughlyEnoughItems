@@ -32,7 +32,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class CategoryIdentifierImpl<D extends Display> implements CategoryIdentifier<D> {
-    private ResourceLocation location;
+    private final ResourceLocation location;
     
     public CategoryIdentifierImpl(ResourceLocation location) {
         this.location = Objects.requireNonNull(location);

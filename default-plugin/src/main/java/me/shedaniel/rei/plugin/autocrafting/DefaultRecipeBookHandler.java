@@ -52,7 +52,7 @@ public class DefaultRecipeBookHandler implements TransferHandler {
         if (container == null)
             return Result.createNotApplicable();
         if (display instanceof DefaultCraftingDisplay) {
-            DefaultCraftingDisplay craftingDisplay = (DefaultCraftingDisplay) display;
+            DefaultCraftingDisplay<?> craftingDisplay = (DefaultCraftingDisplay<?>) display;
             if (craftingDisplay.getOptionalRecipe().isPresent()) {
                 int h = -1, w = -1;
                 if (container instanceof CraftingMenu) {
@@ -64,7 +64,7 @@ public class DefaultRecipeBookHandler implements TransferHandler {
                 }
                 if (h == -1 || w == -1)
                     return Result.createNotApplicable();
-                Recipe<?> recipe = (craftingDisplay).getOptionalRecipe().get();
+                Recipe<?> recipe = craftingDisplay.getOptionalRecipe().get();
                 if (craftingDisplay.getHeight() > h || craftingDisplay.getWidth() > w)
                     return Result.createFailed(new TranslatableComponent("error.rei.transfer.too_small", h, w));
                 if (!context.getMinecraft().player.getRecipeBook().contains(recipe))
