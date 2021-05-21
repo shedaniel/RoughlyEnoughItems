@@ -27,6 +27,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
@@ -40,7 +41,6 @@ import org.jetbrains.annotations.ApiStatus;
 import java.lang.reflect.Field;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.function.ToLongFunction;
 
 @ApiStatus.Internal
 public final class Internals {
@@ -101,7 +101,7 @@ public final class Internals {
         return serverPluginManager.get();
     }
     
-    public static ToLongFunction<Tag> getNbtHasher(String[] ignoredKeys) {
+    public static EntryComparator<Tag> getNbtHasher(String[] ignoredKeys) {
         return nbtHasherProvider.get().provide(ignoredKeys);
     }
     
@@ -130,6 +130,6 @@ public final class Internals {
     }
     
     public interface NbtHasherProvider {
-        ToLongFunction<Tag> provide(String... ignoredKeys);
+        EntryComparator<Tag> provide(String... ignoredKeys);
     }
 }

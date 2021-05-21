@@ -42,22 +42,22 @@ public interface EntryComparator<T> {
     }
     
     static EntryComparator<ItemStack> itemNbt() {
-        ToLongFunction<Tag> nbtHasher = nbtHasher("Count");
+        EntryComparator<Tag> nbtHasher = nbt("Count");
         return (context, stack) -> {
             CompoundTag tag = stack.getTag();
-            return tag == null ? 0L : nbtHasher.applyAsLong(tag);
+            return tag == null ? 0L : nbtHasher.hash(context, tag);
         };
     }
     
     static EntryComparator<FluidStack> fluidNbt() {
-        ToLongFunction<Tag> nbtHasher = nbtHasher("Amount");
+        EntryComparator<Tag> nbtHasher = nbt("Amount");
         return (context, stack) -> {
             CompoundTag tag = stack.getTag();
-            return tag == null ? 0L : nbtHasher.applyAsLong(tag);
+            return tag == null ? 0L : nbtHasher.hash(context, tag);
         };
     }
     
-    static ToLongFunction<Tag> nbtHasher(String... ignoredKeys) {
+    static EntryComparator<Tag> nbt(String... ignoredKeys) {
         return Internals.getNbtHasher(ignoredKeys);
     }
     

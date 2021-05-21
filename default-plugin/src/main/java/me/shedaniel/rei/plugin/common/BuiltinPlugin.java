@@ -34,7 +34,7 @@ import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 
 public interface BuiltinPlugin {
-    CategoryIdentifier<DefaultCraftingDisplay> CRAFTING = CategoryIdentifier.of("minecraft", "plugins/crafting");
+    CategoryIdentifier<DefaultCraftingDisplay<?>> CRAFTING = CategoryIdentifier.of("minecraft", "plugins/crafting");
     CategoryIdentifier<DefaultSmeltingDisplay> SMELTING = CategoryIdentifier.of("minecraft", "plugins/smelting");
     CategoryIdentifier<DefaultSmokingDisplay> SMOKING = CategoryIdentifier.of("minecraft", "plugins/smoking");
     CategoryIdentifier<DefaultBlastingDisplay> BLASTING = CategoryIdentifier.of("minecraft", "plugins/blasting");

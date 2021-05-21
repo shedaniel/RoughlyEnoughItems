@@ -59,20 +59,19 @@ import net.minecraft.world.level.material.Fluid;
 
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.ToLongFunction;
 import java.util.stream.Stream;
 
 public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
     @Override
     public void registerItemComparators(ItemComparatorRegistry registry) {
-        ToLongFunction<Tag> nbtHasher = EntryComparator.nbtHasher();
+        EntryComparator<Tag> nbtHasher = EntryComparator.nbt();
         Function<ItemStack, ListTag> enchantmentTag = stack -> {
             CompoundTag tag = stack.getTag();
             if (tag == null) return null;
             if (!tag.contains("Enchantments", NbtType.LIST)) return null;
             return tag.getList("Enchantments", NbtType.COMPOUND);
         };
-        registry.register((context, stack) -> nbtHasher.applyAsLong(enchantmentTag.apply(stack)), Items.ENCHANTED_BOOK);
+        registry.register((context, stack) -> nbtHasher.hash(context, enchantmentTag.apply(stack)), Items.ENCHANTED_BOOK);
         registry.registerNbt(Items.POTION);
         registry.registerNbt(Items.SPLASH_POTION);
         registry.registerNbt(Items.LINGERING_POTION);
@@ -104,7 +103,7 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
     
     @Override
     public void registerDisplaySerializer(DisplaySerializerRegistry registry) {
-        registry.register(CRAFTING, DefaultCraftingDisplay.Serializer.INSTANCE);
+        registry.register(CRAFTING, DefaultCraftingDisplay.serializer());
         registry.register(SMELTING, DefaultCookingDisplay.serializer(DefaultSmeltingDisplay::new));
         registry.register(SMOKING, DefaultCookingDisplay.serializer(DefaultSmokingDisplay::new));
         registry.register(BLASTING, DefaultCookingDisplay.serializer(DefaultBlastingDisplay::new));
@@ -124,15 +123,15 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
     
     @Override
     public void registerMenuInfo(MenuInfoRegistry registry) {
-        registry.register(BuiltinPlugin.CRAFTING, CraftingMenu.class, new RecipeBookGridMenuInfo<CraftingMenu, DefaultCraftingDisplay>() {
+        registry.register(BuiltinPlugin.CRAFTING, CraftingMenu.class, new RecipeBookGridMenuInfo<CraftingMenu, DefaultCraftingDisplay<?>>() {
             @Override
-            public List<List<ItemStack>> getInputs(MenuInfoContext<CraftingMenu, ?, DefaultCraftingDisplay> context) {
+            public List<List<ItemStack>> getInputs(MenuInfoContext<CraftingMenu, ?, DefaultCraftingDisplay<?>> context) {
                 return context.getDisplay().getOrganisedInputEntries(this, context.getMenu());
             }
         });
-        registry.register(BuiltinPlugin.CRAFTING, InventoryMenu.class, new RecipeBookGridMenuInfo<InventoryMenu, DefaultCraftingDisplay>() {
+        registry.register(BuiltinPlugin.CRAFTING, InventoryMenu.class, new RecipeBookGridMenuInfo<InventoryMenu, DefaultCraftingDisplay<?>>() {
             @Override
-            public List<List<ItemStack>> getInputs(MenuInfoContext<InventoryMenu, ?, DefaultCraftingDisplay> context) {
+            public List<List<ItemStack>> getInputs(MenuInfoContext<InventoryMenu, ?, DefaultCraftingDisplay<?>> context) {
                 return context.getDisplay().getOrganisedInputEntries(this, context.getMenu());
             }
         });

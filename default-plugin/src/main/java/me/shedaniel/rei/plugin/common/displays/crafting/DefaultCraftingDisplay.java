@@ -23,18 +23,14 @@
 
 package me.shedaniel.rei.plugin.common.displays.crafting;
 
-import me.shedaniel.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.display.SimpleDisplaySerializer;
 import me.shedaniel.rei.api.common.display.SimpleMenuDisplay;
+import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.common.registry.RecipeManagerContext;
 import me.shedaniel.rei.api.common.transfer.info.simple.SimpleGridMenuInfo;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
@@ -45,15 +41,29 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class DefaultCraftingDisplay implements SimpleMenuDisplay {
+public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicDisplay implements SimpleMenuDisplay {
+    protected Optional<C> recipe;
+    
+    public DefaultCraftingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<C> recipe) {
+        super(inputs, outputs, Optional.empty());
+        this.recipe = recipe;
+    }
+    
     @Override
     public CategoryIdentifier<?> getCategoryIdentifier() {
         return BuiltinPlugin.CRAFTING;
     }
     
-    public abstract Optional<Recipe<?>> getOptionalRecipe();
+    public Optional<C> getOptionalRecipe() {
+        return recipe;
+    }
     
-    public <T extends AbstractContainerMenu> List<List<ItemStack>> getOrganisedInputEntries(SimpleGridMenuInfo<T, DefaultCraftingDisplay> menuInfo, T container) {
+    @Override
+    public Optional<ResourceLocation> getDisplayLocation() {
+        return getOptionalRecipe().map(Recipe::getId);
+    }
+    
+    public <T extends AbstractContainerMenu> List<List<ItemStack>> getOrganisedInputEntries(SimpleGridMenuInfo<T, DefaultCraftingDisplay<?>> menuInfo, T container) {
         List<List<ItemStack>> list = new ArrayList<>(menuInfo.getCraftingWidth(container) * menuInfo.getCraftingHeight(container));
         for (int i = 0; i < menuInfo.getCraftingWidth(container) * menuInfo.getCraftingHeight(container); i++) {
             list.add(Collections.emptyList());
@@ -66,7 +76,7 @@ public abstract class DefaultCraftingDisplay implements SimpleMenuDisplay {
         return list;
     }
     
-    public static int getSlotWithSize(DefaultCraftingDisplay recipeDisplay, int index, int craftingGridWidth) {
+    public static int getSlotWithSize(DefaultCraftingDisplay<?> recipeDisplay, int index, int craftingGridWidth) {
         return getSlotWithSize(recipeDisplay.getWidth(), index, craftingGridWidth);
     }
     
@@ -76,26 +86,7 @@ public abstract class DefaultCraftingDisplay implements SimpleMenuDisplay {
         return craftingGridWidth * y + x;
     }
     
-    public enum Serializer implements SimpleDisplaySerializer<DefaultCraftingDisplay> {
-        INSTANCE;
-        
-        @Override
-        public DefaultCraftingDisplay read(CompoundTag tag) {
-            List<EntryIngredient> input = EntryIngredients.read(tag.getList("input", NbtType.LIST));
-            List<EntryIngredient> output = EntryIngredients.read(tag.getList("output", NbtType.LIST));
-            Recipe<?> optionalRecipe;
-            if (tag.contains("recipe", NbtType.STRING)) {
-                optionalRecipe = RecipeManagerContext.getInstance().getRecipeManager().byKey(new ResourceLocation(tag.getString("recipe"))).orElse(null);
-            } else {
-                optionalRecipe = null;
-            }
-            return new DefaultCustomDisplay(optionalRecipe, input, output);
-        }
-        
-        @Override
-        public CompoundTag saveExtra(CompoundTag tag, DefaultCraftingDisplay display) {
-            display.getOptionalRecipe().ifPresent(recipe -> tag.putString("recipe", recipe.getId().toString()));
-            return tag;
-        }
+    public static BasicDisplay.Serializer<DefaultCraftingDisplay<?>> serializer() {
+        return BasicDisplay.Serializer.ofSimple(DefaultCustomDisplay::simple);
     }
 }
