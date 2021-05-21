@@ -30,7 +30,11 @@ import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.locale.Language;
@@ -63,14 +67,14 @@ public class FilteringRulesScreen extends Screen {
         super.init();
         {
             Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));
-            addButton(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+            addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
             }));
         }
         {
             Component addText = new TextComponent(" + ");
-            addButton(new Button(width - 4 - 20, 4, 20, 20, addText, button -> {
+            addRenderableWidget(new Button(width - 4 - 20, 4, 20, 20, addText, button -> {
                 FilteringAddRuleScreen screen = new FilteringAddRuleScreen(entry);
                 screen.parent = this;
                 minecraft.setScreen(screen);
@@ -242,6 +246,11 @@ public class FilteringRulesScreen extends Screen {
         
         @Override
         public List<? extends GuiEventListener> children() {
+            return Arrays.asList(configureButton, deleteButton);
+        }
+    
+        @Override
+        public List<? extends NarratableEntry> narratables() {
             return Arrays.asList(configureButton, deleteButton);
         }
     }

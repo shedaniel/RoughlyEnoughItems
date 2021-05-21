@@ -32,9 +32,11 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.impl.client.gui.screen.ConfigReloadingScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Unit;
@@ -57,7 +59,7 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
             }
         }
     };
-    private List<GuiEventListener> children = ImmutableList.of(buttonWidget);
+    private List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public ReloadPluginsEntry(int width) {
         super(NarratorChatListener.NO_TITLE, false);
@@ -93,6 +95,11 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     
     @Override
     public List<? extends GuiEventListener> children() {
+        return children;
+    }
+    
+    @Override
+    public List<? extends NarratableEntry> narratables() {
         return children;
     }
 }

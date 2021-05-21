@@ -33,3 +33,7 @@ accessible    method net/minecraft/client/gui/screens/Screen                    
 accessible    method net/minecraft/client/gui/screens/Screen                                   isValidCharacterForName (Ljava/lang/String;CI)Z
 accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        draggingItem            Lnet/minecraft/world/item/ItemStack;
 mutable       field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        draggingItem            Lnet/minecraft/world/item/ItemStack;
+extendable    method net/minecraft/client/gui/screens/Screen                                   init                    (Lnet/minecraft/client/Minecraft;II)V
+accessible    method net/minecraft/client/gui/screens/Screen                                   addRenderableWidget     (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
+accessible    method net/minecraft/client/gui/screens/Screen                                   addRenderableOnly       (Lnet/minecraft/client/gui/components/Widget;)Lnet/minecraft/client/gui/components/Widget;
+accessible    method net/minecraft/client/gui/screens/Screen                                   addWidget               (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;

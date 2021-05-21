@@ -33,6 +33,7 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -47,7 +48,7 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>
     private List<EntryStack<?>> defaultValue;
     private List<EntryStack<?>> configFiltered;
     private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, new TranslatableComponent("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {});
-    private final List<GuiEventListener> children = ImmutableList.of(buttonWidget);
+    private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public NoFilteringEntry(int width, List<EntryStack<?>> configFiltered, List<EntryStack<?>> defaultValue, Consumer<List<EntryStack<?>>> saveConsumer) {
         super(NarratorChatListener.NO_TITLE, false);
@@ -85,6 +86,11 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>
     
     @Override
     public List<? extends GuiEventListener> children() {
+        return children;
+    }
+    
+    @Override
+    public List<? extends NarratableEntry> narratables() {
         return children;
     }
 }

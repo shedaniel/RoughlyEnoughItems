@@ -73,7 +73,7 @@ public class CreditsScreen extends Screen {
     
     @Override
     public void init() {
-        children.add(entryListWidget = new CreditsEntryListWidget(minecraft, width, height, 32, height - 32));
+        addWidget(entryListWidget = new CreditsEntryListWidget(minecraft, width, height, 32, height - 32));
         entryListWidget.creditsClearEntries();
         List<Tuple<String, String>> translators = Lists.newArrayList();
         Exception[] exception = {null};
@@ -118,7 +118,7 @@ public class CreditsScreen extends Screen {
         entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableTextComponent("Visit the project page at CurseForge."), "https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items", entryListWidget.getItemWidth(), false));
         entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableTextComponent("Support the project via Patreon!"), "https://patreon.com/shedaniel", entryListWidget.getItemWidth(), true));
         entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorChatListener.NO_TITLE));
-        children.add(buttonDone = new Button(width / 2 - 100, height - 26, 200, 20, new TranslatableComponent("gui.done"), button -> openPrevious()));
+        addRenderableWidget(buttonDone = new Button(width / 2 - 100, height - 26, 200, 20, new TranslatableComponent("gui.done"), button -> openPrevious()));
     }
     
     private void openPrevious() {
@@ -145,7 +145,6 @@ public class CreditsScreen extends Screen {
         this.entryListWidget.render(matrices, int_1, int_2, float_1);
         drawCenteredString(matrices, this.font, I18n.get("text.rei.credits"), this.width / 2, 16, 16777215);
         super.render(matrices, int_1, int_2, float_1);
-        buttonDone.render(matrices, int_1, int_2, float_1);
     }
     
 }

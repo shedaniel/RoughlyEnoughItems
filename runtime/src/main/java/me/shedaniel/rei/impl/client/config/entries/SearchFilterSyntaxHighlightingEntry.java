@@ -32,7 +32,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 
@@ -45,19 +47,14 @@ public class SearchFilterSyntaxHighlightingEntry extends TooltipListEntry<Syntax
     private SyntaxHighlightingMode type;
     private SyntaxHighlightingMode defaultValue;
     private Consumer<SyntaxHighlightingMode> save;
-    private final AbstractWidget buttonWidget = new AbstractButton(0, 0, 0, 20, NarratorChatListener.NO_TITLE) {
-        @Override
-        public void onPress() {
-            
-        }
-        
+    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, $ -> {}) {
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             setMessage(new TextComponent(type.toString()));
             super.render(matrices, mouseX, mouseY, delta);
         }
     };
-    private final List<GuiEventListener> children = ImmutableList.of(buttonWidget);
+    private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     @SuppressWarnings("deprecation")
     public SearchFilterSyntaxHighlightingEntry(Component fieldName, SyntaxHighlightingMode type, SyntaxHighlightingMode defaultValue, Consumer<SyntaxHighlightingMode> save) {
@@ -90,6 +87,11 @@ public class SearchFilterSyntaxHighlightingEntry extends TooltipListEntry<Syntax
     
     @Override
     public List<? extends GuiEventListener> children() {
+        return children;
+    }
+    
+    @Override
+    public List<? extends NarratableEntry> narratables() {
         return children;
     }
     

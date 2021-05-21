@@ -36,6 +36,7 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -57,7 +58,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>>>
         filteringRulesScreen.parent = Minecraft.getInstance().screen;
         Minecraft.getInstance().setScreen(filteringRulesScreen);
     });
-    private final List<GuiEventListener> children = ImmutableList.of(buttonWidget);
+    private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public FilteringEntry(int width, List<EntryStack<?>> configFiltered, List<FilteringRule<?>> rules, List<EntryStack<?>> defaultValue, Consumer<List<EntryStack<?>>> saveConsumer, Consumer<List<FilteringRule<?>>> rulesSaveConsumer) {
         super(NarratorChatListener.NO_TITLE, false);
@@ -100,6 +101,11 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>>>
     
     @Override
     public List<? extends GuiEventListener> children() {
+        return children;
+    }
+    
+    @Override
+    public List<? extends NarratableEntry> narratables() {
         return children;
     }
     

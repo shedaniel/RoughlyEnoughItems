@@ -44,7 +44,6 @@ import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
-import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -258,9 +257,6 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultStrippingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
         });
-        DummyHoeItem.getTilledBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
-            registry.add(new DefaultTillingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue().getBlock())));
-        });
         DummyShovelItem.getPathBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultPathingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue().getBlock())));
         });
@@ -380,15 +376,4 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             return STRIPPABLES;
         }
     }
-    
-    public static class DummyHoeItem extends HoeItem {
-        public DummyHoeItem(Tier tier, int i, float f, Properties properties) {
-            super(tier, i, f, properties);
-        }
-        
-        public static Map<Block, BlockState> getTilledBlocksMap() {
-            return TILLABLES;
-        }
-    }
-    
 }

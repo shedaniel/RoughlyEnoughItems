@@ -33,7 +33,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -47,22 +49,19 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<DisplayScreenType> {
     private DisplayScreenType type;
     private DisplayScreenType defaultValue;
     private Consumer<DisplayScreenType> save;
-    private final AbstractWidget buttonWidget = new AbstractButton(0, 0, 0, 20, NarratorChatListener.NO_TITLE) {
-        @Override
-        public void onPress() {
-            Minecraft.getInstance().setScreen(new UncertainDisplayViewingScreen(getConfigScreen(), type, false, original -> {
-                Minecraft.getInstance().setScreen(getConfigScreen());
-                type = original ? DisplayScreenType.ORIGINAL : DisplayScreenType.COMPOSITE;
-            }));
-        }
-        
+    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
+        Minecraft.getInstance().setScreen(new UncertainDisplayViewingScreen(getConfigScreen(), type, false, original -> {
+            Minecraft.getInstance().setScreen(getConfigScreen());
+            type = original ? DisplayScreenType.ORIGINAL : DisplayScreenType.COMPOSITE;
+        }));
+    }) {
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             setMessage(new TranslatableComponent("config.roughlyenoughitems.recipeScreenType.config", type.toString()));
             super.render(matrices, mouseX, mouseY, delta);
         }
     };
-    private final List<GuiEventListener> children = ImmutableList.of(buttonWidget);
+    private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     @SuppressWarnings("deprecation")
     public RecipeScreenTypeEntry(int width, Component fieldName, DisplayScreenType type, DisplayScreenType defaultValue, Consumer<DisplayScreenType> save) {
@@ -96,6 +95,11 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<DisplayScreenType> {
     
     @Override
     public List<? extends GuiEventListener> children() {
+        return children;
+    }
+    
+    @Override
+    public List<? extends NarratableEntry> narratables() {
         return children;
     }
     

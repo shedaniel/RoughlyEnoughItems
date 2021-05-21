@@ -35,9 +35,15 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -45,7 +51,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
-public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFreeEntryListWidget.Entry<E>> extends AbstractContainerEventHandler implements Widget {
+public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFreeEntryListWidget.Entry<E>> extends AbstractContainerEventHandler implements Widget, NarratableEntry {
     protected static final int DRAG_OUTSIDE = -2;
     protected final Minecraft client;
     private final List<E> entries = new Entries();
@@ -62,6 +68,8 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     protected int headerHeight;
     protected double scroll;
     protected boolean scrolling;
+    @Nullable
+    protected E hoveredItem;
     protected E selectedItem;
     protected ResourceLocation backgroundLocation;
     
@@ -85,6 +93,41 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         this.headerHeight = headerHeight;
         if (!boolean_1)
             this.headerHeight = 0;
+    }
+    
+    public NarrationPriority narrationPriority() {
+        if (this.isFocused()) {
+            return NarrationPriority.FOCUSED;
+        } else {
+            return this.hoveredItem != null ? NarrationPriority.HOVERED : NarrationPriority.NONE;
+        }
+    }
+    
+    public void updateNarration(NarrationElementOutput narrationElementOutput) {
+        E entry = this.hoveredItem;
+        if (entry != null) {
+            entry.updateNarration(narrationElementOutput.nest());
+            this.narrateListElementPosition(narrationElementOutput, entry);
+        } else {
+            E entry2 = this.getFocused();
+            if (entry2 != null) {
+                entry2.updateNarration(narrationElementOutput.nest());
+                this.narrateListElementPosition(narrationElementOutput, entry2);
+            }
+        }
+        
+        narrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.component_list.usage"));
+    }
+    
+    protected void narrateListElementPosition(NarrationElementOutput narrationElementOutput, E entry) {
+        List<E> list = this.children();
+        if (list.size() > 1) {
+            int i = list.indexOf(entry);
+            if (i != -1) {
+                narrationElementOutput.add(NarratedElementType.POSITION, new TranslatableComponent("narrator.position.list", i + 1, list.size()));
+            }
+        }
+        
     }
     
     public int getItemWidth() {
@@ -249,9 +292,8 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
             }
             
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            RenderSystem.setShaderTexture(0, AbstractSelectionList.WHITE_TEXTURE_LOCATION);
             Matrix4f matrix = matrices.last().pose();
-            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             buffer.vertex(matrix, scrollbarPositionMinX, this.bottom, 0.0F).color(0, 0, 0, 255).endVertex();
             buffer.vertex(matrix, scrollbarPositionMaxX, this.bottom, 0.0F).color(0, 0, 0, 255).endVertex();
             buffer.vertex(matrix, scrollbarPositionMaxX, this.top, 0.0F).color(0, 0, 0, 255).endVertex();
@@ -405,6 +447,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     }
     
     protected void renderList(PoseStack matrices, int startX, int startY, int int_3, int int_4, float float_1) {
+        this.hoveredItem = this.isMouseOver(int_3, int_4) ? this.getItemAtPosition(int_3, int_4) : null;
         int itemCount = this.getItemCount();
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();
@@ -440,7 +483,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
             
             int y = this.getRowTop(renderIndex);
             int x = this.getRowLeft();
-            renderItem(matrices, item, renderIndex, y, x, itemWidth, itemHeight, int_3, int_4, this.isMouseOver(int_3, int_4) && Objects.equals(this.getItemAtPosition(int_3, int_4), item), float_1);
+            renderItem(matrices, item, renderIndex, y, x, itemWidth, itemHeight, int_3, int_4, Objects.equals(hoveredItem, item), float_1);
         }
         
     }
@@ -503,6 +546,8 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     @Environment(EnvType.CLIENT)
     public abstract static class Entry<E extends Entry<E>> extends GuiComponent implements GuiEventListener {
         @Deprecated DynamicErrorFreeEntryListWidget<E> parent;
+        @Nullable
+        private NarratableEntry lastNarratable;
         
         public Entry() {
         }
@@ -526,6 +571,28 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         @Deprecated
         public int getMorePossibleHeight() {
             return -1;
+        }
+    
+        public abstract List<? extends NarratableEntry> narratables();
+    
+        void updateNarration(NarrationElementOutput narrationElementOutput) {
+            List<? extends NarratableEntry> list = this.narratables();
+            Screen.NarratableSearchResult narratableSearchResult = Screen.findNarratableWidget(list, this.lastNarratable);
+            if (narratableSearchResult != null) {
+                if (narratableSearchResult.priority.isTerminal()) {
+                    this.lastNarratable = narratableSearchResult.entry;
+                }
+            
+                if (list.size() > 1) {
+                    narrationElementOutput.add(NarratedElementType.POSITION, new TranslatableComponent("narrator.position.object_list", new Object[]{narratableSearchResult.index + 1, list.size()}));
+                    if (narratableSearchResult.priority == NarrationPriority.FOCUSED) {
+                        narrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.component_list.usage"));
+                    }
+                }
+            
+                narratableSearchResult.entry.updateNarration(narrationElementOutput.nest());
+            }
+        
         }
     }
     

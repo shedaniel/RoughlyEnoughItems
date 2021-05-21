@@ -129,9 +129,9 @@ public class UncertainDisplayViewingScreen extends Screen {
     
     @Override
     public void init() {
-        this.children.clear();
+        this.children().clear();
         this.widgets.clear();
-        this.children.add(button = Widgets.createButton(new Rectangle(width / 2 - 100, height - 40, 200, 20), NarratorChatListener.NO_TITLE)
+        this._children().add(button = Widgets.createButton(new Rectangle(width / 2 - 100, height - 40, 200, 20), NarratorChatListener.NO_TITLE)
                 .onRender((matrices, button) -> {
                     button.setEnabled(isSet);
                     if (scroll.target() != 0 && allModsUsingJEI != null) {
@@ -174,7 +174,11 @@ public class UncertainDisplayViewingScreen extends Screen {
                 y = UncertainDisplayViewingScreen.this.height * 2 - 64 - (int) (scroll.floatValue() / 200f * height);
             }
         })));
-        this.children.addAll(widgets);
+        this._children().addAll(widgets);
+    }
+    
+    public List<GuiEventListener> _children() {
+        return (List<GuiEventListener>) children();
     }
     
     private Widget transformScroll(Widget widget) {

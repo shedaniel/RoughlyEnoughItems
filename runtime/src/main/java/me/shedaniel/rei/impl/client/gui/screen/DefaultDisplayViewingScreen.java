@@ -156,7 +156,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         super.init();
         boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
         int tabSize = isCompactTabs ? 24 : 28;
-        this.children.clear();
+        this.children().clear();
         this.recipeBounds.clear();
         this.tabs.clear();
         this.preWidgets.clear();
@@ -283,10 +283,10 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 }
             }
         }
-        
-        children.addAll(tabs);
-        children.addAll(widgets);
-        children.addAll(preWidgets);
+    
+        _children().addAll(tabs);
+        _children().addAll(widgets);
+        _children().addAll(preWidgets);
     }
     
     public List<Widget> getWidgets() {
