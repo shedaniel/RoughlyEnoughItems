@@ -24,6 +24,8 @@
 package me.shedaniel.rei.impl.common.entry.comparison;
 
 import com.google.common.base.Predicates;
+import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -32,23 +34,21 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.function.ToLongFunction;
 
 public class NbtHasherProviderImpl implements Internals.NbtHasherProvider {
-    private final ToLongFunction<Tag> defaultHasher = _provide();
+    private final EntryComparator<Tag> defaultHasher = _provide();
     
     @Override
-    public ToLongFunction<Tag> provide(String... ignoredKeys) {
+    public EntryComparator<Tag> provide(String... ignoredKeys) {
         if (ignoredKeys == null || ignoredKeys.length == 0) return defaultHasher;
         return _provide(ignoredKeys);
     }
     
-    private ToLongFunction<Tag> _provide(String... ignoredKeys) {
+    private EntryComparator<Tag> _provide(String... ignoredKeys) {
         return new Hasher(ignoredKeys);
     }
     
-    private static class Hasher implements ToLongFunction<Tag> {
-        @Nullable
+    private static class Hasher implements EntryComparator<Tag> {
         private final Predicate<String> filter;
         
         private Hasher(@Nullable String[] ignoredKeys) {
@@ -66,9 +66,9 @@ public class NbtHasherProviderImpl implements Internals.NbtHasherProvider {
         private boolean shouldHash(String key) {
             return filter.test(key);
         }
-        
+    
         @Override
-        public long applyAsLong(Tag value) {
+        public long hash(ComparisonContext context, Tag value) {
             return hashTag(value);
         }
         

@@ -23,54 +23,30 @@
 
 package me.shedaniel.rei.plugin.common.displays.crafting;
 
-import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
-public class DefaultShapelessDisplay extends DefaultCraftingDisplay {
-    private ShapelessRecipe display;
-    private List<EntryIngredient> input;
-    private EntryIngredient output;
-    
+public class DefaultShapelessDisplay extends DefaultCraftingDisplay<ShapelessRecipe> {
     public DefaultShapelessDisplay(ShapelessRecipe recipe) {
-        this.display = recipe;
-        this.input = EntryIngredients.ofIngredients(recipe.getIngredients());
-        this.output = EntryIngredients.of(recipe.getResultItem());
+        super(
+                EntryIngredients.ofIngredients(recipe.getIngredients()),
+                Collections.singletonList(EntryIngredients.of(recipe.getResultItem())),
+                Optional.of(recipe)
+        );
     }
     
-    @Override
-    public Optional<Recipe<?>> getOptionalRecipe() {
-        return Optional.ofNullable(display);
-    }
-    
-    @Override
-    public Optional<ResourceLocation> getDisplayLocation() {
-        return Optional.ofNullable(display).map(ShapelessRecipe::getId);
-    }
-    
-    @Override
-    public List<EntryIngredient> getInputEntries() {
-        return input;
-    }
-    
-    @Override
-    public List<EntryIngredient> getOutputEntries() {
-        return Collections.singletonList(output);
-    }
-    
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public int getWidth() {
-        return display.getIngredients().size() > 4 ? 3 : 2;
+        return recipe.get().getIngredients().size() > 4 ? 3 : 2;
     }
     
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public int getHeight() {
-        return display.getIngredients().size() > 4 ? 3 : 2;
+        return recipe.get().getIngredients().size() > 4 ? 3 : 2;
     }
 }

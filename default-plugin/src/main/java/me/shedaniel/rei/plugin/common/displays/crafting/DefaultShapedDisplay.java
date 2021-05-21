@@ -23,54 +23,30 @@
 
 package me.shedaniel.rei.plugin.common.displays.crafting;
 
-import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
-public class DefaultShapedDisplay extends DefaultCraftingDisplay {
-    private ShapedRecipe display;
-    private List<EntryIngredient> input;
-    private EntryIngredient output;
-    
+public class DefaultShapedDisplay extends DefaultCraftingDisplay<ShapedRecipe> {
     public DefaultShapedDisplay(ShapedRecipe recipe) {
-        this.display = recipe;
-        this.input = EntryIngredients.ofIngredients(recipe.getIngredients());
-        this.output = EntryIngredients.of(recipe.getResultItem());
+        super(
+                EntryIngredients.ofIngredients(recipe.getIngredients()),
+                Collections.singletonList(EntryIngredients.of(recipe.getResultItem())),
+                Optional.of(recipe)
+        );
     }
     
-    @Override
-    public Optional<ResourceLocation> getDisplayLocation() {
-        return Optional.ofNullable(display).map(ShapedRecipe::getId);
-    }
-    
-    @Override
-    public List<EntryIngredient> getInputEntries() {
-        return input;
-    }
-    
-    @Override
-    public List<EntryIngredient> getOutputEntries() {
-        return Collections.singletonList(output);
-    }
-    
-    @Override
-    public Optional<Recipe<?>> getOptionalRecipe() {
-        return Optional.ofNullable(display);
-    }
-    
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public int getWidth() {
-        return display.getWidth();
+        return recipe.get().getWidth();
     }
     
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public int getHeight() {
-        return display.getHeight();
+        return recipe.get().getHeight();
     }
 }

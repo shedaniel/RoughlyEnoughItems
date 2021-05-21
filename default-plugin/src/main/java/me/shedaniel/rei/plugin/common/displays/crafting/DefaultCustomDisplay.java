@@ -23,31 +23,29 @@
 
 package me.shedaniel.rei.plugin.common.displays.crafting;
 
-import com.google.common.collect.ImmutableList;
+import me.shedaniel.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.registry.RecipeManagerContext;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.BitSet;
 import java.util.List;
 import java.util.Optional;
 
-public class DefaultCustomDisplay extends DefaultCraftingDisplay {
-    private List<EntryIngredient> input;
-    private List<EntryIngredient> output;
-    private Recipe<?> possibleRecipe;
-    private int width, height;
+public class DefaultCustomDisplay extends DefaultCraftingDisplay<Recipe<?>> {
+    private int width;
+    private int height;
     
-    public DefaultCustomDisplay(Recipe<?> possibleRecipe, List<EntryIngredient> input, List<EntryIngredient> output) {
-        this.input = ImmutableList.copyOf(input);
-        this.output = output;
-        this.possibleRecipe = possibleRecipe;
+    public DefaultCustomDisplay(@Nullable Recipe<?> possibleRecipe, List<EntryIngredient> input, List<EntryIngredient> output) {
+        super(input, output, Optional.ofNullable(possibleRecipe));
         BitSet row = new BitSet(3);
         BitSet column = new BitSet(3);
         for (int i = 0; i < 9; i++)
-            if (i < this.input.size()) {
-                List<? extends EntryStack<?>> stacks = this.input.get(i);
+            if (i < input.size()) {
+                List<? extends EntryStack<?>> stacks = input.get(i);
                 if (stacks.stream().anyMatch(stack -> !stack.isEmpty())) {
                     row.set((i - (i % 3)) / 3);
                     column.set(i % 3);
@@ -57,28 +55,10 @@ public class DefaultCustomDisplay extends DefaultCraftingDisplay {
         this.height = column.cardinality();
     }
     
-    protected Optional<Recipe<?>> getRecipe() {
-        return Optional.ofNullable(possibleRecipe);
-    }
-    
-    @Override
-    public Optional<ResourceLocation> getDisplayLocation() {
-        return getRecipe().map(Recipe::getId);
-    }
-    
-    @Override
-    public List<EntryIngredient> getInputEntries() {
-        return input;
-    }
-    
-    @Override
-    public List<EntryIngredient> getOutputEntries() {
-        return output;
-    }
-    
-    @Override
-    public Optional<Recipe<?>> getOptionalRecipe() {
-        return Optional.ofNullable(possibleRecipe);
+    public static DefaultCustomDisplay simple(List<EntryIngredient> input, List<EntryIngredient> output, Optional<ResourceLocation> location) {
+        Recipe<?> optionalRecipe = location.flatMap(resourceLocation -> RecipeManagerContext.getInstance().getRecipeManager().byKey(resourceLocation))
+                .orElse(null);
+        return new DefaultCustomDisplay(optionalRecipe, input, output);
     }
     
     @Override
