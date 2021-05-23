@@ -39,9 +39,9 @@ public interface DisplayVisibilityPredicate extends Comparable<DisplayVisibility
     
     /**
      * Handles the visibility of the display.
-     * {@link ActionResult#PASS} to pass the handling to another handler
-     * {@link ActionResult#SUCCESS} to always display it
-     * {@link ActionResult#FAIL} to never display it
+     * {@link InteractionResult#PASS} to pass the handling to another handler
+     * {@link InteractionResult#SUCCESS} to always display it
+     * {@link InteractionResult#FAIL} to never display it
      *
      * @param category the category of the display
      * @param display  the display of the recipe
