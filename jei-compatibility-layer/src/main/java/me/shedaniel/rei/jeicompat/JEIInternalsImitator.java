@@ -21,36 +21,31 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.registry.display.visibility;
+package me.shedaniel.rei.jeicompat;
 
-import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.common.display.Display;
-import net.minecraft.world.InteractionResult;
+import me.shedaniel.rei.jeicompat.wrap.JEIIngredientFilter;
+import me.shedaniel.rei.jeicompat.wrap.JEIIngredientManager;
+import me.shedaniel.rei.jeicompat.wrap.JEIJeiHelpers;
+import me.shedaniel.rei.jeicompat.wrap.JEIJeiRuntime;
+import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.runtime.IIngredientFilter;
+import mezz.jei.api.runtime.IIngredientManager;
+import mezz.jei.api.runtime.IJeiRuntime;
 
-public interface DisplayVisibilityPredicate extends Comparable<DisplayVisibilityPredicate> {
-    /**
-     * Gets the priority of the handler, the higher the priority, the earlier this is called.
-     *
-     * @return the priority
-     */
-    default double getPriority() {
-        return 0.0;
+public class JEIInternalsImitator {
+    public static IJeiHelpers getHelpers() {
+        return JEIJeiHelpers.INSTANCE;
     }
     
-    /**
-     * Handles the visibility of the display.
-     * {@link InteractionResult#PASS} to pass the handling to another handler
-     * {@link InteractionResult#SUCCESS} to always display it
-     * {@link InteractionResult#FAIL} to never display it
-     *
-     * @param category the category of the display
-     * @param display  the display of the recipe
-     * @return the visibility
-     */
-    InteractionResult handleDisplay(DisplayCategory<?> category, Display display);
+    public static IJeiRuntime getRuntime() {
+        return JEIJeiRuntime.INSTANCE;
+    }
     
-    @Override
-    default int compareTo(DisplayVisibilityPredicate o) {
-        return Double.compare(getPriority(), o.getPriority());
+    public static IIngredientManager getIngredientManager() {
+        return JEIIngredientManager.INSTANCE;
+    }
+    
+    public static IIngredientFilter getIngredientFilter() {
+        return JEIIngredientFilter.INSTANCE;
     }
 }
