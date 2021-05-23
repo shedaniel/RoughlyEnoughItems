@@ -12,12 +12,6 @@ loom {
     accessWidener = gradle.rootProject.project("fabric").file("src/main/resources/roughlyenoughitems.accessWidener")
 }
 
-sourceSets {
-    main {
-        resources.srcDirs += rootProject.file("src/main/resources")
-    }
-}
-
 dependencies {
     modCompileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
     modCompileOnly("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
