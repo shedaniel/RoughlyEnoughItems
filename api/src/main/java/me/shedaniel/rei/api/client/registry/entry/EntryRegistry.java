@@ -29,6 +29,9 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -40,6 +43,21 @@ import java.util.function.LongPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+/**
+ * Registry for registering {@link EntryStack} for display on the overlay entry list.
+ *
+ * <p>The default REI plugin iterates both {@link Registry#ITEM} and {@link Registry#FLUID}
+ * to register new entries. Other plugins may override this default behaviour, altering
+ * the entry list.
+ *
+ * <p>REI plugins should only add entries during reload, modifications outside the
+ * reload phase may not be reflected immediately.
+ *
+ * <p>While this registry can be used for registering variants of stacks, there may be
+ * native alternatives such as {@link Item#fillItemCategory(CreativeModeTab, NonNullList)}.
+ *
+ * @see REIClientPlugin#registerEntries(EntryRegistry)
+ */
 @Environment(EnvType.CLIENT)
 public interface EntryRegistry extends Reloadable<REIClientPlugin> {
     /**

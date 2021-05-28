@@ -56,7 +56,7 @@ public class CategoryRegistryImpl implements CategoryRegistry {
     public void endReload() {
         List<CategoryIdentifier<?>> notRegisteredSerializers = new ArrayList<>();
         for (CategoryIdentifier<?> identifier : this.categories.keySet()) {
-            if (!DisplaySerializerRegistry.getInstance().hasRegistered(identifier)) {
+            if (!DisplaySerializerRegistry.getInstance().hasSerializer(identifier)) {
                 notRegisteredSerializers.add(identifier);
             }
         }

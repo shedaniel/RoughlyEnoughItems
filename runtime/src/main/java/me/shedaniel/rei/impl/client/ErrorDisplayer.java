@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.impl.client;
 
-import me.shedaniel.architectury.annotations.ExpectPlatform;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.impl.client.gui.screen.WarningAndErrorScreen;
 import net.minecraft.client.Minecraft;

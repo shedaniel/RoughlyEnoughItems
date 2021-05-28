@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.plugin.common;
 
-import me.shedaniel.architectury.annotations.ExpectPlatform;
-import me.shedaniel.architectury.annotations.PlatformOnly;
+import dev.architectury.injectables.annotations.ExpectPlatform;
+import dev.architectury.injectables.annotations.PlatformOnly;
 import me.shedaniel.architectury.hooks.FluidStackHooks;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.NbtType;
@@ -56,11 +56,13 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+@ApiStatus.Internal
 public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
     @Override
     public void registerItemComparators(ItemComparatorRegistry registry) {
@@ -141,7 +143,7 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
     }
     
     @Override
-    public int getPriority() {
+    public double getPriority() {
         return -100;
     }
 }

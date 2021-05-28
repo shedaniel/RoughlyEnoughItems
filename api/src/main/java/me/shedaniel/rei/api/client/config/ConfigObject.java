@@ -58,10 +58,6 @@ public interface ConfigObject {
     
     boolean isGrabbingItems();
     
-    boolean isConfigScreenAnimated();
-    
-    boolean isCreditsScreenAnimated();
-    
     boolean isFavoritesAnimated();
     
     boolean isToastDisplayedOnCopyIdentifier();
@@ -91,8 +87,6 @@ public interface ConfigObject {
     String getWeatherCommand();
     
     int getMaxRecipePerPage();
-    
-    boolean doesShowUtilsButtons();
     
     boolean doesDisableRecipeBook();
     

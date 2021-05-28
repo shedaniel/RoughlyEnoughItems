@@ -27,6 +27,11 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+/**
+ * {@inheritDoc}
+ *
+ * @see me.shedaniel.rei.api.common.plugins.REIPlugin#registerItemComparators(ItemComparatorRegistry)
+ */
 public interface ItemComparatorRegistry extends EntryComparatorRegistry<ItemStack, Item> {
     /**
      * @return the instance of {@link ItemComparatorRegistry}

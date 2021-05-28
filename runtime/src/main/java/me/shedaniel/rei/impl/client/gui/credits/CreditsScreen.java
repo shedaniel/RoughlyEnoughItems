@@ -26,13 +26,9 @@ package me.shedaniel.rei.impl.client.gui.credits;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.clothconfig2.impl.EasingMethod;
-import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TextCreditsItem;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
-import me.shedaniel.rei.impl.client.gui.screen.TransformingScreen;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractButton;
@@ -41,9 +37,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -122,14 +116,7 @@ public class CreditsScreen extends Screen {
     }
     
     private void openPrevious() {
-        MutableLong current = new MutableLong(0);
-        Minecraft.getInstance().setScreen(new TransformingScreen(true, parent,
-                this,
-                () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (!ConfigObject.getInstance().isCreditsScreenAnimated() ? -3000 : 0) : current.getValue()),
-                () -> EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1))
-                      * Minecraft.getInstance().getWindow().getGuiScaledWidth(),
-                () -> 0,
-                () -> Util.getMillis() - current.getValue() > 800));
+        Minecraft.getInstance().setScreen(parent);
     }
     
     @Override

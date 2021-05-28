@@ -41,6 +41,10 @@ allprojects {
         maven { url "https://maven.shedaniel.me" }
         maven { url "https://maven.terraformersmc.com/releases" }
     }
+    
+    architectury {
+        transformerVersion = "3.0.46"
+    }
 
     license {
         header rootProject.file("HEADER")
