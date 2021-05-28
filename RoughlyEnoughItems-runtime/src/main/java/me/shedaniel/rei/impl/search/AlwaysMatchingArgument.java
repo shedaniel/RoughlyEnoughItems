@@ -51,7 +51,7 @@ public final class AlwaysMatchingArgument extends Argument<Unit, Unit> {
     }
     
     @Override
-    public MatchStatus matchesArgumentPrefix(String text) {
+    public MatchStatus matchesArgumentPrefix(String text, boolean forceGrammar) {
         return MatchStatus.unmatched();
     }
     

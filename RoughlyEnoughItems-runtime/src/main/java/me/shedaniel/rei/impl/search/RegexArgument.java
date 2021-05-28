@@ -23,9 +23,7 @@
 
 package me.shedaniel.rei.impl.search;
 
-import me.shedaniel.rei.api.ConfigObject;
 import me.shedaniel.rei.api.EntryStack;
-import me.shedaniel.rei.gui.config.SearchMode;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Style;
@@ -51,7 +49,7 @@ public final class RegexArgument extends Argument<@Nullable Pattern, String> {
     }
     
     @Override
-    public MatchStatus matchesArgumentPrefix(String text) {
+    public MatchStatus matchesArgumentPrefix(String text, boolean forceGrammar) {
         boolean inverted = false;
         String matchText = text;
         if (matchText.startsWith("-")) {

@@ -55,12 +55,16 @@ public abstract class Argument<T, R> {
         return SearchMode.PREFIX;
     }
     
-    public MatchStatus matchesArgumentPrefix(String text) {
-        MatchStatus status = checkMatchPrefix(text, getPrefix());
-        if (status.isMatched()) {
-            return status;
-        } else if (getSearchMode() == SearchMode.ALWAYS) {
-            status = checkMatchPrefix(text, "");
+    public MatchStatus matchesArgumentPrefix(String text, boolean forceGrammar) {
+        String prefix = getPrefix();
+        if (forceGrammar && !prefix.isEmpty()) {
+            MatchStatus status = checkMatchPrefix(text, prefix);
+            if (status.isMatched()) {
+                return status;
+            }
+        }
+        if (!forceGrammar && getSearchMode() == SearchMode.ALWAYS) {
+            MatchStatus status = checkMatchPrefix(text, "");
             if (status.isMatched()) {
                 status.notUsingGrammar();
             }
