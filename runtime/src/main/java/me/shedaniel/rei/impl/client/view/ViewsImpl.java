@@ -31,7 +31,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
-import me.shedaniel.rei.api.client.registry.display.LiveDisplayGenerator;
+import me.shedaniel.rei.api.client.registry.display.DynamicDisplayGenerator;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -123,12 +123,12 @@ public class ViewsImpl implements Views {
         
         int generatorsCount = 0;
         
-        for (Map.Entry<CategoryIdentifier<?>, List<LiveDisplayGenerator<?>>> entry : DisplayRegistry.getInstance().getCategoryDisplayGenerators().entrySet()) {
+        for (Map.Entry<CategoryIdentifier<?>, List<DynamicDisplayGenerator<?>>> entry : DisplayRegistry.getInstance().getCategoryDisplayGenerators().entrySet()) {
             CategoryIdentifier<?> categoryId = entry.getKey();
             Set<Display> set = new LinkedHashSet<>();
             generatorsCount += entry.getValue().size();
             
-            for (LiveDisplayGenerator<Display> generator : (List<LiveDisplayGenerator<Display>>) (List<? extends LiveDisplayGenerator<?>>) entry.getValue()) {
+            for (DynamicDisplayGenerator<Display> generator : (List<DynamicDisplayGenerator<Display>>) (List<? extends DynamicDisplayGenerator<?>>) entry.getValue()) {
                 generateLiveDisplays(generator, builder, set::add);
             }
             
@@ -140,7 +140,7 @@ public class ViewsImpl implements Views {
         Consumer<Display> displayConsumer = display -> {
             CollectionUtils.getOrPutEmptyList(result, CategoryRegistry.getInstance().get(display.getCategoryIdentifier()).getCategory()).add(display);
         };
-        for (LiveDisplayGenerator<Display> generator : (List<LiveDisplayGenerator<Display>>) (List<? extends LiveDisplayGenerator<?>>) DisplayRegistry.getInstance().getGlobalDisplayGenerators()) {
+        for (DynamicDisplayGenerator<Display> generator : (List<DynamicDisplayGenerator<Display>>) (List<? extends DynamicDisplayGenerator<?>>) DisplayRegistry.getInstance().getGlobalDisplayGenerators()) {
             generatorsCount++;
             generateLiveDisplays(generator, builder, displayConsumer);
         }
@@ -155,7 +155,7 @@ public class ViewsImpl implements Views {
         return result;
     }
     
-    private <T extends Display> void generateLiveDisplays(LiveDisplayGenerator<T> generator, ViewSearchBuilder builder, Consumer<T> displayConsumer) {
+    private <T extends Display> void generateLiveDisplays(DynamicDisplayGenerator<T> generator, ViewSearchBuilder builder, Consumer<T> displayConsumer) {
         for (EntryStack<?> stack : builder.getRecipesFor()) {
             Optional<List<T>> recipeForDisplays = generator.getRecipeFor(stack);
             if (recipeForDisplays.isPresent()) {

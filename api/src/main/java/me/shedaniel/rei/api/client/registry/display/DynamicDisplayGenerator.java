@@ -24,13 +24,22 @@
 package me.shedaniel.rei.api.client.registry.display;
 
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface LiveDisplayGenerator<T extends Display> {
+/**
+ * Interface for generating dynamic displays at runtime.
+ * Invoked per display view search, so please keep this performant.
+ *
+ * @param <T> the type of displays to generate
+ * @see DisplayRegistry#registerDisplayGenerator(CategoryIdentifier, DynamicDisplayGenerator)
+ * @see DisplayRegistry#registerGlobalDisplayGenerator(DynamicDisplayGenerator)
+ */
+public interface DynamicDisplayGenerator<T extends Display> {
     default Optional<List<T>> getRecipeFor(EntryStack<?> entry) {
         return Optional.empty();
     }
