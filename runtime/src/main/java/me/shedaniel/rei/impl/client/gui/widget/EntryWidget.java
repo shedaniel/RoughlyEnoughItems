@@ -30,7 +30,6 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -43,7 +42,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.REIHelperImpl;
-import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
@@ -384,7 +383,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                     else if (!ConfigObject.getInstance().getFavoriteEntries().contains(favoriteEntry))
                         ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     ConfigManager.getInstance().saveConfig();
-                    FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+                    FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
                     if (favoritesListWidget != null)
                         favoritesListWidget.updateSearch();
                     return true;
@@ -431,7 +430,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                     else if (!ConfigObject.getInstance().getFavoriteEntries().contains(favoriteEntry))
                         ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     ConfigManager.getInstance().saveConfig();
-                    FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+                    FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
                     if (favoritesListWidget != null)
                         favoritesListWidget.updateSearch();
                     return true;

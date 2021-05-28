@@ -32,41 +32,37 @@ import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 
 public class DisplaySerializerRegistryImpl implements DisplaySerializerRegistry {
-    private final Map<CategoryIdentifier<?>, Holder<?>> serializers = new HashMap<>();
+    private final Map<CategoryIdentifier<?>, DisplaySerializer<?>> serializers = new HashMap<>();
     
     @Override
     public <D extends Display> void register(CategoryIdentifier<? extends D> categoryId, DisplaySerializer<D> serializer) {
-        Holder<D> holder = (Holder<D>) serializers.computeIfAbsent(categoryId, id -> new Holder<>());
-        holder.serializer = Optional.of(serializer);
+        serializers.put(categoryId, serializer);
     }
     
     @Override
     public <D extends Display> void registerNotSerializable(CategoryIdentifier<D> categoryId) {
-        serializers.computeIfAbsent(categoryId, id -> new Holder<>()).serializer = Optional.empty();
-    }
-    
-    @Override
-    public <D extends Display> boolean hasRegistered(CategoryIdentifier<D> categoryId) {
-        return serializers.containsKey(categoryId);
+        serializers.remove(categoryId);
     }
     
     @Override
     public <D extends Display> boolean hasSerializer(CategoryIdentifier<D> categoryId) {
-        Holder<?> holder = serializers.get(categoryId);
-        return holder != null && holder.serializer.isPresent();
+        return serializers.containsKey(categoryId);
     }
     
     @Override
-    public <D extends Display> CompoundTag save(CategoryIdentifier<? extends D> categoryId, D display, CompoundTag tag) {
-        return ((DisplaySerializer<D>) serializers.get(categoryId).serializer.get()).save(tag, display);
+    public <D extends Display> CompoundTag save(D display, CompoundTag tag) {
+        CategoryIdentifier<?> categoryId = display.getCategoryIdentifier();
+        return Objects.requireNonNull((DisplaySerializer<D>) serializers.get(categoryId), "Category " + categoryId + " does not have a display serializer!")
+                .save(tag, display);
     }
     
     @Override
     public <D extends Display> D read(CategoryIdentifier<? extends D> categoryId, CompoundTag tag) {
-        return ((DisplaySerializer<D>) serializers.get(categoryId).serializer.get()).read(tag);
+        return Objects.requireNonNull((DisplaySerializer<D>) serializers.get(categoryId), "Category " + categoryId + " does not have a display serializer!")
+                .read(tag);
     }
     
     @Override
@@ -77,9 +73,5 @@ public class DisplaySerializerRegistryImpl implements DisplaySerializerRegistry 
     @Override
     public void acceptPlugin(REIPlugin<?> plugin) {
         plugin.registerDisplaySerializer(this);
-    }
-    
-    private static class Holder<D extends Display> {
-        private Optional<DisplaySerializer<D>> serializer = Optional.empty();
     }
 }

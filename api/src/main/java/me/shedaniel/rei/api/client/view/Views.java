@@ -38,8 +38,7 @@ public interface Views extends Reloadable<REIClientPlugin> {
     /**
      * Returns all craftable items from materials.
      *
-     * @param inventoryItems the materials
      * @return the list of craftable entries
      */
-    Collection<EntryStack<?>> findCraftableEntriesByMaterials(Iterable<? extends EntryStack<?>> inventoryItems);
+    Collection<EntryStack<?>> findCraftableEntriesByMaterials();
 }

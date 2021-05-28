@@ -33,7 +33,7 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
-import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.TextFieldWidget;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
@@ -80,7 +80,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         return TextTransformations.forwardWithTransformation(text, (s, charIndex, c) -> {
             byte arg = highlighter.highlighted[charIndex + index];
             Style style = Style.EMPTY;
-            if (isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
+            if (isMain && ScreenOverlayImpl.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
                 style = ERROR_STYLE;
             }
             if (arg > 0) {
@@ -154,7 +154,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         isHighlighting = isHighlighting && ConfigObject.getInstance().isInventoryHighlightingAllowed();
         if (isMain && isHighlighting) {
             fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -852212);
-        } else if (isMain && ContainerScreenOverlay.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
+        } else if (isMain && ScreenOverlayImpl.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
             fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -43691);
         } else {
             super.renderBorder(matrices);

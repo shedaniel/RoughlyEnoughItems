@@ -140,10 +140,10 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     
     private void pluginSection(MutablePair<Stopwatch, String> sectionData, String sectionName, List<P> list, Consumer<P> consumer) {
         for (P plugin : list) {
-            try (SectionClosable section = section(sectionData, sectionName + " for " + plugin.getPluginName())) {
+            try (SectionClosable section = section(sectionData, sectionName + " for " + plugin.getPluginProviderName())) {
                 consumer.accept(plugin);
             } catch (Throwable throwable) {
-                RoughlyEnoughItemsCore.LOGGER.error(plugin.getPluginName() + " plugin failed to " + sectionName + "!", throwable);
+                RoughlyEnoughItemsCore.LOGGER.error(plugin.getPluginProviderName() + " plugin failed to " + sectionName + "!", throwable);
             }
         }
     }
@@ -165,8 +165,8 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
             }
             
             List<P> plugins = new ArrayList<>(getPlugins().toList());
-            plugins.sort(Comparator.comparingInt(P::getPriority).reversed());
-            RoughlyEnoughItemsCore.LOGGER.info("Reloading Plugin Manager [%s], registered %d plugins: %s", pluginClass.getSimpleName(), plugins.size(), CollectionUtils.mapAndJoinToString(plugins, REIPlugin::getPluginName, ", "));
+            plugins.sort(Comparator.comparingDouble(P::getPriority).reversed());
+            RoughlyEnoughItemsCore.LOGGER.info("Reloading Plugin Manager [%s], registered %d plugins: %s", pluginClass.getSimpleName(), plugins.size(), CollectionUtils.mapAndJoinToString(plugins, REIPlugin::getPluginProviderName, ", "));
             Collections.reverse(plugins);
             
             pluginSection(sectionData, "pre-register", plugins, REIPlugin::preRegister);

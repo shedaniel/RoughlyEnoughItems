@@ -27,11 +27,8 @@ import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.architectury.hooks.ScreenHooks;
-import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.gui.ConfigScreenProvider;
@@ -47,13 +44,13 @@ import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
 import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
-import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -61,34 +58,23 @@ import me.shedaniel.rei.impl.client.REIHelperImpl;
 import me.shedaniel.rei.impl.client.config.entries.*;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
-import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
-import me.shedaniel.rei.impl.client.gui.screen.TransformingScreen;
-import me.shedaniel.rei.impl.client.gui.screen.WarningAndErrorScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionResult;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -309,25 +295,7 @@ public class ConfigManagerImpl implements ConfigManager {
     @Override
     public Screen getConfigScreen(Screen parent) {
         try {
-            if (Platform.isFabric() && !detectWorkingOptifabric()) {
-                List<Tuple<String, String>> warnings = Lists.newArrayList();
-                warnings.add(new Tuple<>(I18n.get("text.rei.config.optifine.title"), null));
-                warnings.add(new Tuple<>(I18n.get("text.rei.config.optifine.description"), null));
-                WarningAndErrorScreen screen = new WarningAndErrorScreen("config screen", warnings, Collections.emptyList(), Minecraft.getInstance()::setScreen);
-                screen.setParent(parent);
-                return screen;
-            }
-            TransformingScreen parentTranslated;
-            {
-                MutableLong current = new MutableLong(0);
-                parentTranslated = new TransformingScreen(true, parent,
-                        null,
-                        () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (!getConfig().isConfigScreenAnimated() ? -3000 : 0) : current.getValue()),
-                        () -> 0, () -> (EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
-                                       * Minecraft.getInstance().getWindow().getGuiScaledHeight(), () -> Util.getMillis() - current.getValue() > 800);
-                parentTranslated.setInitAfter(true);
-            }
-            ConfigScreenProvider<ConfigObjectImpl> provider = (ConfigScreenProvider<ConfigObjectImpl>) AutoConfig.getConfigScreen(ConfigObjectImpl.class, parentTranslated);
+            ConfigScreenProvider<ConfigObjectImpl> provider = (ConfigScreenProvider<ConfigObjectImpl>) AutoConfig.getConfigScreen(ConfigObjectImpl.class, parent);
             provider.setI13nFunction(manager -> "config.roughlyenoughitems");
             provider.setOptionFunction((baseI13n, field) -> field.isAnnotationPresent(ConfigObjectImpl.DontApplyFieldName.class) ? baseI13n : String.format("%s.%s", baseI13n, field.getName()));
             provider.setCategoryFunction((baseI13n, categoryName) -> String.format("%s.%s", baseI13n, categoryName));
@@ -341,74 +309,21 @@ public class ConfigManagerImpl implements ConfigManager {
                     ScreenHooks.addButton(screen, new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
                         MutableLong current = new MutableLong(0);
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
-                        Minecraft.getInstance().setScreen(new TransformingScreen(false, creditsScreen,
-                                screen,
-                                () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (!getConfig().isCreditsScreenAnimated() ? -3000 : 0) : current.getValue()),
-                                () -> (1 - EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
-                                      * Minecraft.getInstance().getWindow().getGuiScaledWidth() * 1.3,
-                                () -> 0,
-                                () -> Util.getMillis() - current.getValue() > 800));
+                        Minecraft.getInstance().setScreen(creditsScreen);
                     }));
                 }).setSavingRunnable(() -> {
                     saveConfig();
                     EntryRegistry.getInstance().refilter();
+                    REIHelper.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
                     if (REIHelperImpl.getSearchField() != null) {
-                        ContainerScreenOverlay.getEntryListWidget().updateSearch(REIHelperImpl.getSearchField().getText(), true);
+                        ScreenOverlayImpl.getEntryListWidget().updateSearch(REIHelperImpl.getSearchField().getText(), true);
                     }
                 }).build();
             });
-            Screen configScreen = provider.get();
-            parentTranslated.setLastScreen(configScreen);
-            MutableLong current = new MutableLong(0);
-            return new TransformingScreen(false, configScreen,
-                    parent,
-                    () -> current.setValue(current.getValue() == 0 ? Util.getMillis() + (!getConfig().isConfigScreenAnimated() ? -3000 : 0) : current.getValue()),
-                    () -> 0, () -> (1 - EasingMethod.EasingMethodImpl.EXPO.apply(Mth.clamp((Util.getMillis() - current.getValue()) / 750.0, 0, 1)))
-                                   * Minecraft.getInstance().getWindow().getGuiScaledHeight() * 1.3, () -> Util.getMillis() - current.getValue() > 800);
+            return provider.get();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
-    
-    private boolean detectWorkingOptifabric() {
-        try {
-            String renderText = FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary", "net.minecraft.class_327", "method_1724", "(Ljava/lang/String;FFIZLnet/minecraft/class_1159;Lnet/minecraft/class_4597;ZII)F");
-            Method method = Font.class.getDeclaredMethod(renderText, String.class, Float.TYPE, Float.TYPE, Integer.TYPE, Boolean.TYPE, Matrix4f.class, MultiBufferSource.class, Boolean.TYPE, Integer.TYPE, Integer.TYPE);
-            return !java.lang.reflect.Modifier.isPrivate(method.getModifiers());
-        } catch (Throwable ignored) {
-            return false;
-        }
-    }
-    
-    public static class ConfigErrorScreen extends Screen {
-        private final Component message;
-        private final Screen parent;
-        
-        public ConfigErrorScreen(Screen parent, Component title, Component message) {
-            super(title);
-            this.parent = parent;
-            this.message = message;
-        }
-        
-        @Override
-        public void init() {
-            super.init();
-            this.addButton(new Button(this.width / 2 - 100, 140, 200, 20, CommonComponents.GUI_CANCEL, button -> this.minecraft.setScreen(parent)));
-        }
-        
-        @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            this.renderBackground(matrices);
-            drawCenteredString(matrices, this.font, this.title, this.width / 2, 90, 16777215);
-            drawCenteredString(matrices, this.font, this.message, this.width / 2, 110, 16777215);
-            super.render(matrices, mouseX, mouseY, delta);
-        }
-        
-        @Override
-        public boolean shouldCloseOnEsc() {
-            return false;
-        }
-    }
-    
 }
