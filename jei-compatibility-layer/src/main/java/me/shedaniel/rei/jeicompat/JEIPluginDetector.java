@@ -287,7 +287,7 @@ public class JEIPluginDetector {
         @Override
         public String getPluginProviderName() {
             if (wrapper != null) {
-                return wrapper.getPluginName();
+                return wrapper.getPluginProviderName();
             }
             
             return "JEI Plugin [" + String.join(", ", modIds) + "]";
@@ -410,7 +410,7 @@ public class JEIPluginDetector {
         }
         
         @Override
-        public String getPluginName() {
+        public String getPluginProviderName() {
             return "JEI Plugin [" + backingPlugin.getPluginUid() + "]";
         }
     }

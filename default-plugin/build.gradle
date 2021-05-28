@@ -1,4 +1,4 @@
-archivesBaseName =  rootProject.name + "-" + project.name
+archivesBaseName = rootProject.name + "-" + project.name
 
 loom {
     accessWidener = gradle.rootProject.project("fabric").file("src/main/resources/roughlyenoughitems.accessWidener")

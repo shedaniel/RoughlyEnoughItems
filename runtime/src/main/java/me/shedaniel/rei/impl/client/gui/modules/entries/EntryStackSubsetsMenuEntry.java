@@ -35,7 +35,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.REIHelperImpl;
-import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -102,13 +102,13 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
                     } else {
                         filteredStacks.add(stack.normalize());
                     }
-                    Menu menu = ((ContainerScreenOverlay) REIHelper.getInstance().getOverlay().get()).getOverlayMenu();
+                    Menu menu = ((ScreenOverlayImpl) REIHelper.getInstance().getOverlay().get()).getOverlayMenu();
                     if (menu != null)
                         recalculateFilter(menu);
                     ConfigManager.getInstance().saveConfig();
                     EntryRegistry.getInstance().refilter();
                     if (REIHelperImpl.getSearchField() != null) {
-                        ContainerScreenOverlay.getEntryListWidget().updateSearch(REIHelperImpl.getSearchField().getText(), true);
+                        ScreenOverlayImpl.getEntryListWidget().updateSearch(REIHelperImpl.getSearchField().getText(), true);
                     }
                 }
             } else if (!RoughlyEnoughItemsCore.isLeftMousePressed) clickedLast = false;

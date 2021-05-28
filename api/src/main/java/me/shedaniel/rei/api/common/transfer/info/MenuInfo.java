@@ -134,7 +134,7 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
      * @return the {@link CompoundTag} serialized
      */
     default CompoundTag save(MenuSerializationContext<T, ?, D> context, D display) {
-        return DisplaySerializerRegistry.getInstance().save(display.getCategoryIdentifier(), display, new CompoundTag());
+        return DisplaySerializerRegistry.getInstance().save(display, new CompoundTag());
     }
     
     /**

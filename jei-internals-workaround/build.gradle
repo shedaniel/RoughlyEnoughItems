@@ -1,4 +1,4 @@
-archivesBaseName =  rootProject.name + "-" + project.name
+archivesBaseName = rootProject.name + "-" + project.name
 
 dependencies {
     forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")

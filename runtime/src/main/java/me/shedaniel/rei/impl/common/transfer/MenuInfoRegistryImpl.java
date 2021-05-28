@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoProvider;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,7 @@ public class MenuInfoRegistryImpl implements MenuInfoRegistry {
     }
     
     @Override
+    @Nullable
     public <T extends AbstractContainerMenu, D extends Display> MenuInfo<T, D> get(CategoryIdentifier<D> category, Class<T> menuClass) {
         Map<Class<? extends AbstractContainerMenu>, List<MenuInfoProvider<?, ?>>> infoMap = map.get(category);
         if (infoMap != null && !infoMap.isEmpty()) {

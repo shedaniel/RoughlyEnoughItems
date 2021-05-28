@@ -59,10 +59,9 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIHelperImpl;
+import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
 import me.shedaniel.rei.impl.client.gui.dragging.CurrentDraggingStack;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
-import me.shedaniel.rei.impl.client.gui.modules.entries.GameModeMenuEntry;
-import me.shedaniel.rei.impl.client.gui.modules.entries.WeatherMenuEntry;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.widget.EntryListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.FavoritesListWidget;
@@ -100,7 +99,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
-public class ContainerScreenOverlay extends ScreenOverlay {
+public class ScreenOverlayImpl extends ScreenOverlay {
     private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final List<Tooltip> TOOLTIPS = Lists.newArrayList();
     private static final List<Runnable> AFTER_RENDER = Lists.newArrayList();
@@ -115,9 +114,8 @@ public class ContainerScreenOverlay extends ScreenOverlay {
     private CurrentDraggingStack draggingStack = new CurrentDraggingStack();
     
     @Nullable
-    private ContainerScreenOverlay.OverlayMenu overlayMenu = null;
+    private ScreenOverlayImpl.OverlayMenu overlayMenu = null;
     
-    public Set<EntryStack<?>> inventoryStacks = Sets.newHashSet();
     
     public static EntryListWidget getEntryListWidget() {
         return ENTRY_LIST_WIDGET;
@@ -128,8 +126,17 @@ public class ContainerScreenOverlay extends ScreenOverlay {
         return favoritesListWidget;
     }
     
-    public static ContainerScreenOverlay getInstance() {
-        return (ContainerScreenOverlay) REIHelper.getInstance().getOverlay().get();
+    public static ScreenOverlayImpl getInstance() {
+        return (ScreenOverlayImpl) REIHelper.getInstance().getOverlay().get();
+    }
+    
+    public void tick() {
+        if (REIHelperImpl.getSearchField() != null) {
+            REIHelperImpl.getSearchField().tick();
+            if (Minecraft.getInstance().player != null) {
+                CraftableFilter.INSTANCE.tick();
+            }
+        }
     }
     
     private static class OverlayMenu {
@@ -302,57 +309,6 @@ public class ContainerScreenOverlay extends ScreenOverlay {
                         0, 0, 600
                 )
         ));
-        if (ConfigObject.getInstance().doesShowUtilsButtons()) {
-            widgets.add(Widgets.createButton(ConfigObject.getInstance().isLowerConfigButton() ? new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getGuiScaledWidth() - 30 : 10, 10, 20, 20) : new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getGuiScaledWidth() - 55 : 35, 10, 20, 20), NarratorChatListener.NO_TITLE)
-                    .onRender((matrices, button) -> {
-                        boolean isOpened = isMenuOpened(Menu.GAME_TYPE);
-                        if (isOpened || !isAnyMenuOpened()) {
-                            boolean inBounds = (button.isFocused() || button.containsMouse(PointHelper.ofMouse())) || isMenuInBounds(Menu.GAME_TYPE);
-                            if (isOpened != inBounds) {
-                                if (inBounds) {
-                                    Menu menu = new Menu(new Point(button.getBounds().x, button.getBounds().getMaxY()),
-                                            CollectionUtils.map(GameType.values(), GameModeMenuEntry::new));
-                                    if (ConfigObject.getInstance().isLeftHandSidePanel())
-                                        menu.menuStartPoint.x -= menu.getBounds().width - button.getBounds().width;
-                                    openMenu(Menu.GAME_TYPE, menu, point -> button.isFocused() && button.containsMouse(PointHelper.ofMouse()), point -> true);
-                                } else {
-                                    closeOverlayMenu();
-                                }
-                            }
-                        }
-                        button.setText(new TextComponent(getGameModeShortText(getCurrentGameMode())));
-                    })
-                    .focusable(false)
-                    .tooltipLine(new TranslatableComponent("text.rei.gamemode_button.tooltip.all"))
-                    .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)));
-            Button weatherButton;
-            widgets.add(weatherButton = Widgets.createButton(new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getGuiScaledWidth() - 30 : 10, 35, 20, 20), NarratorChatListener.NO_TITLE)
-                    .onRender((matrices, button) -> {
-                        boolean isOpened = isMenuOpened(Menu.WEATHER);
-                        if (isOpened || !isAnyMenuOpened()) {
-                            boolean inBounds = (button.isFocused() || button.containsMouse(PointHelper.ofMouse())) || isMenuInBounds(Menu.WEATHER);
-                            if (isOpened != inBounds) {
-                                if (inBounds) {
-                                    Menu menu = new Menu(new Point(button.getBounds().x, button.getBounds().getMaxY()),
-                                            CollectionUtils.map(Weather.values(), WeatherMenuEntry::new));
-                                    if (ConfigObject.getInstance().isLeftHandSidePanel())
-                                        menu.menuStartPoint.x -= menu.getBounds().width - button.getBounds().width;
-                                    openMenu(Menu.WEATHER, menu, point -> button.isFocused() && button.containsMouse(PointHelper.ofMouse()), point -> true);
-                                } else {
-                                    closeOverlayMenu();
-                                }
-                            }
-                        }
-                    })
-                    .tooltipLine(new TranslatableComponent("text.rei.weather_button.tooltip.all"))
-                    .focusable(false)
-                    .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)));
-            widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-                Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                helper.blit(matrices, weatherButton.getBounds().x + 3, weatherButton.getBounds().y + 3, getCurrentWeather().getId() * 14, 14, 14, 14);
-            }));
-        }
         Rectangle subsetsButtonBounds = getSubsetsButtonBounds();
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
             widgets.add(InternalWidgets.wrapLateRenderable(Widgets.withTranslate(Widgets.createButton(subsetsButtonBounds, ClientHelperImpl.getInstance().isAprilFools.get() ? new TranslatableComponent("text.rei.tiny_potato") : new TranslatableComponent("text.rei.subsets"))
@@ -515,12 +471,8 @@ public class ContainerScreenOverlay extends ScreenOverlay {
                 }
             }
         }
-        if (ConfigManager.getInstance().isCraftableOnlyEnabled()) {
-            Set<EntryStack<?>> currentStacks = ClientHelperImpl.getInstance()._getInventoryItemsTypes();
-            if (!currentStacks.equals(this.inventoryStacks)) {
-                this.inventoryStacks = currentStacks;
-                ENTRY_LIST_WIDGET.updateSearch(REIHelperImpl.getSearchField().getText(), true);
-            }
+        if (ConfigManager.getInstance().isCraftableOnlyEnabled() && CraftableFilter.INSTANCE.wasDirty()) {
+            ENTRY_LIST_WIDGET.updateSearch(REIHelperImpl.getSearchField().getText(), true);
         }
         if (OverlaySearchField.isHighlighting) {
             matrices.pushPose();
@@ -693,7 +645,7 @@ public class ContainerScreenOverlay extends ScreenOverlay {
                     ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                 }
                 ConfigManager.getInstance().saveConfig();
-                FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+                FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
                 if (favoritesListWidget != null)
                     favoritesListWidget.updateSearch();
                 return true;
@@ -754,7 +706,7 @@ public class ContainerScreenOverlay extends ScreenOverlay {
                     ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                 }
                 ConfigManager.getInstance().saveConfig();
-                FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+                FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
                 if (favoritesListWidget != null)
                     favoritesListWidget.updateSearch();
                 return true;

@@ -52,7 +52,7 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.screen.AbstractDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.widget.FavoritesListWidget;
@@ -78,8 +78,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-@ApiStatus.Internal
 @Environment(EnvType.CLIENT)
+@ApiStatus.Internal
 public class DefaultClientRuntimePlugin implements REIClientPlugin {
     public static final ResourceLocation PLUGIN = new ResourceLocation("roughlyenoughitems", "default_runtime_plugin");
     
@@ -128,7 +128,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
             return Collections.singletonList(widget.getBounds().clone());
         });
         zones.register(Screen.class, screen -> {
-            FavoritesListWidget widget = ContainerScreenOverlay.getFavoritesListWidget();
+            FavoritesListWidget widget = ScreenOverlayImpl.getFavoritesListWidget();
             if (widget != null) {
                 if (widget.favoritePanelButton.isVisible()) {
                     return Collections.singletonList(widget.favoritePanelButton.bounds);

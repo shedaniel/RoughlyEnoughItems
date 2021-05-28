@@ -1,5 +1,5 @@
 plugins {
-    id("architectury-plugin") version("3.1-SNAPSHOT")
+    id("architectury-plugin") version("3.2-SNAPSHOT")
     id("dev.architectury.loom") version("0.7.2-SNAPSHOT") apply false
     id("org.cadixdev.licenser") version("0.5.0")
     id("com.matthewprenger.cursegradle") version("1.4.0")
@@ -40,6 +40,10 @@ allprojects {
     repositories {
         maven { url "https://maven.shedaniel.me" }
         maven { url "https://maven.terraformersmc.com/releases" }
+    }
+    
+    architectury {
+        transformerVersion = "3.0.46"
     }
 
     license {

@@ -30,15 +30,15 @@ import me.shedaniel.architectury.event.events.GuiEvent;
 import me.shedaniel.architectury.event.events.client.ClientTickEvent;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIHelper;
-import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -60,7 +60,7 @@ public class REIHelperImpl implements REIHelper {
     private static final ResourceLocation DISPLAY_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/display_dark.png");
     @ApiStatus.Internal
     public static boolean isWithinRecipeViewingScreen = false;
-    private ContainerScreenOverlay overlay;
+    private ScreenOverlayImpl overlay;
     private OverlaySearchField searchField;
     private AbstractContainerScreen<?> previousContainerScreen = null;
     private Screen previousScreen = null;
@@ -128,7 +128,7 @@ public class REIHelperImpl implements REIHelper {
     @Override
     public Optional<ScreenOverlay> getOverlay(boolean reset) {
         if (overlay == null || reset) {
-            overlay = new ContainerScreenOverlay();
+            overlay = new ScreenOverlayImpl();
             overlay.init();
             getSearchField().setFocused(false);
         }
@@ -200,8 +200,7 @@ public class REIHelperImpl implements REIHelper {
         Rectangle bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation().mirror(), Minecraft.getInstance().screen);
         
         int yOffset = 8;
-        if (ConfigObject.getInstance().doesShowUtilsButtons()) yOffset += 50;
-        else if (!ConfigObject.getInstance().isLowerConfigButton()) yOffset += 25;
+        if (!ConfigObject.getInstance().isLowerConfigButton()) yOffset += 25;
         return new Rectangle(bounds.x, bounds.y + yOffset, bounds.width, bounds.height - 3 - yOffset);
     }
     
@@ -223,8 +222,9 @@ public class REIHelperImpl implements REIHelper {
             return InteractionResult.PASS;
         });
         ClientTickEvent.CLIENT_POST.register(minecraft -> {
-            if (isOverlayVisible() && getSearchField() != null)
-                getSearchField().tick();
+            if (isOverlayVisible()) {
+                ScreenOverlayImpl.getInstance().tick();
+            }
         });
     }
 }

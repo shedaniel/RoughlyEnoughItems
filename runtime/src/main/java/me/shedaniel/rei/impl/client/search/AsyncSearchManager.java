@@ -35,7 +35,6 @@ import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,10 +63,10 @@ public class AsyncSearchManager {
     
     public static AsyncSearchManager createDefault() {
         return new AsyncSearchManager(EntryRegistry.getInstance()::getPreFilteredList, () -> {
-            boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled() && !ContainerScreenOverlay.getInstance().inventoryStacks.isEmpty();
+            boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled();
             LongSet workingItems = checkCraftable ? new LongOpenHashSet() : null;
             if (checkCraftable) {
-                for (EntryStack<?> stack : Views.getInstance().findCraftableEntriesByMaterials(ContainerScreenOverlay.getInstance().inventoryStacks)) {
+                for (EntryStack<?> stack : Views.getInstance().findCraftableEntriesByMaterials()) {
                     workingItems.add(EntryStacks.hashExact(stack));
                 }
             }
