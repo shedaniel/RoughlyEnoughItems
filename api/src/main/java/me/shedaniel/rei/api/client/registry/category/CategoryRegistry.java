@@ -33,6 +33,8 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.Identifiable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
@@ -41,6 +43,13 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+/**
+ * Registry for registering new categories for displays.
+ * Relies on {@link CategoryIdentifier}, and is reset per plugin reload.
+ *
+ * @see REIClientPlugin#registerCategories(CategoryRegistry)
+ */
+@Environment(EnvType.CLIENT)
 public interface CategoryRegistry extends Reloadable<REIClientPlugin>, Iterable<CategoryRegistry.CategoryConfiguration<?>> {
     /**
      * @return the instance of {@link CategoryRegistry}

@@ -28,8 +28,14 @@ import net.minecraft.world.InteractionResultHolder;
 
 import java.util.stream.Stream;
 
+/**
+ * A bridge of two different entry types, for comparison and equality checks.
+ *
+ * @param <A> the original entry type
+ * @param <B> the destination entry type
+ * @see EntryTypeRegistry#registerBridge(EntryType, EntryType, EntryTypeBridge)
+ */
 @FunctionalInterface
 public interface EntryTypeBridge<A, B> {
-    
     InteractionResultHolder<Stream<EntryStack<B>>> bridge(EntryStack<A> object);
 }

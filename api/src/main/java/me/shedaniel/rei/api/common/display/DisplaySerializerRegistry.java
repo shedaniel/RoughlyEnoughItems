@@ -31,8 +31,12 @@ import me.shedaniel.rei.api.common.transfer.info.MenuSerializationContext;
 import net.minecraft.nbt.CompoundTag;
 
 /**
- * The display serializer used for display transfers.
- * This is mostly a fallback system for {@link me.shedaniel.rei.api.common.transfer.info.MenuInfo#save(MenuSerializationContext, Display)}.
+ * The display serializer used for display serialization, useful for persistent displays across reloads,
+ * and server-client communication.
+ * 
+ * <p>This is mostly a fallback system for {@link me.shedaniel.rei.api.common.transfer.info.MenuInfo#save(MenuSerializationContext, Display)}.
+ * 
+ * @see REIPlugin#registerDisplaySerializer(DisplaySerializerRegistry) 
  */
 public interface DisplaySerializerRegistry extends Reloadable<REIPlugin<?>> {
     static DisplaySerializerRegistry getInstance() {

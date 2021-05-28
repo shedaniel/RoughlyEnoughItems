@@ -27,6 +27,11 @@ import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import net.minecraft.world.level.material.Fluid;
 
+/**
+ * {@inheritDoc}
+ *
+ * @see me.shedaniel.rei.api.common.plugins.REIPlugin#registerFluidComparators(FluidComparatorRegistry)
+ */
 public interface FluidComparatorRegistry extends EntryComparatorRegistry<FluidStack, Fluid> {
     /**
      * @return the instance of {@link FluidComparatorRegistry}

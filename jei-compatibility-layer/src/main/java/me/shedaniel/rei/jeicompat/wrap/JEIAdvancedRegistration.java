@@ -24,7 +24,7 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
-import me.shedaniel.rei.jeicompat.unwrap.JEILiveDisplayGenerator;
+import me.shedaniel.rei.jeicompat.unwrap.JEIDynamicDisplayGenerator;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.recipe.advanced.IRecipeManagerPlugin;
 import mezz.jei.api.registration.IAdvancedRegistration;
@@ -41,6 +41,6 @@ public enum JEIAdvancedRegistration implements IAdvancedRegistration {
     
     @Override
     public void addRecipeManagerPlugin(@NotNull IRecipeManagerPlugin plugin) {
-        DisplayRegistry.getInstance().registerGlobalDisplayGenerator(new JEILiveDisplayGenerator(plugin));
+        DisplayRegistry.getInstance().registerGlobalDisplayGenerator(new JEIDynamicDisplayGenerator(plugin));
     }
 }

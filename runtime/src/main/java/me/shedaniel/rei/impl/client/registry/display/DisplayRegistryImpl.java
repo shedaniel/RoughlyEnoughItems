@@ -28,7 +28,7 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
-import me.shedaniel.rei.api.client.registry.display.LiveDisplayGenerator;
+import me.shedaniel.rei.api.client.registry.display.DynamicDisplayGenerator;
 import me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibilityPredicate;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
@@ -44,8 +44,8 @@ import java.util.function.Predicate;
 
 public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugin> implements DisplayRegistry {
     private final Map<CategoryIdentifier<?>, List<Display>> displays = new ConcurrentHashMap<>();
-    private final Map<CategoryIdentifier<?>, List<LiveDisplayGenerator<?>>> displayGenerators = new ConcurrentHashMap<>();
-    private final List<LiveDisplayGenerator<?>> globalDisplayGenerators = new ArrayList<>();
+    private final Map<CategoryIdentifier<?>, List<DynamicDisplayGenerator<?>>> displayGenerators = new ConcurrentHashMap<>();
+    private final List<DynamicDisplayGenerator<?>> globalDisplayGenerators = new ArrayList<>();
     private final List<DisplayVisibilityPredicate> visibilityPredicates = new ArrayList<>();
     private final List<DisplayFiller<?, ?>> fillers = new ArrayList<>();
     private final MutableInt displayCount = new MutableInt(0);
@@ -83,23 +83,23 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     }
     
     @Override
-    public <A extends Display> void registerGlobalDisplayGenerator(LiveDisplayGenerator<A> generator) {
+    public <A extends Display> void registerGlobalDisplayGenerator(DynamicDisplayGenerator<A> generator) {
         globalDisplayGenerators.add(generator);
     }
     
     @Override
-    public <A extends Display> void registerDisplayGenerator(CategoryIdentifier<A> categoryId, LiveDisplayGenerator<A> generator) {
+    public <A extends Display> void registerDisplayGenerator(CategoryIdentifier<A> categoryId, DynamicDisplayGenerator<A> generator) {
         displayGenerators.computeIfAbsent(categoryId, location -> new ArrayList<>())
                 .add(generator);
     }
     
     @Override
-    public Map<CategoryIdentifier<?>, List<LiveDisplayGenerator<?>>> getCategoryDisplayGenerators() {
+    public Map<CategoryIdentifier<?>, List<DynamicDisplayGenerator<?>>> getCategoryDisplayGenerators() {
         return Collections.unmodifiableMap(displayGenerators);
     }
     
     @Override
-    public List<LiveDisplayGenerator<?>> getGlobalDisplayGenerators() {
+    public List<DynamicDisplayGenerator<?>> getGlobalDisplayGenerators() {
         return Collections.unmodifiableList(globalDisplayGenerators);
     }
     
