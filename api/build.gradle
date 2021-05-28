@@ -1,4 +1,4 @@
-archivesBaseName =  rootProject.name + "-" + project.name
+archivesBaseName = rootProject.name + "-" + project.name
 
 dependencies {
     modCompileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")

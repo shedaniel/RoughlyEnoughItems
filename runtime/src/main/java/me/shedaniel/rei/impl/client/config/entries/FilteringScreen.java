@@ -42,7 +42,7 @@ import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
@@ -265,7 +265,7 @@ public class FilteringScreen extends Screen {
         this.backButton.render(matrices, mouseX, mouseY, delta);
         
         if (tooltip != null) {
-            ((ContainerScreenOverlay) REIHelper.getInstance().getOverlay().get()).renderTooltip(matrices, tooltip);
+            ((ScreenOverlayImpl) REIHelper.getInstance().getOverlay().get()).renderTooltip(matrices, tooltip);
         }
         
         this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);

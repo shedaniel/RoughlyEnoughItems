@@ -301,5 +301,4 @@ public interface TransferHandler extends Comparable<TransferHandler> {
             return recipeDisplaySupplier.get();
         }
     }
-    
 }

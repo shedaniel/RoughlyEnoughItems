@@ -59,7 +59,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
-import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
 import net.minecraft.client.Minecraft;
@@ -645,7 +645,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             Optional<ScreenOverlay> overlayOptional = REIHelper.getInstance().getOverlay();
             Optional<Supplier<Collection<FavoriteMenuEntry>>> menuEntries = favoriteEntry.getMenuEntries();
             if (Math.abs(entry.x.doubleValue() - entry.x.target()) < 1 && Math.abs(entry.y.doubleValue() - entry.y.target()) < 1 && overlayOptional.isPresent() && menuEntries.isPresent()) {
-                ContainerScreenOverlay overlay = (ContainerScreenOverlay) overlayOptional.get();
+                ScreenOverlayImpl overlay = (ScreenOverlayImpl) overlayOptional.get();
                 UUID uuid = favoriteEntry.getUuid();
                 
                 boolean isOpened = overlay.isMenuOpened(uuid);

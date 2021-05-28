@@ -70,7 +70,7 @@ import me.shedaniel.rei.impl.client.REIHelperImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.entry.type.types.RenderingEntryDefinition;
 import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
-import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.client.registry.category.CategoryRegistryImpl;
@@ -574,7 +574,7 @@ public class RoughlyEnoughItemsCore {
                 return;
             resetFocused(screen);
             REIHelper.getInstance().getOverlay().get().render(matrices, mouseX, mouseY, delta);
-            ((ContainerScreenOverlay) REIHelper.getInstance().getOverlay().get()).lateRender(matrices, mouseX, mouseY, delta);
+            ((ScreenOverlayImpl) REIHelper.getInstance().getOverlay().get()).lateRender(matrices, mouseX, mouseY, delta);
             resetFocused(screen);
         });
         ClientScreenInputEvent.MOUSE_DRAGGED_PRE.register((minecraftClient, screen, mouseX1, mouseY1, button, mouseX2, mouseY2) -> {

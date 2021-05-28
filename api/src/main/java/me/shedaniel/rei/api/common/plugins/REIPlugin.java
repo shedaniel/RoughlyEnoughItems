@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.common.plugins;
 
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
@@ -33,19 +34,19 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * Base interface for a REI plugin.
+ *
+ * @see REIServerPlugin
+ * @see REIClientPlugin
+ */
 @ApiStatus.OverrideOnly
 public interface REIPlugin<P extends REIPlugin<?>> extends Comparable<REIPlugin<P>>, REIPluginProvider<P> {
     /**
-     * @return the priority of the plugin, the smaller the number, the earlier it is called.
+     * @return the priority of the plugin, the smaller the priority, the earlier it is called.
      */
-    default int getPriority() {
+    default double getPriority() {
         return 0;
-    }
-    
-    default String getPluginName() {
-        Class<?> self = getClass();
-        String simpleName = self.getSimpleName();
-        return simpleName == null ? self.getName() : simpleName;
     }
     
     @Override

@@ -31,6 +31,21 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
+/**
+ * Registry for registering alternative entry types.
+ *
+ * <p>{@link EntryType} must be declared statically, deferring to the actual
+ * definition by the identifier of the type. During reload, plugins should 
+ * register {@link EntryDefinition} for their deferred {@link EntryType},
+ * these definitions are dynamic.
+ * 
+ * <p>{@link EntryTypeBridge} may be used to convert and compare between
+ * different types
+ * 
+ * @see EntryDefinition
+ * @see #registerBridge(EntryType, EntryType, EntryTypeBridge) 
+ * @see REIPlugin#registerEntryTypes(EntryTypeRegistry) 
+ */
 public interface EntryTypeRegistry extends Reloadable<REIPlugin<?>> {
     static EntryTypeRegistry getInstance() {
         return PluginManager.getInstance().get(EntryTypeRegistry.class);
@@ -76,16 +91,26 @@ public interface EntryTypeRegistry extends Reloadable<REIPlugin<?>> {
     @Nullable
     EntryDefinition<?> get(ResourceLocation id);
     
+    /**
+     * Returns the set of types in their identifier form.
+     *
+     * @return the set of types
+     */
     Set<ResourceLocation> keySet();
     
+    /**
+     * Returns the set of entry definitions.
+     *
+     * @return the set of entry definitions
+     */
     Set<EntryDefinition<?>> values();
     
     /**
      * Register a bridge between two entry types, for example, item to fluid, this is used, to
-     * approximately match two entry stacks,.
+     * approximately match two entry stacks.
      * <p>
      * For bridging two entry types, only 1 one way bridge is required, two way bridges are discouraged
-     * for performance issues.
+     * for performance issues and possible recursion.
      *
      * @param original    the original entry type
      * @param destination the destination entry type

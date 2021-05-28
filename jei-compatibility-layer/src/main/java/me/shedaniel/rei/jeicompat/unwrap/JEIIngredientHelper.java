@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.unwrap;
 
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -51,12 +52,14 @@ public class JEIIngredientHelper<T> implements IIngredientHelper<T> {
     @Override
     public T getMatch(Iterable<T> ingredients, T ingredientToMatch, UidContext context) {
         ComparisonContext comparisonContext = wrapContext(context);
-        return CollectionUtils.findFirstOrNull(ingredients, t -> definition.equals(t, ingredientToMatch, comparisonContext));
+        T value = wrap(definition, ingredientToMatch).getValue();
+        return CollectionUtils.findFirstOrNull(ingredients, t -> definition.equals(wrap(definition, t).getValue(), value, comparisonContext));
     }
     
     @Override
     public String getDisplayName(T ingredient) {
-        return definition.asFormattedText(wrap(definition, ingredient), ingredient).getString();
+        EntryStack<T> entry = wrap(definition, ingredient);
+        return definition.asFormattedText(entry, entry.getValue()).getString();
     }
     
     @Override
@@ -67,24 +70,28 @@ public class JEIIngredientHelper<T> implements IIngredientHelper<T> {
     @Override
     public String getUniqueId(T ingredient, UidContext context) {
         ComparisonContext comparisonContext = wrapContext(context);
-        return String.valueOf(EntryStacks.hash(wrap(definition, ingredient), comparisonContext));
+        EntryStack<T> entry = wrap(definition, ingredient);
+        return String.valueOf(EntryStacks.hash(entry, comparisonContext));
     }
     
     @Override
     public String getModId(T ingredient) {
-        ResourceLocation location = definition.getIdentifier(wrap(definition, ingredient), ingredient);
+        EntryStack<T> entry = wrap(definition, ingredient);
+        ResourceLocation location = definition.getIdentifier(entry, entry.getValue());
         return location == null ? "minecraft" : location.getNamespace();
     }
     
     @Override
     public String getResourceId(T ingredient) {
-        ResourceLocation location = definition.getIdentifier(wrap(definition, ingredient), ingredient);
+        EntryStack<T> entry = wrap(definition, ingredient);
+        ResourceLocation location = definition.getIdentifier(entry, entry.getValue());
         return location == null ? "minecraft:unknown" : location.toString();
     }
     
     @Override
     public T copyIngredient(T ingredient) {
-        return definition.copy(wrap(definition, ingredient), ingredient);
+        EntryStack<T> entry = wrap(definition, ingredient);
+        return definition.copy(entry, entry.getValue());
     }
     
     @Override

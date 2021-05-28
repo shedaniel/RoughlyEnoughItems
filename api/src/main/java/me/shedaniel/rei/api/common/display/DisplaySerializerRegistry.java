@@ -27,8 +27,17 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.registry.Reloadable;
+import me.shedaniel.rei.api.common.transfer.info.MenuSerializationContext;
 import net.minecraft.nbt.CompoundTag;
 
+/**
+ * The display serializer used for display serialization, useful for persistent displays across reloads,
+ * and server-client communication.
+ * 
+ * <p>This is mostly a fallback system for {@link me.shedaniel.rei.api.common.transfer.info.MenuInfo#save(MenuSerializationContext, Display)}.
+ * 
+ * @see REIPlugin#registerDisplaySerializer(DisplaySerializerRegistry) 
+ */
 public interface DisplaySerializerRegistry extends Reloadable<REIPlugin<?>> {
     static DisplaySerializerRegistry getInstance() {
         return PluginManager.getInstance().get(DisplaySerializerRegistry.class);
@@ -37,9 +46,6 @@ public interface DisplaySerializerRegistry extends Reloadable<REIPlugin<?>> {
     /**
      * Registers a {@link DisplaySerializer} for serializing a {@link Display} for syncing across server-client, and
      * for serializing displays to disk for favorites.
-     * <p>
-     * Since REI 6, all {@link me.shedaniel.rei.api.client.registry.display.DisplayCategory} are required to register their serializers,
-     * or mark themselves as unavailable for serialization.
      *
      * @param categoryId the category identifier of the display
      * @param serializer the serializer of the display
@@ -50,20 +56,15 @@ public interface DisplaySerializerRegistry extends Reloadable<REIPlugin<?>> {
     /**
      * Marks a {@link Display} as unavailable to sync across server-client, and
      * for serializing displays to disk for favorites.
-     * <p>
-     * Since REI 6, all {@link me.shedaniel.rei.api.client.registry.display.DisplayCategory} are required to register their serializers,
-     * or mark themselves as unavailable for serialization.
      *
      * @param categoryId the category identifier of the display
      * @param <D>        the type of the display
      */
     <D extends Display> void registerNotSerializable(CategoryIdentifier<D> categoryId);
     
-    <D extends Display> boolean hasRegistered(CategoryIdentifier<D> categoryId);
-    
     <D extends Display> boolean hasSerializer(CategoryIdentifier<D> categoryId);
     
-    <D extends Display> CompoundTag save(CategoryIdentifier<? extends D> categoryId, D display, CompoundTag tag);
+    <D extends Display> CompoundTag save(D display, CompoundTag tag);
     
     <D extends Display> D read(CategoryIdentifier<? extends D> categoryId, CompoundTag tag);
 }

@@ -31,16 +31,24 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
-import me.shedaniel.rei.api.client.registry.display.LiveDisplayGenerator;
+import me.shedaniel.rei.api.client.registry.display.DynamicDisplayGenerator;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
+import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -115,12 +123,12 @@ public class ViewsImpl implements Views {
         
         int generatorsCount = 0;
         
-        for (Map.Entry<CategoryIdentifier<?>, List<LiveDisplayGenerator<?>>> entry : DisplayRegistry.getInstance().getCategoryDisplayGenerators().entrySet()) {
+        for (Map.Entry<CategoryIdentifier<?>, List<DynamicDisplayGenerator<?>>> entry : DisplayRegistry.getInstance().getCategoryDisplayGenerators().entrySet()) {
             CategoryIdentifier<?> categoryId = entry.getKey();
             Set<Display> set = new LinkedHashSet<>();
             generatorsCount += entry.getValue().size();
             
-            for (LiveDisplayGenerator<Display> generator : (List<LiveDisplayGenerator<Display>>) (List<? extends LiveDisplayGenerator<?>>) entry.getValue()) {
+            for (DynamicDisplayGenerator<Display> generator : (List<DynamicDisplayGenerator<Display>>) (List<? extends DynamicDisplayGenerator<?>>) entry.getValue()) {
                 generateLiveDisplays(generator, builder, set::add);
             }
             
@@ -132,7 +140,7 @@ public class ViewsImpl implements Views {
         Consumer<Display> displayConsumer = display -> {
             CollectionUtils.getOrPutEmptyList(result, CategoryRegistry.getInstance().get(display.getCategoryIdentifier()).getCategory()).add(display);
         };
-        for (LiveDisplayGenerator<Display> generator : (List<LiveDisplayGenerator<Display>>) (List<? extends LiveDisplayGenerator<?>>) DisplayRegistry.getInstance().getGlobalDisplayGenerators()) {
+        for (DynamicDisplayGenerator<Display> generator : (List<DynamicDisplayGenerator<Display>>) (List<? extends DynamicDisplayGenerator<?>>) DisplayRegistry.getInstance().getGlobalDisplayGenerators()) {
             generatorsCount++;
             generateLiveDisplays(generator, builder, displayConsumer);
         }
@@ -147,7 +155,7 @@ public class ViewsImpl implements Views {
         return result;
     }
     
-    private <T extends Display> void generateLiveDisplays(LiveDisplayGenerator<T> generator, ViewSearchBuilder builder, Consumer<T> displayConsumer) {
+    private <T extends Display> void generateLiveDisplays(DynamicDisplayGenerator<T> generator, ViewSearchBuilder builder, Consumer<T> displayConsumer) {
         for (EntryStack<?> stack : builder.getRecipesFor()) {
             Optional<List<T>> recipeForDisplays = generator.getRecipeFor(stack);
             if (recipeForDisplays.isPresent()) {
@@ -181,10 +189,49 @@ public class ViewsImpl implements Views {
     }
     
     @Override
-    public Collection<EntryStack<?>> findCraftableEntriesByMaterials(Iterable<? extends EntryStack<?>> inventoryItems) {
+    public Collection<EntryStack<?>> findCraftableEntriesByMaterials() {
+        AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
         Set<EntryStack<?>> craftables = new HashSet<>();
-        for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
+        for (Map.Entry<CategoryIdentifier<?>, List<Display>> entry : DisplayRegistry.getInstance().getAll().entrySet()) {
+            MenuInfo<AbstractContainerMenu, Display> info = menu != null ?
+                    (MenuInfo<AbstractContainerMenu, Display>) MenuInfoRegistry.getInstance().get(entry.getKey(), menu.getClass())
+                    : null;
+            
+            class InfoContext implements MenuInfoContext<AbstractContainerMenu, LocalPlayer, Display> {
+                private Display display;
+                
+                @Override
+                public AbstractContainerMenu getMenu() {
+                    return menu;
+                }
+                
+                @Override
+                public LocalPlayer getPlayerEntity() {
+                    return Minecraft.getInstance().player;
+                }
+                
+                @Override
+                public MenuInfo<AbstractContainerMenu, Display> getContainerInfo() {
+                    return info;
+                }
+                
+                @Override
+                public CategoryIdentifier<Display> getCategoryIdentifier() {
+                    return (CategoryIdentifier<Display>) entry.getKey();
+                }
+                
+                @Override
+                public Display getDisplay() {
+                    return display;
+                }
+            }
+            
+            InfoContext context = new InfoContext();
+            
+            List<Display> displays = entry.getValue();
             for (Display display : displays) {
+                context.display = display;
+                Iterable<SlotAccessor> inputSlots = info != null ? info.getInputSlots(context) : Collections.emptySet();
                 int slotsCraftable = 0;
                 List<EntryIngredient> requiredInput = display.getRequiredEntries();
                 for (EntryIngredient slot : requiredInput) {
@@ -192,13 +239,10 @@ public class ViewsImpl implements Views {
                         slotsCraftable++;
                         continue;
                     }
-                    back:
-                    for (EntryStack<?> possibleType : inventoryItems) {
-                        for (EntryStack<?> slotPossible : slot) {
-                            if (EntryStacks.equalsExact(possibleType, slotPossible)) {
-                                slotsCraftable++;
-                                break back;
-                            }
+                    for (EntryStack<?> slotPossible : slot) {
+                        if (CraftableFilter.INSTANCE.matches(slotPossible, inputSlots)) {
+                            slotsCraftable++;
+                            break;
                         }
                     }
                 }

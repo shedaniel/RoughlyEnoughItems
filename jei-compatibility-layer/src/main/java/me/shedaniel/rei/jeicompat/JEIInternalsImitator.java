@@ -21,25 +21,31 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.registry.display;
+package me.shedaniel.rei.jeicompat;
 
-import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
-import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.jeicompat.wrap.JEIIngredientFilter;
+import me.shedaniel.rei.jeicompat.wrap.JEIIngredientManager;
+import me.shedaniel.rei.jeicompat.wrap.JEIJeiHelpers;
+import me.shedaniel.rei.jeicompat.wrap.JEIJeiRuntime;
+import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.runtime.IIngredientFilter;
+import mezz.jei.api.runtime.IIngredientManager;
+import mezz.jei.api.runtime.IJeiRuntime;
 
-import java.util.List;
-import java.util.Optional;
-
-public interface LiveDisplayGenerator<T extends Display> {
-    default Optional<List<T>> getRecipeFor(EntryStack<?> entry) {
-        return Optional.empty();
+public class JEIInternalsImitator {
+    public static IJeiHelpers getHelpers() {
+        return JEIJeiHelpers.INSTANCE;
     }
     
-    default Optional<List<T>> getUsageFor(EntryStack<?> entry) {
-        return Optional.empty();
+    public static IJeiRuntime getRuntime() {
+        return JEIJeiRuntime.INSTANCE;
     }
     
-    default Optional<List<T>> generate(ViewSearchBuilder builder) {
-        return Optional.empty();
+    public static IIngredientManager getIngredientManager() {
+        return JEIIngredientManager.INSTANCE;
+    }
+    
+    public static IIngredientFilter getIngredientFilter() {
+        return JEIIngredientFilter.INSTANCE;
     }
 }

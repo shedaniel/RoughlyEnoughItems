@@ -24,6 +24,8 @@
 package me.shedaniel.rei.impl.client;
 
 import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
@@ -65,7 +67,6 @@ import org.jetbrains.annotations.Nullable;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
@@ -215,11 +216,12 @@ public class ClientHelperImpl implements ClientHelper {
     }
     
     @ApiStatus.Internal
-    public Set<EntryStack<?>> _getInventoryItemsTypes() {
+    public LongSet _getInventoryItemsTypes() {
         return Minecraft.getInstance().player.getInventory().compartments.stream()
                 .flatMap(Collection::stream)
                 .map(EntryStacks::of)
-                .collect(Collectors.toSet());
+                .mapToLong(EntryStacks::hashExact)
+                .collect(LongOpenHashSet::new, LongOpenHashSet::add, LongOpenHashSet::addAll);
     }
     
     @ApiStatus.Internal

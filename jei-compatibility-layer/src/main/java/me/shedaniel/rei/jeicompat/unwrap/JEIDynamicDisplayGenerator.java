@@ -24,7 +24,7 @@
 package me.shedaniel.rei.jeicompat.unwrap;
 
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
-import me.shedaniel.rei.api.client.registry.display.LiveDisplayGenerator;
+import me.shedaniel.rei.api.client.registry.display.DynamicDisplayGenerator;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -44,10 +44,10 @@ import java.util.Optional;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrapCategory;
 
-public class JEILiveDisplayGenerator implements LiveDisplayGenerator<Display> {
+public class JEIDynamicDisplayGenerator implements DynamicDisplayGenerator<Display> {
     private final IRecipeManagerPlugin plugin;
     
-    public JEILiveDisplayGenerator(IRecipeManagerPlugin plugin) {
+    public JEIDynamicDisplayGenerator(IRecipeManagerPlugin plugin) {
         this.plugin = plugin;
     }
     

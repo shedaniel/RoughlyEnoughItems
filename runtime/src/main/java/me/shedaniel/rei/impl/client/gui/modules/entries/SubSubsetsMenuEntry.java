@@ -37,7 +37,7 @@ import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.REIHelperImpl;
-import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
@@ -153,12 +153,12 @@ public class SubSubsetsMenuEntry extends MenuEntry {
             if (clickedBefore) {
                 clickedBefore = false;
                 List<EntryStack<?>> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
-                Menu overlay = ((ContainerScreenOverlay) REIHelper.getInstance().getOverlay().get()).getOverlayMenu();
+                Menu overlay = ((ScreenOverlayImpl) REIHelper.getInstance().getOverlay().get()).getOverlayMenu();
                 setFiltered(filteredStacks, overlay, this, !(getFilteredRatio() > 0));
                 ConfigManager.getInstance().saveConfig();
                 EntryRegistry.getInstance().refilter();
                 if (REIHelperImpl.getSearchField() != null) {
-                    ContainerScreenOverlay.getEntryListWidget().updateSearch(REIHelperImpl.getSearchField().getText(), true);
+                    ScreenOverlayImpl.getEntryListWidget().updateSearch(REIHelperImpl.getSearchField().getText(), true);
                 }
             } else {
                 clickedBefore = true;

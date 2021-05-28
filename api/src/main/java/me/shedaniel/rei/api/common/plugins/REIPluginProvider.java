@@ -25,6 +25,11 @@ package me.shedaniel.rei.api.common.plugins;
 
 import java.util.Collection;
 
+/**
+ * A provider for {@link REIPlugin}.
+ *
+ * @param <P> the type of plugin
+ */
 public interface REIPluginProvider<P extends REIPlugin<?>> {
     default String getPluginProviderName() {
         Class<?> self = getClass();
@@ -32,7 +37,18 @@ public interface REIPluginProvider<P extends REIPlugin<?>> {
         return simpleName == null ? self.getName() : simpleName;
     }
     
+    /**
+     * Provides the collection of REI plugins, can be dynamic.
+     *
+     * @return the collection of REI plugins.
+     */
     Collection<P> provide();
     
+    /**
+     * Returns the type of plugin this provider provides,
+     * should be same as {@link P}.
+     *
+     * @return the type of plugin this provider provides
+     */
     Class<P> getPluginProviderClass();
 }

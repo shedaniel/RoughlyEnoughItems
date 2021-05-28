@@ -29,6 +29,7 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
 
@@ -44,6 +45,7 @@ public interface MenuInfoRegistry extends Reloadable<REIServerPlugin> {
     
     <D extends Display> void registerGeneric(Predicate<CategoryIdentifier<?>> categoryPredicate, MenuInfoProvider<?, D> menuInfo);
     
+    @Nullable
     <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> get(CategoryIdentifier<D> category, Class<C> menuClass);
     
     int infoSize();

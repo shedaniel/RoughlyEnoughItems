@@ -56,7 +56,7 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
-import me.shedaniel.rei.impl.client.gui.ContainerScreenOverlay;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -343,7 +343,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     
     public void updateArea(String searchTerm) {
         this.bounds = REIHelper.getInstance().calculateEntryListArea();
-        FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+        FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
         if (favoritesListWidget != null) {
             favoritesListWidget.updateFavoritesBounds(searchTerm);
         }
@@ -403,7 +403,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             this.widgets = Lists.newArrayList(renders);
             this.widgets.addAll(entries);
         }
-        FavoritesListWidget favoritesListWidget = ContainerScreenOverlay.getFavoritesListWidget();
+        FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
         if (favoritesListWidget != null) {
             favoritesListWidget.updateEntriesPosition(entry -> true);
         }
@@ -431,7 +431,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             allStacks = list;
         }
         debugTime = ConfigObject.getInstance().doDebugRenderTimeRequired();
-        FavoritesListWidget favorites = ContainerScreenOverlay.getFavoritesListWidget();
+        FavoritesListWidget favorites = ScreenOverlayImpl.getFavoritesListWidget();
         if (favorites != null) {
             favorites.updateSearch();
         }

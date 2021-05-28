@@ -41,6 +41,7 @@ import java.util.Collection;
  * A definition of an {@link EntryType}, an interface to provide information from an object type.
  *
  * @param <T> the type of entry
+ * @see EntryTypeRegistry
  */
 public interface EntryDefinition<T> {
     Class<T> getValueType();

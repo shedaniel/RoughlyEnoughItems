@@ -102,16 +102,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
-    public boolean isConfigScreenAnimated() {
-        return basics.motion.configScreenAnimation;
-    }
-    
-    @Override
-    public boolean isCreditsScreenAnimated() {
-        return basics.motion.creditsScreenAnimation;
-    }
-    
-    @Override
     public boolean isFavoritesAnimated() {
         return basics.motion.favoritesAnimation;
     }
@@ -174,11 +164,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public int getMaxRecipePerPage() {
         return advanced.layout.maxRecipesPerPage;
-    }
-    
-    @Override
-    public boolean doesShowUtilsButtons() {
-        return appearance.layout.showUtilsButtons;
     }
     
     @Override
@@ -430,8 +415,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public static class Motion {
-        private boolean configScreenAnimation = false;
-        private boolean creditsScreenAnimation = false;
         private boolean favoritesAnimation = true;
     }
     
@@ -463,7 +446,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares the position of the config button.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
             private ConfigButtonPosition configButtonLocation = ConfigButtonPosition.LOWER;
             @Comment("Declares whether the craftable filter button is enabled.") private boolean enableCraftableOnlyButton = false;
-            @Comment("Declares whether the utils buttons are shown.") private boolean showUtilsButtons = false;
         }
         
         @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double horizontalEntriesBoundaries = 1.0;

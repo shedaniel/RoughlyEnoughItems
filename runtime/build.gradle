@@ -1,4 +1,4 @@
-archivesBaseName =  rootProject.name + "-" + project.name
+archivesBaseName = rootProject.name + "-" + project.name
 
 architectury {
     common(forgeEnabled.toBoolean())
@@ -10,12 +10,6 @@ repositories {
 
 loom {
     accessWidener = gradle.rootProject.project("fabric").file("src/main/resources/roughlyenoughitems.accessWidener")
-}
-
-sourceSets {
-    main {
-        resources.srcDirs += rootProject.file("src/main/resources")
-    }
 }
 
 dependencies {
