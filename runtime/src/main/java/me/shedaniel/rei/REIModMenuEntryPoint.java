@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei;
 
-import me.shedaniel.architectury.platform.Platform;
+import dev.architectury.platform.Platform;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 
 public class REIModMenuEntryPoint {

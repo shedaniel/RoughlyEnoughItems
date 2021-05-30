@@ -54,6 +54,7 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
@@ -133,7 +134,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     public void tick() {
         if (REIHelperImpl.getSearchField() != null) {
             REIHelperImpl.getSearchField().tick();
-            if (Minecraft.getInstance().player != null) {
+            if (Minecraft.getInstance().player != null && !PluginManager.areAnyReloading()) {
                 CraftableFilter.INSTANCE.tick();
             }
         }

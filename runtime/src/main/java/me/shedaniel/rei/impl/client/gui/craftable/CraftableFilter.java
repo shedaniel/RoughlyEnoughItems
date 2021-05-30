@@ -2,6 +2,7 @@ package me.shedaniel.rei.impl.client.gui.craftable;
 
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.longs.LongSets;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
@@ -29,7 +30,13 @@ public class CraftableFilter {
     
     public void tick() {
         if (dirty) return;
-        LongSet currentStacks = ClientHelperImpl.getInstance()._getInventoryItemsTypes();
+        LongSet currentStacks;
+        try {
+            currentStacks = ClientHelperImpl.getInstance()._getInventoryItemsTypes();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            currentStacks = LongSets.EMPTY_SET;
+        }
         if (!currentStacks.equals(this.invStacks)) {
             invStacks = new LongOpenHashSet(currentStacks);
             markDirty();

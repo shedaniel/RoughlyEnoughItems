@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.impl.common.entry.type.types;
 
-import me.shedaniel.architectury.utils.Env;
-import me.shedaniel.architectury.utils.EnvExecutor;
+import dev.architectury.utils.Env;
+import dev.architectury.utils.EnvExecutor;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;

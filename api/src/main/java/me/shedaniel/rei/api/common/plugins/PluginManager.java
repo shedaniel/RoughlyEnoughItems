@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.common.plugins;
 
-import me.shedaniel.architectury.utils.EnvExecutor;
+import dev.architectury.utils.EnvExecutor;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.registry.ParentReloadable;
 import me.shedaniel.rei.api.common.registry.Reloadable;

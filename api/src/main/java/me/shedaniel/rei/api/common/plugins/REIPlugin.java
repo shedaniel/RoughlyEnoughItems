@@ -71,7 +71,7 @@ public interface REIPlugin<P extends REIPlugin<?>> extends Comparable<REIPlugin<
     }
     
     /**
-     * Registers fluid comparators for identifying variants of {@link me.shedaniel.architectury.fluid.FluidStack}.
+     * Registers fluid comparators for identifying variants of {@link dev.architectury.fluid.FluidStack}.
      *
      * @see FluidComparatorRegistry
      */

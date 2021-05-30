@@ -25,12 +25,12 @@ package me.shedaniel.rei.plugin.client.entry;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.architectury.fluid.FluidStack;
-import me.shedaniel.architectury.hooks.FluidStackHooks;
-import me.shedaniel.architectury.platform.Platform;
+import dev.architectury.fluid.FluidStack;
+import dev.architectury.hooks.fluid.FluidStackHooks;
+import dev.architectury.platform.Platform;
+import dev.architectury.utils.Env;
+import dev.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
-import me.shedaniel.architectury.utils.Env;
-import me.shedaniel.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.AbstractEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;

@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.common.compat;
 import alexiil.mc.lib.attributes.fluid.FluidAttributes;
 import alexiil.mc.lib.attributes.fluid.GroupedFluidInvView;
 import alexiil.mc.lib.attributes.fluid.amount.FluidAmount;
-import me.shedaniel.architectury.hooks.FluidStackHooks;
+import dev.architectury.hooks.fluid.FluidStackHooks;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.util.EntryStacks;

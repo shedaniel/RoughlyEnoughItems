@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.plugin.common.displays.crafting;
 
-import me.shedaniel.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.registry.RecipeManagerContext;

@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.impl.common.util;
 
-import me.shedaniel.architectury.platform.Platform;
+import dev.architectury.platform.Platform;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.ApiStatus;

@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.config;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import me.shedaniel.architectury.platform.Platform;
+import dev.architectury.platform.Platform;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;

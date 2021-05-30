@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl.common.fluid;
 
 import com.google.common.collect.ForwardingList;
 import com.google.common.collect.Lists;
-import me.shedaniel.architectury.fluid.FluidStack;
+import dev.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;

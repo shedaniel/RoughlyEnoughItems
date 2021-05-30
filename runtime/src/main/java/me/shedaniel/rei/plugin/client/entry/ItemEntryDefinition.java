@@ -28,10 +28,10 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.architectury.utils.Env;
+import dev.architectury.utils.EnvExecutor;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
-import me.shedaniel.architectury.utils.Env;
-import me.shedaniel.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.AbstractEntryRenderer;
@@ -202,6 +202,12 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         @Override
         public BakedModel getExtraData(EntryStack<ItemStack> entry) {
             return Minecraft.getInstance().getItemRenderer().getModel(entry.getValue(), null, null, 0);
+        }
+        
+        @Override
+        public boolean isBatched(EntryStack<ItemStack> entry) {
+            // TODO Fix rendering overlay with batched renderer
+            return false;
         }
         
         @Override

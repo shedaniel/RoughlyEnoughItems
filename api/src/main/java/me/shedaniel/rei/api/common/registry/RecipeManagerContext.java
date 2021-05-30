@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.common.registry;
 
-import me.shedaniel.architectury.utils.NbtType;
+import dev.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import net.minecraft.nbt.CompoundTag;

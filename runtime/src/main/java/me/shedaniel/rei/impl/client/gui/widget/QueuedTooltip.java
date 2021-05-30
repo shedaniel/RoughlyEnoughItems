@@ -25,8 +25,8 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 
 import com.google.common.collect.Lists;
-import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.architectury.utils.Env;
+import dev.architectury.platform.Platform;
+import dev.architectury.utils.Env;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;

@@ -34,7 +34,7 @@ dependencies {
 //    modRuntime("me.shedaniel:SmoothScrollingEverywhere:3.0.3-unstable") {
 //        transitive(false)
 //    }
-    modApi("me.shedaniel:architectury-fabric:${architectury_version}")
+    modApi("dev.architectury:architectury-fabric:${architectury_version}")
 
     implementation(project(path: ":api")) { transitive = false }
     implementation(project(path: ":default-plugin")) { transitive = false }
