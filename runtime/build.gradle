@@ -15,7 +15,7 @@ loom {
 dependencies {
     modCompileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
     modCompileOnly("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
-    modCompileOnly("me.shedaniel:architectury:${architectury_version}")
+    modCompileOnly("dev.architectury:architectury:${architectury_version}")
     compileOnly(project(path: ":api"))
     modCompileOnly("alexiil.mc.lib:libblockattributes-fluids:0.8.3-pre.3")
 }

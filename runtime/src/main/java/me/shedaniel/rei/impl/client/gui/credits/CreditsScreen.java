@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl.client.gui.credits;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.architectury.platform.Platform;
+import dev.architectury.platform.Platform;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TextCreditsItem;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;

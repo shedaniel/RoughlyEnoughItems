@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
+import dev.architectury.hooks.forge.FluidStackHooksForge;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
@@ -80,7 +80,7 @@ public enum JEISubtypeRegistration implements ISubtypeRegistration {
         return (context, stack) -> interpreter.apply(stack, wrapContext(context)).hashCode();
     }
     
-    private static EntryComparator<me.shedaniel.architectury.fluid.FluidStack> wrapFluidComparator(IIngredientSubtypeInterpreter<FluidStack> interpreter) {
+    private static EntryComparator<dev.architectury.fluid.FluidStack> wrapFluidComparator(IIngredientSubtypeInterpreter<FluidStack> interpreter) {
         return (context, stack) -> interpreter.apply(FluidStackHooksForge.toForge(stack), wrapContext(context)).hashCode();
     }
 }

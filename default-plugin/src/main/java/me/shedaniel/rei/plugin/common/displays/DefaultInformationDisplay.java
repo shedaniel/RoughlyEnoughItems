@@ -24,7 +24,7 @@
 package me.shedaniel.rei.plugin.common.displays;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.architectury.utils.NbtType;
+import dev.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializer;

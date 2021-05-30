@@ -23,14 +23,13 @@
 
 package me.shedaniel.rei.api.common.entry.comparison;
 
-import me.shedaniel.architectury.fluid.FluidStack;
+import dev.architectury.fluid.FluidStack;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Objects;
-import java.util.function.ToLongFunction;
 
 /**
  * Hasher implementation for {@link T}.

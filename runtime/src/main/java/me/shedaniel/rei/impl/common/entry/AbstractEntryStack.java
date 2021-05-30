@@ -24,11 +24,11 @@
 package me.shedaniel.rei.impl.common.entry;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.architectury.platform.Platform;
+import dev.architectury.utils.Env;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
-import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;

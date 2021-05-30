@@ -26,8 +26,9 @@ package me.shedaniel.rei.impl.client;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.Window;
-import me.shedaniel.architectury.event.events.GuiEvent;
-import me.shedaniel.architectury.event.events.client.ClientTickEvent;
+import dev.architectury.event.EventResult;
+import dev.architectury.event.events.client.ClientGuiEvent;
+import dev.architectury.event.events.client.ClientTickEvent;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.api.client.config.ConfigManager;
@@ -46,8 +47,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -217,10 +216,10 @@ public class REIHelperImpl implements REIHelper {
     }
     
     public void onInitializeClient() {
-        GuiEvent.INIT_PRE.register((screen, access) -> {
+        ClientGuiEvent.INIT_PRE.register((screen, access) -> {
             if (previousContainerScreen != screen && screen instanceof AbstractContainerScreen)
                 previousContainerScreen = (AbstractContainerScreen<?>) screen;
-            return InteractionResult.PASS;
+            return EventResult.pass();
         });
         ClientTickEvent.CLIENT_POST.register(minecraft -> {
             if (isOverlayVisible()) {

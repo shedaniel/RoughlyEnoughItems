@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
+import dev.architectury.hooks.forge.FluidStackHooksForge;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;

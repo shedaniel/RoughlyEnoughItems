@@ -23,11 +23,11 @@
 
 package me.shedaniel.rei.plugin.common;
 
+import dev.architectury.hooks.fluid.FluidStackHooks;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.injectables.annotations.PlatformOnly;
-import me.shedaniel.architectury.hooks.FluidStackHooks;
-import me.shedaniel.architectury.platform.Platform;
-import me.shedaniel.architectury.utils.NbtType;
+import dev.architectury.platform.Platform;
+import dev.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;

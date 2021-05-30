@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.common.display.basic;
 
-import me.shedaniel.architectury.utils.NbtType;
+import dev.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.SimpleDisplaySerializer;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;

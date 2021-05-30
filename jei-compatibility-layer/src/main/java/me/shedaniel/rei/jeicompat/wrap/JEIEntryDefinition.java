@@ -24,7 +24,7 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.architectury.utils.EnvExecutor;
+import dev.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;

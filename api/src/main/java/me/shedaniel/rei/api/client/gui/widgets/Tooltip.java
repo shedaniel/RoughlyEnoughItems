@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.client.gui.widgets;
 
-import me.shedaniel.architectury.utils.EnvExecutor;
+import dev.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIHelper;
 import me.shedaniel.rei.impl.ClientInternals;

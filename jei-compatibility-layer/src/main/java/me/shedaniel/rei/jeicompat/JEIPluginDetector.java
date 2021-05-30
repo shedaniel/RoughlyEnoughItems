@@ -26,7 +26,7 @@ package me.shedaniel.rei.jeicompat;
 import com.google.common.base.Predicates;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.netty.buffer.Unpooled;
-import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
+import dev.architectury.hooks.forge.FluidStackHooksForge;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
@@ -190,8 +190,8 @@ public class JEIPluginDetector {
     
     public static <T> T unwrap(EntryStack<T> stack) {
         T value = stack.getValue();
-        if (value instanceof me.shedaniel.architectury.fluid.FluidStack) {
-            return (T) FluidStackHooksForge.toForge((me.shedaniel.architectury.fluid.FluidStack) value);
+        if (value instanceof dev.architectury.fluid.FluidStack) {
+            return (T) FluidStackHooksForge.toForge((dev.architectury.fluid.FluidStack) value);
         }
         return value;
     }

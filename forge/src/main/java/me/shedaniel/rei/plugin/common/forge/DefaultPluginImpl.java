@@ -24,7 +24,7 @@
 package me.shedaniel.rei.plugin.common.forge;
 
 import com.google.common.base.Predicates;
-import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
+import dev.architectury.hooks.forge.FluidStackHooksForge;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.world.InteractionResultHolder;
