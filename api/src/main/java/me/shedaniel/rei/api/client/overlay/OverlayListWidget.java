@@ -24,16 +24,19 @@
 package me.shedaniel.rei.api.client.overlay;
 
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.stream.Stream;
 
+@Environment(EnvType.CLIENT)
 public interface OverlayListWidget {
     /**
      * Returns the mouse hovered stack within the overlay list widget.
      *
      * @return the mouse hovered stack, returns {@link EntryStack#empty()} if none is hovered
      */
-    EntryStack<?> getFocusedStacK();
+    EntryStack<?> getFocusedStack();
     
     Stream<EntryStack<?>> getEntries();
 }

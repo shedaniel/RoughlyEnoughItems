@@ -25,8 +25,11 @@ package me.shedaniel.rei.api.client.registry.display.visibility;
 
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.world.InteractionResult;
 
+@Environment(EnvType.CLIENT)
 public interface DisplayVisibilityPredicate extends Comparable<DisplayVisibilityPredicate> {
     /**
      * Gets the priority of the handler, the higher the priority, the earlier this is called.

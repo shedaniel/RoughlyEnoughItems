@@ -30,7 +30,7 @@ import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
@@ -171,7 +171,7 @@ public class DefaultBeaconPaymentCategory implements DisplayCategory<DefaultBeac
             }
             ScissorsHandler.INSTANCE.removeLastScissor();
             ScissorsHandler.INSTANCE.scissor(scrolling.getBounds());
-            scrolling.renderScrollBar(0xff000000, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+            scrolling.renderScrollBar(0xff000000, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
             ScissorsHandler.INSTANCE.removeLastScissor();
         }
         

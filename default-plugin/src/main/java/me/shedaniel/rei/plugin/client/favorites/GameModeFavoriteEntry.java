@@ -26,7 +26,7 @@ package me.shedaniel.rei.plugin.client.favorites;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.CompoundFavoriteRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
@@ -258,7 +258,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
                 fill(matrices, x, y, x + width, y + 12, -12237499);
             }
             if (!disabled && selected && containsMouse) {
-                REIHelper.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", text)));
+                REIRuntime.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", text)));
             }
             String s = text;
             if (disabled) {

@@ -25,12 +25,15 @@ package me.shedaniel.rei.api.client.registry.screen;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 
 import java.util.Arrays;
 import java.util.function.Supplier;
 
 @FunctionalInterface
+@Environment(EnvType.CLIENT)
 public interface SimpleClickArea<T extends Screen> {
     Rectangle provide(T screen);
     

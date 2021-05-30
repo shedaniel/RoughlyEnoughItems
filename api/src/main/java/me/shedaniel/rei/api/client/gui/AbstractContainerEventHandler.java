@@ -30,7 +30,7 @@ import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.Nullable;
 
-@Environment(value = EnvType.CLIENT)
+@Environment(EnvType.CLIENT)
 public abstract class AbstractContainerEventHandler extends GuiComponent implements ContainerEventHandler {
     @Nullable
     private GuiEventListener focused;

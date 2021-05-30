@@ -39,7 +39,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.ClientHelper;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.EntryPanelOrdering;
@@ -173,7 +173,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                 ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
                 if (config.setEntrySize(config.getEntrySize() + amount * 0.075)) {
                     ConfigManager.getInstance().saveConfig();
-                    REIHelper.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
+                    REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
                     return true;
                 }
             } else if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
@@ -250,7 +250,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             updatePosition(delta);
             ScissorsHandler.INSTANCE.removeLastScissor();
             if (scrolling.getMaxScroll() > 0) {
-                scrolling.renderScrollBar(0, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+                scrolling.renderScrollBar(0, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
             }
         } else {
             for (Widget widget : renders) {
@@ -342,7 +342,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     }
     
     public void updateArea(String searchTerm) {
-        this.bounds = REIHelper.getInstance().calculateEntryListArea();
+        this.bounds = REIRuntime.getInstance().calculateEntryListArea();
         FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
         if (favoritesListWidget != null) {
             favoritesListWidget.updateFavoritesBounds(searchTerm);
@@ -478,7 +478,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     }
     
     @Override
-    public EntryStack<?> getFocusedStacK() {
+    public EntryStack<?> getFocusedStack() {
         Point mouse = PointHelper.ofMouse();
         if (containsMouse(mouse)) {
             for (EntryListEntry entry : entries) {

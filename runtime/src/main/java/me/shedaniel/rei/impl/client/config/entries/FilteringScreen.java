@@ -35,7 +35,7 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
@@ -234,7 +234,7 @@ public class FilteringScreen extends Screen {
         }
         manager.render(matrices, mouseX, mouseY, delta);
         updatePosition(delta);
-        scrolling.renderScrollBar(0, 1.0F, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8F : 1F);
+        scrolling.renderScrollBar(0, 1.0F, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8F : 1F);
         matrices.pushPose();
         matrices.translate(0, 0, 300);
         this.searchField.laterRender(matrices, mouseX, mouseY, delta);
@@ -265,7 +265,7 @@ public class FilteringScreen extends Screen {
         this.backButton.render(matrices, mouseX, mouseY, delta);
         
         if (tooltip != null) {
-            ((ScreenOverlayImpl) REIHelper.getInstance().getOverlay().get()).renderTooltip(matrices, tooltip);
+            ((ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().get()).renderTooltip(matrices, tooltip);
         }
         
         this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
@@ -463,13 +463,7 @@ public class FilteringScreen extends Screen {
         }
         
         @Override
-        protected void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            
-        }
-        
-        @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            super.render(matrices, mouseX, mouseY, delta);
+        protected void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {
             if (isSelected()) {
                 Rectangle bounds = getBounds();
                 RenderSystem.disableDepthTest();

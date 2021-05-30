@@ -36,18 +36,17 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
-public interface REIHelper extends Reloadable<REIClientPlugin> {
+public interface REIRuntime extends Reloadable<REIClientPlugin> {
     /**
-     * @return the instance of {@link REIHelper}
+     * @return the instance of {@link REIRuntime}
      */
-    static REIHelper getInstance() {
-        return PluginManager.getClientInstance().get(REIHelper.class);
+    static REIRuntime getInstance() {
+        return PluginManager.getClientInstance().get(REIRuntime.class);
     }
     
     boolean isOverlayVisible();

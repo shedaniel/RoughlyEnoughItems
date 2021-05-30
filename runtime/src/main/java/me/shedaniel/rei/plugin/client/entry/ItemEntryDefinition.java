@@ -205,12 +205,6 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         }
         
         @Override
-        public boolean isBatched(EntryStack<ItemStack> entry) {
-            // TODO Fix rendering overlay with batched renderer
-            return false;
-        }
-        
-        @Override
         public void render(EntryStack<ItemStack> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
             BakedModel model = getExtraData(entry);
             setupGL(entry, model);
@@ -286,6 +280,13 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         }
         
         @Override
+        public void afterBase(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, float delta) {
+            endGL(entry, model);
+            RenderSystem.getModelViewStack().popPose();
+            RenderSystem.applyModelViewMatrix();
+        }
+        
+        @Override
         public void renderOverlay(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
             renderOverlay(entry, bounds);
         }
@@ -300,9 +301,6 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         
         @Override
         public void endBatch(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, float delta) {
-            endGL(entry, model);
-            RenderSystem.getModelViewStack().popPose();
-            RenderSystem.applyModelViewMatrix();
         }
         
         public void endGL(EntryStack<ItemStack> entry, BakedModel model) {

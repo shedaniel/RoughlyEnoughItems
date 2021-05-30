@@ -26,6 +26,8 @@ package me.shedaniel.rei.api.client.favorites;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.ClientInternals;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -36,6 +38,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+@Environment(EnvType.CLIENT)
 public abstract class FavoriteEntry {
     public static final String TYPE_KEY = "type";
     private final UUID uuid = UUID.randomUUID();

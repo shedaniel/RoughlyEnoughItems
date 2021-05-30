@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -33,7 +32,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.ClientHelper;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.config.ConfigManager;
@@ -59,7 +58,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.REIHelperImpl;
+import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
 import me.shedaniel.rei.impl.client.gui.dragging.CurrentDraggingStack;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
@@ -128,12 +127,12 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public static ScreenOverlayImpl getInstance() {
-        return (ScreenOverlayImpl) REIHelper.getInstance().getOverlay().get();
+        return (ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().get();
     }
     
     public void tick() {
-        if (REIHelperImpl.getSearchField() != null) {
-            REIHelperImpl.getSearchField().tick();
+        if (REIRuntimeImpl.getSearchField() != null) {
+            REIRuntimeImpl.getSearchField().tick();
             if (Minecraft.getInstance().player != null && !PluginManager.areAnyReloading()) {
                 CraftableFilter.INSTANCE.tick();
             }
@@ -237,10 +236,10 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             favoritesListWidget.favoritePanel.resetRows();
             widgets.add(favoritesListWidget);
         }
-        ENTRY_LIST_WIDGET.updateArea(REIHelperImpl.getSearchField() == null ? "" : REIHelperImpl.getSearchField().getText());
-        REIHelperImpl.getSearchField().getBounds().setBounds(getSearchFieldArea());
-        this.widgets.add(REIHelperImpl.getSearchField());
-        REIHelperImpl.getSearchField().setResponder(s -> ENTRY_LIST_WIDGET.updateSearch(s, false));
+        ENTRY_LIST_WIDGET.updateArea(REIRuntimeImpl.getSearchField() == null ? "" : REIRuntimeImpl.getSearchField().getText());
+        REIRuntimeImpl.getSearchField().getBounds().setBounds(getSearchFieldArea());
+        this.widgets.add(REIRuntimeImpl.getSearchField());
+        REIRuntimeImpl.getSearchField().setResponder(s -> ENTRY_LIST_WIDGET.updateSearch(s, false));
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             widgets.add(leftButton = Widgets.createButton(new Rectangle(bounds.x, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent("text.rei.left_arrow"))
                     .onClick(button -> {
@@ -274,7 +273,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                                                 ClientHelper.getInstance().setCheating(!ClientHelper.getInstance().isCheating());
                                                 return;
                                             }
-                                            ConfigManager.getInstance().openConfigScreen(REIHelper.getInstance().getPreviousScreen());
+                                            ConfigManager.getInstance().openConfigScreen(REIRuntime.getInstance().getPreviousScreen());
                                         })
                                         .onRender((matrices, button) -> {
                                             if (ClientHelper.getInstance().isCheating() && ClientHelperImpl.getInstance().hasOperatorPermission()) {
@@ -339,7 +338,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                             .focusable(false)
                             .onClick(button -> {
                                 ConfigManager.getInstance().toggleCraftableOnly();
-                                ENTRY_LIST_WIDGET.updateSearch(REIHelperImpl.getSearchField().getText(), true);
+                                ENTRY_LIST_WIDGET.updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
                             })
                             .onRender((matrices, button) -> button.setTint(ConfigManager.getInstance().isCraftableOnlyEnabled() ? 939579655 : 956235776))
                             .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
@@ -404,7 +403,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         int widthRemoved = 1;
         if (ConfigObject.getInstance().isCraftableFilterEnabled()) widthRemoved += 22;
         if (ConfigObject.getInstance().isLowerConfigButton()) widthRemoved += 22;
-        SearchFieldLocation searchFieldLocation = REIHelper.getInstance().getContextualSearchFieldLocation();
+        SearchFieldLocation searchFieldLocation = REIRuntime.getInstance().getContextualSearchFieldLocation();
         switch (searchFieldLocation) {
             case TOP_SIDE:
                 return getTopSideSearchFieldArea(widthRemoved);
@@ -462,7 +461,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (shouldReload) {
-            ENTRY_LIST_WIDGET.updateSearch(REIHelperImpl.getSearchField().getText(), true);
+            ENTRY_LIST_WIDGET.updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
             init();
         } else {
             for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(minecraft.screen)) {
@@ -473,7 +472,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             }
         }
         if (ConfigManager.getInstance().isCraftableOnlyEnabled() && CraftableFilter.INSTANCE.wasDirty()) {
-            ENTRY_LIST_WIDGET.updateSearch(REIHelperImpl.getSearchField().getText(), true);
+            ENTRY_LIST_WIDGET.updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
         }
         if (OverlaySearchField.isHighlighting) {
             matrices.pushPose();
@@ -513,8 +512,8 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public void lateRender(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (REIHelper.getInstance().isOverlayVisible()) {
-            REIHelperImpl.getSearchField().laterRender(matrices, mouseX, mouseY, delta);
+        if (REIRuntime.getInstance().isOverlayVisible()) {
+            REIRuntimeImpl.getSearchField().laterRender(matrices, mouseX, mouseY, delta);
             for (Widget widget : widgets) {
                 if (widget instanceof LateRenderable && (overlayMenu == null || overlayMenu.wrappedMenu != widget))
                     widget.render(matrices, mouseX, mouseY, delta);
@@ -538,7 +537,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             }
         }
         TOOLTIPS.clear();
-        if (REIHelper.getInstance().isOverlayVisible()) {
+        if (REIRuntime.getInstance().isOverlayVisible()) {
             for (Runnable runnable : AFTER_RENDER) {
                 runnable.run();
             }
@@ -576,7 +575,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public void renderWidgets(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (!REIHelper.getInstance().isOverlayVisible())
+        if (!REIRuntime.getInstance().isOverlayVisible())
             return;
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             leftButton.setEnabled(ENTRY_LIST_WIDGET.getTotalPages() > 1);
@@ -590,7 +589,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (!REIHelper.getInstance().isOverlayVisible())
+        if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
         if (overlayMenu != null && overlayMenu.wrappedMenu.mouseScrolled(mouseX, mouseY, amount))
             return true;
@@ -622,15 +621,15 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (REIHelper.getInstance().isOverlayVisible()) {
-            if (REIHelperImpl.getSearchField().keyPressed(keyCode, scanCode, modifiers))
+        if (REIRuntime.getInstance().isOverlayVisible()) {
+            if (REIRuntimeImpl.getSearchField().keyPressed(keyCode, scanCode, modifiers))
                 return true;
             for (GuiEventListener listener : widgets)
-                if (listener != REIHelperImpl.getSearchField() && listener.keyPressed(keyCode, scanCode, modifiers))
+                if (listener != REIRuntimeImpl.getSearchField() && listener.keyPressed(keyCode, scanCode, modifiers))
                     return true;
         }
         if (ConfigObject.getInstance().getHideKeybind().matchesKey(keyCode, scanCode)) {
-            REIHelper.getInstance().toggleOverlayVisible();
+            REIRuntime.getInstance().toggleOverlayVisible();
             return true;
         }
         EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen, PointHelper.ofMouse());
@@ -652,13 +651,13 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 return true;
             }
         }
-        if (!REIHelper.getInstance().isOverlayVisible())
+        if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
         if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesKey(keyCode, scanCode)) {
-            REIHelperImpl.getSearchField().setFocused(true);
-            setFocused(REIHelperImpl.getSearchField());
-            REIHelperImpl.getSearchField().keybindFocusTime = System.currentTimeMillis();
-            REIHelperImpl.getSearchField().keybindFocusKey = keyCode;
+            REIRuntimeImpl.getSearchField().setFocused(true);
+            setFocused(REIRuntimeImpl.getSearchField());
+            REIRuntimeImpl.getSearchField().keybindFocusTime = System.currentTimeMillis();
+            REIRuntimeImpl.getSearchField().keybindFocusKey = keyCode;
             return true;
         }
         return false;
@@ -666,12 +665,12 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
-        if (!REIHelper.getInstance().isOverlayVisible())
+        if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
-        if (REIHelperImpl.getSearchField().charTyped(char_1, int_1))
+        if (REIRuntimeImpl.getSearchField().charTyped(char_1, int_1))
             return true;
         for (GuiEventListener listener : widgets)
-            if (listener != REIHelperImpl.getSearchField() && listener.charTyped(char_1, int_1))
+            if (listener != REIRuntimeImpl.getSearchField() && listener.charTyped(char_1, int_1))
                 return true;
         return false;
     }
@@ -683,7 +682,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean visible = REIHelper.getInstance().isOverlayVisible();
+        boolean visible = REIRuntime.getInstance().isOverlayVisible();
         if (visible && configButton.mouseClicked(mouseX, mouseY, button)) {
             this.setFocused(configButton);
             if (button == 0)
@@ -691,8 +690,8 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             return true;
         }
         if (ConfigObject.getInstance().getHideKeybind().matchesMouse(button)) {
-            REIHelper.getInstance().toggleOverlayVisible();
-            return REIHelper.getInstance().isOverlayVisible();
+            REIRuntime.getInstance().toggleOverlayVisible();
+            return REIRuntime.getInstance().isOverlayVisible();
         }
         EntryStack<?> stack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen, PointHelper.ofMouse());
         if (stack != null && !stack.isEmpty()) {
@@ -719,7 +718,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 else this.setFocused(null);
                 if (button == 0)
                     this.setDragging(true);
-                REIHelperImpl.getSearchField().setFocused(false);
+                REIRuntimeImpl.getSearchField().setFocused(false);
                 return true;
             }
         }
@@ -752,15 +751,15 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 if (button == 0)
                     this.setDragging(true);
                 if (!(element instanceof OverlaySearchField))
-                    REIHelperImpl.getSearchField().setFocused(false);
+                    REIRuntimeImpl.getSearchField().setFocused(false);
                 return true;
             }
         }
         if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesMouse(button)) {
-            REIHelperImpl.getSearchField().setFocused(true);
-            setFocused(REIHelperImpl.getSearchField());
-            REIHelperImpl.getSearchField().keybindFocusTime = -1;
-            REIHelperImpl.getSearchField().keybindFocusKey = -1;
+            REIRuntimeImpl.getSearchField().setFocused(true);
+            setFocused(REIRuntimeImpl.getSearchField());
+            REIRuntimeImpl.getSearchField().keybindFocusTime = -1;
+            REIRuntimeImpl.getSearchField().keybindFocusKey = -1;
             return true;
         }
         return false;
@@ -768,7 +767,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     
     @Override
     public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
-        if (!REIHelper.getInstance().isOverlayVisible())
+        if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
         return (this.getFocused() != null && this.isDragging() && int_1 == 0) && this.getFocused().mouseDragged(double_1, double_2, int_1, double_3, double_4);
     }

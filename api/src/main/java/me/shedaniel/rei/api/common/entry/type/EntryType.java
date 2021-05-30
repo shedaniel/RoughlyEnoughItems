@@ -23,10 +23,19 @@
 
 package me.shedaniel.rei.api.common.entry.type;
 
+import me.shedaniel.rei.api.client.entry.type.BuiltinClientEntryTypes;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
+/**
+ * A type of entry, used to defer an {@link EntryDefinition} once loaded into the game.
+ *
+ * @param <T> the type of entry
+ * @see BuiltinEntryTypes
+ * @see VanillaEntryTypes
+ * @see BuiltinClientEntryTypes
+ */
 @ApiStatus.NonExtendable
 public interface EntryType<T> {
     static <T> EntryType<T> deferred(ResourceLocation id) {

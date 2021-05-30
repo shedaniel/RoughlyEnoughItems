@@ -64,7 +64,7 @@ public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHold
         this.widgets = Stream.concat(inputWidgets.stream(), outputWidgets.stream()).collect(Collectors.toList());
     }
     
-    private Slot createSlot(EntryIngredient ingredient) {
+    protected Slot createSlot(EntryIngredient ingredient) {
         return Widgets.createSlot(new Point(0, 0))
                 .entries(CollectionUtils.filterToList(ingredient, stack -> !stack.isEmpty()))
                 .disableBackground()

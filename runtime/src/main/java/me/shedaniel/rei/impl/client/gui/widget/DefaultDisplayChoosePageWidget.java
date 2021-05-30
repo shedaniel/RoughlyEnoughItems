@@ -28,7 +28,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -120,10 +120,10 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
             @Override
             public void render(PoseStack matrices, int i, int i1, float v) {
                 text = new TranslatableComponent("text.rei.choose_page");
-                font.draw(matrices, text.getVisualOrderText(), bounds.x + 5, bounds.y + 5, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
+                font.draw(matrices, text.getVisualOrderText(), bounds.x + 5, bounds.y + 5, REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
                 String endString = String.format(" /%d", maxPage);
                 int width = font.width(endString);
-                font.draw(matrices, endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
+                font.draw(matrices, endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
             }
         });
         String endString = String.format(" /%d", maxPage);

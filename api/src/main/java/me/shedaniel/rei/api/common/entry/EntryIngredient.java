@@ -26,6 +26,7 @@ package me.shedaniel.rei.api.common.entry;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -81,6 +82,7 @@ public interface EntryIngredient extends List<EntryStack<?>> {
     
     EntryIngredient map(UnaryOperator<EntryStack<?>> transformer);
     
+    @ApiStatus.NonExtendable
     interface Builder {
         Builder add(EntryStack<?> stack);
         

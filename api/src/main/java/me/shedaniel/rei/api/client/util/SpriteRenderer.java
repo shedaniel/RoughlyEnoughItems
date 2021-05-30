@@ -28,43 +28,46 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 
+@Environment(EnvType.CLIENT)
 public class SpriteRenderer {
     public static RenderPass beginPass() {
         return new RenderPass();
     }
     
     public static class RenderPass {
-        float x1 = 0;
-        float x2 = 1;
-        float y1 = 0;
-        float y2 = 0;
-        float z1 = 0;
-        float uStart = 0F;
-        float uEnd = 1F;
-        float vStart = 0F;
-        float vEnd = 1F;
-        int u = 0;
-        int v = 1;
-        int r = 0xff;
-        int g = 0xff;
-        int b = 0xff;
-        int a = 0xff;
-        int l = 0;
-        float nX = 0;
-        float nY = 0;
-        float nZ = 0;
-        TextureAtlasSprite sprite;
-        VertexConsumer consumer;
-        MultiBufferSource consumers;
-        PoseStack matrices;
-        Matrix4f model;
-        Matrix3f normal;
-        RenderType layer;
+        private float x1 = 0;
+        private float x2 = 1;
+        private float y1 = 0;
+        private float y2 = 0;
+        private float z1 = 0;
+        private float uStart = 0F;
+        private float uEnd = 1F;
+        private float vStart = 0F;
+        private float vEnd = 1F;
+        private int u = 0;
+        private int v = 1;
+        private int r = 0xff;
+        private int g = 0xff;
+        private int b = 0xff;
+        private int a = 0xff;
+        private int l = 0;
+        private float nX = 0;
+        private float nY = 0;
+        private float nZ = 0;
+        private TextureAtlasSprite sprite;
+        private VertexConsumer consumer;
+        private MultiBufferSource consumers;
+        private PoseStack matrices;
+        private Matrix4f model;
+        private Matrix3f normal;
+        private RenderType layer;
         
         private RenderPass() {}
         

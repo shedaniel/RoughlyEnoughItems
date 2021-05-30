@@ -30,7 +30,7 @@ import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.ClientGuiEvent;
 import dev.architectury.event.events.client.ClientTickEvent;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
@@ -55,7 +55,7 @@ import java.util.Optional;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
-public class REIHelperImpl implements REIHelper {
+public class REIRuntimeImpl implements REIRuntime {
     private static final ResourceLocation DISPLAY_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/display.png");
     private static final ResourceLocation DISPLAY_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/display_dark.png");
     @ApiStatus.Internal
@@ -68,11 +68,11 @@ public class REIHelperImpl implements REIHelper {
     
     /**
      * @return the instance of screen helper
-     * @see REIHelper#getInstance()
+     * @see REIRuntime#getInstance()
      */
     @ApiStatus.Internal
-    public static REIHelperImpl getInstance() {
-        return (REIHelperImpl) REIHelper.getInstance();
+    public static REIRuntimeImpl getInstance() {
+        return (REIRuntimeImpl) REIRuntime.getInstance();
     }
     
     @Override

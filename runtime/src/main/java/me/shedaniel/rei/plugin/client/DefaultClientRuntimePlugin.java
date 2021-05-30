@@ -30,7 +30,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.ClientHelper;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
@@ -153,12 +153,12 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
             }
         });
         registry.registerDraggableStackProvider(DraggableStackProviderWidget.from(context -> {
-            if (RoughlyEnoughItemsCore.shouldReturn(context.getScreen()) || !REIHelper.getInstance().isOverlayVisible()) return Collections.emptyList();
-            return Widgets.walk(REIHelper.getInstance().getOverlay().get().children(), DraggableStackProviderWidget.class::isInstance);
+            if (RoughlyEnoughItemsCore.shouldReturn(context.getScreen()) || !REIRuntime.getInstance().isOverlayVisible()) return Collections.emptyList();
+            return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableStackProviderWidget.class::isInstance);
         }));
         registry.registerDraggableStackVisitor(DraggableStackVisitorWidget.from(context -> {
-            if (RoughlyEnoughItemsCore.shouldReturn(context.getScreen()) || !REIHelper.getInstance().isOverlayVisible()) return Collections.emptyList();
-            return Widgets.walk(REIHelper.getInstance().getOverlay().get().children(), DraggableStackVisitorWidget.class::isInstance);
+            if (RoughlyEnoughItemsCore.shouldReturn(context.getScreen()) || !REIRuntime.getInstance().isOverlayVisible()) return Collections.emptyList();
+            return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableStackVisitorWidget.class::isInstance);
         }));
     }
     

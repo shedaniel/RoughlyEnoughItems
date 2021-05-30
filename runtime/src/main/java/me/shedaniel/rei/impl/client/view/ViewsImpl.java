@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class ViewsImpl implements Views {
-    public Map<DisplayCategory<?>, List<Display>> buildMapFor(ViewSearchBuilder builder) {
+    public static Map<DisplayCategory<?>, List<Display>> buildMapFor(ViewSearchBuilder builder) {
         Stopwatch stopwatch = Stopwatch.createStarted();
         Set<CategoryIdentifier<?>> categories = builder.getCategories();
         List<EntryStack<?>> recipesFor = builder.getRecipesFor();
@@ -112,7 +112,7 @@ public class ViewsImpl implements Views {
             }
             for (EntryStack<?> stack : usagesFor) {
                 if (isStackWorkStationOfCategory(categoryConfiguration, stack)) {
-                    set.addAll(CollectionUtils.filterToSet(allRecipesFromCategory, this::isDisplayVisible));
+                    set.addAll(CollectionUtils.filterToSet(allRecipesFromCategory, ViewsImpl::isDisplayVisible));
                     break;
                 }
             }
@@ -155,7 +155,7 @@ public class ViewsImpl implements Views {
         return result;
     }
     
-    private <T extends Display> void generateLiveDisplays(DynamicDisplayGenerator<T> generator, ViewSearchBuilder builder, Consumer<T> displayConsumer) {
+    private static <T extends Display> void generateLiveDisplays(DynamicDisplayGenerator<T> generator, ViewSearchBuilder builder, Consumer<T> displayConsumer) {
         for (EntryStack<?> stack : builder.getRecipesFor()) {
             Optional<List<T>> recipeForDisplays = generator.getRecipeFor(stack);
             if (recipeForDisplays.isPresent()) {
@@ -254,7 +254,7 @@ public class ViewsImpl implements Views {
         return craftables;
     }
     
-    private <T> boolean isStackWorkStationOfCategory(CategoryRegistry.CategoryConfiguration<?> category, EntryStack<T> stack) {
+    private static <T> boolean isStackWorkStationOfCategory(CategoryRegistry.CategoryConfiguration<?> category, EntryStack<T> stack) {
         for (EntryIngredient ingredient : category.getWorkstations()) {
             if (EntryIngredients.testFuzzy(ingredient, stack)) {
                 return true;
@@ -263,7 +263,7 @@ public class ViewsImpl implements Views {
         return false;
     }
     
-    private boolean isDisplayVisible(Display display) {
+    private static boolean isDisplayVisible(Display display) {
         return DisplayRegistry.getInstance().isDisplayVisible(display);
     }
     

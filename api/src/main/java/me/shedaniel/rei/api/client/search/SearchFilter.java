@@ -24,6 +24,8 @@
 package me.shedaniel.rei.api.client.search;
 
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.function.Predicate;
 
@@ -32,6 +34,7 @@ import java.util.function.Predicate;
  *
  * @see SearchProvider
  */
+@Environment(EnvType.CLIENT)
 public interface SearchFilter extends Predicate<EntryStack<?>> {
     static SearchFilter matchAll() {
         return new SearchFilter() {

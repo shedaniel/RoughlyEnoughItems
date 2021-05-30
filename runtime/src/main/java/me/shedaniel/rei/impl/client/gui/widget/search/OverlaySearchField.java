@@ -30,7 +30,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
@@ -230,7 +230,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     public boolean containsMouse(double mouseX, double mouseY) {
-        return (!isMain || REIHelper.getInstance().getOverlay().get().isNotInExclusionZones(mouseX, mouseY)) && super.containsMouse(mouseX, mouseY);
+        return (!isMain || REIRuntime.getInstance().getOverlay().get().isNotInExclusionZones(mouseX, mouseY)) && super.containsMouse(mouseX, mouseY);
     }
     
     @Override

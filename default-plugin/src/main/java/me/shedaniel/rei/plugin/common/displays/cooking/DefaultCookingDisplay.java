@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.plugin.common.displays.cooking;
 
-import me.shedaniel.rei.api.common.display.SimpleMenuDisplay;
+import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
 import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.registry.RecipeManagerContext;
@@ -37,7 +37,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class DefaultCookingDisplay extends BasicDisplay implements SimpleMenuDisplay {
+public abstract class DefaultCookingDisplay extends BasicDisplay implements SimpleGridMenuDisplay {
     private Recipe<?> recipe;
     private float xp;
     private double cookTime;

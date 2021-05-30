@@ -38,7 +38,7 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
@@ -128,7 +128,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
                 if (config.setEntrySize(config.getEntrySize() + double_3 * 0.075)) {
                     ConfigManager.getInstance().saveConfig();
-                    REIHelper.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
+                    REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
                     return true;
                 }
             } else {
@@ -174,7 +174,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     }
     
     @Override
-    public EntryStack<?> getFocusedStacK() {
+    public EntryStack<?> getFocusedStack() {
         Point mouse = PointHelper.ofMouse();
         if (innerBounds.contains(mouse)) {
             for (Entry entry : entries.values()) {
@@ -288,7 +288,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 .render(matrices, mouseX, mouseY, delta);
         
         updatePosition(delta);
-        scrolling.renderScrollBar(0, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+        scrolling.renderScrollBar(0, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
         ScissorsHandler.INSTANCE.removeLastScissor();
         
         renderAddFavorite(matrices, mouseX, mouseY, delta);
@@ -327,7 +327,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     }
     
     public void updateFavoritesBounds(@Nullable String searchTerm) {
-        this.fullBounds = REIHelper.getInstance().calculateFavoritesListArea();
+        this.fullBounds = REIRuntime.getInstance().calculateFavoritesListArea();
     }
     
     public void updateSearch() {
@@ -642,7 +642,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            Optional<ScreenOverlay> overlayOptional = REIHelper.getInstance().getOverlay();
+            Optional<ScreenOverlay> overlayOptional = REIRuntime.getInstance().getOverlay();
             Optional<Supplier<Collection<FavoriteMenuEntry>>> menuEntries = favoriteEntry.getMenuEntries();
             if (Math.abs(entry.x.doubleValue() - entry.x.target()) < 1 && Math.abs(entry.y.doubleValue() - entry.y.target()) < 1 && overlayOptional.isPresent() && menuEntries.isPresent()) {
                 ScreenOverlayImpl overlay = (ScreenOverlayImpl) overlayOptional.get();

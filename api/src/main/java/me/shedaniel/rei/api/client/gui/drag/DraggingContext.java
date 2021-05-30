@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api.client.gui.drag;
 
 import me.shedaniel.math.Point;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,7 +41,7 @@ import java.util.function.Supplier;
  */
 public interface DraggingContext<S extends Screen> {
     static DraggingContext<?> getInstance() {
-        return REIHelper.getInstance().getOverlay().get().getDraggingContext();
+        return REIRuntime.getInstance().getOverlay().get().getDraggingContext();
     }
     
     /**

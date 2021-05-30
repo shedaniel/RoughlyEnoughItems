@@ -33,6 +33,7 @@ import dev.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.AbstractEntryRenderer;
+import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.util.SpriteRenderer;
@@ -173,7 +174,45 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
         return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getFluid());
     }
     
-    public static class FluidEntryRenderer extends AbstractEntryRenderer<FluidStack> {
+    public static class FluidEntryRenderer extends AbstractEntryRenderer<FluidStack> implements BatchedEntryRenderer<FluidStack, TextureAtlasSprite> {
+        @Override
+        public TextureAtlasSprite getExtraData(EntryStack<FluidStack> entry) {
+            FluidStack stack = entry.getValue();
+            if (stack.isEmpty()) return null;
+            return FluidStackHooks.getStillTexture(stack);
+        }
+        
+        @Override
+        public int getBatchIdentifier(EntryStack<FluidStack> entry, Rectangle bounds, TextureAtlasSprite extraData) {
+            return 0;
+        }
+        
+        @Override
+        public void startBatch(EntryStack<FluidStack> entry, TextureAtlasSprite extraData, PoseStack matrices, float delta) {}
+        
+        @Override
+        public void renderBase(EntryStack<FluidStack> entry, TextureAtlasSprite sprite, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
+            SpriteRenderer.beginPass()
+                    .setup(immediate, RenderType.solid())
+                    .sprite(sprite)
+                    .color(FluidStackHooks.getColor(entry.getValue()))
+                    .light(0x00f000f0)
+                    .overlay(OverlayTexture.NO_OVERLAY)
+                    .alpha(0xff)
+                    .normal(matrices.last().normal(), 0, 0, 0)
+                    .position(matrices.last().pose(), bounds.x, bounds.getMaxY() - bounds.height * Mth.clamp(entry.get(EntryStack.Settings.FLUID_RENDER_RATIO), 0, 1), bounds.getMaxX(), bounds.getMaxY(), entry.getZ())
+                    .next(InventoryMenu.BLOCK_ATLAS);
+        }
+    
+        @Override
+        public void afterBase(EntryStack<FluidStack> entry, TextureAtlasSprite extraData, PoseStack matrices, float delta) {}
+    
+        @Override
+        public void renderOverlay(EntryStack<FluidStack> entry, TextureAtlasSprite extraData, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {}
+        
+        @Override
+        public void endBatch(EntryStack<FluidStack> entry, TextureAtlasSprite extraData, PoseStack matrices, float delta) {}
+        
         @Override
         public void render(EntryStack<FluidStack> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
             FluidStack stack = entry.getValue();

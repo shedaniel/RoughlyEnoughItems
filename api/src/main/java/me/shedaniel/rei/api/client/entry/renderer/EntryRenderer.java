@@ -41,6 +41,7 @@ import org.jetbrains.annotations.Nullable;
  * @param <T> the entry type
  * @see BatchedEntryRenderer
  */
+@Environment(EnvType.CLIENT)
 public interface EntryRenderer<T> {
     static <T> EntryRenderer<T> empty() {
         return ClientInternals.getEmptyEntryRenderer();

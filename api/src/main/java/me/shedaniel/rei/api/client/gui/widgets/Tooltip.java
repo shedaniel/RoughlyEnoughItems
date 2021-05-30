@@ -25,7 +25,7 @@ package me.shedaniel.rei.api.client.gui.widgets;
 
 import dev.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.minecraft.network.chat.Component;
@@ -59,6 +59,6 @@ public interface Tooltip {
     List<Component> getText();
     
     default void queue() {
-        EnvExecutor.runInEnv(EnvType.CLIENT, () -> () -> REIHelper.getInstance().queueTooltip(this));
+        EnvExecutor.runInEnv(EnvType.CLIENT, () -> () -> REIRuntime.getInstance().queueTooltip(this));
     }
 }

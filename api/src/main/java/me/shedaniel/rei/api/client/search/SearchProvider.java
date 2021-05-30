@@ -26,7 +26,10 @@ package me.shedaniel.rei.api.client.search;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
+@Environment(EnvType.CLIENT)
 public interface SearchProvider extends Reloadable<REIClientPlugin> {
     static SearchProvider getInstance() {
         return PluginManager.getClientInstance().get(SearchProvider.class);

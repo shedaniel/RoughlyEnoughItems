@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client;
 
+import com.google.common.base.Suppliers;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
 import io.netty.buffer.Unpooled;
@@ -30,7 +31,7 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.client.ClientHelper;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
@@ -244,7 +245,7 @@ public class ClientHelperImpl implements ClientHelper {
         if (ConfigObject.getInstance().getRecipeScreenType() == DisplayScreenType.COMPOSITE) {
             screen = new CompositeDisplayViewingScreen(map, builder.getPreferredOpenedCategory());
         } else if (ConfigObject.getInstance().getRecipeScreenType() == DisplayScreenType.UNSET) {
-            screen = new UncertainDisplayViewingScreen(REIHelper.getInstance().getPreviousScreen(), DisplayScreenType.UNSET, true, original -> {
+            screen = new UncertainDisplayViewingScreen(REIRuntime.getInstance().getPreviousScreen(), DisplayScreenType.UNSET, true, original -> {
                 ConfigObject.getInstance().setRecipeScreenType(original ? DisplayScreenType.ORIGINAL : DisplayScreenType.COMPOSITE);
                 ConfigManager.getInstance().saveConfig();
                 openView(builder);
@@ -261,7 +262,7 @@ public class ClientHelperImpl implements ClientHelper {
             }
         }
         if (Minecraft.getInstance().screen instanceof DisplayScreen) {
-            REIHelperImpl.getInstance().storeDisplayScreen((DisplayScreen) Minecraft.getInstance().screen);
+            REIRuntimeImpl.getInstance().storeDisplayScreen((DisplayScreen) Minecraft.getInstance().screen);
         }
         Minecraft.getInstance().setScreen(screen);
         return true;
@@ -295,7 +296,7 @@ public class ClientHelperImpl implements ClientHelper {
         private final List<EntryStack<?>> usagesFor = new ArrayList<>();
         @Nullable
         private CategoryIdentifier<?> preferredOpenedCategory = null;
-        private final LazyLoadedValue<Map<DisplayCategory<?>, List<Display>>> map = new LazyLoadedValue<>(() -> ((ViewsImpl) Views.getInstance()).buildMapFor(this));
+        private final Supplier<Map<DisplayCategory<?>, List<Display>>> map = Suppliers.memoize(() -> ViewsImpl.buildMapFor(this));
         
         @Override
         public ViewSearchBuilder addCategory(CategoryIdentifier<?> category) {

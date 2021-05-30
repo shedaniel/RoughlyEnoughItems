@@ -24,7 +24,10 @@
 package me.shedaniel.rei.api.client.registry.screen;
 
 import me.shedaniel.math.Rectangle;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
+@Environment(EnvType.CLIENT)
 public interface DisplayBoundsProvider<T> extends OverlayDecider {
     /**
      * @param screen the screen

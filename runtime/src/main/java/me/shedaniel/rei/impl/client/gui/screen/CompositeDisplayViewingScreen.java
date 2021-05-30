@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
@@ -32,8 +31,7 @@ import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.client.ClientHelper;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
@@ -48,7 +46,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.REIHelperImpl;
+import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
 import net.minecraft.client.Minecraft;
@@ -268,14 +266,14 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 scrollBarAlphaFutureTime = System.currentTimeMillis();
             return true;
         }
-        REIHelperImpl.isWithinRecipeViewingScreen = true;
+        REIRuntimeImpl.isWithinRecipeViewingScreen = true;
         for (GuiEventListener listener : children()) {
             if (listener.mouseScrolled(mouseX, mouseY, amount)) {
-                REIHelperImpl.isWithinRecipeViewingScreen = false;
+                REIRuntimeImpl.isWithinRecipeViewingScreen = false;
                 return true;
             }
         }
-        REIHelperImpl.isWithinRecipeViewingScreen = false;
+        REIRuntimeImpl.isWithinRecipeViewingScreen = false;
         int tabSize = ConfigObject.getInstance().isUsingCompactTabs() ? 24 : 28;
         if (mouseX >= bounds.x && mouseX <= bounds.getMaxX() && mouseY >= bounds.y - tabSize && mouseY < bounds.y) {
             if (amount < 0) selectedCategoryIndex++;
@@ -350,7 +348,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 Optional.ofNullable(displayRenderers.get(i).getTooltip(new Point(mouseX, mouseY))).ifPresent(Tooltip::queue);
             }
         }
-        scrolling.renderScrollBar(0, scrollBarAlpha, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+        scrolling.renderScrollBar(0, scrollBarAlpha, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
         ScissorsHandler.INSTANCE.removeLastScissor();
         matrices.popPose();
     }
@@ -407,14 +405,14 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             if (element.keyPressed(keyCode, scanCode, modifiers))
                 return true;
         if (keyCode == 256 || this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
-            Minecraft.getInstance().setScreen(REIHelper.getInstance().getPreviousScreen());
+            Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
             return true;
         }
         if (keyCode == 259) {
-            if (REIHelperImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIHelperImpl.getInstance().getLastDisplayScreen());
+            if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
+                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
             } else {
-                minecraft.setScreen(REIHelper.getInstance().getPreviousScreen());
+                minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
             }
             return true;
         }

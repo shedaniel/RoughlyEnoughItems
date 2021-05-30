@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.modules.entries;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
@@ -89,7 +89,7 @@ public class GameModeMenuEntry extends MenuEntry {
             fill(matrices, x, y, x + width, y + 12, -12237499);
         }
         if (selected && containsMouse) {
-            REIHelper.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", text)));
+            REIRuntime.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", text)));
         }
         font.draw(matrices, text, x + 2, y + 2, selected ? 16777215 : 8947848);
     }
@@ -99,7 +99,7 @@ public class GameModeMenuEntry extends MenuEntry {
         if (rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12) {
             Minecraft.getInstance().player.chat(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", gameMode.name().toLowerCase(Locale.ROOT)));
             minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-            REIHelper.getInstance().getOverlay().get().closeOverlayMenu();
+            REIRuntime.getInstance().getOverlay().get().closeOverlayMenu();
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
