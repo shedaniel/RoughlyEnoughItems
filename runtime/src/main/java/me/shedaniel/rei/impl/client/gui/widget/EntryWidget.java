@@ -30,7 +30,7 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
@@ -41,7 +41,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.client.REIHelperImpl;
+import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -280,6 +280,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         if (hasHighlight() && highlighted) {
             drawHighlighted(matrices, mouseX, mouseY, delta);
         }
+        drawExtra(matrices, mouseX, mouseY, delta);
     }
     
     public final boolean hasTooltips() {
@@ -292,7 +293,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (background) {
-            RenderSystem.setShaderTexture(0, REIHelper.getInstance().isDarkThemeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
+            RenderSystem.setShaderTexture(0, REIRuntime.getInstance().isDarkThemeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
             blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
         }
     }
@@ -319,6 +320,8 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         }
     }
     
+    protected void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {}
+    
     @Override
     @Nullable
     public Tooltip getCurrentTooltip(me.shedaniel.math.Point point) {
@@ -328,7 +331,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     protected void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
-        int color = REIHelper.getInstance().isDarkThemeEnabled() ? -1877929711 : -2130706433;
+        int color = REIRuntime.getInstance().isDarkThemeEnabled() ? -1877929711 : -2130706433;
         setZ(300);
         Rectangle bounds = getInnerBounds();
         fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), color, color);
@@ -357,7 +360,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (REIHelperImpl.isWithinRecipeViewingScreen && entryStacks.size() > 1 && containsMouse(mouseX, mouseY)) {
+        if (REIRuntimeImpl.isWithinRecipeViewingScreen && entryStacks.size() > 1 && containsMouse(mouseX, mouseY)) {
             if (amount < 0) {
                 EntryWidget.stackDisplayOffset = ((System.currentTimeMillis() + stackDisplayOffset) / 1000 - 1) * 1000;
                 return true;

@@ -32,7 +32,7 @@ import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.display.SimpleMenuDisplay;
+import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
 import me.shedaniel.rei.api.common.transfer.RecipeFinder;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
@@ -56,9 +56,9 @@ import java.util.List;
 public class DefaultCategoryHandler implements TransferHandler {
     @Override
     public Result handle(Context context) {
-        if (!(context.getDisplay() instanceof SimpleMenuDisplay))
+        if (!(context.getDisplay() instanceof SimpleGridMenuDisplay))
             return Result.createNotApplicable();
-        SimpleMenuDisplay display = (SimpleMenuDisplay) context.getDisplay();
+        SimpleGridMenuDisplay display = (SimpleGridMenuDisplay) context.getDisplay();
         AbstractContainerScreen<?> containerScreen = context.getContainerScreen();
         if (containerScreen == null) {
             return Result.createNotApplicable();

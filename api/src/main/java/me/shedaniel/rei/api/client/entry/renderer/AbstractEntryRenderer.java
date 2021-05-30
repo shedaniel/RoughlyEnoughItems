@@ -23,7 +23,10 @@
 
 package me.shedaniel.rei.api.client.entry.renderer;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
 
+@Environment(EnvType.CLIENT)
 public abstract class AbstractEntryRenderer<T> extends GuiComponent implements EntryRenderer<T> {
 }

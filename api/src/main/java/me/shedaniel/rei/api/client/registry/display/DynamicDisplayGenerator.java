@@ -27,6 +27,8 @@ import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,6 +41,7 @@ import java.util.Optional;
  * @see DisplayRegistry#registerDisplayGenerator(CategoryIdentifier, DynamicDisplayGenerator)
  * @see DisplayRegistry#registerGlobalDisplayGenerator(DynamicDisplayGenerator)
  */
+@Environment(EnvType.CLIENT)
 public interface DynamicDisplayGenerator<T extends Display> {
     default Optional<List<T>> getRecipeFor(EntryStack<?> entry) {
         return Optional.empty();

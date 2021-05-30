@@ -29,14 +29,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.impl.client.REIHelperImpl;
+import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
@@ -136,7 +136,7 @@ public class SubSubsetsMenuEntry extends MenuEntry {
             } else clickedBefore = false;
             if (clickedBefore) {
                 if (rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12 && !entries.isEmpty()) {
-                    REIHelper.getInstance().queueTooltip(Tooltip.create(new TextComponent("Click again to filter everything in this group.")));
+                    REIRuntime.getInstance().queueTooltip(Tooltip.create(new TextComponent("Click again to filter everything in this group.")));
                 } else clickedBefore = false;
             }
         } else clickedBefore = false;
@@ -153,12 +153,12 @@ public class SubSubsetsMenuEntry extends MenuEntry {
             if (clickedBefore) {
                 clickedBefore = false;
                 List<EntryStack<?>> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
-                Menu overlay = ((ScreenOverlayImpl) REIHelper.getInstance().getOverlay().get()).getOverlayMenu();
+                Menu overlay = ((ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().get()).getOverlayMenu();
                 setFiltered(filteredStacks, overlay, this, !(getFilteredRatio() > 0));
                 ConfigManager.getInstance().saveConfig();
                 EntryRegistry.getInstance().refilter();
-                if (REIHelperImpl.getSearchField() != null) {
-                    ScreenOverlayImpl.getEntryListWidget().updateSearch(REIHelperImpl.getSearchField().getText(), true);
+                if (REIRuntimeImpl.getSearchField() != null) {
+                    ScreenOverlayImpl.getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
                 }
             } else {
                 clickedBefore = true;

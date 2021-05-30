@@ -32,8 +32,11 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.client.subsets.SubsetsRegistry;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
 
+@Environment(EnvType.CLIENT)
 public interface REIClientPlugin extends REIPlugin<REIClientPlugin> {
     /**
      * Registers new categories

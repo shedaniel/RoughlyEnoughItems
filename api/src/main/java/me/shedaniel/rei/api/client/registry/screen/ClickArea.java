@@ -26,12 +26,15 @@ package me.shedaniel.rei.api.client.registry.screen;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.impl.ClientInternals;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.stream.Stream;
 
 @FunctionalInterface
+@Environment(EnvType.CLIENT)
 public interface ClickArea<T extends Screen> {
     Result handle(ClickAreaContext<T> context);
     

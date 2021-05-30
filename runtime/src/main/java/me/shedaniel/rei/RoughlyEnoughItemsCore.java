@@ -33,7 +33,7 @@ import dev.architectury.platform.Platform;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.utils.Env;
 import me.shedaniel.math.Point;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
@@ -67,7 +67,7 @@ import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.Internals;
-import me.shedaniel.rei.impl.client.REIHelperImpl;
+import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.entry.type.types.RenderingEntryDefinition;
 import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
@@ -182,7 +182,8 @@ public class RoughlyEnoughItemsCore {
             
             public EntryType<Unit> emptyType(ResourceLocation id) {
                 if (empty == null) {
-                    empty = new EntryType<Unit>() {
+                    int hashCode = id.hashCode();
+                    empty = new EntryType<>() {
                         @Override
                         public ResourceLocation getId() {
                             return id;
@@ -192,6 +193,11 @@ public class RoughlyEnoughItemsCore {
                         public EntryDefinition<Unit> getDefinition() {
                             return EmptyEntryDefinition.EMPTY;
                         }
+                        
+                        @Override
+                        public int hashCode() {
+                            return hashCode;
+                        }
                     };
                 }
                 return empty;
@@ -200,7 +206,8 @@ public class RoughlyEnoughItemsCore {
             @Environment(EnvType.CLIENT)
             public EntryType<Renderer> renderingType(ResourceLocation id) {
                 if (render == null) {
-                    render = new EntryType<Renderer>() {
+                    int hashCode = id.hashCode();
+                    render = new EntryType<>() {
                         @Override
                         public ResourceLocation getId() {
                             return id;
@@ -209,6 +216,11 @@ public class RoughlyEnoughItemsCore {
                         @Override
                         public EntryDefinition<Renderer> getDefinition() {
                             return RenderingEntryDefinition.RENDERING;
+                        }
+    
+                        @Override
+                        public int hashCode() {
+                            return hashCode;
                         }
                     };
                 }
@@ -392,7 +404,7 @@ public class RoughlyEnoughItemsCore {
                 new FavoriteEntryTypeRegistryImpl(),
                 new SubsetsRegistryImpl(),
                 new TransferHandlerRegistryImpl(),
-                new REIHelperImpl()), "clientPluginManager");
+                new REIRuntimeImpl()), "clientPluginManager");
     }
     
     @ApiStatus.Internal
@@ -490,7 +502,7 @@ public class RoughlyEnoughItemsCore {
     
     @Environment(EnvType.CLIENT)
     public static boolean shouldReturn(Screen screen) {
-        if (!REIHelper.getInstance().getOverlay().isPresent()) return true;
+        if (!REIRuntime.getInstance().getOverlay().isPresent()) return true;
         if (screen == null) return true;
         if (screen != Minecraft.getInstance().screen) return true;
         return _shouldReturn(screen);
@@ -505,7 +517,7 @@ public class RoughlyEnoughItemsCore {
                     continue;
                 InteractionResult result = decider.shouldScreenBeOverlaid(screenClass);
                 if (result != InteractionResult.PASS) {
-                    return result == InteractionResult.FAIL || REIHelper.getInstance().getPreviousScreen() == null;
+                    return result == InteractionResult.FAIL || REIRuntime.getInstance().getPreviousScreen() == null;
                 }
             }
         } catch (ConcurrentModificationException ignored) {
@@ -520,7 +532,7 @@ public class RoughlyEnoughItemsCore {
         MutableLong lastReload = new MutableLong(-1);
         ClientRecipeUpdateEvent.EVENT.register(recipeManager -> reloadPlugins(lastReload));
         ClientGuiEvent.INIT_POST.register((screen, access) -> {
-            REIHelperImpl.getInstance().setPreviousScreen(screen);
+            REIRuntimeImpl.getInstance().setPreviousScreen(screen);
             if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen) {
                 access.getRenderables().removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
                 access.getNarratables().removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
@@ -532,7 +544,7 @@ public class RoughlyEnoughItemsCore {
             if (shouldReturn(screen))
                 return EventResult.pass();
             resetFocused(screen);
-            if (REIHelper.getInstance().getOverlay().get().mouseClicked(mouseX, mouseY, button)) {
+            if (REIRuntime.getInstance().getOverlay().get().mouseClicked(mouseX, mouseY, button)) {
                 if (button == 0) {
                     screen.setDragging(true);
                 }
@@ -546,7 +558,7 @@ public class RoughlyEnoughItemsCore {
             if (shouldReturn(screen))
                 return EventResult.pass();
             resetFocused(screen);
-            if (REIHelper.getInstance().isOverlayVisible() && REIHelper.getInstance().getOverlay().get().mouseReleased(mouseX, mouseY, button)
+            if (REIRuntime.getInstance().isOverlayVisible() && REIRuntime.getInstance().getOverlay().get().mouseReleased(mouseX, mouseY, button)
                 && resetFocused(screen)) {
                 return EventResult.interruptTrue();
             }
@@ -556,7 +568,7 @@ public class RoughlyEnoughItemsCore {
             if (shouldReturn(screen))
                 return EventResult.pass();
             resetFocused(screen);
-            if (REIHelper.getInstance().isOverlayVisible() && REIHelper.getInstance().getOverlay().get().mouseScrolled(mouseX, mouseY, amount)
+            if (REIRuntime.getInstance().isOverlayVisible() && REIRuntime.getInstance().getOverlay().get().mouseScrolled(mouseX, mouseY, amount)
                 && resetFocused(screen))
                 return EventResult.interruptTrue();
             return EventResult.pass();
@@ -565,7 +577,7 @@ public class RoughlyEnoughItemsCore {
             if (shouldReturn(screen))
                 return EventResult.pass();
             resetFocused(screen);
-            if (REIHelper.getInstance().getOverlay().get().charTyped(character, keyCode)
+            if (REIRuntime.getInstance().getOverlay().get().charTyped(character, keyCode)
                 && resetFocused(screen))
                 return EventResult.interruptTrue();
             return EventResult.pass();
@@ -574,15 +586,15 @@ public class RoughlyEnoughItemsCore {
             if (shouldReturn(screen))
                 return;
             resetFocused(screen);
-            REIHelper.getInstance().getOverlay().get().render(matrices, mouseX, mouseY, delta);
-            ((ScreenOverlayImpl) REIHelper.getInstance().getOverlay().get()).lateRender(matrices, mouseX, mouseY, delta);
+            REIRuntime.getInstance().getOverlay().get().render(matrices, mouseX, mouseY, delta);
+            ((ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().get()).lateRender(matrices, mouseX, mouseY, delta);
             resetFocused(screen);
         });
         ClientScreenInputEvent.MOUSE_DRAGGED_PRE.register((minecraftClient, screen, mouseX1, mouseY1, button, mouseX2, mouseY2) -> {
             if (shouldReturn(screen))
                 return EventResult.pass();
             resetFocused(screen);
-            if (REIHelper.getInstance().getOverlay().get().mouseDragged(mouseX1, mouseY1, button, mouseX2, mouseY2)
+            if (REIRuntime.getInstance().getOverlay().get().mouseDragged(mouseX1, mouseY1, button, mouseX2, mouseY2)
                 && resetFocused(screen))
                 return EventResult.interruptTrue();
             return EventResult.pass();
@@ -599,7 +611,7 @@ public class RoughlyEnoughItemsCore {
             if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
                 return EventResult.pass();
             resetFocused(screen);
-            if (REIHelper.getInstance().getOverlay().get().keyPressed(i, i1, i2)
+            if (REIRuntime.getInstance().getOverlay().get().keyPressed(i, i1, i2)
                 && resetFocused(screen))
                 return EventResult.interruptTrue();
             return EventResult.pass();

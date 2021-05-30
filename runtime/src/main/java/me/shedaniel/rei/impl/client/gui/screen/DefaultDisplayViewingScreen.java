@@ -33,8 +33,7 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.client.ClientHelper;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
@@ -47,11 +46,10 @@ import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
-import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.REIHelperImpl;
+import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.RecipeDisplayExporter;
 import me.shedaniel.rei.impl.client.gui.widget.DefaultDisplayChoosePageWidget;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
@@ -137,14 +135,14 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             if (element.keyPressed(keyCode, scanCode, modifiers))
                 return true;
         if (keyCode == 256 || this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
-            Minecraft.getInstance().setScreen(REIHelper.getInstance().getPreviousScreen());
+            Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
             return true;
         }
         if (keyCode == 259) {
-            if (REIHelperImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIHelperImpl.getInstance().getLastDisplayScreen());
+            if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
+                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
             } else {
-                minecraft.setScreen(REIHelper.getInstance().getPreviousScreen());
+                minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
             }
             return true;
         }
@@ -328,7 +326,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             widget.render(matrices, mouseX, mouseY, delta);
         }
         PanelWidget.render(matrices, bounds, -1);
-        if (REIHelper.getInstance().isDarkThemeEnabled()) {
+        if (REIRuntime.getInstance().isDarkThemeEnabled()) {
             fill(matrices, bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF404040);
             fill(matrices, bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 30, 0xFF404040);
         } else {
@@ -448,14 +446,14 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        REIHelperImpl.isWithinRecipeViewingScreen = true;
+        REIRuntimeImpl.isWithinRecipeViewingScreen = true;
         for (GuiEventListener listener : children()) {
             if (listener.mouseScrolled(mouseX, mouseY, amount)) {
-                REIHelperImpl.isWithinRecipeViewingScreen = false;
+                REIRuntimeImpl.isWithinRecipeViewingScreen = false;
                 return true;
             }
         }
-        REIHelperImpl.isWithinRecipeViewingScreen = false;
+        REIRuntimeImpl.isWithinRecipeViewingScreen = false;
         if (getBounds().contains(PointHelper.ofMouse())) {
             if (amount > 0 && recipeBack.isEnabled())
                 recipeBack.onClick();

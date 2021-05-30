@@ -27,7 +27,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -69,7 +69,7 @@ public class DefaultBrewingCategory implements DisplayCategory<DefaultBrewingDis
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));
         widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            RenderSystem.setShaderTexture(0, REIHelper.getInstance().getDefaultDisplayTexture());
+            RenderSystem.setShaderTexture(0, REIRuntime.getInstance().getDefaultDisplayTexture());
             helper.blit(matrices, startPoint.x, startPoint.y, 0, 108, 103, 59);
             int width = Mth.ceil(System.currentTimeMillis() / 250d % 18d);
             helper.blit(matrices, startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);

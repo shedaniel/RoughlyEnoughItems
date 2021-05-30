@@ -34,10 +34,12 @@ import java.lang.ref.WeakReference;
 @ApiStatus.Internal
 public class EntryTypeDeferred<T> implements EntryType<T> {
     private final ResourceLocation id;
+    private final int hashCode;
     private WeakReference<EntryDefinition<T>> reference;
     
     public EntryTypeDeferred(ResourceLocation id) {
         this.id = id;
+        this.hashCode = id.hashCode();
     }
     
     @Override
@@ -60,5 +62,17 @@ public class EntryTypeDeferred<T> implements EntryType<T> {
         EntryDefinition<T> definition = d.cast();
         reference = new WeakReference<>(definition);
         return definition;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EntryTypeDeferred<?> that)) return false;
+        return hashCode == that.hashCode && id.equals(that.id);
+    }
+    
+    @Override
+    public int hashCode() {
+        return hashCode;
     }
 }

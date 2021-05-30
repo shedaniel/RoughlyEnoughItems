@@ -27,14 +27,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.impl.client.REIHelperImpl;
+import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
@@ -91,7 +91,7 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
             fill(matrices, x, y, x + width, y + 18, 1174405119);
         }
         if (containsMouse && mouseX >= x + (width / 2) - 8 && mouseX <= x + (width / 2) + 8 && mouseY >= y + 1 && mouseY <= y + 17) {
-            REIHelper.getInstance().queueTooltip(stack.getTooltip(new Point(mouseX, mouseY)));
+            REIRuntime.getInstance().queueTooltip(stack.getTooltip(new Point(mouseX, mouseY)));
             if (RoughlyEnoughItemsCore.isLeftMousePressed && !clickedLast) {
                 clickedLast = true;
                 if (!getParent().scrolling.draggingScrollBar) {
@@ -102,13 +102,13 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
                     } else {
                         filteredStacks.add(stack.normalize());
                     }
-                    Menu menu = ((ScreenOverlayImpl) REIHelper.getInstance().getOverlay().get()).getOverlayMenu();
+                    Menu menu = ((ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().get()).getOverlayMenu();
                     if (menu != null)
                         recalculateFilter(menu);
                     ConfigManager.getInstance().saveConfig();
                     EntryRegistry.getInstance().refilter();
-                    if (REIHelperImpl.getSearchField() != null) {
-                        ScreenOverlayImpl.getEntryListWidget().updateSearch(REIHelperImpl.getSearchField().getText(), true);
+                    if (REIRuntimeImpl.getSearchField() != null) {
+                        ScreenOverlayImpl.getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
                     }
                 }
             } else if (!RoughlyEnoughItemsCore.isLeftMousePressed) clickedLast = false;

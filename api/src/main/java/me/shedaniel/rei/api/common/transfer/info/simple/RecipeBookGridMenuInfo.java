@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.api.common.transfer.info.simple;
 
-import me.shedaniel.rei.api.common.display.SimpleMenuDisplay;
+import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
 import me.shedaniel.rei.api.common.transfer.RecipeFinder;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 
-public class RecipeBookGridMenuInfo<T extends RecipeBookMenu<?>, D extends SimpleMenuDisplay> implements SimpleGridMenuInfo<T, D> {
+public class RecipeBookGridMenuInfo<T extends RecipeBookMenu<?>, D extends SimpleGridMenuDisplay> implements SimpleGridMenuInfo<T, D> {
     @Override
     public int getCraftingResultSlotIndex(T menu) {
         return menu.getResultSlotIndex();

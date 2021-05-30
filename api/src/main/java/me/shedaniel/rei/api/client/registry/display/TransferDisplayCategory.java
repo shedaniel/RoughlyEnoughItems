@@ -28,10 +28,13 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.common.display.Display;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public interface TransferDisplayCategory<T extends Display> extends DisplayCategory<T> {
     @ApiStatus.OverrideOnly
     @ApiStatus.ScheduledForRemoval

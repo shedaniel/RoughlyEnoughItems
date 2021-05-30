@@ -28,7 +28,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.config.RecipeBorderType;
@@ -121,7 +121,7 @@ public final class PanelWidget extends Panel {
         float green = ((color >> 8) & 0xFF) / 255f;
         float blue = (color & 0xFF) / 255f;
         RenderSystem.setShaderColor(red, green, blue, alpha);
-        RenderSystem.setShaderTexture(0, REIHelper.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
+        RenderSystem.setShaderTexture(0, REIRuntime.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
         int xTextureOffset = getXTextureOffset();
         int yTextureOffset = getYTextureOffset();

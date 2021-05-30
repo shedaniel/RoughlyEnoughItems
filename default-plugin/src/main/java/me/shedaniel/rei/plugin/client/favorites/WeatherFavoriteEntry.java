@@ -27,7 +27,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.CompoundFavoriteRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
@@ -299,7 +299,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
                 fill(matrices, x, y, x + width, y + 12, -12237499);
             }
             if (selected && containsMouse) {
-                REIHelper.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.weather_button.tooltip.entry", text)));
+                REIRuntime.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.weather_button.tooltip.entry", text)));
             }
             font.draw(matrices, text, x + 2, y + 2, selected ? 16777215 : 8947848);
         }

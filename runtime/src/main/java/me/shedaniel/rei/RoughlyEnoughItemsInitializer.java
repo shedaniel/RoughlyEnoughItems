@@ -45,7 +45,7 @@ public class RoughlyEnoughItemsInitializer {
             initializeEntryPoint(true, "me.shedaniel.rei.RoughlyEnoughItemsCore");
             initializeEntryPoint(true, "me.shedaniel.rei.REIModMenuEntryPoint");
             initializeEntryPoint(true, "me.shedaniel.rei.impl.client.ClientHelperImpl");
-            initializeEntryPoint(true, "me.shedaniel.rei.impl.client.REIHelperImpl");
+            initializeEntryPoint(true, "me.shedaniel.rei.impl.client.REIRuntimeImpl");
         }
         
         initializeEntryPoint(true, "me.shedaniel.rei.impl.client.ErrorDisplayer");

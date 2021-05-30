@@ -24,11 +24,14 @@
 package me.shedaniel.rei.api.client.registry.category;
 
 import me.shedaniel.math.Rectangle;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 /**
  * The area for the + button.
  */
 @FunctionalInterface
+@Environment(EnvType.CLIENT)
 public interface ButtonArea {
     static ButtonArea defaultArea() {
         return bounds -> new Rectangle(bounds.getMaxX() + 2, bounds.getMaxY() - 16, 10, 10);

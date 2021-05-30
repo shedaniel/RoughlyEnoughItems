@@ -25,6 +25,13 @@ package me.shedaniel.rei.api.common.display;
 
 import net.minecraft.nbt.CompoundTag;
 
+/**
+ * The display serializer used for display serialization, useful for persistent displays across reloads,
+ * and server-client communication.
+ *
+ * @see SimpleDisplaySerializer
+ * @see DisplaySerializerRegistry
+ */
 public interface DisplaySerializer<D extends Display> {
     CompoundTag save(CompoundTag tag, D display);
     

@@ -26,7 +26,7 @@ package me.shedaniel.rei.plugin.autocrafting;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.display.SimpleMenuDisplay;
+import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultCookingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import net.fabricmc.api.EnvType;
@@ -43,7 +43,7 @@ import net.minecraft.world.item.crafting.Recipe;
 public class DefaultRecipeBookHandler implements TransferHandler {
     @Override
     public Result handle(Context context) {
-        if (context.getDisplay() instanceof SimpleMenuDisplay && ClientHelper.getInstance().canUseMovePackets())
+        if (context.getDisplay() instanceof SimpleGridMenuDisplay && ClientHelper.getInstance().canUseMovePackets())
             return Result.createNotApplicable();
         Display display = context.getDisplay();
         if (!(context.getMenu() instanceof RecipeBookMenu))

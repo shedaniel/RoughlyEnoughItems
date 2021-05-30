@@ -25,11 +25,17 @@ package me.shedaniel.rei.api.client.registry.screen;
 
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.InteractionResult;
 
 import static net.minecraft.world.InteractionResult.PASS;
 
+/**
+ * @see DisplayBoundsProvider
+ */
+@Environment(EnvType.CLIENT)
 public interface OverlayDecider extends Comparable<OverlayDecider> {
     <R extends Screen> boolean isHandingScreen(Class<R> screen);
     

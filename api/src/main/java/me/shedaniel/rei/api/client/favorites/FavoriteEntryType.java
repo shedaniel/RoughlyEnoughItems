@@ -27,6 +27,8 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -35,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public interface FavoriteEntryType<T extends FavoriteEntry> {
     /**
      * A builtin type of favorites, wrapping a {@link EntryStack}.

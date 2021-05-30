@@ -36,7 +36,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.ClientHelper;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
@@ -251,7 +251,7 @@ public class UncertainDisplayViewingScreen extends Screen {
         if (int_1 == 256 || this.minecraft.options.keyInventory.matches(int_1, int_2)) {
             Minecraft.getInstance().setScreen(parent);
             if (parent instanceof AbstractContainerScreen) {
-                REIHelper.getInstance().getOverlay().get().queueReloadOverlay();
+                REIRuntime.getInstance().getOverlay().get().queueReloadOverlay();
             }
             return true;
         }

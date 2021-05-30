@@ -25,10 +25,13 @@ package me.shedaniel.rei.api.client.overlay;
 
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
 
+@Environment(EnvType.CLIENT)
 public abstract class ScreenOverlay extends WidgetWithBounds {
     @ApiStatus.Internal
     public abstract void closeOverlayMenu();

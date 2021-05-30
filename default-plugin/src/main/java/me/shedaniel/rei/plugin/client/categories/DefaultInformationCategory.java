@@ -32,7 +32,7 @@ import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
@@ -102,7 +102,7 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
         return new AbstractRenderer() {
             @Override
             public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                RenderSystem.setShaderTexture(0, REIHelper.getInstance().getDefaultDisplayTexture());
+                RenderSystem.setShaderTexture(0, REIRuntime.getInstance().getDefaultDisplayTexture());
                 matrices.pushPose();
                 matrices.translate(-1.2f, -1, 0);
                 Matrix4f matrix = matrices.last().pose();
@@ -198,13 +198,13 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
             int currentY = (int) -scrolling.scrollAmount + innerBounds.y;
             for (FormattedCharSequence text : texts) {
                 if (text != null && currentY + font.lineHeight >= innerBounds.y && currentY <= innerBounds.getMaxY()) {
-                    font.draw(matrices, text, innerBounds.x + 2, currentY + 2, REIHelper.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF090909);
+                    font.draw(matrices, text, innerBounds.x + 2, currentY + 2, REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF090909);
                 }
                 currentY += text == null ? 4 : font.lineHeight;
             }
             ScissorsHandler.INSTANCE.removeLastScissor();
             ScissorsHandler.INSTANCE.scissor(scrolling.getBounds());
-            scrolling.renderScrollBar(0xff000000, 1, REIHelper.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+            scrolling.renderScrollBar(0xff000000, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
             ScissorsHandler.INSTANCE.removeLastScissor();
         }
         

@@ -25,10 +25,13 @@ package me.shedaniel.rei.api.client.gui;
 
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.OverrideOnly
+@Environment(EnvType.CLIENT)
 public abstract class DisplayRenderer extends AbstractRenderer {
     public abstract int getHeight();
     

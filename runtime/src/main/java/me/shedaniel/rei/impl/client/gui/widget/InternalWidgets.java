@@ -29,7 +29,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
@@ -68,7 +68,7 @@ public final class InternalWidgets {
     private InternalWidgets() {}
     
     public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Component text, Supplier<Display> displaySupplier, List<Widget> setupDisplay, DisplayCategory<?> category) {
-        AbstractContainerScreen<?> containerScreen = REIHelper.getInstance().getPreviousContainerScreen();
+        AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
         boolean[] visible = {false};
         List<Component>[] errorTooltip = new List[]{null};
         Button autoCraftingButton = Widgets.createButton(rectangle, text)
@@ -88,7 +88,7 @@ public final class InternalWidgets {
                             e.printStackTrace();
                         }
                     Minecraft.getInstance().setScreen(containerScreen);
-                    REIHelper.getInstance().getOverlay().get().queueReloadOverlay();
+                    REIRuntime.getInstance().getOverlay().get().queueReloadOverlay();
                 })
                 .onRender((matrices, button) -> {
                     button.setEnabled(false);

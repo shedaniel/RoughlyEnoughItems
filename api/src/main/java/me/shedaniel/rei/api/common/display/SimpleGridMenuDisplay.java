@@ -29,7 +29,7 @@ package me.shedaniel.rei.api.common.display;
  *
  * @see me.shedaniel.rei.api.common.transfer.info.simple.SimpleGridMenuInfo
  */
-public interface SimpleMenuDisplay extends Display {
+public interface SimpleGridMenuDisplay extends Display {
     int getWidth();
     
     int getHeight();

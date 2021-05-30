@@ -25,10 +25,13 @@ package me.shedaniel.rei.api.client.registry.screen;
 
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.InteractionResultHolder;
 
 @FunctionalInterface
+@Environment(EnvType.CLIENT)
 public interface FocusedStackProvider extends Comparable<FocusedStackProvider> {
     /**
      * @return the priority of this handler, higher priorities will be called first.

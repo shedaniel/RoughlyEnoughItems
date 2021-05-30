@@ -24,9 +24,12 @@
 package me.shedaniel.rei.api.client.favorites;
 
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+@Environment(EnvType.CLIENT)
 public abstract class FavoriteMenuEntry extends Widget {
     @Nullable
     @ApiStatus.Internal

@@ -26,6 +26,8 @@ package me.shedaniel.rei.api.client.entry.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 
@@ -35,6 +37,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
  * @param <T> the entry type
  * @param <E> the type of extra data returned in {@link #getExtraData(EntryStack)}
  */
+@Environment(EnvType.CLIENT)
 public interface BatchedEntryRenderer<T, E> extends EntryRenderer<T> {
     default boolean isBatched(EntryStack<T> entry) {
         return true;
@@ -57,9 +60,7 @@ public interface BatchedEntryRenderer<T, E> extends EntryRenderer<T> {
      * @param extraData the extra data returned from {@link #getExtraData(EntryStack)}
      * @return the batch identifier
      */
-    default int getBatchIdentifier(EntryStack<T> entry, Rectangle bounds, E extraData) {
-        return getClass().hashCode();
-    }
+    int getBatchIdentifier(EntryStack<T> entry, Rectangle bounds, E extraData);
     
     /**
      * Modifies the {@link PoseStack} passed tp various batch rendering methods.
@@ -82,6 +83,8 @@ public interface BatchedEntryRenderer<T, E> extends EntryRenderer<T> {
     void startBatch(EntryStack<T> entry, E extraData, PoseStack matrices, float delta);
     
     void renderBase(EntryStack<T> entry, E extraData, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta);
+    
+    void afterBase(EntryStack<T> entry, E extraData, PoseStack matrices, float delta);
     
     void renderOverlay(EntryStack<T> entry, E extraData, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta);
     

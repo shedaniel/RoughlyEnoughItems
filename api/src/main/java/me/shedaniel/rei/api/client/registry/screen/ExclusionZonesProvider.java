@@ -24,10 +24,13 @@
 package me.shedaniel.rei.api.client.registry.screen;
 
 import me.shedaniel.math.Rectangle;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 
 import java.util.Collection;
 
 @FunctionalInterface
+@Environment(EnvType.CLIENT)
 public interface ExclusionZonesProvider<T> {
     Collection<Rectangle> provide(T screen);
 }

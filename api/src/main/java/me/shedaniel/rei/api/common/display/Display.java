@@ -30,6 +30,13 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * A display, holds ingredients and information for {@link me.shedaniel.rei.api.client.registry.display.DisplayCategory}
+ * to setup widgets for.
+ *
+ * @see me.shedaniel.rei.api.common.display.basic.BasicDisplay
+ * @see me.shedaniel.rei.api.client.registry.display.DisplayRegistry
+ */
 public interface Display {
     /**
      * @return a list of inputs

@@ -30,12 +30,15 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.common.util.Animator;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 
 import java.util.List;
 import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 
+@Environment(EnvType.CLIENT)
 public class CompoundFavoriteRenderer extends AbstractRenderer {
     protected Animator offset = new Animator(0);
     protected Rectangle scissorArea = new Rectangle();
@@ -59,7 +62,7 @@ public class CompoundFavoriteRenderer extends AbstractRenderer {
         this(false, renderers, supplier);
     }
     
-    public CompoundFavoriteRenderer(boolean showcase, List<Renderer> renderers, IntSupplier supplier) {
+    protected CompoundFavoriteRenderer(boolean showcase, List<Renderer> renderers, IntSupplier supplier) {
         this(showcase, renderers.size(), renderers::get, supplier);
     }
     

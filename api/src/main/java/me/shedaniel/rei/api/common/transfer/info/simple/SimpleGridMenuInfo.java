@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.common.transfer.info.simple;
 
-import me.shedaniel.rei.api.common.display.SimpleMenuDisplay;
+import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
 import me.shedaniel.rei.api.common.transfer.info.MenuTransferException;
@@ -38,13 +38,13 @@ import java.util.stream.IntStream;
  * A simple implementation of {@link MenuInfo} that provides {@link SlotAccessor} by {@link net.minecraft.world.inventory.Slot}.
  * <p>
  * Designed to be used for {@link net.minecraft.world.inventory.RecipeBookMenu}, and expects a width and height for a grid for the input.
- * Requires the display to be a implementation of {@link SimpleMenuDisplay}, to provide the width and height of the display.
+ * Requires the display to be a implementation of {@link SimpleGridMenuDisplay}, to provide the width and height of the display.
  *
  * @param <T> the type of the menu
  * @param <D> the type of display
- * @see SimpleMenuDisplay
+ * @see SimpleGridMenuDisplay
  */
-public interface SimpleGridMenuInfo<T extends AbstractContainerMenu, D extends SimpleMenuDisplay> extends SimplePlayerInventoryMenuInfo<T, D> {
+public interface SimpleGridMenuInfo<T extends AbstractContainerMenu, D extends SimpleGridMenuDisplay> extends SimplePlayerInventoryMenuInfo<T, D> {
     default Iterable<SlotAccessor> getInputSlots(MenuInfoContext<T, ?, D> context) {
         return getInputStackSlotIds(context)
                 .mapToObj(value -> SlotAccessor.fromSlot(context.getMenu().getSlot(value)))
@@ -66,7 +66,7 @@ public interface SimpleGridMenuInfo<T extends AbstractContainerMenu, D extends S
     default void validate(MenuInfoContext<T, ?, D> context) throws MenuTransferException {
         int width = getCraftingWidth(context.getMenu());
         int height = getCraftingHeight(context.getMenu());
-        SimpleMenuDisplay display = context.getDisplay();
+        SimpleGridMenuDisplay display = context.getDisplay();
         if (display != null && (display.getWidth() > width || display.getHeight() > height)) {
             throw new MenuTransferException(new TranslatableComponent("error.rei.transfer.too_small", width, height));
         }

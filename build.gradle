@@ -43,10 +43,6 @@ allprojects {
         mavenLocal()
     }
     
-    architectury {
-        transformerVersion = "3.0.46"
-    }
-
     license {
         header rootProject.file("HEADER")
         include "**/*.java"
@@ -64,7 +60,6 @@ allprojects {
 
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
-
         options.release = 16
     }
 }
@@ -157,6 +152,8 @@ task releaseOnCf {
     releaseChangelog = changes.toString()
     if (subprojects.any { it.name == "forge" }) {
         dependsOn project("forge").tasks.getByName("curseforge")
+    } else if (subprojects.any { it.name == "fabric" }) {
+        dependsOn project("fabric").tasks.getByName("curseforge")
     }
 }
 

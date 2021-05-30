@@ -24,11 +24,14 @@
 package me.shedaniel.rei.api.client.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiComponent;
 
 /**
- * Consumer of a {@link DrawableHelper} and information of mouse and delta.
+ * Consumer of a {@link GuiComponent} and information of mouse and delta.
  */
+@Environment(EnvType.CLIENT)
 public interface DrawableConsumer {
     void render(GuiComponent helper, PoseStack matrices, int mouseX, int mouseY, float delta);
 }
