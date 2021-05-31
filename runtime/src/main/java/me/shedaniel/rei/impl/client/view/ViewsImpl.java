@@ -62,17 +62,18 @@ public class ViewsImpl implements Views {
         Set<CategoryIdentifier<?>> categories = builder.getCategories();
         List<EntryStack<?>> recipesFor = builder.getRecipesFor();
         List<EntryStack<?>> usagesFor = builder.getUsagesFor();
+        DisplayRegistry displayRegistry = DisplayRegistry.getInstance();
         
         Map<DisplayCategory<?>, List<Display>> result = Maps.newLinkedHashMap();
         for (CategoryRegistry.CategoryConfiguration<?> categoryConfiguration : CategoryRegistry.getInstance()) {
             DisplayCategory<?> category = categoryConfiguration.getCategory();
             CategoryIdentifier<?> categoryId = categoryConfiguration.getCategoryIdentifier();
-            List<Display> allRecipesFromCategory = DisplayRegistry.getInstance().get((CategoryIdentifier<Display>) categoryId);
+            List<Display> allRecipesFromCategory = displayRegistry.get((CategoryIdentifier<Display>) categoryId);
             
             Set<Display> set = Sets.newLinkedHashSet();
             if (categories.contains(categoryId)) {
                 for (Display display : allRecipesFromCategory) {
-                    if (isDisplayVisible(display)) {
+                    if (displayRegistry.isDisplayVisible(display)) {
                         set.add(display);
                     }
                 }
@@ -82,7 +83,7 @@ public class ViewsImpl implements Views {
                 continue;
             }
             for (Display display : allRecipesFromCategory) {
-                if (!isDisplayVisible(display)) continue;
+                if (!displayRegistry.isDisplayVisible(display)) continue;
                 if (!recipesFor.isEmpty()) {
                     back:
                     for (List<? extends EntryStack<?>> results : display.getOutputEntries()) {
@@ -112,7 +113,7 @@ public class ViewsImpl implements Views {
             }
             for (EntryStack<?> stack : usagesFor) {
                 if (isStackWorkStationOfCategory(categoryConfiguration, stack)) {
-                    set.addAll(CollectionUtils.filterToSet(allRecipesFromCategory, ViewsImpl::isDisplayVisible));
+                    set.addAll(CollectionUtils.filterToSet(allRecipesFromCategory, displayRegistry::isDisplayVisible));
                     break;
                 }
             }
@@ -123,13 +124,13 @@ public class ViewsImpl implements Views {
         
         int generatorsCount = 0;
         
-        for (Map.Entry<CategoryIdentifier<?>, List<DynamicDisplayGenerator<?>>> entry : DisplayRegistry.getInstance().getCategoryDisplayGenerators().entrySet()) {
+        for (Map.Entry<CategoryIdentifier<?>, List<DynamicDisplayGenerator<?>>> entry : displayRegistry.getCategoryDisplayGenerators().entrySet()) {
             CategoryIdentifier<?> categoryId = entry.getKey();
             Set<Display> set = new LinkedHashSet<>();
             generatorsCount += entry.getValue().size();
             
             for (DynamicDisplayGenerator<Display> generator : (List<DynamicDisplayGenerator<Display>>) (List<? extends DynamicDisplayGenerator<?>>) entry.getValue()) {
-                generateLiveDisplays(generator, builder, set::add);
+                generateLiveDisplays(displayRegistry, generator, builder, set::add);
             }
             
             if (!set.isEmpty()) {
@@ -140,9 +141,9 @@ public class ViewsImpl implements Views {
         Consumer<Display> displayConsumer = display -> {
             CollectionUtils.getOrPutEmptyList(result, CategoryRegistry.getInstance().get(display.getCategoryIdentifier()).getCategory()).add(display);
         };
-        for (DynamicDisplayGenerator<Display> generator : (List<DynamicDisplayGenerator<Display>>) (List<? extends DynamicDisplayGenerator<?>>) DisplayRegistry.getInstance().getGlobalDisplayGenerators()) {
+        for (DynamicDisplayGenerator<Display> generator : (List<DynamicDisplayGenerator<Display>>) (List<? extends DynamicDisplayGenerator<?>>) displayRegistry.getGlobalDisplayGenerators()) {
             generatorsCount++;
-            generateLiveDisplays(generator, builder, displayConsumer);
+            generateLiveDisplays(displayRegistry, generator, builder, displayConsumer);
         }
         
         String message = String.format("Built Recipe View in %s for %d categories, %d recipes for, %d usages for and %d live recipe generators.",
@@ -155,12 +156,12 @@ public class ViewsImpl implements Views {
         return result;
     }
     
-    private static <T extends Display> void generateLiveDisplays(DynamicDisplayGenerator<T> generator, ViewSearchBuilder builder, Consumer<T> displayConsumer) {
+    private static <T extends Display> void generateLiveDisplays(DisplayRegistry displayRegistry, DynamicDisplayGenerator<T> generator, ViewSearchBuilder builder, Consumer<T> displayConsumer) {
         for (EntryStack<?> stack : builder.getRecipesFor()) {
             Optional<List<T>> recipeForDisplays = generator.getRecipeFor(stack);
             if (recipeForDisplays.isPresent()) {
                 for (T display : recipeForDisplays.get()) {
-                    if (isDisplayVisible(display)) {
+                    if (displayRegistry.isDisplayVisible(display)) {
                         displayConsumer.accept(display);
                     }
                 }
@@ -171,7 +172,7 @@ public class ViewsImpl implements Views {
             Optional<List<T>> usageForDisplays = generator.getUsageFor(stack);
             if (usageForDisplays.isPresent()) {
                 for (T display : usageForDisplays.get()) {
-                    if (isDisplayVisible(display)) {
+                    if (displayRegistry.isDisplayVisible(display)) {
                         displayConsumer.accept(display);
                     }
                 }
@@ -181,7 +182,7 @@ public class ViewsImpl implements Views {
         Optional<List<T>> displaysGenerated = generator.generate(builder);
         if (displaysGenerated.isPresent()) {
             for (T display : displaysGenerated.get()) {
-                if (isDisplayVisible(display)) {
+                if (displayRegistry.isDisplayVisible(display)) {
                     displayConsumer.accept(display);
                 }
             }
@@ -261,10 +262,6 @@ public class ViewsImpl implements Views {
             }
         }
         return false;
-    }
-    
-    private static boolean isDisplayVisible(Display display) {
-        return DisplayRegistry.getInstance().isDisplayVisible(display);
     }
     
     @Override
