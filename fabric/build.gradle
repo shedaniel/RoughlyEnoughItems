@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "5.0.0"
+    id "com.github.johnrengelman.shadow" version "7.0.0"
 }
 
 configurations {
@@ -22,6 +22,8 @@ loom {
     accessWidener = file("src/main/resources/roughlyenoughitems.accessWidener")
 }
 
+def depProjects = [":api", ":runtime", ":default-plugin"]
+
 dependencies {
     modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
     modRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}")
@@ -31,21 +33,13 @@ dependencies {
     modRuntime("com.terraformersmc:modmenu:${modmenu_version}") {
         transitive(false)
     }
-//    modRuntime("me.shedaniel:SmoothScrollingEverywhere:3.0.3-unstable") {
-//        transitive(false)
-//    }
     modApi("dev.architectury:architectury-fabric:${architectury_version}")
 
-    implementation(project(path: ":api")) { transitive = false }
-    implementation(project(path: ":default-plugin")) { transitive = false }
-    implementation(project(path: ":runtime")) { transitive = false }
-    developmentFabric(project(path: ":api")) { transitive = false }
-    developmentFabric(project(path: ":default-plugin")) { transitive = false }
-    developmentFabric(project(path: ":runtime")) { transitive = false }
-
-    shadowCommon(project(path: ":api", configuration: "transformProductionFabric")) { transitive = false }
-    shadowCommon(project(path: ":default-plugin", configuration: "transformProductionFabric")) { transitive = false }
-    shadowCommon(project(path: ":runtime", configuration: "transformProductionFabric")) { transitive = false }
+    depProjects.forEach {
+        implementation(project(path: it)) { transitive = false }
+        developmentFabric(project(path: it)) { transitive = false }
+        shadowCommon(project(path: it, configuration: "transformProductionFabric")) { transitive = false }
+    }
 }
 
 shadowJar {
@@ -61,4 +55,33 @@ remapJar {
 
 jar {
     classifier "dev"
+}
+
+java {
+    withSourcesJar()
+}
+
+sourcesJar {
+    afterEvaluate {
+        depProjects.forEach {
+            def depSources = project(it).sourcesJar
+            dependsOn depSources
+            from depSources.archiveFile.map { zipTree(it) }
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenFabric(MavenPublication) {
+            artifactId = rootProject.name + "-" + project.name
+            artifact(remapJar) { classifier null }
+            afterEvaluate {
+                artifact(remapSourcesJar.output) {
+                    builtBy remapSourcesJar
+                    classifier "sources"
+                }
+            }
+        }
+    }
 }

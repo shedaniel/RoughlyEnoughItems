@@ -40,7 +40,6 @@ allprojects {
     repositories {
         maven { url "https://maven.shedaniel.me" }
         maven { url "https://maven.terraformersmc.com/releases" }
-        mavenLocal()
     }
     
     license {
@@ -65,36 +64,11 @@ allprojects {
 }
 
 subprojects {
-//    apply plugin: "forgified-fabric-loom"
-
     group = rootProject.group
     version = rootProject.version
     archivesBaseName = rootProject.name
 
-//    loom {
-//        silentMojangMappingsLicense()
-//    }
-
-    dependencies {
-//        minecraft("com.mojang:minecraft:${project.minecraft_version}")
-//        mappings(loom.officialMojangMappings())
-//        modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
-    }
-
-    /*publishing {
-        publications {
-            create("${archivesBaseName}_mavenJava", MavenPublication) {
-                afterEvaluate {
-                    artifact(jar) {
-                        builtBy mavenJar
-                    }
-                    artifact(sourcesJar) {
-                        builtBy remapSourcesJar
-                    }
-                }
-            }
-        }
-
+    publishing {
         repositories {
             if (System.getenv("MAVEN_PASS") != null) {
                 maven {
@@ -106,19 +80,11 @@ subprojects {
                 }
             }
         }
-    }*/
+    }
 }
 
 task licenseFormatAll
 subprojects { licenseFormatAll.dependsOn("${path}:licenseFormat") }
-//subprojects { rootProject.remapJar.dependsOn("${path}:remapJar") }
-
-//dependencies {
-//    subprojects.each {
-//        compile project(path: ":${it.name}", configuration: "dev")
-//        include project(path: ":${it.name}", configuration: "remapped")
-//    }
-//}
 
 ext {
     releaseChangelog = "No changelog"
