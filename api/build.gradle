@@ -15,3 +15,22 @@ remapJar {
         remapAccessWidener.set(false)
     }
 }
+
+java {
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        mavenCommon(MavenPublication) {
+            artifactId = rootProject.name + "-" + project.name
+            artifact remapJar
+            afterEvaluate {
+                artifact(remapSourcesJar.output) {
+                    builtBy remapSourcesJar
+                    classifier "sources"
+                }
+            }
+        }
+    }
+}
