@@ -231,7 +231,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                     }
                 }
                 if (entry.getType() == VanillaEntryTypes.ITEM)
-                    entry.<ItemStack>cast().getValue().setCount(button != 1 && !Screen.hasShiftDown() ? 1 : ((ItemStack) entry.getValue()).getMaxStackSize());
+                    entry.<ItemStack>castValue().setCount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.<ItemStack>castValue().getMaxStackSize());
                 return ClientHelper.getInstance().tryCheatingEntry(entry);
             }
             
