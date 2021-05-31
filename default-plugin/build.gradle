@@ -25,11 +25,19 @@ java {
     withSourcesJar()
 }
 
+task fakeJar(type: Jar, dependsOn: remapJar) {
+    from remapJar.archiveFile.map { zipTree(it) }
+    from(rootProject.file("fake/fabric.mod.json")) {
+        into ""
+    }
+    archiveClassifier.set "fake"
+}
+
 publishing {
     publications {
         mavenCommon(MavenPublication) {
             artifactId = rootProject.name + "-" + project.name
-            artifact remapJar
+            artifact(fakeJar) { classifier null }
             afterEvaluate {
                 artifact(remapSourcesJar.output) {
                     builtBy remapSourcesJar
