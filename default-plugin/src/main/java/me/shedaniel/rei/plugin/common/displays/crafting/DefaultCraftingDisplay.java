@@ -27,6 +27,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
 import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.transfer.info.simple.SimpleGridMenuInfo;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -69,8 +70,8 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
             list.add(Collections.emptyList());
         }
         for (int i = 0; i < getInputEntries().size(); i++) {
-            List<ItemStack> stacks = CollectionUtils.filterAndMap(getInputEntries().get(i), stack -> stack.getType() == VanillaEntryTypes.ITEM,
-                    stack -> stack.<ItemStack>cast().getValue());
+            List<ItemStack> stacks = CollectionUtils.<EntryStack<?>, ItemStack>filterAndMap(getInputEntries().get(i), stack -> stack.getType() == VanillaEntryTypes.ITEM,
+                    EntryStack::castValue);
             list.set(getSlotWithSize(this, i, menuInfo.getCraftingWidth(container)), stacks);
         }
         return list;

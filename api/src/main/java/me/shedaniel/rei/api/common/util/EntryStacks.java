@@ -81,7 +81,7 @@ public final class EntryStacks {
         EntryType<A> leftType = left.getType();
         EntryType<B> rightType = right.getType();
         if (leftType == rightType) {
-            return left.getDefinition().equals(left.getValue(), right.<A>cast().getValue(), context);
+            return left.getDefinition().equals(left.getValue(), right.<A>castValue(), context);
         }
         for (EntryTypeBridge<A, B> bridge : EntryTypeRegistry.getInstance().getBridgesFor(leftType, rightType)) {
             InteractionResultHolder<Stream<EntryStack<B>>> holder = bridge.bridge(left);

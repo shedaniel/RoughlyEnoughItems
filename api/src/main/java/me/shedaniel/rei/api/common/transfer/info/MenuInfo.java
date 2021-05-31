@@ -26,6 +26,7 @@ package me.shedaniel.rei.api.common.transfer.info;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.transfer.RecipeFinder;
 import me.shedaniel.rei.api.common.transfer.RecipeFinderPopulator;
@@ -120,7 +121,8 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
     default List<List<ItemStack>> getInputs(MenuInfoContext<T, ?, D> context) {
         if (context.getDisplay() == null) return Collections.emptyList();
         return CollectionUtils.map(context.getDisplay().getInputEntries(), inputEntry ->
-                CollectionUtils.filterAndMap(inputEntry, stack -> stack.getType() == VanillaEntryTypes.ITEM, stack -> stack.<ItemStack>cast().getValue()));
+                CollectionUtils.<EntryStack<?>, ItemStack>filterAndMap(inputEntry, 
+                        stack -> stack.getType() == VanillaEntryTypes.ITEM, EntryStack::castValue));
     }
     
     /**

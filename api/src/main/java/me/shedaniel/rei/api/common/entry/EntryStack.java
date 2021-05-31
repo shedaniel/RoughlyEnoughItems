@@ -133,6 +133,10 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     
     T getValue();
     
+    default <R> R castValue() {
+        return (R) getValue();
+    }
+    
     <R> EntryStack<T> setting(Settings<R> settings, R value);
     
     <R> EntryStack<T> removeSetting(Settings<R> settings);
