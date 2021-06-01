@@ -85,3 +85,29 @@ publishing {
         }
     }
 }
+
+curseforge {
+    if (project.hasProperty('danielshe_curse_api_key') || System.getenv('danielshe_curse_api_key') != null) {
+        apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
+        project {
+            id = "310111"
+            releaseType = "beta"
+            changelogType = "html"
+            changelog = rootProject.releaseChangelog
+            addGameVersion "1.17"
+            addGameVersion "Fabric"
+            relations {
+                requiredDependency "architectury-fabric"
+                requiredDependency "cloth-config"
+                requiredDependency "fabric-api"
+            }
+            mainArtifact(tasks.getByName("remapJar")) {
+                displayName = "[Fabric $project.supported_version] v$project.version"
+            }
+        }
+    }
+    options {
+        forgeGradleIntegration = false
+        javaVersionAutoDetect = false
+    }
+}
