@@ -83,6 +83,20 @@ publishing {
                 }
             }
         }
+        ["api", "default-plugin", "runtime"].forEach { projectName ->
+            create(projectName + "Fabric", MavenPublication.class) { publication ->
+                publication.artifactId = rootProject.name + "-" + projectName + "-fabric"
+                project.afterEvaluate {
+                    def project = project(":" + projectName)
+                    publication.artifact(project.fakeJar) { classifier null }
+                    def remapSourcesJarTask = project.remapSourcesJar
+                    publication.artifact(remapSourcesJarTask.output) {
+                        builtBy remapSourcesJarTask
+                        classifier "sources"
+                    }
+                }
+            }
+        }
     }
 }
 
