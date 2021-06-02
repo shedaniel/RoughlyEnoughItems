@@ -38,7 +38,6 @@ import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
-import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;

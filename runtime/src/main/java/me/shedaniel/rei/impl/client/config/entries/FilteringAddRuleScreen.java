@@ -192,7 +192,7 @@ public class FilteringAddRuleScreen extends Screen {
         public List<? extends GuiEventListener> children() {
             return Collections.singletonList(addButton);
         }
-    
+        
         @Override
         public List<? extends NarratableEntry> narratables() {
             return Collections.singletonList(addButton);

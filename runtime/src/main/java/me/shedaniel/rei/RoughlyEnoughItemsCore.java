@@ -217,7 +217,7 @@ public class RoughlyEnoughItemsCore {
                         public EntryDefinition<Renderer> getDefinition() {
                             return RenderingEntryDefinition.RENDERING;
                         }
-    
+                        
                         @Override
                         public int hashCode() {
                             return hashCode;

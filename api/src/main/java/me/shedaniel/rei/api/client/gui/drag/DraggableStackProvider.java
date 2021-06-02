@@ -43,7 +43,7 @@ public interface DraggableStackProvider<T extends Screen> extends Comparable<Dra
                 }
                 return false;
             }
-    
+            
             @Override
             @Nullable
             public DraggableStack getHoveredStack(DraggingContext<T> context, double mouseX, double mouseY) {

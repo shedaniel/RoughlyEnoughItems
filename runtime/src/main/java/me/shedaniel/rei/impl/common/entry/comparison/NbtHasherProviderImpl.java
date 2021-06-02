@@ -66,7 +66,7 @@ public class NbtHasherProviderImpl implements Internals.NbtHasherProvider {
         private boolean shouldHash(String key) {
             return filter.test(key);
         }
-    
+        
         @Override
         public long hash(ComparisonContext context, Tag value) {
             return hashTag(value);

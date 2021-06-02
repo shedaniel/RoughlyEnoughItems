@@ -30,11 +30,8 @@ import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.narration.NarratedElementType;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.locale.Language;
@@ -248,7 +245,7 @@ public class FilteringRulesScreen extends Screen {
         public List<? extends GuiEventListener> children() {
             return Arrays.asList(configureButton, deleteButton);
         }
-    
+        
         @Override
         public List<? extends NarratableEntry> narratables() {
             return Arrays.asList(configureButton, deleteButton);
