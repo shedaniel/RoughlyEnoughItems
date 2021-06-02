@@ -202,6 +202,18 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
     <T, D extends Display> void registerFiller(Class<T> typeClass, Predicate<? extends T> predicate, Function<T, D> filler);
     
     /**
+     * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
+     * <p>
+     * Vanilla {@link Recipe} are by default filled, display filters
+     * can be used to automatically generate displaies for vanilla {@link Recipe}.
+     *
+     * @param predicate the predicate of the object
+     * @param filler    the filler, taking an object and returning a {@code D}
+     * @param <D>       the type of display
+     */
+    <D extends Display> void registerFiller(Predicate<?> predicate, Function<?, D> filler);
+    
+    /**
      * Tries to fill displays from {@code T}.
      *
      * @param value the object

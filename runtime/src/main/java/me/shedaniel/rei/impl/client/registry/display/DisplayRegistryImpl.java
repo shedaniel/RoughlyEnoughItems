@@ -47,7 +47,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     private final Map<CategoryIdentifier<?>, List<DynamicDisplayGenerator<?>>> displayGenerators = new ConcurrentHashMap<>();
     private final List<DynamicDisplayGenerator<?>> globalDisplayGenerators = new ArrayList<>();
     private final List<DisplayVisibilityPredicate> visibilityPredicates = new ArrayList<>();
-    private final List<DisplayFiller<?, ?>> fillers = new ArrayList<>();
+    private final List<DisplayFiller<?>> fillers = new ArrayList<>();
     private final MutableInt displayCount = new MutableInt(0);
     
     public DisplayRegistryImpl() {
@@ -133,7 +133,12 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     
     @Override
     public <T, D extends Display> void registerFiller(Class<T> typeClass, Predicate<? extends T> predicate, Function<T, D> filler) {
-        fillers.add(new DisplayFiller<>(typeClass, (Predicate<T>) predicate, filler));
+        registerFiller(o -> typeClass.isInstance(o) && ((Predicate<T>) predicate).test((T) o), o -> filler.apply((T) o));
+    }
+    
+    @Override
+    public <D extends Display> void registerFiller(Predicate<?> predicate, Function<?, D> filler) {
+        fillers.add(new DisplayFiller<>((Predicate<Object>) predicate, (Function<Object, D>) filler));
     }
     
     @Override
@@ -164,7 +169,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     public <T> Collection<Display> tryFillDisplay(T value) {
         if (value instanceof Display) return Collections.singleton((Display) value);
         List<Display> displays = null;
-        for (DisplayFiller<?, ?> filler : fillers) {
+        for (DisplayFiller<?> filler : fillers) {
             Display display = tryFillDisplayGenerics(filler, value);
             if (display != null) {
                 if (displays == null) displays = Collections.singletonList(display);
@@ -180,10 +185,10 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
         return Collections.emptyList();
     }
     
-    private <T, D extends Display> D tryFillDisplayGenerics(DisplayFiller<T, D> filler, Object value) {
+    private <D extends Display> D tryFillDisplayGenerics(DisplayFiller<D> filler, Object value) {
         try {
-            if (filler.typeClass.isInstance(value) && filler.predicate.test((T) value)) {
-                return filler.mappingFunction.apply((T) value);
+            if (filler.predicate.test(value)) {
+                return filler.mappingFunction.apply(value);
             }
         } catch (Throwable e) {
             RoughlyEnoughItemsCore.LOGGER.error("Failed to fill displays!", e);
@@ -192,16 +197,9 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
         return null;
     }
     
-    private static class DisplayFiller<T, D extends Display> {
-        private final Class<T> typeClass;
-        private final Predicate<T> predicate;
-        
-        private final Function<T, D> mappingFunction;
-        
-        public DisplayFiller(Class<T> typeClass, Predicate<T> predicate, Function<T, D> mappingFunction) {
-            this.typeClass = typeClass;
-            this.predicate = predicate;
-            this.mappingFunction = mappingFunction;
-        }
-    }
+    private static record DisplayFiller<D extends Display>(
+            Predicate<Object> predicate,
+            
+            Function<Object, D> mappingFunction
+    ) {}
 }
