@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.plugin.common;
 
+import dev.architectury.event.CompoundEventResult;
 import dev.architectury.hooks.fluid.FluidStackHooks;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.injectables.annotations.PlatformOnly;
@@ -50,7 +51,6 @@ import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
@@ -87,10 +87,10 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
             if (stack.getItem() instanceof BucketItem) {
                 Fluid fluid = ((BucketItem) stack.getItem()).content;
                 if (fluid != null) {
-                    return InteractionResultHolder.success(Stream.of(EntryStacks.of(fluid, FluidStackHooks.bucketAmount())));
+                    return CompoundEventResult.interruptTrue(Stream.of(EntryStacks.of(fluid, FluidStackHooks.bucketAmount())));
                 }
             }
-            return InteractionResultHolder.pass(null);
+            return CompoundEventResult.pass();
         });
         if (Platform.isForge()) {
             registerForgeFluidSupport(support);

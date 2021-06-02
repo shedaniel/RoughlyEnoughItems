@@ -25,6 +25,7 @@ package me.shedaniel.rei.plugin.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.architectury.event.CompoundEventResult;
 import dev.architectury.fluid.FluidStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -67,7 +68,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
@@ -91,9 +91,9 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         registry.registerBridge(VanillaEntryTypes.ITEM, VanillaEntryTypes.FLUID, input -> {
             Optional<Stream<EntryStack<FluidStack>>> stream = FluidSupportProvider.getInstance().itemToFluids(input);
             if (!stream.isPresent()) {
-                return InteractionResultHolder.pass(Stream.empty());
+                return CompoundEventResult.pass();
             }
-            return InteractionResultHolder.success(stream.get());
+            return CompoundEventResult.interruptTrue(stream.get());
         });
     }
     

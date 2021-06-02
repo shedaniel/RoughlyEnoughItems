@@ -25,12 +25,11 @@ package me.shedaniel.rei.impl.common.fluid;
 
 import com.google.common.collect.ForwardingList;
 import com.google.common.collect.Lists;
+import dev.architectury.event.CompoundEventResult;
 import dev.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -65,12 +64,11 @@ public class FluidSupportProviderImpl extends ForwardingList<FluidSupportProvide
     public Optional<Stream<EntryStack<FluidStack>>> itemToFluids(EntryStack<? extends ItemStack> stack) {
         if (stack.isEmpty()) return Optional.empty();
         for (Provider provider : providers) {
-            InteractionResultHolder<@Nullable Stream<EntryStack<FluidStack>>> resultHolder = Objects.requireNonNull(provider.itemToFluid(stack));
-            Stream<EntryStack<FluidStack>> stream = resultHolder.getObject();
-            if (stream != null) {
-                if (resultHolder.getResult().consumesAction()) {
-                    return Optional.of(stream);
-                } else if (resultHolder.getResult() == InteractionResult.FAIL) {
+            CompoundEventResult<@Nullable Stream<EntryStack<FluidStack>>> resultHolder = Objects.requireNonNull(provider.itemToFluid(stack));
+            if (resultHolder.interruptsFurtherEvaluation()) {
+                if (resultHolder.isTrue()) {
+                    return Optional.of(resultHolder.object());
+                } else {
                     return Optional.empty();
                 }
             }

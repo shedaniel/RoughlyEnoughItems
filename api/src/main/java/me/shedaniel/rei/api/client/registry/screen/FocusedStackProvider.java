@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.api.client.registry.screen;
 
+import dev.architectury.event.CompoundEventResult;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.world.InteractionResultHolder;
 
 @FunctionalInterface
 @Environment(EnvType.CLIENT)
@@ -40,7 +40,7 @@ public interface FocusedStackProvider extends Comparable<FocusedStackProvider> {
         return 0d;
     }
     
-    InteractionResultHolder<EntryStack<?>> provide(Screen screen, Point mouse);
+    CompoundEventResult<EntryStack<?>> provide(Screen screen, Point mouse);
     
     @Override
     default int compareTo(FocusedStackProvider o) {

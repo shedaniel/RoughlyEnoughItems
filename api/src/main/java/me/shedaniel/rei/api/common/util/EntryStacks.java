@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.common.util;
 
+import dev.architectury.event.CompoundEventResult;
 import dev.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
@@ -30,8 +31,6 @@ import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeBridge;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
@@ -84,9 +83,9 @@ public final class EntryStacks {
             return left.getDefinition().equals(left.getValue(), right.<A>castValue(), context);
         }
         for (EntryTypeBridge<A, B> bridge : EntryTypeRegistry.getInstance().getBridgesFor(leftType, rightType)) {
-            InteractionResultHolder<Stream<EntryStack<B>>> holder = bridge.bridge(left);
-            if (holder.getResult() == InteractionResult.SUCCESS) {
-                Iterator<EntryStack<B>> iterator = holder.getObject().iterator();
+            CompoundEventResult<Stream<EntryStack<B>>> holder = bridge.bridge(left);
+            if (holder.isTrue()) {
+                Iterator<EntryStack<B>> iterator = holder.object().iterator();
                 while (iterator.hasNext()) {
                     EntryStack<B> next = iterator.next();
                     if (next.getDefinition().equals(next.getValue(), right.getValue(), context)) {
@@ -96,9 +95,9 @@ public final class EntryStacks {
             }
         }
         for (EntryTypeBridge<B, A> bridge : EntryTypeRegistry.getInstance().getBridgesFor(rightType, leftType)) {
-            InteractionResultHolder<Stream<EntryStack<A>>> holder = bridge.bridge(right);
-            if (holder.getResult() == InteractionResult.SUCCESS) {
-                Iterator<EntryStack<A>> iterator = holder.getObject().iterator();
+            CompoundEventResult<Stream<EntryStack<A>>> holder = bridge.bridge(right);
+            if (holder.isTrue()) {
+                Iterator<EntryStack<A>> iterator = holder.object().iterator();
                 while (iterator.hasNext()) {
                     EntryStack<A> next = iterator.next();
                     if (next.getDefinition().equals(next.getValue(), left.getValue(), context)) {

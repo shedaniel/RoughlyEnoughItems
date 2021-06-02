@@ -26,13 +26,11 @@ package me.shedaniel.rei.impl.common.compat;
 import alexiil.mc.lib.attributes.fluid.FluidAttributes;
 import alexiil.mc.lib.attributes.fluid.GroupedFluidInvView;
 import alexiil.mc.lib.attributes.fluid.amount.FluidAmount;
+import dev.architectury.event.CompoundEventResult;
 import dev.architectury.hooks.fluid.FluidStackHooks;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import net.minecraft.world.InteractionResultHolder;
-
-import java.util.stream.Stream;
 
 public class LBASupportPlugin implements REIServerPlugin {
     @Override
@@ -40,13 +38,13 @@ public class LBASupportPlugin implements REIServerPlugin {
         support.register(entry -> {
             GroupedFluidInvView view = FluidAttributes.GROUPED_INV_VIEW.get(entry.getValue());
             if (view.getStoredFluids().size() > 0)
-                return InteractionResultHolder.success(view.getStoredFluids().stream()
+                return CompoundEventResult.interruptTrue(view.getStoredFluids().stream()
                         .filter(fluidKey -> !fluidKey.isEmpty() && fluidKey.getRawFluid() != null)
                         .map(fluidKey -> {
                             FluidAmount amount = view.getAmount_F(fluidKey);
                             return EntryStacks.of(fluidKey.getRawFluid(), amount.mul(FluidStackHooks.bucketAmount()).asLong(1));
                         }));
-            return InteractionResultHolder.pass(Stream.empty());
+            return CompoundEventResult.pass();
         });
     }
 }
