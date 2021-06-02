@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.registry.display;
 
+import dev.architectury.event.EventResult;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -33,7 +34,6 @@ import me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibility
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.common.registry.RecipeManagerContextImpl;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.crafting.Recipe;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -114,9 +114,9 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
         DisplayCategory<Display> category = (DisplayCategory<Display>) CategoryRegistry.getInstance().get(display.getCategoryIdentifier()).getCategory();
         for (DisplayVisibilityPredicate predicate : visibilityPredicates) {
             try {
-                InteractionResult result = predicate.handleDisplay(category, display);
-                if (result != InteractionResult.PASS) {
-                    return result == InteractionResult.SUCCESS;
+                EventResult result = predicate.handleDisplay(category, display);
+                if (result.interruptsFurtherEvaluation()) {
+                    return result.isEmpty() || result.isTrue();
                 }
             } catch (Throwable throwable) {
                 RoughlyEnoughItemsCore.LOGGER.error("Failed to check if the recipe is visible!", throwable);

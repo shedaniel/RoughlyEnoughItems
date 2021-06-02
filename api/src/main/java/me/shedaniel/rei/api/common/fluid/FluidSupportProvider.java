@@ -23,14 +23,13 @@
 
 package me.shedaniel.rei.api.common.fluid;
 
+import dev.architectury.event.CompoundEventResult;
 import dev.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.registry.Reloadable;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +49,6 @@ public interface FluidSupportProvider extends Reloadable<REIPlugin<?>>, List<Flu
     
     @FunctionalInterface
     interface Provider {
-        InteractionResultHolder<@Nullable Stream<EntryStack<FluidStack>>> itemToFluid(EntryStack<? extends ItemStack> stack);
+        CompoundEventResult<Stream<EntryStack<FluidStack>>> itemToFluid(EntryStack<? extends ItemStack> stack);
     }
 }
