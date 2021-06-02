@@ -183,7 +183,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param <T>       the type of object
      * @param <D>       the type of display
      */
-    default <T, D extends Display> void registerFiller(Class<T> typeClass, Function<T, D> filler) {
+    default <T, D extends Display> void registerFiller(Class<T> typeClass, Function<? extends T, D> filler) {
         registerFiller(typeClass, Predicates.alwaysTrue(), filler);
     }
     
@@ -199,7 +199,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param <T>       the type of object
      * @param <D>       the type of display
      */
-    <T, D extends Display> void registerFiller(Class<T> typeClass, Predicate<? extends T> predicate, Function<T, D> filler);
+    <T, D extends Display> void registerFiller(Class<T> typeClass, Predicate<? extends T> predicate, Function<? extends T, D> filler);
     
     /**
      * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
