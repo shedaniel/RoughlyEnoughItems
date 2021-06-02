@@ -61,7 +61,7 @@ public class SearchProviderImpl implements SearchProvider {
         public String getFilter() {
             return filter;
         }
-    
+        
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -69,7 +69,7 @@ public class SearchProviderImpl implements SearchProvider {
             SearchFilterImpl that = (SearchFilterImpl) o;
             return Objects.equals(filter, that.filter);
         }
-    
+        
         @Override
         public int hashCode() {
             return Objects.hash(filter);

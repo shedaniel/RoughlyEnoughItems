@@ -80,14 +80,14 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
                 public Tooltip getTooltip(Point mouse) {
                     return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.dropdown"));
                 }
-            
+                
                 @Override
                 public boolean equals(Object o) {
                     if (this == o) return true;
                     if (o == null || getClass() != o.getClass()) return false;
                     return hashCode() == o.hashCode();
                 }
-            
+                
                 @Override
                 public int hashCode() {
                     return Objects.hash(getClass(), showcase);
@@ -187,7 +187,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
     
     public enum Type implements FavoriteEntryType<GameModeFavoriteEntry> {
         INSTANCE;
-    
+        
         @Override
         public GameModeFavoriteEntry read(CompoundTag object) {
             String stringValue = object.getString(KEY);
@@ -199,7 +199,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         public GameModeFavoriteEntry fromArgs(Object... args) {
             return new GameModeFavoriteEntry((GameType) args[0]);
         }
-    
+        
         @Override
         public CompoundTag save(GameModeFavoriteEntry entry, CompoundTag tag) {
             tag.putString(KEY, entry.gameMode == null ? "NOT_SET" : entry.gameMode.name());
@@ -262,7 +262,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             }
             String s = text;
             if (disabled) {
-                s = ChatFormatting.STRIKETHROUGH.toString() + s;
+                s = ChatFormatting.STRIKETHROUGH + s;
             }
             font.draw(matrices, s, x + 2, y + 2, selected && !disabled ? 16777215 : 8947848);
         }

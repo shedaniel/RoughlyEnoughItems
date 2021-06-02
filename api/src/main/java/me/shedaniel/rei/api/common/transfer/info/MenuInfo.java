@@ -121,7 +121,7 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
     default List<List<ItemStack>> getInputs(MenuInfoContext<T, ?, D> context) {
         if (context.getDisplay() == null) return Collections.emptyList();
         return CollectionUtils.map(context.getDisplay().getInputEntries(), inputEntry ->
-                CollectionUtils.<EntryStack<?>, ItemStack>filterAndMap(inputEntry, 
+                CollectionUtils.<EntryStack<?>, ItemStack>filterAndMap(inputEntry,
                         stack -> stack.getType() == VanillaEntryTypes.ITEM, EntryStack::castValue));
     }
     

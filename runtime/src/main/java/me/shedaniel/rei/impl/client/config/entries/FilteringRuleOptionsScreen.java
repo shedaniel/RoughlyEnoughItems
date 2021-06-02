@@ -148,7 +148,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         public List<? extends GuiEventListener> children() {
             return Collections.emptyList();
         }
-    
+        
         @Override
         public List<? extends NarratableEntry> narratables() {
             return Collections.emptyList();
@@ -176,7 +176,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         public List<? extends GuiEventListener> children() {
             return Collections.emptyList();
         }
-    
+        
         @Override
         public List<? extends NarratableEntry> narratables() {
             return Collections.emptyList();
@@ -212,7 +212,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         public List<? extends GuiEventListener> children() {
             return Collections.singletonList(widget);
         }
-    
+        
         @Override
         public List<? extends NarratableEntry> narratables() {
             return Collections.singletonList(widget);
@@ -252,7 +252,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         public List<? extends GuiEventListener> children() {
             return Collections.singletonList(widget);
         }
-    
+        
         @Override
         public List<? extends NarratableEntry> narratables() {
             return Collections.singletonList(widget);

@@ -71,7 +71,7 @@ public class BatchedEntryRendererManager {
                 EntryStack<Object> cast = currentEntry.cast();
                 if (batchedRenderer.isBatched(cast)) {
                     int hash = batchedRenderer.getBatchIdentifier(cast, widget.getBounds(), batchedRenderer.getExtraData(cast))
-                            ^ widget.getCurrentEntry().getType().hashCode();
+                               ^ widget.getCurrentEntry().getType().hashCode();
                     List<EntryWidget> entries = grouping.get(hash);
                     if (entries == null) {
                         grouping.put(hash, entries = new ArrayList<>());

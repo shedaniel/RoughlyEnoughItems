@@ -31,7 +31,6 @@ import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.impl.client.gui.screen.UncertainDisplayViewingScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;

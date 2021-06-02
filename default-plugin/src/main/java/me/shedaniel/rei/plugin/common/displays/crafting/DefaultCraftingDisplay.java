@@ -70,6 +70,7 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
             list.add(Collections.emptyList());
         }
         for (int i = 0; i < getInputEntries().size(); i++) {
+            @SuppressWarnings("RedundantTypeArguments")
             List<ItemStack> stacks = CollectionUtils.<EntryStack<?>, ItemStack>filterAndMap(getInputEntries().get(i), stack -> stack.getType() == VanillaEntryTypes.ITEM,
                     EntryStack::castValue);
             list.set(getSlotWithSize(this, i, menuInfo.getCraftingWidth(container)), stacks);

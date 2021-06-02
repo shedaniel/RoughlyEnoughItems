@@ -51,12 +51,12 @@ public class PluginDetectorImpl {
                     public Collection<P> provide() {
                         return plugin.provide();
                     }
-    
+                    
                     @Override
                     public Class<P> getPluginProviderClass() {
                         return plugin.getPluginProviderClass();
                     }
-    
+                    
                     @Override
                     public String getPluginProviderName() {
                         return plugin.getPluginProviderName() + " [" + container.getProvider().getMetadata().getId() + "]";

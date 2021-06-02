@@ -70,12 +70,12 @@ public class EntryIngredientImpl {
             private EntryIngredient _of(EntryStack<?>... stacks) {
                 return new ArrayIngredient(stacks);
             }
-    
+            
             @Override
             public EntryIngredient.Builder builder() {
                 return new EntryIngredientBuilder(0);
             }
-    
+            
             @Override
             public EntryIngredient.Builder builder(int initialCapacity) {
                 return new EntryIngredientBuilder(initialCapacity);
@@ -86,17 +86,17 @@ public class EntryIngredientImpl {
     private static class EntryIngredientBuilder implements EntryIngredient.Builder {
         private EntryStack<?>[] contents;
         private int size = 0;
-    
+        
         public EntryIngredientBuilder(int initialCapacity) {
             this.contents = new EntryStack[initialCapacity];
         }
-    
+        
         private void ensureCapacity(int minCapacity) {
             if (contents.length < minCapacity) {
                 this.contents = Arrays.copyOf(this.contents, expandedCapacity(contents.length, minCapacity));
             }
         }
-    
+        
         static int expandedCapacity(int oldCapacity, int minCapacity) {
             int newCapacity = oldCapacity + (oldCapacity >> 1) + 1;
             if (newCapacity < minCapacity) {
@@ -107,14 +107,14 @@ public class EntryIngredientImpl {
             }
             return newCapacity;
         }
-    
+        
         @Override
         public EntryIngredient.Builder add(EntryStack<?> stack) {
             ensureCapacity(size + 1);
             contents[size++] = stack;
             return this;
         }
-    
+        
         @Override
         public EntryIngredient.Builder add(EntryStack<?>... stacks) {
             ensureCapacity(size + stacks.length);
@@ -122,7 +122,7 @@ public class EntryIngredientImpl {
             size += stacks.length;
             return this;
         }
-    
+        
         @Override
         public EntryIngredient.Builder addAll(Iterable<? extends EntryStack<?>> stacks) {
             if (stacks instanceof Collection) {
@@ -134,7 +134,7 @@ public class EntryIngredientImpl {
             }
             return this;
         }
-    
+        
         @Override
         public EntryIngredient build() {
             if (contents.length > size) {
@@ -146,6 +146,7 @@ public class EntryIngredientImpl {
     
     private static class EmptyEntryIngredient extends AbstractList<EntryStack<?>> implements EntryIngredient, RandomAccess {
         private static final EmptyEntryIngredient EMPTY = new EmptyEntryIngredient();
+        
         @Override
         public Iterator<EntryStack<?>> iterator() {
             return Collections.emptyIterator();
@@ -227,17 +228,17 @@ public class EntryIngredientImpl {
         public Spliterator<EntryStack<?>> spliterator() {
             return Spliterators.emptySpliterator();
         }
-    
+        
         @Override
         public ListTag save() {
             return new ListTag();
         }
-    
+        
         @Override
         public EntryIngredient filter(Predicate<EntryStack<?>> filter) {
             return this;
         }
-    
+        
         @Override
         public EntryIngredient map(UnaryOperator<EntryStack<?>> transformer) {
             return this;
@@ -346,14 +347,14 @@ public class EntryIngredientImpl {
                 }
             };
         }
-    
+        
         @Override
         public ListTag save() {
             ListTag listTag = new ListTag();
             listTag.add(stack.save());
             return listTag;
         }
-    
+        
         @Override
         public EntryIngredient filter(Predicate<EntryStack<?>> filter) {
             if (filter.test(stack)) {
@@ -361,7 +362,7 @@ public class EntryIngredientImpl {
             }
             return EmptyEntryIngredient.EMPTY;
         }
-    
+        
         @Override
         public EntryIngredient map(UnaryOperator<EntryStack<?>> transformer) {
             return new SingletonEntryIngredient(transformer.apply(stack));
@@ -451,7 +452,7 @@ public class EntryIngredientImpl {
         public void sort(Comparator<? super EntryStack<?>> c) {
             throw new UnsupportedOperationException();
         }
-    
+        
         @Override
         public ListTag save() {
             ListTag listTag = new ListTag();
@@ -460,12 +461,12 @@ public class EntryIngredientImpl {
             }
             return listTag;
         }
-    
+        
         @Override
         public EntryIngredient filter(Predicate<EntryStack<?>> filter) {
             return EntryIngredient.of(stream().filter(filter).toArray(EntryStack[]::new));
         }
-    
+        
         @Override
         public EntryIngredient map(UnaryOperator<EntryStack<?>> transformer) {
             EntryStack<?>[] out = new EntryStack[array.length];

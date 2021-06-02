@@ -281,7 +281,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 }
             }
         }
-    
+        
         _children().addAll(tabs);
         _children().addAll(widgets);
         _children().addAll(preWidgets);

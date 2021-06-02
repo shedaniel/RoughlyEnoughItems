@@ -32,7 +32,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -572,9 +571,9 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         public int getMorePossibleHeight() {
             return -1;
         }
-    
+        
         public abstract List<? extends NarratableEntry> narratables();
-    
+        
         void updateNarration(NarrationElementOutput narrationElementOutput) {
             List<? extends NarratableEntry> list = this.narratables();
             Screen.NarratableSearchResult narratableSearchResult = Screen.findNarratableWidget(list, this.lastNarratable);
@@ -582,17 +581,17 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
                 if (narratableSearchResult.priority.isTerminal()) {
                     this.lastNarratable = narratableSearchResult.entry;
                 }
-            
+                
                 if (list.size() > 1) {
-                    narrationElementOutput.add(NarratedElementType.POSITION, new TranslatableComponent("narrator.position.object_list", new Object[]{narratableSearchResult.index + 1, list.size()}));
+                    narrationElementOutput.add(NarratedElementType.POSITION, new TranslatableComponent("narrator.position.object_list", narratableSearchResult.index + 1, list.size()));
                     if (narratableSearchResult.priority == NarrationPriority.FOCUSED) {
                         narrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.component_list.usage"));
                     }
                 }
-            
+                
                 narratableSearchResult.entry.updateNarration(narrationElementOutput.nest());
             }
-        
+            
         }
     }
     

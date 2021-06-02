@@ -38,7 +38,6 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.controls.ControlList;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -213,7 +212,7 @@ public class WarningAndErrorScreen extends Screen {
         public int getWidth() {
             return 0;
         }
-    
+        
         @Override
         public List<? extends NarratableEntry> narratables() {
             return Collections.emptyList();
@@ -246,14 +245,14 @@ public class WarningAndErrorScreen extends Screen {
         public int getWidth() {
             return Minecraft.getInstance().font.width(text) + 10;
         }
-    
+        
         @Override
         public List<? extends NarratableEntry> narratables() {
             return ImmutableList.of(new NarratableEntry() {
                 public NarrationPriority narrationPriority() {
                     return NarrationPriority.HOVERED;
                 }
-            
+                
                 public void updateNarration(NarrationElementOutput narrationElementOutput) {
                     StringBuilder builder = new StringBuilder();
                     text.accept((i, style, j) -> {
@@ -317,14 +316,14 @@ public class WarningAndErrorScreen extends Screen {
             }
             return false;
         }
-    
+        
         @Override
         public List<? extends NarratableEntry> narratables() {
             return ImmutableList.of(new NarratableEntry() {
                 public NarrationPriority narrationPriority() {
                     return NarrationPriority.HOVERED;
                 }
-            
+                
                 public void updateNarration(NarrationElementOutput narrationElementOutput) {
                     StringBuilder builder = new StringBuilder();
                     text.accept((i, style, j) -> {

@@ -261,52 +261,52 @@ public final class InternalWidgets {
         public boolean isRenderingPanel(Panel panel) {
             return PanelWidget.isRendering(panel);
         }
-    
+        
         @Override
         public Widget createDrawableWidget(DrawableConsumer drawable) {
             return new DrawableWidget(drawable);
         }
-    
+        
         @Override
         public me.shedaniel.rei.api.client.gui.widgets.Slot createSlot(Point point) {
             return new EntryWidget(point);
         }
-    
+        
         @Override
         public me.shedaniel.rei.api.client.gui.widgets.Slot createSlot(Rectangle bounds) {
             return new EntryWidget(bounds);
         }
-    
+        
         @Override
         public Button createButton(Rectangle bounds, Component text) {
             return new ButtonWidget(bounds, text);
         }
-    
+        
         @Override
         public Panel createPanelWidget(Rectangle bounds) {
             return new PanelWidget(bounds);
         }
-    
+        
         @Override
         public Label createLabel(Point point, FormattedText text) {
             return new LabelWidget(point, text);
         }
-    
+        
         @Override
         public Arrow createArrow(Rectangle rectangle) {
             return new ArrowWidget(rectangle);
         }
-    
+        
         @Override
         public BurningFire createBurningFire(Rectangle rectangle) {
             return new BurningFireWidget(rectangle);
         }
-    
+        
         @Override
         public DrawableConsumer createTexturedConsumer(ResourceLocation texture, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight) {
             return new TexturedDrawableConsumer(texture, x, y, width, height, u, v, uWidth, vHeight, textureWidth, textureHeight);
         }
-    
+        
         @Override
         public DrawableConsumer createFillRectangleConsumer(Rectangle rectangle, int color) {
             return new FillRectangleDrawableConsumer(rectangle, color);

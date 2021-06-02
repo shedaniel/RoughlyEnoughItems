@@ -203,10 +203,10 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
                     .position(matrices.last().pose(), bounds.x, bounds.getMaxY() - bounds.height * Mth.clamp(entry.get(EntryStack.Settings.FLUID_RENDER_RATIO), 0, 1), bounds.getMaxX(), bounds.getMaxY(), entry.getZ())
                     .next(InventoryMenu.BLOCK_ATLAS);
         }
-    
+        
         @Override
         public void afterBase(EntryStack<FluidStack> entry, TextureAtlasSprite extraData, PoseStack matrices, float delta) {}
-    
+        
         @Override
         public void renderOverlay(EntryStack<FluidStack> entry, TextureAtlasSprite extraData, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {}
         

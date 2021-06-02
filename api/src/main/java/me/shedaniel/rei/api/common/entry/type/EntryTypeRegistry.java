@@ -35,16 +35,16 @@ import java.util.Set;
  * Registry for registering alternative entry types.
  *
  * <p>{@link EntryType} must be declared statically, deferring to the actual
- * definition by the identifier of the type. During reload, plugins should 
+ * definition by the identifier of the type. During reload, plugins should
  * register {@link EntryDefinition} for their deferred {@link EntryType},
  * these definitions are dynamic.
- * 
+ *
  * <p>{@link EntryTypeBridge} may be used to convert and compare between
  * different types
- * 
+ *
  * @see EntryDefinition
- * @see #registerBridge(EntryType, EntryType, EntryTypeBridge) 
- * @see REIPlugin#registerEntryTypes(EntryTypeRegistry) 
+ * @see #registerBridge(EntryType, EntryType, EntryTypeBridge)
+ * @see REIPlugin#registerEntryTypes(EntryTypeRegistry)
  */
 public interface EntryTypeRegistry extends Reloadable<REIPlugin<?>> {
     static EntryTypeRegistry getInstance() {
