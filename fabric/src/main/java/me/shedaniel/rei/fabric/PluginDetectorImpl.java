@@ -36,6 +36,7 @@ import java.util.function.Consumer;
 
 public class PluginDetectorImpl {
     private static <P extends REIPlugin<?>> void loadPlugin(Class<? extends P> pluginClass, Consumer<? super REIPluginProvider<P>> consumer) {
+        RuntimeException exception = null;
         for (EntrypointContainer<REIPluginProvider> container : Iterables.concat(
                 FabricLoader.getInstance().getEntrypointContainers("rei_containers", REIPluginProvider.class),
                 FabricLoader.getInstance().getEntrypointContainers("rei_server", REIPluginProvider.class),
@@ -44,25 +45,36 @@ public class PluginDetectorImpl {
                 FabricLoader.getInstance().getEntrypointContainers("rei_plugins", REIPluginProvider.class),
                 FabricLoader.getInstance().getEntrypointContainers("rei_plugins_v0", REIPluginProvider.class)
         )) {
-            REIPluginProvider<P> plugin = container.getEntrypoint();
-            if (pluginClass.isAssignableFrom(plugin.getPluginProviderClass())) {
-                consumer.accept(new REIPluginProvider<P>() {
-                    @Override
-                    public Collection<P> provide() {
-                        return plugin.provide();
-                    }
-                    
-                    @Override
-                    public Class<P> getPluginProviderClass() {
-                        return plugin.getPluginProviderClass();
-                    }
-                    
-                    @Override
-                    public String getPluginProviderName() {
-                        return plugin.getPluginProviderName() + " [" + container.getProvider().getMetadata().getId() + "]";
-                    }
-                });
+            try {
+                REIPluginProvider<P> plugin = container.getEntrypoint();
+                if (pluginClass.isAssignableFrom(plugin.getPluginProviderClass())) {
+                    consumer.accept(new REIPluginProvider<>() {
+                        @Override
+                        public Collection<P> provide() {
+                            return plugin.provide();
+                        }
+                        
+                        @Override
+                        public Class<P> getPluginProviderClass() {
+                            return plugin.getPluginProviderClass();
+                        }
+                        
+                        @Override
+                        public String getPluginProviderName() {
+                            return plugin.getPluginProviderName() + " [" + container.getProvider().getMetadata().getId() + "]";
+                        }
+                    });
+                }
+            } catch (Throwable t) {
+                if (exception == null) {
+                    exception = new RuntimeException("Could not create REI Plugin [" + pluginClass.getName() + "] due to errors, provided by '" + container.getProvider().getMetadata().getId() + "'!", t);
+                } else {
+                    exception.addSuppressed(t);
+                }
             }
+        }
+        if (exception != null) {
+            throw exception;
         }
     }
     
