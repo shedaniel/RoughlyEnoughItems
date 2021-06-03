@@ -464,8 +464,8 @@ public class RoughlyEnoughItemsCore {
         });
         NetworkManager.registerReceiver(NetworkManager.s2c(), RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (buf, context) -> {
             Screen currentScreen = Minecraft.getInstance().screen;
-            if (currentScreen instanceof CraftingScreen) {
-                RecipeBookComponent recipeBookGui = ((RecipeUpdateListener) currentScreen).getRecipeBookComponent();
+            if (currentScreen instanceof CraftingScreen craftingScreen) {
+                RecipeBookComponent recipeBookGui = craftingScreen.getRecipeBookComponent();
                 GhostRecipe ghostSlots = recipeBookGui.ghostRecipe;
                 ghostSlots.clear();
                 
@@ -481,7 +481,7 @@ public class RoughlyEnoughItemsCore {
                 }
                 
                 ghostSlots.addIngredient(Ingredient.of(Items.STONE), 381203812, 12738291);
-                CraftingMenu container = ((CraftingScreen) currentScreen).getMenu();
+                CraftingMenu container = craftingScreen.getMenu();
                 for (int i = 0; i < input.size(); i++) {
                     List<ItemStack> stacks = input.get(i);
                     if (!stacks.isEmpty()) {
@@ -534,9 +534,9 @@ public class RoughlyEnoughItemsCore {
         ClientGuiEvent.INIT_POST.register((screen, access) -> {
             REIRuntimeImpl.getInstance().setPreviousScreen(screen);
             if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen) {
-                access.getRenderables().removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
-                access.getNarratables().removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
-                screen.children().removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
+                access.getRenderables().removeIf(widget -> widget instanceof ImageButton button && button.resourceLocation.equals(recipeButtonTex));
+                access.getNarratables().removeIf(widget -> widget instanceof ImageButton button && button.resourceLocation.equals(recipeButtonTex));
+                screen.children().removeIf(widget -> widget instanceof ImageButton button && button.resourceLocation.equals(recipeButtonTex));
             }
         });
         ClientScreenInputEvent.MOUSE_CLICKED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {

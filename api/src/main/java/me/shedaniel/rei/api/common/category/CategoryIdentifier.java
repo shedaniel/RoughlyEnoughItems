@@ -32,15 +32,15 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.NonExtendable
 public interface CategoryIdentifier<D extends Display> extends Identifiable {
     static <D extends Display> CategoryIdentifier<D> of(String str) {
-        return of(new ResourceLocation(str));
+        return Internals.getCategoryIdentifier(str);
     }
     
     static <D extends Display> CategoryIdentifier<D> of(String namespace, String path) {
-        return of(new ResourceLocation(namespace, path));
+        return of(namespace + ":" + path);
     }
     
     static <D extends Display> CategoryIdentifier<D> of(ResourceLocation identifier) {
-        return Internals.getCategoryIdentifier(identifier);
+        return of(identifier.toString());
     }
     
     default String getNamespace() {

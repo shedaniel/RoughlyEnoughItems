@@ -136,9 +136,9 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     @Override
     @Nullable
     public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
-        if (isShown() && renderer instanceof EntryStack && containsMouse(mouseX, mouseY)) {
+        if (isShown() && renderer instanceof EntryStack<?> entryStack && containsMouse(mouseX, mouseY)) {
             return new DraggableStack() {
-                EntryStack<?> stack = ((EntryStack<?>) renderer).copy();
+                EntryStack<?> stack = entryStack.copy();
                 
                 @Override
                 public EntryStack<?> getStack() {

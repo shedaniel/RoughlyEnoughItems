@@ -298,8 +298,8 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                 }
             }
             for (Widget child : children()) {
-                if (child.containsMouse(mouseX, mouseY) && child instanceof EntryWidget) {
-                    if (((EntryWidget) child).cancelDeleteItems(stack)) {
+                if (child.containsMouse(mouseX, mouseY) && child instanceof EntryWidget widget) {
+                    if (widget.cancelDeleteItems(stack)) {
                         return;
                     }
                 }

@@ -255,8 +255,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         
         @Override
         public boolean isSame(FavoriteEntry other) {
-            if (!(other instanceof EntryStackFavoriteEntry)) return false;
-            EntryStackFavoriteEntry that = (EntryStackFavoriteEntry) other;
+            if (!(other instanceof EntryStackFavoriteEntry that)) return false;
             return EntryStacks.equalsExact(stack, that.stack);
         }
     }

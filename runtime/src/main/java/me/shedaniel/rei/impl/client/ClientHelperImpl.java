@@ -157,14 +157,14 @@ public class ClientHelperImpl implements ClientHelper {
     
     @Override
     public void sendDeletePacket() {
-        if (Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
+        if (Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen inventoryScreen) {
             Minecraft.getInstance().player.containerMenu.setCarried(ItemStack.EMPTY);
-            ((CreativeModeInventoryScreen) Minecraft.getInstance().screen).isQuickCrafting = false;
+            inventoryScreen.isQuickCrafting = false;
             return;
         }
         NetworkManager.sendToServer(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()));
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen) {
-            ((AbstractContainerScreen<?>) Minecraft.getInstance().screen).isQuickCrafting = false;
+        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> containerScreen) {
+            containerScreen.isQuickCrafting = false;
         }
     }
     
@@ -252,16 +252,16 @@ public class ClientHelperImpl implements ClientHelper {
         } else {
             screen = new DefaultDisplayViewingScreen(map, builder.getPreferredOpenedCategory());
         }
-        if (screen instanceof DisplayScreen) {
+        if (screen instanceof DisplayScreen displayScreen) {
             for (EntryStack<?> stack : builder.getUsagesFor()) {
-                ((DisplayScreen) screen).addIngredientToNotice(stack);
+                displayScreen.addIngredientToNotice(stack);
             }
             for (EntryStack<?> stack : builder.getRecipesFor()) {
-                ((DisplayScreen) screen).addResultToNotice(stack);
+                displayScreen.addResultToNotice(stack);
             }
         }
-        if (Minecraft.getInstance().screen instanceof DisplayScreen) {
-            REIRuntimeImpl.getInstance().storeDisplayScreen((DisplayScreen) Minecraft.getInstance().screen);
+        if (Minecraft.getInstance().screen instanceof DisplayScreen displayScreen) {
+            REIRuntimeImpl.getInstance().storeDisplayScreen(displayScreen);
         }
         Minecraft.getInstance().setScreen(screen);
         return true;
@@ -281,8 +281,8 @@ public class ClientHelperImpl implements ClientHelper {
         public ViewSearchBuilder fillPreferredOpenedCategory() {
             if (getPreferredOpenedCategory() == null) {
                 Screen currentScreen = Minecraft.getInstance().screen;
-                if (currentScreen instanceof DisplayScreen) {
-                    setPreferredOpenedCategory(((DisplayScreen) currentScreen).getCurrentCategoryId());
+                if (currentScreen instanceof DisplayScreen displayScreen) {
+                    setPreferredOpenedCategory(displayScreen.getCurrentCategoryId());
                 }
             }
             return this;

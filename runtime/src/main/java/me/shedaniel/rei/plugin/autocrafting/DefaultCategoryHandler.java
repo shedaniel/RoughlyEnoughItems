@@ -56,9 +56,8 @@ import java.util.List;
 public class DefaultCategoryHandler implements TransferHandler {
     @Override
     public Result handle(Context context) {
-        if (!(context.getDisplay() instanceof SimpleGridMenuDisplay))
+        if (!(context.getDisplay() instanceof SimpleGridMenuDisplay display))
             return Result.createNotApplicable();
-        SimpleGridMenuDisplay display = (SimpleGridMenuDisplay) context.getDisplay();
         AbstractContainerScreen<?> containerScreen = context.getContainerScreen();
         if (containerScreen == null) {
             return Result.createNotApplicable();
@@ -87,8 +86,8 @@ public class DefaultCategoryHandler implements TransferHandler {
         }
         
         context.getMinecraft().setScreen(containerScreen);
-        if (containerScreen instanceof RecipeUpdateListener) {
-            ((RecipeUpdateListener) containerScreen).getRecipeBookComponent().ghostRecipe.clear();
+        if (containerScreen instanceof RecipeUpdateListener listener) {
+            listener.getRecipeBookComponent().ghostRecipe.clear();
         }
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         buf.writeResourceLocation(display.getCategoryIdentifier().getIdentifier());

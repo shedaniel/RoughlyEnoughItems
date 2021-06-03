@@ -28,14 +28,18 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 public class CategoryIdentifierImpl<D extends Display> implements CategoryIdentifier<D> {
     private final ResourceLocation location;
+    private final int hashCode;
     
     public CategoryIdentifierImpl(ResourceLocation location) {
         this.location = Objects.requireNonNull(location);
+        this.hashCode = location.hashCode();
     }
     
     @Override
@@ -45,13 +49,13 @@ public class CategoryIdentifierImpl<D extends Display> implements CategoryIdenti
     
     @Override
     public int hashCode() {
-        return location.hashCode();
+        return hashCode;
     }
     
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof CategoryIdentifier)) return false;
-        return location.equals(((CategoryIdentifier<?>) obj).getIdentifier());
+        if (!(obj instanceof CategoryIdentifier<?> that)) return false;
+        return location.equals(that.getIdentifier());
     }
     
     @Override
@@ -60,6 +64,13 @@ public class CategoryIdentifierImpl<D extends Display> implements CategoryIdenti
     }
     
     public static void attach() {
-        Internals.attachInstance((Function<ResourceLocation, CategoryIdentifier<?>>) CategoryIdentifierImpl::new, "categoryIdentifier");
+        Map<String, CategoryIdentifier<?>> cache = new ConcurrentHashMap<>();
+        Internals.attachInstance((Function<String, CategoryIdentifier<?>>) id -> {
+            CategoryIdentifier<?> identifier = cache.get(id);
+            if (identifier != null) return identifier;
+            identifier = new CategoryIdentifierImpl<>(new ResourceLocation(id));
+            cache.put(id, identifier);
+            return identifier;
+        }, "categoryIdentifier");
     }
 }

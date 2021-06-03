@@ -171,8 +171,7 @@ public abstract class AbstractEntryStack<A> extends AbstractRenderer implements 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AbstractEntryStack)) return false;
-        AbstractEntryStack<?> that = (AbstractEntryStack<?>) o;
+        if (!(o instanceof AbstractEntryStack<?> that)) return false;
         return EntryStacks.equalsExact(this, that);
     }
     

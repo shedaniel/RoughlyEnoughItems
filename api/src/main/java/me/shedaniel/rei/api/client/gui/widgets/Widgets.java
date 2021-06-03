@@ -147,10 +147,10 @@ public final class Widgets {
         
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            if (element instanceof GuiComponent)
-                ((GuiComponent) element).setBlitOffset(getZ());
-            if (element instanceof net.minecraft.client.gui.components.Widget)
-                ((net.minecraft.client.gui.components.Widget) element).render(matrices, mouseX, mouseY, delta);
+            if (element instanceof GuiComponent component)
+                component.setBlitOffset(getZ());
+            if (element instanceof net.minecraft.client.gui.components.Widget widget)
+                widget.render(matrices, mouseX, mouseY, delta);
         }
         
         @Override
@@ -168,8 +168,8 @@ public final class Widgets {
         public void setFocused(@Nullable GuiEventListener guiEventListener) {
             if (guiEventListener == element) {
                 super.setFocused(element);
-            } else if (element instanceof ContainerEventHandler) {
-                ((ContainerEventHandler) element).setFocused(guiEventListener);
+            } else if (element instanceof ContainerEventHandler handler) {
+                handler.setFocused(guiEventListener);
             }
         }
         
@@ -185,8 +185,8 @@ public final class Widgets {
     }
     
     public static WidgetWithBounds wrapRenderer(Rectangle bounds, Renderer renderer) {
-        if (renderer instanceof Widget)
-            return wrapWidgetWithBounds((Widget) renderer, bounds);
+        if (renderer instanceof Widget widget)
+            return wrapWidgetWithBounds(widget, bounds);
         return new RendererWrappedWidget(renderer, bounds);
     }
     
@@ -195,8 +195,8 @@ public final class Widgets {
     }
     
     public static WidgetWithBounds wrapWidgetWithBounds(Widget widget, Rectangle bounds) {
-        if (widget instanceof WidgetWithBounds)
-            return (WidgetWithBounds) widget;
+        if (widget instanceof WidgetWithBounds withBounds)
+            return withBounds;
         if (bounds == null)
             return new DelegateWidget(widget);
         return new DelegateWidgetWithBounds(widget, bounds);
@@ -218,8 +218,8 @@ public final class Widgets {
         
         @Override
         public List<? extends GuiEventListener> children() {
-            if (renderer instanceof GuiEventListener)
-                return Collections.singletonList((GuiEventListener) renderer);
+            if (renderer instanceof GuiEventListener listener)
+                return Collections.singletonList(listener);
             return Collections.emptyList();
         }
         
@@ -388,13 +388,13 @@ public final class Widgets {
                     if (predicate.test(listener)) {
                         return (T) listener;
                     }
-                    if (listener instanceof ContainerEventHandler) {
-                        List<? extends GuiEventListener> children = ((ContainerEventHandler) listener).children();
+                    if (listener instanceof ContainerEventHandler handler) {
+                        List<? extends GuiEventListener> children = handler.children();
                         if (!children.isEmpty()) {
                             stack.push(children.iterator());
                         }
-                    } else if (listener instanceof WidgetHolder) {
-                        List<? extends GuiEventListener> children = ((WidgetHolder) listener).children();
+                    } else if (listener instanceof WidgetHolder holder) {
+                        List<? extends GuiEventListener> children = holder.children();
                         if (!children.isEmpty()) {
                             stack.push(children.iterator());
                         }
