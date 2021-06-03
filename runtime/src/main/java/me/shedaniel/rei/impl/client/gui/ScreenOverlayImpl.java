@@ -477,8 +477,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         if (OverlaySearchField.isHighlighting) {
             matrices.pushPose();
             matrices.translate(0, 0, 200f);
-            if (Minecraft.getInstance().screen instanceof AbstractContainerScreen) {
-                AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) Minecraft.getInstance().screen;
+            if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> containerScreen) {
                 int x = containerScreen.leftPos, y = containerScreen.topPos;
                 for (Slot slot : containerScreen.getMenu().slots) {
                     if (!slot.hasItem() || !ENTRY_LIST_WIDGET.matches(EntryStacks.of(slot.getItem()))) {

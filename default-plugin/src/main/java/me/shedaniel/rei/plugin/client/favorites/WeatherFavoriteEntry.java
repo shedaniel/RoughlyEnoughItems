@@ -187,8 +187,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
     
     @Override
     public boolean isSame(FavoriteEntry other) {
-        if (!(other instanceof WeatherFavoriteEntry)) return false;
-        WeatherFavoriteEntry that = (WeatherFavoriteEntry) other;
+        if (!(other instanceof WeatherFavoriteEntry that)) return false;
         return Objects.equals(weather, that.weather);
     }
     

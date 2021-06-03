@@ -74,8 +74,8 @@ public class NbtHasherProviderImpl implements Internals.NbtHasherProvider {
         
         private int hashTag(Tag tag) {
             if (tag == null) return 0;
-            if (tag instanceof ListTag) return hashListTag((ListTag) tag);
-            if (tag instanceof CompoundTag) return hashCompoundTag((CompoundTag) tag);
+            if (tag instanceof ListTag list) return hashListTag(list);
+            if (tag instanceof CompoundTag compound) return hashCompoundTag(compound);
             return tag.hashCode();
         }
         

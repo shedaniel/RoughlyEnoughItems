@@ -37,8 +37,8 @@ public final class ClientEntryStacks {
     private ClientEntryStacks() {}
     
     public static EntryStack<?> of(Renderer renderer) {
-        if (renderer instanceof EntryStack) {
-            return (EntryStack<?>) renderer;
+        if (renderer instanceof EntryStack<?> stack) {
+            return stack;
         }
         
         return EntryStack.of(BuiltinClientEntryTypes.RENDERING, renderer);

@@ -53,6 +53,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
@@ -84,8 +85,9 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
     public void registerFluidSupport(FluidSupportProvider support) {
         support.register(entry -> {
             ItemStack stack = entry.getValue();
-            if (stack.getItem() instanceof BucketItem) {
-                Fluid fluid = ((BucketItem) stack.getItem()).content;
+            Item item = stack.getItem();
+            if (item instanceof BucketItem bucketItem) {
+                Fluid fluid = bucketItem.content;
                 if (fluid != null) {
                     return CompoundEventResult.interruptTrue(Stream.of(EntryStacks.of(fluid, FluidStackHooks.bucketAmount())));
                 }
@@ -125,13 +127,13 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
     
     @Override
     public void registerMenuInfo(MenuInfoRegistry registry) {
-        registry.register(BuiltinPlugin.CRAFTING, CraftingMenu.class, new RecipeBookGridMenuInfo<CraftingMenu, DefaultCraftingDisplay<?>>() {
+        registry.register(BuiltinPlugin.CRAFTING, CraftingMenu.class, new RecipeBookGridMenuInfo<>() {
             @Override
             public List<List<ItemStack>> getInputs(MenuInfoContext<CraftingMenu, ?, DefaultCraftingDisplay<?>> context) {
                 return context.getDisplay().getOrganisedInputEntries(this, context.getMenu());
             }
         });
-        registry.register(BuiltinPlugin.CRAFTING, InventoryMenu.class, new RecipeBookGridMenuInfo<InventoryMenu, DefaultCraftingDisplay<?>>() {
+        registry.register(BuiltinPlugin.CRAFTING, InventoryMenu.class, new RecipeBookGridMenuInfo<>() {
             @Override
             public List<List<ItemStack>> getInputs(MenuInfoContext<InventoryMenu, ?, DefaultCraftingDisplay<?>> context) {
                 return context.getDisplay().getOrganisedInputEntries(this, context.getMenu());

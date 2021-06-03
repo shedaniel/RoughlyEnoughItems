@@ -27,7 +27,7 @@ import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import org.jetbrains.annotations.ApiStatus;
 
 public interface REIServerPlugin extends REIPlugin<REIServerPlugin> {
-    @ApiStatus.NonExtendable
+    @ApiStatus.OverrideOnly
     default void registerMenuInfo(MenuInfoRegistry registry) {
     }
     

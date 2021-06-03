@@ -171,18 +171,18 @@ public class SubSubsetsMenuEntry extends MenuEntry {
     
     private void setFiltered(List<EntryStack<?>> filteredStacks, Menu subsetsMenu, SubSubsetsMenuEntry subSubsetsMenuEntry, boolean filtered) {
         for (MenuEntry entry : subSubsetsMenuEntry.entries) {
-            if (entry instanceof EntryStackSubsetsMenuEntry) {
-                if (((EntryStackSubsetsMenuEntry) entry).isFiltered() != filtered) {
+            if (entry instanceof EntryStackSubsetsMenuEntry menuEntry) {
+                if (menuEntry.isFiltered() != filtered) {
                     if (!filtered) {
-                        filteredStacks.removeIf(next -> EntryStacks.equalsExact(next, ((EntryStackSubsetsMenuEntry) entry).stack));
+                        filteredStacks.removeIf(next -> EntryStacks.equalsExact(next, menuEntry.stack));
                     } else {
-                        filteredStacks.add(((EntryStackSubsetsMenuEntry) entry).stack.normalize());
+                        filteredStacks.add(menuEntry.stack.normalize());
                     }
                 }
                 if (subsetsMenu != null)
-                    ((EntryStackSubsetsMenuEntry) entry).recalculateFilter(subsetsMenu);
-            } else if (entry instanceof SubSubsetsMenuEntry) {
-                setFiltered(filteredStacks, subsetsMenu, (SubSubsetsMenuEntry) entry, filtered);
+                    menuEntry.recalculateFilter(subsetsMenu);
+            } else if (entry instanceof SubSubsetsMenuEntry menuEntry) {
+                setFiltered(filteredStacks, subsetsMenu, menuEntry, filtered);
             }
         }
     }

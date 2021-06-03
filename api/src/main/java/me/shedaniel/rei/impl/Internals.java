@@ -50,7 +50,7 @@ public final class Internals {
     private static Supplier<PluginManager<REIPlugin<?>>> commonPluginManager = Internals::throwNotSetup;
     private static Supplier<PluginManager<REIServerPlugin>> serverPluginManager = Internals::throwNotSetup;
     private static Supplier<NbtHasherProvider> nbtHasherProvider = Internals::throwNotSetup;
-    private static Function<ResourceLocation, CategoryIdentifier<?>> categoryIdentifier = (object) -> throwNotSetup();
+    private static Function<String, CategoryIdentifier<?>> categoryIdentifier = (object) -> throwNotSetup();
     
     private static <T> T throwNotSetup() {
         throw new AssertionError("REI Internals have not been initialized!");
@@ -105,7 +105,7 @@ public final class Internals {
         return nbtHasherProvider.get().provide(ignoredKeys);
     }
     
-    public static <T extends Display> CategoryIdentifier<T> getCategoryIdentifier(ResourceLocation location) {
+    public static <T extends Display> CategoryIdentifier<T> getCategoryIdentifier(String location) {
         return (CategoryIdentifier<T>) categoryIdentifier.apply(location);
     }
     

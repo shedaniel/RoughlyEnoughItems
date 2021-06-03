@@ -182,7 +182,8 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     private void buildEntries(Collection<MenuEntry> entries) {
         this.entries.clear();
         this.entries.addAll(entries);
-        this.entries.sort(Comparator.comparing(entry -> entry instanceof SubSubsetsMenuEntry ? 0 : 1).thenComparing(entry -> entry instanceof SubSubsetsMenuEntry ? ((SubSubsetsMenuEntry) entry).text : ""));
+        this.entries.sort(Comparator.comparing(entry -> entry instanceof SubSubsetsMenuEntry ? 0 : 1)
+                .thenComparing(entry -> entry instanceof SubSubsetsMenuEntry menuEntry ? menuEntry.text : ""));
         for (MenuEntry entry : this.entries) {
             entry.parent = this;
         }
@@ -221,7 +222,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
         fill(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), containsMouse(mouseX, mouseY) ? (REIRuntime.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
         fill(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), -16777216);
         boolean contains = innerBounds.contains(mouseX, mouseY);
-        MenuEntry focused = getFocused() instanceof MenuEntry ? (MenuEntry) getFocused() : null;
+        MenuEntry focused = getFocused() instanceof MenuEntry menuEntry ? menuEntry : null;
         int currentY = (int) (innerBounds.y - scrolling.scrollAmount);
         for (MenuEntry child : children()) {
             boolean containsMouse = contains && mouseY >= currentY && mouseY < currentY + child.getEntryHeight();

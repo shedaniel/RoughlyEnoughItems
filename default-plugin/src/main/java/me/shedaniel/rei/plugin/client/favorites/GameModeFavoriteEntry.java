@@ -180,8 +180,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
     
     @Override
     public boolean isSame(FavoriteEntry other) {
-        if (!(other instanceof GameModeFavoriteEntry)) return false;
-        GameModeFavoriteEntry that = (GameModeFavoriteEntry) other;
+        if (!(other instanceof GameModeFavoriteEntry that)) return false;
         return Objects.equals(gameMode, that.gameMode);
     }
     

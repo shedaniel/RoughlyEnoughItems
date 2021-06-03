@@ -155,8 +155,8 @@ public class REIRuntimeImpl implements REIRuntime {
         
         this.previousScreen = previousScreen;
         
-        if (previousScreen instanceof AbstractContainerScreen) {
-            this.previousContainerScreen = (AbstractContainerScreen<?>) previousScreen;
+        if (previousScreen instanceof AbstractContainerScreen<?> containerScreen) {
+            this.previousContainerScreen = containerScreen;
         }
     }
     
@@ -217,8 +217,8 @@ public class REIRuntimeImpl implements REIRuntime {
     
     public void onInitializeClient() {
         ClientGuiEvent.INIT_PRE.register((screen, access) -> {
-            if (previousContainerScreen != screen && screen instanceof AbstractContainerScreen)
-                previousContainerScreen = (AbstractContainerScreen<?>) screen;
+            if (previousContainerScreen != screen && screen instanceof AbstractContainerScreen<?> containerScreen)
+                previousContainerScreen = containerScreen;
             return EventResult.pass();
         });
         ClientTickEvent.CLIENT_POST.register(minecraft -> {

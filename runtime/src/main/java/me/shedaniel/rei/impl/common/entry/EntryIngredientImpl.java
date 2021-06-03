@@ -58,11 +58,11 @@ public class EntryIngredientImpl {
             @Override
             public EntryIngredient of(Iterable<EntryStack<?>> stacks) {
                 if (stacks instanceof EntryIngredient) return (EntryIngredient) stacks;
-                if (stacks instanceof Collection) {
-                    int size = ((Collection<EntryStack<?>>) stacks).size();
+                if (stacks instanceof Collection<EntryStack<?>> collection) {
+                    int size = collection.size();
                     if (size == 0) return empty();
                     if (size == 1) return of(stacks.iterator().next());
-                    return _of(((Collection<EntryStack<?>>) stacks).toArray(new EntryStack[0]));
+                    return _of(collection.toArray(new EntryStack[0]));
                 }
                 return _of(StreamSupport.stream(stacks.spliterator(), false).toArray(EntryStack[]::new));
             }
@@ -125,8 +125,7 @@ public class EntryIngredientImpl {
         
         @Override
         public EntryIngredient.Builder addAll(Iterable<? extends EntryStack<?>> stacks) {
-            if (stacks instanceof Collection) {
-                Collection<?> collection = (Collection<?>) stacks;
+            if (stacks instanceof Collection<?> collection) {
                 ensureCapacity(size + collection.size());
             }
             for (EntryStack<?> stack : stacks) {
