@@ -29,9 +29,7 @@ import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -50,20 +48,6 @@ public class CategoryRegistryImpl implements CategoryRegistry {
     @Override
     public void startReload() {
         this.categories.clear();
-    }
-    
-    @Override
-    public void endReload() {
-        List<CategoryIdentifier<?>> notRegisteredSerializers = new ArrayList<>();
-        for (CategoryIdentifier<?> identifier : this.categories.keySet()) {
-            if (!DisplaySerializerRegistry.getInstance().hasSerializer(identifier)) {
-                notRegisteredSerializers.add(identifier);
-            }
-        }
-        if (!notRegisteredSerializers.isEmpty()) {
-            throw new IllegalStateException(notRegisteredSerializers.size() + " categories did not register their serializers! " +
-                                            CollectionUtils.mapAndJoinToString(notRegisteredSerializers, Object::toString, ", "));
-        }
     }
     
     @Override
