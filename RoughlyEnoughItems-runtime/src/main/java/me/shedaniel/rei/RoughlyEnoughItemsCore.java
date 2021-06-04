@@ -582,8 +582,6 @@ public class RoughlyEnoughItemsCore implements ClientModInitializer {
         ClothClientHooks.SCREEN_LATE_RENDER.register((matrices, minecraftClient, screen, i, i1, v) -> {
             if (shouldReturn(screen))
                 return;
-            if (!ScreenHelper.isOverlayVisible())
-                return;
             ScreenHelper.getLastOverlay().lateRender(matrices, i, i1, v);
         });
         ClothClientHooks.SCREEN_KEY_PRESSED.register((minecraftClient, screen, i, i1, i2) -> {

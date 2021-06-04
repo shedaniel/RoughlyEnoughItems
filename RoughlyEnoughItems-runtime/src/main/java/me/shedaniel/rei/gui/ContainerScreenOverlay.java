@@ -565,12 +565,12 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
                 if (widget instanceof LateRenderable && (overlayMenu == null || overlayMenu.wrappedMenu != widget))
                     widget.render(matrices, mouseX, mouseY, delta);
             }
-        }
-        if (overlayMenu != null) {
-            if (overlayMenu.wrappedMenu.containsMouse(mouseX, mouseY)) {
-                TOOLTIPS.clear();
+            if (overlayMenu != null) {
+                if (overlayMenu.wrappedMenu.containsMouse(mouseX, mouseY)) {
+                    TOOLTIPS.clear();
+                }
+                overlayMenu.wrappedMenu.render(matrices, mouseX, mouseY, delta);
             }
-            overlayMenu.wrappedMenu.render(matrices, mouseX, mouseY, delta);
         }
         Screen currentScreen = Minecraft.getInstance().screen;
         if (!(currentScreen instanceof RecipeViewingScreen) || !((RecipeViewingScreen) currentScreen).choosePageActivated)
@@ -582,7 +582,9 @@ public class ContainerScreenOverlay extends WidgetWithBounds implements REIOverl
             runnable.run();
         }
         TOOLTIPS.clear();
-        AFTER_RENDER.clear();
+        if (ScreenHelper.isOverlayVisible()) {
+            AFTER_RENDER.clear();
+        }
     }
     
     public void renderTooltip(PoseStack matrices, Tooltip tooltip) {
