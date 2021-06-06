@@ -24,6 +24,7 @@
 package me.shedaniel.rei.fabric;
 
 import com.google.common.collect.Iterables;
+import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.plugins.*;
 import net.fabricmc.api.EnvType;
@@ -36,7 +37,6 @@ import java.util.function.Consumer;
 
 public class PluginDetectorImpl {
     private static <P extends REIPlugin<?>> void loadPlugin(Class<? extends P> pluginClass, Consumer<? super REIPluginProvider<P>> consumer) {
-        RuntimeException exception = null;
         for (EntrypointContainer<REIPluginProvider> container : Iterables.concat(
                 FabricLoader.getInstance().getEntrypointContainers("rei_containers", REIPluginProvider.class),
                 FabricLoader.getInstance().getEntrypointContainers("rei_server", REIPluginProvider.class),
@@ -66,16 +66,17 @@ public class PluginDetectorImpl {
                     });
                 }
             } catch (Throwable t) {
-                if (exception == null) {
-                    exception = new RuntimeException("Could not create REI Plugin [" + pluginClass.getName() + "] due to errors, provided by '" + container.getProvider().getMetadata().getId() + "'!", t);
-                } else {
-                    exception.addSuppressed(t);
-                }
+                String error = "Could not create REI Plugin [" + getSimpleName(pluginClass) + "] due to errors, provided by '" + container.getProvider().getMetadata().getId() + "'!";
+                new RuntimeException(error, t).printStackTrace();
+                RoughlyEnoughItemsState.error(error);
             }
         }
-        if (exception != null) {
-            throw exception;
-        }
+    }
+    
+    private static <P> String getSimpleName(Class<? extends P> pluginClass) {
+        String simpleName = pluginClass.getSimpleName();
+        if (simpleName == null) return pluginClass.getName();
+        return simpleName;
     }
     
     public static void detectServerPlugins() {
