@@ -231,7 +231,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     protected void renderBackBackground(PoseStack matrices, BufferBuilder buffer, Tesselator tessellator) {
         RenderSystem.setShaderTexture(0, backgroundLocation);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         Matrix4f matrix = matrices.last().pose();
         float float_2 = 32.0F;
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
