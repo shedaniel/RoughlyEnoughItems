@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.client.gui.modules.entries;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -92,7 +92,7 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
         }
         if (containsMouse && mouseX >= x + (width / 2) - 8 && mouseX <= x + (width / 2) + 8 && mouseY >= y + 1 && mouseY <= y + 17) {
             REIRuntime.getInstance().queueTooltip(stack.getTooltip(new Point(mouseX, mouseY)));
-            if (RoughlyEnoughItemsCore.isLeftMousePressed && !clickedLast) {
+            if (RoughlyEnoughItemsCoreClient.isLeftMousePressed && !clickedLast) {
                 clickedLast = true;
                 if (!getParent().scrolling.draggingScrollBar) {
                     minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
@@ -111,7 +111,7 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
                         ScreenOverlayImpl.getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
                     }
                 }
-            } else if (!RoughlyEnoughItemsCore.isLeftMousePressed) clickedLast = false;
+            } else if (!RoughlyEnoughItemsCoreClient.isLeftMousePressed) clickedLast = false;
         } else clickedLast = false;
         stack.render(matrices, new Rectangle(x + (width / 2) - 8, y + 1, 16, 16), mouseX, mouseY, delta);
     }

@@ -42,7 +42,7 @@ public class RoughlyEnoughItemsInitializer {
     
     public static void onInitializeClient() {
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
-            initializeEntryPoint(true, "me.shedaniel.rei.RoughlyEnoughItemsCore");
+            initializeEntryPoint(true, "me.shedaniel.rei.RoughlyEnoughItemsCoreClient");
             initializeEntryPoint(true, "me.shedaniel.rei.REIModMenuEntryPoint");
             initializeEntryPoint(true, "me.shedaniel.rei.impl.client.ClientHelperImpl");
             initializeEntryPoint(true, "me.shedaniel.rei.impl.client.REIRuntimeImpl");
@@ -75,8 +75,8 @@ public class RoughlyEnoughItemsInitializer {
                     method.invoke(instance);
                 }
             }
-        } catch (InstantiationException | InvocationTargetException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            throw new RuntimeException("Failed to initialize REI entry point: " + className, e);
         }
     }
     

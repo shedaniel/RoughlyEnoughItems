@@ -24,6 +24,7 @@
 package me.shedaniel.rei.fabric;
 
 import com.google.common.collect.Iterables;
+import me.shedaniel.rei.RoughlyEnoughItemsInitializer;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.plugins.*;
@@ -37,6 +38,7 @@ import java.util.function.Consumer;
 
 public class PluginDetectorImpl {
     private static <P extends REIPlugin<?>> void loadPlugin(Class<? extends P> pluginClass, Consumer<? super REIPluginProvider<P>> consumer) {
+        out:
         for (EntrypointContainer<REIPluginProvider> container : Iterables.concat(
                 FabricLoader.getInstance().getEntrypointContainers("rei_containers", REIPluginProvider.class),
                 FabricLoader.getInstance().getEntrypointContainers("rei_server", REIPluginProvider.class),
@@ -66,6 +68,11 @@ public class PluginDetectorImpl {
                     });
                 }
             } catch (Throwable t) {
+                Throwable throwable = t;
+                while (throwable != null) {
+                    if (throwable.getMessage().contains("environment type SERVER") && !RoughlyEnoughItemsInitializer.isClient()) continue out;
+                    throwable = throwable.getCause();
+                }
                 String error = "Could not create REI Plugin [" + getSimpleName(pluginClass) + "] due to errors, provided by '" + container.getProvider().getMetadata().getId() + "'!";
                 new RuntimeException(error, t).printStackTrace();
                 RoughlyEnoughItemsState.error(error);

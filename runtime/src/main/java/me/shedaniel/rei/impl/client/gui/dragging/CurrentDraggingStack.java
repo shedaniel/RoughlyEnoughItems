@@ -27,7 +27,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
@@ -69,7 +69,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
                     entry.stack.drag();
                 }
             }
-            if (!RoughlyEnoughItemsCore.isLeftMousePressed) {
+            if (!RoughlyEnoughItemsCoreClient.isLeftMousePressed) {
                 drop();
             } else if (entry.dragging) {
                 matrices.pushPose();
