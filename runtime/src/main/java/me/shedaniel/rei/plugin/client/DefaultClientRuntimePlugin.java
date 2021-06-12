@@ -29,7 +29,7 @@ import dev.architectury.event.CompoundEventResult;
 import dev.architectury.fluid.FluidStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
@@ -153,11 +153,11 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
             }
         });
         registry.registerDraggableStackProvider(DraggableStackProviderWidget.from(context -> {
-            if (RoughlyEnoughItemsCore.shouldReturn(context.getScreen()) || !REIRuntime.getInstance().isOverlayVisible()) return Collections.emptyList();
+            if (RoughlyEnoughItemsCoreClient.shouldReturn(context.getScreen()) || !REIRuntime.getInstance().isOverlayVisible()) return Collections.emptyList();
             return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableStackProviderWidget.class::isInstance);
         }));
         registry.registerDraggableStackVisitor(DraggableStackVisitorWidget.from(context -> {
-            if (RoughlyEnoughItemsCore.shouldReturn(context.getScreen()) || !REIRuntime.getInstance().isOverlayVisible()) return Collections.emptyList();
+            if (RoughlyEnoughItemsCoreClient.shouldReturn(context.getScreen()) || !REIRuntime.getInstance().isOverlayVisible()) return Collections.emptyList();
             return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableStackVisitorWidget.class::isInstance);
         }));
     }
