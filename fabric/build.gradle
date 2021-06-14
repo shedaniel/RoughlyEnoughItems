@@ -105,7 +105,7 @@ curseforge {
         apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
         project {
             id = "310111"
-            releaseType = "beta"
+            releaseType = "release"
             changelogType = "html"
             changelog = rootProject.releaseChangelog
             addGameVersion "1.17"

@@ -27,12 +27,8 @@ import dev.architectury.platform.Platform;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
-import me.shedaniel.rei.api.client.gui.Renderer;
-import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
-import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
-import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
@@ -42,24 +38,19 @@ import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.impl.Internals;
-import me.shedaniel.rei.impl.client.entry.type.types.RenderingEntryDefinition;
 import me.shedaniel.rei.impl.common.category.CategoryIdentifierImpl;
 import me.shedaniel.rei.impl.common.display.DisplaySerializerRegistryImpl;
-import me.shedaniel.rei.impl.common.entry.EmptyEntryStack;
+import me.shedaniel.rei.impl.common.entry.DeferringEntryTypeProviderImpl;
 import me.shedaniel.rei.impl.common.entry.EntryIngredientImpl;
-import me.shedaniel.rei.impl.common.entry.TypedEntryStack;
+import me.shedaniel.rei.impl.common.entry.EntryStackProviderImpl;
 import me.shedaniel.rei.impl.common.entry.comparison.FluidComparatorRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.comparison.ItemComparatorRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.comparison.NbtHasherProviderImpl;
-import me.shedaniel.rei.impl.common.entry.type.EntryTypeDeferred;
 import me.shedaniel.rei.impl.common.entry.type.EntryTypeRegistryImpl;
-import me.shedaniel.rei.impl.common.entry.type.types.EmptyEntryDefinition;
 import me.shedaniel.rei.impl.common.fluid.FluidSupportProviderImpl;
 import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
 import me.shedaniel.rei.impl.common.registry.RecipeManagerContextImpl;
 import me.shedaniel.rei.impl.common.transfer.MenuInfoRegistryImpl;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
@@ -68,9 +59,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -88,87 +76,10 @@ public class RoughlyEnoughItemsCore {
     
     public static void attachCommonInternals() {
         CategoryIdentifierImpl.attach();
-        Internals.attachInstance((Function<ResourceLocation, EntryType<?>>) new Function<ResourceLocation, EntryType<?>>() {
-            ResourceLocation RENDERING_ID = new ResourceLocation("rendering");
-            private Map<ResourceLocation, EntryType<?>> typeCache = new ConcurrentHashMap<>();
-            private EntryType<Unit> empty;
-            @Environment(EnvType.CLIENT)
-            private EntryType<Renderer> render;
-            
-            @Override
-            public EntryType<?> apply(ResourceLocation id) {
-                if (id.equals(BuiltinEntryTypes.EMPTY_ID)) {
-                    return typeCache.computeIfAbsent(id, this::emptyType);
-                } else if (id.equals(RENDERING_ID) && Platform.getEnv() == EnvType.CLIENT) {
-                    return typeCache.computeIfAbsent(id, this::renderingType);
-                }
-                return typeCache.computeIfAbsent(id, EntryTypeDeferred::new);
-            }
-            
-            public EntryType<Unit> emptyType(ResourceLocation id) {
-                if (empty == null) {
-                    int hashCode = id.hashCode();
-                    empty = new EntryType<>() {
-                        @Override
-                        public ResourceLocation getId() {
-                            return id;
-                        }
-                        
-                        @Override
-                        public EntryDefinition<Unit> getDefinition() {
-                            return EmptyEntryDefinition.EMPTY;
-                        }
-                        
-                        @Override
-                        public int hashCode() {
-                            return hashCode;
-                        }
-                    };
-                }
-                return empty;
-            }
-            
-            @Environment(EnvType.CLIENT)
-            public EntryType<Renderer> renderingType(ResourceLocation id) {
-                if (render == null) {
-                    int hashCode = id.hashCode();
-                    render = new EntryType<>() {
-                        @Override
-                        public ResourceLocation getId() {
-                            return id;
-                        }
-                        
-                        @Override
-                        public EntryDefinition<Renderer> getDefinition() {
-                            return RenderingEntryDefinition.RENDERING;
-                        }
-                        
-                        @Override
-                        public int hashCode() {
-                            return hashCode;
-                        }
-                    };
-                }
-                return render;
-            }
-        }, "entryTypeDeferred");
-        Internals.attachInstance(new Internals.EntryStackProvider() {
-            @Override
-            public EntryStack<Unit> empty() {
-                return EmptyEntryStack.EMPTY;
-            }
-            
-            @Override
-            public <T> EntryStack<T> of(EntryDefinition<T> definition, T value) {
-                if (Objects.equals(definition.getType().getId(), BuiltinEntryTypes.EMPTY_ID)) {
-                    return empty().cast();
-                }
-                
-                return new TypedEntryStack<>(definition, value);
-            }
-        }, Internals.EntryStackProvider.class);
-        Internals.attachInstance(new NbtHasherProviderImpl(), Internals.NbtHasherProvider.class);
-        Internals.attachInstance(EntryIngredientImpl.provide(), Internals.EntryIngredientProvider.class);
+        Internals.attachInstance((Function<ResourceLocation, EntryType<?>>) DeferringEntryTypeProviderImpl.INSTANCE, "entryTypeDeferred");
+        Internals.attachInstance(EntryStackProviderImpl.INSTANCE, Internals.EntryStackProvider.class);
+        Internals.attachInstance(NbtHasherProviderImpl.INSTANCE, Internals.NbtHasherProvider.class);
+        Internals.attachInstance(EntryIngredientImpl.INSTANCE, Internals.EntryIngredientProvider.class);
         Internals.attachInstanceSupplier(new PluginManagerImpl<>(
                 REIPlugin.class,
                 UnaryOperator.identity(),

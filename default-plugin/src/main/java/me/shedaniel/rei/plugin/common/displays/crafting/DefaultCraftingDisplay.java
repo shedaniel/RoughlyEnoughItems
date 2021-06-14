@@ -38,7 +38,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,21 +64,24 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     }
     
     public <T extends AbstractContainerMenu> List<List<ItemStack>> getOrganisedInputEntries(SimpleGridMenuInfo<T, DefaultCraftingDisplay<?>> menuInfo, T container) {
-        List<List<ItemStack>> list = new ArrayList<>(menuInfo.getCraftingWidth(container) * menuInfo.getCraftingHeight(container));
-        for (int i = 0; i < menuInfo.getCraftingWidth(container) * menuInfo.getCraftingHeight(container); i++) {
-            list.add(Collections.emptyList());
+        return CollectionUtils.map(getOrganisedInputEntries(menuInfo.getCraftingWidth(container), menuInfo.getCraftingHeight(container)), ingredient ->
+                CollectionUtils.<EntryStack<?>, ItemStack>filterAndMap(ingredient, stack -> stack.getType() == VanillaEntryTypes.ITEM,
+                        EntryStack::castValue));
+    }
+    
+    public <T extends AbstractContainerMenu> List<EntryIngredient> getOrganisedInputEntries(int menuWidth, int menuHeight) {
+        List<EntryIngredient> list = new ArrayList<>(menuWidth * menuHeight);
+        for (int i = 0; i < menuWidth * menuHeight; i++) {
+            list.add(EntryIngredient.empty());
         }
         for (int i = 0; i < getInputEntries().size(); i++) {
-            @SuppressWarnings("RedundantTypeArguments")
-            List<ItemStack> stacks = CollectionUtils.<EntryStack<?>, ItemStack>filterAndMap(getInputEntries().get(i), stack -> stack.getType() == VanillaEntryTypes.ITEM,
-                    EntryStack::castValue);
-            list.set(getSlotWithSize(this, i, menuInfo.getCraftingWidth(container)), stacks);
+            list.set(getSlotWithSize(this, i, menuWidth), getInputEntries().get(i));
         }
         return list;
     }
     
-    public static int getSlotWithSize(DefaultCraftingDisplay<?> recipeDisplay, int index, int craftingGridWidth) {
-        return getSlotWithSize(recipeDisplay.getWidth(), index, craftingGridWidth);
+    public static int getSlotWithSize(DefaultCraftingDisplay<?> display, int index, int craftingGridWidth) {
+        return getSlotWithSize(display.getWidth(), index, craftingGridWidth);
     }
     
     public static int getSlotWithSize(int recipeWidth, int index, int craftingGridWidth) {
@@ -89,6 +91,7 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     }
     
     public static BasicDisplay.Serializer<DefaultCraftingDisplay<?>> serializer() {
-        return BasicDisplay.Serializer.ofSimple(DefaultCustomDisplay::simple);
+        return BasicDisplay.Serializer.<DefaultCraftingDisplay<?>>ofSimple(DefaultCustomDisplay::simple)
+                .inputProvider(display -> display.getOrganisedInputEntries(3, 3));
     }
 }

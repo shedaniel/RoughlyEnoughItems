@@ -34,7 +34,6 @@ import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
-import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.api.common.transfer.info.simple.RecipeBookGridMenuInfo;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -59,7 +58,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -127,18 +125,8 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
     
     @Override
     public void registerMenuInfo(MenuInfoRegistry registry) {
-        registry.register(BuiltinPlugin.CRAFTING, CraftingMenu.class, new RecipeBookGridMenuInfo<>() {
-            @Override
-            public List<List<ItemStack>> getInputs(MenuInfoContext<CraftingMenu, ?, DefaultCraftingDisplay<?>> context) {
-                return context.getDisplay().getOrganisedInputEntries(this, context.getMenu());
-            }
-        });
-        registry.register(BuiltinPlugin.CRAFTING, InventoryMenu.class, new RecipeBookGridMenuInfo<>() {
-            @Override
-            public List<List<ItemStack>> getInputs(MenuInfoContext<InventoryMenu, ?, DefaultCraftingDisplay<?>> context) {
-                return context.getDisplay().getOrganisedInputEntries(this, context.getMenu());
-            }
-        });
+        registry.register(BuiltinPlugin.CRAFTING, CraftingMenu.class, new RecipeBookGridMenuInfo<>());
+        registry.register(BuiltinPlugin.CRAFTING, InventoryMenu.class, new RecipeBookGridMenuInfo<>());
         registry.register(BuiltinPlugin.SMELTING, FurnaceMenu.class, new RecipeBookGridMenuInfo<>());
         registry.register(BuiltinPlugin.SMOKING, SmokerMenu.class, new RecipeBookGridMenuInfo<>());
         registry.register(BuiltinPlugin.BLASTING, BlastFurnaceMenu.class, new RecipeBookGridMenuInfo<>());

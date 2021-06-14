@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -67,6 +68,8 @@ public abstract class BasicDisplay implements Display {
     public static class Serializer<P extends BasicDisplay> implements SimpleDisplaySerializer<P> {
         protected final Constructor<P> constructor;
         protected final ExtraSerializer<P> extraSerializer;
+        protected EntryIngredientsProvider<P> inputEntries = EntryIngredientsProvider.pass();
+        protected EntryIngredientsProvider<P> outputEntries = EntryIngredientsProvider.pass();
         
         public static <P extends BasicDisplay> Serializer<P> ofSimple(SimpleConstructor<P> constructor) {
             return new Serializer<>(constructor, (p, tag) -> {});
@@ -109,6 +112,16 @@ public abstract class BasicDisplay implements Display {
             this.extraSerializer = extraSerializer;
         }
         
+        public Serializer<P> inputProvider(EntryIngredientsProvider<P> provider) {
+            this.inputEntries = provider;
+            return this;
+        }
+        
+        public Serializer<P> outputProvider(EntryIngredientsProvider<P> provider) {
+            this.outputEntries = provider;
+            return this;
+        }
+        
         @Override
         public CompoundTag saveExtra(CompoundTag tag, P display) {
             display.getDisplayLocation().ifPresent(location -> tag.putString("location", location.toString()));
@@ -127,6 +140,20 @@ public abstract class BasicDisplay implements Display {
                 location = null;
             }
             return constructor.construct(input, output, Optional.ofNullable(location), tag);
+        }
+        
+        @Override
+        public List<EntryIngredient> getInputIngredients(P display) {
+            List<EntryIngredient> entries = this.inputEntries.getEntries(display);
+            if (entries != null) return entries;
+            return SimpleDisplaySerializer.super.getInputIngredients(display);
+        }
+        
+        @Override
+        public List<EntryIngredient> getOutputIngredients(P display) {
+            List<EntryIngredient> entries = this.outputEntries.getEntries(display);
+            if (entries != null) return entries;
+            return SimpleDisplaySerializer.super.getOutputIngredients(display);
         }
         
         @FunctionalInterface
@@ -167,6 +194,16 @@ public abstract class BasicDisplay implements Display {
         @FunctionalInterface
         public interface ExtraSerializer<R extends Display> {
             void serialize(R display, CompoundTag tag);
+        }
+        
+        @FunctionalInterface
+        public interface EntryIngredientsProvider<R extends Display> {
+            @Nullable
+            List<EntryIngredient> getEntries(R display);
+            
+            static <R extends Display> EntryIngredientsProvider<R> pass() {
+                return display -> null;
+            }
         }
     }
 }

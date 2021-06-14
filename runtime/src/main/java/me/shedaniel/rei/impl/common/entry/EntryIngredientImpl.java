@@ -35,52 +35,50 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.StreamSupport;
 
-public class EntryIngredientImpl {
-    public static Internals.EntryIngredientProvider provide() {
-        return new Internals.EntryIngredientProvider() {
-            @Override
-            public EntryIngredient empty() {
-                return EmptyEntryIngredient.EMPTY;
-            }
-            
-            @Override
-            public EntryIngredient of(EntryStack<?> stack) {
-                return new SingletonEntryIngredient(stack);
-            }
-            
-            @Override
-            public EntryIngredient of(EntryStack<?>... stacks) {
-                if (stacks.length == 0) return empty();
-                if (stacks.length == 1) return of(stacks[0]);
-                return _of(stacks);
-            }
-            
-            @Override
-            public EntryIngredient of(Iterable<EntryStack<?>> stacks) {
-                if (stacks instanceof EntryIngredient) return (EntryIngredient) stacks;
-                if (stacks instanceof Collection<EntryStack<?>> collection) {
-                    int size = collection.size();
-                    if (size == 0) return empty();
-                    if (size == 1) return of(stacks.iterator().next());
-                    return _of(collection.toArray(new EntryStack[0]));
-                }
-                return _of(StreamSupport.stream(stacks.spliterator(), false).toArray(EntryStack[]::new));
-            }
-            
-            private EntryIngredient _of(EntryStack<?>... stacks) {
-                return new ArrayIngredient(stacks);
-            }
-            
-            @Override
-            public EntryIngredient.Builder builder() {
-                return new EntryIngredientBuilder(0);
-            }
-            
-            @Override
-            public EntryIngredient.Builder builder(int initialCapacity) {
-                return new EntryIngredientBuilder(initialCapacity);
-            }
-        };
+public enum EntryIngredientImpl implements Internals.EntryIngredientProvider {
+    INSTANCE;
+    
+    @Override
+    public EntryIngredient empty() {
+        return EmptyEntryIngredient.EMPTY;
+    }
+    
+    @Override
+    public EntryIngredient of(EntryStack<?> stack) {
+        return new SingletonEntryIngredient(stack);
+    }
+    
+    @Override
+    public EntryIngredient of(EntryStack<?>... stacks) {
+        if (stacks.length == 0) return empty();
+        if (stacks.length == 1) return of(stacks[0]);
+        return _of(stacks);
+    }
+    
+    @Override
+    public EntryIngredient of(Iterable<EntryStack<?>> stacks) {
+        if (stacks instanceof EntryIngredient) return (EntryIngredient) stacks;
+        if (stacks instanceof Collection<EntryStack<?>> collection) {
+            int size = collection.size();
+            if (size == 0) return empty();
+            if (size == 1) return of(stacks.iterator().next());
+            return _of(collection.toArray(new EntryStack[0]));
+        }
+        return _of(StreamSupport.stream(stacks.spliterator(), false).toArray(EntryStack[]::new));
+    }
+    
+    private EntryIngredient _of(EntryStack<?>... stacks) {
+        return new ArrayIngredient(stacks);
+    }
+    
+    @Override
+    public EntryIngredient.Builder builder() {
+        return new EntryIngredientBuilder(0);
+    }
+    
+    @Override
+    public EntryIngredient.Builder builder(int initialCapacity) {
+        return new EntryIngredientBuilder(initialCapacity);
     }
     
     private static class EntryIngredientBuilder implements EntryIngredient.Builder {
