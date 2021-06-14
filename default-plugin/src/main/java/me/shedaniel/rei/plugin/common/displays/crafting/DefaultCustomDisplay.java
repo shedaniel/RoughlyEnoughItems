@@ -44,14 +44,14 @@ public class DefaultCustomDisplay extends DefaultCraftingDisplay<Recipe<?>> {
         BitSet column = new BitSet(3);
         for (int i = 0; i < 9; i++)
             if (i < input.size()) {
-                List<? extends EntryStack<?>> stacks = input.get(i);
+                EntryIngredient stacks = input.get(i);
                 if (stacks.stream().anyMatch(stack -> !stack.isEmpty())) {
                     row.set((i - (i % 3)) / 3);
                     column.set(i % 3);
                 }
             }
-        this.width = row.cardinality();
-        this.height = column.cardinality();
+        this.width = column.cardinality();
+        this.height = row.cardinality();
     }
     
     public static DefaultCustomDisplay simple(List<EntryIngredient> input, List<EntryIngredient> output, Optional<ResourceLocation> location) {

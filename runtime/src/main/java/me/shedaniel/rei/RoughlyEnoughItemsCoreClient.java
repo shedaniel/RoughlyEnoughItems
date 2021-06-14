@@ -53,6 +53,7 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.client.favorites.DelegatingFavoriteEntryProviderImpl;
 import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
@@ -118,75 +119,7 @@ public class RoughlyEnoughItemsCoreClient {
         InternalWidgets.attach();
         EmptyEntryDefinition.EmptyRenderer emptyEntryRenderer = new EmptyEntryDefinition.EmptyRenderer();
         ClientInternals.attachInstance((Supplier<EntryRenderer<?>>) () -> emptyEntryRenderer, "emptyEntryRenderer");
-        ClientInternals.attachInstance((BiFunction<Supplier<FavoriteEntry>, Supplier<CompoundTag>, FavoriteEntry>) (supplier, toJson) -> new FavoriteEntry() {
-            FavoriteEntry value = null;
-            
-            @Override
-            public FavoriteEntry getUnwrapped() {
-                if (this.value == null) {
-                    this.value = supplier.get();
-                }
-                return Objects.requireNonNull(value).getUnwrapped();
-            }
-            
-            @Override
-            public UUID getUuid() {
-                return getUnwrapped().getUuid();
-            }
-            
-            @Override
-            public boolean isInvalid() {
-                try {
-                    return getUnwrapped().isInvalid();
-                } catch (Exception e) {
-                    return true;
-                }
-            }
-            
-            @Override
-            public Renderer getRenderer(boolean showcase) {
-                return getUnwrapped().getRenderer(showcase);
-            }
-            
-            @Override
-            public boolean doAction(int button) {
-                return getUnwrapped().doAction(button);
-            }
-            
-            @Override
-            public Optional<Supplier<Collection<FavoriteMenuEntry>>> getMenuEntries() {
-                return getUnwrapped().getMenuEntries();
-            }
-            
-            @Override
-            public long hashIgnoreAmount() {
-                return getUnwrapped().hashIgnoreAmount();
-            }
-            
-            @Override
-            public FavoriteEntry copy() {
-                return FavoriteEntry.delegate(supplier, toJson);
-            }
-            
-            @Override
-            public ResourceLocation getType() {
-                return getUnwrapped().getType();
-            }
-            
-            @Override
-            public CompoundTag save(CompoundTag tag) {
-                if (toJson == null) {
-                    return getUnwrapped().save(tag);
-                }
-                
-                return tag.merge(toJson.get());
-            }
-            
-            @Override
-            public boolean isSame(FavoriteEntry other) {
-                return getUnwrapped().isSame(other.getUnwrapped());
-            }
-        }, "delegateFavoriteEntry");
+        ClientInternals.attachInstance((BiFunction<Supplier<FavoriteEntry>, Supplier<CompoundTag>, FavoriteEntry>) DelegatingFavoriteEntryProviderImpl::new, "delegateFavoriteEntry");
         ClientInternals.attachInstance((Function<CompoundTag, FavoriteEntry>) (object) -> {
             String type = object.getString(FavoriteEntry.TYPE_KEY);
             ResourceLocation id = new ResourceLocation(type);

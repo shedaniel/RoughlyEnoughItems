@@ -66,6 +66,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     
     static EntryStack<?> read(CompoundTag tag) {
         EntryDefinition<?> definition = EntryTypeRegistry.getInstance().get(new ResourceLocation(tag.getString("type")));
+        if (definition == null) throw new NullPointerException("Read missing entry type: " + definition);
         EntrySerializer<?> serializer = definition.getSerializer();
         if (serializer != null && serializer.supportReading()) {
             return EntryStack.of((EntryDefinition<Object>) definition, serializer.read(tag));

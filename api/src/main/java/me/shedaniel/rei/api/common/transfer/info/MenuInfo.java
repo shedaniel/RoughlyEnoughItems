@@ -99,7 +99,7 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
      */
     default void markDirty(MenuInfoContext<T, ? extends ServerPlayer, D> context) {
         context.getPlayerEntity().getInventory().setChanged();
-        context.getMenu().broadcastChanges();
+        context.getMenu().sendAllDataToRemote();
     }
     
     /**

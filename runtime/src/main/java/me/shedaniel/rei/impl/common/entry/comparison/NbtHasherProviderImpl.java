@@ -35,7 +35,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class NbtHasherProviderImpl implements Internals.NbtHasherProvider {
+public enum NbtHasherProviderImpl implements Internals.NbtHasherProvider {
+    INSTANCE;
     private final EntryComparator<Tag> defaultHasher = _provide();
     
     @Override

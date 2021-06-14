@@ -21,30 +21,30 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.display;
+package me.shedaniel.rei.impl.common.entry;
 
-import me.shedaniel.rei.api.common.entry.EntryIngredient;
-import me.shedaniel.rei.api.common.util.EntryIngredients;
-import net.minecraft.nbt.CompoundTag;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
+import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
+import me.shedaniel.rei.impl.Internals;
+import net.minecraft.util.Unit;
 
-import java.util.List;
+import java.util.Objects;
 
-public interface SimpleDisplaySerializer<D extends Display> extends DisplaySerializer<D> {
+public enum EntryStackProviderImpl implements Internals.EntryStackProvider {
+    INSTANCE;
+    
     @Override
-    default CompoundTag save(CompoundTag tag, D display) {
-        tag.put("input", EntryIngredients.save(getInputIngredients(display)));
-        tag.put("output", EntryIngredients.save(getOutputIngredients(display)));
-        tag = saveExtra(tag, display);
-        return tag;
+    public EntryStack<Unit> empty() {
+        return EmptyEntryStack.EMPTY;
     }
     
-    default List<EntryIngredient> getInputIngredients(D display) {
-        return display.getInputEntries();
+    @Override
+    public <T> EntryStack<T> of(EntryDefinition<T> definition, T value) {
+        if (Objects.equals(definition.getType().getId(), BuiltinEntryTypes.EMPTY_ID)) {
+            return empty().cast();
+        }
+        
+        return new TypedEntryStack<>(definition, value);
     }
-    
-    default List<EntryIngredient> getOutputIngredients(D display) {
-        return display.getOutputEntries();
-    }
-    
-    CompoundTag saveExtra(CompoundTag tag, D display);
 }
