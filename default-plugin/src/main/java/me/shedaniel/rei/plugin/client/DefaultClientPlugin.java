@@ -112,7 +112,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerBrewingRecipe(Ingredient input, Ingredient ingredient, ItemStack output) {
-        DisplayRegistry.getInstance().add(new DefaultBrewingDisplay(new BrewingRecipe(input, ingredient, output)));
+        DisplayRegistry.getInstance().add(new BrewingRecipe(input, ingredient, output));
     }
     
     @Override
@@ -214,14 +214,14 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerDisplays(DisplayRegistry registry) {
-        registry.registerFiller(ShapelessRecipe.class, DefaultShapelessDisplay::new);
-        registry.registerFiller(ShapedRecipe.class, DefaultShapedDisplay::new);
-        registry.registerFiller(SmeltingRecipe.class, DefaultSmeltingDisplay::new);
-        registry.registerFiller(SmokingRecipe.class, DefaultSmokingDisplay::new);
-        registry.registerFiller(BlastingRecipe.class, DefaultBlastingDisplay::new);
-        registry.registerFiller(CampfireCookingRecipe.class, DefaultCampfireDisplay::new);
-        registry.registerFiller(StonecutterRecipe.class, DefaultStoneCuttingDisplay::new);
-        registry.registerFiller(UpgradeRecipe.class, DefaultSmithingDisplay::new);
+        registry.registerRecipeFiller(ShapelessRecipe.class, RecipeType.CRAFTING, DefaultShapelessDisplay::new);
+        registry.registerRecipeFiller(ShapedRecipe.class, RecipeType.CRAFTING, DefaultShapedDisplay::new);
+        registry.registerRecipeFiller(SmeltingRecipe.class, RecipeType.SMELTING, DefaultSmeltingDisplay::new);
+        registry.registerRecipeFiller(SmokingRecipe.class, RecipeType.SMOKING, DefaultSmokingDisplay::new);
+        registry.registerRecipeFiller(BlastingRecipe.class, RecipeType.BLASTING, DefaultBlastingDisplay::new);
+        registry.registerRecipeFiller(CampfireCookingRecipe.class, RecipeType.CAMPFIRE_COOKING, DefaultCampfireDisplay::new);
+        registry.registerRecipeFiller(StonecutterRecipe.class, RecipeType.STONECUTTING, DefaultStoneCuttingDisplay::new);
+        registry.registerRecipeFiller(UpgradeRecipe.class, RecipeType.SMITHING, DefaultSmithingDisplay::new);
         registry.registerFiller(BrewingRecipe.class, DefaultBrewingDisplay::new);
         for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.getFuel().entrySet()) {
             registry.add(new DefaultFuelDisplay(Collections.singletonList(EntryIngredients.of(entry.getKey())), Collections.emptyList(), entry.getValue()));
