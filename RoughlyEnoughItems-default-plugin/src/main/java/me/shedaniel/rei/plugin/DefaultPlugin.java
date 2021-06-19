@@ -234,8 +234,8 @@ public class DefaultPlugin implements REIPluginV0, BuiltinPlugin {
     
     @Override
     public void registerRecipeDisplays(RecipeHelper recipeHelper) {
-        recipeHelper.registerRecipes(CRAFTING, ShapelessRecipe.class, DefaultShapelessDisplay::new);
-        recipeHelper.registerRecipes(CRAFTING, ShapedRecipe.class, DefaultShapedDisplay::new);
+        recipeHelper.registerRecipes(CRAFTING, (Recipe recipe) -> recipe instanceof ShapelessRecipe && recipe.getType() == RecipeType.CRAFTING, DefaultShapelessDisplay::new);
+        recipeHelper.registerRecipes(CRAFTING, (Recipe recipe) -> recipe instanceof ShapedRecipe && recipe.getType() == RecipeType.CRAFTING, DefaultShapedDisplay::new);
         recipeHelper.registerRecipes(SMELTING, SmeltingRecipe.class, DefaultSmeltingDisplay::new);
         recipeHelper.registerRecipes(SMOKING, SmokingRecipe.class, DefaultSmokingDisplay::new);
         recipeHelper.registerRecipes(BLASTING, BlastingRecipe.class, DefaultBlastingDisplay::new);
