@@ -33,11 +33,9 @@ import me.shedaniel.rei.api.common.registry.RecipeManagerContext;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeType;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -80,11 +78,18 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
     int displaySize();
     
     /**
-     * Registers a recipe display
+     * Registers a display.
      *
-     * @param display the recipe display
+     * @param display the display
      */
     void add(Display display);
+    
+    /**
+     * Registers a display by the object provided, to be filled during {@link #tryFillDisplay(Object)}.
+     *
+     * @param object the object to be filled
+     */
+    void add(Object object);
     
     /**
      * Returns an unmodifiable map of displays visible to the player
@@ -171,6 +176,51 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @return an unmodifiable list of visibility predicates.
      */
     List<DisplayVisibilityPredicate> getVisibilityPredicates();
+    
+    /**
+     * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
+     * <p>
+     * Vanilla {@link Recipe} are by default filled, display filters
+     * can be used to automatically generate displaies for vanilla {@link Recipe}.
+     *
+     * @param typeClass the type of {@code T}
+     * @param filler    the filler, taking a {@code T} and returning a {@code D}
+     * @param <T>       the type of object
+     * @param <D>       the type of display
+     */
+    default <T extends Recipe<?>, D extends Display> void registerRecipeFiller(Class<T> typeClass, RecipeType<? super T> recipeType, Function<? extends T, D> filler) {
+        registerRecipeFiller(typeClass, type -> Objects.equals(recipeType, type), filler);
+    }
+    
+    /**
+     * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
+     * <p>
+     * Vanilla {@link Recipe} are by default filled, display filters
+     * can be used to automatically generate displaies for vanilla {@link Recipe}.
+     *
+     * @param typeClass the type of {@code T}
+     * @param filler    the filler, taking a {@code T} and returning a {@code D}
+     * @param <T>       the type of object
+     * @param <D>       the type of display
+     */
+    default <T extends Recipe<?>, D extends Display> void registerRecipeFiller(Class<T> typeClass, Predicate<RecipeType<? super T>> recipeType, Function<? extends T, D> filler) {
+        registerRecipeFiller(typeClass, recipeType, Predicates.alwaysTrue(), filler);
+    }
+    
+    /**
+     * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
+     * <p>
+     * Vanilla {@link Recipe} are by default filled, display filters
+     * can be used to automatically generate displaies for vanilla {@link Recipe}.
+     *
+     * @param typeClass the type of {@code T}
+     * @param filler    the filler, taking a {@code T} and returning a {@code D}
+     * @param <T>       the type of object
+     * @param <D>       the type of display
+     */
+    default <T extends Recipe<?>, D extends Display> void registerRecipeFiller(Class<T> typeClass, Predicate<RecipeType<? super T>> recipeType, Predicate<? extends T> predicate, Function<? extends T, D> filler) {
+        registerFiller(typeClass, recipe -> recipeType.test((RecipeType<? super T>) recipe.getType()) && ((Predicate<T>) predicate).test(recipe), filler);
+    }
     
     /**
      * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.

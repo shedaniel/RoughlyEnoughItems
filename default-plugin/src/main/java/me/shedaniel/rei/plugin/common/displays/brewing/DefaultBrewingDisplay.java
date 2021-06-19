@@ -38,11 +38,18 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * The default display for brewing recipes.
+ *
+ * @see BrewingRecipe
+ */
+@ApiStatus.Internal
 public class DefaultBrewingDisplay implements Display {
     private EntryStack<?> output;
     private EntryIngredient reactant, input;

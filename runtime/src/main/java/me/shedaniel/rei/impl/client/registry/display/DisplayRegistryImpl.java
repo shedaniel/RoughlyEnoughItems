@@ -71,6 +71,13 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
         displayCount.increment();
     }
     
+    @Override
+    public void add(Object object) {
+        for (Display display : tryFillDisplay(object)) {
+            add(display);
+        }
+    }
+    
     public void registerDisplay(int index, Display display) {
         displays.computeIfAbsent(display.getCategoryIdentifier(), location -> new ArrayList<>())
                 .add(index, display);
