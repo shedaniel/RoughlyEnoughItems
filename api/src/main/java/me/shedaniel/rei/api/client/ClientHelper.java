@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.client;
 
 import me.shedaniel.rei.api.client.config.ConfigManager;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.FormattingUtils;
@@ -141,6 +142,8 @@ public interface ClientHelper {
             components.add(ClientHelper.getInstance().getFormattedModFromModId(modId));
         return components;
     }
+    
+    void appendModIdToTooltips(Tooltip components, String modId);
     
     /**
      * Gets the mod from an identifier

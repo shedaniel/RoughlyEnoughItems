@@ -51,6 +51,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -63,6 +64,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagCollection;
 import net.minecraft.tags.TagContainer;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -71,6 +73,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySerializer<ItemStack> {
     @Environment(EnvType.CLIENT)
@@ -326,7 +329,17 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         public Tooltip getTooltip(EntryStack<ItemStack> entry, Point mouse) {
             if (entry.isEmpty())
                 return null;
-            return Tooltip.create(tryGetItemStackToolTip(entry, entry.getValue(), true));
+            Tooltip tooltip = Tooltip.create();
+            Optional<TooltipComponent> component = entry.getValue().getTooltipImage();
+            List<Component> components = tryGetItemStackToolTip(entry, entry.getValue(), true);
+            if (!components.isEmpty()) {
+                tooltip.add(components.get(0));
+            }
+            component.ifPresent(tooltipComponent -> tooltip.add(ClientTooltipComponent.create(tooltipComponent)));
+            for (int i = 1; i < components.size(); i++) {
+                tooltip.add(components.get(i));
+            }
+            return tooltip;
         }
     }
 }

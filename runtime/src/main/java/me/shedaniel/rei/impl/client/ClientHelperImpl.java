@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -43,6 +44,7 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.gui.screen.CompositeDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
@@ -127,6 +129,19 @@ public class ClientHelperImpl implements ClientHelper {
     
     public boolean canDeleteItems() {
         return hasPermissionToUsePackets() || Minecraft.getInstance().gameMode.hasInfiniteItems();
+    }
+    
+    @Override
+    public void appendModIdToTooltips(Tooltip components, String modId) {
+        final String modName = ClientHelper.getInstance().getModFromModId(modId);
+        boolean alreadyHasMod = false;
+        for (Tooltip.Entry s : components.entries())
+            if (s.isText() && FormattingUtils.stripFormatting(s.getAsText().getString()).equalsIgnoreCase(modName)) {
+                alreadyHasMod = true;
+                break;
+            }
+        if (!alreadyHasMod)
+            components.add(ClientHelper.getInstance().getFormattedModFromModId(modId));
     }
     
     @Override
