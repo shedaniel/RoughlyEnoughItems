@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.plugin.client.entry;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.fluid.FluidStack;
@@ -47,10 +48,14 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Registry;
@@ -69,6 +74,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -174,12 +180,30 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
         return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getFluid());
     }
     
+    @Override
+    public void fillCrashReport(CrashReport report, CrashReportCategory category, EntryStack<FluidStack> entry) {
+        EntryDefinition.super.fillCrashReport(report, category, entry);
+        FluidStack stack = entry.getValue();
+        category.setDetail("Fluid Type", () -> String.valueOf(Registry.FLUID.getKey(stack.getFluid())));
+        category.setDetail("Fluid Amount", () -> String.valueOf(stack.getAmount()));
+        category.setDetail("Fluid NBT", () -> String.valueOf(stack.getTag()));
+    }
+    
     public static class FluidEntryRenderer extends AbstractEntryRenderer<FluidStack> implements BatchedEntryRenderer<FluidStack, TextureAtlasSprite> {
+        private static final Supplier<TextureAtlasSprite> MISSING_SPRITE = Suppliers.memoize(() -> {
+            TextureAtlas atlas = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
+            return atlas.getSprite(MissingTextureAtlasSprite.getLocation());
+        });
+        
         @Override
         public TextureAtlasSprite getExtraData(EntryStack<FluidStack> entry) {
             FluidStack stack = entry.getValue();
             if (stack.isEmpty()) return null;
             return FluidStackHooks.getStillTexture(stack);
+        }
+        
+        private TextureAtlasSprite missingTexture() {
+            return MISSING_SPRITE.get();
         }
         
         @Override
@@ -192,16 +216,17 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
         
         @Override
         public void renderBase(EntryStack<FluidStack> entry, TextureAtlasSprite sprite, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
+            TextureAtlasSprite s = sprite == null ? missingTexture() : sprite;
             SpriteRenderer.beginPass()
                     .setup(immediate, RenderType.solid())
-                    .sprite(sprite)
-                    .color(FluidStackHooks.getColor(entry.getValue()))
+                    .sprite(s)
+                    .color(sprite == null ? 0xFFFFFF : FluidStackHooks.getColor(entry.getValue()))
                     .light(0x00f000f0)
                     .overlay(OverlayTexture.NO_OVERLAY)
                     .alpha(0xff)
                     .normal(matrices.last().normal(), 0, 0, 0)
                     .position(matrices.last().pose(), bounds.x, bounds.getMaxY() - bounds.height * Mth.clamp(entry.get(EntryStack.Settings.FLUID_RENDER_RATIO), 0, 1), bounds.getMaxX(), bounds.getMaxY(), entry.getZ())
-                    .next(InventoryMenu.BLOCK_ATLAS);
+                    .next(s.atlas().location());
         }
         
         @Override

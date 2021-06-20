@@ -29,6 +29,8 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagContainer;
@@ -74,6 +76,10 @@ public interface EntryDefinition<T> {
     @ApiStatus.NonExtendable
     default <O> EntryDefinition<O> cast() {
         return (EntryDefinition<O>) this;
+    }
+    
+    default void fillCrashReport(CrashReport report, CrashReportCategory category, EntryStack<T> entry) {
+        category.setDetail("Entry definition class name", () -> getClass().getCanonicalName());
     }
 }
 

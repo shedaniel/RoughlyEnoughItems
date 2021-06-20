@@ -31,6 +31,9 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.impl.client.util.CrashReportUtils;
+import net.minecraft.CrashReport;
+import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -131,31 +134,55 @@ public class BatchedEntryRendererManager {
         MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
         int i = 0;
         for (T entry : entries) {
-            entry.drawBackground(matrices, mouseX, mouseY, delta);
+            try {
+                entry.drawBackground(matrices, mouseX, mouseY, delta);
+            } catch (Throwable throwable) {
+                CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry background");
+                CrashReportUtils.renderer(report, entry);
+                throw new ReportedException(report);
+            }
         }
         firstRenderer.startBatch(first, extraData[0], matrices, delta);
         for (T entry : entries) {
-            @SuppressWarnings("rawtypes")
-            EntryStack currentEntry = entry.getCurrentEntry();
-            currentEntry.setZ(100);
-            firstRenderer.renderBase(currentEntry, extraData[i++], matrices, immediate, entry.getInnerBounds(), mouseX, mouseY, delta);
-            if (debugTime && !currentEntry.isEmpty()) size.increment();
+            try {
+                @SuppressWarnings("rawtypes")
+                EntryStack currentEntry = entry.getCurrentEntry();
+                currentEntry.setZ(100);
+                firstRenderer.renderBase(currentEntry, extraData[i++], matrices, immediate, entry.getInnerBounds(), mouseX, mouseY, delta);
+                if (debugTime && !currentEntry.isEmpty()) size.increment();
+            } catch (Throwable throwable) {
+                CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry base");
+                CrashReportUtils.renderer(report, entry);
+                throw new ReportedException(report);
+            }
         }
         immediate.endBatch();
         firstRenderer.afterBase(first, extraData[0], matrices, delta);
         i = 0;
         for (T entry : entries) {
-            @SuppressWarnings("rawtypes")
-            EntryStack currentEntry = entry.getCurrentEntry();
-            firstRenderer.renderOverlay(currentEntry, extraData[i++], matrices, immediate, entry.getInnerBounds(), mouseX, mouseY, delta);
+            try {
+                @SuppressWarnings("rawtypes")
+                EntryStack currentEntry = entry.getCurrentEntry();
+                firstRenderer.renderOverlay(currentEntry, extraData[i++], matrices, immediate, entry.getInnerBounds(), mouseX, mouseY, delta);
+            } catch (Throwable throwable) {
+                CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry base");
+                CrashReportUtils.renderer(report, entry);
+                throw new ReportedException(report);
+            }
         }
         immediate.endBatch();
         for (T entry : entries) {
-            if (entry.containsMouse(mouseX, mouseY)) {
-                entry.queueTooltip(matrices, mouseX, mouseY, delta);
-                entry.drawHighlighted(matrices, mouseX, mouseY, delta);
+            try {
+                if (entry.containsMouse(mouseX, mouseY)) {
+                    entry.queueTooltip(matrices, mouseX, mouseY, delta);
+                    entry.drawHighlighted(matrices, mouseX, mouseY, delta);
+                }
+                entry.drawExtra(matrices, mouseX, mouseY, delta);
+            } catch (Throwable throwable) {
+                CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry extra");
+                CrashReportUtils.renderer(report, entry);
+                throw new ReportedException(report);
             }
-            entry.drawExtra(matrices, mouseX, mouseY, delta);
         }
         if (debugTime) time.add(System.nanoTime() - l);
         firstRenderer.endBatch(first, extraData[0], matrices, delta);
@@ -165,12 +192,18 @@ public class BatchedEntryRendererManager {
         for (T entry : entries) {
             if (entry.getCurrentEntry().isEmpty())
                 continue;
-            if (debugTime) {
-                size.increment();
-                long l = System.nanoTime();
-                entry.render(matrices, mouseX, mouseY, delta);
-                time.add(System.nanoTime() - l);
-            } else entry.render(matrices, mouseX, mouseY, delta);
+            try {
+                if (debugTime) {
+                    size.increment();
+                    long l = System.nanoTime();
+                    entry.render(matrices, mouseX, mouseY, delta);
+                    time.add(System.nanoTime() - l);
+                } else entry.render(matrices, mouseX, mouseY, delta);
+            } catch (Throwable throwable) {
+                CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry");
+                CrashReportUtils.renderer(report, entry);
+                throw new ReportedException(report);
+            }
         }
     }
 }

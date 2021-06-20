@@ -61,6 +61,10 @@ public final class EntryStacks {
         return of(new ItemStack(item));
     }
     
+    public static EntryStack<ItemStack> of(ItemLike item, int amount) {
+        return of(new ItemStack(item, amount));
+    }
+    
     /**
      * Compares equality under the provided {@code context}.
      * Prioritizes {@link me.shedaniel.rei.api.common.entry.type.EntryDefinition#equals(Object, Object, ComparisonContext)} then compares
