@@ -49,6 +49,10 @@ public final class EntryIngredients {
         return EntryIngredient.of(EntryStacks.of(stack));
     }
     
+    public static EntryIngredient of(ItemLike stack, int amount) {
+        return EntryIngredient.of(EntryStacks.of(stack, amount));
+    }
+    
     public static EntryIngredient of(ItemStack stack) {
         return EntryIngredient.of(EntryStacks.of(stack));
     }
@@ -80,11 +84,15 @@ public final class EntryIngredients {
     }
     
     public static EntryIngredient ofItems(Collection<ItemLike> stacks) {
+        return ofItems(stacks, 1);
+    }
+    
+    public static EntryIngredient ofItems(Collection<ItemLike> stacks, int amount) {
         if (stacks.size() == 0) return EntryIngredient.empty();
-        if (stacks.size() == 1) return EntryIngredient.of(EntryStacks.of(stacks.iterator().next()));
+        if (stacks.size() == 1) return EntryIngredient.of(EntryStacks.of(stacks.iterator().next(), amount));
         EntryIngredient.Builder result = EntryIngredient.builder(stacks.size());
         for (ItemLike stack : stacks) {
-            result.add(EntryStacks.of(stack));
+            result.add(EntryStacks.of(stack, amount));
         }
         return result.build();
     }

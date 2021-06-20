@@ -43,6 +43,8 @@ import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
@@ -481,5 +483,21 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         getBounds().setBounds(bounds.x - 1, bounds.y - 1, bounds.width + 2, bounds.height + 2);
         render(matrices, mouseX, mouseY, delta);
         getBounds().setBounds(clone);
+    }
+    
+    @Override
+    public void fillCrashReport(CrashReport report, CrashReportCategory category) {
+        super.fillCrashReport(report, category);
+        category.setDetail("Notice mark", () -> String.valueOf(getNoticeMark()));
+        category.setDetail("Interactable", () -> String.valueOf(isInteractable()));
+        category.setDetail("Interactable favorites", () -> String.valueOf(isInteractableFavorites()));
+        category.setDetail("Highlight enabled", () -> String.valueOf(isHighlightEnabled()));
+        category.setDetail("Tooltip enabled", () -> String.valueOf(isTooltipsEnabled()));
+        category.setDetail("Background enabled", () -> String.valueOf(isBackgroundEnabled()));
+        category.setDetail("Entries count", () -> String.valueOf(entryStacks.size()));
+        EntryStack<?> currentEntry = getCurrentEntry();
+        
+        CrashReportCategory entryCategory = report.addCategory("Current Rendering Entry");
+        currentEntry.fillCrashReport(report, entryCategory);
     }
 }

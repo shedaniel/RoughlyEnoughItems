@@ -48,6 +48,8 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
@@ -192,6 +194,16 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
                 SEARCH_BLACKLISTED.add(value.getItem());
             }
         return Lists.newArrayList(asFormattedText(entry, value));
+    }
+    
+    @Override
+    public void fillCrashReport(CrashReport report, CrashReportCategory category, EntryStack<ItemStack> entry) {
+        EntryDefinition.super.fillCrashReport(report, category, entry);
+        ItemStack stack = entry.getValue();
+        category.setDetail("Item Type", () -> String.valueOf(stack.getItem()));
+        category.setDetail("Item Damage", () -> String.valueOf(stack.getDamageValue()));
+        category.setDetail("Item NBT", () -> String.valueOf(stack.getTag()));
+        category.setDetail("Item Foil", () -> String.valueOf(stack.hasFoil()));
     }
     
     @Environment(EnvType.CLIENT)

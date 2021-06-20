@@ -38,6 +38,8 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -199,5 +201,20 @@ public abstract class AbstractEntryStack<A> extends AbstractRenderer implements 
     @Override
     public Component asFormattedText() {
         return getDefinition().asFormattedText(this, getValue());
+    }
+    
+    @Override
+    public void fillCrashReport(CrashReport report, CrashReportCategory category) {
+        super.fillCrashReport(report, category);
+        category.setDetail("Entry type", () -> String.valueOf(getType().getId()));
+        category.setDetail("Is empty", () -> String.valueOf(isEmpty()));
+        category.setDetail("Entry identifier", () -> String.valueOf(getIdentifier()));
+        
+        CrashReportCategory rendererCategory = report.addCategory("Entry Renderer");
+        try {
+            getDefinition().fillCrashReport(report, rendererCategory, this);
+        } catch (Throwable throwable) {
+            rendererCategory.setDetailError("Filling Report", throwable);
+        }
     }
 }

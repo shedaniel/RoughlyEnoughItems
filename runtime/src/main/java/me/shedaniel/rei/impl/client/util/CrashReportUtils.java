@@ -21,38 +21,37 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.gui;
+package me.shedaniel.rei.impl.client.util;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.math.Point;
-import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import me.shedaniel.rei.api.client.gui.Renderer;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 
-public interface Renderer {
-    @Environment(EnvType.CLIENT)
-    void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta);
-    
-    @Nullable
-    @Environment(EnvType.CLIENT)
-    default Tooltip getTooltip(Point mouse) {
-        return null;
+public class CrashReportUtils {
+    public static CrashReport essential(Throwable throwable, String task) {
+        CrashReport report = CrashReport.forThrowable(throwable, "Rendering background of entry");
+        screen(report, Minecraft.getInstance().screen);
+        return report;
     }
     
-    int getZ();
+    private static void screen(CrashReport report, Screen screen) {
+        if (screen != null) {
+            CrashReportCategory category = report.addCategory("Screen details");
+            String screenName = screen.getClass().getCanonicalName();
+            category.setDetail("Screen name", () -> screenName);
+        }
+    }
     
-    void setZ(int z);
-    
-    default void fillCrashReport(CrashReport report, CrashReportCategory category) {
-        category.setDetail("Renderer name", () -> getClass().getCanonicalName());
-        category.setDetail("Z level", () -> String.valueOf(getZ()));
-        if (this instanceof WidgetWithBounds widget) {
-            category.setDetail("Bounds", () -> String.valueOf(widget.getBounds()));
+    public static void renderer(CrashReport report, Renderer renderer) {
+        if (renderer != null) {
+            CrashReportCategory category = report.addCategory("Renderer details");
+            try {
+                renderer.fillCrashReport(report, category);
+            } catch (Throwable throwable) {
+                category.setDetailError("Filling Report", throwable);
+            }
         }
     }
 }
