@@ -25,15 +25,16 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 
 import com.google.common.collect.Lists;
-import dev.architectury.platform.Platform;
-import dev.architectury.utils.Env;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -41,47 +42,21 @@ import java.util.List;
  * @see Tooltip
  */
 @ApiStatus.Internal
+@Environment(EnvType.CLIENT)
 public class QueuedTooltip implements Tooltip {
-    
     private Point location;
-    private List<Component> text;
+    private List<Tooltip.Entry> components;
     
-    private QueuedTooltip(Point location, Collection<Component> text) {
+    private QueuedTooltip(Point location, Collection<Tooltip.Entry> components) {
         this.location = location;
         if (this.location == null) {
-            if (Platform.getEnvironment() == Env.CLIENT) {
-                setLocationToMouse();
-            }
+            this.location = PointHelper.ofMouse();
         }
-        this.text = Lists.newArrayList(text);
+        this.components = Lists.newArrayList(components);
     }
     
-    private void setLocationToMouse() {
-        this.location = PointHelper.ofMouse();
-    }
-    
-    public static QueuedTooltip create(Point location, List<Component> text) {
+    public static QueuedTooltip impl(Point location, Collection<Tooltip.Entry> text) {
         return new QueuedTooltip(location, text);
-    }
-    
-    public static QueuedTooltip create(Point location, Collection<Component> text) {
-        return new QueuedTooltip(location, text);
-    }
-    
-    public static QueuedTooltip create(Point location, Component... text) {
-        return QueuedTooltip.create(location, Arrays.asList(text));
-    }
-    
-    public static QueuedTooltip create(List<Component> text) {
-        return QueuedTooltip.create(null, text);
-    }
-    
-    public static QueuedTooltip create(Collection<Component> text) {
-        return QueuedTooltip.create(null, text);
-    }
-    
-    public static QueuedTooltip create(Component... text) {
-        return QueuedTooltip.create(null, text);
     }
     
     @Override
@@ -96,11 +71,45 @@ public class QueuedTooltip implements Tooltip {
     
     @Override
     public List<Component> getText() {
-        return text;
+        return CollectionUtils.filterAndMap(components, Tooltip.Entry::isText, Tooltip.Entry::getAsText);
+    }
+    
+    @Override
+    public List<Entry> entries() {
+        return components;
+    }
+    
+    @Override
+    public Tooltip add(Component text) {
+        components.add(new TooltipEntryImpl(text));
+        return this;
+    }
+    
+    @Override
+    public Tooltip add(ClientTooltipComponent component) {
+        components.add(new TooltipEntryImpl(component));
+        return this;
     }
     
     @Override
     public void queue() {
         Tooltip.super.queue();
+    }
+    
+    public record TooltipEntryImpl(Object obj) implements Tooltip.Entry {
+        @Override
+        public Component getAsText() {
+            return (Component) obj;
+        }
+        
+        @Override
+        public boolean isText() {
+            return obj instanceof Component;
+        }
+        
+        @Override
+        public ClientTooltipComponent getAsComponent() {
+            return (ClientTooltipComponent) obj;
+        }
     }
 }

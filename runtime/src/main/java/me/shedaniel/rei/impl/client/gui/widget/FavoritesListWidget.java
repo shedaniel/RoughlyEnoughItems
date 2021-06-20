@@ -1050,8 +1050,8 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                     if (!scrollBounds.contains(point)) return null;
                     Tooltip tooltip = super.getCurrentTooltip(point);
                     if (tooltip != null) {
-                        tooltip.getText().add(ImmutableTextComponent.EMPTY);
-                        tooltip.getText().add(new TranslatableComponent("tooltip.rei.drag_to_add_favorites"));
+                        tooltip.add(ImmutableTextComponent.EMPTY);
+                        tooltip.add(new TranslatableComponent("tooltip.rei.drag_to_add_favorites"));
                     }
                     return tooltip;
                 }

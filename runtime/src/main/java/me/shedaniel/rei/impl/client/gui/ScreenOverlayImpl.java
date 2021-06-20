@@ -75,6 +75,8 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.entity.ItemRenderer;
@@ -97,6 +99,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class ScreenOverlayImpl extends ScreenOverlay {
@@ -545,26 +548,26 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public void renderTooltip(PoseStack matrices, Tooltip tooltip) {
-        renderTooltip(matrices, tooltip.getText().stream()
-                .flatMap(component -> Minecraft.getInstance().font.getSplitter().splitLines(component, 100000, Style.EMPTY).stream())
+        renderTooltipInner(matrices, tooltip.entries().stream()
+                .flatMap(component -> {
+                    if (component.isText()) {
+                        return Minecraft.getInstance().font.getSplitter().splitLines(component.getAsText(), 100000, Style.EMPTY).stream()
+                                .map(Language.getInstance()::getVisualOrder)
+                                .map(ClientTooltipComponent::create);
+                    } else {
+                        return Stream.of(component.getAsComponent());
+                    }
+                })
                 .collect(Collectors.toList()), tooltip.getX(), tooltip.getY());
     }
     
-    public void renderTooltip(PoseStack matrices, List<FormattedText> lines, int mouseX, int mouseY) {
-        if (lines.isEmpty()) {
-            return;
-        }
-        List<FormattedCharSequence> orderedTexts = CollectionUtils.map(lines, Language.getInstance()::getVisualOrder);
-        renderTooltipInner(matrices, orderedTexts, mouseX, mouseY);
-    }
-    
-    public void renderTooltipInner(PoseStack matrices, List<FormattedCharSequence> lines, int mouseX, int mouseY) {
+    public void renderTooltipInner(PoseStack matrices, List<ClientTooltipComponent> lines, int mouseX, int mouseY) {
         if (lines.isEmpty()) {
             return;
         }
         matrices.pushPose();
         matrices.translate(0, 0, 500);
-        minecraft.screen.renderTooltip(matrices, lines, mouseX, mouseY);
+        minecraft.screen.renderTooltipInternal(matrices, lines, mouseX, mouseY);
         matrices.popPose();
     }
     

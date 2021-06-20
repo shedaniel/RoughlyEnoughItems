@@ -60,7 +60,8 @@ public final class ClientInternals {
     private static BiFunction<Supplier<FavoriteEntry>, Supplier<CompoundTag>, FavoriteEntry> delegateFavoriteEntry = (supplier, toJson) -> throwNotSetup();
     private static Function<CompoundTag, FavoriteEntry> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
-    private static BiFunction<@Nullable Point, Collection<Component>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
+    private static BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
+    private static Function<Object, Tooltip.Entry> tooltipEntryProvider = (component) -> throwNotSetup();
     private static Supplier<List<String>> jeiCompatMods = ClientInternals::throwNotSetup;
     private static Supplier<Object> builtinClientPlugin = ClientInternals::throwNotSetup;
     
@@ -113,8 +114,12 @@ public final class ClientInternals {
         return clickAreaHandlerResult.apply(applicable);
     }
     
-    public static Tooltip createTooltip(@Nullable Point point, Collection<Component> texts) {
+    public static Tooltip createTooltip(@Nullable Point point, Collection<Tooltip.Entry> texts) {
         return tooltipProvider.apply(point, texts);
+    }
+    
+    public static Tooltip.Entry createTooltipEntry(Object component) {
+        return tooltipEntryProvider.apply(component);
     }
     
     public static FavoriteEntry delegateFavoriteEntry(Supplier<FavoriteEntry> supplier, Supplier<CompoundTag> toJoin) {

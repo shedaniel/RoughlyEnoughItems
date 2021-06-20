@@ -26,18 +26,31 @@ package me.shedaniel.rei.api.client.gui.widgets;
 import dev.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public interface Tooltip {
+    static Tooltip.Entry entry(Component text) {
+        return ClientInternals.createTooltipEntry(text);
+    }
+    
+    static Tooltip.Entry entry(ClientTooltipComponent text) {
+        return ClientInternals.createTooltipEntry(text);
+    }
+    
     static Tooltip create(@Nullable Point point, Collection<Component> texts) {
-        return ClientInternals.createTooltip(point, texts);
+        return from(point, CollectionUtils.map(texts, Tooltip::entry));
     }
     
     static Tooltip create(@Nullable Point point, Component... texts) {
@@ -52,13 +65,74 @@ public interface Tooltip {
         return create(Arrays.asList(texts));
     }
     
+    static Tooltip from(@Nullable Point point, Collection<Entry> entries) {
+        return ClientInternals.createTooltip(point, entries);
+    }
+    
+    static Tooltip from(@Nullable Point point, Entry... entries) {
+        return from(point, Arrays.asList(entries));
+    }
+    
+    static Tooltip from(Collection<Entry> entries) {
+        return from(null, entries);
+    }
+    
+    static Tooltip from(Entry... entries) {
+        return from(Arrays.asList(entries));
+    }
+    
     int getX();
     
     int getY();
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     List<Component> getText();
+    
+    List<Entry> entries();
+    
+    Tooltip add(ClientTooltipComponent component);
+    
+    Tooltip add(Component text);
+    
+    default Tooltip addAll(ClientTooltipComponent... components) {
+        for (ClientTooltipComponent component : components) {
+            add(component);
+        }
+        return this;
+    }
+    
+    default Tooltip addAll(Component... text) {
+        for (Component component : text) {
+            add(component);
+        }
+        return this;
+    }
+    
+    default Tooltip addAllComponents(Iterable<ClientTooltipComponent> text) {
+        for (ClientTooltipComponent component : text) {
+            add(component);
+        }
+        return this;
+    }
+    
+    default Tooltip addAllTexts(Iterable<Component> text) {
+        for (Component component : text) {
+            add(component);
+        }
+        return this;
+    }
     
     default void queue() {
         EnvExecutor.runInEnv(EnvType.CLIENT, () -> () -> REIRuntime.getInstance().queueTooltip(this));
+    }
+    
+    @ApiStatus.NonExtendable
+    interface Entry {
+        boolean isText();
+        
+        Component getAsText();
+        
+        ClientTooltipComponent getAsComponent();
     }
 }
