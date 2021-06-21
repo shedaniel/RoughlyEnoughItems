@@ -24,14 +24,29 @@
 package me.shedaniel.rei.impl.common.entry.comparison;
 
 import dev.architectury.fluid.FluidStack;
+import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import net.minecraft.world.level.material.Fluid;
 
 public class FluidComparatorRegistryImpl extends EntryComparatorRegistryImpl<FluidStack, Fluid> implements FluidComparatorRegistry {
+    private final EntryComparator<FluidStack> fluidNbt = EntryComparator.fluidNbt();
+    private final EntryComparator<FluidStack> defaultComparator = (context, stack) -> {
+        if (context.isExact()) {
+            return fluidNbt.hash(context, stack);
+        } else {
+            return 1;
+        }
+    };
+    
     @Override
     public Fluid getEntry(FluidStack stack) {
         return stack.getFluid();
+    }
+    
+    @Override
+    public EntryComparator<FluidStack> defaultComparator() {
+        return defaultComparator;
     }
     
     @Override

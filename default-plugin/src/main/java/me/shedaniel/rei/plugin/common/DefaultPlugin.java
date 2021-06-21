@@ -51,10 +51,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.inventory.*;
-import net.minecraft.world.item.BucketItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -69,8 +66,13 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
         Function<ItemStack, ListTag> enchantmentTag = stack -> {
             CompoundTag tag = stack.getTag();
             if (tag == null) return null;
-            if (!tag.contains("Enchantments", NbtType.LIST)) return null;
-            return tag.getList("Enchantments", NbtType.COMPOUND);
+            if (!tag.contains(ItemStack.TAG_ENCH, NbtType.LIST)) {
+                if (tag.contains(EnchantedBookItem.TAG_STORED_ENCHANTMENTS, NbtType.LIST)) {
+                    return tag.getList(EnchantedBookItem.TAG_STORED_ENCHANTMENTS, NbtType.COMPOUND);
+                }
+                return null;
+            }
+            return tag.getList(ItemStack.TAG_ENCH, NbtType.COMPOUND);
         };
         registry.register((context, stack) -> nbtHasher.hash(context, enchantmentTag.apply(stack)), Items.ENCHANTED_BOOK);
         registry.registerNbt(Items.POTION);

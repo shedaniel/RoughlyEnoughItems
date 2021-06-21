@@ -75,7 +75,6 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -83,10 +82,12 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.locale.Language;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -643,9 +644,8 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 return ViewSearchBuilder.builder().addUsagesFor(stack).open();
             } else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
                 FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack);
-                if (!ConfigObject.getInstance().getFavoriteEntries().contains(favoriteEntry)) {
-                    ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
-                }
+                ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
+                ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                 ConfigManager.getInstance().saveConfig();
                 FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
                 if (favoritesListWidget != null)
@@ -704,9 +704,8 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 return ViewSearchBuilder.builder().addUsagesFor(stack).open();
             } else if (visible && ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
                 FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack);
-                if (!ConfigObject.getInstance().getFavoriteEntries().contains(favoriteEntry)) {
-                    ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
-                }
+                ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
+                ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                 ConfigManager.getInstance().saveConfig();
                 FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
                 if (favoritesListWidget != null)

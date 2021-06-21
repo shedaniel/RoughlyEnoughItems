@@ -385,8 +385,10 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                     FavoriteEntry favoriteEntry = asFavoriteEntry();
                     if (reverseFavoritesAction())
                         ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                    else if (!ConfigObject.getInstance().getFavoriteEntries().contains(favoriteEntry))
+                    else {
+                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
                         ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
+                    }
                     ConfigManager.getInstance().saveConfig();
                     FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
                     if (favoritesListWidget != null)
@@ -432,8 +434,10 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                     FavoriteEntry favoriteEntry = asFavoriteEntry();
                     if (reverseFavoritesAction())
                         ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                    else if (!ConfigObject.getInstance().getFavoriteEntries().contains(favoriteEntry))
+                    else {
+                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
                         ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
+                    }
                     ConfigManager.getInstance().saveConfig();
                     FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
                     if (favoritesListWidget != null)

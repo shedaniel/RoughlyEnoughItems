@@ -23,15 +23,30 @@
 
 package me.shedaniel.rei.impl.common.entry.comparison;
 
+import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public class ItemComparatorRegistryImpl extends EntryComparatorRegistryImpl<ItemStack, Item> implements ItemComparatorRegistry {
+    private final EntryComparator<ItemStack> itemNbt = EntryComparator.itemNbt();
+    private final EntryComparator<ItemStack> defaultComparator = (context, stack) -> {
+        if (context.isExact()) {
+            return itemNbt.hash(context, stack);
+        } else {
+            return 1;
+        }
+    };
+    
     @Override
     public Item getEntry(ItemStack stack) {
         return stack.getItem();
+    }
+    
+    @Override
+    public EntryComparator<ItemStack> defaultComparator() {
+        return defaultComparator;
     }
     
     @Override
