@@ -346,7 +346,8 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
             try {
                 component.ifPresent(tooltipComponent -> tooltip.add(ClientTooltipComponent.create(tooltipComponent)));
             } catch (IllegalArgumentException exception) {
-                throw new IllegalArgumentException("Failed to add tooltip component! " + component.orElse(null), exception);
+                TooltipComponent tooltipComponent = component.orElse(null);
+                throw new IllegalArgumentException("Failed to add tooltip component! " + tooltipComponent + ", Class: " + (tooltipComponent == null ? null : tooltipComponent.getClass().getCanonicalName()), exception);
             }
             for (int i = 1; i < components.size(); i++) {
                 tooltip.add(components.get(i));
