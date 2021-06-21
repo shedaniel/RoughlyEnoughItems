@@ -53,13 +53,15 @@ public abstract class EntryComparatorRegistryImpl<T, S> implements EntryComparat
     
     public abstract S getEntry(T stack);
     
+    public abstract EntryComparator<T> defaultComparator();
+    
     @Override
     public long hashOf(ComparisonContext context, T stack) {
         EntryComparator<T> comparator = comparators.get(getEntry(stack));
         if (comparator != null) {
             return comparator.hash(context, stack);
         }
-        return 1;
+        return defaultComparator().hash(context, stack);
     }
     
     @Override

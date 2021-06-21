@@ -461,7 +461,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             }
             
             double x = position.x - 8;
-            double y = position.y - 8;
+            double y = position.y + scrolling.scrollAmount - 8;
             
             return Mth.clamp(entriesPoints.stream()
                             .filter(value -> {
@@ -486,7 +486,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     public void drop(Entry entry, DraggableStack stack, FavoriteEntry favoriteEntry) {
         DraggingContext<?> context = DraggingContext.getInstance();
         double x = context.getCurrentPosition().x;
-        double y = context.getCurrentPosition().y;
+        double y = context.getCurrentPosition().y + scrolling.scrollAmount;
         entry.startedDraggingPosition = null;
         
         entry.x.setAs(x - 8);
