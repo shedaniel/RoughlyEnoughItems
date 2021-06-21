@@ -80,7 +80,14 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     private EntryRenderer<ItemStack> renderer;
     
     public ItemEntryDefinition() {
-        EnvExecutor.runInEnv(Env.CLIENT, () -> () -> renderer = new ItemEntryRenderer());
+        EnvExecutor.runInEnv(Env.CLIENT, () -> () -> Client.init(this));
+    }
+    
+    @Environment(EnvType.CLIENT)
+    private static class Client {
+        private static void init(ItemEntryDefinition definition) {
+            definition.renderer = definition.new ItemEntryRenderer();
+        }
     }
     
     @Override
@@ -188,6 +195,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getItem());
     }
     
+    @Environment(EnvType.CLIENT)
     private List<Component> tryGetItemStackToolTip(EntryStack<ItemStack> entry, ItemStack value, boolean careAboutAdvanced) {
         if (!SEARCH_BLACKLISTED.contains(value.getItem()))
             try {
@@ -335,7 +343,11 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
             if (!components.isEmpty()) {
                 tooltip.add(components.get(0));
             }
-            component.ifPresent(tooltipComponent -> tooltip.add(ClientTooltipComponent.create(tooltipComponent)));
+            try {
+                component.ifPresent(tooltipComponent -> tooltip.add(ClientTooltipComponent.create(tooltipComponent)));
+            } catch (IllegalArgumentException exception) {
+                throw new IllegalArgumentException("Failed to add tooltip component! " + component.orElse(null), exception);
+            }
             for (int i = 1; i < components.size(); i++) {
                 tooltip.add(components.get(i));
             }

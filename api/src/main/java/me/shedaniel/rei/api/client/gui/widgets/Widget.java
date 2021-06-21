@@ -28,6 +28,8 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
 import me.shedaniel.rei.api.client.gui.Renderer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 
@@ -36,6 +38,7 @@ import net.minecraft.client.gui.Font;
  *
  * @see WidgetWithBounds for a widget with bounds
  */
+@Environment(EnvType.CLIENT)
 public abstract class Widget extends AbstractContainerEventHandler implements net.minecraft.client.gui.components.Widget, Renderer {
     
     /**

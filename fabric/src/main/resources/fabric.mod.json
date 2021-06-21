@@ -24,6 +24,7 @@
     ],
     "rei": [
       "me.shedaniel.rei.plugin.common.DefaultPlugin",
+      "me.shedaniel.rei.plugin.common.DefaultRuntimePlugin",
       "me.shedaniel.rei.plugin.client.DefaultClientPlugin",
       "me.shedaniel.rei.plugin.client.DefaultClientRuntimePlugin"
     ]

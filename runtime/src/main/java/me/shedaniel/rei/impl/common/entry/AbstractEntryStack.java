@@ -32,14 +32,16 @@ import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
-import me.shedaniel.rei.api.client.gui.AbstractRenderer;
+import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.client.util.CrashReportUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -53,9 +55,23 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 
 @ApiStatus.Internal
-public abstract class AbstractEntryStack<A> extends AbstractRenderer implements EntryStack<A> {
+public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
     private static final Short2ObjectMap<Object> EMPTY_SETTINGS = Short2ObjectMaps.emptyMap();
     private Short2ObjectMap<Object> settings = null;
+    @Environment(EnvType.CLIENT)
+    private int blitOffset;
+    
+    @Override
+    @Environment(EnvType.CLIENT)
+    public int getZ() {
+        return blitOffset;
+    }
+    
+    @Override
+    @Environment(EnvType.CLIENT)
+    public void setZ(int z) {
+        this.blitOffset = z;
+    }
     
     @Override
     public <T> EntryStack<A> setting(Settings<T> settings, T value) {
@@ -150,24 +166,36 @@ public abstract class AbstractEntryStack<A> extends AbstractRenderer implements 
     
     @Override
     public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-        this.getRenderer().render(this, matrices, bounds, mouseX, mouseY, delta);
+        try {
+            this.getRenderer().render(this, matrices, bounds, mouseX, mouseY, delta);
+        } catch (Throwable throwable) {
+            CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry");
+            CrashReportUtils.renderer(report, this);
+            throw new ReportedException(report);
+        }
     }
     
     @Override
     @Nullable
     public Tooltip getTooltip(Point mouse, boolean appendModName) {
-        Mutable<Tooltip> tooltip = new MutableObject<>(getRenderer().<A>cast().getTooltip(this, mouse));
-        if (tooltip.getValue() == null) return null;
-        tooltip.getValue().addAllTexts(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
-        tooltip.setValue(get(Settings.TOOLTIP_PROCESSOR).apply(this, tooltip.getValue()));
-        if (tooltip.getValue() == null) return null;
-        if (appendModName) {
-            ResourceLocation location = getIdentifier();
-            if (location != null) {
-                ClientHelper.getInstance().appendModIdToTooltips(tooltip.getValue(), location.getNamespace());
+        try {
+            Mutable<Tooltip> tooltip = new MutableObject<>(getRenderer().<A>cast().getTooltip(this, mouse));
+            if (tooltip.getValue() == null) return null;
+            tooltip.getValue().addAllTexts(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
+            tooltip.setValue(get(Settings.TOOLTIP_PROCESSOR).apply(this, tooltip.getValue()));
+            if (tooltip.getValue() == null) return null;
+            if (appendModName) {
+                ResourceLocation location = getIdentifier();
+                if (location != null) {
+                    ClientHelper.getInstance().appendModIdToTooltips(tooltip.getValue(), location.getNamespace());
+                }
             }
+            return tooltip.getValue();
+        } catch (Throwable throwable) {
+            CrashReport report = CrashReportUtils.essential(throwable, "Getting tooltips");
+            CrashReportUtils.renderer(report, this);
+            throw new ReportedException(report);
         }
-        return tooltip.getValue();
     }
     
     @Override
@@ -205,7 +233,7 @@ public abstract class AbstractEntryStack<A> extends AbstractRenderer implements 
     
     @Override
     public void fillCrashReport(CrashReport report, CrashReportCategory category) {
-        super.fillCrashReport(report, category);
+        EntryStack.super.fillCrashReport(report, category);
         category.setDetail("Entry type", () -> String.valueOf(getType().getId()));
         category.setDetail("Is empty", () -> String.valueOf(isEmpty()));
         category.setDetail("Entry identifier", () -> String.valueOf(getIdentifier()));
