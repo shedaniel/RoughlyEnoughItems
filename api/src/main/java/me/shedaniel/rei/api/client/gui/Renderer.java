@@ -44,8 +44,10 @@ public interface Renderer {
         return null;
     }
     
+    @Environment(EnvType.CLIENT)
     int getZ();
     
+    @Environment(EnvType.CLIENT)
     void setZ(int z);
     
     default void fillCrashReport(CrashReport report, CrashReportCategory category) {

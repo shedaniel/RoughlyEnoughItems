@@ -84,7 +84,14 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     private EntryRenderer<FluidStack> renderer;
     
     public FluidEntryDefinition() {
-        EnvExecutor.runInEnv(Env.CLIENT, () -> () -> renderer = new FluidEntryRenderer());
+        EnvExecutor.runInEnv(Env.CLIENT, () -> () -> Client.init(this));
+    }
+    
+    @Environment(EnvType.CLIENT)
+    private static class Client {
+        private static void init(FluidEntryDefinition definition) {
+            definition.renderer = new FluidEntryRenderer();
+        }
     }
     
     @Override
@@ -189,6 +196,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
         category.setDetail("Fluid NBT", () -> String.valueOf(stack.getTag()));
     }
     
+    @Environment(EnvType.CLIENT)
     public static class FluidEntryRenderer extends AbstractEntryRenderer<FluidStack> implements BatchedEntryRenderer<FluidStack, TextureAtlasSprite> {
         private static final Supplier<TextureAtlasSprite> MISSING_SPRITE = Suppliers.memoize(() -> {
             TextureAtlas atlas = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);

@@ -25,7 +25,6 @@ package me.shedaniel.rei.plugin.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.event.CompoundEventResult;
 import dev.architectury.fluid.FluidStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -49,9 +48,7 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
@@ -59,8 +56,6 @@ import me.shedaniel.rei.impl.client.gui.screen.AbstractDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.widget.FavoritesListWidget;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
-import me.shedaniel.rei.plugin.client.entry.FluidEntryDefinition;
-import me.shedaniel.rei.plugin.client.entry.ItemEntryDefinition;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
@@ -74,29 +69,11 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
 @ApiStatus.Internal
 public class DefaultClientRuntimePlugin implements REIClientPlugin {
-    public static final ResourceLocation PLUGIN = new ResourceLocation("roughlyenoughitems", "default_runtime_plugin");
-    
-    @Override
-    public void registerEntryTypes(EntryTypeRegistry registry) {
-        registry.register(VanillaEntryTypes.ITEM, new ItemEntryDefinition());
-        registry.register(VanillaEntryTypes.FLUID, new FluidEntryDefinition());
-        
-        registry.registerBridge(VanillaEntryTypes.ITEM, VanillaEntryTypes.FLUID, input -> {
-            Optional<Stream<EntryStack<FluidStack>>> stream = FluidSupportProvider.getInstance().itemToFluids(input);
-            if (!stream.isPresent()) {
-                return CompoundEventResult.pass();
-            }
-            return CompoundEventResult.interruptTrue(stream.get());
-        });
-    }
-    
     @Override
     public void registerEntries(EntryRegistry registry) {
         if (ClientHelperImpl.getInstance().isAprilFools.get()) {
