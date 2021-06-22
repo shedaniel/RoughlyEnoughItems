@@ -33,6 +33,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
@@ -45,14 +46,16 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public class QueuedTooltip implements Tooltip {
     private Point location;
-    private List<Tooltip.Entry> components;
+    private List<Tooltip.Entry> entries;
+    private List<TooltipComponent> components;
     
-    private QueuedTooltip(Point location, Collection<Tooltip.Entry> components) {
+    private QueuedTooltip(Point location, Collection<Tooltip.Entry> entries) {
         this.location = location;
         if (this.location == null) {
             this.location = PointHelper.ofMouse();
         }
-        this.components = Lists.newArrayList(components);
+        this.entries = Lists.newArrayList(entries);
+        this.components = Lists.newArrayList();
     }
     
     public static QueuedTooltip impl(Point location, Collection<Tooltip.Entry> text) {
@@ -71,23 +74,34 @@ public class QueuedTooltip implements Tooltip {
     
     @Override
     public List<Component> getText() {
-        return CollectionUtils.filterAndMap(components, Tooltip.Entry::isText, Tooltip.Entry::getAsText);
+        return CollectionUtils.filterAndMap(entries, Tooltip.Entry::isText, Tooltip.Entry::getAsText);
     }
     
     @Override
     public List<Entry> entries() {
+        return entries;
+    }
+    
+    @Override
+    public List<TooltipComponent> components() {
         return components;
     }
     
     @Override
     public Tooltip add(Component text) {
-        components.add(new TooltipEntryImpl(text));
+        entries.add(new TooltipEntryImpl(text));
         return this;
     }
     
     @Override
     public Tooltip add(ClientTooltipComponent component) {
-        components.add(new TooltipEntryImpl(component));
+        entries.add(new TooltipEntryImpl(component));
+        return this;
+    }
+    
+    @Override
+    public Tooltip add(TooltipComponent component) {
+        components.add(component);
         return this;
     }
     
