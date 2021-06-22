@@ -32,6 +32,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -91,9 +92,13 @@ public interface Tooltip {
     
     List<Entry> entries();
     
+    List<TooltipComponent> components();
+    
     Tooltip add(ClientTooltipComponent component);
     
     Tooltip add(Component text);
+    
+    Tooltip add(TooltipComponent component);
     
     default Tooltip addAll(ClientTooltipComponent... components) {
         for (ClientTooltipComponent component : components) {

@@ -57,6 +57,7 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
+import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
@@ -90,6 +91,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
@@ -549,7 +551,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public void renderTooltip(PoseStack matrices, Tooltip tooltip) {
-        renderTooltipInner(matrices, tooltip.entries().stream()
+        List<ClientTooltipComponent> lines = tooltip.entries().stream()
                 .flatMap(component -> {
                     if (component.isText()) {
                         return Minecraft.getInstance().font.getSplitter().splitLines(component.getAsText(), 100000, Style.EMPTY).stream()
@@ -559,7 +561,15 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                         return Stream.of(component.getAsComponent());
                     }
                 })
-                .collect(Collectors.toList()), tooltip.getX(), tooltip.getY());
+                .collect(Collectors.toList());
+        for (TooltipComponent component : tooltip.components()) {
+            try {
+                ClientInternals.getClientTooltipComponent(lines, component);
+            } catch (Throwable exception) {
+                throw new IllegalArgumentException("Failed to add tooltip component! " + component + ", Class: " + (component == null ? null : component.getClass().getCanonicalName()), exception);
+            }
+        }
+        renderTooltipInner(matrices, lines, tooltip.getX(), tooltip.getY());
     }
     
     public void renderTooltipInner(PoseStack matrices, List<ClientTooltipComponent> lines, int mouseX, int mouseY) {

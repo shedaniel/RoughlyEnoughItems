@@ -51,7 +51,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -343,12 +342,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
             if (!components.isEmpty()) {
                 tooltip.add(components.get(0));
             }
-            try {
-                component.ifPresent(tooltipComponent -> tooltip.add(ClientTooltipComponent.create(tooltipComponent)));
-            } catch (IllegalArgumentException exception) {
-                TooltipComponent tooltipComponent = component.orElse(null);
-                throw new IllegalArgumentException("Failed to add tooltip component! " + tooltipComponent + ", Class: " + (tooltipComponent == null ? null : tooltipComponent.getClass().getCanonicalName()), exception);
-            }
+            component.ifPresent(tooltip::add);
             for (int i = 1; i < components.size(); i++) {
                 tooltip.add(components.get(i));
             }
