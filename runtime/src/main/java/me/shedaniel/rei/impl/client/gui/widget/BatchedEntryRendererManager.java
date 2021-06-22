@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Iterables;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -45,7 +46,7 @@ import java.util.List;
 
 public class BatchedEntryRendererManager {
     private boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
-    private Int2ObjectMap<List<EntryWidget>> grouping = new Int2ObjectOpenHashMap<>();
+    private Int2ObjectMap<List<Object>> grouping = new Int2ObjectOpenHashMap<>();
     private List<EntryWidget> toRender = new ArrayList<>();
     
     public BatchedEntryRendererManager() {
@@ -68,20 +69,28 @@ public class BatchedEntryRendererManager {
     public void add(EntryWidget widget) {
         if (fastEntryRendering) {
             EntryStack<?> currentEntry = widget.getCurrentEntry();
-            EntryRenderer<?> renderer = currentEntry.getRenderer();
-            if (renderer instanceof BatchedEntryRenderer) {
-                BatchedEntryRenderer<Object, Object> batchedRenderer = (BatchedEntryRenderer<Object, Object>) renderer;
-                EntryStack<Object> cast = currentEntry.cast();
-                if (batchedRenderer.isBatched(cast)) {
-                    int hash = batchedRenderer.getBatchIdentifier(cast, widget.getBounds(), batchedRenderer.getExtraData(cast))
-                               ^ widget.getCurrentEntry().getType().hashCode();
-                    List<EntryWidget> entries = grouping.get(hash);
-                    if (entries == null) {
-                        grouping.put(hash, entries = new ArrayList<>());
+            try {
+                EntryRenderer<?> renderer = currentEntry.getRenderer();
+                if (renderer instanceof BatchedEntryRenderer) {
+                    BatchedEntryRenderer<Object, Object> batchedRenderer = (BatchedEntryRenderer<Object, Object>) renderer;
+                    EntryStack<Object> cast = currentEntry.cast();
+                    if (batchedRenderer.isBatched(cast)) {
+                        Object extraData = batchedRenderer.getExtraData(cast);
+                        int hash = batchedRenderer.getBatchIdentifier(cast, widget.getBounds(), extraData)
+                                   ^ widget.getCurrentEntry().getType().hashCode();
+                        List<Object> entries = grouping.get(hash);
+                        if (entries == null) {
+                            grouping.put(hash, entries = new ArrayList<>());
+                        }
+                        entries.add(widget);
+                        entries.add(extraData);
+                        return;
                     }
-                    entries.add(widget);
-                    return;
                 }
+            } catch (Throwable throwable) {
+                CrashReport report = CrashReportUtils.essential(throwable, "Adding entry");
+                CrashReportUtils.renderer(report, currentEntry);
+                throw new ReportedException(report);
             }
         }
         toRender.add(widget);
@@ -93,8 +102,24 @@ public class BatchedEntryRendererManager {
     
     public void render(boolean debugTime, MutableInt size, MutableLong time, PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (fastEntryRendering) {
-            for (List<EntryWidget> entries : grouping.values()) {
-                renderEntries(debugTime, size, time, fastEntryRendering, matrices, mouseX, mouseY, delta, entries);
+            for (List<Object> entries : grouping.values()) {
+                Object[] extraData = new Object[entries.size() / 2];
+                for (int i = 0; i < extraData.length; i++) {
+                    extraData[i] = entries.get(i * 2 + 1);
+                }
+                renderBatched(debugTime, size, time, matrices, mouseX, mouseY, delta, () -> new AbstractIterator<>() {
+                    public int i = 0;
+                    
+                    @Override
+                    protected EntryWidget computeNext() {
+                        if (i >= entries.size()) {
+                            return endOfData();
+                        }
+                        EntryWidget widget = (EntryWidget) entries.get(i);
+                        i += 2;
+                        return widget;
+                    }
+                }, extraData);
             }
         }
         if (!toRender.isEmpty()) {
