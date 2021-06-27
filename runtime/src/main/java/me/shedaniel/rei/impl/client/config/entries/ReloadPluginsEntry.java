@@ -36,7 +36,6 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Unit;
@@ -95,11 +94,6 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     
     @Override
     public List<? extends GuiEventListener> children() {
-        return children;
-    }
-    
-    @Override
-    public List<? extends NarratableEntry> narratables() {
         return children;
     }
 }

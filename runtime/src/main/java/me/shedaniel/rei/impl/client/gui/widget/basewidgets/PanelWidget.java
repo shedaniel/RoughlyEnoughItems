@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.config.RecipeBorderType;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
@@ -120,8 +121,8 @@ public final class PanelWidget extends Panel {
         float red = ((color >> 16) & 0xFF) / 255f;
         float green = ((color >> 8) & 0xFF) / 255f;
         float blue = (color & 0xFF) / 255f;
-        RenderSystem.setShaderColor(red, green, blue, alpha);
-        RenderSystem.setShaderTexture(0, REIRuntime.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
+        RenderSystem.color4f(red, green, blue, alpha);
+        Minecraft.getInstance().getTextureManager().bind(REIRuntime.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
         int xTextureOffset = getXTextureOffset();
         int yTextureOffset = getYTextureOffset();

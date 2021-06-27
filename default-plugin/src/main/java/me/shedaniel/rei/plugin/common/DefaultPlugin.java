@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.plugin.common;
 
-import dev.architectury.event.CompoundEventResult;
-import dev.architectury.hooks.fluid.FluidStackHooks;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.injectables.annotations.PlatformOnly;
-import dev.architectury.platform.Platform;
-import dev.architectury.utils.NbtType;
+import me.shedaniel.architectury.event.CompoundEventResult;
+import me.shedaniel.architectury.hooks.FluidStackHooks;
+import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
@@ -51,7 +51,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.inventory.*;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -66,13 +69,13 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
         Function<ItemStack, ListTag> enchantmentTag = stack -> {
             CompoundTag tag = stack.getTag();
             if (tag == null) return null;
-            if (!tag.contains(ItemStack.TAG_ENCH, NbtType.LIST)) {
-                if (tag.contains(EnchantedBookItem.TAG_STORED_ENCHANTMENTS, NbtType.LIST)) {
-                    return tag.getList(EnchantedBookItem.TAG_STORED_ENCHANTMENTS, NbtType.COMPOUND);
+            if (!tag.contains("Enchantments", NbtType.LIST)) {
+                if (tag.contains("StoredEnchantments", NbtType.LIST)) {
+                    return tag.getList("StoredEnchantments", NbtType.COMPOUND);
                 }
                 return null;
             }
-            return tag.getList(ItemStack.TAG_ENCH, NbtType.COMPOUND);
+            return tag.getList("Enchantments", NbtType.COMPOUND);
         };
         registry.register((context, stack) -> nbtHasher.hash(context, enchantmentTag.apply(stack)), Items.ENCHANTED_BOOK);
         registry.registerNbt(Items.POTION);
@@ -86,8 +89,8 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
         support.register(entry -> {
             ItemStack stack = entry.getValue();
             Item item = stack.getItem();
-            if (item instanceof BucketItem bucketItem) {
-                Fluid fluid = bucketItem.content;
+            if (item instanceof BucketItem) {
+                Fluid fluid = ((BucketItem) item).content;
                 if (fluid != null) {
                     return CompoundEventResult.interruptTrue(Stream.of(EntryStacks.of(fluid, FluidStackHooks.bucketAmount())));
                 }

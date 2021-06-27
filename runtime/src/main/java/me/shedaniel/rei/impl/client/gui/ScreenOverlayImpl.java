@@ -28,6 +28,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector4f;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -57,7 +58,6 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
-import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
@@ -76,22 +76,18 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
@@ -101,8 +97,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class ScreenOverlayImpl extends ScreenOverlay {
@@ -308,7 +302,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                                         }),
                                 Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
                                     helper.setBlitOffset(helper.getBlitOffset() + 1);
-                                    RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
+                                    Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
                                     helper.blit(matrices, configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
                                 })
                         ),
@@ -483,7 +477,8 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         if (OverlaySearchField.isHighlighting) {
             matrices.pushPose();
             matrices.translate(0, 0, 200f);
-            if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> containerScreen) {
+            if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>) {
+                AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) Minecraft.getInstance().screen;
                 int x = containerScreen.leftPos, y = containerScreen.topPos;
                 for (Slot slot : containerScreen.getMenu().slots) {
                     if (!slot.hasItem() || !ENTRY_LIST_WIDGET.matches(EntryStacks.of(slot.getItem()))) {
@@ -493,7 +488,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             }
             matrices.popPose();
         }
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.renderWidgets(matrices, mouseX, mouseY, delta);
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             Screen screen = Minecraft.getInstance().screen;
@@ -551,35 +546,15 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public void renderTooltip(PoseStack matrices, Tooltip tooltip) {
-        List<ClientTooltipComponent> lines = tooltip.entries().stream()
-                .flatMap(component -> {
-                    if (component.isText()) {
-                        return Minecraft.getInstance().font.getSplitter().splitLines(component.getAsText(), 100000, Style.EMPTY).stream()
-                                .map(Language.getInstance()::getVisualOrder)
-                                .map(ClientTooltipComponent::create);
-                    } else {
-                        return Stream.of(component.getAsComponent());
-                    }
-                })
-                .collect(Collectors.toList());
-        for (TooltipComponent component : tooltip.components()) {
-            try {
-                ClientInternals.getClientTooltipComponent(lines, component);
-            } catch (Throwable exception) {
-                throw new IllegalArgumentException("Failed to add tooltip component! " + component + ", Class: " + (component == null ? null : component.getClass().getCanonicalName()), exception);
-            }
-        }
-        renderTooltipInner(matrices, lines, tooltip.getX(), tooltip.getY());
-    }
-    
-    public void renderTooltipInner(PoseStack matrices, List<ClientTooltipComponent> lines, int mouseX, int mouseY) {
-        if (lines.isEmpty()) {
+        if (tooltip.getText().isEmpty()) {
             return;
         }
-        matrices.pushPose();
-        matrices.translate(0, 0, 500);
-        minecraft.screen.renderTooltipInternal(matrices, lines, mouseX, mouseY);
-        matrices.popPose();
+        renderTooltipInner(minecraft.screen, matrices, tooltip, tooltip.getX(), tooltip.getY());
+    }
+    
+    @ExpectPlatform
+    public static void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
+        throw new AssertionError();
     }
     
     public void addTooltip(@Nullable Tooltip tooltip) {

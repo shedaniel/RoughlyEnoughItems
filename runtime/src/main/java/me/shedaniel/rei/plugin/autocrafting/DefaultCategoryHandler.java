@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.plugin.autocrafting;
 
-import dev.architectury.networking.NetworkManager;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
@@ -56,8 +56,9 @@ import java.util.List;
 public class DefaultCategoryHandler implements TransferHandler {
     @Override
     public Result handle(Context context) {
-        if (!(context.getDisplay() instanceof SimpleGridMenuDisplay display))
+        if (!(context.getDisplay() instanceof SimpleGridMenuDisplay))
             return Result.createNotApplicable();
+        SimpleGridMenuDisplay display = (SimpleGridMenuDisplay) context.getDisplay();
         AbstractContainerScreen<?> containerScreen = context.getContainerScreen();
         if (containerScreen == null) {
             return Result.createNotApplicable();
@@ -86,8 +87,8 @@ public class DefaultCategoryHandler implements TransferHandler {
         }
         
         context.getMinecraft().setScreen(containerScreen);
-        if (containerScreen instanceof RecipeUpdateListener listener) {
-            listener.getRecipeBookComponent().ghostRecipe.clear();
+        if (containerScreen instanceof RecipeUpdateListener) {
+            ((RecipeUpdateListener) containerScreen).getRecipeBookComponent().ghostRecipe.clear();
         }
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         buf.writeResourceLocation(display.getCategoryIdentifier().getIdentifier());

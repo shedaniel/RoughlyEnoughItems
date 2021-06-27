@@ -43,6 +43,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class CurrentDraggingStack extends Widget implements LateRenderable, DraggingContext<Screen> {
     private DraggableStackProvider<Screen> provider;
@@ -201,7 +202,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
         
         public DraggableStackVisitor.BoundsProvider getBoundsProvider() {
             if (boundsProvider == null) {
-                boundsProvider = DraggableStackVisitor.BoundsProvider.concat(visitor.getDraggableAcceptingBounds(CurrentDraggingStack.this, stack).toList());
+                boundsProvider = DraggableStackVisitor.BoundsProvider.concat(visitor.getDraggableAcceptingBounds(CurrentDraggingStack.this, stack).collect(Collectors.toList()));
             }
             
             return boundsProvider;
@@ -222,8 +223,8 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof ShapeBounds shapeBounds)) return false;
-            return hash == shapeBounds.hash;
+            if (!(o instanceof ShapeBounds)) return false;
+            return hash == ((ShapeBounds) o).hash;
         }
         
         @Override

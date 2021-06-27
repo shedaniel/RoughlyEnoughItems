@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.impl.common.entry;
 
-import dev.architectury.platform.Platform;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
@@ -61,7 +61,7 @@ public enum DeferringEntryTypeProviderImpl implements Function<ResourceLocation,
     public EntryType<Unit> emptyType(ResourceLocation id) {
         if (empty == null) {
             int hashCode = id.hashCode();
-            empty = new EntryType<>() {
+            empty = new EntryType<Unit>() {
                 @Override
                 public ResourceLocation getId() {
                     return id;
@@ -85,7 +85,7 @@ public enum DeferringEntryTypeProviderImpl implements Function<ResourceLocation,
     public EntryType<Renderer> renderingType(ResourceLocation id) {
         if (render == null) {
             int hashCode = id.hashCode();
-            render = new EntryType<>() {
+            render = new EntryType<Renderer>() {
                 @Override
                 public ResourceLocation getId() {
                     return id;

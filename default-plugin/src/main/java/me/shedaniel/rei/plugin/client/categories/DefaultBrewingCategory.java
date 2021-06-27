@@ -38,6 +38,7 @@ import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.brewing.DefaultBrewingDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
@@ -69,7 +70,7 @@ public class DefaultBrewingCategory implements DisplayCategory<DefaultBrewingDis
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));
         widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            RenderSystem.setShaderTexture(0, REIRuntime.getInstance().getDefaultDisplayTexture());
+            Minecraft.getInstance().getTextureManager().bind(REIRuntime.getInstance().getDefaultDisplayTexture());
             helper.blit(matrices, startPoint.x, startPoint.y, 0, 108, 103, 59);
             int width = Mth.ceil(System.currentTimeMillis() / 250d % 18d);
             helper.blit(matrices, startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);

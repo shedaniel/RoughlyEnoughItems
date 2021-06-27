@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.client.registry.screen;
 
-import dev.architectury.event.CompoundEventResult;
+import me.shedaniel.architectury.event.CompoundEventResult;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.fabricmc.api.EnvType;

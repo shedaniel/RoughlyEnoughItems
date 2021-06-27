@@ -30,6 +30,7 @@ import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -215,7 +216,7 @@ public class SpriteRenderer {
             float sX = sprite.getWidth();
             float sY = sprite.getHeight();
             
-            RenderSystem.setShaderTexture(0, texture);
+            Minecraft.getInstance().getTextureManager().bind(texture);
             
             for (float y = y1; y < y2; y += Math.min(y2 - y, sY)) {
                 for (float x = x1; x < x2; x += Math.min(x2 - x, sX)) {

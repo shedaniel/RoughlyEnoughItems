@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei;
 
-import dev.architectury.platform.Platform;
-import dev.architectury.registry.ReloadListenerRegistry;
-import dev.architectury.utils.Env;
-import dev.architectury.utils.EnvExecutor;
+import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.registry.ReloadListeners;
+import me.shedaniel.architectury.utils.Env;
+import me.shedaniel.architectury.utils.EnvExecutor;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
@@ -129,7 +129,7 @@ public class RoughlyEnoughItemsCore {
         
         if (Platform.getEnvironment() == Env.SERVER) {
             MutableLong lastReload = new MutableLong(-1);
-            ReloadListenerRegistry.register(PackType.SERVER_DATA, (preparationBarrier, resourceManager, profilerFiller, profilerFiller2, executor, executor2) -> {
+            ReloadListeners.registerReloadListener(PackType.SERVER_DATA, (preparationBarrier, resourceManager, profilerFiller, profilerFiller2, executor, executor2) -> {
                 return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(RoughlyEnoughItemsCore::_reloadPlugins, executor2);
             });
         }

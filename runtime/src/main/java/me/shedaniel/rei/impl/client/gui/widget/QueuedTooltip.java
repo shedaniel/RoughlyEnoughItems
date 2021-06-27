@@ -28,12 +28,10 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
@@ -46,19 +44,18 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public class QueuedTooltip implements Tooltip {
     private Point location;
-    private List<Tooltip.Entry> entries;
-    private List<TooltipComponent> components;
+    private List<Component> entries;
+    private EntryStack<?> stack = EntryStack.empty();
     
-    private QueuedTooltip(Point location, Collection<Tooltip.Entry> entries) {
+    private QueuedTooltip(Point location, Collection<Component> entries) {
         this.location = location;
         if (this.location == null) {
             this.location = PointHelper.ofMouse();
         }
         this.entries = Lists.newArrayList(entries);
-        this.components = Lists.newArrayList();
     }
     
-    public static QueuedTooltip impl(Point location, Collection<Tooltip.Entry> text) {
+    public static QueuedTooltip impl(Point location, Collection<Component> text) {
         return new QueuedTooltip(location, text);
     }
     
@@ -74,34 +71,12 @@ public class QueuedTooltip implements Tooltip {
     
     @Override
     public List<Component> getText() {
-        return CollectionUtils.filterAndMap(entries, Tooltip.Entry::isText, Tooltip.Entry::getAsText);
-    }
-    
-    @Override
-    public List<Entry> entries() {
         return entries;
     }
     
     @Override
-    public List<TooltipComponent> components() {
-        return components;
-    }
-    
-    @Override
     public Tooltip add(Component text) {
-        entries.add(new TooltipEntryImpl(text));
-        return this;
-    }
-    
-    @Override
-    public Tooltip add(ClientTooltipComponent component) {
-        entries.add(new TooltipEntryImpl(component));
-        return this;
-    }
-    
-    @Override
-    public Tooltip add(TooltipComponent component) {
-        components.add(component);
+        entries.add(text);
         return this;
     }
     
@@ -110,20 +85,14 @@ public class QueuedTooltip implements Tooltip {
         Tooltip.super.queue();
     }
     
-    public record TooltipEntryImpl(Object obj) implements Tooltip.Entry {
-        @Override
-        public Component getAsText() {
-            return (Component) obj;
-        }
-        
-        @Override
-        public boolean isText() {
-            return obj instanceof Component;
-        }
-        
-        @Override
-        public ClientTooltipComponent getAsComponent() {
-            return (ClientTooltipComponent) obj;
-        }
+    @Override
+    public EntryStack<?> getContextStack() {
+        return stack;
+    }
+    
+    @Override
+    public Tooltip withContextStack(EntryStack<?> stack) {
+        this.stack = stack.copy();
+        return this;
     }
 }

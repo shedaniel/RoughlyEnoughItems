@@ -53,8 +53,8 @@ public interface Renderer {
     default void fillCrashReport(CrashReport report, CrashReportCategory category) {
         category.setDetail("Renderer name", () -> getClass().getCanonicalName());
         category.setDetail("Z level", () -> String.valueOf(getZ()));
-        if (this instanceof WidgetWithBounds widget) {
-            category.setDetail("Bounds", () -> String.valueOf(widget.getBounds()));
+        if (this instanceof WidgetWithBounds) {
+            category.setDetail("Bounds", () -> String.valueOf(((WidgetWithBounds) this).getBounds()));
         }
     }
 }

@@ -21,36 +21,27 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.common.entry.comparison;
+package me.shedaniel.rei.impl.client.gui.fabric;
 
-import me.shedaniel.architectury.fluid.FluidStack;
-import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
-import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
-import me.shedaniel.rei.api.common.plugins.REIPlugin;
-import net.minecraft.world.level.material.Fluid;
+import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Style;
 
-public class FluidComparatorRegistryImpl extends EntryComparatorRegistryImpl<FluidStack, Fluid> implements FluidComparatorRegistry {
-    private final EntryComparator<FluidStack> fluidNbt = EntryComparator.fluidNbt();
-    private final EntryComparator<FluidStack> defaultComparator = (context, stack) -> {
-        if (context.isExact()) {
-            return fluidNbt.hash(context, stack);
-        } else {
-            return 1;
-        }
-    };
-    
-    @Override
-    public Fluid getEntry(FluidStack stack) {
-        return stack.getFluid();
-    }
-    
-    @Override
-    public EntryComparator<FluidStack> defaultComparator() {
-        return defaultComparator;
-    }
-    
-    @Override
-    public void acceptPlugin(REIPlugin<?> plugin) {
-        plugin.registerFluidComparators(this);
+import java.util.stream.Collectors;
+
+public class ScreenOverlayImplImpl {
+    public static void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
+        matrices.pushPose();
+        matrices.translate(0, 0, 500);
+        screen.renderTooltip(matrices, tooltip.getText().stream()
+                .flatMap(component -> {
+                    return Minecraft.getInstance().font.getSplitter().splitLines(component, 100000, Style.EMPTY).stream()
+                            .map(Language.getInstance()::getVisualOrder);
+                })
+                .collect(Collectors.toList()), mouseX, mouseY);
+        matrices.popPose();
     }
 }

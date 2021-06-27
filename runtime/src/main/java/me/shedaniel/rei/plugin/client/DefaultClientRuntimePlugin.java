@@ -23,11 +23,10 @@
 
 package me.shedaniel.rei.plugin.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
-import dev.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
@@ -60,6 +59,7 @@ import me.shedaniel.rei.impl.client.gui.widget.FavoritesListWidget;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
@@ -84,7 +84,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                 
                 @Override
                 public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                    RenderSystem.setShaderTexture(0, id);
+                    Minecraft.getInstance().getTextureManager().bind(id);
                     innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), 0, 1, 0, 1);
                 }
                 
@@ -175,8 +175,9 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         @Override
         public DataResult<EntryStackFavoriteEntry> fromArgsResult(Object... args) {
             if (args.length == 0) return DataResult.error("Cannot create EntryStackFavoriteEntry from empty args!");
-            if (!(args[0] instanceof EntryStack<?> stack))
+            if (!(args[0] instanceof EntryStack))
                 return DataResult.error("Creation of EntryStackFavoriteEntry from args expected EntryStack as the first argument!");
+            EntryStack<?> stack = (EntryStack<?>) args[0];
             if (!stack.supportSaving())
                 return DataResult.error("Creation of EntryStackFavoriteEntry from an unserializable stack!");
             return DataResult.success(new EntryStackFavoriteEntry(stack), Lifecycle.stable());
@@ -245,8 +246,8 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         
         @Override
         public boolean isSame(FavoriteEntry other) {
-            if (!(other instanceof EntryStackFavoriteEntry that)) return false;
-            return EntryStacks.equalsExact(stack, that.stack);
+            if (!(other instanceof EntryStackFavoriteEntry)) return false;
+            return EntryStacks.equalsExact(stack, ((EntryStackFavoriteEntry) other).stack);
         }
     }
 }

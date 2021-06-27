@@ -29,7 +29,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
-import dev.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
@@ -289,8 +289,8 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             matrices.popPose();
         }
         
-        if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
-            EntryStack<?> stack = EntryStacks.of(minecraft.player.containerMenu.getCarried().copy());
+        if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
+            EntryStack<?> stack = EntryStacks.of(minecraft.player.inventory.getCarried().copy());
             if (stack.getValueType() == FluidStack.class) {
                 Item bucketItem = ((FluidStack) stack.getValue()).getFluid().getBucket();
                 if (bucketItem != null) {
@@ -298,8 +298,8 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                 }
             }
             for (Widget child : children()) {
-                if (child.containsMouse(mouseX, mouseY) && child instanceof EntryWidget widget) {
-                    if (widget.cancelDeleteItems(stack)) {
+                if (child.containsMouse(mouseX, mouseY) && child instanceof EntryWidget) {
+                    if (((EntryWidget) child).cancelDeleteItems(stack)) {
                         return;
                     }
                 }
@@ -466,7 +466,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (containsMouse(mouseX, mouseY)) {
             LocalPlayer player = minecraft.player;
-            if (ClientHelper.getInstance().isCheating() && player != null && player.containerMenu != null && !player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
+            if (ClientHelper.getInstance().isCheating() && player != null && player.containerMenu != null && !player.inventory.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
                 ClientHelper.getInstance().sendDeletePacket();
                 return true;
             }

@@ -53,7 +53,7 @@ public interface DraggableStackVisitorWidget {
     }
     
     @ApiStatus.ScheduledForRemoval
-    @Deprecated(forRemoval = true)
+    @Deprecated
     default Optional<DraggableStackVisitor.Acceptor> visitDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
         return Optional.empty();
     }
@@ -93,7 +93,7 @@ public interface DraggableStackVisitorWidget {
     }
     
     static DraggableStackVisitor<Screen> toVisitor(DraggableStackVisitorWidget widget, double priority) {
-        return new DraggableStackVisitor<>() {
+        return new DraggableStackVisitor<Screen>() {
             @Override
             public boolean acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
                 return widget.acceptDraggedStack(context, stack);

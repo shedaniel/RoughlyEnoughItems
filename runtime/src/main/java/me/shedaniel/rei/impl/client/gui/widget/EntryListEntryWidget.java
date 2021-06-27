@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -51,7 +51,7 @@ public abstract class EntryListEntryWidget extends EntryWidget {
     
     @Override
     public void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (ClientHelper.getInstance().isCheating() && !minecraft.player.containerMenu.getCarried().isEmpty()) {
+        if (ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCarried().isEmpty()) {
             return;
         }
         super.queueTooltip(matrices, mouseX, mouseY, delta);

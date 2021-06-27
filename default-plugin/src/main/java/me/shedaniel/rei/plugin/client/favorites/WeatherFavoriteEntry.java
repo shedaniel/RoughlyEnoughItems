@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.plugin.client.favorites;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
@@ -125,7 +124,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
             }
             
             private void renderWeatherIcon(PoseStack matrices, Weather type, int centerX, int centerY, int color) {
-                RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
+                Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
                 blit(matrices, centerX - 7, centerY - 7, type.getId() * 14, 14, 14, 14, 256, 256);
             }
             
@@ -189,8 +188,8 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
     
     @Override
     public boolean isSame(FavoriteEntry other) {
-        if (!(other instanceof WeatherFavoriteEntry that)) return false;
-        return Objects.equals(weather, that.weather);
+        if (!(other instanceof WeatherFavoriteEntry)) return false;
+        return Objects.equals(weather, ((WeatherFavoriteEntry) other).weather);
     }
     
     public enum Type implements FavoriteEntryType<WeatherFavoriteEntry> {
@@ -206,9 +205,9 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
         @Override
         public DataResult<WeatherFavoriteEntry> fromArgsResult(Object... args) {
             if (args.length == 0) return DataResult.error("Cannot create WeatherFavoriteEntry from empty args!");
-            if (!(args[0] instanceof Weather weather))
+            if (!(args[0] instanceof Weather))
                 return DataResult.error("Creation of WeatherFavoriteEntry from args expected Weather as the first argument!");
-            return DataResult.success(new WeatherFavoriteEntry(weather), Lifecycle.stable());
+            return DataResult.success(new WeatherFavoriteEntry((Weather) args[0]), Lifecycle.stable());
         }
         
         @Override

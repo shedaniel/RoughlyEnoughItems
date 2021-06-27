@@ -51,8 +51,8 @@ public class ExportRecipeIdentifierToast implements Toast {
     
     @Override
     public Visibility render(PoseStack matrices, ToastComponent toastManager, long var2) {
-        RenderSystem.setShaderTexture(0, TEXTURE);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        Minecraft.getInstance().getTextureManager().bind(TEXTURE);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         toastManager.blit(matrices, 0, 0, 0, 0, 160, 32);
         if (this.subtitle == null) {
             toastManager.getMinecraft().font.draw(matrices, this.title, 18.0F, 12.0F, 11141120);

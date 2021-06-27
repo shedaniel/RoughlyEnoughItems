@@ -93,7 +93,7 @@ public interface SimplePlayerInventoryMenuInfo<T extends AbstractContainerMenu, 
     }
     
     default Iterable<SlotAccessor> getInventorySlots(MenuInfoContext<T, ?, D> context) {
-        Inventory inventory = context.getPlayerEntity().getInventory();
+        Inventory inventory = context.getPlayerEntity().inventory;
         return IntStream.range(0, inventory.items.size())
                 .mapToObj(index -> SlotAccessor.fromContainer(inventory, index))
                 .collect(Collectors.toList());

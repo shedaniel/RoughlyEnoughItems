@@ -24,11 +24,11 @@
 package me.shedaniel.rei.impl.client;
 
 import com.google.common.base.Suppliers;
-import dev.architectury.networking.NetworkManager;
-import dev.architectury.platform.Platform;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import me.shedaniel.architectury.networking.NetworkManager;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
@@ -57,11 +57,12 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.util.Mth;
-import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -135,8 +136,8 @@ public class ClientHelperImpl implements ClientHelper {
     public void appendModIdToTooltips(Tooltip components, String modId) {
         final String modName = ClientHelper.getInstance().getModFromModId(modId);
         boolean alreadyHasMod = false;
-        for (Tooltip.Entry s : components.entries())
-            if (s.isText() && FormattingUtils.stripFormatting(s.getAsText().getString()).equalsIgnoreCase(modName)) {
+        for (Component s : components.getText())
+            if (FormattingUtils.stripFormatting(s.getString()).equalsIgnoreCase(modName)) {
                 alreadyHasMod = true;
                 break;
             }
@@ -172,14 +173,14 @@ public class ClientHelperImpl implements ClientHelper {
     
     @Override
     public void sendDeletePacket() {
-        if (Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen inventoryScreen) {
-            Minecraft.getInstance().player.containerMenu.setCarried(ItemStack.EMPTY);
-            inventoryScreen.isQuickCrafting = false;
+        if (Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
+            Minecraft.getInstance().player.inventory.setCarried(ItemStack.EMPTY);
+            ((CreativeModeInventoryScreen) Minecraft.getInstance().screen).isQuickCrafting = false;
             return;
         }
         NetworkManager.sendToServer(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()));
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> containerScreen) {
-            containerScreen.isQuickCrafting = false;
+        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>) {
+            ((AbstractContainerScreen<?>) Minecraft.getInstance().screen).isQuickCrafting = false;
         }
     }
     
@@ -189,22 +190,22 @@ public class ClientHelperImpl implements ClientHelper {
             return false;
         EntryStack<ItemStack> entry = (EntryStack<ItemStack>) e;
         if (Minecraft.getInstance().player == null) return false;
-        if (Minecraft.getInstance().player.getInventory() == null) return false;
+        if (Minecraft.getInstance().player.inventory == null) return false;
         ItemStack cheatedStack = entry.getValue().copy();
         if (ConfigObject.getInstance().isGrabbingItems() && Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
-            AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
+            Inventory inventory = Minecraft.getInstance().player.inventory;
             EntryStack<ItemStack> stack = entry.copy();
-            if (!menu.getCarried().isEmpty() && EntryStacks.equalsExact(EntryStacks.of(menu.getCarried()), stack)) {
-                stack.getValue().setCount(Mth.clamp(stack.getValue().getCount() + menu.getCarried().getCount(), 1, stack.getValue().getMaxStackSize()));
-            } else if (!menu.getCarried().isEmpty()) {
+            if (!inventory.getCarried().isEmpty() && EntryStacks.equalsExact(EntryStacks.of(inventory.getCarried()), stack)) {
+                stack.getValue().setCount(Mth.clamp(stack.getValue().getCount() + inventory.getCarried().getCount(), 1, stack.getValue().getMaxStackSize()));
+            } else if (!inventory.getCarried().isEmpty()) {
                 return false;
             }
-            menu.setCarried(stack.getValue().copy());
+            inventory.setCarried(stack.getValue().copy());
             return true;
         } else if (ClientHelperImpl.getInstance().canUsePackets()) {
-            AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
+            Inventory inventory = Minecraft.getInstance().player.inventory;
             EntryStack<ItemStack> stack = entry.copy();
-            if (!menu.getCarried().isEmpty() && !EntryStacks.equalsExact(EntryStacks.of(menu.getCarried()), stack)) {
+            if (!inventory.getCarried().isEmpty() && !EntryStacks.equalsExact(EntryStacks.of(inventory.getCarried()), stack)) {
                 return false;
             }
             try {
@@ -232,7 +233,7 @@ public class ClientHelperImpl implements ClientHelper {
     
     @ApiStatus.Internal
     public LongSet _getInventoryItemsTypes() {
-        return Minecraft.getInstance().player.getInventory().compartments.stream()
+        return Minecraft.getInstance().player.inventory.compartments.stream()
                 .flatMap(Collection::stream)
                 .map(EntryStacks::of)
                 .mapToLong(EntryStacks::hashExact)
@@ -267,7 +268,8 @@ public class ClientHelperImpl implements ClientHelper {
         } else {
             screen = new DefaultDisplayViewingScreen(map, builder.getPreferredOpenedCategory());
         }
-        if (screen instanceof DisplayScreen displayScreen) {
+        if (screen instanceof DisplayScreen) {
+            DisplayScreen displayScreen = (DisplayScreen) screen;
             for (EntryStack<?> stack : builder.getUsagesFor()) {
                 displayScreen.addIngredientToNotice(stack);
             }
@@ -275,8 +277,8 @@ public class ClientHelperImpl implements ClientHelper {
                 displayScreen.addResultToNotice(stack);
             }
         }
-        if (Minecraft.getInstance().screen instanceof DisplayScreen displayScreen) {
-            REIRuntimeImpl.getInstance().storeDisplayScreen(displayScreen);
+        if (Minecraft.getInstance().screen instanceof DisplayScreen) {
+            REIRuntimeImpl.getInstance().storeDisplayScreen((DisplayScreen) Minecraft.getInstance().screen);
         }
         Minecraft.getInstance().setScreen(screen);
         return true;
@@ -296,8 +298,8 @@ public class ClientHelperImpl implements ClientHelper {
         public ViewSearchBuilder fillPreferredOpenedCategory() {
             if (getPreferredOpenedCategory() == null) {
                 Screen currentScreen = Minecraft.getInstance().screen;
-                if (currentScreen instanceof DisplayScreen displayScreen) {
-                    setPreferredOpenedCategory(displayScreen.getCurrentCategoryId());
+                if (currentScreen instanceof DisplayScreen) {
+                    setPreferredOpenedCategory(((DisplayScreen) currentScreen).getCurrentCategoryId());
                 }
             }
             return this;

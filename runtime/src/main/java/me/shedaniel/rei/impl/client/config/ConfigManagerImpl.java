@@ -28,7 +28,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import dev.architectury.hooks.client.screen.ScreenHooks;
+import me.shedaniel.architectury.hooks.ScreenHooks;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.gui.ConfigScreenProvider;
@@ -301,7 +301,7 @@ public class ConfigManagerImpl implements ConfigManager {
                     builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new ReloadPluginsEntry(220));
                 }
                 return builder.setAfterInitConsumer(screen -> {
-                    ScreenHooks.addRenderableWidget(screen, new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
+                    ScreenHooks.addButton(screen, new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
                         MutableLong current = new MutableLong(0);
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
                         Minecraft.getInstance().setScreen(creditsScreen);

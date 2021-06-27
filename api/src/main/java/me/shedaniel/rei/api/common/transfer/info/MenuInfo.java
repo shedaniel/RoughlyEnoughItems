@@ -98,8 +98,11 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
      * @param context the context of the transfer
      */
     default void markDirty(MenuInfoContext<T, ? extends ServerPlayer, D> context) {
-        context.getPlayerEntity().getInventory().setChanged();
-        context.getMenu().sendAllDataToRemote();
+        context.getPlayerEntity().inventory.setChanged();
+        context.getMenu().broadcastChanges();
+        
+        AbstractContainerMenu containerMenu = context.getPlayerEntity().containerMenu;
+        context.getPlayerEntity().refreshContainer(containerMenu, containerMenu.getItems());
     }
     
     /**

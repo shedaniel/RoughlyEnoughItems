@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.impl.client.registry.display;
 
-import dev.architectury.event.EventResult;
+import me.shedaniel.architectury.event.EventResult;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -35,6 +35,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.common.registry.RecipeManagerContextImpl;
 import net.minecraft.world.item.crafting.Recipe;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import java.util.*;
@@ -123,7 +124,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
             try {
                 EventResult result = predicate.handleDisplay(category, display);
                 if (result.interruptsFurtherEvaluation()) {
-                    return result.isEmpty() || result.isTrue();
+                    return !BooleanUtils.isFalse(result.value());
                 }
             } catch (Throwable throwable) {
                 RoughlyEnoughItemsCore.LOGGER.error("Failed to check if the recipe is visible!", throwable);
@@ -204,9 +205,31 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
         return null;
     }
     
-    private static record DisplayFiller<D extends Display>(
-            Predicate<Object> predicate,
-            
-            Function<Object, D> mappingFunction
-    ) {}
+    private static class DisplayFiller<D extends Display> {
+        private final Predicate<Object> predicate;
+        private final Function<Object, D> mappingFunction;
+    
+        public DisplayFiller(Predicate<Object> predicate, Function<Object, D> mappingFunction) {
+            this.predicate = predicate;
+            this.mappingFunction = mappingFunction;
+        }
+    
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof DisplayFiller)) return false;
+        
+            DisplayFiller<?> that = (DisplayFiller<?>) o;
+        
+            if (!Objects.equals(predicate, that.predicate)) return false;
+            return Objects.equals(mappingFunction, that.mappingFunction);
+        }
+    
+        @Override
+        public int hashCode() {
+            int result = predicate != null ? predicate.hashCode() : 0;
+            result = 31 * result + (mappingFunction != null ? mappingFunction.hashCode() : 0);
+            return result;
+        }
+    }
 }

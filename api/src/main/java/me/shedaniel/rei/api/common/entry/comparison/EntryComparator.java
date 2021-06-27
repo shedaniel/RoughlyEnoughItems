@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.common.entry.comparison;
 
-import dev.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;

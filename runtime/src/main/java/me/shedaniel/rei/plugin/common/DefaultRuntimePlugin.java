@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.plugin.common;
 
-import dev.architectury.event.CompoundEventResult;
-import dev.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.event.CompoundEventResult;
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
@@ -32,8 +32,6 @@ import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.plugin.client.entry.FluidEntryDefinition;
 import me.shedaniel.rei.plugin.client.entry.ItemEntryDefinition;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 

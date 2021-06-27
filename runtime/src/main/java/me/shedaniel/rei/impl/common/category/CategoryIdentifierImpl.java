@@ -54,8 +54,8 @@ public class CategoryIdentifierImpl<D extends Display> implements CategoryIdenti
     
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof CategoryIdentifier<?> that)) return false;
-        return location.equals(that.getIdentifier());
+        if (!(obj instanceof CategoryIdentifier<?>)) return false;
+        return location.equals(((CategoryIdentifier<?>) obj).getIdentifier());
     }
     
     @Override

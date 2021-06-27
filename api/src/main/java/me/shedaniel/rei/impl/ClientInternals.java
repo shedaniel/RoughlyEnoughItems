@@ -37,19 +37,16 @@ import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -64,9 +61,7 @@ public final class ClientInternals {
     private static BiFunction<Supplier<DataResult<FavoriteEntry>>, Supplier<CompoundTag>, FavoriteEntry> delegateFavoriteEntry = (supplier, toJson) -> throwNotSetup();
     private static Function<CompoundTag, DataResult<FavoriteEntry>> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
-    private static BiConsumer<List<ClientTooltipComponent>, TooltipComponent> clientTooltipComponentProvider = (tooltip, result) -> throwNotSetup();
-    private static BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
-    private static Function<Object, Tooltip.Entry> tooltipEntryProvider = (component) -> throwNotSetup();
+    private static BiFunction<@Nullable Point, Collection<Component>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
     private static Supplier<List<String>> jeiCompatMods = ClientInternals::throwNotSetup;
     private static Supplier<Object> builtinClientPlugin = ClientInternals::throwNotSetup;
     
@@ -119,16 +114,8 @@ public final class ClientInternals {
         return clickAreaHandlerResult.apply(applicable);
     }
     
-    public static void getClientTooltipComponent(List<ClientTooltipComponent> tooltip, TooltipComponent component) {
-        clientTooltipComponentProvider.accept(tooltip, component);
-    }
-    
-    public static Tooltip createTooltip(@Nullable Point point, Collection<Tooltip.Entry> texts) {
+    public static Tooltip createTooltip(@Nullable Point point, Collection<Component> texts) {
         return tooltipProvider.apply(point, texts);
-    }
-    
-    public static Tooltip.Entry createTooltipEntry(Object component) {
-        return tooltipEntryProvider.apply(component);
     }
     
     public static FavoriteEntry delegateFavoriteEntry(Supplier<DataResult<FavoriteEntry>> supplier, Supplier<CompoundTag> toJoin) {

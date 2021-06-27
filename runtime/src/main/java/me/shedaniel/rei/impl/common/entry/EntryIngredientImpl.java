@@ -58,7 +58,8 @@ public enum EntryIngredientImpl implements Internals.EntryIngredientProvider {
     @Override
     public EntryIngredient of(Iterable<EntryStack<?>> stacks) {
         if (stacks instanceof EntryIngredient) return (EntryIngredient) stacks;
-        if (stacks instanceof Collection<EntryStack<?>> collection) {
+        if (stacks instanceof Collection) {
+            Collection<EntryStack<?>> collection = (Collection<EntryStack<?>>) stacks;
             int size = collection.size();
             if (size == 0) return empty();
             if (size == 1) return of(stacks.iterator().next());
@@ -123,8 +124,8 @@ public enum EntryIngredientImpl implements Internals.EntryIngredientProvider {
         
         @Override
         public EntryIngredient.Builder addAll(Iterable<? extends EntryStack<?>> stacks) {
-            if (stacks instanceof Collection<?> collection) {
-                ensureCapacity(size + collection.size());
+            if (stacks instanceof Collection) {
+                ensureCapacity(size + ((Collection<?>) stacks).size());
             }
             for (EntryStack<?> stack : stacks) {
                 add(stack);

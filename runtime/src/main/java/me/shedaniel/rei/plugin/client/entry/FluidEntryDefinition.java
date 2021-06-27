@@ -26,11 +26,12 @@ package me.shedaniel.rei.plugin.client.entry;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.fluid.FluidStack;
-import dev.architectury.hooks.fluid.FluidStackHooks;
-import dev.architectury.platform.Platform;
-import dev.architectury.utils.Env;
-import dev.architectury.utils.EnvExecutor;
+import me.shedaniel.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.hooks.FluidStackHooks;
+import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.utils.Env;
+import me.shedaniel.architectury.utils.EnvExecutor;
+import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.AbstractEntryRenderer;
@@ -129,7 +130,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     @Override
     public FluidStack normalize(EntryStack<FluidStack> entry, FluidStack value) {
         Fluid fluid = value.getFluid();
-        if (fluid instanceof FlowingFluid flowingFluid) fluid = flowingFluid.getSource();
+        if (fluid instanceof FlowingFluid) fluid = ((FlowingFluid) fluid).getSource();
         FluidStack copy = FluidStack.create(fluid, value.getAmount(), value.getTag());
         copy.setAmount(FluidStack.bucketAmount());
         return copy;
@@ -183,7 +184,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     
     @Override
     public Collection<ResourceLocation> getTagsFor(TagContainer tagContainer, EntryStack<FluidStack> entry, FluidStack value) {
-        TagCollection<Fluid> collection = tagContainer.getOrEmpty(Registry.FLUID_REGISTRY);
+        TagCollection<Fluid> collection = tagContainer.getFluids();
         return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getFluid());
     }
     
@@ -276,8 +277,8 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
             if (entry.isEmpty())
                 return null;
             List<Component> toolTip = Lists.newArrayList(entry.asFormattedText());
-            long amount = entry.getValue().getAmount();
-            if (amount >= 0) {
+            Fraction amount = entry.getValue().getAmount();
+            if (!amount.isLessThan(Fraction.zero())) {
                 String amountTooltip = I18n.get(FLUID_AMOUNT, entry.getValue().getAmount());
                 if (amountTooltip != null) {
                     toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList()));

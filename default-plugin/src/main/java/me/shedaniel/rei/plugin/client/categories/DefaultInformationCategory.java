@@ -60,9 +60,8 @@ import java.util.Objects;
 @Environment(EnvType.CLIENT)
 public class DefaultInformationCategory implements DisplayCategory<DefaultInformationDisplay> {
     protected static void innerBlit(Matrix4f matrix4f, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder.vertex(matrix4f, xStart, yEnd, z).uv(uStart, vEnd).endVertex();
         bufferBuilder.vertex(matrix4f, xEnd, yEnd, z).uv(uEnd, vEnd).endVertex();
         bufferBuilder.vertex(matrix4f, xEnd, yStart, z).uv(uEnd, vStart).endVertex();
@@ -102,7 +101,7 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
         return new AbstractRenderer() {
             @Override
             public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                RenderSystem.setShaderTexture(0, REIRuntime.getInstance().getDefaultDisplayTexture());
+                Minecraft.getInstance().getTextureManager().bind(REIRuntime.getInstance().getDefaultDisplayTexture());
                 matrices.pushPose();
                 matrices.translate(-1.2f, -1, 0);
                 Matrix4f matrix = matrices.last().pose();

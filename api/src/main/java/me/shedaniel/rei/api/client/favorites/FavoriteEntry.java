@@ -103,7 +103,8 @@ public abstract class FavoriteEntry {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof FavoriteEntry that)) return false;
+        if (!(o instanceof FavoriteEntry)) return false;
+        FavoriteEntry that = (FavoriteEntry) o;
         try {
             FavoriteEntry unwrapped = getUnwrapped();
             FavoriteEntry thatUnwrapped = that.getUnwrapped();

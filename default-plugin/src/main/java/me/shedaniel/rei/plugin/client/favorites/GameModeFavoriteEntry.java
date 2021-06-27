@@ -123,7 +123,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             @Override
             @Nullable
             public Tooltip getTooltip(Point mouse) {
-                return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", type.getLongDisplayName().getString()));
+                return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", type.getDisplayName().getString()));
             }
             
             @Override
@@ -182,8 +182,8 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
     
     @Override
     public boolean isSame(FavoriteEntry other) {
-        if (!(other instanceof GameModeFavoriteEntry that)) return false;
-        return Objects.equals(gameMode, that.gameMode);
+        if (!(other instanceof GameModeFavoriteEntry)) return false;
+        return Objects.equals(gameMode, ((GameModeFavoriteEntry) other).gameMode);
     }
     
     public enum Type implements FavoriteEntryType<GameModeFavoriteEntry> {
@@ -199,9 +199,9 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         @Override
         public DataResult<GameModeFavoriteEntry> fromArgsResult(Object... args) {
             if (args.length == 0) return DataResult.error("Cannot create GameModeFavoriteEntry from empty args!");
-            if (!(args[0] instanceof GameType type))
+            if (!(args[0] instanceof GameType))
                 return DataResult.error("Creation of GameModeFavoriteEntry from args expected GameType as the first argument!");
-            return DataResult.success(new GameModeFavoriteEntry(type), Lifecycle.stable());
+            return DataResult.success(new GameModeFavoriteEntry((GameType) args[0]), Lifecycle.stable());
         }
         
         @Override
@@ -219,7 +219,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         private int textWidth = -69;
         
         public GameModeMenuEntry(GameType gameMode) {
-            this.text = gameMode.getLongDisplayName().getString();
+            this.text = gameMode.getDisplayName().getString();
             this.gameMode = gameMode;
         }
         

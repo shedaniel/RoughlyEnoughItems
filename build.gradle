@@ -28,7 +28,7 @@ subprojects {
         minecraft("com.mojang:minecraft:${rootProject.minecraft_version}")
         mappings(loom.layered {
             officialMojangMappings()
-            crane("dev.architectury:crane:1.17+build.11")
+//            crane("dev.architectury:crane:1.17+build.11")
         })
     }
 }
@@ -62,7 +62,7 @@ allprojects {
 
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
-        options.release = 16
+        options.release = 8
     }
 }
 

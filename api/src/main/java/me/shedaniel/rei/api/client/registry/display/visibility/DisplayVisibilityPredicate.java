@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.client.registry.display.visibility;
 
-import dev.architectury.event.EventResult;
+import me.shedaniel.architectury.event.EventResult;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
 import net.fabricmc.api.EnvType;

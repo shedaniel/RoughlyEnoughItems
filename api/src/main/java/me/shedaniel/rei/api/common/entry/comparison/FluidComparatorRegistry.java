@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.common.entry.comparison;
 
-import dev.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import net.minecraft.world.level.material.Fluid;
 

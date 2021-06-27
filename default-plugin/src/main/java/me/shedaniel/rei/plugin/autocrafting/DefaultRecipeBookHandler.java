@@ -46,11 +46,13 @@ public class DefaultRecipeBookHandler implements TransferHandler {
         if (context.getDisplay() instanceof SimpleGridMenuDisplay && ClientHelper.getInstance().canUseMovePackets())
             return Result.createNotApplicable();
         Display display = context.getDisplay();
-        if (!(context.getMenu() instanceof RecipeBookMenu<?> container))
+        if (!(context.getMenu() instanceof RecipeBookMenu<?>))
             return Result.createNotApplicable();
+        RecipeBookMenu<?> container = (RecipeBookMenu<?>) context.getMenu();
         if (container == null)
             return Result.createNotApplicable();
-        if (display instanceof DefaultCraftingDisplay<?> craftingDisplay) {
+        if (display instanceof DefaultCraftingDisplay<?>) {
+            DefaultCraftingDisplay<?> craftingDisplay = (DefaultCraftingDisplay<?>) display;
             if (craftingDisplay.getOptionalRecipe().isPresent()) {
                 int h = -1, w = -1;
                 if (container instanceof CraftingMenu) {
@@ -75,7 +77,8 @@ public class DefaultRecipeBookHandler implements TransferHandler {
                 context.getMinecraft().gameMode.handlePlaceRecipe(container.containerId, recipe, Screen.hasShiftDown());
                 return Result.createSuccessful();
             }
-        } else if (display instanceof DefaultCookingDisplay defaultDisplay) {
+        } else if (display instanceof DefaultCookingDisplay) {
+            DefaultCookingDisplay defaultDisplay = (DefaultCookingDisplay) display;
             if (defaultDisplay.getOptionalRecipe().isPresent()) {
                 Recipe<?> recipe = (defaultDisplay).getOptionalRecipe().get();
                 if (!context.getMinecraft().player.getRecipeBook().contains(recipe))

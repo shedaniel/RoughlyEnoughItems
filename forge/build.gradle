@@ -62,6 +62,7 @@ dependencies {
     modRuntime("curse.maven:jer-240630:3066754")
     modRuntime("curse.maven:jep-417645:3198370")
     modRuntime("curse.maven:simple-storage-network-268495:3257204")
+    modRuntime("curse.maven:create-328085:3278516")
 }
 
 shadowJar {

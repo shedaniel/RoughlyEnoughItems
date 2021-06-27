@@ -33,7 +33,6 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -86,11 +85,6 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>
     
     @Override
     public List<? extends GuiEventListener> children() {
-        return children;
-    }
-    
-    @Override
-    public List<? extends NarratableEntry> narratables() {
         return children;
     }
 }

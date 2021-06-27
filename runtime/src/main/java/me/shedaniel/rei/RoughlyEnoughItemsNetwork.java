@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei;
 
-import dev.architectury.networking.NetworkManager;
 import io.netty.buffer.Unpooled;
+import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.common.transfer.InputSlotCrafter;
@@ -36,6 +36,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
@@ -56,10 +57,10 @@ public class RoughlyEnoughItemsNetwork {
                 player.displayClientMessage(new TranslatableComponent("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
                 return;
             }
-            AbstractContainerMenu menu = player.containerMenu;
+            Inventory menu = player.inventory;
             if (!menu.getCarried().isEmpty()) {
                 menu.setCarried(ItemStack.EMPTY);
-                menu.broadcastChanges();
+                player.broadcastCarriedItem();
             }
         });
         NetworkManager.registerReceiver(NetworkManager.c2s(), CREATE_ITEMS_PACKET, (buf, context) -> {
@@ -69,7 +70,7 @@ public class RoughlyEnoughItemsNetwork {
                 return;
             }
             ItemStack stack = buf.readItem();
-            if (player.getInventory().add(stack.copy())) {
+            if (player.inventory.add(stack.copy())) {
                 NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.copy()).writeUtf(player.getScoreboardName(), 32767));
             } else {
                 player.displayClientMessage(new TranslatableComponent("text.rei.failed_cheat_items"), false);
@@ -82,7 +83,7 @@ public class RoughlyEnoughItemsNetwork {
                 return;
             }
             
-            AbstractContainerMenu menu = player.containerMenu;
+            Inventory menu = player.inventory;
             ItemStack itemStack = buf.readItem();
             ItemStack stack = itemStack.copy();
             if (!menu.getCarried().isEmpty() && ItemStack.isSameIgnoreDurability(menu.getCarried(), stack) && ItemStack.tagMatches(menu.getCarried(), stack)) {
@@ -91,7 +92,7 @@ public class RoughlyEnoughItemsNetwork {
                 return;
             }
             menu.setCarried(stack.copy());
-            menu.broadcastChanges();
+            player.broadcastCarriedItem();
             NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(itemStack.copy()).writeUtf(player.getScoreboardName(), 32767));
         });
         NetworkManager.registerReceiver(NetworkManager.c2s(), MOVE_ITEMS_PACKET, (packetByteBuf, context) -> {

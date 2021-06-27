@@ -30,7 +30,6 @@ import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
@@ -59,7 +58,7 @@ public class FilteringAddRuleScreen extends Screen {
         super.init();
         {
             Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));
-            addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+            addButton(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
             }));
@@ -190,11 +189,6 @@ public class FilteringAddRuleScreen extends Screen {
         
         @Override
         public List<? extends GuiEventListener> children() {
-            return Collections.singletonList(addButton);
-        }
-        
-        @Override
-        public List<? extends NarratableEntry> narratables() {
             return Collections.singletonList(addButton);
         }
     }

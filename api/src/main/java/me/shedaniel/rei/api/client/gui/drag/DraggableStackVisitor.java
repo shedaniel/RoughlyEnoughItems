@@ -70,7 +70,7 @@ public interface DraggableStackVisitor<T extends Screen> extends Comparable<Drag
         };
     }
     
-    @Deprecated(forRemoval = true)
+    @Deprecated
     @ApiStatus.ScheduledForRemoval
     default Optional<Acceptor> visitDraggedStack(DraggingContext<T> context, DraggableStack stack) {
         return Optional.empty();

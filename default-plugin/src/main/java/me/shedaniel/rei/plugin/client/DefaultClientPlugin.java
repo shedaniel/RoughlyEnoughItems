@@ -28,10 +28,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.injectables.annotations.PlatformOnly;
-import dev.architectury.platform.Platform;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
@@ -191,7 +191,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 registry.addWorkstations(PATHING, EntryStacks.of(item));
             }
         });
-        TagCollection<Item> itemTagCollection = Minecraft.getInstance().getConnection().getTags().getOrEmpty(Registry.ITEM_REGISTRY);
+        TagCollection<Item> itemTagCollection = Minecraft.getInstance().getConnection().getTags().getItems();
         Tag<Item> axesTag = itemTagCollection.getTag(new ResourceLocation("c", "axes"));
         if (axesTag != null) {
             for (Item item : axesTag.getValues()) {
@@ -373,7 +373,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         }
         
         public static Map<Block, Block> getStrippedBlocksMap() {
-            return STRIPPABLES;
+            return STRIPABLES;
         }
     }
 }

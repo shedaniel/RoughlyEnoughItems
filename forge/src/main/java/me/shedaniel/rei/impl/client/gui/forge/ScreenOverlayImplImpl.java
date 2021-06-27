@@ -21,36 +21,25 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.common.entry.comparison;
+package me.shedaniel.rei.impl.client.gui.forge;
 
-import me.shedaniel.architectury.fluid.FluidStack;
-import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
-import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
-import me.shedaniel.rei.api.common.plugins.REIPlugin;
-import net.minecraft.world.level.material.Fluid;
+import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fml.client.gui.GuiUtils;
 
-public class FluidComparatorRegistryImpl extends EntryComparatorRegistryImpl<FluidStack, Fluid> implements FluidComparatorRegistry {
-    private final EntryComparator<FluidStack> fluidNbt = EntryComparator.fluidNbt();
-    private final EntryComparator<FluidStack> defaultComparator = (context, stack) -> {
-        if (context.isExact()) {
-            return fluidNbt.hash(context, stack);
-        } else {
-            return 1;
-        }
-    };
-    
-    @Override
-    public Fluid getEntry(FluidStack stack) {
-        return stack.getFluid();
-    }
-    
-    @Override
-    public EntryComparator<FluidStack> defaultComparator() {
-        return defaultComparator;
-    }
-    
-    @Override
-    public void acceptPlugin(REIPlugin<?> plugin) {
-        plugin.registerFluidComparators(this);
+public class ScreenOverlayImplImpl {
+    public static void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
+        matrices.pushPose();
+        matrices.translate(0, 0, 500);
+        EntryStack<?> stack = tooltip.getContextStack();
+        ItemStack itemStack = stack.getValue() instanceof ItemStack ? stack.castValue() : ItemStack.EMPTY;
+        GuiUtils.preItemToolTip(itemStack);
+        GuiUtils.drawHoveringText(matrices, tooltip.getText(), mouseX, mouseY, screen.width, screen.height, screen.width, Minecraft.getInstance().font);
+        GuiUtils.postItemToolTip();
+        matrices.popPose();
     }
 }

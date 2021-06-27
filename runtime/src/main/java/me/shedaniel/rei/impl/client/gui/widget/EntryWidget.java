@@ -45,6 +45,7 @@ import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
@@ -295,7 +296,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (background) {
-            RenderSystem.setShaderTexture(0, REIRuntime.getInstance().isDarkThemeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
+            Minecraft.getInstance().getTextureManager().bind(REIRuntime.getInstance().isDarkThemeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
             blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
         }
     }

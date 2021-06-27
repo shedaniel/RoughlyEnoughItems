@@ -26,9 +26,8 @@ package me.shedaniel.rei.impl.client;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.Window;
-import dev.architectury.event.EventResult;
-import dev.architectury.event.events.client.ClientGuiEvent;
-import dev.architectury.event.events.client.ClientTickEvent;
+import me.shedaniel.architectury.event.events.GuiEvent;
+import me.shedaniel.architectury.event.events.client.ClientTickEvent;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
@@ -47,6 +46,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -155,8 +155,8 @@ public class REIRuntimeImpl implements REIRuntime {
         
         this.previousScreen = previousScreen;
         
-        if (previousScreen instanceof AbstractContainerScreen<?> containerScreen) {
-            this.previousContainerScreen = containerScreen;
+        if (previousScreen instanceof AbstractContainerScreen<?>) {
+            this.previousContainerScreen = (AbstractContainerScreen<?>) previousScreen;
         }
     }
     
@@ -216,10 +216,10 @@ public class REIRuntimeImpl implements REIRuntime {
     }
     
     public void onInitializeClient() {
-        ClientGuiEvent.INIT_PRE.register((screen, access) -> {
-            if (previousContainerScreen != screen && screen instanceof AbstractContainerScreen<?> containerScreen)
-                previousContainerScreen = containerScreen;
-            return EventResult.pass();
+        GuiEvent.INIT_PRE.register((screen, widgets, children) -> {
+            if (previousContainerScreen != screen && screen instanceof AbstractContainerScreen<?>)
+                previousContainerScreen = (AbstractContainerScreen<?>) screen;
+            return InteractionResult.PASS;
         });
         ClientTickEvent.CLIENT_POST.register(minecraft -> {
             if (isOverlayVisible()) {

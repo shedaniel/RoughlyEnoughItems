@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.forge;
 
-import dev.architectury.platform.forge.EventBuses;
+import me.shedaniel.architectury.platform.forge.EventBuses;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
@@ -34,6 +34,7 @@ import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.plugin.client.DefaultClientPlugin;
 import me.shedaniel.rei.plugin.client.DefaultClientRuntimePlugin;
 import me.shedaniel.rei.plugin.common.DefaultPlugin;
+import me.shedaniel.rei.plugin.common.DefaultRuntimePlugin;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -69,6 +70,7 @@ public class PluginDetectorImpl {
     
     public static void detectServerPlugins() {
         PluginView.getServerInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultPlugin()));
+        PluginView.getServerInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultRuntimePlugin()));
         RoughlyEnoughItemsForge.<REIPlugin, REIServerPlugin>scanAnnotation(REIPlugin.class, REIServerPlugin.class::isAssignableFrom, (modId, plugin) -> {
             ((PluginView<REIServerPlugin>) PluginManager.getServerInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
         });

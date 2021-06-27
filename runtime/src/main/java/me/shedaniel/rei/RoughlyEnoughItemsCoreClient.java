@@ -25,11 +25,10 @@ package me.shedaniel.rei;
 
 import com.google.common.collect.Lists;
 import com.mojang.serialization.DataResult;
-import dev.architectury.event.EventResult;
-import dev.architectury.event.events.client.ClientGuiEvent;
-import dev.architectury.event.events.client.ClientRecipeUpdateEvent;
-import dev.architectury.event.events.client.ClientScreenInputEvent;
-import dev.architectury.networking.NetworkManager;
+import me.shedaniel.architectury.event.events.GuiEvent;
+import me.shedaniel.architectury.event.events.RecipeUpdateEvent;
+import me.shedaniel.architectury.event.events.client.ClientScreenInputEvent;
+import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -128,8 +127,7 @@ public class RoughlyEnoughItemsCoreClient {
             if (entryType == null) return DataResult.error("Unknown favorite type: " + id + ", json: " + object);
             return entryType.readResult(object);
         }, "favoriteEntryFromJson");
-        ClientInternals.attachInstance((BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip>) QueuedTooltip::impl, "tooltipProvider");
-        ClientInternals.attachInstance((Function<Object, Tooltip.Entry>) QueuedTooltip.TooltipEntryImpl::new, "tooltipEntryProvider");
+        ClientInternals.attachInstance((BiFunction<@Nullable Point, Collection<Component>, Tooltip>) QueuedTooltip::impl, "tooltipProvider");
         ClientInternals.attachInstance((Function<@Nullable Boolean, ClickArea.Result>) successful -> new ClickArea.Result() {
             private List<CategoryIdentifier<?>> categories = Lists.newArrayList();
             
@@ -197,7 +195,8 @@ public class RoughlyEnoughItemsCoreClient {
         });
         NetworkManager.registerReceiver(NetworkManager.s2c(), RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (buf, context) -> {
             Screen currentScreen = Minecraft.getInstance().screen;
-            if (currentScreen instanceof CraftingScreen craftingScreen) {
+            if (currentScreen instanceof CraftingScreen) {
+                CraftingScreen craftingScreen = (CraftingScreen) currentScreen;
                 RecipeBookComponent recipeBookGui = craftingScreen.getRecipeBookComponent();
                 GhostRecipe ghostSlots = recipeBookGui.ghostRecipe;
                 ghostSlots.clear();
@@ -233,7 +232,7 @@ public class RoughlyEnoughItemsCoreClient {
     }
     
     public static boolean shouldReturn(Screen screen) {
-        if (REIRuntime.getInstance().getOverlay().isEmpty()) return true;
+        if (!REIRuntime.getInstance().getOverlay().isPresent()) return true;
         if (screen == null) return true;
         if (screen != Minecraft.getInstance().screen) return true;
         return _shouldReturn(screen);
@@ -263,59 +262,58 @@ public class RoughlyEnoughItemsCoreClient {
         Minecraft client = Minecraft.getInstance();
         final ResourceLocation recipeButtonTex = new ResourceLocation("textures/gui/recipe_button.png");
         MutableLong lastReload = new MutableLong(-1);
-        ClientRecipeUpdateEvent.EVENT.register(recipeManager -> reloadPlugins(lastReload));
-        ClientGuiEvent.INIT_POST.register((screen, access) -> {
+        RecipeUpdateEvent.EVENT.register(recipeManager -> reloadPlugins(lastReload));
+        GuiEvent.INIT_POST.register((screen, widgets, children) -> {
             REIRuntimeImpl.getInstance().setPreviousScreen(screen);
             if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen) {
-                access.getRenderables().removeIf(widget -> widget instanceof ImageButton button && button.resourceLocation.equals(recipeButtonTex));
-                access.getNarratables().removeIf(widget -> widget instanceof ImageButton button && button.resourceLocation.equals(recipeButtonTex));
-                screen.children().removeIf(widget -> widget instanceof ImageButton button && button.resourceLocation.equals(recipeButtonTex));
+                widgets.removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
+                screen.children().removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
             }
         });
         ClientScreenInputEvent.MOUSE_CLICKED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
             isLeftMousePressed = true;
             if (shouldReturn(screen))
-                return EventResult.pass();
+                return InteractionResult.PASS;
             resetFocused(screen);
             if (getOverlay().mouseClicked(mouseX, mouseY, button)) {
                 if (button == 0) {
                     screen.setDragging(true);
                 }
                 resetFocused(screen);
-                return EventResult.interruptTrue();
+                return InteractionResult.SUCCESS;
             }
-            return EventResult.pass();
+            return InteractionResult.PASS;
         });
         ClientScreenInputEvent.MOUSE_RELEASED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
             isLeftMousePressed = false;
             if (shouldReturn(screen))
-                return EventResult.pass();
+                return InteractionResult.PASS;
             resetFocused(screen);
             if (REIRuntime.getInstance().isOverlayVisible() && getOverlay().mouseReleased(mouseX, mouseY, button)
                 && resetFocused(screen)) {
-                return EventResult.interruptTrue();
+                return InteractionResult.SUCCESS;
             }
-            return EventResult.pass();
+            return InteractionResult.PASS;
         });
         ClientScreenInputEvent.MOUSE_SCROLLED_PRE.register((minecraftClient, screen, mouseX, mouseY, amount) -> {
             if (shouldReturn(screen))
-                return EventResult.pass();
+                return InteractionResult.PASS;
             resetFocused(screen);
             if (REIRuntime.getInstance().isOverlayVisible() && getOverlay().mouseScrolled(mouseX, mouseY, amount)
                 && resetFocused(screen))
-                return EventResult.interruptTrue();
-            return EventResult.pass();
+                return InteractionResult.SUCCESS;
+            return InteractionResult.PASS;
         });
         ClientScreenInputEvent.CHAR_TYPED_PRE.register((minecraftClient, screen, character, keyCode) -> {
             if (shouldReturn(screen))
-                return EventResult.pass();
+                return InteractionResult.PASS;
             resetFocused(screen);
             if (getOverlay().charTyped(character, keyCode)
                 && resetFocused(screen))
-                return EventResult.interruptTrue();
-            return EventResult.pass();
+                return InteractionResult.SUCCESS;
+            return InteractionResult.PASS;
         });
-        ClientGuiEvent.RENDER_POST.register((screen, matrices, mouseX, mouseY, delta) -> {
+        GuiEvent.RENDER_POST.register((screen, matrices, mouseX, mouseY, delta) -> {
             if (shouldReturn(screen))
                 return;
             resetFocused(screen);
@@ -325,29 +323,29 @@ public class RoughlyEnoughItemsCoreClient {
         });
         ClientScreenInputEvent.MOUSE_DRAGGED_PRE.register((minecraftClient, screen, mouseX1, mouseY1, button, mouseX2, mouseY2) -> {
             if (shouldReturn(screen))
-                return EventResult.pass();
+                return InteractionResult.PASS;
             resetFocused(screen);
             if (getOverlay().mouseDragged(mouseX1, mouseY1, button, mouseX2, mouseY2)
                 && resetFocused(screen))
-                return EventResult.interruptTrue();
-            return EventResult.pass();
+                return InteractionResult.SUCCESS;
+            return InteractionResult.PASS;
         });
         ClientScreenInputEvent.KEY_PRESSED_PRE.register((minecraftClient, screen, i, i1, i2) -> {
             if (shouldReturn(screen))
-                return EventResult.pass();
+                return InteractionResult.PASS;
             if (screen instanceof AbstractContainerScreen && ConfigObject.getInstance().doesDisableRecipeBook() && ConfigObject.getInstance().doesFixTabCloseContainer()) {
                 if (i == 258 && minecraftClient.options.keyInventory.matches(i, i1)) {
                     minecraftClient.player.closeContainer();
-                    return EventResult.interruptTrue();
+                    return InteractionResult.SUCCESS;
                 }
             }
             if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
-                return EventResult.pass();
+                return InteractionResult.PASS;
             resetFocused(screen);
             if (getOverlay().keyPressed(i, i1, i2)
                 && resetFocused(screen))
-                return EventResult.interruptTrue();
-            return EventResult.pass();
+                return InteractionResult.SUCCESS;
+            return InteractionResult.PASS;
         });
     }
     

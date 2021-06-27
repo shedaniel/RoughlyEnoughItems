@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.config;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.architectury.platform.Platform;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
@@ -424,16 +424,16 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public static class KeyBindings {
-        private ModifierKeyCode recipeKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_R), Modifier.none());
-        private ModifierKeyCode usageKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_U), Modifier.none());
-        private ModifierKeyCode hideKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_O), Modifier.of(false, true, false));
+        private ModifierKeyCode recipeKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(82), Modifier.none());
+        private ModifierKeyCode usageKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(85), Modifier.none());
+        private ModifierKeyCode hideKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(79), Modifier.of(false, true, false));
         private ModifierKeyCode previousPageKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode nextPageKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode focusSearchFieldKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode copyRecipeIdentifierKeybind = ModifierKeyCode.unknown();
-        private ModifierKeyCode favoriteKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_A), Modifier.none());
+        private ModifierKeyCode favoriteKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(65), Modifier.none());
         private ModifierKeyCode exportImageKeybind = ModifierKeyCode.unknown();
-        private ModifierKeyCode previousScreenKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_BACKSPACE), Modifier.none());
+        private ModifierKeyCode previousScreenKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(259), Modifier.none());
     }
     
     public static class Appearance {

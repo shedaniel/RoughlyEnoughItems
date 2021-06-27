@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.api.common.entry;
 
-import dev.architectury.utils.Env;
-import dev.architectury.utils.EnvExecutor;
+import me.shedaniel.architectury.utils.Env;
+import me.shedaniel.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;

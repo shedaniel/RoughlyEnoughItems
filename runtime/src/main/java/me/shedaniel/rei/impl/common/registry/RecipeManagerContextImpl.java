@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.impl.common.registry;
 
-import dev.architectury.utils.EnvExecutor;
-import dev.architectury.utils.GameInstance;
+import me.shedaniel.architectury.utils.EnvExecutor;
+import me.shedaniel.architectury.utils.GameInstance;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.registry.RecipeManagerContext;
 import net.minecraft.client.Minecraft;

@@ -23,28 +23,18 @@
 
 package me.shedaniel.rei.fabric;
 
-import com.google.common.base.Suppliers;
 import com.google.common.collect.Iterables;
 import me.shedaniel.rei.RoughlyEnoughItemsInitializer;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.plugins.*;
-import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class PluginDetectorImpl {
     private static <P extends REIPlugin<?>> void loadPlugin(Class<? extends P> pluginClass, Consumer<? super REIPluginProvider<P>> consumer) {
@@ -60,7 +50,7 @@ public class PluginDetectorImpl {
             try {
                 REIPluginProvider<P> plugin = container.getEntrypoint();
                 if (pluginClass.isAssignableFrom(plugin.getPluginProviderClass())) {
-                    consumer.accept(new REIPluginProvider<>() {
+                    consumer.accept(new REIPluginProvider<P>() {
                         @Override
                         public Collection<P> provide() {
                             return plugin.provide();
@@ -115,22 +105,5 @@ public class PluginDetectorImpl {
     @Environment(EnvType.CLIENT)
     public static void detectClientPlugins() {
         loadPlugin(REIClientPlugin.class, ((PluginView<REIClientPlugin>) PluginManager.getClientInstance())::registerPlugin);
-        Supplier<Method> method = Suppliers.memoize(() -> {
-            String methodName = FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary", "net.minecraft.class_437", "method_32635", "(Ljava/util/List;Lnet/minecraft/class_5632;)V");
-            try {
-                Method declaredMethod = Screen.class.getDeclaredMethod(methodName, List.class, TooltipComponent.class);
-                if (declaredMethod != null) declaredMethod.setAccessible(true);
-                return declaredMethod;
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        ClientInternals.attachInstance((BiConsumer<List<ClientTooltipComponent>, TooltipComponent>) (lines, component) -> {
-            try {
-                method.get().invoke(null, lines, component);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-        }, "clientTooltipComponentProvider");
     }
 }

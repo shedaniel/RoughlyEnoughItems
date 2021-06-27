@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.modules.entries;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
@@ -41,6 +40,7 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.TextComponent;
@@ -142,7 +142,7 @@ public class SubSubsetsMenuEntry extends MenuEntry {
         } else clickedBefore = false;
         font.draw(matrices, text, x + 2, y + 2, selected ? 16777215 : 8947848);
         if (!entries.isEmpty()) {
-            RenderSystem.setShaderTexture(0, TabWidget.CHEST_GUI_TEXTURE);
+            Minecraft.getInstance().getTextureManager().bind(TabWidget.CHEST_GUI_TEXTURE);
             blit(matrices, x + width - 15, y - 2, 0, 28, 18, 18);
         }
     }
@@ -171,7 +171,8 @@ public class SubSubsetsMenuEntry extends MenuEntry {
     
     private void setFiltered(List<EntryStack<?>> filteredStacks, Menu subsetsMenu, SubSubsetsMenuEntry subSubsetsMenuEntry, boolean filtered) {
         for (MenuEntry entry : subSubsetsMenuEntry.entries) {
-            if (entry instanceof EntryStackSubsetsMenuEntry menuEntry) {
+            if (entry instanceof EntryStackSubsetsMenuEntry) {
+                EntryStackSubsetsMenuEntry menuEntry = (EntryStackSubsetsMenuEntry) entry;
                 if (menuEntry.isFiltered() != filtered) {
                     if (!filtered) {
                         filteredStacks.removeIf(next -> EntryStacks.equalsExact(next, menuEntry.stack));
@@ -181,8 +182,8 @@ public class SubSubsetsMenuEntry extends MenuEntry {
                 }
                 if (subsetsMenu != null)
                     menuEntry.recalculateFilter(subsetsMenu);
-            } else if (entry instanceof SubSubsetsMenuEntry menuEntry) {
-                setFiltered(filteredStacks, subsetsMenu, menuEntry, filtered);
+            } else if (entry instanceof SubSubsetsMenuEntry) {
+                setFiltered(filteredStacks, subsetsMenu, (SubSubsetsMenuEntry) entry, filtered);
             }
         }
     }

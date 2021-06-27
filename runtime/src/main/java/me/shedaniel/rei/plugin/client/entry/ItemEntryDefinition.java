@@ -28,10 +28,10 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.utils.Env;
-import dev.architectury.utils.EnvExecutor;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
+import me.shedaniel.architectury.utils.Env;
+import me.shedaniel.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.AbstractEntryRenderer;
@@ -63,7 +63,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagCollection;
 import net.minecraft.tags.TagContainer;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -72,7 +71,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySerializer<ItemStack> {
     @Environment(EnvType.CLIENT)
@@ -190,7 +188,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     
     @Override
     public Collection<ResourceLocation> getTagsFor(TagContainer tagContainer, EntryStack<ItemStack> entry, ItemStack value) {
-        TagCollection<Item> collection = tagContainer.getOrEmpty(Registry.ITEM_REGISTRY);
+        TagCollection<Item> collection = tagContainer.getItems();
         return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getItem());
     }
     
@@ -218,39 +216,11 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     
     @Environment(EnvType.CLIENT)
     public class ItemEntryRenderer extends AbstractEntryRenderer<ItemStack> implements BatchedEntryRenderer<ItemStack, BakedModel> {
-        private static final float SCALE = 20.0F;
         public static final int ITEM_LIGHT = 0xf000f0;
         
         @Override
         public BakedModel getExtraData(EntryStack<ItemStack> entry) {
-            return Minecraft.getInstance().getItemRenderer().getModel(entry.getValue(), null, null, 0);
-        }
-        
-        @Override
-        public void render(EntryStack<ItemStack> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-            BakedModel model = getExtraData(entry);
-            setupGL(entry, model);
-            if (!entry.isEmpty()) {
-                ItemStack value = entry.getValue();
-                matrices.pushPose();
-                matrices.mulPoseMatrix(RenderSystem.getModelViewMatrix());
-                matrices.translate(bounds.getCenterX(), bounds.getCenterY(), entry.getZ());
-                matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, 1.0F);
-                PoseStack modelViewStack = RenderSystem.getModelViewStack();
-                modelViewStack.pushPose();
-                modelViewStack.last().pose().load(matrices.last().pose());
-                RenderSystem.applyModelViewMatrix();
-                MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-                Minecraft.getInstance().getItemRenderer().render(value, ItemTransforms.TransformType.GUI, false, new PoseStack(), immediate,
-                        ITEM_LIGHT, OverlayTexture.NO_OVERLAY, model);
-                immediate.endBatch();
-                matrices.popPose();
-                modelViewStack.popPose();
-                RenderSystem.applyModelViewMatrix();
-            }
-            renderOverlay(entry, bounds);
-            endGL(entry, model);
-            RenderSystem.applyModelViewMatrix();
+            return Minecraft.getInstance().getItemRenderer().getModel(entry.getValue(), null, null);
         }
         
         @Override
@@ -260,60 +230,38 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         
         @Override
         public void startBatch(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, float delta) {
-            setupGL(entry, model);
-            PoseStack modelViewStack = RenderSystem.getModelViewStack();
-            modelViewStack.pushPose();
-            modelViewStack.scale(SCALE, -SCALE, 1.0F);
-            RenderSystem.applyModelViewMatrix();
-        }
-        
-        public void setupGL(EntryStack<ItemStack> entry, BakedModel model) {
+            Minecraft.getInstance().getTextureManager().bind(TextureAtlas.LOCATION_BLOCKS);
             Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
-            RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
+            RenderSystem.pushMatrix();
+            RenderSystem.enableRescaleNormal();
+            RenderSystem.enableAlphaTest();
+            RenderSystem.defaultAlphaFunc();
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             boolean sideLit = model.usesBlockLight();
-            if (!sideLit) Lighting.setupForFlatItems();
+            if (!sideLit)
+                Lighting.setupForFlatItems();
         }
         
         @Override
         public void renderBase(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
             if (!entry.isEmpty()) {
-                ItemStack value = entry.getValue();
+                ItemStack stack = entry.getValue();
                 matrices.pushPose();
-                matrices.translate(bounds.getCenterX() / SCALE, bounds.getCenterY() / -SCALE, entry.getZ());
-                matrices.scale(bounds.getWidth() / SCALE, (bounds.getWidth() + bounds.getHeight()) / 2f / SCALE, 1.0F);
-                Minecraft.getInstance().getItemRenderer().render(value, ItemTransforms.TransformType.GUI, false, matrices, immediate,
-                        ITEM_LIGHT, OverlayTexture.NO_OVERLAY, model);
+                matrices.translate(bounds.getCenterX(), bounds.getCenterY(), 100.0F + entry.getZ());
+                matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, bounds.getHeight());
+                Minecraft.getInstance().getItemRenderer().render(stack, ItemTransforms.TransformType.GUI, false, matrices, immediate, ITEM_LIGHT, OverlayTexture.NO_OVERLAY, model);
                 matrices.popPose();
-                
-                /*ItemStack value = entry.getValue();
-                matrices.pushPose();
-                matrices.last().pose().load(RenderSystem.getModelViewStack().last().pose());
-                matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, 1.0F);
-                RenderSystem.modelViewMatrix = matrices.last().pose();
-                PoseStack stack = new PoseStack();
-                stack.translate(bounds.getCenterX() / (double) bounds.getWidth(),bounds.getCenterY() * -2.0 / (bounds.getWidth() + bounds.getHeight()),100.0F + entry.getZ());
-                Minecraft.getInstance().getItemRenderer().render(value, ItemTransforms.TransformType.GUI, false, stack, immediate,
-                        0xf000f0, OverlayTexture.NO_OVERLAY, getModelFromStack(value));
-                matrices.popPose();*/
             }
         }
         
         @Override
-        public void afterBase(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, float delta) {
-            endGL(entry, model);
-            RenderSystem.getModelViewStack().popPose();
-            RenderSystem.applyModelViewMatrix();
+        public void afterBase(EntryStack<ItemStack> entry, BakedModel extraData, PoseStack matrices, float delta) {
         }
         
         @Override
         public void renderOverlay(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
-            renderOverlay(entry, bounds);
-        }
-        
-        public void renderOverlay(EntryStack<ItemStack> entry, Rectangle bounds) {
             if (!entry.isEmpty()) {
                 Minecraft.getInstance().getItemRenderer().blitOffset = entry.getZ();
                 Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, entry.getValue(), bounds.x, bounds.y, null);
@@ -323,12 +271,13 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         
         @Override
         public void endBatch(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, float delta) {
-        }
-        
-        public void endGL(EntryStack<ItemStack> entry, BakedModel model) {
             RenderSystem.enableDepthTest();
+            RenderSystem.disableAlphaTest();
+            RenderSystem.disableRescaleNormal();
             boolean sideLit = model.usesBlockLight();
-            if (!sideLit) Lighting.setupFor3DItems();
+            if (!sideLit)
+                Lighting.setupFor3DItems();
+            RenderSystem.popMatrix();
         }
         
         @Override
@@ -336,17 +285,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         public Tooltip getTooltip(EntryStack<ItemStack> entry, Point mouse) {
             if (entry.isEmpty())
                 return null;
-            Tooltip tooltip = Tooltip.create();
-            Optional<TooltipComponent> component = entry.getValue().getTooltipImage();
-            List<Component> components = tryGetItemStackToolTip(entry, entry.getValue(), true);
-            if (!components.isEmpty()) {
-                tooltip.add(components.get(0));
-            }
-            component.ifPresent(tooltip::add);
-            for (int i = 1; i < components.size(); i++) {
-                tooltip.add(components.get(i));
-            }
-            return tooltip;
+            return Tooltip.create(tryGetItemStackToolTip(entry, entry.getValue(), true));
         }
     }
 }

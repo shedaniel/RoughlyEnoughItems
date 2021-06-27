@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.client.util;
 
-import dev.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.entry.type.BuiltinClientEntryTypes;
 import me.shedaniel.rei.api.client.gui.Renderer;
@@ -37,8 +37,8 @@ public final class ClientEntryStacks {
     private ClientEntryStacks() {}
     
     public static EntryStack<?> of(Renderer renderer) {
-        if (renderer instanceof EntryStack<?> stack) {
-            return stack;
+        if (renderer instanceof EntryStack<?>) {
+            return (EntryStack<?>) renderer;
         }
         
         return EntryStack.of(BuiltinClientEntryTypes.RENDERING, renderer);

@@ -24,11 +24,11 @@
 package me.shedaniel.rei.impl.common.entry;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.platform.Platform;
-import dev.architectury.utils.Env;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
@@ -181,6 +181,7 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
         try {
             Mutable<Tooltip> tooltip = new MutableObject<>(getRenderer().<A>cast().getTooltip(this, mouse));
             if (tooltip.getValue() == null) return null;
+            tooltip.getValue().withContextStack(this);
             tooltip.getValue().addAllTexts(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
             tooltip.setValue(get(Settings.TOOLTIP_PROCESSOR).apply(this, tooltip.getValue()));
             if (tooltip.getValue() == null) return null;
@@ -201,7 +202,8 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AbstractEntryStack<?> that)) return false;
+        if (!(o instanceof AbstractEntryStack<?>)) return false;
+        AbstractEntryStack<?> that = (AbstractEntryStack<?>) o;
         return EntryStacks.equalsExact(this, that);
     }
     

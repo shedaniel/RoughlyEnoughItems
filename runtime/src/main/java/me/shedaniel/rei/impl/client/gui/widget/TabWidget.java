@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -39,6 +38,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -111,7 +111,7 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (renderer != null) {
-            RenderSystem.setShaderTexture(0, REIRuntime.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
+            Minecraft.getInstance().getTextureManager().bind(REIRuntime.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
             this.blit(matrices, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
             renderer.setZ(100);
             renderer.render(matrices, new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 5, 16, 16), mouseX, mouseY, delta);
@@ -136,9 +136,9 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     @Override
     @Nullable
     public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
-        if (isShown() && renderer instanceof EntryStack<?> entryStack && containsMouse(mouseX, mouseY)) {
+        if (isShown() && renderer instanceof EntryStack<?> && containsMouse(mouseX, mouseY)) {
             return new DraggableStack() {
-                EntryStack<?> stack = entryStack.copy();
+                EntryStack<?> stack = ((EntryStack<?>) renderer).copy();
                 
                 @Override
                 public EntryStack<?> getStack() {

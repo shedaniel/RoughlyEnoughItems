@@ -164,8 +164,8 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         }
         if (favoritePanel.bounds.contains(mouseX, mouseY)) {
             for (AddFavoritePanel.Row row : favoritePanel.rows.get()) {
-                if (row instanceof AddFavoritePanel.SectionEntriesRow entriesRow) {
-                    for (AddFavoritePanel.SectionEntriesRow.SectionFavoriteWidget widget : entriesRow.widgets) {
+                if (row instanceof AddFavoritePanel.SectionEntriesRow) {
+                    for (AddFavoritePanel.SectionEntriesRow.SectionFavoriteWidget widget : ((AddFavoritePanel.SectionEntriesRow) row).widgets) {
                         if (widget.containsMouse(mouseX, mouseY)) {
                             Entry entry = new Entry(widget.entry.copy(), entrySize());
                             entry.size.setAs(entrySize() * 100);
@@ -190,8 +190,8 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         }
         if (favoritePanel.bounds.contains(mouse)) {
             for (AddFavoritePanel.Row row : favoritePanel.rows.get()) {
-                if (row instanceof AddFavoritePanel.SectionEntriesRow entriesRow) {
-                    for (AddFavoritePanel.SectionEntriesRow.SectionFavoriteWidget widget : entriesRow.widgets) {
+                if (row instanceof AddFavoritePanel.SectionEntriesRow) {
+                    for (AddFavoritePanel.SectionEntriesRow.SectionFavoriteWidget widget : ((AddFavoritePanel.SectionEntriesRow) row).widgets) {
                         if (widget.containsMouse(mouse)) {
                             return ClientEntryStacks.of(widget.entry.getRenderer(false)).copy();
                         }

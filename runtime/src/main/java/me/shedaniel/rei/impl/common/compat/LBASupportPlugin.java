@@ -26,8 +26,8 @@ package me.shedaniel.rei.impl.common.compat;
 import alexiil.mc.lib.attributes.fluid.FluidAttributes;
 import alexiil.mc.lib.attributes.fluid.GroupedFluidInvView;
 import alexiil.mc.lib.attributes.fluid.amount.FluidAmount;
-import dev.architectury.event.CompoundEventResult;
-import dev.architectury.hooks.fluid.FluidStackHooks;
+import me.shedaniel.architectury.event.CompoundEventResult;
+import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -42,7 +42,7 @@ public class LBASupportPlugin implements REIServerPlugin {
                         .filter(fluidKey -> !fluidKey.isEmpty() && fluidKey.getRawFluid() != null)
                         .map(fluidKey -> {
                             FluidAmount amount = view.getAmount_F(fluidKey);
-                            return EntryStacks.of(fluidKey.getRawFluid(), amount.mul(FluidStackHooks.bucketAmount()).asLong(1));
+                            return EntryStacks.of(fluidKey.getRawFluid(), Fraction.of(amount.numerator, amount.denominator));
                         }));
             return CompoundEventResult.pass();
         });

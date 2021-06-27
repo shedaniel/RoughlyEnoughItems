@@ -27,6 +27,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
@@ -53,7 +54,7 @@ public final class TexturedDrawableConsumer implements DrawableConsumer {
     
     @Override
     public void render(GuiComponent helper, PoseStack matrices, int mouseX, int mouseY, float delta) {
-        RenderSystem.setShaderTexture(0, identifier);
+        Minecraft.getInstance().getTextureManager().bind(identifier);
         innerBlit(matrices.last().pose(), x, x + width, y, y + height, helper.getBlitOffset(), uWidth, vHeight, u, v, textureWidth, textureHeight);
     }
     
@@ -62,14 +63,14 @@ public final class TexturedDrawableConsumer implements DrawableConsumer {
     }
     
     protected static void innerBlit(Matrix4f matrix, int xStart, int xEnd, int yStart, int yEnd, int z, float uStart, float uEnd, float vStart, float vEnd) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
         bufferBuilder.vertex(matrix, xStart, yEnd, z).uv(uStart, vEnd).endVertex();
         bufferBuilder.vertex(matrix, xEnd, yEnd, z).uv(uEnd, vEnd).endVertex();
         bufferBuilder.vertex(matrix, xEnd, yStart, z).uv(uEnd, vStart).endVertex();
         bufferBuilder.vertex(matrix, xStart, yStart, z).uv(uStart, vStart).endVertex();
         bufferBuilder.end();
+        RenderSystem.enableAlphaTest();
         BufferUploader.end(bufferBuilder);
     }
 }

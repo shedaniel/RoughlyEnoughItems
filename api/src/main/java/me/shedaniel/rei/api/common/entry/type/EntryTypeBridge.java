@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.common.entry.type;
 
-import dev.architectury.event.CompoundEventResult;
+import me.shedaniel.architectury.event.CompoundEventResult;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 
 import java.util.stream.Stream;

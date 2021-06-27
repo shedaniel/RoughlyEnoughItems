@@ -107,7 +107,7 @@ public class BatchedEntryRendererManager {
                 for (int i = 0; i < extraData.length; i++) {
                     extraData[i] = entries.get(i * 2 + 1);
                 }
-                renderBatched(debugTime, size, time, matrices, mouseX, mouseY, delta, () -> new AbstractIterator<>() {
+                renderBatched(debugTime, size, time, matrices, mouseX, mouseY, delta, () -> new AbstractIterator<EntryWidget>() {
                     public int i = 0;
                     
                     @Override

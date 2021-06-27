@@ -34,7 +34,6 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -94,11 +93,6 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<DisplayScreenType> {
     
     @Override
     public List<? extends GuiEventListener> children() {
-        return children;
-    }
-    
-    @Override
-    public List<? extends NarratableEntry> narratables() {
         return children;
     }
     

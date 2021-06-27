@@ -67,7 +67,8 @@ public class EntryTypeDeferred<T> implements EntryType<T> {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof EntryTypeDeferred<?> that)) return false;
+        if (!(o instanceof EntryTypeDeferred)) return false;
+        EntryTypeDeferred<?> that = (EntryTypeDeferred<?>) o;
         return hashCode == that.hashCode && id.equals(that.id);
     }
     

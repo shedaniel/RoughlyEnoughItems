@@ -23,17 +23,14 @@
 
 package me.shedaniel.rei.api.client.gui.widgets;
 
-import dev.architectury.utils.EnvExecutor;
+import me.shedaniel.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -42,16 +39,8 @@ import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public interface Tooltip {
-    static Tooltip.Entry entry(Component text) {
-        return ClientInternals.createTooltipEntry(text);
-    }
-    
-    static Tooltip.Entry entry(ClientTooltipComponent text) {
-        return ClientInternals.createTooltipEntry(text);
-    }
-    
     static Tooltip create(@Nullable Point point, Collection<Component> texts) {
-        return from(point, CollectionUtils.map(texts, Tooltip::entry));
+        return from(point, texts);
     }
     
     static Tooltip create(@Nullable Point point, Component... texts) {
@@ -66,19 +55,19 @@ public interface Tooltip {
         return create(Arrays.asList(texts));
     }
     
-    static Tooltip from(@Nullable Point point, Collection<Entry> entries) {
+    static Tooltip from(@Nullable Point point, Collection<Component> entries) {
         return ClientInternals.createTooltip(point, entries);
     }
     
-    static Tooltip from(@Nullable Point point, Entry... entries) {
+    static Tooltip from(@Nullable Point point, Component... entries) {
         return from(point, Arrays.asList(entries));
     }
     
-    static Tooltip from(Collection<Entry> entries) {
+    static Tooltip from(Collection<Component> entries) {
         return from(null, entries);
     }
     
-    static Tooltip from(Entry... entries) {
+    static Tooltip from(Component... entries) {
         return from(Arrays.asList(entries));
     }
     
@@ -86,36 +75,12 @@ public interface Tooltip {
     
     int getY();
     
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
     List<Component> getText();
-    
-    List<Entry> entries();
-    
-    List<TooltipComponent> components();
-    
-    Tooltip add(ClientTooltipComponent component);
     
     Tooltip add(Component text);
     
-    Tooltip add(TooltipComponent component);
-    
-    default Tooltip addAll(ClientTooltipComponent... components) {
-        for (ClientTooltipComponent component : components) {
-            add(component);
-        }
-        return this;
-    }
-    
     default Tooltip addAll(Component... text) {
         for (Component component : text) {
-            add(component);
-        }
-        return this;
-    }
-    
-    default Tooltip addAllComponents(Iterable<ClientTooltipComponent> text) {
-        for (ClientTooltipComponent component : text) {
             add(component);
         }
         return this;
@@ -132,12 +97,7 @@ public interface Tooltip {
         EnvExecutor.runInEnv(EnvType.CLIENT, () -> () -> REIRuntime.getInstance().queueTooltip(this));
     }
     
-    @ApiStatus.NonExtendable
-    interface Entry {
-        boolean isText();
-        
-        Component getAsText();
-        
-        ClientTooltipComponent getAsComponent();
-    }
+    EntryStack<?> getContextStack();
+    
+    Tooltip withContextStack(EntryStack<?> stack);
 }

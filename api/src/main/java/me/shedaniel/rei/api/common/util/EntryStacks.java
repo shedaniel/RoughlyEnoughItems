@@ -23,8 +23,9 @@
 
 package me.shedaniel.rei.api.common.util;
 
-import dev.architectury.event.CompoundEventResult;
-import dev.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.event.CompoundEventResult;
+import me.shedaniel.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
@@ -34,6 +35,7 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
+import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
@@ -45,7 +47,7 @@ public final class EntryStacks {
         return of(fluid, FluidStack.bucketAmount());
     }
     
-    public static EntryStack<FluidStack> of(Fluid fluid, long amount) {
+    public static EntryStack<FluidStack> of(Fluid fluid, Fraction amount) {
         return EntryStack.of(VanillaEntryTypes.FLUID, FluidStack.create(fluid, amount));
     }
     
@@ -88,7 +90,7 @@ public final class EntryStacks {
         }
         for (EntryTypeBridge<A, B> bridge : EntryTypeRegistry.getInstance().getBridgesFor(leftType, rightType)) {
             CompoundEventResult<Stream<EntryStack<B>>> holder = bridge.bridge(left);
-            if (holder.isTrue()) {
+            if (BooleanUtils.isTrue(holder.result().value())) {
                 Iterator<EntryStack<B>> iterator = holder.object().iterator();
                 while (iterator.hasNext()) {
                     EntryStack<B> next = iterator.next();
@@ -100,7 +102,7 @@ public final class EntryStacks {
         }
         for (EntryTypeBridge<B, A> bridge : EntryTypeRegistry.getInstance().getBridgesFor(rightType, leftType)) {
             CompoundEventResult<Stream<EntryStack<A>>> holder = bridge.bridge(right);
-            if (holder.isTrue()) {
+            if (BooleanUtils.isTrue(holder.result().value())) {
                 Iterator<EntryStack<A>> iterator = holder.object().iterator();
                 while (iterator.hasNext()) {
                     EntryStack<A> next = iterator.next();

@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.client.registry.screen;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.platform.Window;
-import dev.architectury.event.CompoundEventResult;
+import me.shedaniel.architectury.event.CompoundEventResult;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
@@ -48,6 +48,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.ApiStatus;
@@ -129,11 +130,11 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     public <T extends Screen> EntryStack<?> getFocusedStack(T screen, Point mouse) {
         for (FocusedStackProvider provider : focusedStackProviders) {
             CompoundEventResult<EntryStack<?>> result = Objects.requireNonNull(provider.provide(screen, mouse));
-            if (result.isTrue()) {
+            if (BooleanUtils.isTrue(result.result().value())) {
                 if (result != null && !result.object().isEmpty())
                     return result.object();
                 return null;
-            } else if (result.isFalse())
+            } else if (BooleanUtils.isFalse(result.result().value()))
                 return null;
         }
         
@@ -250,7 +251,8 @@ public class ScreenRegistryImpl implements ScreenRegistry {
         registerFocusedStack(new FocusedStackProvider() {
             @Override
             public CompoundEventResult<EntryStack<?>> provide(Screen screen, Point mouse) {
-                if (screen instanceof AbstractContainerScreen<?> containerScreen) {
+                if (screen instanceof AbstractContainerScreen<?>) {
+                    AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) screen;
                     if (containerScreen.hoveredSlot != null && !containerScreen.hoveredSlot.getItem().isEmpty())
                         return CompoundEventResult.interruptTrue(EntryStacks.of(containerScreen.hoveredSlot.getItem()));
                 }

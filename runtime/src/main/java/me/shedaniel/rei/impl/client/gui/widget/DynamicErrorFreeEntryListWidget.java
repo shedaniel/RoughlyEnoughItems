@@ -25,7 +25,10 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
 import net.fabricmc.api.EnvType;
@@ -34,12 +37,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.narration.NarratedElementType;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +47,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
-public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFreeEntryListWidget.Entry<E>> extends AbstractContainerEventHandler implements Widget, NarratableEntry {
+public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFreeEntryListWidget.Entry<E>> extends AbstractContainerEventHandler implements Widget {
     protected static final int DRAG_OUTSIDE = -2;
     protected final Minecraft client;
     private final List<E> entries = new Entries();
@@ -92,41 +89,6 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         this.headerHeight = headerHeight;
         if (!boolean_1)
             this.headerHeight = 0;
-    }
-    
-    public NarrationPriority narrationPriority() {
-        if (this.isFocused()) {
-            return NarrationPriority.FOCUSED;
-        } else {
-            return this.hoveredItem != null ? NarrationPriority.HOVERED : NarrationPriority.NONE;
-        }
-    }
-    
-    public void updateNarration(NarrationElementOutput narrationElementOutput) {
-        E entry = this.hoveredItem;
-        if (entry != null) {
-            entry.updateNarration(narrationElementOutput.nest());
-            this.narrateListElementPosition(narrationElementOutput, entry);
-        } else {
-            E entry2 = this.getFocused();
-            if (entry2 != null) {
-                entry2.updateNarration(narrationElementOutput.nest());
-                this.narrateListElementPosition(narrationElementOutput, entry2);
-            }
-        }
-        
-        narrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.component_list.usage"));
-    }
-    
-    protected void narrateListElementPosition(NarrationElementOutput narrationElementOutput, E entry) {
-        List<E> list = this.children();
-        if (list.size() > 1) {
-            int i = list.indexOf(entry);
-            if (i != -1) {
-                narrationElementOutput.add(NarratedElementType.POSITION, new TranslatableComponent("narrator.position.list", i + 1, list.size()));
-            }
-        }
-        
     }
     
     public int getItemWidth() {
@@ -229,12 +191,11 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     
     @Deprecated
     protected void renderBackBackground(PoseStack matrices, BufferBuilder buffer, Tesselator tessellator) {
-        RenderSystem.setShaderTexture(0, backgroundLocation);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        Minecraft.getInstance().getTextureManager().bind(backgroundLocation);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         Matrix4f matrix = matrices.last().pose();
         float float_2 = 32.0F;
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        buffer.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
         buffer.vertex(matrix, this.left, this.bottom, 0.0F).uv(this.left / 32.0F, ((this.bottom + (int) this.getScroll()) / 32.0F)).color(32, 32, 32, 255).endVertex();
         buffer.vertex(matrix, this.right, this.bottom, 0.0F).uv(this.right / 32.0F, ((this.bottom + (int) this.getScroll()) / 32.0F)).color(32, 32, 32, 255).endVertex();
         buffer.vertex(matrix, this.right, this.top, 0.0F).uv(this.right / 32.0F, ((this.top + (int) this.getScroll()) / 32.0F)).color(32, 32, 32, 255).endVertex();
@@ -256,14 +217,13 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
             this.renderHeader(matrices, rowLeft, startY, tessellator);
         this.renderList(matrices, rowLeft, startY, mouseX, mouseY, delta);
         RenderSystem.disableDepthTest();
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
         this.renderHoleBackground(matrices, 0, this.top, 255, 255);
         this.renderHoleBackground(matrices, this.bottom, this.height, 255, 255);
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 0, 1);
         RenderSystem.disableTexture();
         Matrix4f matrix = matrices.last().pose();
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        buffer.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
         buffer.vertex(matrix, this.left, this.top + 4, 0.0F).uv(0, 1).color(0, 0, 0, 0).endVertex();
         buffer.vertex(matrix, this.right, this.top + 4, 0.0F).uv(1, 1).color(0, 0, 0, 0).endVertex();
         buffer.vertex(matrix, this.right, this.top, 0.0F).uv(1, 0).color(0, 0, 0, 255).endVertex();
@@ -290,9 +250,8 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
                 int_10 = this.top;
             }
             
-            RenderSystem.setShader(GameRenderer::getPositionColorShader);
             Matrix4f matrix = matrices.last().pose();
-            buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+            buffer.begin(7, DefaultVertexFormat.POSITION_COLOR);
             buffer.vertex(matrix, scrollbarPositionMinX, this.bottom, 0.0F).color(0, 0, 0, 255).endVertex();
             buffer.vertex(matrix, scrollbarPositionMaxX, this.bottom, 0.0F).color(0, 0, 0, 255).endVertex();
             buffer.vertex(matrix, scrollbarPositionMaxX, this.top, 0.0F).color(0, 0, 0, 255).endVertex();
@@ -465,9 +424,8 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
                 RenderSystem.disableTexture();
                 float float_2 = this.isFocused() ? 1.0F : 0.5F;
                 Matrix4f matrix = matrices.last().pose();
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                RenderSystem.setShader(GameRenderer::getPositionColorShader);
-                buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                buffer.begin(7, DefaultVertexFormat.POSITION_COLOR);
                 buffer.vertex(matrix, itemMinX, itemY + itemHeight + 2, 0.0F).color(float_2, float_2, float_2, 1.0F).endVertex();
                 buffer.vertex(matrix, itemMaxX, itemY + itemHeight + 2, 0.0F).color(float_2, float_2, float_2, 1.0F).endVertex();
                 buffer.vertex(matrix, itemMaxX, itemY - 2, 0.0F).color(float_2, float_2, float_2, 1.0F).endVertex();
@@ -509,12 +467,11 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     protected void renderHoleBackground(PoseStack matrices, int y1, int y2, int alpha1, int alpha2) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.getBuilder();
-        RenderSystem.setShaderTexture(0, backgroundLocation);
+        Minecraft.getInstance().getTextureManager().bind(backgroundLocation);
         Matrix4f matrix = matrices.last().pose();
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         float float_1 = 32.0F;
-        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        buffer.begin(7, DefaultVertexFormat.POSITION_TEX_COLOR);
         buffer.vertex(matrix, this.left, y2, 0.0F).uv(0, ((float) y2 / 32.0F)).color(64, 64, 64, alpha2).endVertex();
         buffer.vertex(matrix, this.left + this.width, y2, 0.0F).uv(((float) this.width / 32.0F), ((float) y2 / 32.0F)).color(64, 64, 64, alpha2).endVertex();
         buffer.vertex(matrix, this.left + this.width, y1, 0.0F).uv(((float) this.width / 32.0F), ((float) y1 / 32.0F)).color(64, 64, 64, alpha1).endVertex();
@@ -545,8 +502,6 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     @Environment(EnvType.CLIENT)
     public abstract static class Entry<E extends Entry<E>> extends GuiComponent implements GuiEventListener {
         @Deprecated DynamicErrorFreeEntryListWidget<E> parent;
-        @Nullable
-        private NarratableEntry lastNarratable;
         
         public Entry() {
         }
@@ -570,28 +525,6 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         @Deprecated
         public int getMorePossibleHeight() {
             return -1;
-        }
-        
-        public abstract List<? extends NarratableEntry> narratables();
-        
-        void updateNarration(NarrationElementOutput narrationElementOutput) {
-            List<? extends NarratableEntry> list = this.narratables();
-            Screen.NarratableSearchResult narratableSearchResult = Screen.findNarratableWidget(list, this.lastNarratable);
-            if (narratableSearchResult != null) {
-                if (narratableSearchResult.priority.isTerminal()) {
-                    this.lastNarratable = narratableSearchResult.entry;
-                }
-                
-                if (list.size() > 1) {
-                    narrationElementOutput.add(NarratedElementType.POSITION, new TranslatableComponent("narrator.position.object_list", narratableSearchResult.index + 1, list.size()));
-                    if (narratableSearchResult.priority == NarrationPriority.FOCUSED) {
-                        narrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.component_list.usage"));
-                    }
-                }
-                
-                narratableSearchResult.entry.updateNarration(narrationElementOutput.nest());
-            }
-            
         }
     }
     
