@@ -24,6 +24,7 @@
 package me.shedaniel.rei;
 
 import com.google.common.collect.Lists;
+import com.mojang.serialization.DataResult;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.ClientGuiEvent;
 import dev.architectury.event.events.client.ClientRecipeUpdateEvent;
@@ -76,7 +77,6 @@ import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CraftingScreen;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.recipebook.GhostRecipe;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.resources.language.I18n;
@@ -97,7 +97,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -111,8 +110,8 @@ import java.util.stream.Stream;
 public class RoughlyEnoughItemsCoreClient {
     @ApiStatus.Experimental
     public static boolean isLeftMousePressed = false;
-    private static final ExecutorService RELOAD_PLUGINS = Executors.newSingleThreadScheduledExecutor(r -> {
-        Thread thread = new Thread(r, "REI-ReloadPlugins");
+    private static final ExecutorService RELOAD_PLUGINS = Executors.newSingleThreadScheduledExecutor(task -> {
+        Thread thread = new Thread(task, "REI-ReloadPlugins");
         thread.setDaemon(true);
         return thread;
     });
@@ -121,11 +120,13 @@ public class RoughlyEnoughItemsCoreClient {
         InternalWidgets.attach();
         EmptyEntryDefinition.EmptyRenderer emptyEntryRenderer = new EmptyEntryDefinition.EmptyRenderer();
         ClientInternals.attachInstance((Supplier<EntryRenderer<?>>) () -> emptyEntryRenderer, "emptyEntryRenderer");
-        ClientInternals.attachInstance((BiFunction<Supplier<FavoriteEntry>, Supplier<CompoundTag>, FavoriteEntry>) DelegatingFavoriteEntryProviderImpl::new, "delegateFavoriteEntry");
-        ClientInternals.attachInstance((Function<CompoundTag, FavoriteEntry>) (object) -> {
+        ClientInternals.attachInstance((BiFunction<Supplier<DataResult<FavoriteEntry>>, Supplier<CompoundTag>, FavoriteEntry>) DelegatingFavoriteEntryProviderImpl::new, "delegateFavoriteEntry");
+        ClientInternals.attachInstance((Function<CompoundTag, DataResult<FavoriteEntry>>) (object) -> {
             String type = object.getString(FavoriteEntry.TYPE_KEY);
             ResourceLocation id = new ResourceLocation(type);
-            return Objects.requireNonNull(Objects.requireNonNull(FavoriteEntryType.registry().get(id)).read(object));
+            FavoriteEntryType<FavoriteEntry> entryType = FavoriteEntryType.registry().get(id);
+            if (entryType == null) return DataResult.error("Unknown favorite type: " + id + ", json: " + object);
+            return entryType.readResult(object);
         }, "favoriteEntryFromJson");
         ClientInternals.attachInstance((BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip>) QueuedTooltip::impl, "tooltipProvider");
         ClientInternals.attachInstance((Function<Object, Tooltip.Entry>) QueuedTooltip.TooltipEntryImpl::new, "tooltipEntryProvider");

@@ -23,6 +23,8 @@
 
 package me.shedaniel.rei.api.client.favorites;
 
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Lifecycle;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.ClientInternals;
@@ -44,16 +46,29 @@ public abstract class FavoriteEntry {
     private final UUID uuid = UUID.randomUUID();
     
     public static FavoriteEntry delegate(Supplier<FavoriteEntry> supplier, @Nullable Supplier<CompoundTag> toJson) {
+        return delegateResult(() -> DataResult.success(supplier.get(), Lifecycle.stable()), toJson);
+    }
+    
+    public static FavoriteEntry delegateResult(Supplier<DataResult<FavoriteEntry>> supplier, @Nullable Supplier<CompoundTag> toJson) {
         return ClientInternals.delegateFavoriteEntry(supplier, toJson);
     }
     
     @Nullable
     public static FavoriteEntry read(CompoundTag object) {
+        return readResult(object).result().orElse(null);
+    }
+    
+    public static DataResult<FavoriteEntry> readResult(CompoundTag object) {
         return ClientInternals.favoriteEntryFromJson(object);
     }
     
+    public static FavoriteEntry readDelegated(CompoundTag object) {
+        CompoundTag copy = object.copy();
+        return delegateResult(() -> readResult(object), () -> copy);
+    }
+    
     public static FavoriteEntry fromEntryStack(EntryStack<?> stack) {
-        return delegate(() -> FavoriteEntryType.registry().get(FavoriteEntryType.ENTRY_STACK).fromArgs(stack), null);
+        return delegateResult(() -> FavoriteEntryType.registry().get(FavoriteEntryType.ENTRY_STACK).fromArgsResult(stack), null);
     }
     
     public static boolean isEntryInvalid(@Nullable FavoriteEntry entry) {
@@ -89,9 +104,14 @@ public abstract class FavoriteEntry {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof FavoriteEntry that)) return false;
-        FavoriteEntry unwrapped = getUnwrapped();
-        FavoriteEntry thatUnwrapped = that.getUnwrapped();
-        return unwrapped == thatUnwrapped || unwrapped.isSame(thatUnwrapped);
+        try {
+            FavoriteEntry unwrapped = getUnwrapped();
+            FavoriteEntry thatUnwrapped = that.getUnwrapped();
+            return unwrapped == thatUnwrapped || unwrapped.isSame(thatUnwrapped);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            return false;
+        }
     }
     
     @Override

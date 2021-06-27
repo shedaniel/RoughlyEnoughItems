@@ -224,17 +224,12 @@ public class ConfigManagerImpl implements ConfigManager {
             }
         });
         builder.registerDeserializer(Tag.class, FavoriteEntry.class, (value, marshaller) -> {
-            try {
-                return FavoriteEntry.delegate(() -> FavoriteEntry.read((CompoundTag) value), () -> (CompoundTag) value);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
+            return FavoriteEntry.readDelegated((CompoundTag) value);
         });
         builder.registerDeserializer(String.class, FavoriteEntry.class, (value, marshaller) -> {
             try {
                 CompoundTag tag = TagParser.parseTag(value);
-                return FavoriteEntry.delegate(() -> FavoriteEntry.read(tag), () -> tag);
+                return FavoriteEntry.readDelegated(tag);
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;

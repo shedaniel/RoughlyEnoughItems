@@ -24,42 +24,89 @@
 package me.shedaniel.rei.api.client.gui.drag;
 
 import net.minecraft.client.gui.screens.Screen;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * An interface to be implemented on {@link me.shedaniel.rei.api.client.gui.widgets.Widget} to accept
  * incoming {@link DraggableStack}.
  */
-@FunctionalInterface
 public interface DraggableStackVisitorWidget {
     static DraggableStackVisitorWidget from(Function<DraggingContext<Screen>, Iterable<DraggableStackVisitorWidget>> providers) {
-        return (context, stack) -> {
-            for (DraggableStackVisitorWidget visitor : providers.apply(context)) {
-                Optional<DraggableStackVisitor.Acceptor> acceptor = visitor.visitDraggedStack(context, stack);
-                if (acceptor.isPresent()) return acceptor;
+        return new DraggableStackVisitorWidget() {
+            @Override
+            public boolean acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
+                return StreamSupport.stream(providers.apply(context).spliterator(), false)
+                        .anyMatch(visitor -> visitor.acceptDraggedStack(context, stack));
             }
-            return Optional.empty();
+            
+            @Override
+            public Stream<DraggableStackVisitor.BoundsProvider> getDraggableAcceptingBounds(DraggingContext<Screen> context, DraggableStack stack) {
+                return StreamSupport.stream(providers.apply(context).spliterator(), false)
+                        .flatMap(visitor -> visitor.getDraggableAcceptingBounds(context, stack));
+            }
         };
     }
     
-    Optional<DraggableStackVisitor.Acceptor> visitDraggedStack(DraggingContext<Screen> context, DraggableStack stack);
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated(forRemoval = true)
+    default Optional<DraggableStackVisitor.Acceptor> visitDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
+        return Optional.empty();
+    }
+    
+    /**
+     * Accepts a dragged stack, implementations of this function should check if the {@code context} is within
+     * boundaries of the widget.
+     *
+     * @param context the context of the current dragged stack on the overlay
+     * @param stack   the stack being dragged
+     * @return whether the stack is accepted by the widget
+     */
+    default boolean acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
+        Optional<DraggableStackVisitor.Acceptor> acceptor = visitDraggedStack(context, stack);
+        if (acceptor.isPresent()) {
+            acceptor.get().accept(stack);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Returns the accepting bounds for the dragging stack, this should only be called once on drag.
+     * The bounds are used to overlay to indicate to the users that the widget is accepting entries.
+     *
+     * @param context the context of the current dragged stack on the overlay
+     * @param stack   the stack being dragged
+     * @return the accepting bounds for the dragging stack in a stream
+     */
+    default Stream<DraggableStackVisitor.BoundsProvider> getDraggableAcceptingBounds(DraggingContext<Screen> context, DraggableStack stack) {
+        return Stream.empty();
+    }
     
     static DraggableStackVisitor<Screen> toVisitor(DraggableStackVisitorWidget widget) {
         return toVisitor(widget, 0.0);
     }
     
     static DraggableStackVisitor<Screen> toVisitor(DraggableStackVisitorWidget widget, double priority) {
-        return new DraggableStackVisitor<Screen>() {
+        return new DraggableStackVisitor<>() {
             @Override
-            public Optional<Acceptor> visitDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
-                return widget.visitDraggedStack(context, stack);
+            public boolean acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
+                return widget.acceptDraggedStack(context, stack);
             }
             
             @Override
             public <R extends Screen> boolean isHandingScreen(R screen) {
                 return true;
+            }
+            
+            @Override
+            public Stream<BoundsProvider> getDraggableAcceptingBounds(DraggingContext<Screen> context, DraggableStack stack) {
+                return widget.getDraggableAcceptingBounds(context, stack);
             }
             
             @Override

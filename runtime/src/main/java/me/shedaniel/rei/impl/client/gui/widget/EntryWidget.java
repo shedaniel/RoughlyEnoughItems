@@ -383,17 +383,19 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
                 if (keyCode.matchesMouse(button)) {
                     FavoriteEntry favoriteEntry = asFavoriteEntry();
-                    if (reverseFavoritesAction())
-                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                    else {
-                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                        ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
+                    if (favoriteEntry != null) {
+                        if (reverseFavoritesAction())
+                            ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
+                        else {
+                            ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
+                            ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
+                        }
+                        ConfigManager.getInstance().saveConfig();
+                        FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
+                        if (favoritesListWidget != null)
+                            favoritesListWidget.updateSearch();
+                        return true;
                     }
-                    ConfigManager.getInstance().saveConfig();
-                    FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                    if (favoritesListWidget != null)
-                        favoritesListWidget.updateSearch();
-                    return true;
                 }
             }
             if ((ConfigObject.getInstance().getRecipeKeybind().getType() != InputConstants.Type.MOUSE && button == 0) || ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button))
@@ -405,8 +407,10 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     @ApiStatus.Internal
+    @Nullable
     protected FavoriteEntry asFavoriteEntry() {
-        return FavoriteEntry.fromEntryStack(getCurrentEntry().normalize());
+        FavoriteEntry entry = FavoriteEntry.fromEntryStack(getCurrentEntry().normalize());
+        return entry.isInvalid() ? null : entry;
     }
     
     @ApiStatus.Internal
@@ -432,17 +436,19 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
                 if (keyCode.matchesKey(int_1, int_2)) {
                     FavoriteEntry favoriteEntry = asFavoriteEntry();
-                    if (reverseFavoritesAction())
-                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                    else {
-                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                        ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
+                    if (favoriteEntry != null) {
+                        if (reverseFavoritesAction())
+                            ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
+                        else {
+                            ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
+                            ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
+                        }
+                        ConfigManager.getInstance().saveConfig();
+                        FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
+                        if (favoritesListWidget != null)
+                            favoritesListWidget.updateSearch();
+                        return true;
                     }
-                    ConfigManager.getInstance().saveConfig();
-                    FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                    if (favoritesListWidget != null)
-                        favoritesListWidget.updateSearch();
-                    return true;
                 }
             }
             if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(int_1, int_2))

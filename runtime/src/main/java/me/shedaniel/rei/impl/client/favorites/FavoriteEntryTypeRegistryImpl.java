@@ -26,6 +26,8 @@ package me.shedaniel.rei.impl.client.favorites;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
+import me.shedaniel.rei.api.client.config.ConfigManager;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
@@ -79,6 +81,16 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
     public void startReload() {
         this.registry.clear();
         this.sections.clear();
+    }
+    
+    @Override
+    public void endReload() {
+        if (ConfigObject.getInstance().isFavoritesEnabled()) {
+            List<FavoriteEntry> favorites = ConfigObject.getInstance().getFavoriteEntries();
+            favorites.removeIf(FavoriteEntry::isInvalid);
+            
+            ConfigManager.getInstance().saveConfig();
+        }
     }
     
     private static class SectionImpl implements FavoriteEntryType.Section {
