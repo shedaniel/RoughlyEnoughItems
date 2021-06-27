@@ -129,6 +129,8 @@ public interface ConfigObject {
     
     ModifierKeyCode getExportImageKeybind();
     
+    ModifierKeyCode getPreviousScreenKeybind();
+    
     double getEntrySize();
     
     boolean isUsingCompactTabs();

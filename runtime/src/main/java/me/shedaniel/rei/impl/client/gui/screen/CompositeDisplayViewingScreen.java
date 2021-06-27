@@ -236,6 +236,13 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 selectedRecipeIndex = categoryMap.get(categories.get(selectedCategoryIndex)).size() - 1;
             init();
             return true;
+        } else if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesMouse(button)) {
+            if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
+                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+            } else {
+                minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
+            }
+            return true;
         }
         for (GuiEventListener entry : children())
             if (entry.mouseClicked(mouseX, mouseY, button)) {
@@ -408,7 +415,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
             return true;
         }
-        if (keyCode == 259) {
+        if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesKey(keyCode, scanCode)) {
             if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
                 minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
             } else {
