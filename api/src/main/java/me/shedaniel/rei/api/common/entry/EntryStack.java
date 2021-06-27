@@ -77,13 +77,17 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     
     @Nullable
     default CompoundTag save() {
-        EntrySerializer<T> serializer = getDefinition().getSerializer();
-        if (serializer != null && serializer.supportSaving()) {
-            CompoundTag tag = serializer.save(this, getValue());
+        if (supportSaving()) {
+            CompoundTag tag = getDefinition().getSerializer().save(this, getValue());
             tag.putString("type", getType().getId().toString());
             return tag;
         }
         throw new UnsupportedOperationException(getType().getId() + " does not support serialization!");
+    }
+    
+    default boolean supportSaving() {
+        EntrySerializer<T> serializer = getDefinition().getSerializer();
+        return serializer != null && serializer.supportSaving();
     }
     
     @Nullable

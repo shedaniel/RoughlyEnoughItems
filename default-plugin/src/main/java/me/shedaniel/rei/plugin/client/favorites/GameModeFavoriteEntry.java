@@ -24,6 +24,8 @@
 package me.shedaniel.rei.plugin.client.favorites;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Lifecycle;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
@@ -188,15 +190,18 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         INSTANCE;
         
         @Override
-        public GameModeFavoriteEntry read(CompoundTag object) {
+        public DataResult<GameModeFavoriteEntry> readResult(CompoundTag object) {
             String stringValue = object.getString(KEY);
             GameType type = stringValue.equals("NOT_SET") ? null : GameType.valueOf(stringValue);
-            return new GameModeFavoriteEntry(type);
+            return DataResult.success(new GameModeFavoriteEntry(type), Lifecycle.stable());
         }
         
         @Override
-        public GameModeFavoriteEntry fromArgs(Object... args) {
-            return new GameModeFavoriteEntry((GameType) args[0]);
+        public DataResult<GameModeFavoriteEntry> fromArgsResult(Object... args) {
+            if (args.length == 0) return DataResult.error("Cannot create GameModeFavoriteEntry from empty args!");
+            if (!(args[0] instanceof GameType type))
+                return DataResult.error("Creation of GameModeFavoriteEntry from args expected GameType as the first argument!");
+            return DataResult.success(new GameModeFavoriteEntry(type), Lifecycle.stable());
         }
         
         @Override

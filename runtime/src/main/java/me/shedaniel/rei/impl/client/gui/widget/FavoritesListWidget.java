@@ -51,6 +51,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
+import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -70,6 +71,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
+import net.minecraft.util.Unit;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -153,7 +158,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         if (innerBounds.contains(mouseX, mouseY)) {
             for (Entry entry : entries.values()) {
                 if (entry.getWidget().containsMouse(mouseX, mouseY)) {
-                    return new FavoriteDraggableStack(entry, false);
+                    return new FavoriteDraggableStack(entry, null);
                 }
             }
         }
@@ -164,7 +169,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                         if (widget.containsMouse(mouseX, mouseY)) {
                             Entry entry = new Entry(widget.entry.copy(), entrySize());
                             entry.size.setAs(entrySize() * 100);
-                            return new FavoriteDraggableStack(entry, true);
+                            return new FavoriteDraggableStack(entry, widget);
                         }
                     }
                 }
@@ -209,13 +214,13 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         private Entry entry;
         private FavoriteEntry favoriteEntry;
         private EntryStack<?> stack;
-        private boolean showcase;
+        private WidgetWithBounds showcaseWidget;
         
-        public FavoriteDraggableStack(Entry entry, boolean showcase) {
+        public FavoriteDraggableStack(Entry entry, WidgetWithBounds showcaseWidget) {
             this.entry = entry;
             this.favoriteEntry = entry.getEntry();
             this.stack = ClientEntryStacks.of(favoriteEntry.getRenderer(false));
-            this.showcase = showcase;
+            this.showcaseWidget = showcaseWidget;
         }
         
         @Override
@@ -225,7 +230,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         
         @Override
         public void drag() {
-            if (!showcase) {
+            if (showcaseWidget == null) {
                 entries.remove(entry.hashIgnoreAmount());
                 applyNewFavorites(CollectionUtils.map(entries.values(), Entry::getEntry));
             }
@@ -234,28 +239,53 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         @Override
         public void release(boolean accepted) {
             if (!accepted) {
-                drop(entry, this, favoriteEntry);
+                if (showcaseWidget != null) {
+                    DraggingContext.getInstance().renderBackToPosition(this, DraggingContext.getInstance().getCurrentPosition(),
+                            () -> new Point(showcaseWidget.getBounds().x, showcaseWidget.getBounds().y));
+                } else {
+                    drop(entry, this, favoriteEntry);
+                }
             }
         }
     }
     
-    @Override
-    public Optional<DraggableStackVisitor.Acceptor> visitDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
-        if (innerBounds.contains(PointHelper.ofMouse())) {
-            EntrySerializer<?> serializer = stack.getStack().getDefinition().getSerializer();
-            if (stack instanceof FavoriteDraggableStack || (serializer.supportReading() && serializer.supportSaving())) {
-                return Optional.of(this::acceptDraggedStack);
+    public Optional<Tuple<Entry, FavoriteEntry>> checkDraggedStacks(DraggingContext<Screen> context, DraggableStack stack) {
+        EntrySerializer<?> serializer = stack.getStack().getDefinition().getSerializer();
+        if (stack instanceof FavoriteDraggableStack || (serializer.supportReading() && serializer.supportSaving())) {
+            try {
+                FavoriteEntry favoriteEntry = stack instanceof FavoriteDraggableStack ? ((FavoriteDraggableStack) stack).favoriteEntry.copy()
+                        : FavoriteEntry.fromEntryStack(stack.getStack().copy());
+                Entry entry = new Entry(favoriteEntry, entrySize());
+                entry.size.setAs(entrySize() * 100);
+                return Optional.of(new Tuple<>(entry, favoriteEntry));
+            } catch (Throwable ignored) {
             }
         }
         return Optional.empty();
     }
     
-    private void acceptDraggedStack(DraggableStack stack) {
-        FavoriteEntry favoriteEntry = stack instanceof FavoriteDraggableStack ? ((FavoriteDraggableStack) stack).favoriteEntry.copy()
-                : FavoriteEntry.fromEntryStack(stack.getStack().copy());
-        Entry entry = new Entry(favoriteEntry, entrySize());
-        entry.size.setAs(entrySize() * 100);
-        drop(entry, stack, favoriteEntry);
+    @Override
+    public boolean acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
+        return checkDraggedStacks(context, stack)
+                .filter(tuple -> innerBounds.contains(context.getCurrentPosition()))
+                .map(tuple -> {
+                    drop(tuple.getA(), stack, tuple.getB());
+                    return Unit.INSTANCE;
+                }).isPresent();
+    }
+    
+    @Override
+    public Stream<DraggableStackVisitor.BoundsProvider> getDraggableAcceptingBounds(DraggingContext<Screen> context, DraggableStack stack) {
+        return checkDraggedStacks(context, stack).isPresent() ? Stream.of(DraggableStackVisitor.BoundsProvider.ofShape(buildBounds())) : Stream.empty();
+    }
+    
+    private VoxelShape buildBounds() {
+        Class<? extends Screen> screenClass = Minecraft.getInstance().screen.getClass();
+        VoxelShape shape = DraggableStackVisitor.BoundsProvider.fromRectangle(innerBounds);
+        for (Rectangle zone : ScreenRegistry.getInstance().exclusionZones().getExclusionZones(screenClass)) {
+            shape = Shapes.joinUnoptimized(shape, DraggableStackVisitor.BoundsProvider.fromRectangle(zone), BooleanOp.ONLY_FIRST);
+        }
+        return shape.optimize();
     }
     
     @Override
@@ -424,7 +454,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     public int getReleaseIndex() {
         DraggingContext<?> context = DraggingContext.getInstance();
         Point position = context.getCurrentPosition();
-        if (context.isDraggingStack() && currentBounds.contains(position)) {
+        if (context.isDraggingStack() && currentBounds.contains(position) && checkDraggedStacks(context.cast(), context.getCurrentStack()).isPresent()) {
             int entrySize = entrySize();
             int width = innerBounds.width / entrySize;
             int currentX = 0;

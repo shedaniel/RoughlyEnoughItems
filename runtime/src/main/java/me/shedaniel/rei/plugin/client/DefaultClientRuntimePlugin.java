@@ -25,6 +25,8 @@ package me.shedaniel.rei.plugin.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Lifecycle;
 import dev.architectury.fluid.FluidStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -160,13 +162,24 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         }
         
         @Override
-        public EntryStackFavoriteEntry read(CompoundTag object) {
-            return new EntryStackFavoriteEntry(EntryStack.read(object.getCompound(key)));
+        public DataResult<EntryStackFavoriteEntry> readResult(CompoundTag object) {
+            EntryStack<?> stack;
+            try {
+                stack = EntryStack.read(object.getCompound(key));
+            } catch (Throwable throwable) {
+                return DataResult.error(throwable.getMessage());
+            }
+            return DataResult.success(new EntryStackFavoriteEntry(stack), Lifecycle.stable());
         }
         
         @Override
-        public EntryStackFavoriteEntry fromArgs(Object... args) {
-            return new EntryStackFavoriteEntry((EntryStack<?>) args[0]);
+        public DataResult<EntryStackFavoriteEntry> fromArgsResult(Object... args) {
+            if (args.length == 0) return DataResult.error("Cannot create EntryStackFavoriteEntry from empty args!");
+            if (!(args[0] instanceof EntryStack<?> stack))
+                return DataResult.error("Creation of EntryStackFavoriteEntry from args expected EntryStack as the first argument!");
+            if (!stack.supportSaving())
+                return DataResult.error("Creation of EntryStackFavoriteEntry from an unserializable stack!");
+            return DataResult.success(new EntryStackFavoriteEntry(stack), Lifecycle.stable());
         }
         
         @Override

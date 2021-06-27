@@ -343,13 +343,13 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                         Arrays.stream(GameType.values())
                                 .filter(type -> type.getId() >= 0),
                         Stream.of((GameType) null)
-                ).<FavoriteEntry>map(GameModeFavoriteEntry.Type.INSTANCE::fromArgs).toArray(FavoriteEntry[]::new));
+                ).<FavoriteEntry>map(GameModeFavoriteEntry::new).toArray(FavoriteEntry[]::new));
         registry.register(WeatherFavoriteEntry.ID, WeatherFavoriteEntry.Type.INSTANCE);
         registry.getOrCrateSection(new TranslatableComponent(WeatherFavoriteEntry.TRANSLATION_KEY))
                 .add(Stream.concat(
                         Arrays.stream(WeatherFavoriteEntry.Weather.values()),
                         Stream.of((WeatherFavoriteEntry.Weather) null)
-                ).<FavoriteEntry>map(WeatherFavoriteEntry.Type.INSTANCE::fromArgs).toArray(FavoriteEntry[]::new));
+                ).<FavoriteEntry>map(WeatherFavoriteEntry::new).toArray(FavoriteEntry[]::new));
     }
     
     @Override

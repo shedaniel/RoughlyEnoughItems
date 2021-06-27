@@ -38,6 +38,7 @@ import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -49,6 +50,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     @Nullable
     private DraggableEntry entry;
     private final List<RenderBackEntry> backToOriginals = new ArrayList<>();
+    private final Set<ShapeBounds> bounds = new HashSet<>();
     
     public void set(DraggableStackProvider<Screen> provider, DraggableStackVisitor<Screen> visitor) {
         this.provider = provider;
@@ -57,6 +59,8 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        Integer hash = null;
+        
         if (entry != null) {
             if (!entry.dragging) {
                 Point startPoint = entry.start;
@@ -69,6 +73,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
                     entry.stack.drag();
                 }
             }
+            
             if (!RoughlyEnoughItemsCoreClient.isLeftMousePressed) {
                 drop();
             } else if (entry.dragging) {
@@ -76,6 +81,36 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
                 matrices.translate(0, 0, 600);
                 entry.stack.render(matrices, new Rectangle(mouseX - 8, mouseY - 8, 16, 16), mouseX, mouseY, delta);
                 matrices.popPose();
+                
+                VoxelShape shape = entry.getBoundsProvider().bounds();
+                ShapeBounds shapeBounds = new ShapeBounds(shape);
+                shapeBounds.alpha.setTo(60, 300);
+                bounds.add(shapeBounds);
+                hash = shapeBounds.hash;
+            }
+        }
+        
+        for (ShapeBounds bound : bounds) {
+            if ((hash == null || hash != bound.hash) && bound.alpha.target() != 0) {
+                bound.alpha.setTo(0, 300);
+            }
+        }
+        
+        {
+            Iterator<ShapeBounds> iterator = bounds.iterator();
+            while (iterator.hasNext()) {
+                ShapeBounds bounds = iterator.next();
+                bounds.update(delta);
+                if (bounds.alpha.target() == 0 && bounds.alpha.doubleValue() <= 2) {
+                    iterator.remove();
+                } else {
+                    bounds.shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
+                        matrices.pushPose();
+                        matrices.translate(0, 0, 500);
+                        fillGradient(matrices, (int) x1, (int) y1, (int) x2, (int) y2, 0xfdff6b | (bounds.alpha.intValue() << 24), 0xfdff6b | (bounds.alpha.intValue() << 24));
+                        matrices.popPose();
+                    });
+                }
             }
         }
         
@@ -121,9 +156,8 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     private boolean drop() {
         if (entry != null && entry.dragging) {
-            Optional<DraggableStackVisitor.Acceptor> acceptor = visitor.visitDraggedStack(this, entry.stack);
-            entry.stack.release(acceptor.isPresent());
-            acceptor.ifPresent(a -> a.accept(entry.stack));
+            boolean released = visitor.acceptDraggedStack(this, entry.stack);
+            entry.stack.release(released);
             entry = null;
             return true;
         }
@@ -154,14 +188,51 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
         backToOriginals.add(new RenderBackEntry(stack, initialPosition, position));
     }
     
-    private static class DraggableEntry {
+    private class DraggableEntry {
         private final DraggableStack stack;
         private final Point start;
         private boolean dragging = false;
+        private DraggableStackVisitor.BoundsProvider boundsProvider;
         
         private DraggableEntry(DraggableStack stack, Point start) {
             this.stack = stack;
             this.start = start;
+        }
+        
+        public DraggableStackVisitor.BoundsProvider getBoundsProvider() {
+            if (boundsProvider == null) {
+                boundsProvider = DraggableStackVisitor.BoundsProvider.concat(visitor.getDraggableAcceptingBounds(CurrentDraggingStack.this, stack).toList());
+            }
+            
+            return boundsProvider;
+        }
+    }
+    
+    private static class ShapeBounds {
+        private VoxelShape shape;
+        private Animator alpha;
+        private int hash;
+        
+        public ShapeBounds(VoxelShape shape) {
+            this.shape = shape;
+            this.alpha = new Animator(0);
+            this.hash = shape.toAabbs().hashCode();
+        }
+        
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof ShapeBounds shapeBounds)) return false;
+            return hash == shapeBounds.hash;
+        }
+        
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+        
+        public void update(double delta) {
+            this.alpha.update(delta);
         }
     }
     

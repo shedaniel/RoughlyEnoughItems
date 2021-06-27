@@ -23,6 +23,8 @@
 
 package me.shedaniel.rei.api.client.favorites;
 
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Lifecycle;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
@@ -48,9 +50,25 @@ public interface FavoriteEntryType<T extends FavoriteEntry> {
         return PluginManager.getClientInstance().get(FavoriteEntryType.Registry.class);
     }
     
-    T read(CompoundTag object);
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
+    default T read(CompoundTag object) {
+        throw new UnsupportedOperationException("Implementation of FavoriteEntryType must override #read or #readResult");
+    }
     
-    T fromArgs(Object... args);
+    default DataResult<T> readResult(CompoundTag object) {
+        return DataResult.success(read(object), Lifecycle.stable());
+    }
+    
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
+    default T fromArgs(Object... args) {
+        throw new UnsupportedOperationException("Implementation of FavoriteEntryType must override #fromArgs or #fromArgsResult");
+    }
+    
+    default DataResult<T> fromArgsResult(Object... args) {
+        return DataResult.success(fromArgs(args), Lifecycle.stable());
+    }
     
     CompoundTag save(T entry, CompoundTag tag);
     

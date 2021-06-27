@@ -25,6 +25,8 @@ package me.shedaniel.rei.plugin.client.favorites;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Lifecycle;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
@@ -195,15 +197,18 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
         INSTANCE;
         
         @Override
-        public WeatherFavoriteEntry read(CompoundTag object) {
+        public DataResult<WeatherFavoriteEntry> readResult(CompoundTag object) {
             String stringValue = object.getString(KEY);
-            Weather type = stringValue.equals("NOT_SET") ? null : Weather.valueOf(stringValue);
-            return new WeatherFavoriteEntry(type);
+            Weather weather = stringValue.equals("NOT_SET") ? null : Weather.valueOf(stringValue);
+            return DataResult.success(new WeatherFavoriteEntry(weather), Lifecycle.stable());
         }
         
         @Override
-        public WeatherFavoriteEntry fromArgs(Object... args) {
-            return new WeatherFavoriteEntry((Weather) args[0]);
+        public DataResult<WeatherFavoriteEntry> fromArgsResult(Object... args) {
+            if (args.length == 0) return DataResult.error("Cannot create WeatherFavoriteEntry from empty args!");
+            if (!(args[0] instanceof Weather weather))
+                return DataResult.error("Creation of WeatherFavoriteEntry from args expected Weather as the first argument!");
+            return DataResult.success(new WeatherFavoriteEntry(weather), Lifecycle.stable());
         }
         
         @Override

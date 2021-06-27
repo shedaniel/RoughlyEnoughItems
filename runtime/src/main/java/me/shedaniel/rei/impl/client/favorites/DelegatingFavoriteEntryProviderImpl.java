@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.favorites;
 
+import com.mojang.serialization.DataResult;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.Renderer;
@@ -36,11 +37,11 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 public class DelegatingFavoriteEntryProviderImpl extends FavoriteEntry {
-    private final Supplier<FavoriteEntry> supplier;
+    private final Supplier<DataResult<FavoriteEntry>> supplier;
     private final Supplier<CompoundTag> toJson;
     private FavoriteEntry value = null;
     
-    public DelegatingFavoriteEntryProviderImpl(Supplier<FavoriteEntry> supplier, Supplier<CompoundTag> toJson) {
+    public DelegatingFavoriteEntryProviderImpl(Supplier<DataResult<FavoriteEntry>> supplier, Supplier<CompoundTag> toJson) {
         this.supplier = supplier;
         this.toJson = toJson;
     }
@@ -49,7 +50,8 @@ public class DelegatingFavoriteEntryProviderImpl extends FavoriteEntry {
     public FavoriteEntry getUnwrapped() {
         synchronized (this) {
             if (this.value == null) {
-                this.value = supplier.get();
+                DataResult<FavoriteEntry> result = supplier.get();
+                this.value = result.getOrThrow(false, error -> {});
             }
         }
         return Objects.requireNonNull(value).getUnwrapped();
@@ -91,7 +93,7 @@ public class DelegatingFavoriteEntryProviderImpl extends FavoriteEntry {
     
     @Override
     public FavoriteEntry copy() {
-        return FavoriteEntry.delegate(supplier, toJson);
+        return FavoriteEntry.delegateResult(supplier, toJson);
     }
     
     @Override

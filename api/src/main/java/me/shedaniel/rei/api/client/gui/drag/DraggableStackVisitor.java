@@ -23,10 +23,16 @@
 
 package me.shedaniel.rei.api.client.gui.drag;
 
+import me.shedaniel.math.Rectangle;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A visitor for accepting {@link DraggableStack} to the screen.
@@ -45,19 +51,60 @@ public interface DraggableStackVisitor<T extends Screen> extends Comparable<Drag
             }
             
             @Override
-            public Optional<Acceptor> visitDraggedStack(DraggingContext<T> context, DraggableStack stack) {
+            public boolean acceptDraggedStack(DraggingContext<T> context, DraggableStack stack) {
                 for (DraggableStackVisitor<T> visitor : visitors.get()) {
                     if (visitor.isHandingScreen(context.getScreen())) {
-                        Optional<Acceptor> acceptor = visitor.visitDraggedStack(context, stack);
-                        if (acceptor.isPresent()) return acceptor;
+                        boolean visited = visitor.acceptDraggedStack(context, stack);
+                        if (visited) return true;
                     }
                 }
-                return Optional.empty();
+                return false;
+            }
+            
+            @Override
+            public Stream<BoundsProvider> getDraggableAcceptingBounds(DraggingContext<T> context, DraggableStack stack) {
+                return StreamSupport.stream(visitors.get().spliterator(), false)
+                        .filter(visitor -> visitor.isHandingScreen(context.getScreen()))
+                        .flatMap(visitor -> visitor.getDraggableAcceptingBounds(context, stack));
             }
         };
     }
     
-    Optional<Acceptor> visitDraggedStack(DraggingContext<T> context, DraggableStack stack);
+    @Deprecated(forRemoval = true)
+    @ApiStatus.ScheduledForRemoval
+    default Optional<Acceptor> visitDraggedStack(DraggingContext<T> context, DraggableStack stack) {
+        return Optional.empty();
+    }
+    
+    /**
+     * Accepts a dragged stack, implementations of this function should check if the {@code context} is within
+     * boundaries of the accepting boundaries.
+     *
+     * @param context the context of the current dragged stack on the overlay
+     * @param stack   the stack being dragged
+     * @return whether the stack is accepted by the visitor
+     */
+    default boolean acceptDraggedStack(DraggingContext<T> context, DraggableStack stack) {
+        Optional<Acceptor> acceptor = visitDraggedStack(context, stack);
+        if (acceptor.isPresent()) {
+            acceptor.get().accept(stack);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Returns the accepting bounds for the dragging stack, this should only be called once on drag.
+     * The bounds are used to overlay to indicate to the users that the area is accepting entries.
+     *
+     * @param context the context of the current dragged stack on the overlay
+     * @param stack   the stack being dragged
+     * @return the accepting bounds for the dragging stack in a stream
+     */
+    default Stream<BoundsProvider> getDraggableAcceptingBounds(DraggingContext<T> context, DraggableStack stack) {
+        return Stream.empty();
+    }
     
     <R extends Screen> boolean isHandingScreen(R screen);
     
@@ -82,5 +129,45 @@ public interface DraggableStackVisitor<T extends Screen> extends Comparable<Drag
     @FunctionalInterface
     interface Acceptor {
         void accept(DraggableStack stack);
+    }
+    
+    @FunctionalInterface
+    interface BoundsProvider {
+        static VoxelShape fromRectangle(Rectangle bounds) {
+            return Shapes.box(bounds.x, bounds.y, 0, bounds.getMaxX(), bounds.getMaxY(), 0.1);
+        }
+        
+        static BoundsProvider ofRectangle(Rectangle bounds) {
+            return ofShape(fromRectangle(bounds));
+        }
+        
+        static BoundsProvider ofRectangles(Iterable<Rectangle> bounds) {
+            VoxelShape shape = StreamSupport.stream(bounds.spliterator(), false)
+                    .map(BoundsProvider::fromRectangle)
+                    .reduce(Shapes.empty(), Shapes::or);
+            return ofShape(shape);
+        }
+        
+        static BoundsProvider ofShape(VoxelShape shape) {
+            return () -> shape;
+        }
+        
+        static BoundsProvider ofShapes(Iterable<VoxelShape> shapes) {
+            VoxelShape shape = StreamSupport.stream(shapes.spliterator(), false)
+                    .reduce(Shapes.empty(), Shapes::or);
+            return ofShape(shape);
+        }
+        
+        static BoundsProvider empty() {
+            return Shapes::empty;
+        }
+        
+        static BoundsProvider concat(Iterable<BoundsProvider> providers) {
+            return () -> StreamSupport.stream(providers.spliterator(), false)
+                    .map(BoundsProvider::bounds)
+                    .reduce(Shapes.empty(), Shapes::or);
+        }
+        
+        VoxelShape bounds();
     }
 }
