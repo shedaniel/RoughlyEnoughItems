@@ -267,6 +267,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public ModifierKeyCode getPreviousScreenKeybind() {
+        return basics.keyBindings.previousScreenKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.previousScreenKeybind;
+    }
+    
+    @Override
     public double getEntrySize() {
         return advanced.accessibility.entrySize;
     }
@@ -419,15 +424,16 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public static class KeyBindings {
-        private ModifierKeyCode recipeKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(82), Modifier.none());
-        private ModifierKeyCode usageKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(85), Modifier.none());
-        private ModifierKeyCode hideKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(79), Modifier.of(false, true, false));
+        private ModifierKeyCode recipeKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_R), Modifier.none());
+        private ModifierKeyCode usageKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_U), Modifier.none());
+        private ModifierKeyCode hideKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_O), Modifier.of(false, true, false));
         private ModifierKeyCode previousPageKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode nextPageKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode focusSearchFieldKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode copyRecipeIdentifierKeybind = ModifierKeyCode.unknown();
-        private ModifierKeyCode favoriteKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(65), Modifier.none());
+        private ModifierKeyCode favoriteKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_A), Modifier.none());
         private ModifierKeyCode exportImageKeybind = ModifierKeyCode.unknown();
+        private ModifierKeyCode previousScreenKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_BACKSPACE), Modifier.none());
     }
     
     public static class Appearance {

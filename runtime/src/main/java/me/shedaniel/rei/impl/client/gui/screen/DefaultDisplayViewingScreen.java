@@ -138,7 +138,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
             return true;
         }
-        if (keyCode == 259) {
+        if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesKey(keyCode, scanCode)) {
             if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
                 minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
             } else {
@@ -487,6 +487,13 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             if (recipeBack.isEnabled())
                 recipeBack.onClick();
             return recipeBack.isEnabled();
+        } else if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesMouse(button)) {
+            if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
+                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+            } else {
+                minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
+            }
+            return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }

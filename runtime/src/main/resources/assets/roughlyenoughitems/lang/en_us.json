@@ -134,6 +134,7 @@
   "config.roughlyenoughitems.keyBindings.copyRecipeIdentifierKeybind": "Copy Recipe Identifier:",
   "config.roughlyenoughitems.keyBindings.exportImageKeybind": "Export Recipe:",
   "config.roughlyenoughitems.keyBindings.favoriteKeybind": "Favorite Entry:",
+  "config.roughlyenoughitems.keyBindings.previousScreenKeybind": "Previous Screen:",
   "config.roughlyenoughitems.cheatingStyle": "Cheating Style:",
   "config.roughlyenoughitems.cheatingStyle.grab": "Grab",
   "config.roughlyenoughitems.cheatingStyle.give": "Give",
