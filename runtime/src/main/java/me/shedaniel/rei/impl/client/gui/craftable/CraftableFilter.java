@@ -67,11 +67,11 @@ public class CraftableFilter {
     }
     
     public boolean matches(EntryStack<?> stack, Iterable<SlotAccessor> inputSlots) {
-        if (invStacks.contains(EntryStacks.hashExact(stack))) return true;
+        if (invStacks.contains(EntryStacks.hashFuzzy(stack))) return true;
         if (stack.getType() != VanillaEntryTypes.ITEM) return false;
         for (SlotAccessor slot : inputSlots) {
             EntryStack<?> itemStack = EntryStacks.of(slot.getItemStack());
-            if (!itemStack.isEmpty() && EntryStacks.equalsExact(itemStack, stack)) {
+            if (!itemStack.isEmpty() && EntryStacks.equalsFuzzy(itemStack, stack)) {
                 return true;
             }
         }

@@ -218,4 +218,13 @@ public class EntryRegistryImpl implements EntryRegistry {
             return entries.removeIf(stack -> predicate.test(EntryStacks.hashExact(stack)));
         }
     }
+    
+    @Override
+    public boolean removeEntryFuzzyHashIf(LongPredicate predicate) {
+        if (reloading) {
+            return reloadingRegistry.removeIf(wrapper -> predicate.test(EntryStacks.hashFuzzy(wrapper.unwrap())));
+        } else {
+            return entries.removeIf(stack -> predicate.test(EntryStacks.hashFuzzy(stack)));
+        }
+    }
 }

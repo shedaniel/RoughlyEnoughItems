@@ -25,11 +25,21 @@ package me.shedaniel.rei.api.common.entry.comparison;
 
 public enum ComparisonContext {
     /**
-     * Should only compare the type of the object, normalized stacks may still not be the same.
+     * Should only compare the type of the object.
+     * <p>
+     * The fuzzy context type denotes that the equivalent stacks should be <b>primarily</b> the same.
+     * <p>
+     * For example, enchantment books of different enchantments should be different within this context,
+     * while tools with different damage values and different enchantments should be treated as the same within this context.
+     * Skulker boxes with different content should be different within this context.
      */
     FUZZY(false),
     /**
-     * Should compare the nbt and the type of the object, normalized stacks should be exactly the same.
+     * Should compare the nbt and the type of the object.
+     * <p>
+     * The exact context type denotes that the equivalent stacks should be <b>functionally</b> the same.
+     * <p>
+     * For example, tools with different damage values and different enchantments should be treated as different within this context.
      */
     EXACT(true);
     

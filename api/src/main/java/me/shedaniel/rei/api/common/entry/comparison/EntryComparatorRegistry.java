@@ -30,9 +30,6 @@ import me.shedaniel.rei.api.common.registry.Reloadable;
  * Registry for registering custom methods for identifying variants of {@link T}.
  * The default comparator is {@link EntryComparator#noop()} when fuzzy, which does not compare the NBT of the entries;
  * and nbt when exact.
- *
- * <p>
- * This comparator is used when the comparison context is {@link ComparisonContext#EXACT}.
  */
 public interface EntryComparatorRegistry<T, S> extends Reloadable<REIPlugin<?>> {
     void register(EntryComparator<T> comparator, S entry);
