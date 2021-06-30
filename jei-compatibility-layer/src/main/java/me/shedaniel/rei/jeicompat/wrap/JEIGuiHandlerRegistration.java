@@ -92,11 +92,11 @@ public enum JEIGuiHandlerRegistration implements IGuiHandlerRegistration {
             return CollectionUtils.map(exclusionZones.apply(screen), rect2i -> new Rectangle(rect2i.getX(), rect2i.getY(), rect2i.getWidth(), rect2i.getHeight()));
         });
         ScreenRegistry.getInstance().registerFocusedStack((screen, mouse) -> {
-            if (!screenClass.isInstance(screen)) return InteractionResultHolder.pass(EntryStack.empty());
+            if (!screenClass.isInstance(screen)) return CompoundEventResult.pass();
             Object ingredient = focusedStack.apply((T) screen, (double) mouse.x, (double) mouse.y);
-            if (ingredient == null) return InteractionResultHolder.pass(EntryStack.empty());
+            if (ingredient == null) return CompoundEventResult.pass();
             
-            return InteractionResultHolder.success(wrap(ingredient));
+            return CompoundEventResult.interruptTrue(wrap(ingredient));
         });
     }
     
@@ -109,17 +109,30 @@ public enum JEIGuiHandlerRegistration implements IGuiHandlerRegistration {
     @Override
     public <T extends Screen> void addGhostIngredientHandler(@NotNull Class<T> guiClass, @NotNull IGhostIngredientHandler<T> handler) {
         ScreenRegistry.getInstance().registerDraggableStackVisitor(new DraggableStackVisitor<T>() {
-            @Override
-            public Optional<Acceptor> visitDraggedStack(DraggingContext<T> context, DraggableStack stack) {
+            public Optional<IGhostIngredientHandler.Target<Object>> canAccept(DraggingContext<T> context, DraggableStack stack) {
                 List<IGhostIngredientHandler.Target<Object>> list = handler.getTargets(context.getScreen(), unwrap(stack.getStack()), true);
                 for (IGhostIngredientHandler.Target<Object> target : list) {
                     if (target.getArea().contains(context.getCurrentPosition().x, context.getCurrentPosition().y)) {
-                        return Optional.of(s -> {
-                            target.accept(unwrap(s.getStack().copy()));
-                        });
+                        return Optional.of(target);
                     }
                 }
                 return Optional.empty();
+            }
+            
+            @Override
+            public boolean acceptDraggedStack(DraggingContext<T> context, DraggableStack stack) {
+                return canAccept(context, stack).map(target -> {
+                    target.accept(unwrap(stack.getStack().copy()));
+                    return Unit.INSTANCE;
+                }).isPresent();
+            }
+            
+            @Override
+            public Stream<BoundsProvider> getDraggableAcceptingBounds(DraggingContext<T> context, DraggableStack stack) {
+                return Stream.of(BoundsProvider.ofRectangles(() -> handler.getTargets(context.getScreen(), unwrap(stack.getStack()), true).stream()
+                        .map(IGhostIngredientHandler.Target::getArea)
+                        .map(rect2i -> new Rectangle(rect2i.getX(), rect2i.getY(), rect2i.getWidth(), rect2i.getHeight()))
+                        .iterator()));
             }
             
             @Override

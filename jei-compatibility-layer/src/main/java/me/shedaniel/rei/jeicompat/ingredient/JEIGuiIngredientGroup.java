@@ -128,13 +128,14 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     public void init(int slotIndex, boolean input, int xPosition, int yPosition) {
         SlotWrapper slot = getSlot(slotIndex);
         slot.slot.setNoticeMark(input ? Slot.INPUT : Slot.OUTPUT);
-        slot.slot.getBounds().setLocation(xPosition, yPosition);
+        slot.slot.getBounds().setLocation(xPosition - 1, yPosition - 1);
     }
     
     @Override
     public void init(int slotIndex, boolean input, @NotNull IIngredientRenderer<T> ingredientRenderer, int xPosition, int yPosition, int width, int height, int xPadding, int yPadding) {
-        init(slotIndex, input, xPosition - 1, yPosition - 1);
         SlotWrapper slot = getSlot(slotIndex);
+        slot.slot.setNoticeMark(input ? Slot.INPUT : Slot.OUTPUT);
+        slot.slot.getBounds().setLocation(xPosition - 1, yPosition - 1);
         slot.slot.getBounds().setSize(width + 2, height + 2);
         slot.renderer = ingredientRenderer;
     }

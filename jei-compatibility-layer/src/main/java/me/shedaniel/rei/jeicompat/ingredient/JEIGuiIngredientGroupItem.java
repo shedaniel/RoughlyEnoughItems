@@ -33,4 +33,9 @@ public class JEIGuiIngredientGroupItem extends JEIGuiIngredientGroup<ItemStack> 
     public JEIGuiIngredientGroupItem(IIngredientType<ItemStack> type, Value<IDrawable> background) {
         super(type, background);
     }
+    
+    @Override
+    public void init(int slotIndex, boolean input, int xPosition, int yPosition) {
+        super.init(slotIndex, input, xPosition + 1, yPosition + 1);
+    }
 }

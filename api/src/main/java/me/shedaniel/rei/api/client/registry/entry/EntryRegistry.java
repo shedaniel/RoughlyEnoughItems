@@ -183,4 +183,14 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
      * @return whether it was successful to remove any entry
      */
     boolean removeEntryExactHashIf(LongPredicate predicate);
+    
+    /**
+     * Removes entries from the entry list, if it matches the predicate.
+     * This method is usually faster than {@link #removeEntryIf(Predicate)}
+     * due to its fast comparison.
+     *
+     * @param predicate a predicate which returns {@code true} for the entries to be removed
+     * @return whether it was successful to remove any entry
+     */
+    boolean removeEntryFuzzyHashIf(LongPredicate predicate);
 }
