@@ -116,10 +116,11 @@ public final class EntryStacks {
     }
     
     /**
-     * Compares equality for the {@link ComparisonContext#EXACT} context, stacks that equal should share the same normalized stack.
+     * Compares equality for the {@link ComparisonContext#EXACT} context.
      * <p>
-     * For example, enchantment books of different enchantments will not be equal under this context.
-     * However, difference between the amount of objects in a stack will not affect the result.
+     * The exact context type denotes that the equivalent stacks should be <b>functionally</b> the same.
+     * <p>
+     * For example, tools with different damage values and different enchantments should be treated as different within this context.
      *
      * @param left  the first stack to compare
      * @param right the second stack to compare
@@ -130,10 +131,13 @@ public final class EntryStacks {
     }
     
     /**
-     * Compares equality for the {@link ComparisonContext#FUZZY} context, stacks that equal may not share the same normalized stack.
-     * This result is less specific, mainly used for fuzzy matching between different stacks.
+     * Compares equality for the {@link ComparisonContext#FUZZY} context.
      * <p>
-     * For example, enchantment books of different enchantments should still be equal under this context.
+     * The fuzzy context type denotes that the equivalent stacks should be <b>primarily</b> the same.
+     * <p>
+     * For example, enchantment books of different enchantments should be different within this context,
+     * while tools with different damage values and different enchantments should be treated as the same within this context.
+     * Skulker boxes with different content should be different within this context.
      *
      * @param left  the first stack to compare
      * @param right the second stack to compare
@@ -156,10 +160,11 @@ public final class EntryStacks {
     }
     
     /**
-     * Hash Code of the {@link ComparisonContext#EXACT} context, stacks with the same hash code should share the same normalized stack.
+     * Hash Code of the {@link ComparisonContext#EXACT} context.
      * <p>
-     * For example, enchantment books of different enchantments will not receive the same hash code under this context.
-     * However, difference between the amount of objects in a stack will not affect the hash code.
+     * The exact context type denotes that the equivalent stacks should be <b>functionally</b> the same.
+     * <p>
+     * For example, tools with different damage values and different enchantments should be treated as different within this context.
      *
      * @param stack the stack to hash code
      * @param <T>   the type of the stack
@@ -171,10 +176,13 @@ public final class EntryStacks {
     }
     
     /**
-     * Hash Code of the {@link ComparisonContext#FUZZY} context, stacks with the same hash code may not share the same normalized stack.
-     * This hash is less specific, mainly used for fuzzy matching between different stacks.
+     * Hash Code of the {@link ComparisonContext#FUZZY} context.
      * <p>
-     * For example, enchantment books of different enchantments should still receive the same hash code under this context.
+     * The fuzzy context type denotes that the equivalent stacks should be <b>primarily</b> the same.
+     * <p>
+     * For example, enchantment books of different enchantments should be different within this context,
+     * while tools with different damage values and different enchantments should be treated as the same within this context.
+     * Skulker boxes with different content should be different within this context.
      *
      * @param stack the stack to hash code
      * @param <T>   the type of the stack

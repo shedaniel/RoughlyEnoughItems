@@ -236,7 +236,7 @@ public class ClientHelperImpl implements ClientHelper {
         return Minecraft.getInstance().player.inventory.compartments.stream()
                 .flatMap(Collection::stream)
                 .map(EntryStacks::of)
-                .mapToLong(EntryStacks::hashExact)
+                .mapToLong(EntryStacks::hashFuzzy)
                 .collect(LongOpenHashSet::new, LongOpenHashSet::add, LongOpenHashSet::addAll);
     }
     

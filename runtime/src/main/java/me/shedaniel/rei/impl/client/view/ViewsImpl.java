@@ -89,7 +89,7 @@ public class ViewsImpl implements Views {
                     for (List<? extends EntryStack<?>> results : display.getOutputEntries()) {
                         for (EntryStack<?> otherEntry : results) {
                             for (EntryStack<?> stack : recipesFor) {
-                                if (EntryStacks.equalsExact(otherEntry, stack)) {
+                                if (EntryStacks.equalsFuzzy(otherEntry, stack)) {
                                     set.add(display);
                                     break back;
                                 }
@@ -102,7 +102,7 @@ public class ViewsImpl implements Views {
                     for (List<? extends EntryStack<?>> input : display.getInputEntries()) {
                         for (EntryStack<?> otherEntry : input) {
                             for (EntryStack<?> stack : usagesFor) {
-                                if (EntryStacks.equalsExact(otherEntry, stack)) {
+                                if (EntryStacks.equalsFuzzy(otherEntry, stack)) {
                                     set.add(display);
                                     break back;
                                 }
