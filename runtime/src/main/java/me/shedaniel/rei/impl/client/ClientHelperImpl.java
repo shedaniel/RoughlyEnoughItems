@@ -232,6 +232,11 @@ public class ClientHelperImpl implements ClientHelper {
     
     @ApiStatus.Internal
     public LongSet _getInventoryItemsTypes() {
+        try {
+            VanillaEntryTypes.ITEM.getDefinition();
+        } catch (NullPointerException e) {
+            return new LongOpenHashSet();
+        }
         return Minecraft.getInstance().player.getInventory().compartments.stream()
                 .flatMap(Collection::stream)
                 .map(EntryStacks::of)
