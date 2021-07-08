@@ -30,6 +30,10 @@ repositories {
     }
 }
 
+loom {
+    mixinConfig "rei-jei-internals-workaround.mixins.json"
+}
+
 dependencies {
     forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
     modApi("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
