@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -48,6 +49,7 @@ public class QueuedTooltip implements Tooltip {
     private Point location;
     private List<Tooltip.Entry> entries;
     private List<TooltipComponent> components;
+    private EntryStack<?> stack = EntryStack.empty();
     
     private QueuedTooltip(Point location, Collection<Tooltip.Entry> entries) {
         this.location = location;
@@ -108,6 +110,17 @@ public class QueuedTooltip implements Tooltip {
     @Override
     public void queue() {
         Tooltip.super.queue();
+    }
+    
+    @Override
+    public EntryStack<?> getContextStack() {
+        return stack;
+    }
+    
+    @Override
+    public Tooltip withContextStack(EntryStack<?> stack) {
+        this.stack = stack.copy();
+        return this;
     }
     
     public record TooltipEntryImpl(Object obj) implements Tooltip.Entry {

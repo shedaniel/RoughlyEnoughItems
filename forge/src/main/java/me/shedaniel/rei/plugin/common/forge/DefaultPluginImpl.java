@@ -24,10 +24,10 @@
 package me.shedaniel.rei.plugin.common.forge;
 
 import com.google.common.base.Predicates;
-import dev.architectury.hooks.forge.FluidStackHooksForge;
+import dev.architectury.event.CompoundEventResult;
+import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
@@ -44,7 +44,7 @@ public class DefaultPluginImpl {
             if (handlerOptional.isPresent()) {
                 IFluidHandlerItem handler = handlerOptional.orElse(null);
                 if (handler.getTanks() > 0) {
-                    return InteractionResultHolder.success(IntStream.range(0, handler.getTanks())
+                    return CompoundEventResult.interruptTrue(IntStream.range(0, handler.getTanks())
                             .mapToObj(handler::getFluidInTank)
                             .filter(Predicates.not(FluidStack::isEmpty))
                             .map(FluidStackHooksForge::fromForge)
@@ -52,7 +52,7 @@ public class DefaultPluginImpl {
                 }
             }
             
-            return InteractionResultHolder.pass(null);
+            return CompoundEventResult.pass();
         });
     }
 }

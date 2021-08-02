@@ -21,31 +21,25 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat.wrap;
+package me.shedaniel.rei.impl.client.gui.forge;
 
-import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
-import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
+import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import mezz.jei.api.runtime.IBookmarkOverlay;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fmlclient.gui.GuiUtils;
 
-import java.util.Optional;
-
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
-
-public enum JEIBookmarkOverlay implements IBookmarkOverlay {
-    INSTANCE;
-    
-    @Override
-    @Nullable
-    public Object getIngredientUnderMouse() {
-        if (!REIRuntime.getInstance().isOverlayVisible()) return null;
-        ScreenOverlay overlay = REIRuntime.getInstance().getOverlay().get();
-        Optional<OverlayListWidget> favoritesList = overlay.getFavoritesList();
-        if (!favoritesList.isPresent()) return null;
-        EntryStack<?> stack = favoritesList.get().getFocusedStack();
-        if (stack.isEmpty()) return null;
-        return unwrap(stack);
+public class ScreenOverlayImplImpl {
+    public static void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
+        matrices.pushPose();
+        matrices.translate(0, 0, 500);
+        EntryStack<?> stack = tooltip.getContextStack();
+        ItemStack itemStack = stack.getValue() instanceof ItemStack ? stack.castValue() : ItemStack.EMPTY;
+        GuiUtils.preItemToolTip(itemStack);
+        GuiUtils.drawHoveringText(matrices, tooltip.getText(), mouseX, mouseY, screen.width, screen.height, screen.width, Minecraft.getInstance().font);
+        GuiUtils.postItemToolTip();
+        matrices.popPose();
     }
 }

@@ -24,13 +24,13 @@ To allow players to view items and recipes.
 [[dependencies.roughlyenoughitems]]
 modId = "architectury"
 mandatory = true
-versionRange = "[1.10.139,)"
+versionRange = "[2.3.22,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.roughlyenoughitems]]
-modId = "cloth-config"
+modId = "cloth_config"
 mandatory = true
-versionRange = "[4.11.18,)"
+versionRange = "[5.0.36,)"
 ordering = "NONE"
 side = "BOTH"

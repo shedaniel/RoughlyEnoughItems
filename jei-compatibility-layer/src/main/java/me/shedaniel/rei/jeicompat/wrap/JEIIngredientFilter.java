@@ -24,10 +24,9 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import com.google.common.collect.ImmutableList;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import mezz.jei.api.runtime.IIngredientFilter;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,13 +39,13 @@ public enum JEIIngredientFilter implements IIngredientFilter {
     
     @Override
     public void setFilterText(@NotNull String filterText) {
-        REIHelper.getInstance().getSearchTextField().setText(filterText);
+        REIRuntime.getInstance().getSearchTextField().setText(filterText);
     }
     
     @Override
     @NotNull
     public String getFilterText() {
-        return REIHelper.getInstance().getSearchTextField().getText();
+        return REIRuntime.getInstance().getSearchTextField().getText();
     }
     
     @Override

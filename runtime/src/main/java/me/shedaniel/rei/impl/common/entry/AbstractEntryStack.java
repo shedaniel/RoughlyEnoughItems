@@ -181,6 +181,7 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
         try {
             Mutable<Tooltip> tooltip = new MutableObject<>(getRenderer().<A>cast().getTooltip(this, mouse));
             if (tooltip.getValue() == null) return null;
+            tooltip.getValue().withContextStack(this);
             tooltip.getValue().addAllTexts(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
             tooltip.setValue(get(Settings.TOOLTIP_PROCESSOR).apply(this, tooltip.getValue()));
             if (tooltip.getValue() == null) return null;

@@ -67,21 +67,21 @@ public class RoughlyEnoughItemsForge {
                     .map(IModInfo::getModId)
                     .collect(Collectors.toList());
             for (ModFileScanData.AnnotationData annotation : data.getAnnotations()) {
-                if (annotationType.equals(annotation.getAnnotationType())) {
+                if (annotationType.equals(annotation.targetType())) {
                     try {
-                        Class<T> clazz = (Class<T>) Class.forName(annotation.getMemberName());
+                        Class<T> clazz = (Class<T>) Class.forName(annotation.memberName());
                         if (predicate.test(clazz)) {
                             instances.add(new ImmutablePair<>(modIds, () -> {
                                 try {
                                     return clazz.getDeclaredConstructor().newInstance();
                                 } catch (Throwable throwable) {
-                                    LOGGER.error("Failed to load plugin: " + annotation.getMemberName(), throwable);
+                                    LOGGER.error("Failed to load plugin: " + annotation.memberName(), throwable);
                                     return null;
                                 }
                             }));
                         }
                     } catch (Throwable throwable) {
-                        LOGGER.error("Failed to load plugin: " + annotation.getMemberName(), throwable);
+                        LOGGER.error("Failed to load plugin: " + annotation.memberName(), throwable);
                     }
                 }
             }

@@ -23,9 +23,9 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import dev.architectury.utils.value.Value;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import dev.architectury.utils.Value;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -159,7 +159,7 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
                     for (EntryStack<?> entry : wrapper.slot.getEntries()) {
                         if (entry.getType() == VanillaEntryTypes.FLUID) {
                             ClientEntryStacks.setFluidRenderRatio(entry.cast(),
-                                    entry.<dev.architectury.fluid.FluidStack>cast().getValue().getAmount().floatValue() / wrapper.fluidCapacity);
+                                    entry.<dev.architectury.fluid.FluidStack>cast().getValue().getAmount() / wrapper.fluidCapacity);
                         }
                     }
                 }

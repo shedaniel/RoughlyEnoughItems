@@ -24,7 +24,7 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import com.google.common.collect.ImmutableList;
-import me.shedaniel.rei.api.client.REIHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
@@ -41,9 +41,9 @@ public enum JEIIngredientListOverlay implements IIngredientListOverlay {
     @Override
     @Nullable
     public Object getIngredientUnderMouse() {
-        if (!REIHelper.getInstance().isOverlayVisible()) return null;
-        ScreenOverlay overlay = REIHelper.getInstance().getOverlay().get();
-        EntryStack<?> stack = overlay.getEntryList().getFocusedStacK();
+        if (!REIRuntime.getInstance().isOverlayVisible()) return null;
+        ScreenOverlay overlay = REIRuntime.getInstance().getOverlay().get();
+        EntryStack<?> stack = overlay.getEntryList().getFocusedStack();
         if (stack.isEmpty()) return null;
         return unwrap(stack);
     }
@@ -63,14 +63,14 @@ public enum JEIIngredientListOverlay implements IIngredientListOverlay {
     
     @Override
     public boolean hasKeyboardFocus() {
-        return REIHelper.getInstance().isOverlayVisible() && REIHelper.getInstance().getSearchTextField().isFocused();
+        return REIRuntime.getInstance().isOverlayVisible() && REIRuntime.getInstance().getSearchTextField().isFocused();
     }
     
     @Override
     @NotNull
     public ImmutableList<Object> getVisibleIngredients() {
-        if (REIHelper.getInstance().isOverlayVisible()) {
-            ScreenOverlay overlay = REIHelper.getInstance().getOverlay().get();
+        if (REIRuntime.getInstance().isOverlayVisible()) {
+            ScreenOverlay overlay = REIRuntime.getInstance().getOverlay().get();
             return overlay.getEntryList().getEntries().map(JEIPluginDetector::unwrap)
                     .collect(ImmutableList.toImmutableList());
         }

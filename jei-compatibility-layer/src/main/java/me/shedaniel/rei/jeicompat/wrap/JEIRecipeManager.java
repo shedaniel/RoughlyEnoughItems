@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import dev.architectury.event.EventResult;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
@@ -38,7 +39,6 @@ import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -143,15 +143,15 @@ public enum JEIRecipeManager implements IRecipeManager {
     
     public class Predicate implements DisplayVisibilityPredicate {
         @Override
-        public InteractionResult handleDisplay(DisplayCategory<?> category, Display display) {
+        public EventResult handleDisplay(DisplayCategory<?> category, Display display) {
             if (hiddenCategories.contains(category.getCategoryIdentifier())) {
-                return InteractionResult.FAIL;
+                return EventResult.interruptFalse();
             }
             Set<Object> hidden = hiddenRecipes.get(category.getCategoryIdentifier());
             if (hidden != null && hidden.contains(wrapRecipe(category, display))) {
-                return InteractionResult.FAIL;
+                return EventResult.interruptFalse();
             }
-            return InteractionResult.PASS;
+            return EventResult.pass();
         }
     }
 }

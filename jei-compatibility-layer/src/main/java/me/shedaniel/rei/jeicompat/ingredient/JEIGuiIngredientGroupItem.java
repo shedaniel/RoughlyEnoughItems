@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.ingredient;
 
-import dev.architectury.utils.Value;
+import dev.architectury.utils.value.Value;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
 import mezz.jei.api.ingredients.IIngredientType;

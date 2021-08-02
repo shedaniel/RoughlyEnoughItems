@@ -25,8 +25,8 @@ package me.shedaniel.rei.jeicompat;
 
 import com.google.common.base.Predicates;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
 import io.netty.buffer.Unpooled;
-import dev.architectury.hooks.forge.FluidStackHooksForge;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;

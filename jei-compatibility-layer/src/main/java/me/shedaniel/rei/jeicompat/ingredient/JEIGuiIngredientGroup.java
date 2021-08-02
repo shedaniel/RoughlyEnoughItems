@@ -25,9 +25,9 @@ package me.shedaniel.rei.jeicompat.ingredient;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.architectury.utils.value.Value;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import dev.architectury.utils.Value;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
@@ -42,7 +42,7 @@ import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IFocus;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,7 +53,7 @@ import java.util.*;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
 
 public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
-    private static final Method func_238468_a_ = ObfuscationReflectionHelper.findMethod(GuiComponent.class, "func_238468_a_",
+    private static final Method m_93179_ = ObfuscationReflectionHelper.findMethod(GuiComponent.class, "m_93179_",
             PoseStack.class, Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE);
     private final IIngredientType<T> type;
     private final Int2ObjectMap<SlotWrapper> slots = new Int2ObjectOpenHashMap<>();
@@ -183,7 +183,7 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
             slot.setZ(300);
             Rectangle bounds = slot.getInnerBounds();
             try {
-                func_238468_a_.invoke(slot, matrixStack, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), color, color);
+                m_93179_.invoke(slot, matrixStack, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), color, color);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }

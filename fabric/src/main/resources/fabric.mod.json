@@ -24,9 +24,9 @@
     ],
     "rei": [
       "me.shedaniel.rei.plugin.common.DefaultPlugin",
-      "me.shedaniel.rei.plugin.common.DefaultRuntimePlugin",
+      "me.shedaniel.rei.plugin.common.runtime.DefaultRuntimePlugin",
       "me.shedaniel.rei.plugin.client.DefaultClientPlugin",
-      "me.shedaniel.rei.plugin.client.DefaultClientRuntimePlugin"
+      "me.shedaniel.rei.plugin.client.runtime.DefaultClientRuntimePlugin"
     ]
   },
   "accessWidener": "roughlyenoughitems.accessWidener",

@@ -23,7 +23,8 @@
 
 package me.shedaniel.rei.jeicompat.ingredient;
 
-import dev.architectury.utils.Value;
+import dev.architectury.utils.value.Value;
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiFluidStackGroup;
 import mezz.jei.api.ingredients.IIngredientType;

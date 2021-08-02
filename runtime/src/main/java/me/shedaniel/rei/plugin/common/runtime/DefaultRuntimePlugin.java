@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.common;
+package me.shedaniel.rei.plugin.common.runtime;
 
 import dev.architectury.event.CompoundEventResult;
 import dev.architectury.fluid.FluidStack;
