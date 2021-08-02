@@ -26,6 +26,7 @@ package me.shedaniel.rei.api.client.gui.widgets;
 import dev.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
@@ -127,6 +128,10 @@ public interface Tooltip {
         }
         return this;
     }
+    
+    EntryStack<?> getContextStack();
+    
+    Tooltip withContextStack(EntryStack<?> stack);
     
     default void queue() {
         EnvExecutor.runInEnv(EnvType.CLIENT, () -> () -> REIRuntime.getInstance().queueTooltip(this));

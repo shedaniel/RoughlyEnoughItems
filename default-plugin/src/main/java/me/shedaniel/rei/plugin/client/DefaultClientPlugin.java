@@ -48,7 +48,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
-import me.shedaniel.rei.plugin.autocrafting.DefaultRecipeBookHandler;
+import me.shedaniel.rei.plugin.autocrafting.recipebook.DefaultRecipeBookHandler;
 import me.shedaniel.rei.plugin.client.categories.*;
 import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconBaseCategory;
 import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconPaymentCategory;

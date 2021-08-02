@@ -28,6 +28,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector4f;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -551,35 +552,12 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public void renderTooltip(PoseStack matrices, Tooltip tooltip) {
-        List<ClientTooltipComponent> lines = tooltip.entries().stream()
-                .flatMap(component -> {
-                    if (component.isText()) {
-                        return Minecraft.getInstance().font.getSplitter().splitLines(component.getAsText(), 100000, Style.EMPTY).stream()
-                                .map(Language.getInstance()::getVisualOrder)
-                                .map(ClientTooltipComponent::create);
-                    } else {
-                        return Stream.of(component.getAsComponent());
-                    }
-                })
-                .collect(Collectors.toList());
-        for (TooltipComponent component : tooltip.components()) {
-            try {
-                ClientInternals.getClientTooltipComponent(lines, component);
-            } catch (Throwable exception) {
-                throw new IllegalArgumentException("Failed to add tooltip component! " + component + ", Class: " + (component == null ? null : component.getClass().getCanonicalName()), exception);
-            }
-        }
-        renderTooltipInner(matrices, lines, tooltip.getX(), tooltip.getY());
+        renderTooltipInner(minecraft.screen, matrices, tooltip, tooltip.getX(), tooltip.getY());
     }
     
-    public void renderTooltipInner(PoseStack matrices, List<ClientTooltipComponent> lines, int mouseX, int mouseY) {
-        if (lines.isEmpty()) {
-            return;
-        }
-        matrices.pushPose();
-        matrices.translate(0, 0, 500);
-        minecraft.screen.renderTooltipInternal(matrices, lines, mouseX, mouseY);
-        matrices.popPose();
+    @ExpectPlatform
+    public static void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
+        throw new AssertionError();
     }
     
     public void addTooltip(@Nullable Tooltip tooltip) {

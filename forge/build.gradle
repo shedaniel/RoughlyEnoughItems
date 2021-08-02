@@ -1,5 +1,5 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "5.0.0"
+    id "com.github.johnrengelman.shadow" version "7.0.0"
 }
 
 configurations {
@@ -33,35 +33,35 @@ repositories {
 dependencies {
     forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
     modApi("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
-    modApi("me.shedaniel:architectury-forge:${architectury_version}")
+    modApi("dev.architectury:architectury-forge:${architectury_version}")
 
     implementation(project(path: ":api")) { transitive = false }
     implementation(project(path: ":default-plugin")) { transitive = false }
     implementation(project(path: ":runtime")) { transitive = false }
     implementation(project(path: ":jei-compatibility-layer")) { transitive = false }
-    implementation(project(path: ":jei-internals-workaround")) { transitive = false }
+    // implementation(project(path: ":jei-internals-workaround")) { transitive = false }
     developmentForge(project(path: ":api")) { transitive = false }
     developmentForge(project(path: ":default-plugin")) { transitive = false }
     developmentForge(project(path: ":runtime")) { transitive = false }
     developmentForge(project(path: ":jei-compatibility-layer")) { transitive = false }
-    developmentForge(project(path: ":jei-internals-workaround")) { transitive = false }
+    // developmentForge(project(path: ":jei-internals-workaround")) { transitive = false }
 
     shadowCommon(project(path: ":api", configuration: "transformProductionForge")) { transitive = false }
     shadowCommon(project(path: ":default-plugin", configuration: "transformProductionForge")) { transitive = false }
     shadowCommon(project(path: ":runtime", configuration: "transformProductionForge")) { transitive = false }
     shadowCommon(project(path: ":jei-compatibility-layer")) { transitive = false }
 
-    modRuntime("curse.maven:chiselsbits-231095:3176033")
-    modRuntime("curse.maven:jumbofurnace-390880:3120970")
-    modRuntime("curse.maven:cyclic-239286:3221427")
-    modRuntime("curse.maven:mekanism-268560:3206392")
-    modRuntime("curse.maven:refined-storage-243076:3196167")
-    modRuntime("appeng:appliedenergistics2:8.2.0")
-    modRuntime("curse.maven:tcon-74072:3273213")
-    modRuntime("curse.maven:mantle-74924:3273201")
-    modRuntime("curse.maven:jer-240630:3066754")
-    modRuntime("curse.maven:jep-417645:3198370")
-    modRuntime("curse.maven:simple-storage-network-268495:3257204")
+    // modRuntime("curse.maven:chiselsbits-231095:3176033")
+    // modRuntime("curse.maven:jumbofurnace-390880:3120970")
+    // modRuntime("curse.maven:cyclic-239286:3221427")
+    // modRuntime("curse.maven:mekanism-268560:3206392")
+    // modRuntime("curse.maven:refined-storage-243076:3196167")
+    // modRuntime("appeng:appliedenergistics2:8.2.0")
+    // modRuntime("curse.maven:tcon-74072:3273213")
+    // modRuntime("curse.maven:mantle-74924:3273201")
+    // modRuntime("curse.maven:jer-240630:3066754")
+    // modRuntime("curse.maven:jep-417645:3198370")
+    // modRuntime("curse.maven:simple-storage-network-268495:3257204")
 }
 
 shadowJar {
@@ -84,11 +84,11 @@ curseforge {
         apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
         project {
             id = "392060"
-            releaseType = "beta"
+            releaseType = "release"
             changelogType = "html"
             changelog = rootProject.releaseChangelog
-            addGameVersion "1.16.4"
-            addGameVersion "1.16.5"
+            addGameVersion "1.17"
+            addGameVersion "1.17.1"
             addGameVersion "Java 8"
             addGameVersion "Forge"
             relations {
