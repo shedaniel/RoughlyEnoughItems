@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import me.shedaniel.architectury.hooks.ScreenHooks;
 import me.shedaniel.autoconfig.AutoConfig;
@@ -40,10 +41,11 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonNull;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonObject;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonPrimitive;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.api.DeserializationException;
-import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
-import me.shedaniel.clothconfig2.api.Modifier;
-import me.shedaniel.clothconfig2.api.ModifierKeyCode;
+import me.shedaniel.clothconfig2.api.*;
+import me.shedaniel.clothconfig2.gui.AbstractConfigScreen;
+import me.shedaniel.clothconfig2.gui.GlobalizedClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
+import me.shedaniel.clothconfig2.gui.entries.TextListEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
@@ -54,6 +56,7 @@ import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.entries.*;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
@@ -62,23 +65,22 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static me.shedaniel.autoconfig.util.Utils.getUnsafely;
 import static me.shedaniel.autoconfig.util.Utils.setUnsafely;
@@ -289,6 +291,45 @@ public class ConfigManagerImpl implements ConfigManager {
     @SuppressWarnings("deprecation")
     @Override
     public Screen getConfigScreen(Screen parent) {
+        class EmptyEntry extends AbstractConfigListEntry<Object> {
+            private final int height;
+            
+            public EmptyEntry(int height) {
+                super(new TextComponent(UUID.randomUUID().toString()), false);
+                this.height = height;
+            }
+            
+            public int getItemHeight() {
+                return this.height;
+            }
+            
+            public Object getValue() {
+                return null;
+            }
+            
+            public Optional<Object> getDefaultValue() {
+                return Optional.empty();
+            }
+            
+            public boolean isMouseInside(int mouseX, int mouseY, int x, int y, int entryWidth, int entryHeight) {
+                return false;
+            }
+            
+            public void save() {
+            }
+            
+            public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+            }
+            
+            public List<? extends GuiEventListener> children() {
+                return Collections.emptyList();
+            }
+            
+            public List<? extends NarratableEntry> narratables() {
+                return Collections.emptyList();
+            }
+        }
+        
         try {
             ConfigScreenProvider<ConfigObjectImpl> provider = (ConfigScreenProvider<ConfigObjectImpl>) AutoConfig.getConfigScreen(ConfigObjectImpl.class, parent);
             provider.setI13nFunction(manager -> "config.roughlyenoughitems");
@@ -301,6 +342,19 @@ public class ConfigManagerImpl implements ConfigManager {
                     builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new ReloadPluginsEntry(220));
                 }
                 return builder.setAfterInitConsumer(screen -> {
+                    TextListEntry feedbackEntry = ConfigEntryBuilder.create().startTextDescription(
+                            new TranslatableComponent("text.rei.feedback", new TranslatableComponent("text.rei.feedback.link")
+                                    .withStyle(style -> style
+                                            .withColor(TextColor.fromRgb(0xff1fc3ff))
+                                            .withUnderlined(true)
+                                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://forms.gle/5tdnK5WN1wng78pV8"))
+                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ImmutableTextComponent("https://forms.gle/5tdnK5WN1wng78pV8")))
+                                    ))
+                                    .withStyle(ChatFormatting.GRAY)
+                    ).build();
+                    feedbackEntry.setScreen((AbstractConfigScreen) screen);
+                    ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) feedbackEntry);
+                    ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) new EmptyEntry(4));
                     ScreenHooks.addButton(screen, new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
                         MutableLong current = new MutableLong(0);
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
