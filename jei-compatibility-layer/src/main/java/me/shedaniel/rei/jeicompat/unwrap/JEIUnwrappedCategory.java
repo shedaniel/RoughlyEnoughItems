@@ -29,6 +29,7 @@ import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,8 +57,8 @@ public class JEIUnwrappedCategory<T extends Display> implements IRecipeCategory<
     
     @Override
     @NotNull
-    public String getTitle() {
-        return backingCategory.getTitle().getString();
+    public Component getTitle() {
+        return backingCategory.getTitle();
     }
     
     @Override

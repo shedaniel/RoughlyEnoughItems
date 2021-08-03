@@ -33,19 +33,14 @@ import mezz.jei.api.ingredients.subtypes.UidContext;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapContext;
 
 public class JEIIngredientHelper<T> implements IIngredientHelper<T> {
     private final EntryDefinition<T> definition;
     
     public JEIIngredientHelper(EntryDefinition<T> definition) {
         this.definition = definition;
-    }
-    
-    @Nullable
-    @Override
-    public T getMatch(Iterable<T> ingredients, T ingredientToMatch) {
-        return getMatch(ingredients, ingredientToMatch, UidContext.Ingredient);
     }
     
     @Nullable
@@ -60,11 +55,6 @@ public class JEIIngredientHelper<T> implements IIngredientHelper<T> {
     public String getDisplayName(T ingredient) {
         EntryStack<T> entry = wrap(definition, ingredient);
         return definition.asFormattedText(entry, entry.getValue()).getString();
-    }
-    
-    @Override
-    public String getUniqueId(T ingredient) {
-        return getUniqueId(ingredient, UidContext.Ingredient);
     }
     
     @Override

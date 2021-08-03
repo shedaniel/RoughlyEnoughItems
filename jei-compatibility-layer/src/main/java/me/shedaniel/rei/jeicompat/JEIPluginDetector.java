@@ -150,19 +150,23 @@ public class JEIPluginDetector {
             @NotNull
             public <T> List<T> getRecipes(@NotNull IRecipeCategory<T> recipeCategory) {
                 CategoryIdentifier<Display> categoryId = CategoryIdentifier.of(recipeCategory.getUid());
-                return wrapRecipes(categoryId);
+                return wrapRecipes(categoryId, false);
             }
         };
     }
     
-    public static <T> List<T> wrapRecipes(CategoryIdentifier<?> id) {
-        return wrapRecipes(CategoryRegistry.getInstance().get(id).getCategory(), DisplayRegistry.getInstance().get(id));
+    public static <T> List<T> wrapRecipes(CategoryIdentifier<?> id, boolean checkVisible) {
+        return wrapRecipes(CategoryRegistry.getInstance().get(id).getCategory(), DisplayRegistry.getInstance().get(id), checkVisible);
     }
     
-    public static <A extends Display, T> List<T> wrapRecipes(DisplayCategory<?> category, List<A> displays) {
+    public static <A extends Display, T> List<T> wrapRecipes(DisplayCategory<?> category, List<A> displays, boolean checkVisible) {
         boolean isWrappedCategory = category instanceof JEIWrappedCategory;
+        if (checkVisible && CategoryRegistry.getInstance().isCategoryInvisible(category)) return new ArrayList<>();
         if (isWrappedCategory) {
-            return CollectionUtils.map(displays, display -> ((JEIWrappedDisplay<T>) display).getBackingRecipe());
+            return CollectionUtils.filterAndMap(displays, display -> !checkVisible || DisplayRegistry.getInstance().isDisplayVisible(display),
+                    display -> ((JEIWrappedDisplay<T>) display).getBackingRecipe());
+        } else if (checkVisible) {
+            return (List<T>) CollectionUtils.filterToList(displays, display -> DisplayRegistry.getInstance().isDisplayVisible(display));
         } else {
             return (List<T>) displays;
         }
@@ -376,6 +380,9 @@ public class JEIPluginDetector {
             }));
             backingPlugin.registerRecipeCatalysts(JEIRecipeCatalystRegistration.INSTANCE);
             backingPlugin.registerVanillaCategoryExtensions(JEIVanillaCategoryExtensionRegistration.INSTANCE);
+            if (!registry.getVisibilityPredicates().contains(JEIRecipeManager.INSTANCE.categoryPredicate)) {
+                registry.registerVisibilityPredicate(JEIRecipeManager.INSTANCE.categoryPredicate);
+            }
         }
         
         @Override
@@ -389,8 +396,8 @@ public class JEIPluginDetector {
                 registry.registerFiller(JEIWrappedDisplay.class, display -> display.getCategoryIdentifier().getIdentifier().equals(category.getIdentifier()), Function.identity());
             }
             backingPlugin.registerAdvanced(JEIAdvancedRegistration.INSTANCE);
-            if (!registry.getVisibilityPredicates().contains(JEIRecipeManager.INSTANCE.predicate)) {
-                registry.registerVisibilityPredicate(JEIRecipeManager.INSTANCE.predicate);
+            if (!registry.getVisibilityPredicates().contains(JEIRecipeManager.INSTANCE.displayPredicate)) {
+                registry.registerVisibilityPredicate(JEIRecipeManager.INSTANCE.displayPredicate);
             }
         }
         

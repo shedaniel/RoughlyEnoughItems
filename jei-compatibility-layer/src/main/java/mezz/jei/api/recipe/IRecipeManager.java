@@ -8,6 +8,7 @@ import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -15,24 +16,6 @@ import java.util.List;
  * Get the instance from {@link IJeiRuntime#getRecipeManager()}.
  */
 public interface IRecipeManager {
-    
-    /**
-     * Returns an unmodifiable list of all Recipe Categories
-     */
-    List<IRecipeCategory<?>> getRecipeCategories();
-    
-    /**
-     * Returns an unmodifiable list of Recipe Categories
-     */
-    List<IRecipeCategory<?>> getRecipeCategories(List<ResourceLocation> recipeCategoryUids);
-    
-    /**
-     * Returns the recipe category for the given UID.
-     * Returns null if the recipe category does not exist.
-     */
-    @Nullable
-    IRecipeCategory<?> getRecipeCategory(ResourceLocation recipeCategoryUid);
-    
     /**
      * Returns a new focus.
      */
@@ -40,25 +23,50 @@ public interface IRecipeManager {
     
     /**
      * Returns a list of Recipe Categories for the focus.
+     *
+     * @param focus         an optional search focus to narrow the results on
+     * @param includeHidden set true to include recipe categories that are hidden or have no recipes.
+     * @since JEI 7.7.1
      */
-    <V> List<IRecipeCategory<?>> getRecipeCategories(IFocus<V> focus);
+    <V> List<IRecipeCategory<?>> getRecipeCategories(@Nullable IFocus<V> focus, boolean includeHidden);
+    
+    /**
+     * Returns a list of Recipe Categories for the focus
+     *
+     * @param recipeCategoryUids a list of recipe category uids to retrieve
+     * @param focus              an optional search focus to narrow the results on
+     * @param includeHidden      set true to include recipe categories that are hidden or have no recipes.
+     * @since JEI 7.7.1
+     */
+    <V> List<IRecipeCategory<?>> getRecipeCategories(Collection<ResourceLocation> recipeCategoryUids, @Nullable IFocus<V> focus, boolean includeHidden);
+    
+    /**
+     * Returns the recipe category for the given UID.
+     * Returns null if the recipe category does not exist.
+     *
+     * @since JEI 7.7.1
+     */
+    @Nullable
+    IRecipeCategory<?> getRecipeCategory(ResourceLocation recipeCategoryUid, boolean includeHidden);
     
     /**
      * Returns a list of recipes in the recipeCategory that have the focus.
+     *
+     * @param recipeCategory the recipe category to find recipes in
+     * @param focus          the current search focus, or null if there is no focus.
+     * @param includeHidden  set true to include recipes that are hidden.
+     * @since JEI 7.7.1
      */
-    <T, V> List<T> getRecipes(IRecipeCategory<T> recipeCategory, IFocus<V> focus);
-    
-    /**
-     * Returns a list of recipes in recipeCategory.
-     */
-    <T> List<T> getRecipes(IRecipeCategory<T> recipeCategory);
+    <T, V> List<T> getRecipes(IRecipeCategory<T> recipeCategory, @Nullable IFocus<V> focus, boolean includeHidden);
     
     /**
      * Returns an unmodifiable collection of ingredients that can craft the recipes from recipeCategory.
      * For instance, the crafting table ItemStack is returned here for Crafting recipe category.
      * These are registered with {@link IRecipeCatalystRegistration#addRecipeCatalyst(Object, ResourceLocation...)}.
+     *
+     * @since JEI 7.7.1
      */
-    List<Object> getRecipeCatalysts(IRecipeCategory<?> recipeCategory);
+    List<Object> getRecipeCatalysts(IRecipeCategory<?> recipeCategory, boolean includeHidden);
     
     /**
      * Returns a drawable recipe layout, for addons that want to draw the layouts somewhere.
@@ -68,7 +76,7 @@ public interface IRecipeManager {
      * @param recipe         the specific recipe to draw.
      * @param focus          the focus of the recipe layout.
      */
-    @Nullable <T> IRecipeLayoutDrawable createRecipeLayoutDrawable(IRecipeCategory<T> recipeCategory, T recipe, IFocus<?> focus);
+    <T> IRecipeLayoutDrawable createRecipeLayoutDrawable(IRecipeCategory<T> recipeCategory, T recipe, IFocus<?> focus);
     
     /**
      * Hides a recipe so that it will not be displayed.

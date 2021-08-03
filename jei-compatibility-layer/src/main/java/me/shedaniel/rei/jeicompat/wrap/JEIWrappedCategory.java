@@ -114,7 +114,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
     
     @Override
     public Component getTitle() {
-        return backingCategory.getTitleAsTextComponent();
+        return backingCategory.getTitle();
     }
     
     @Override

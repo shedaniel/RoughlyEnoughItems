@@ -28,7 +28,6 @@ import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
-import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -40,11 +39,6 @@ import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapContext;
 
 public enum JEISubtypeRegistration implements ISubtypeRegistration {
     INSTANCE;
-    
-    @Override
-    public void registerSubtypeInterpreter(@NotNull Item item, @NotNull ISubtypeInterpreter interpreter) {
-        registerSubtypeInterpreter(item, (IIngredientSubtypeInterpreter) interpreter);
-    }
     
     @Override
     public void registerSubtypeInterpreter(@NotNull Item item, @NotNull IIngredientSubtypeInterpreter<ItemStack> interpreter) {

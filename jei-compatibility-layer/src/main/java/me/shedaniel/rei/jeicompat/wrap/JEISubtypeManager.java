@@ -24,7 +24,6 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
-import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import mezz.jei.api.ingredients.subtypes.ISubtypeManager;
@@ -37,15 +36,6 @@ import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapContext;
 
 public enum JEISubtypeManager implements ISubtypeManager {
     INSTANCE;
-    
-    @Override
-    @Nullable
-    public String getSubtypeInfo(ItemStack itemStack) {
-        if (ItemComparatorRegistry.getInstance().containsComparator(itemStack.getItem())) {
-            return String.valueOf(ItemComparatorRegistry.getInstance().hashOf(ComparisonContext.EXACT, itemStack));
-        }
-        return null;
-    }
     
     @Override
     @Nullable

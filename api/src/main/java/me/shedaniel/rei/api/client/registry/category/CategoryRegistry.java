@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.client.registry.category;
 
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.category.visibility.CategoryVisibilityPredicate;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
@@ -47,6 +48,11 @@ import java.util.stream.StreamSupport;
  * Registry for registering new categories for displays.
  * Relies on {@link CategoryIdentifier}, and is reset per plugin reload.
  *
+ * <p>Plugins may also determine the visibility of the categories dynamically via
+ * {@link CategoryVisibilityPredicate}, these predicates are preferred comparing to
+ * removing the categories from the registry.
+ *
+ * @see CategoryVisibilityPredicate
  * @see REIClientPlugin#registerCategories(CategoryRegistry)
  */
 @Environment(EnvType.CLIENT)
@@ -106,6 +112,38 @@ public interface CategoryRegistry extends Reloadable<REIClientPlugin>, Iterable<
     <T extends Display> void configure(CategoryIdentifier<T> category, Consumer<CategoryConfiguration<T>> action);
     
     int size();
+    
+    /**
+     * Registers a category visibility predicate
+     *
+     * @param predicate the predicate to be registered
+     */
+    void registerVisibilityPredicate(CategoryVisibilityPredicate predicate);
+    
+    /**
+     * Tests the category against all visibility predicates to determine whether it is visible
+     *
+     * @param category the category to test against
+     * @return whether the category is visible
+     */
+    boolean isCategoryVisible(DisplayCategory<?> category);
+    
+    /**
+     * Tests the category against all visibility predicates to determine whether it is invisible
+     *
+     * @param category the category to test against
+     * @return whether the category is invisible
+     */
+    default boolean isCategoryInvisible(DisplayCategory<?> category) {
+        return !isCategoryVisible(category);
+    }
+    
+    /**
+     * Returns an unmodifiable list of visibility predicates.
+     *
+     * @return an unmodifiable list of visibility predicates.
+     */
+    List<CategoryVisibilityPredicate> getVisibilityPredicates();
     
     default <D extends Display> void addWorkstations(CategoryIdentifier<D> category, EntryIngredient... stations) {
         configure(category, config -> config.addWorkstations(stations));
