@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.registry.display;
 
+import com.google.common.base.Preconditions;
 import dev.architectury.event.EventResult;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
@@ -119,6 +120,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     @Override
     public boolean isDisplayVisible(Display display) {
         DisplayCategory<Display> category = (DisplayCategory<Display>) CategoryRegistry.getInstance().get(display.getCategoryIdentifier()).getCategory();
+        Preconditions.checkNotNull(category, "Failed to resolve category: " + display.getCategoryIdentifier());
         for (DisplayVisibilityPredicate predicate : visibilityPredicates) {
             try {
                 EventResult result = predicate.handleDisplay(category, display);
@@ -126,7 +128,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
                     return result.isEmpty() || result.isTrue();
                 }
             } catch (Throwable throwable) {
-                RoughlyEnoughItemsCore.LOGGER.error("Failed to check if the recipe is visible!", throwable);
+                RoughlyEnoughItemsCore.LOGGER.error("Failed to check if the display is visible!", throwable);
             }
         }
         
