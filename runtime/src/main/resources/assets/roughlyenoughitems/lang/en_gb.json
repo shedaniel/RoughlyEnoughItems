@@ -1,4 +1,5 @@
 {
+  "category.rei.blasting": "Blasting",
   "text.rei.favorites": "Favourites",
   "text.rei.favorites_tooltip": " \n§7Press %s to add this to favourites.",
   "text.rei.remove_favorites_tooltip": " \n§7Press %s to remove this from favourites.",
@@ -6,5 +7,7 @@
   "config.roughlyenoughitems.keyBindings.favoriteKeybind": "Favourite Entry:",
   "config.roughlyenoughitems.search.searchFavorites": "Search Filter in Favourites:",
   "config.roughlyenoughitems.tooltips.displayFavoritesTooltip": "Append Favourites Hint:",
+  "config.roughlyenoughitems.syntaxHighlightingMode.colorful": "Colourful",
+  "config.roughlyenoughitems.syntaxHighlightingMode.colorful_underscored": "Colourful (Underscored)",
   "config.roughlyenoughitems.filteringRulesScreen": "Customised Filtering Rules"
 }

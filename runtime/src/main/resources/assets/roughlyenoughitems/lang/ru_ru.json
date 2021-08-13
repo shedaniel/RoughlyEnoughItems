@@ -134,6 +134,7 @@
   "config.roughlyenoughitems.keyBindings.copyRecipeIdentifierKeybind": "Скопировать идентификатор рецепта:",
   "config.roughlyenoughitems.keyBindings.exportImageKeybind": "Экспорт рецепта:",
   "config.roughlyenoughitems.keyBindings.favoriteKeybind": "Закладка:",
+  "config.roughlyenoughitems.keyBindings.previousScreenKeybind": "Предыдущее окно:",
   "config.roughlyenoughitems.cheatingStyle": "Вид читерства",
   "config.roughlyenoughitems.cheatingStyle.grab": "Взять",
   "config.roughlyenoughitems.cheatingStyle.give": "Выдать",
