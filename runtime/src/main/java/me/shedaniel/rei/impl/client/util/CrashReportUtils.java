@@ -26,12 +26,13 @@ package me.shedaniel.rei.impl.client.util;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
+import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 
 public class CrashReportUtils {
     public static CrashReport essential(Throwable throwable, String task) {
-        CrashReport report = CrashReport.forThrowable(throwable, "Rendering background of entry");
+        CrashReport report = CrashReport.forThrowable(throwable, task);
         screen(report, Minecraft.getInstance().screen);
         return report;
     }
@@ -53,5 +54,9 @@ public class CrashReportUtils {
                 category.setDetailError("Filling Report", throwable);
             }
         }
+    }
+    
+    public static ReportedException throwReport(CrashReport report) {
+        return new ReportedException(report);
     }
 }
