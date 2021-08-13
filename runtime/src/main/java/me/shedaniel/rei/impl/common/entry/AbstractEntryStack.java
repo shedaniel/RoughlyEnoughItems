@@ -41,7 +41,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
-import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -171,7 +170,7 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
         } catch (Throwable throwable) {
             CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry");
             CrashReportUtils.renderer(report, this);
-            throw new ReportedException(report);
+            throw CrashReportUtils.throwReport(report);
         }
     }
     
@@ -195,7 +194,7 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
         } catch (Throwable throwable) {
             CrashReport report = CrashReportUtils.essential(throwable, "Getting tooltips");
             CrashReportUtils.renderer(report, this);
-            throw new ReportedException(report);
+            throw CrashReportUtils.throwReport(report);
         }
     }
     
