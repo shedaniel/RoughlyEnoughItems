@@ -205,6 +205,8 @@
   "config.roughlyenoughitems.scrollingEntryListWidget.boolean.false": "Paginato",
   "config.roughlyenoughitems.horizontalEntriesBoundaries": "Bordi delle Voci Orizzontali:",
   "config.roughlyenoughitems.verticalEntriesBoundaries": "Bordi delle Voci Verticali:",
+  "config.roughlyenoughitems.syntaxHighlightingMode": "Modalità evidenziazione sintassi:",
+  "config.roughlyenoughitems.syntaxHighlightingMode.config": "%s",
   "config.roughlyenoughitems.filteringScreen": "Filtraggio Personalizzato",
   "config.roughlyenoughitems.filteringRulesScreen": "Regole di Filtraggio Personalizzate",
   "config.roughlyenoughitems.filteringRulesScreen.new": "Crea Regola di Filtraggio",
