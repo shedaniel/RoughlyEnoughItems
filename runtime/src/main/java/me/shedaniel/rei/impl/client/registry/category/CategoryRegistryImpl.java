@@ -23,13 +23,17 @@
 
 package me.shedaniel.rei.impl.client.registry.category;
 
+import me.shedaniel.architectury.event.EventResult;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.ButtonArea;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.category.visibility.CategoryVisibilityPredicate;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -39,6 +43,7 @@ import java.util.function.Consumer;
 public class CategoryRegistryImpl implements CategoryRegistry {
     private final Map<CategoryIdentifier<?>, Configuration<?>> categories = new LinkedHashMap<>();
     private final Map<CategoryIdentifier<?>, List<Consumer<CategoryConfiguration<?>>>> listeners = new HashMap<>();
+    private final List<CategoryVisibilityPredicate> visibilityPredicates = new ArrayList<>();
     
     @Override
     public void acceptPlugin(REIClientPlugin plugin) {
@@ -88,6 +93,33 @@ public class CategoryRegistryImpl implements CategoryRegistry {
     @Override
     public int size() {
         return categories.size();
+    }
+    
+    @Override
+    public void registerVisibilityPredicate(CategoryVisibilityPredicate predicate) {
+        visibilityPredicates.add(predicate);
+        visibilityPredicates.sort(Comparator.reverseOrder());
+    }
+    
+    @Override
+    public boolean isCategoryVisible(DisplayCategory<?> category) {
+        for (CategoryVisibilityPredicate predicate : visibilityPredicates) {
+            try {
+                EventResult result = predicate.handleCategory(category);
+                if (result.interruptsFurtherEvaluation()) {
+                    return result.value() == null || BooleanUtils.isTrue(result.value());
+                }
+            } catch (Throwable throwable) {
+                RoughlyEnoughItemsCore.LOGGER.error("Failed to check if the category is visible!", throwable);
+            }
+        }
+        
+        return true;
+    }
+    
+    @Override
+    public List<CategoryVisibilityPredicate> getVisibilityPredicates() {
+        return Collections.unmodifiableList(visibilityPredicates);
     }
     
     private static class Configuration<T extends Display> implements CategoryConfiguration<T> {

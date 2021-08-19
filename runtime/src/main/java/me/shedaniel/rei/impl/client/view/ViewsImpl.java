@@ -67,6 +67,7 @@ public class ViewsImpl implements Views {
         Map<DisplayCategory<?>, List<Display>> result = Maps.newLinkedHashMap();
         for (CategoryRegistry.CategoryConfiguration<?> categoryConfiguration : CategoryRegistry.getInstance()) {
             DisplayCategory<?> category = categoryConfiguration.getCategory();
+            if (CategoryRegistry.getInstance().isCategoryInvisible(category)) continue;
             CategoryIdentifier<?> categoryId = categoryConfiguration.getCategoryIdentifier();
             List<Display> allRecipesFromCategory = displayRegistry.get((CategoryIdentifier<Display>) categoryId);
             
@@ -126,15 +127,17 @@ public class ViewsImpl implements Views {
         
         for (Map.Entry<CategoryIdentifier<?>, List<DynamicDisplayGenerator<?>>> entry : displayRegistry.getCategoryDisplayGenerators().entrySet()) {
             CategoryIdentifier<?> categoryId = entry.getKey();
+            DisplayCategory<?> category = CategoryRegistry.getInstance().get(categoryId).getCategory();
+            if (CategoryRegistry.getInstance().isCategoryInvisible(category)) continue;
             Set<Display> set = new LinkedHashSet<>();
             generatorsCount += entry.getValue().size();
-            
+    
             for (DynamicDisplayGenerator<Display> generator : (List<DynamicDisplayGenerator<Display>>) (List<? extends DynamicDisplayGenerator<?>>) entry.getValue()) {
                 generateLiveDisplays(displayRegistry, generator, builder, set::add);
             }
-            
+    
             if (!set.isEmpty()) {
-                CollectionUtils.getOrPutEmptyList(result, CategoryRegistry.getInstance().get(categoryId).getCategory()).addAll(set);
+                CollectionUtils.getOrPutEmptyList(result, category).addAll(set);
             }
         }
         
