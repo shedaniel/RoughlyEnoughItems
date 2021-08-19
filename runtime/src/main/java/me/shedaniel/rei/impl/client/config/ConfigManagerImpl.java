@@ -69,7 +69,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -322,10 +321,6 @@ public class ConfigManagerImpl implements ConfigManager {
             }
             
             public List<? extends GuiEventListener> children() {
-                return Collections.emptyList();
-            }
-            
-            public List<? extends NarratableEntry> narratables() {
                 return Collections.emptyList();
             }
         }
