@@ -282,7 +282,7 @@ public class RoughlyEnoughItemsCoreClient {
                     screen.setDragging(true);
                 }
                 resetFocused(screen);
-                return EventResult.interruptTrue();
+                return EventResult.interruptFalse();
             }
             return EventResult.pass();
         });
@@ -293,7 +293,7 @@ public class RoughlyEnoughItemsCoreClient {
             resetFocused(screen);
             if (REIRuntime.getInstance().isOverlayVisible() && getOverlay().mouseReleased(mouseX, mouseY, button)
                 && resetFocused(screen)) {
-                return EventResult.interruptTrue();
+                return EventResult.interruptFalse();
             }
             return EventResult.pass();
         });
@@ -303,7 +303,7 @@ public class RoughlyEnoughItemsCoreClient {
             resetFocused(screen);
             if (REIRuntime.getInstance().isOverlayVisible() && getOverlay().mouseScrolled(mouseX, mouseY, amount)
                 && resetFocused(screen))
-                return EventResult.interruptTrue();
+                return EventResult.interruptFalse();
             return EventResult.pass();
         });
         ClientScreenInputEvent.CHAR_TYPED_PRE.register((minecraftClient, screen, character, keyCode) -> {
@@ -312,7 +312,7 @@ public class RoughlyEnoughItemsCoreClient {
             resetFocused(screen);
             if (getOverlay().charTyped(character, keyCode)
                 && resetFocused(screen))
-                return EventResult.interruptTrue();
+                return EventResult.interruptFalse();
             return EventResult.pass();
         });
         ClientGuiEvent.RENDER_POST.register((screen, matrices, mouseX, mouseY, delta) -> {
@@ -329,7 +329,7 @@ public class RoughlyEnoughItemsCoreClient {
             resetFocused(screen);
             if (getOverlay().mouseDragged(mouseX1, mouseY1, button, mouseX2, mouseY2)
                 && resetFocused(screen))
-                return EventResult.interruptTrue();
+                return EventResult.interruptFalse();
             return EventResult.pass();
         });
         ClientScreenInputEvent.KEY_PRESSED_PRE.register((minecraftClient, screen, i, i1, i2) -> {
@@ -338,7 +338,7 @@ public class RoughlyEnoughItemsCoreClient {
             if (screen instanceof AbstractContainerScreen && ConfigObject.getInstance().doesDisableRecipeBook() && ConfigObject.getInstance().doesFixTabCloseContainer()) {
                 if (i == 258 && minecraftClient.options.keyInventory.matches(i, i1)) {
                     minecraftClient.player.closeContainer();
-                    return EventResult.interruptTrue();
+                    return EventResult.interruptFalse();
                 }
             }
             if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
@@ -346,7 +346,7 @@ public class RoughlyEnoughItemsCoreClient {
             resetFocused(screen);
             if (getOverlay().keyPressed(i, i1, i2)
                 && resetFocused(screen))
-                return EventResult.interruptTrue();
+                return EventResult.interruptFalse();
             return EventResult.pass();
         });
     }
