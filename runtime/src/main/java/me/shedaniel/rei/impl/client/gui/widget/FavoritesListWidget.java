@@ -766,18 +766,18 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         @Override
         protected boolean isAvailable(int mouseX, int mouseY) {
             float expendProgress = widget.favoritePanel.expendState.floatValue();
-            return widget.fullBounds.contains(mouseX, mouseY) || expendProgress > .1f;
+            return widget.fullBounds.contains(mouseX, mouseY) || REIRuntime.getInstance().getOverlay().orElseThrow().getEntryList().containsMouse(new Point(mouseX, mouseY)) || expendProgress > .1f;
         }
         
         @Override
         protected void renderButtonText(PoseStack matrices, MultiBufferSource.BufferSource bufferSource) {
             float expendProgress = widget.favoritePanel.expendState.floatValue();
             if (expendProgress < .9f) {
-                int textColor = 0xFFFFFF | (Math.round(0xef * alpha.floatValue() * (1 - expendProgress)) << 24);
+                int textColor = 0xFFFFFF | (Math.round(0xFF * alpha.floatValue() * (1 - expendProgress)) << 24);
                 font.drawInBatch("+", bounds.getCenterX() - 2.5f, bounds.getCenterY() - 3, textColor, false, matrices.last().pose(), bufferSource, false, 0, 15728880);
             }
             if (expendProgress > .1f) {
-                int textColor = 0xFFFFFF | (Math.round(0xef * alpha.floatValue() * expendProgress) << 24);
+                int textColor = 0xFFFFFF | (Math.round(0xFF * alpha.floatValue() * expendProgress) << 24);
                 font.drawInBatch("-", bounds.getCenterX() - 2.5f, bounds.getCenterY() - 3, textColor, false, matrices.last().pose(), bufferSource, false, 0, 15728880);
             }
         }
@@ -800,7 +800,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             boolean hovered = containsMouse(mouseX, mouseY);
             this.alpha.setTo(hovered ? 1f : isAvailable(mouseX, mouseY) ? 0.3f : 0f, 260);
             this.alpha.update(delta);
-            int buttonColor = 0xFFFFFF | (Math.round(0x34 * alpha.floatValue()) << 24);
+            int buttonColor = 0xFFFFFF | (Math.round(0x74 * alpha.floatValue()) << 24);
             fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), buttonColor, buttonColor);
             if (isVisible()) {
                 MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());

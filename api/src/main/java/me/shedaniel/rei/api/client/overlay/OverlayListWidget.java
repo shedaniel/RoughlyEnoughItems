@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.client.overlay;
 
+import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -39,4 +40,6 @@ public interface OverlayListWidget {
     EntryStack<?> getFocusedStack();
     
     Stream<EntryStack<?>> getEntries();
+    
+    boolean containsMouse(Point point);
 }
