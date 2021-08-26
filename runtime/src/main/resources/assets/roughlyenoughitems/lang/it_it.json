@@ -1,5 +1,4 @@
 {
-  "key.rei.category": "Roughly Enough Items (Imposta Modificatori alla Schermata di Configurazione)",
   "text.rei.cheating": "Cheating",
   "text.rei.cheating_disabled": "§7Cheating Disabilitato",
   "text.rei.cheating_enabled": "§cCheating Abilitato",
@@ -39,8 +38,6 @@
   "text.rei.composting.page": "Pagina %d",
   "text.rei.config": "Configurazione",
   "text.rei.config_tooltip": "Apri schermata di configurazione\n§7Clicca Shift per attivare la modalità cheat",
-  "text.rei.config.optifine.title": "Impossibile aprire la schermata di configurazione di REI",
-  "text.rei.config.optifine.description": "La schermata di configurazione è incompatibile con la tua istanza di OptiFine / OptiFabric.",
   "text.rei.cheat_items": "Ho dato [{item_name}§f] x{item_count} a {player_name}.",
   "text.rei.failed_cheat_items": "§cImpossibile dare gli oggetti.",
   "ordering.rei.ascending": "Crescente",

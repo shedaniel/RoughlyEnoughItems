@@ -1,5 +1,4 @@
 {
-  "key.rei.category": "Roughly Enough Items (Ayar Ekranında Değiştiriciyi Ayarla)",
   "text.rei.cheating": "Hile",
   "text.rei.cheating_disabled": "§7Hileler Kapatıldı",
   "text.rei.cheating_enabled": "§cHileler Açıldı",
@@ -39,8 +38,6 @@
   "text.rei.composting.page": "%d. Sayfa",
   "text.rei.config": "Ayar",
   "text.rei.config_tooltip": "Ayar Ekranını Aç\n§7Shift ile tıklayarak hile modunu kapat/aç",
-  "text.rei.config.optifine.title": "REI yapılandırma ekranı açılamadı",
-  "text.rei.config.optifine.description": "Yapılandırma ekranı kullandığın OptiFine/OptiFabric ile uyumsuz.",
   "text.rei.cheat_items": "{player_name} oyuncusuna {item_count} tane [{item_name}§f] verildi.",
   "text.rei.failed_cheat_items": "§cEşyalar verilemedi.",
   "ordering.rei.ascending": "Artan",

@@ -1,5 +1,4 @@
 {
-  "key.rei.category": "Вполне достаточно предметов",
   "text.rei.cheating": "Читы",
   "text.rei.cheating_disabled": "§7Читы выключены",
   "text.rei.cheating_enabled": "§cЧиты включены",
@@ -39,8 +38,6 @@
   "text.rei.composting.page": "%d страница",
   "text.rei.config": "Конфигурация",
   "text.rei.config_tooltip": "Открыть окно конфигурации\n§7Shift+ЛКМ переключения читов",
-  "text.rei.config.optifine.title": "Не удалось открыть экран конфигурации REI",
-  "text.rei.config.optifine.description": "Экран конфигурации несовместим с Вашей версией OptiFine / OptiFabric.",
   "text.rei.cheat_items": "Выдано x{item_count} [{item_name}] игроку {player_name}",
   "text.rei.failed_cheat_items": "§cНе удалось выдать предметы.",
   "ordering.rei.ascending": "По возрастанию",

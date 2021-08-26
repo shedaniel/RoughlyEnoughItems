@@ -27,6 +27,7 @@ import dev.architectury.platform.Platform;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
+import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.annotation.Nullable;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
@@ -36,6 +37,7 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.impl.Internals;
 import me.shedaniel.rei.impl.common.category.CategoryIdentifierImpl;
@@ -112,10 +114,16 @@ public class RoughlyEnoughItemsCore {
                 new MenuInfoRegistryImpl()), "serverPluginManager");
     }
     
-    public static void _reloadPlugins() {
+    public static void _reloadPlugins(@Nullable ReloadStage stage) {
+        if (stage == null) {
+            for (ReloadStage reloadStage : ReloadStage.values()) {
+                _reloadPlugins(reloadStage);
+            }
+            return;
+        }
         try {
             for (PluginManager<? extends REIPlugin<?>> instance : PluginManager.getActiveInstances()) {
-                instance.startReload();
+                instance.startReload(stage);
             }
         } catch (Throwable throwable) {
             throwable.printStackTrace();
@@ -130,7 +138,7 @@ public class RoughlyEnoughItemsCore {
         if (Platform.getEnvironment() == Env.SERVER) {
             MutableLong lastReload = new MutableLong(-1);
             ReloadListenerRegistry.register(PackType.SERVER_DATA, (preparationBarrier, resourceManager, profilerFiller, profilerFiller2, executor, executor2) -> {
-                return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(RoughlyEnoughItemsCore::_reloadPlugins, executor2);
+                return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(() -> RoughlyEnoughItemsCore._reloadPlugins(null), executor2);
             });
         }
     }

@@ -28,6 +28,7 @@ import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.subsets.SubsetsRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -41,6 +42,11 @@ import java.util.*;
 @Environment(EnvType.CLIENT)
 public class SubsetsRegistryImpl implements SubsetsRegistry {
     private final Map<String, Set<EntryStack<?>>> paths = Maps.newHashMap();
+    
+    @Override
+    public ReloadStage getStage() {
+        return ReloadStage.START;
+    }
     
     @Override
     public void acceptPlugin(REIClientPlugin plugin) {

@@ -1,5 +1,4 @@
 {
-  "key.rei.category": "Roughly Enough Items (Nastavit modifikátory v konfiguračním okně)",
   "text.rei.cheating": "Podvádění",
   "text.rei.cheating_disabled": "§7Podvádění zakázáno",
   "text.rei.cheating_enabled": "§cPodvádění povoleno",
@@ -41,8 +40,6 @@
   "text.rei.composting.page": "Strana %d",
   "text.rei.config": "Konfigurace",
   "text.rei.config_tooltip": "Otevřít konfigurační okno\n§7Shift-Klik pro přepnutí podvádění",
-  "text.rei.config.optifine.title": "Nepodařilo se otevřít konfigurační okno REI",
-  "text.rei.config.optifine.description": "Konfigurační okno je nekompatibilní s vaší instancí OptiFine / OptiFabric.",
   "text.rei.cheat_items": "Hráči {player_name} dán předmět ({item_count}x) [{item_name}§f]",
   "text.rei.failed_cheat_items": "§cNepodařilo se dát předměty.",
   "text.rei.too_long_nbt": "§cNBT předmětu je příliš dlouhé, než aby mohl být použito ve hře pro více hráčů.",

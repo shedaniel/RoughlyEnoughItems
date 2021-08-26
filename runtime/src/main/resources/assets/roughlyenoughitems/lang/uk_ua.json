@@ -1,5 +1,4 @@
 {
-  "key.rei.category": "Цілком достатньо предметів",
   "text.rei.cheating": "Чітерство",
   "text.rei.cheating_disabled": "§7Чітерство вимкнено",
   "text.rei.cheating_enabled": "§cЧітерство увімкно",
@@ -39,8 +38,6 @@
   "text.rei.composting.page": "Сторінка %d",
   "text.rei.config": "Конфігурація",
   "text.rei.config_tooltip": "Відкрити вікно конфігурації\n§7Shift+ЛФМ перемикання режиму читерства",
-  "text.rei.config.optifine.title": "Не вдалося відкрити екран конфігурації REI",
-  "text.rei.config.optifine.description": "Екран конфігурації несумісний з Вашою версією OptiFine / OptiFabric.",
   "text.rei.cheat_items": "Видано x{item_count} [{item_name}] гравцеві {player_name}",
   "text.rei.failed_cheat_items": "§cНе вдалося надати предмети.",
   "ordering.rei.ascending": "За зростанням",

@@ -1,5 +1,4 @@
 {
-  "key.rei.category": "roughle INoo itemz (set modifeirz et conFIG scren)",
   "text.rei.cheating": "cheetin",
   "text.rei.cheating_disabled": "§7cheetin diSabld",
   "text.rei.cheating_enabled": "§ccheetIN INABld",
@@ -36,8 +35,6 @@
   "text.rei.composting.page": "Page %d",
   "text.rei.config": "Config",
   "text.rei.config_tooltip": "Open Config Scween\n§7Shift-Cwick to toggwe cheat mode",
-  "text.rei.config.optifine.title": "oh sadface faild to OPIN REi config scrin",
-  "text.rei.config.optifine.description": "teh configurashun sCRIN r encompatibl wif optIFIne / OPTIFABrIc!!",
   "text.rei.cheat_items": "Gave [{item_name}§f] x{item_count} to {pwayew_name}.",
   "text.rei.failed_cheat_items": "§cFaiwed to give items.",
   "ordering.rei.ascending": "Ascending",

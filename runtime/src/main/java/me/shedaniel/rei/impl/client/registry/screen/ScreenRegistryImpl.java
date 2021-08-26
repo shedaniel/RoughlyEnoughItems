@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.*;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
@@ -67,6 +68,11 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     private Map<Class<?>, List<OverlayDecider>> cache = new HashMap<>();
     private ExclusionZones exclusionZones;
     private Class<? extends Screen> tmpScreen;
+    
+    @Override
+    public ReloadStage getStage() {
+        return ReloadStage.START;
+    }
     
     @Override
     public void acceptPlugin(REIClientPlugin plugin) {

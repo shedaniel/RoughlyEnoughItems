@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
@@ -66,6 +67,11 @@ public class EntryRegistryImpl implements EntryRegistry {
     @Override
     public void acceptPlugin(REIClientPlugin plugin) {
         plugin.registerEntries(this);
+    }
+    
+    @Override
+    public ReloadStage getStage() {
+        return ReloadStage.START;
     }
     
     @Override

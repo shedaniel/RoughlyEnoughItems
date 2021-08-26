@@ -23,40 +23,7 @@
 
 package me.shedaniel.rei.api.common.registry;
 
-import me.shedaniel.rei.api.common.plugins.REIPlugin;
-
-import java.util.List;
-
-public interface ParentReloadable<P extends REIPlugin<?>> extends Reloadable<P> {
-    List<Reloadable<P>> getReloadables();
-    
-    void registerReloadable(Reloadable<? extends P> reloadable);
-    
-    @Override
-    default void startReload() {
-        for (ReloadStage stage : ReloadStage.values()) {
-            startReload(stage);
-        }
-    }
-    
-    @Override
-    default void endReload() {
-        for (ReloadStage stage : ReloadStage.values()) {
-            endReload(stage);
-        }
-    }
-    
-    @Override
-    default void startReload(ReloadStage stage) {
-        for (Reloadable<P> reloadable : getReloadables()) {
-            reloadable.startReload(stage);
-        }
-    }
-    
-    @Override
-    default void endReload(ReloadStage stage) {
-        for (Reloadable<P> reloadable : getReloadables()) {
-            reloadable.endReload(stage);
-        }
-    }
+public enum ReloadStage {
+    START,
+    END,
 }

@@ -63,7 +63,7 @@ public interface EntryTypeRegistry extends Reloadable<REIPlugin<?>> {
     }
     
     /**
-     * Registers a entry type, with its entry definition.
+     * Registers an entry type, with its entry definition.
      *
      * @param id         the identifier of the entry type
      * @param definition the definition of the entry

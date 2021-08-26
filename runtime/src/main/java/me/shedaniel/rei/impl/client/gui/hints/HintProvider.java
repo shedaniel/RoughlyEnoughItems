@@ -21,42 +21,21 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.registry;
+package me.shedaniel.rei.impl.client.gui.hints;
 
-import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import me.shedaniel.math.Color;
+import me.shedaniel.math.Point;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public interface ParentReloadable<P extends REIPlugin<?>> extends Reloadable<P> {
-    List<Reloadable<P>> getReloadables();
+public interface HintProvider {
+    List<Component> provide();
     
-    void registerReloadable(Reloadable<? extends P> reloadable);
+    @Nullable
+    Tooltip provideTooltip(Point mouse);
     
-    @Override
-    default void startReload() {
-        for (ReloadStage stage : ReloadStage.values()) {
-            startReload(stage);
-        }
-    }
-    
-    @Override
-    default void endReload() {
-        for (ReloadStage stage : ReloadStage.values()) {
-            endReload(stage);
-        }
-    }
-    
-    @Override
-    default void startReload(ReloadStage stage) {
-        for (Reloadable<P> reloadable : getReloadables()) {
-            reloadable.startReload(stage);
-        }
-    }
-    
-    @Override
-    default void endReload(ReloadStage stage) {
-        for (Reloadable<P> reloadable : getReloadables()) {
-            reloadable.endReload(stage);
-        }
-    }
+    Color getColor();
 }

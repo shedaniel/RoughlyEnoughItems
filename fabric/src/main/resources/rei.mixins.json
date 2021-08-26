@@ -3,9 +3,11 @@
   "package": "me.shedaniel.rei.mixin.fabric",
   "compatibilityLevel": "JAVA_8",
   "client": [
+    "MixinClientPacketListener",
     "MixinScreen"
   ],
   "mixins": [
+    "MixinPacketEncoder"
   ],
   "injectors": {
     "maxShiftBy": 5,
