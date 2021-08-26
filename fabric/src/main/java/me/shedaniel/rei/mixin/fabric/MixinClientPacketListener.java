@@ -21,42 +21,25 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.registry;
+package me.shedaniel.rei.mixin.fabric;
 
-import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
+import net.minecraft.world.item.crafting.RecipeManager;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.List;
-
-public interface ParentReloadable<P extends REIPlugin<?>> extends Reloadable<P> {
-    List<Reloadable<P>> getReloadables();
+@Mixin(ClientPacketListener.class)
+public class MixinClientPacketListener {
+    @Shadow @Final private RecipeManager recipeManager;
     
-    void registerReloadable(Reloadable<? extends P> reloadable);
-    
-    @Override
-    default void startReload() {
-        for (ReloadStage stage : ReloadStage.values()) {
-            startReload(stage);
-        }
-    }
-    
-    @Override
-    default void endReload() {
-        for (ReloadStage stage : ReloadStage.values()) {
-            endReload(stage);
-        }
-    }
-    
-    @Override
-    default void startReload(ReloadStage stage) {
-        for (Reloadable<P> reloadable : getReloadables()) {
-            reloadable.startReload(stage);
-        }
-    }
-    
-    @Override
-    default void endReload(ReloadStage stage) {
-        for (Reloadable<P> reloadable : getReloadables()) {
-            reloadable.endReload(stage);
-        }
+    @Inject(method = "handleUpdateRecipes", at = @At("HEAD"))
+    private void handleUpdateRecipes(ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket, CallbackInfo ci) {
+        RoughlyEnoughItemsCoreClient.PRE_UPDATE_RECIPES.invoker().update(recipeManager);
     }
 }

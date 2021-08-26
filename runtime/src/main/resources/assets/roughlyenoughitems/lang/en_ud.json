@@ -1,5 +1,4 @@
 {
-  "key.rei.category": "(uǝǝɹɔS ƃᴉɟuoƆ ʇɐ sɹǝᴉɟᴉpoW ʇǝS) sɯǝʇI ɥƃnouƎ ʎlɥƃnoɹ",
   "text.rei.cheating": "ƃuᴉʇɐǝɥƆ",
   "text.rei.cheating_disabled": "§7pǝןqɐsıᗡ buıʇɐǝɥϽ",
   "text.rei.cheating_enabled": "§cpǝןqɐuƎ buıʇɐǝɥϽ",
@@ -31,7 +30,6 @@
   "text.rei.composting.page": "p% ǝbɐԀ",
   "text.rei.config": "bıɟuoϽ",
   "text.rei.config_tooltip": "uǝǝɹɔS bıɟuoϽ uǝdO\n§7ǝpoɯ ʇɐǝɥɔ ǝןbboʇ oʇ ʞɔıןϽ-ʇɟıɥS",
-  "text.rei.config.optifine.description": "The configuration screen is incompatible with OptiFine / OptiFabric.",
   "text.rei.cheat_items": "§7˙{player_name} oʇ {item_count}x [{item_name}§7] ǝʌɐƃ",
   "text.rei.failed_cheat_items": "§c˙sɯǝʇı ǝʌıb oʇ pǝןıɐℲ",
   "ordering.rei.ascending": "buıpuǝɔs∀",

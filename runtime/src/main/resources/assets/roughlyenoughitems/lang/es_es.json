@@ -1,5 +1,4 @@
 {
-  "key.rei.category": "Roughly Enough Items (Ajustar Modificadores en la Pantalla de Configuración)",
   "text.rei.cheating": "Trampas",
   "text.rei.cheating_disabled": "§Trampas desactivadas",
   "text.rei.cheating_enabled": "§cTrampas activadas",
@@ -39,8 +38,6 @@
   "text.rei.composting.page": "Página %d",
   "text.rei.config": "Configuración",
   "text.rei.config_tooltip": "Abrir pantalla de configuración\n§7Shift + Click para cambiar el modo trucos",
-  "text.rei.config.optifine.title": "Error al abrir la pantalla de configuración de REI",
-  "text.rei.config.optifine.description": "La pantalla de configuración no es compatible con tu instancia de OptiFine / OptiFabric.",
   "text.rei.cheat_items": "Dar [{item_name}§f] x{item_count} a {player_name}.",
   "text.rei.failed_cheat_items": "§cError al dar objetos.",
   "ordering.rei.ascending": "Ascendente",

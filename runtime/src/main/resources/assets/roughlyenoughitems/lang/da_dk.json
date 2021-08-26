@@ -29,8 +29,6 @@
   "text.rei.composting.page": "Side %d",
   "text.rei.config": "Konfig",
   "text.rei.config_tooltip": "Åbn konfigskærm\n§7Skift-Klik for at slå snydetilstand til/fra",
-  "text.rei.config.optifine.title": "Kunne ikke åbne REI-konfigskærm",
-  "text.rei.config.optifine.description": "Konfigurationsskærmen er inkompatibel med din forekomst af OptiFine / OptiFabric.",
   "text.rei.cheat_items": "Gav [{item_name}§f] x{item_count} til {player_name}.",
   "text.rei.failed_cheat_items": "§cKunne ikke give genstande.",
   "ordering.rei.ascending": "Stigende",

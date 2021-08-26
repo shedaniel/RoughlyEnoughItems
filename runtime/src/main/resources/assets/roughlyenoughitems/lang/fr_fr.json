@@ -1,5 +1,4 @@
 {
-  "key.rei.category": "Roughly Enough Items (paramètres dans le menu de config.)",
   "text.rei.cheating": "Triche",
   "text.rei.cheating_disabled": "§7Triche désactivée",
   "text.rei.cheating_enabled": "§cTriche activée",
@@ -41,8 +40,6 @@
   "text.rei.composting.page": "Page %d",
   "text.rei.config": "Configuration",
   "text.rei.config_tooltip": "Ouvrir le menu de configuration \n§7Maj. + Clic pour activer le mode triche",
-  "text.rei.config.optifine.title": "Échec de l'ouverture de l'écran de configuration de REI",
-  "text.rei.config.optifine.description": "L'écran de configuration est incompatible avec votre instance d'OptiFine / OptiFabric.",
   "text.rei.cheat_items": "Don de {item_count} [{item_name}§f] à {player_name}",
   "text.rei.failed_cheat_items": "§cImpossible de donner les objets.",
   "text.rei.too_long_nbt": "§cL'objet NBT est trop long pour être affiché en multijoueur",

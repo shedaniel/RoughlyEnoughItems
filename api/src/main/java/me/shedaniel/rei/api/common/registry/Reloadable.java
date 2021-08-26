@@ -27,9 +27,25 @@ import me.shedaniel.rei.api.common.plugins.REIPlugin;
 
 @FunctionalInterface
 public interface Reloadable<P extends REIPlugin<?>> {
+    default ReloadStage getStage() {
+        return ReloadStage.END;
+    }
+    
     void startReload();
     
+    default void startReload(ReloadStage stage) {
+        if (stage == getStage()) {
+            startReload();
+        }
+    }
+    
     default void endReload() {}
+    
+    default void endReload(ReloadStage stage) {
+        if (stage == getStage()) {
+            endReload();
+        }
+    }
     
     /**
      * Accepts a {@link REIPlugin}
@@ -37,6 +53,12 @@ public interface Reloadable<P extends REIPlugin<?>> {
      * @param plugin the plugin to accept
      */
     default void acceptPlugin(P plugin) {}
+    
+    default void acceptPlugin(P plugin, ReloadStage stage) {
+        if (stage == getStage()) {
+            acceptPlugin(plugin);
+        }
+    }
     
     /**
      * Returns whether {@link Reloadable#acceptPlugin(REIPlugin)} should be done in parallel.

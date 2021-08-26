@@ -29,11 +29,11 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
+import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.plugin.client.entry.FluidEntryDefinition;
 import me.shedaniel.rei.plugin.client.entry.ItemEntryDefinition;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -43,6 +43,13 @@ import java.util.stream.Stream;
 @ApiStatus.Internal
 public class DefaultRuntimePlugin implements REIServerPlugin {
     public static final ResourceLocation PLUGIN = new ResourceLocation("roughlyenoughitems", "default_runtime_plugin");
+    
+    public DefaultRuntimePlugin() {
+        PluginStageExecutionWatcher watcher = new PluginStageExecutionWatcher();
+        PluginManager.getInstance().registerReloadable(watcher);
+        REIRuntimeImpl.getInstance().addHintProvider(watcher);
+        REIRuntimeImpl.getInstance().addHintProvider(new SearchBarHighlightWatcher());
+    }
     
     @Override
     public void registerEntryTypes(EntryTypeRegistry registry) {

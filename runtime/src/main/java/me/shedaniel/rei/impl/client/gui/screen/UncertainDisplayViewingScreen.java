@@ -146,7 +146,7 @@ public class UncertainDisplayViewingScreen extends Screen {
                     } else if (allModsUsingJEI != null && jeiEnabled) {
                         ConfigManagerImpl.getInstance().getConfig().setJEICompatibilityLayerEnabled(jeiEnabled);
                         ConfigManager.getInstance().saveConfig();
-                        RoughlyEnoughItemsCoreClient.reloadPlugins(null);
+                        RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
                         Minecraft.getInstance().setScreen(new ConfigReloadingScreen(() -> callback.accept(original)));
                     } else {
                         callback.accept(original);
