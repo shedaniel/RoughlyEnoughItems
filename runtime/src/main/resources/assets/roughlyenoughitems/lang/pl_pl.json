@@ -1,5 +1,4 @@
 {
-  "key.rei.category": "Roughly Enough Items (Ustaw Modyfikatory w Panelu Konfiguracyjnym)",
   "text.rei.cheating": "Tryb Oszukiwania",
   "text.rei.cheating_disabled": "§7Tryb Oszukiwania wyłączony",
   "text.rei.cheating_enabled": "§cTryb Oszukiwania włączony",
@@ -39,8 +38,6 @@
   "text.rei.composting.page": "Strona %d",
   "text.rei.config": "Konfiguracja",
   "text.rei.config_tooltip": "Otwórz Panel Konfiguracyjny\n§7Kliknij z Shiftem by przełączyć Tryb Oszukiwania",
-  "text.rei.config.optifine.title": "Nie udało się otworzyć ekranu konfiguracji REI",
-  "text.rei.config.optifine.description": "Ekran konfiguracji jest niekompatybilny z OptiFine / OptiFabric.",
   "text.rei.cheat_items": "Daj [{item_name}§f] x{item_count} graczowi {player_name}.",
   "text.rei.failed_cheat_items": "§cBłąd podczas dawania przedmiotów.",
   "ordering.rei.ascending": "Rosnący",

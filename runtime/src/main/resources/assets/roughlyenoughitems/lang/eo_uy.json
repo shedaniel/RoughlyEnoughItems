@@ -1,5 +1,4 @@
 {
-  "key.rei.category": "Roughly Enough Items (Determini Modifajn ĉe Agorda Ekrano)",
   "text.rei.cheating": "Trompado",
   "text.rei.cheating_disabled": "§7Trompado Malŝaltita",
   "text.rei.cheating_enabled": "§cTrompado Ŝaltita",
@@ -39,8 +38,6 @@
   "text.rei.composting.page": "Paĝo %d",
   "text.rei.config": "Agordo",
   "text.rei.config_tooltip": "Malfermi Agordan Ekranon\n§7Majuskle klaku por baskuli trompreĝimon",
-  "text.rei.config.optifine.title": "Malsukcesis malfermi agordan ekranon de REI",
-  "text.rei.config.optifine.description": "La agorda ekrano malkongruas kun via apero de OptiFine / OptiFabric.",
   "text.rei.cheat_items": "Donis [{item_name}§f] x{item_count} al {player_name}.",
   "text.rei.failed_cheat_items": "§cMalsukcesis doni aferojn.",
   "ordering.rei.ascending": "Kreskanta",

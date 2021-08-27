@@ -21,42 +21,35 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.registry;
+package me.shedaniel.rei.plugin.client;
 
-import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import me.shedaniel.math.Color;
+import me.shedaniel.math.Point;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
+import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.List;
 
-public interface ParentReloadable<P extends REIPlugin<?>> extends Reloadable<P> {
-    List<Reloadable<P>> getReloadables();
-    
-    void registerReloadable(Reloadable<? extends P> reloadable);
-    
+public class SearchBarHighlightWatcher implements HintProvider {
     @Override
-    default void startReload() {
-        for (ReloadStage stage : ReloadStage.values()) {
-            startReload(stage);
-        }
+    public List<Component> provide() {
+        return OverlaySearchField.isHighlighting ? Collections.singletonList(new TranslatableComponent("text.rei.inventory.highlighting.enabled")) :
+                Collections.emptyList();
     }
     
     @Override
-    default void endReload() {
-        for (ReloadStage stage : ReloadStage.values()) {
-            endReload(stage);
-        }
+    @Nullable
+    public Tooltip provideTooltip(Point mouse) {
+        return Tooltip.create(mouse, new TranslatableComponent("text.rei.inventory.highlighting.enabled.tooltip"));
     }
     
     @Override
-    default void startReload(ReloadStage stage) {
-        for (Reloadable<P> reloadable : getReloadables()) {
-            reloadable.startReload(stage);
-        }
-    }
-    
-    @Override
-    default void endReload(ReloadStage stage) {
-        for (Reloadable<P> reloadable : getReloadables()) {
-            reloadable.endReload(stage);
-        }
+    public Color getColor() {
+        return Color.ofTransparent(0x50f7ed23);
     }
 }

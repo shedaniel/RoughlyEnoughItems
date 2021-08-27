@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
@@ -45,6 +46,11 @@ import java.util.Map;
 public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry {
     private final BiMap<ResourceLocation, FavoriteEntryType<?>> registry = HashBiMap.create();
     private final Map<Component, FavoriteEntryType.Section> sections = Maps.newLinkedHashMap();
+    
+    @Override
+    public ReloadStage getStage() {
+        return ReloadStage.START;
+    }
     
     @Override
     public void acceptPlugin(REIClientPlugin plugin) {

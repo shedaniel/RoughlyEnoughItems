@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeBridge;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -44,6 +45,11 @@ import java.util.Set;
 public class EntryTypeRegistryImpl implements EntryTypeRegistry {
     private final BiMap<ResourceLocation, EntryDefinition<?>> entryTypes = HashBiMap.create();
     private final Table<ResourceLocation, ResourceLocation, List<EntryTypeBridge<?, ?>>> typeBridges = HashBasedTable.create();
+    
+    @Override
+    public ReloadStage getStage() {
+        return ReloadStage.START;
+    }
     
     @Override
     public void acceptPlugin(REIPlugin<?> plugin) {

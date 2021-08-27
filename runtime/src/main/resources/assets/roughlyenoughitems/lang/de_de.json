@@ -1,5 +1,4 @@
 {
-  "key.rei.category": "Roughly Enough Items (Setze Modifizierungen im Einstellungsbildschirm)",
   "text.rei.cheating": "Cheating",
   "text.rei.cheating_disabled": "§7Cheating deaktiviert",
   "text.rei.cheating_enabled": "§cCheating Aktiviert",
@@ -39,8 +38,6 @@
   "text.rei.composting.page": "Seite %d",
   "text.rei.config": "Einstellung",
   "text.rei.config_tooltip": "Öffne das Konfig-Menü\n§7Shift-Klick um den Cheatenmodus ein-/auszuschalten",
-  "text.rei.config.optifine.title": "Fehler beim Öffnen der REI-Einstellungen",
-  "text.rei.config.optifine.description": "Der Konfigurationsbildschirm ist mit OptiFine / OptiFabric nicht kompatibel.",
   "text.rei.cheat_items": "[{item_name}] x{item_count} {player_name} gegeben.",
   "text.rei.failed_cheat_items": "§cItems geben fehlgeschlagen.",
   "ordering.rei.ascending": "Aufsteigend",

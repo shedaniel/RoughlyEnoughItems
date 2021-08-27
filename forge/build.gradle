@@ -31,7 +31,15 @@ repositories {
 }
 
 loom {
-    mixinConfig "rei-jei-internals-workaround.mixins.json"
+    launches {
+        all {
+            arg "--mixin", "rei-jei-internals-workaround.mixins.json"
+        }
+    }
+
+    localMods {
+        it.add(project(":jei-internals-workaround").sourceSets.main)
+    }
 }
 
 dependencies {
@@ -48,7 +56,6 @@ dependencies {
     developmentForge(project(path: ":default-plugin")) { transitive = false }
     developmentForge(project(path: ":runtime")) { transitive = false }
     developmentForge(project(path: ":jei-compatibility-layer")) { transitive = false }
-    developmentForge(project(path: ":jei-internals-workaround")) { transitive = false }
 
     shadowCommon(project(path: ":api", configuration: "transformProductionForge")) { transitive = false }
     shadowCommon(project(path: ":default-plugin", configuration: "transformProductionForge")) { transitive = false }

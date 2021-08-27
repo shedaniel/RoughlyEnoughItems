@@ -76,6 +76,11 @@ public class CategoryRegistryImpl implements CategoryRegistry {
     }
     
     @Override
+    public <T extends Display> Optional<CategoryConfiguration<T>> tryGet(CategoryIdentifier<T> category) {
+        return Optional.ofNullable((CategoryConfiguration<T>) this.categories.get(category));
+    }
+    
+    @Override
     public <T extends Display> void configure(CategoryIdentifier<T> category, Consumer<CategoryConfiguration<T>> action) {
         if (this.categories.containsKey(category)) {
             action.accept(get(category));

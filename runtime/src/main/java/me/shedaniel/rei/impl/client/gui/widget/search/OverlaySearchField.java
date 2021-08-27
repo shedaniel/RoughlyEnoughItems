@@ -26,14 +26,21 @@ package me.shedaniel.rei.impl.client.gui.widget.search;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.TextFieldWidget;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
@@ -41,14 +48,17 @@ import me.shedaniel.rei.impl.client.search.argument.type.ArgumentTypesRegistry;
 import me.shedaniel.rei.impl.client.search.argument.type.TextArgumentType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
+import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -130,9 +140,63 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     public void laterRender(PoseStack matrices, int int_1, int int_2, float float_1) {
         RenderSystem.disableDepthTest();
+        if (isMain) drawHint(matrices, int_1, int_2);
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
         super.render(matrices, int_1, int_2, float_1);
         RenderSystem.enableDepthTest();
+    }
+    
+    private void drawHint(PoseStack poses, int int_1, int int_2) {
+        List<Pair<HintProvider, Component>> hints = CollectionUtils.flatMap(REIRuntimeImpl.getInstance().getHintProviders(), provider ->
+                CollectionUtils.map(provider.provide(), component -> new Pair<>(provider, component)));
+        if (hints.isEmpty()) return;
+        int width = getBounds().getWidth() - 4;
+        List<Pair<HintProvider, FormattedCharSequence>> sequences = CollectionUtils.flatMap(hints, pair ->
+                CollectionUtils.map(font.split(pair.getSecond(), width - 6), sequence -> new Pair<>(pair.getFirst(), sequence)));
+        Color color = hints.stream()
+                .map(Pair::getFirst)
+                .distinct()
+                .map(HintProvider::getColor)
+                .reduce((color1, color2) -> {
+                    int r = color1.getRed() - (color1.getRed() - color2.getRed()) / 2;
+                    int g = color1.getGreen() - (color1.getGreen() - color2.getGreen()) / 2;
+                    int b = color1.getBlue() - (color1.getBlue() - color2.getBlue()) / 2;
+                    return Color.ofRGBA(r, g, b, (color1.getAlpha() + color2.getAlpha()) / 2);
+                }).orElse(Color.ofTransparent(0x50000000));
+        int height = 6 + font.lineHeight * sequences.size();
+        int x = getBounds().getX() + 2;
+        int y = getBounds().getY() - height;
+        Tesselator tesselator = Tesselator.getInstance();
+        BufferBuilder bufferBuilder = tesselator.getBuilder();
+        bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR);
+        Matrix4f pose = poses.last().pose();
+        int background = 0xf0100010;
+        int color1 = color.getColor();
+        int color2 = color.darker(2).getColor();
+        fillGradient(pose, bufferBuilder, x, y - 1, x + width, y, 400, background, background);
+        fillGradient(pose, bufferBuilder, x, y + height, x + width, y + height + 1, 400, background, background);
+        fillGradient(pose, bufferBuilder, x, y, x + width, y + height, 400, background, background);
+        fillGradient(pose, bufferBuilder, x - 1, y, x, y + height, 400, background, background);
+        fillGradient(pose, bufferBuilder, x + width, y, x + width + 1, y + height, 400, background, background);
+        fillGradient(pose, bufferBuilder, x, y + 1, x + 1, y + height - 1, 400, color1, color2);
+        fillGradient(pose, bufferBuilder, x + width - 1, y + 1, x + width, y + height - 1, 400, color1, color2);
+        fillGradient(pose, bufferBuilder, x, y, x + width, y + 1, 400, color1, color1);
+        fillGradient(pose, bufferBuilder, x, y + height - 1, x + width, y + height, 400, color2, color2);
+        bufferBuilder.end();
+        BufferUploader.end(bufferBuilder);
+        poses.pushPose();
+        poses.translate(0.0D, 0.0D, 400.0D);
+        for (int i = 0; i < sequences.size(); i++) {
+            Pair<HintProvider, FormattedCharSequence> pair = sequences.get(i);
+            int lineWidth = font.drawShadow(poses, pair.getSecond(), x + 3, y + 3 + font.lineHeight * i, -1);
+            if (new Rectangle(x + 3, y + 3 + font.lineHeight * i, lineWidth, font.lineHeight).contains(int_1, int_2)) {
+                Tooltip tooltip = pair.getFirst().provideTooltip(new Point(int_1, int_2));
+                if (tooltip != null) {
+                    tooltip.queue();
+                }
+            }
+        }
+        poses.popPose();
     }
     
     @Override

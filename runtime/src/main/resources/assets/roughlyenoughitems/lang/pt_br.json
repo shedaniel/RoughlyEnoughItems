@@ -1,5 +1,4 @@
 {
-  "key.rei.category": "Roughly Enough Items (menu de definições)",
   "text.rei.cheating": "Trapaças",
   "text.rei.cheating_disabled": "§7Trapaças desativadas",
   "text.rei.cheating_enabled": "§cTrapaças ativadas",
@@ -40,8 +39,6 @@
   "text.rei.composting.page": "Página %d",
   "text.rei.config": "Definições",
   "text.rei.config_tooltip": "Abrir menu de definições\n§7Shift+clique para alternar o modo trapaça",
-  "text.rei.config.optifine.title": "Falha ao abrir a tela de definições do REI",
-  "text.rei.config.optifine.description": "O menu de definições é incompatível com a sua versão do OptiFine/OptiFabric.",
   "text.rei.cheat_items": "{player_name} recebeu {item_count} unidade(s) de [{item_name}§f].",
   "text.rei.failed_cheat_items": "§cFalha ao obter itens.",
   "ordering.rei.ascending": "Crescente",
@@ -96,6 +93,7 @@
   "text.rei.recipe_screen_type.selection": "Selecionar estilo da tela de receita",
   "text.rei.recipe_screen_type.selection.sub": "Você sempre pode editar essa opção através do menu de definições.",
   "text.rei.jei_compat.sub": "Deseja ativar a compatibilidade com o JEI %s§7?\nIsso permitirá o carregamento de plugins JEI das seguintes fontes:\n%s\n\n§7Porém a compatibilidade REI JEI não está perfeita e pode causar problemas\n§cUSE A SEU PRÓPRIO RISCO!",
+  "text.rei.jei_compat.sub.stability": "§c§l(ALFA)",
   "text.rei.view_recipes_for": "Ver receitas para %s",
   "text.rei.subsets": "Subconjuntos",
   "text.rei.tiny_potato": "Batatinhas",

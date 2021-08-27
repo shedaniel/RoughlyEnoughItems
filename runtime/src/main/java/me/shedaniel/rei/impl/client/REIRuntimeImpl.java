@@ -38,7 +38,9 @@ import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -50,8 +52,7 @@ import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.LinkedHashSet;
-import java.util.Optional;
+import java.util.*;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
@@ -65,6 +66,7 @@ public class REIRuntimeImpl implements REIRuntime {
     private AbstractContainerScreen<?> previousContainerScreen = null;
     private Screen previousScreen = null;
     private LinkedHashSet<DisplayScreen> lastDisplayScreen = Sets.newLinkedHashSetWithExpectedSize(10);
+    private List<HintProvider> hintProviders = new ArrayList<>();
     
     /**
      * @return the instance of screen helper
@@ -73,6 +75,14 @@ public class REIRuntimeImpl implements REIRuntime {
     @ApiStatus.Internal
     public static REIRuntimeImpl getInstance() {
         return (REIRuntimeImpl) REIRuntime.getInstance();
+    }
+    
+    public void addHintProvider(HintProvider provider) {
+        this.hintProviders.add(provider);
+    }
+    
+    public List<HintProvider> getHintProviders() {
+        return Collections.unmodifiableList(hintProviders);
     }
     
     @Override
@@ -211,7 +221,12 @@ public class REIRuntimeImpl implements REIRuntime {
     }
     
     @Override
-    public void endReload() {
+    public void startReload(ReloadStage stage) {
+        startReload();
+    }
+    
+    @Override
+    public void endReload(ReloadStage stage) {
         getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
     }
     

@@ -25,10 +25,13 @@ package me.shedaniel.rei;
 
 import com.google.common.collect.Lists;
 import com.mojang.serialization.DataResult;
+import me.shedaniel.architectury.event.Event;
+import me.shedaniel.architectury.event.EventFactory;
 import me.shedaniel.architectury.event.events.GuiEvent;
 import me.shedaniel.architectury.event.events.RecipeUpdateEvent;
 import me.shedaniel.architectury.event.events.client.ClientScreenInputEvent;
 import me.shedaniel.architectury.networking.NetworkManager;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -47,6 +50,7 @@ import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.plugins.PluginView;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
@@ -107,6 +111,7 @@ import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
 public class RoughlyEnoughItemsCoreClient {
+    public static final Event<RecipeUpdateEvent> PRE_UPDATE_RECIPES = EventFactory.createLoop();
     @ApiStatus.Experimental
     public static boolean isLeftMousePressed = false;
     private static final ExecutorService RELOAD_PLUGINS = Executors.newSingleThreadScheduledExecutor(task -> {
@@ -261,8 +266,10 @@ public class RoughlyEnoughItemsCoreClient {
     private void registerEvents() {
         Minecraft client = Minecraft.getInstance();
         final ResourceLocation recipeButtonTex = new ResourceLocation("textures/gui/recipe_button.png");
-        MutableLong lastReload = new MutableLong(-1);
-        RecipeUpdateEvent.EVENT.register(recipeManager -> reloadPlugins(lastReload));
+        MutableLong startReload = new MutableLong(-1);
+        MutableLong endReload = new MutableLong(-1);
+        PRE_UPDATE_RECIPES.register(recipeManager -> reloadPlugins(startReload, ReloadStage.START));
+        RecipeUpdateEvent.EVENT.register(recipeManager -> reloadPlugins(endReload, Platform.isFabric() ? ReloadStage.END : null));
         GuiEvent.INIT_POST.register((screen, widgets, children) -> {
             REIRuntimeImpl.getInstance().setPreviousScreen(screen);
             if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen) {
@@ -357,7 +364,7 @@ public class RoughlyEnoughItemsCoreClient {
     }
     
     @ApiStatus.Internal
-    public static void reloadPlugins(MutableLong lastReload) {
+    public static void reloadPlugins(MutableLong lastReload, @Nullable ReloadStage start) {
         if (lastReload != null) {
             if (lastReload.getValue() > 0 && System.currentTimeMillis() - lastReload.getValue() <= 5000) {
                 RoughlyEnoughItemsCore.LOGGER.warn("Suppressing Reload Plugins!");
@@ -366,9 +373,9 @@ public class RoughlyEnoughItemsCoreClient {
             lastReload.setValue(System.currentTimeMillis());
         }
         if (ConfigObject.getInstance().doesRegisterRecipesInAnotherThread()) {
-            CompletableFuture.runAsync(RoughlyEnoughItemsCore::_reloadPlugins, RELOAD_PLUGINS);
+            CompletableFuture.runAsync(() -> RoughlyEnoughItemsCore._reloadPlugins(start), RELOAD_PLUGINS);
         } else {
-            RoughlyEnoughItemsCore._reloadPlugins();
+            RoughlyEnoughItemsCore._reloadPlugins(start);
         }
     }
 }

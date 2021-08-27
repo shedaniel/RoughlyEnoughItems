@@ -36,8 +36,6 @@
   "text.rei.composting.page": "%dページ",
   "text.rei.config": "設定",
   "text.rei.config_tooltip": "設定画面を開く\n§7チートモードを 左シフトキー + 左クリック で切り替え",
-  "text.rei.config.optifine.title": "REI設定画面を開けませんでした",
-  "text.rei.config.optifine.description": "この設定画面は OptiFine / OptiFabric と互換性がありません。",
   "text.rei.cheat_items": "{player_name}に[{item_name}§f]を{item_count} 個与えました",
   "text.rei.failed_cheat_items": "§cアイテムを与えることができませんでした。",
   "ordering.rei.ascending": "昇順",

@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.common.entry.comparison;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparatorRegistry;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
@@ -44,6 +45,11 @@ public abstract class EntryComparatorRegistryImpl<T, S> implements EntryComparat
         if (put != null) {
             LOGGER.warn("[REI] Overriding " + put + "entry comparator with " + comparator + "for " + entry + "! This may result in unwanted comparisons!");
         }
+    }
+    
+    @Override
+    public ReloadStage getStage() {
+        return ReloadStage.START;
     }
     
     @Override

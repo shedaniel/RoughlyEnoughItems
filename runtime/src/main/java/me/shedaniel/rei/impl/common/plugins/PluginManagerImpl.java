@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.Util;
@@ -167,7 +168,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     }
     
     @Override
-    public void startReload() {
+    public void startReload(ReloadStage stage) {
         try {
             reloading = true;
             long startTime = Util.getMillis();
@@ -176,7 +177,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
             for (Reloadable<P> reloadable : reloadables) {
                 Class<?> reloadableClass = reloadable.getClass();
                 try (SectionClosable startReload = section(sectionData, "start-reload-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()))) {
-                    reloadable.startReload();
+                    reloadable.startReload(stage);
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                 }
@@ -184,18 +185,18 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
             
             List<P> plugins = new ArrayList<>(getPlugins().toList());
             plugins.sort(Comparator.comparingDouble(P::getPriority).reversed());
-            RoughlyEnoughItemsCore.LOGGER.info("Reloading Plugin Manager [%s], registered %d plugins: %s", pluginClass.getSimpleName(), plugins.size(), CollectionUtils.mapAndJoinToString(plugins, REIPlugin::getPluginProviderName, ", "));
+            RoughlyEnoughItemsCore.LOGGER.info("Reloading Plugin Manager [%s] stage [%s], registered %d plugins: %s", pluginClass.getSimpleName(), stage.toString(), plugins.size(), CollectionUtils.mapAndJoinToString(plugins, REIPlugin::getPluginProviderName, ", "));
             Collections.reverse(plugins);
             
             for (Reloadable<P> reloadable : getReloadables()) {
                 Class<?> reloadableClass = reloadable.getClass();
-                pluginSection(sectionData, "reloadable-plugin-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()), plugins, reloadable::acceptPlugin);
+                pluginSection(sectionData, "reloadable-plugin-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()), plugins, plugin -> reloadable.acceptPlugin(plugin, stage));
             }
             
             for (Reloadable<P> reloadable : reloadables) {
                 Class<?> reloadableClass = reloadable.getClass();
                 try (SectionClosable endReload = section(sectionData, "end-reload-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()))) {
-                    reloadable.endReload();
+                    reloadable.endReload(stage);
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                 }

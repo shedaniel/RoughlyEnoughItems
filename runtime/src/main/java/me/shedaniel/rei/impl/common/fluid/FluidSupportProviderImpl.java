@@ -30,6 +30,7 @@ import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.ApiStatus;
@@ -45,6 +46,11 @@ import java.util.stream.Stream;
 public class FluidSupportProviderImpl extends ForwardingList<FluidSupportProvider.Provider> implements FluidSupportProvider {
     private final List<Provider> providers = Lists.newCopyOnWriteArrayList();
     private final List<Provider> immutable = Collections.unmodifiableList(providers);
+    
+    @Override
+    public ReloadStage getStage() {
+        return ReloadStage.START;
+    }
     
     @Override
     public void acceptPlugin(REIPlugin<?> plugin) {
