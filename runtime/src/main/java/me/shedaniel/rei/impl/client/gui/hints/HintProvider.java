@@ -26,11 +26,14 @@ package me.shedaniel.rei.impl.client.gui.hints;
 import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public interface HintProvider {
     List<Component> provide();
     

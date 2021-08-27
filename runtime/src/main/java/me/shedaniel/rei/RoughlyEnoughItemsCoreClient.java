@@ -269,7 +269,7 @@ public class RoughlyEnoughItemsCoreClient {
         final ResourceLocation recipeButtonTex = new ResourceLocation("textures/gui/recipe_button.png");
         MutableLong startReload = new MutableLong(-1);
         MutableLong endReload = new MutableLong(-1);
-        PRE_UPDATE_RECIPES.register(recipeManager -> reloadPlugins(endReload, ReloadStage.START));
+        PRE_UPDATE_RECIPES.register(recipeManager -> reloadPlugins(startReload, ReloadStage.START));
         ClientRecipeUpdateEvent.EVENT.register(recipeManager -> reloadPlugins(endReload, Platform.isFabric() ? ReloadStage.END : null));
         ClientGuiEvent.INIT_POST.register((screen, access) -> {
             REIRuntimeImpl.getInstance().setPreviousScreen(screen);

@@ -21,12 +21,13 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.common.runtime;
+package me.shedaniel.rei.plugin.client.runtime;
 
 import com.google.common.collect.ImmutableList;
 import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.registry.Reloadable;
@@ -38,25 +39,30 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PluginStageExecutionWatcher implements Reloadable<REIPlugin<?>>, HintProvider {
-    private Set<ReloadStage> stages = new HashSet<>();
+public class PluginStageExecutionWatcher implements HintProvider {
+    private Map<PluginManager<?>, Set<ReloadStage>> allStages = new HashMap<>();
     
-    @Override
-    public void startReload() {
-        for (ReloadStage stage : ReloadStage.values()) {
-            startReload(stage);
-        }
-    }
-    
-    @Override
-    public void startReload(ReloadStage stage) {
-        if (stage.ordinal() == 0) stages.clear();
-        stages.add(stage);
+    public <T extends REIPlugin<?>> Reloadable<? extends T> reloadable(PluginManager<?> manager) {
+        return new Reloadable<>() {
+            @Override
+            public void startReload() {
+                for (ReloadStage stage : ReloadStage.values()) {
+                    startReload(stage);
+                }
+            }
+            
+            @Override
+            public void startReload(ReloadStage stage) {
+                Set<ReloadStage> stages = allStages.computeIfAbsent(manager, $ -> new HashSet<>());
+                if (stage.ordinal() == 0) stages.clear();
+                stages.add(stage);
+            }
+        };
     }
     
     public Set<ReloadStage> notVisited() {
         Set<ReloadStage> notVisited = new HashSet<>(Arrays.asList(ReloadStage.values()));
-        notVisited.removeAll(stages);
+        notVisited.removeIf(stage -> allStages.values().stream().allMatch(stages -> stages.contains(stage)));
         return notVisited;
     }
     
