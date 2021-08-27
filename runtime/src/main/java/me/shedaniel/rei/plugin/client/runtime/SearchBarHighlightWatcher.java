@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.common.runtime;
+package me.shedaniel.rei.plugin.client.runtime;
 
 import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;

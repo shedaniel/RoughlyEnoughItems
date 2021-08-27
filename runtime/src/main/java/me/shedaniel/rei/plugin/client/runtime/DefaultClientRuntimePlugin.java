@@ -51,8 +51,12 @@ import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
+import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.screen.AbstractDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
@@ -76,6 +80,16 @@ import java.util.function.Function;
 @Environment(EnvType.CLIENT)
 @ApiStatus.Internal
 public class DefaultClientRuntimePlugin implements REIClientPlugin {
+    @SuppressWarnings("rawtypes")
+    public DefaultClientRuntimePlugin() {
+        PluginStageExecutionWatcher watcher = new PluginStageExecutionWatcher();
+        for (PluginManager<? extends REIPlugin<?>> instance : PluginManager.getActiveInstances()) {
+            instance.registerReloadable((Reloadable) watcher.reloadable(instance));
+        }
+        REIRuntimeImpl.getInstance().addHintProvider(watcher);
+        REIRuntimeImpl.getInstance().addHintProvider(new SearchBarHighlightWatcher());
+    }
+    
     @Override
     public void registerEntries(EntryRegistry registry) {
         if (ClientHelperImpl.getInstance().isAprilFools.get()) {
