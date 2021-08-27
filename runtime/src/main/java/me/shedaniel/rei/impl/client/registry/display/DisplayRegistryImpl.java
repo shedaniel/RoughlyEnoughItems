@@ -38,6 +38,7 @@ import me.shedaniel.rei.impl.common.registry.RecipeManagerContextImpl;
 import net.minecraft.world.item.crafting.Recipe;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,6 +46,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugin> implements DisplayRegistry {
+    private final WeakHashMap<Display, Object> displaysBase = new WeakHashMap<>();
     private final Map<CategoryIdentifier<?>, List<Display>> displays = new ConcurrentHashMap<>();
     private final Map<CategoryIdentifier<?>, List<DynamicDisplayGenerator<?>>> displayGenerators = new ConcurrentHashMap<>();
     private final List<DynamicDisplayGenerator<?>> globalDisplayGenerators = new ArrayList<>();
@@ -67,23 +69,15 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     }
     
     @Override
-    public void add(Display display) {
+    public void add(Display display, @Nullable Object origin) {
         displays.computeIfAbsent(display.getCategoryIdentifier(), location -> new ArrayList<>())
                 .add(display);
         displayCount.increment();
-    }
-    
-    @Override
-    public void add(Object object) {
-        for (Display display : tryFillDisplay(object)) {
-            add(display);
+        if (origin != null) {
+            synchronized (displaysBase) {
+                displaysBase.put(display, origin);
+            }
         }
-    }
-    
-    public void registerDisplay(int index, Display display) {
-        displays.computeIfAbsent(display.getCategoryIdentifier(), location -> new ArrayList<>())
-                .add(index, display);
-        displayCount.increment();
     }
     
     @Override
@@ -167,10 +161,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
             List<Recipe<?>> allSortedRecipes = getAllSortedRecipes();
             for (int i = allSortedRecipes.size() - 1; i >= 0; i--) {
                 Recipe<?> recipe = allSortedRecipes.get(i);
-                Collection<Display> displays = tryFillDisplay(recipe);
-                for (Display display : displays) {
-                    registerDisplay(0, display);
-                }
+                add(recipe);
             }
         }
     }
@@ -207,26 +198,32 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
         return null;
     }
     
+    @Override
+    @Nullable
+    public Object getDisplayOrigin(Display display) {
+        return displaysBase.get(display);
+    }
+    
     private static class DisplayFiller<D extends Display> {
         private final Predicate<Object> predicate;
         private final Function<Object, D> mappingFunction;
-    
+        
         public DisplayFiller(Predicate<Object> predicate, Function<Object, D> mappingFunction) {
             this.predicate = predicate;
             this.mappingFunction = mappingFunction;
         }
-    
+        
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o instanceof DisplayFiller)) return false;
-        
+            
             DisplayFiller<?> that = (DisplayFiller<?>) o;
-        
+            
             if (!Objects.equals(predicate, that.predicate)) return false;
             return Objects.equals(mappingFunction, that.mappingFunction);
         }
-    
+        
         @Override
         public int hashCode() {
             int result = predicate != null ? predicate.hashCode() : 0;

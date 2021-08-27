@@ -32,7 +32,6 @@ import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
 import me.shedaniel.rei.api.common.transfer.RecipeFinder;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
@@ -56,9 +55,7 @@ import java.util.List;
 public class DefaultCategoryHandler implements TransferHandler {
     @Override
     public Result handle(Context context) {
-        if (!(context.getDisplay() instanceof SimpleGridMenuDisplay))
-            return Result.createNotApplicable();
-        SimpleGridMenuDisplay display = (SimpleGridMenuDisplay) context.getDisplay();
+        Display display = context.getDisplay();
         AbstractContainerScreen<?> containerScreen = context.getContainerScreen();
         if (containerScreen == null) {
             return Result.createNotApplicable();
@@ -72,7 +69,11 @@ public class DefaultCategoryHandler implements TransferHandler {
         try {
             menuInfo.validate(menuInfoContext);
         } catch (MenuTransferException e) {
-            return Result.createFailed(e.getError());
+            if (e.isApplicable()) {
+                return Result.createFailed(e.getError());
+            } else {
+                return Result.createNotApplicable();
+            }
         }
         List<List<ItemStack>> input = menuInfo.getInputs(menuInfoContext);
         IntList intList = hasItems(menu, menuInfo, display, input);

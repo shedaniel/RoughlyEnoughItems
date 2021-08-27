@@ -115,7 +115,13 @@ public class RoughlyEnoughItemsCore {
     public static void _reloadPlugins() {
         try {
             for (PluginManager<? extends REIPlugin<?>> instance : PluginManager.getActiveInstances()) {
+                instance.view().pre();
+            }
+            for (PluginManager<? extends REIPlugin<?>> instance : PluginManager.getActiveInstances()) {
                 instance.startReload();
+            }
+            for (PluginManager<? extends REIPlugin<?>> instance : PluginManager.getActiveInstances()) {
+                instance.view().post();
             }
         } catch (Throwable throwable) {
             throwable.printStackTrace();
