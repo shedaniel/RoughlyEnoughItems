@@ -150,6 +150,24 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     }
     
     @Override
+    public void pre() {
+        List<P> plugins = new ArrayList<>(getPlugins().toList());
+        plugins.sort(Comparator.comparingDouble(P::getPriority).reversed());
+        Collections.reverse(plugins);
+        MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
+        pluginSection(sectionData, "pre-register", plugins, REIPlugin::preRegister);
+    }
+    
+    @Override
+    public void post() {
+        List<P> plugins = new ArrayList<>(getPlugins().toList());
+        plugins.sort(Comparator.comparingDouble(P::getPriority).reversed());
+        Collections.reverse(plugins);
+        MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
+        pluginSection(sectionData, "post-register", plugins, REIPlugin::postRegister);
+    }
+    
+    @Override
     public void startReload(ReloadStage stage) {
         try {
             reloading = true;
@@ -170,17 +188,9 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
             RoughlyEnoughItemsCore.LOGGER.info("Reloading Plugin Manager [%s] stage [%s], registered %d plugins: %s", pluginClass.getSimpleName(), stage.toString(), plugins.size(), CollectionUtils.mapAndJoinToString(plugins, REIPlugin::getPluginProviderName, ", "));
             Collections.reverse(plugins);
             
-            if (stage == ReloadStage.START) {
-                pluginSection(sectionData, "pre-register", plugins, REIPlugin::preRegister);
-            }
-            
             for (Reloadable<P> reloadable : getReloadables()) {
                 Class<?> reloadableClass = reloadable.getClass();
                 pluginSection(sectionData, "reloadable-plugin-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()), plugins, plugin -> reloadable.acceptPlugin(plugin, stage));
-            }
-            
-            if (stage == ReloadStage.END) {
-                pluginSection(sectionData, "post-register", plugins, REIPlugin::postRegister);
             }
             
             for (Reloadable<P> reloadable : reloadables) {

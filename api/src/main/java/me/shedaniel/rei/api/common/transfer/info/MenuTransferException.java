@@ -28,16 +28,30 @@ import net.minecraft.network.chat.TranslatableComponent;
 
 public class MenuTransferException extends Exception {
     private final Component component;
+    private final boolean applicable;
+    
+    private MenuTransferException(Component component, boolean applicable) {
+        this.component = component;
+        this.applicable = applicable;
+    }
     
     public MenuTransferException(Component component) {
-        this.component = component;
+        this(component, true);
     }
     
     public MenuTransferException(String message) {
         this(new TranslatableComponent(message));
     }
     
+    public static MenuTransferException createNotApplicable() {
+        return new MenuTransferException(null, false);
+    }
+    
     public Component getError() {
         return component;
+    }
+    
+    public boolean isApplicable() {
+        return applicable;
     }
 }

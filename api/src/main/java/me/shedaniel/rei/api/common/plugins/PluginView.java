@@ -31,7 +31,6 @@ import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
-@FunctionalInterface
 public interface PluginView<P extends REIPlugin<?>> {
     @Environment(EnvType.CLIENT)
     static PluginView<REIClientPlugin> getClientInstance() {
@@ -54,9 +53,26 @@ public interface PluginView<P extends REIPlugin<?>> {
     void registerPlugin(REIPluginProvider<? extends P> plugin);
     
     default PluginView<P> then(PluginView<? super P> view) {
-        return plugin -> {
-            registerPlugin(plugin);
-            view.registerPlugin(plugin);
+        return new PluginView<P>() {
+            @Override
+            public void registerPlugin(REIPluginProvider<? extends P> plugin) {
+                PluginView.this.registerPlugin(plugin);
+                view.registerPlugin(plugin);
+            }
+            
+            @Override
+            public void pre() {
+                PluginView.this.pre();
+            }
+            
+            @Override
+            public void post() {
+                PluginView.this.post();
+            }
         };
     }
+    
+    void pre();
+    
+    void post();
 }
