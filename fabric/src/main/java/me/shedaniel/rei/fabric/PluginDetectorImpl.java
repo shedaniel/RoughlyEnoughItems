@@ -80,7 +80,7 @@ public class PluginDetectorImpl {
             } catch (Throwable t) {
                 Throwable throwable = t;
                 while (throwable != null) {
-                    if (throwable.getMessage().contains("environment type SERVER") && !RoughlyEnoughItemsInitializer.isClient()) continue out;
+                    if (throwable.getMessage() != null && throwable.getMessage().contains("environment type SERVER") && !RoughlyEnoughItemsInitializer.isClient()) continue out;
                     throwable = throwable.getCause();
                 }
                 String error = "Could not create REI Plugin [" + getSimpleName(pluginClass) + "] due to errors, provided by '" + container.getProvider().getMetadata().getId() + "'!";
