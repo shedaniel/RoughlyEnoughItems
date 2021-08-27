@@ -21,37 +21,25 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.transfer.info;
+package me.shedaniel.rei.jeicompat.wrap;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import dev.architectury.utils.value.Value;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
+import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.recipe.category.IRecipeCategory;
 
-public class MenuTransferException extends Exception {
-    private final Component component;
-    private final boolean applicable;
+public class JEIWrappingRecipeLayout<T extends Display> extends JEIRecipeLayout<T> {
+    private final IRecipeCategory<T> category;
     
-    private MenuTransferException(Component component, boolean applicable) {
-        this.component = component;
-        this.applicable = applicable;
+    public JEIWrappingRecipeLayout(DisplayCategory<T> category, Value<IDrawable> background) {
+        super(background);
+        this.category = new JEIUnwrappedCategory<>(category);
     }
     
-    public MenuTransferException(Component component) {
-        this(component, true);
-    }
-    
-    public MenuTransferException(String message) {
-        this(new TranslatableComponent(message));
-    }
-    
-    public static MenuTransferException createNotApplicable() {
-        return new MenuTransferException(null, false);
-    }
-    
-    public Component getError() {
-        return component;
-    }
-    
-    public boolean isApplicable() {
-        return applicable;
+    @Override
+    public IRecipeCategory<T> getRecipeCategory() {
+        return category;
     }
 }

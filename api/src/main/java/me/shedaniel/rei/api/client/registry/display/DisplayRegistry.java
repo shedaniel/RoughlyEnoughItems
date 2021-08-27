@@ -34,6 +34,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
@@ -82,14 +83,31 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      *
      * @param display the display
      */
-    void add(Display display);
+    default void add(Display display) {
+        add(display, null);
+    }
+    
+    /**
+     * Registers a display with an origin attached.
+     *
+     * @param display the display
+     */
+    void add(Display display, @Nullable Object origin);
     
     /**
      * Registers a display by the object provided, to be filled during {@link #tryFillDisplay(Object)}.
      *
      * @param object the object to be filled
      */
-    void add(Object object);
+    default void add(Object object) {
+        if (object instanceof Display) {
+            add((Display) object, null);
+        } else {
+            for (Display display : tryFillDisplay(object)) {
+                add(display, object);
+            }
+        }
+    }
     
     /**
      * Returns an unmodifiable map of displays visible to the player
@@ -271,4 +289,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @return the collection of displays
      */
     <T> Collection<Display> tryFillDisplay(T value);
+    
+    @Nullable
+    Object getDisplayOrigin(Display display);
 }

@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicates;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
@@ -68,7 +69,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -166,18 +166,19 @@ public class JEIPluginDetector {
             return CollectionUtils.filterAndMap(displays, display -> !checkVisible || DisplayRegistry.getInstance().isDisplayVisible(display),
                     display -> ((JEIWrappedDisplay<T>) display).getBackingRecipe());
         } else if (checkVisible) {
-            return (List<T>) CollectionUtils.filterToList(displays, display -> DisplayRegistry.getInstance().isDisplayVisible(display));
+            return (List<T>) CollectionUtils.filterAndMap(displays, display -> DisplayRegistry.getInstance().isDisplayVisible(display),
+                    display -> DisplayRegistry.getInstance().getDisplayOrigin(display));
         } else {
-            return (List<T>) displays;
+            return (List<T>) CollectionUtils.map(displays, display -> DisplayRegistry.getInstance().getDisplayOrigin(display));
         }
     }
     
-    public static <A extends Display, T> T wrapRecipe(DisplayCategory<?> category, A display) {
-        boolean isWrappedCategory = category instanceof JEIWrappedCategory;
+    public static <A extends Display> Object wrapRecipe(A display) {
+        boolean isWrappedCategory = display instanceof JEIWrappedDisplay;
         if (isWrappedCategory) {
-            return ((JEIWrappedDisplay<T>) display).getBackingRecipe();
+            return ((JEIWrappedDisplay<?>) display).getBackingRecipe();
         } else {
-            return (T) display;
+            return MoreObjects.firstNonNull(DisplayRegistry.getInstance().getDisplayOrigin(display), display);
         }
     }
     
@@ -321,6 +322,7 @@ public class JEIPluginDetector {
         public final IModPlugin backingPlugin;
         
         public final List<JEIWrappedCategory<?>> categories = new ArrayList<>();
+        public final List<Runnable> post = new ArrayList<>();
         
         public JEIPluginWrapper(List<String> modIds, IModPlugin backingPlugin) {
             this.modIds = modIds;
@@ -348,35 +350,37 @@ public class JEIPluginDetector {
             backingPlugin.registerCategories(wrapCategoryRegistration(registry, category -> {
                 categories.add(category);
                 
-                if (Recipe.class.isAssignableFrom(category.getRecipeClass())) {
-                    DisplaySerializerRegistry.getInstance().register(category.getCategoryIdentifier(), new DisplaySerializer<JEIWrappedDisplay<?>>() {
-                        @Override
-                        public CompoundTag save(CompoundTag tag, JEIWrappedDisplay<?> display) {
-                            Recipe<?> recipe = (Recipe<?>) display.getBackingRecipe();
-                            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-                            ((RecipeSerializer<Recipe<?>>) recipe.getSerializer()).toNetwork(buf, recipe);
-                            tag.putString("serializer", Registry.RECIPE_SERIALIZER.getKey(recipe.getSerializer()).toString());
-                            tag.putString("data", Base64.encodeBase64String(buf.array()));
-                            tag.putString("id", recipe.getId().toString());
-                            return null;
-                        }
-                        
-                        @Override
-                        public JEIWrappedDisplay<?> read(CompoundTag tag) {
-                            RecipeSerializer<?> serializer = Registry.RECIPE_SERIALIZER.get(new ResourceLocation(tag.getString("serializer")));
-                            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.copiedBuffer(Base64.decodeBase64(tag.getString("data"))));
-                            Recipe<?> recipe = serializer.fromNetwork(new ResourceLocation(tag.getString("id")), buf);
-                            return new JEIWrappedDisplay<>((JEIWrappedCategory<? super Recipe<?>>) category, recipe);
-                        }
-                        
-                        @Override
-                        public boolean isPersistent() {
-                            return false;
-                        }
-                    });
-                } else {
-                    DisplaySerializerRegistry.getInstance().registerNotSerializable(category.getCategoryIdentifier());
-                }
+                post.add(() -> {
+                    if (Recipe.class.isAssignableFrom(category.getRecipeClass())) {
+                        DisplaySerializerRegistry.getInstance().register(category.getCategoryIdentifier(), new DisplaySerializer<JEIWrappedDisplay<?>>() {
+                            @Override
+                            public CompoundTag save(CompoundTag tag, JEIWrappedDisplay<?> display) {
+                                Recipe<?> recipe = (Recipe<?>) display.getBackingRecipe();
+                                FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+                                ((RecipeSerializer<Recipe<?>>) recipe.getSerializer()).toNetwork(buf, recipe);
+                                tag.putString("serializer", Registry.RECIPE_SERIALIZER.getKey(recipe.getSerializer()).toString());
+                                tag.putString("data", Base64.encodeBase64String(buf.array()));
+                                tag.putString("id", recipe.getId().toString());
+                                return tag;
+                            }
+            
+                            @Override
+                            public JEIWrappedDisplay<?> read(CompoundTag tag) {
+                                RecipeSerializer<?> serializer = Registry.RECIPE_SERIALIZER.get(new ResourceLocation(tag.getString("serializer")));
+                                FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.copiedBuffer(Base64.decodeBase64(tag.getString("data"))));
+                                Recipe<?> recipe = serializer.fromNetwork(new ResourceLocation(tag.getString("id")), buf);
+                                return new JEIWrappedDisplay<>((JEIWrappedCategory<? super Recipe<?>>) category, recipe);
+                            }
+            
+                            @Override
+                            public boolean isPersistent() {
+                                return false;
+                            }
+                        });
+                    } else {
+                        DisplaySerializerRegistry.getInstance().registerNotSerializable(category.getCategoryIdentifier());
+                    }
+                });
             }));
             backingPlugin.registerRecipeCatalysts(JEIRecipeCatalystRegistration.INSTANCE);
             backingPlugin.registerVanillaCategoryExtensions(JEIVanillaCategoryExtensionRegistration.INSTANCE);
@@ -389,10 +393,8 @@ public class JEIPluginDetector {
         public void registerDisplays(DisplayRegistry registry) {
             backingPlugin.registerRecipes(JEIRecipeRegistration.INSTANCE);
             for (JEIWrappedCategory<?> category : categories) {
-                if (Recipe.class.isAssignableFrom(category.getRecipeClass())) {
-                    registry.registerFiller((Class<Recipe<Container>>) category.getRecipeClass(), ((JEIWrappedCategory<Recipe<Container>>) category)::handlesRecipe,
-                            recipe -> new JEIWrappedDisplay(category, recipe));
-                }
+                registry.registerFiller((Class<Object>) category.getRecipeClass(), ((JEIWrappedCategory<Object>) category)::handlesRecipe,
+                        recipe -> new JEIWrappedDisplay(category, recipe));
                 registry.registerFiller(JEIWrappedDisplay.class, display -> display.getCategoryIdentifier().getIdentifier().equals(category.getIdentifier()), Function.identity());
             }
             backingPlugin.registerAdvanced(JEIAdvancedRegistration.INSTANCE);
@@ -408,12 +410,16 @@ public class JEIPluginDetector {
         
         @Override
         public void registerTransferHandlers(TransferHandlerRegistry registry) {
-            backingPlugin.registerRecipeTransferHandlers(JEIRecipeTransferRegistration.INSTANCE);
+            backingPlugin.registerRecipeTransferHandlers(new JEIRecipeTransferRegistration(post::add));
         }
         
         @Override
         public void postRegister() {
             backingPlugin.onRuntimeAvailable(JEIJeiRuntime.INSTANCE);
+            for (Runnable runnable : post) {
+                runnable.run();
+            }
+            post.clear();
         }
         
         @Override

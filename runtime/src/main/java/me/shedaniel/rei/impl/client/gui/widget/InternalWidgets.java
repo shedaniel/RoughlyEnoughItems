@@ -177,7 +177,7 @@ public final class InternalWidgets {
                         }
                     }
                     if (Minecraft.getInstance().options.advancedItemTooltips && displaySupplier.get().getDisplayLocation().isPresent()) {
-                        str.add(new TranslatableComponent("text.rei.recipe_id", new TextComponent(displaySupplier.get().getDisplayLocation().get().toString()).withStyle(ChatFormatting.GRAY)).withStyle(ChatFormatting.GRAY));
+                        str.add(new TranslatableComponent("text.rei.recipe_id", "", new TextComponent(displaySupplier.get().getDisplayLocation().get().toString()).withStyle(ChatFormatting.GRAY)).withStyle(ChatFormatting.GRAY));
                     }
                     return str.toArray(new Component[0]);
                 });

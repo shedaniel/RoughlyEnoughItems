@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
@@ -51,6 +52,7 @@ public final class Internals {
     private static Supplier<PluginManager<REIServerPlugin>> serverPluginManager = Internals::throwNotSetup;
     private static Supplier<NbtHasherProvider> nbtHasherProvider = Internals::throwNotSetup;
     private static Function<String, CategoryIdentifier<?>> categoryIdentifier = (object) -> throwNotSetup();
+    private static Supplier<MenuInfoRegistry> stubMenuInfoRegistry = Internals::throwNotSetup;
     
     private static <T> T throwNotSetup() {
         throw new AssertionError("REI Internals have not been initialized!");

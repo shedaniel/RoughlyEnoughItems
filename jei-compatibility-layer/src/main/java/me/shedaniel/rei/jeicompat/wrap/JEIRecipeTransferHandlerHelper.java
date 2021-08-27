@@ -21,37 +21,31 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.transfer.info;
+package me.shedaniel.rei.jeicompat.wrap;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import mezz.jei.api.recipe.transfer.IRecipeTransferError;
+import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
-public class MenuTransferException extends Exception {
-    private final Component component;
-    private final boolean applicable;
+import java.util.Collection;
+
+public enum JEIRecipeTransferHandlerHelper implements IRecipeTransferHandlerHelper {
+    INSTANCE;
     
-    private MenuTransferException(Component component, boolean applicable) {
-        this.component = component;
-        this.applicable = applicable;
+    @Override
+    public IRecipeTransferError createInternalError() {
+        return new JEIRecipeTransferError(IRecipeTransferError.Type.INTERNAL, new TranslatableComponent("error.rei.internal.error", ""));
     }
     
-    public MenuTransferException(Component component) {
-        this(component, true);
+    @Override
+    public IRecipeTransferError createUserErrorWithTooltip(Component tooltipMessage) {
+        return new JEIRecipeTransferError(IRecipeTransferError.Type.USER_FACING, tooltipMessage);
     }
     
-    public MenuTransferException(String message) {
-        this(new TranslatableComponent(message));
-    }
-    
-    public static MenuTransferException createNotApplicable() {
-        return new MenuTransferException(null, false);
-    }
-    
-    public Component getError() {
-        return component;
-    }
-    
-    public boolean isApplicable() {
-        return applicable;
+    @Override
+    public IRecipeTransferError createUserErrorForSlots(Component tooltipMessage, Collection<Integer> missingItemSlots) {
+        return new JEIRecipeTransferError(IRecipeTransferError.Type.USER_FACING, tooltipMessage, new IntArrayList(missingItemSlots));
     }
 }

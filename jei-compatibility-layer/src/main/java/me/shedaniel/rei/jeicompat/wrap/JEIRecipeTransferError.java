@@ -21,37 +21,49 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.transfer.info;
+package me.shedaniel.rei.jeicompat.wrap;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import mezz.jei.api.gui.IRecipeLayout;
+import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import org.jetbrains.annotations.Nullable;
 
-public class MenuTransferException extends Exception {
-    private final Component component;
-    private final boolean applicable;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
+
+public class JEIRecipeTransferError implements IRecipeTransferError {
+    private final Type type;
+    private final Component text;
+    @Nullable
+    private final IntArrayList redSlots;
     
-    private MenuTransferException(Component component, boolean applicable) {
-        this.component = component;
-        this.applicable = applicable;
+    public JEIRecipeTransferError(Type type, Component text) {
+        this(type, text, null);
     }
     
-    public MenuTransferException(Component component) {
-        this(component, true);
+    public JEIRecipeTransferError(Type type, Component text, @Nullable IntArrayList redSlots) {
+        this.type = type;
+        this.text = text;
+        this.redSlots = redSlots;
     }
     
-    public MenuTransferException(String message) {
-        this(new TranslatableComponent(message));
+    @Override
+    public Type getType() {
+        return type;
     }
     
-    public static MenuTransferException createNotApplicable() {
-        return new MenuTransferException(null, false);
+    public Component getText() {
+        return text;
     }
     
-    public Component getError() {
-        return component;
+    @Nullable
+    public IntArrayList getRedSlots() {
+        return redSlots;
     }
     
-    public boolean isApplicable() {
-        return applicable;
+    @Override
+    public void showError(PoseStack matrixStack, int mouseX, int mouseY, IRecipeLayout recipeLayout, int recipeX, int recipeY) {
+        TODO();
     }
 }

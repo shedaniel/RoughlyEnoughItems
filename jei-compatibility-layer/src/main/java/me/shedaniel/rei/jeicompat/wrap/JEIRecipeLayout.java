@@ -32,6 +32,8 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupFluid;
@@ -45,7 +47,6 @@ import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
 import mezz.jei.api.gui.ingredient.ITooltipCallback;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.IFocus;
-import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
@@ -56,15 +57,11 @@ import java.util.*;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
 
-public class JEIRecipeLayout<T> implements IRecipeLayout {
-    private final JEIWrappedCategory<T> category;
-    private final JEIWrappedDisplay<T> display;
-    private final Map<IIngredientType<?>, IGuiIngredientGroup<?>> groups = new HashMap<>();
+public abstract class JEIRecipeLayout<T> implements IRecipeLayout {
+    private final Map<EntryDefinition<?>, IGuiIngredientGroup<?>> groups = new HashMap<>();
     public final Value<IDrawable> background;
     
-    public JEIRecipeLayout(JEIWrappedCategory<T> category, JEIWrappedDisplay<T> display, Value<IDrawable> background) {
-        this.category = category;
-        this.display = display;
+    public JEIRecipeLayout(Value<IDrawable> background) {
         this.background = background;
     }
     
@@ -83,12 +80,12 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
     @Override
     @NotNull
     public <T> IGuiIngredientGroup<T> getIngredientsGroup(@NotNull IIngredientType<T> ingredientType) {
-        return (IGuiIngredientGroup<T>) groups.computeIfAbsent(ingredientType, type -> {
-            if (Objects.equals(type.getIngredientClass(), ItemStack.class))
-                return new JEIGuiIngredientGroupItem(type.cast(), background);
-            if (Objects.equals(type.getIngredientClass(), FluidStack.class))
-                return new JEIGuiIngredientGroupFluid(type.cast(), background);
-            return new JEIGuiIngredientGroup<>(type, background);
+        return (IGuiIngredientGroup<T>) groups.computeIfAbsent(wrapEntryDefinition(ingredientType), type -> {
+            if (Objects.equals(ingredientType.getIngredientClass(), ItemStack.class))
+                return new JEIGuiIngredientGroupItem(ingredientType.cast(), background);
+            if (Objects.equals(ingredientType.getIngredientClass(), FluidStack.class))
+                return new JEIGuiIngredientGroupFluid(ingredientType.cast(), background);
+            return new JEIGuiIngredientGroup<>(ingredientType, background);
         });
     }
     
@@ -114,12 +111,6 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
     }
     
     @Override
-    @NotNull
-    public IRecipeCategory<?> getRecipeCategory() {
-        return category.getBackingCategory();
-    }
-    
-    @Override
     public void moveRecipeTransferButton(int posX, int posY) {
         throw TODO();
     }
@@ -129,12 +120,12 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
         throw TODO();
     }
     
-    public Map<IIngredientType<?>, IGuiIngredientGroup<?>> getGroups() {
+    public Map<EntryDefinition<?>, IGuiIngredientGroup<?>> getGroups() {
         return groups;
     }
     
     public void addTo(List<Widget> widgets, Rectangle bounds) {
-        for (Map.Entry<IIngredientType<?>, IGuiIngredientGroup<?>> groupEntry : getGroups().entrySet()) {
+        for (Map.Entry<EntryDefinition<?>, IGuiIngredientGroup<?>> groupEntry : getGroups().entrySet()) {
             JEIGuiIngredientGroup<?> group = (JEIGuiIngredientGroup<?>) groupEntry.getValue();
             Int2ObjectMap<? extends JEIGuiIngredientGroup<?>.SlotWrapper> guiIngredients = group.getGuiIngredients();
             IntArrayList integers = new IntArrayList(guiIngredients.keySet());

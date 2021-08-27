@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.Minecraft;
@@ -136,12 +137,18 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
         return backingCategory;
     }
     
+    public JEIRecipeLayout<T> createLayout(JEIWrappedDisplay<T> display, Value<IDrawable> background) {
+        JEIRecipeLayout<T> layout = new JEIBasedRecipeLayout<>(this, display, background);
+        backingCategory.setRecipe(layout, display.getBackingRecipe(), display.getIngredients());
+        return layout;
+    }
+    
     @Override
     public List<Widget> setupDisplay(JEIWrappedDisplay<T> display, Rectangle bounds) {
         List<Widget> widgets = new ArrayList<>();
         widgets.add(Widgets.createRecipeBase(bounds));
         IDrawable[] background = {this.background.get()};
-        JEIRecipeLayout<T> layout = new JEIRecipeLayout<>(this, display, new Value<IDrawable>() {
+        JEIRecipeLayout<T> layout = createLayout(display, new Value<IDrawable>() {
             @Override
             public void accept(IDrawable iDrawable) {
                 background[0] = iDrawable;
@@ -152,7 +159,6 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
                 return background[0];
             }
         });
-        backingCategory.setRecipe(layout, display.getBackingRecipe(), display.getIngredients());
         widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
             background[0].draw(matrices, bounds.x + 4, bounds.y + 4);
         }));

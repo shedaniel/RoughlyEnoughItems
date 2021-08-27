@@ -45,7 +45,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapList;
 
 public enum JEIRecipeRegistration implements IRecipeRegistration {
     INSTANCE;
@@ -72,17 +73,8 @@ public enum JEIRecipeRegistration implements IRecipeRegistration {
     public void addRecipes(@NotNull Collection<?> recipes, @NotNull ResourceLocation categoryId) {
         CategoryRegistry.CategoryConfiguration<Display> config = CategoryRegistry.getInstance().get(CategoryIdentifier.of(categoryId));
         DisplayCategory<?> category = config.getCategory();
-        if (category instanceof JEIWrappedCategory) {
-            for (Object recipe : recipes) {
-                DisplayRegistry.getInstance().add(new JEIWrappedDisplay<>((JEIWrappedCategory) config.getCategory(), recipe));
-            }
-        } else {
-            for (Object recipe : recipes) {
-                Collection<Display> displays = createDisplayFrom(recipe);
-                for (Display display : displays) {
-                    DisplayRegistry.getInstance().add(display);
-                }
-            }
+        for (Object recipe : recipes) {
+            DisplayRegistry.getInstance().add(recipe);
         }
     }
     

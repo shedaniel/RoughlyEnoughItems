@@ -26,10 +26,15 @@ package me.shedaniel.rei.impl.client.gui.forge;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fmlclient.gui.GuiUtils;
+
+import java.util.List;
 
 public class ScreenOverlayImplImpl {
     public static void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
@@ -38,7 +43,8 @@ public class ScreenOverlayImplImpl {
         EntryStack<?> stack = tooltip.getContextStack();
         ItemStack itemStack = stack.getValue() instanceof ItemStack ? stack.castValue() : ItemStack.EMPTY;
         GuiUtils.preItemToolTip(itemStack);
-        GuiUtils.drawHoveringText(matrices, tooltip.getText(), mouseX, mouseY, screen.width, screen.height, screen.width, Minecraft.getInstance().font);
+        List<FormattedText> texts = CollectionUtils.flatMap(tooltip.getText(), component -> Minecraft.getInstance().font.getSplitter().splitLines(component, 100000, Style.EMPTY));
+        GuiUtils.drawHoveringText(matrices, texts, mouseX, mouseY, screen.width, screen.height, screen.width, Minecraft.getInstance().font);
         GuiUtils.postItemToolTip();
         matrices.popPose();
     }

@@ -134,10 +134,10 @@ public enum JEIRecipeManager implements IRecipeManager {
     
     @Override
     public <T> void addRecipe(T recipe, ResourceLocation recipeCategoryUid) {
-        Collection<Display> display = createDisplayFrom(recipe);
-        for (Display d : display) {
-            if (Objects.equals(d.getCategoryIdentifier().getIdentifier(), recipeCategoryUid)) {
-                DisplayRegistry.getInstance().add(d);
+        Collection<Display> displays = createDisplayFrom(recipe);
+        for (Display display : displays) {
+            if (Objects.equals(display.getCategoryIdentifier().getIdentifier(), recipeCategoryUid)) {
+                DisplayRegistry.getInstance().add(display, recipe);
             }
         }
     }
@@ -146,7 +146,7 @@ public enum JEIRecipeManager implements IRecipeManager {
         @Override
         public EventResult handleDisplay(DisplayCategory<?> category, Display display) {
             Set<Object> hidden = hiddenRecipes.get(category.getCategoryIdentifier());
-            if (hidden != null && hidden.contains(wrapRecipe(category, display))) {
+            if (hidden != null && hidden.contains(wrapRecipe(display))) {
                 return EventResult.interruptFalse();
             }
             return EventResult.pass();

@@ -21,37 +21,21 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.transfer.info;
+package me.shedaniel.rei.jeicompat;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import dev.architectury.platform.Platform;
+import dev.architectury.utils.Env;
+import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
+import me.shedaniel.rei.jeicompat.transfer.JEITransferMenuInfo;
 
-public class MenuTransferException extends Exception {
-    private final Component component;
-    private final boolean applicable;
-    
-    private MenuTransferException(Component component, boolean applicable) {
-        this.component = component;
-        this.applicable = applicable;
-    }
-    
-    public MenuTransferException(Component component) {
-        this(component, true);
-    }
-    
-    public MenuTransferException(String message) {
-        this(new TranslatableComponent(message));
-    }
-    
-    public static MenuTransferException createNotApplicable() {
-        return new MenuTransferException(null, false);
-    }
-    
-    public Component getError() {
-        return component;
-    }
-    
-    public boolean isApplicable() {
-        return applicable;
+import java.util.Optional;
+
+public class JEITransferHandlerPlugin implements REIServerPlugin {
+    @Override
+    public void registerMenuInfo(MenuInfoRegistry registry) {
+        if (Platform.getEnvironment() == Env.SERVER) {
+            registry.registerGeneric(id -> true, (categoryId, menuClass) -> Optional.of(new JEITransferMenuInfo<>()));
+        }
     }
 }
