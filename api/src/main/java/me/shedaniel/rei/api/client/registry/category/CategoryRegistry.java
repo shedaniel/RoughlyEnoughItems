@@ -109,6 +109,8 @@ public interface CategoryRegistry extends Reloadable<REIClientPlugin>, Iterable<
     
     <T extends Display> CategoryConfiguration<T> get(CategoryIdentifier<T> category);
     
+    <T extends Display> Optional<CategoryConfiguration<T>> tryGet(CategoryIdentifier<T> category);
+    
     <T extends Display> void configure(CategoryIdentifier<T> category, Consumer<CategoryConfiguration<T>> action);
     
     int size();

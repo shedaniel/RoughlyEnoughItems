@@ -505,7 +505,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             };
             Set<CategoryIdentifier<?>> categories = ScreenRegistry.getInstance().handleClickArea((Class<Screen>) screen.getClass(), context);
             if (categories != null && !categories.isEmpty()) {
-                Component collect = CollectionUtils.mapAndJoinToComponent(categories, identifier -> CategoryRegistry.getInstance().get(identifier).getCategory().getTitle(), new ImmutableTextComponent(", "));
+                Component collect = CollectionUtils.mapAndJoinToComponent(categories, identifier -> CategoryRegistry.getInstance().tryGet(identifier).map(config -> config.getCategory().getTitle()).orElse(new ImmutableTextComponent(identifier.toString())), new ImmutableTextComponent(", "));
                 Tooltip.create(new TranslatableComponent("text.rei.view_recipes_for", collect)).queue();
             }
         }
