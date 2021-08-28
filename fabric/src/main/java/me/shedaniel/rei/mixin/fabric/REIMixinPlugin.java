@@ -44,7 +44,7 @@ public class REIMixinPlugin implements IMixinConfigPlugin {
     
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.endsWith("MixinClientPacketListener"))
+        if (mixinClassName.endsWith("MixinClientPacketListener") || mixinClassName.endsWith("MixinPacketEncoder"))
             return FabricLoader.getInstance().isModLoaded("architectury");
         return true;
     }
