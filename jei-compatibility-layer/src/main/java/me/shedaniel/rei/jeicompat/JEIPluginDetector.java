@@ -64,6 +64,7 @@ import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.advanced.IRecipeManagerPlugin;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.api.recipe.category.extensions.IRecipeCategoryExtension;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -74,13 +75,11 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.fluids.FluidStack;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 public class JEIPluginDetector {
     private static final Renderer EMPTY_RENDERER = new Renderer() {
@@ -321,7 +320,7 @@ public class JEIPluginDetector {
         public final List<String> modIds;
         public final IModPlugin backingPlugin;
         
-        public final List<JEIWrappedCategory<?>> categories = new ArrayList<>();
+        public final Map<DisplayCategory<?>, List<Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>>>> categories = new HashMap<>();
         public final List<Runnable> post = new ArrayList<>();
         
         public JEIPluginWrapper(List<String> modIds, IModPlugin backingPlugin) {
@@ -348,7 +347,7 @@ public class JEIPluginDetector {
         public void registerCategories(CategoryRegistry registry) {
             this.categories.clear();
             backingPlugin.registerCategories(wrapCategoryRegistration(registry, category -> {
-                categories.add(category);
+                categories.put(category, new ArrayList<>());
                 
                 post.add(() -> {
                     if (Recipe.class.isAssignableFrom(category.getRecipeClass())) {
@@ -363,7 +362,7 @@ public class JEIPluginDetector {
                                 tag.putString("id", recipe.getId().toString());
                                 return tag;
                             }
-            
+                            
                             @Override
                             public JEIWrappedDisplay<?> read(CompoundTag tag) {
                                 RecipeSerializer<?> serializer = Registry.RECIPE_SERIALIZER.get(new ResourceLocation(tag.getString("serializer")));
@@ -371,7 +370,7 @@ public class JEIPluginDetector {
                                 Recipe<?> recipe = serializer.fromNetwork(new ResourceLocation(tag.getString("id")), buf);
                                 return new JEIWrappedDisplay<>((JEIWrappedCategory<? super Recipe<?>>) category, recipe);
                             }
-            
+                            
                             @Override
                             public boolean isPersistent() {
                                 return false;
@@ -383,7 +382,7 @@ public class JEIPluginDetector {
                 });
             }));
             backingPlugin.registerRecipeCatalysts(JEIRecipeCatalystRegistration.INSTANCE);
-            backingPlugin.registerVanillaCategoryExtensions(JEIVanillaCategoryExtensionRegistration.INSTANCE);
+            backingPlugin.registerVanillaCategoryExtensions(new JEIVanillaCategoryExtensionRegistration(this));
             if (!registry.getVisibilityPredicates().contains(JEIRecipeManager.INSTANCE.categoryPredicate)) {
                 registry.registerVisibilityPredicate(JEIRecipeManager.INSTANCE.categoryPredicate);
             }
@@ -392,11 +391,6 @@ public class JEIPluginDetector {
         @Override
         public void registerDisplays(DisplayRegistry registry) {
             backingPlugin.registerRecipes(JEIRecipeRegistration.INSTANCE);
-            for (JEIWrappedCategory<?> category : categories) {
-                registry.registerFiller((Class<Object>) category.getRecipeClass(), ((JEIWrappedCategory<Object>) category)::handlesRecipe,
-                        recipe -> new JEIWrappedDisplay(category, recipe));
-                registry.registerFiller(JEIWrappedDisplay.class, display -> display.getCategoryIdentifier().getIdentifier().equals(category.getIdentifier()), Function.identity());
-            }
             backingPlugin.registerAdvanced(JEIAdvancedRegistration.INSTANCE);
             if (!registry.getVisibilityPredicates().contains(JEIRecipeManager.INSTANCE.displayPredicate)) {
                 registry.registerVisibilityPredicate(JEIRecipeManager.INSTANCE.displayPredicate);
@@ -415,6 +409,17 @@ public class JEIPluginDetector {
         
         @Override
         public void postRegister() {
+            for (Map.Entry<DisplayCategory<?>, List<Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>>>> entry : categories.entrySet()) {
+                DisplayCategory<?> category = entry.getKey();
+                if (category instanceof JEIWrappedCategory) {
+                    DisplayRegistry.getInstance().registerFiller((Class<Object>) ((JEIWrappedCategory<?>) category).getRecipeClass(), ((JEIWrappedCategory<Object>) category)::handlesRecipe,
+                            recipe -> new JEIWrappedDisplay((JEIWrappedCategory<?>) category, recipe));
+                }
+                DisplayRegistry.getInstance().registerFiller(JEIWrappedDisplay.class, display -> display.getCategoryIdentifier().getIdentifier().equals(category.getIdentifier()), Function.identity());
+                for (Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>> pair : entry.getValue()) {
+//                    DisplayRegistry.getInstance().registerFiller(pair.getLeft(), pair.getMiddle(), );
+                }
+            }
             backingPlugin.onRuntimeAvailable(JEIJeiRuntime.INSTANCE);
             for (Runnable runnable : post) {
                 runnable.run();

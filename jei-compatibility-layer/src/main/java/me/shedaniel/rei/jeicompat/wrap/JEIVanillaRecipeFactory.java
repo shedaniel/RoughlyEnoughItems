@@ -27,11 +27,10 @@ import me.shedaniel.rei.plugin.common.displays.anvil.AnvilRecipe;
 import mezz.jei.api.recipe.vanilla.IJeiBrewingRecipe;
 import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 
 import java.util.Collections;
 import java.util.List;
-
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 
 public enum JEIVanillaRecipeFactory implements IVanillaRecipeFactory {
     INSTANCE;
@@ -48,11 +47,11 @@ public enum JEIVanillaRecipeFactory implements IVanillaRecipeFactory {
     
     @Override
     public IJeiBrewingRecipe createBrewingRecipe(List<ItemStack> ingredients, ItemStack potionInput, ItemStack potionOutput) {
-        throw TODO();
+        return createBrewingRecipe(ingredients, Collections.singletonList(potionInput), potionOutput);
     }
     
     @Override
     public IJeiBrewingRecipe createBrewingRecipe(List<ItemStack> ingredients, List<ItemStack> potionInputs, ItemStack potionOutput) {
-        throw TODO();
+        return new JEIBrewingRecipe(Ingredient.of(potionInputs.toArray(new ItemStack[0])), Ingredient.of(ingredients.toArray(new ItemStack[0])), potionOutput);
     }
 }

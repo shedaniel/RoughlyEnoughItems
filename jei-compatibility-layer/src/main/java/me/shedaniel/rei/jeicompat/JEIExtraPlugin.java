@@ -21,25 +21,21 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat.wrap;
+package me.shedaniel.rei.jeicompat;
 
-import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
-import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import me.shedaniel.rei.plugin.common.BuiltinPlugin;
-import mezz.jei.api.recipe.category.extensions.IExtendableRecipeCategory;
-import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension;
-import mezz.jei.api.registration.IVanillaCategoryExtensionRegistration;
-import net.minecraft.world.item.crafting.CraftingRecipe;
+import dev.architectury.platform.Platform;
+import dev.architectury.utils.Env;
+import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
+import me.shedaniel.rei.jeicompat.transfer.JEITransferMenuInfo;
 
-public class JEIVanillaCategoryExtensionRegistration implements IVanillaCategoryExtensionRegistration {
-    private final JEIPluginDetector.JEIPluginWrapper wrapper;
-    
-    public JEIVanillaCategoryExtensionRegistration(JEIPluginDetector.JEIPluginWrapper wrapper) {
-        this.wrapper = wrapper;
-    }
-    
+import java.util.Optional;
+
+public class JEIExtraPlugin implements REIServerPlugin {
     @Override
-    public IExtendableRecipeCategory<CraftingRecipe, ICraftingCategoryExtension> getCraftingCategory() {
-        return new JEIExtendableRecipeCategory<>(wrapper, CategoryRegistry.getInstance().get(BuiltinPlugin.CRAFTING).getCategory());
+    public void registerMenuInfo(MenuInfoRegistry registry) {
+        if (Platform.getEnvironment() == Env.SERVER) {
+            registry.registerGeneric(id -> true, (categoryId, menuClass) -> Optional.of(new JEITransferMenuInfo<>()));
+        }
     }
 }

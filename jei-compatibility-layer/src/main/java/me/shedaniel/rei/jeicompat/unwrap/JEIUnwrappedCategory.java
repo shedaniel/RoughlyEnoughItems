@@ -25,6 +25,7 @@ package me.shedaniel.rei.jeicompat.unwrap;
 
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.jeicompat.wrap.JEIWrappedCategory;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.ingredients.IIngredients;
@@ -36,10 +37,10 @@ import org.jetbrains.annotations.NotNull;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.WILL_NOT_BE_IMPLEMENTED;
 
-public class JEIUnwrappedCategory<T extends Display> implements IRecipeCategory<T> {
-    private final DisplayCategory<T> backingCategory;
+public class JEIUnwrappedCategory<T, D extends Display> implements IRecipeCategory<T> {
+    private final DisplayCategory<D> backingCategory;
     
-    public JEIUnwrappedCategory(DisplayCategory<T> backingCategory) {
+    public JEIUnwrappedCategory(DisplayCategory<D> backingCategory) {
         this.backingCategory = backingCategory;
     }
     
@@ -52,6 +53,9 @@ public class JEIUnwrappedCategory<T extends Display> implements IRecipeCategory<
     @Override
     @NotNull
     public Class<? extends T> getRecipeClass() {
+        if (backingCategory instanceof JEIWrappedCategory) {
+            return ((JEIWrappedCategory<T>) backingCategory).getBackingCategory().getRecipeClass();
+        }
         return (Class<? extends T>) Display.class;
     }
     
@@ -64,22 +68,40 @@ public class JEIUnwrappedCategory<T extends Display> implements IRecipeCategory<
     @Override
     @NotNull
     public IDrawable getBackground() {
+        if (backingCategory instanceof JEIWrappedCategory) {
+            return ((JEIWrappedCategory<?>) backingCategory).getBackingCategory().getBackground();
+        }
         throw WILL_NOT_BE_IMPLEMENTED();
     }
     
     @Override
     @NotNull
     public IDrawable getIcon() {
+        if (backingCategory instanceof JEIWrappedCategory) {
+            return ((JEIWrappedCategory<?>) backingCategory).getBackingCategory().getIcon();
+        }
         throw TODO();
     }
     
     @Override
     public void setIngredients(@NotNull T recipe, @NotNull IIngredients ingredients) {
+        if (backingCategory instanceof JEIWrappedCategory) {
+            ((JEIWrappedCategory<T>) backingCategory).getBackingCategory().setIngredients(recipe, ingredients);
+            return;
+        }
         throw WILL_NOT_BE_IMPLEMENTED();
     }
     
     @Override
     public void setRecipe(@NotNull IRecipeLayout recipeLayout, @NotNull T recipe, @NotNull IIngredients ingredients) {
+        if (backingCategory instanceof JEIWrappedCategory) {
+            ((JEIWrappedCategory<T>) backingCategory).getBackingCategory().setRecipe(recipeLayout, recipe, ingredients);
+            return;
+        }
         throw WILL_NOT_BE_IMPLEMENTED();
+    }
+    
+    public DisplayCategory<D> getBackingCategory() {
+        return backingCategory;
     }
 }

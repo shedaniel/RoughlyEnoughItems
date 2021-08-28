@@ -23,19 +23,7 @@
 
 package me.shedaniel.rei.jeicompat;
 
-import dev.architectury.platform.Platform;
-import dev.architectury.utils.Env;
-import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
-import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
-import me.shedaniel.rei.jeicompat.transfer.JEITransferMenuInfo;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 
-import java.util.Optional;
-
-public class JEITransferHandlerPlugin implements REIServerPlugin {
-    @Override
-    public void registerMenuInfo(MenuInfoRegistry registry) {
-        if (Platform.getEnvironment() == Env.SERVER) {
-            registry.registerGeneric(id -> true, (categoryId, menuClass) -> Optional.of(new JEITransferMenuInfo<>()));
-        }
-    }
+public class JEIExtraClientPlugin implements REIClientPlugin {
 }

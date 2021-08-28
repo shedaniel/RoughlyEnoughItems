@@ -23,23 +23,35 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import me.shedaniel.rei.plugin.common.BuiltinPlugin;
+import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
 import mezz.jei.api.recipe.category.extensions.IExtendableRecipeCategory;
-import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension;
-import mezz.jei.api.registration.IVanillaCategoryExtensionRegistration;
-import net.minecraft.world.item.crafting.CraftingRecipe;
+import mezz.jei.api.recipe.category.extensions.IRecipeCategoryExtension;
+import org.apache.commons.lang3.tuple.Triple;
 
-public class JEIVanillaCategoryExtensionRegistration implements IVanillaCategoryExtensionRegistration {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+public class JEIExtendableRecipeCategory<T, D extends Display, W extends IRecipeCategoryExtension> extends JEIUnwrappedCategory<T, D> implements IExtendableRecipeCategory<T, W> {
     private final JEIPluginDetector.JEIPluginWrapper wrapper;
     
-    public JEIVanillaCategoryExtensionRegistration(JEIPluginDetector.JEIPluginWrapper wrapper) {
+    public JEIExtendableRecipeCategory(JEIPluginDetector.JEIPluginWrapper wrapper, DisplayCategory<D> backingCategory) {
+        super(backingCategory);
         this.wrapper = wrapper;
     }
     
     @Override
-    public IExtendableRecipeCategory<CraftingRecipe, ICraftingCategoryExtension> getCraftingCategory() {
-        return new JEIExtendableRecipeCategory<>(wrapper, CategoryRegistry.getInstance().get(BuiltinPlugin.CRAFTING).getCategory());
+    public <R extends T> void addCategoryExtension(Class<? extends R> recipeClass, Function<R, ? extends W> extensionFactory) {
+        addCategoryExtension(recipeClass, $ -> true, extensionFactory);
+    }
+    
+    @Override
+    public <R extends T> void addCategoryExtension(Class<? extends R> recipeClass, Predicate<R> extensionFilter, Function<R, ? extends W> extensionFactory) {
+        List<Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>>> triples = this.wrapper.categories.computeIfAbsent(getBackingCategory(), $ -> new ArrayList<>());
+        triples.add(Triple.of(recipeClass, (Predicate) extensionFilter, (Function) extensionFactory));
     }
 }

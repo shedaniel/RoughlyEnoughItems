@@ -23,23 +23,18 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
-import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import me.shedaniel.rei.plugin.common.BuiltinPlugin;
-import mezz.jei.api.recipe.category.extensions.IExtendableRecipeCategory;
-import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension;
-import mezz.jei.api.registration.IVanillaCategoryExtensionRegistration;
-import net.minecraft.world.item.crafting.CraftingRecipe;
+import me.shedaniel.rei.plugin.common.displays.brewing.BrewingRecipe;
+import mezz.jei.api.recipe.vanilla.IJeiBrewingRecipe;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 
-public class JEIVanillaCategoryExtensionRegistration implements IVanillaCategoryExtensionRegistration {
-    private final JEIPluginDetector.JEIPluginWrapper wrapper;
-    
-    public JEIVanillaCategoryExtensionRegistration(JEIPluginDetector.JEIPluginWrapper wrapper) {
-        this.wrapper = wrapper;
+public class JEIBrewingRecipe extends BrewingRecipe implements IJeiBrewingRecipe {
+    public JEIBrewingRecipe(Ingredient input, Ingredient ingredient, ItemStack output) {
+        super(input, ingredient, output);
     }
     
     @Override
-    public IExtendableRecipeCategory<CraftingRecipe, ICraftingCategoryExtension> getCraftingCategory() {
-        return new JEIExtendableRecipeCategory<>(wrapper, CategoryRegistry.getInstance().get(BuiltinPlugin.CRAFTING).getCategory());
+    public int getBrewingSteps() {
+        return 0;
     }
 }
