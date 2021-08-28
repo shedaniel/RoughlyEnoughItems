@@ -26,6 +26,7 @@ package me.shedaniel.rei;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -63,7 +64,7 @@ public class RoughlyEnoughItemsInitializer {
                     } catch (NoSuchMethodException ignored) {
                     }
                     if (method != null) {
-                        method.invoke(instance);
+                        MethodHandles.lookup().unreflect(method).bindTo(instance).invoke();
                     }
                 }
             } else {
@@ -72,7 +73,7 @@ public class RoughlyEnoughItemsInitializer {
                 } catch (NoSuchMethodException ignored) {
                 }
                 if (method != null) {
-                    method.invoke(instance);
+                    MethodHandles.lookup().unreflect(method).bindTo(instance).invoke();
                 }
             }
         } catch (Throwable e) {

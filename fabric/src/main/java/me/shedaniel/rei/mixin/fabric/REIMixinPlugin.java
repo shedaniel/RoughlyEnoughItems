@@ -23,30 +23,49 @@
 
 package me.shedaniel.rei.mixin.fabric;
 
-import me.shedaniel.rei.impl.client.fabric.ErrorDisplayerImpl;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import net.fabricmc.loader.api.FabricLoader;
+import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
+import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
-import java.util.function.Consumer;
+import java.util.List;
+import java.util.Set;
 
-@Mixin(Screen.class)
-public class MixinScreen {
-    @Unique
-    private static final ThreadLocal<Boolean> REI_IN = ThreadLocal.withInitial(() -> false);
+public class REIMixinPlugin implements IMixinConfigPlugin {
+    @Override
+    public void onLoad(String mixinPackage) {
+        
+    }
     
-    @Inject(method = "init(Lnet/minecraft/client/Minecraft;II)V", at = @At("HEAD"))
-    private void init(Minecraft minecraft, int i, int j, CallbackInfo ci) {
-        if (!REI_IN.get()) {
-            REI_IN.set(true);
-            for (Consumer<Screen> consumer : ErrorDisplayerImpl.consumerList) {
-                consumer.accept((Screen) (Object) this);
-            }
-            REI_IN.set(false);
-        }
+    @Override
+    public String getRefMapperConfig() {
+        return null;
+    }
+    
+    @Override
+    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        if (mixinClassName.endsWith("MixinClientPacketListener"))
+            return FabricLoader.getInstance().isModLoaded("architectury");
+        return true;
+    }
+    
+    @Override
+    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
+        
+    }
+    
+    @Override
+    public List<String> getMixins() {
+        return null;
+    }
+    
+    @Override
+    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+        
+    }
+    
+    @Override
+    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+        
     }
 }
