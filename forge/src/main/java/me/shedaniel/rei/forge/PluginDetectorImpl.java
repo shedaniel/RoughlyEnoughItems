@@ -30,8 +30,9 @@ import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.jeicompat.JEIExtraClientPlugin;
+import me.shedaniel.rei.jeicompat.JEIExtraPlugin;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import me.shedaniel.rei.jeicompat.JEITransferHandlerPlugin;
 import me.shedaniel.rei.plugin.client.DefaultClientPlugin;
 import me.shedaniel.rei.plugin.client.runtime.DefaultClientRuntimePlugin;
 import me.shedaniel.rei.plugin.common.DefaultPlugin;
@@ -72,7 +73,7 @@ public class PluginDetectorImpl {
     public static void detectServerPlugins() {
         PluginView.getServerInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultPlugin()));
         PluginView.getServerInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultRuntimePlugin()));
-        PluginView.getServerInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new JEITransferHandlerPlugin()));
+        PluginView.getServerInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new JEIExtraPlugin()));
         RoughlyEnoughItemsForge.<REIPlugin, REIServerPlugin>scanAnnotation(REIPlugin.class, REIServerPlugin.class::isAssignableFrom, (modId, plugin) -> {
             ((PluginView<REIServerPlugin>) PluginManager.getServerInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
         });
@@ -89,6 +90,7 @@ public class PluginDetectorImpl {
     public static void detectClientPlugins() {
         PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientPlugin()));
         PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientRuntimePlugin()));
+        PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new JEIExtraClientPlugin()));
         RoughlyEnoughItemsForge.<REIPlugin, REIClientPlugin>scanAnnotation(REIPlugin.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin) -> {
             ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
         });
