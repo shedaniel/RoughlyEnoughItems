@@ -23,39 +23,40 @@
 
 package me.shedaniel.rei.plugin.common.displays.anvil;
 
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-public class AnvilRecipe {
-    @Nullable
-    private final ResourceLocation id;
-    private final List<ItemStack> leftInput;
-    private final List<ItemStack> rightInputs;
-    private final List<ItemStack> outputs;
-    
-    public AnvilRecipe(@Nullable ResourceLocation id, List<ItemStack> leftInput, List<ItemStack> rightInputs, List<ItemStack> outputs) {
-        this.id = id;
-        this.leftInput = leftInput;
-        this.rightInputs = rightInputs;
-        this.outputs = outputs;
+public class DefaultAnvilDisplay extends BasicDisplay {
+    public DefaultAnvilDisplay(AnvilRecipe recipe) {
+        this(
+                Arrays.asList(
+                        EntryIngredients.ofItemStacks(recipe.getLeftInput()),
+                        EntryIngredients.ofItemStacks(recipe.getRightInputs())
+                ),
+                Collections.singletonList(EntryIngredients.ofItemStacks(recipe.getOutputs())),
+                Optional.ofNullable(recipe.getId())
+        );
     }
     
-    public ResourceLocation getId() {
-        return id;
+    public DefaultAnvilDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location) {
+        super(inputs, outputs, location);
     }
     
-    public List<ItemStack> getLeftInput() {
-        return leftInput;
+    @Override
+    public CategoryIdentifier<?> getCategoryIdentifier() {
+        return BuiltinPlugin.ANVIL;
     }
     
-    public List<ItemStack> getRightInputs() {
-        return rightInputs;
-    }
-    
-    public List<ItemStack> getOutputs() {
-        return outputs;
+    public static BasicDisplay.Serializer<DefaultAnvilDisplay> serializer() {
+        return BasicDisplay.Serializer.ofSimple(DefaultAnvilDisplay::new);
     }
 }

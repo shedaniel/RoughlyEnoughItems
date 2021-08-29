@@ -25,6 +25,7 @@ package me.shedaniel.rei.plugin.common;
 
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.plugin.common.displays.*;
+import me.shedaniel.rei.plugin.common.displays.anvil.DefaultAnvilDisplay;
 import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconBaseDisplay;
 import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconPaymentDisplay;
 import me.shedaniel.rei.plugin.common.displays.brewing.DefaultBrewingDisplay;
@@ -45,6 +46,7 @@ public interface BuiltinPlugin {
     CategoryIdentifier<DefaultCompostingDisplay> COMPOSTING = CategoryIdentifier.of("minecraft", "plugins/composting");
     CategoryIdentifier<DefaultFuelDisplay> FUEL = CategoryIdentifier.of("minecraft", "plugins/fuel");
     CategoryIdentifier<DefaultSmithingDisplay> SMITHING = CategoryIdentifier.of("minecraft", "plugins/smithing");
+    CategoryIdentifier<DefaultAnvilDisplay> ANVIL = CategoryIdentifier.of("minecraft", "plugins/anvil");
     CategoryIdentifier<DefaultBeaconBaseDisplay> BEACON_BASE = CategoryIdentifier.of("minecraft", "plugins/beacon_base");
     CategoryIdentifier<DefaultBeaconPaymentDisplay> BEACON_PAYMENT = CategoryIdentifier.of("minecraft", "plugins/beacon_payment");
     CategoryIdentifier<DefaultTillingDisplay> TILLING = CategoryIdentifier.of("minecraft", "plugins/tilling");
