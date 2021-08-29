@@ -83,7 +83,7 @@ public final class VanillaRecipeCategoryUid {
      * <p>
      * This is a built-in category, you can create new recipes with {@link IVanillaRecipeFactory#createAnvilRecipe(ItemStack, List, List)}
      */
-    public static final ResourceLocation ANVIL = new ResourceLocation(ModIds.MINECRAFT_ID, "anvil");
+    public static final ResourceLocation ANVIL = BuiltinClientPlugin.ANVIL.getIdentifier();
     
     /**
      * The smithing recipe category.

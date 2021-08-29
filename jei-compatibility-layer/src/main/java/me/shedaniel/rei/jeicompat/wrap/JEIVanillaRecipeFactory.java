@@ -37,12 +37,12 @@ public enum JEIVanillaRecipeFactory implements IVanillaRecipeFactory {
     
     @Override
     public Object createAnvilRecipe(ItemStack leftInput, List<ItemStack> rightInputs, List<ItemStack> outputs) {
-        return new AnvilRecipe(Collections.singletonList(leftInput), rightInputs, outputs);
+        return new AnvilRecipe(null, Collections.singletonList(leftInput), rightInputs, outputs);
     }
     
     @Override
     public Object createAnvilRecipe(List<ItemStack> leftInputs, List<ItemStack> rightInputs, List<ItemStack> outputs) {
-        return new AnvilRecipe(leftInputs, rightInputs, outputs);
+        return new AnvilRecipe(null, leftInputs, rightInputs, outputs);
     }
     
     @Override
