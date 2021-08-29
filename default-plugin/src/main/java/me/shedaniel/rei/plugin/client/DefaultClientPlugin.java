@@ -50,6 +50,7 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.plugin.autocrafting.recipebook.DefaultRecipeBookHandler;
 import me.shedaniel.rei.plugin.client.categories.*;
+import me.shedaniel.rei.plugin.client.categories.anvil.DefaultAnvilCategory;
 import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconBaseCategory;
 import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconPaymentCategory;
 import me.shedaniel.rei.plugin.client.categories.cooking.DefaultCookingCategory;
@@ -59,6 +60,8 @@ import me.shedaniel.rei.plugin.client.exclusionzones.DefaultRecipeBookExclusionZ
 import me.shedaniel.rei.plugin.client.favorites.GameModeFavoriteEntry;
 import me.shedaniel.rei.plugin.client.favorites.WeatherFavoriteEntry;
 import me.shedaniel.rei.plugin.common.displays.*;
+import me.shedaniel.rei.plugin.common.displays.anvil.AnvilRecipe;
+import me.shedaniel.rei.plugin.common.displays.anvil.DefaultAnvilDisplay;
 import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconBaseDisplay;
 import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconPaymentDisplay;
 import me.shedaniel.rei.plugin.common.displays.brewing.BrewingRecipe;
@@ -150,6 +153,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 new DefaultCompostingCategory(),
                 new DefaultStrippingCategory(),
                 new DefaultSmithingCategory(),
+                new DefaultAnvilCategory(),
                 new DefaultBeaconBaseCategory(),
                 new DefaultBeaconPaymentCategory(),
                 new DefaultTillingCategory(),
@@ -173,6 +177,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.addWorkstations(CAMPFIRE, EntryStacks.of(Items.CAMPFIRE), EntryStacks.of(Items.SOUL_CAMPFIRE));
         registry.addWorkstations(FUEL, EntryStacks.of(Items.FURNACE), EntryStacks.of(Items.SMOKER), EntryStacks.of(Items.BLAST_FURNACE));
         registry.addWorkstations(BREWING, EntryStacks.of(Items.BREWING_STAND));
+        registry.addWorkstations(ANVIL, EntryStacks.of(Items.ANVIL));
         registry.addWorkstations(STONE_CUTTING, EntryStacks.of(Items.STONECUTTER));
         registry.addWorkstations(COMPOSTING, EntryStacks.of(Items.COMPOSTER));
         registry.addWorkstations(SMITHING, EntryStacks.of(Items.SMITHING_TABLE));
@@ -222,6 +227,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.registerRecipeFiller(CampfireCookingRecipe.class, RecipeType.CAMPFIRE_COOKING, DefaultCampfireDisplay::new);
         registry.registerRecipeFiller(StonecutterRecipe.class, RecipeType.STONECUTTING, DefaultStoneCuttingDisplay::new);
         registry.registerRecipeFiller(UpgradeRecipe.class, RecipeType.SMITHING, DefaultSmithingDisplay::new);
+        registry.registerFiller(AnvilRecipe.class, DefaultAnvilDisplay::new);
         registry.registerFiller(BrewingRecipe.class, DefaultBrewingDisplay::new);
         for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.getFuel().entrySet()) {
             registry.add(new DefaultFuelDisplay(Collections.singletonList(EntryIngredients.of(entry.getKey())), Collections.emptyList(), entry.getValue()));
