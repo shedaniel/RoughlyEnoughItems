@@ -42,25 +42,24 @@ loom {
     }
 }
 
+def depProjects = [":api", ":runtime", ":default-plugin"]
+
 dependencies {
     forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
     modApi("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
     modApi("me.shedaniel:architectury-forge:${architectury_version}")
 
-    implementation(project(path: ":api")) { transitive = false }
-    implementation(project(path: ":default-plugin")) { transitive = false }
-    implementation(project(path: ":runtime")) { transitive = false }
     implementation(project(path: ":jei-compatibility-layer")) { transitive = false }
     implementation(project(path: ":jei-internals-workaround")) { transitive = false }
-    developmentForge(project(path: ":api")) { transitive = false }
-    developmentForge(project(path: ":default-plugin")) { transitive = false }
-    developmentForge(project(path: ":runtime")) { transitive = false }
     developmentForge(project(path: ":jei-compatibility-layer")) { transitive = false }
 
-    shadowCommon(project(path: ":api", configuration: "transformProductionForge")) { transitive = false }
-    shadowCommon(project(path: ":default-plugin", configuration: "transformProductionForge")) { transitive = false }
-    shadowCommon(project(path: ":runtime", configuration: "transformProductionForge")) { transitive = false }
     shadowCommon(project(path: ":jei-compatibility-layer")) { transitive = false }
+
+    depProjects.forEach {
+        implementation(project(path: it)) { transitive = false }
+        developmentForge(project(path: it)) { transitive = false }
+        shadowCommon(project(path: it, configuration: "transformProductionForge")) { transitive = false }
+    }
 
     modRuntime("curse.maven:chiselsbits-231095:3176033")
     modRuntime("curse.maven:jumbofurnace-390880:3120970")
@@ -89,6 +88,49 @@ remapJar {
 
 jar {
     classifier "dev"
+}
+
+java {
+    withSourcesJar()
+}
+
+sourcesJar {
+    afterEvaluate {
+        depProjects.forEach {
+            def depSources = project(it).sourcesJar
+            dependsOn depSources
+            from depSources.archiveFile.map { zipTree(it) }
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenFabric(MavenPublication) {
+            artifactId = rootProject.name + "-" + project.name
+            artifact(remapJar) { classifier null }
+            afterEvaluate {
+                artifact(remapSourcesJar.output) {
+                    builtBy remapSourcesJar
+                    classifier "sources"
+                }
+            }
+        }
+        ["api", "default-plugin"].forEach { projectName ->
+            create(projectName + "Fabric", MavenPublication.class) { publication ->
+                publication.artifactId = rootProject.name + "-" + projectName + "-forge"
+                project.afterEvaluate {
+                    def project = project(":" + projectName)
+                    publication.artifact(project.fakeJar) { classifier null }
+                    def remapSourcesJarTask = project.remapSourcesJar
+                    publication.artifact(remapSourcesJarTask.output) {
+                        builtBy remapSourcesJarTask
+                        classifier "sources"
+                    }
+                }
+            }
+        }
+    }
 }
 
 curseforge {
