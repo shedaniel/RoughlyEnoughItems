@@ -30,26 +30,37 @@ repositories {
     }
 }
 
+loom {
+    launches {
+        all {
+            arg "--mixin", "rei-jei-internals-workaround.mixins.json"
+        }
+    }
+
+    localMods {
+        it.add(project(":jei-internals-workaround").sourceSets.main)
+    }
+}
+
+def depProjects = [":api", ":runtime", ":default-plugin"]
+
 dependencies {
     forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
     modApi("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
     modApi("dev.architectury:architectury-forge:${architectury_version}")
 
-    implementation(project(path: ":api")) { transitive = false }
-    implementation(project(path: ":default-plugin")) { transitive = false }
-    implementation(project(path: ":runtime")) { transitive = false }
     implementation(project(path: ":jei-compatibility-layer")) { transitive = false }
     // implementation(project(path: ":jei-internals-workaround")) { transitive = false }
-    developmentForge(project(path: ":api")) { transitive = false }
-    developmentForge(project(path: ":default-plugin")) { transitive = false }
-    developmentForge(project(path: ":runtime")) { transitive = false }
     developmentForge(project(path: ":jei-compatibility-layer")) { transitive = false }
     // developmentForge(project(path: ":jei-internals-workaround")) { transitive = false }
 
-    shadowCommon(project(path: ":api", configuration: "transformProductionForge")) { transitive = false }
-    shadowCommon(project(path: ":default-plugin", configuration: "transformProductionForge")) { transitive = false }
-    shadowCommon(project(path: ":runtime", configuration: "transformProductionForge")) { transitive = false }
     shadowCommon(project(path: ":jei-compatibility-layer")) { transitive = false }
+
+    depProjects.forEach {
+        implementation(project(path: it)) { transitive = false }
+        developmentForge(project(path: it)) { transitive = false }
+        shadowCommon(project(path: it, configuration: "transformProductionForge")) { transitive = false }
+    }
 
     // modRuntime("curse.maven:chiselsbits-231095:3176033")
     // modRuntime("curse.maven:jumbofurnace-390880:3120970")
@@ -62,6 +73,7 @@ dependencies {
     // modRuntime("curse.maven:jer-240630:3066754")
     // modRuntime("curse.maven:jep-417645:3198370")
     // modRuntime("curse.maven:simple-storage-network-268495:3257204")
+    // modRuntime("curse.maven:create-328085:3278516")
 }
 
 shadowJar {
@@ -77,6 +89,49 @@ remapJar {
 
 jar {
     classifier "dev"
+}
+
+java {
+    withSourcesJar()
+}
+
+sourcesJar {
+    afterEvaluate {
+        depProjects.forEach {
+            def depSources = project(it).sourcesJar
+            dependsOn depSources
+            from depSources.archiveFile.map { zipTree(it) }
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenFabric(MavenPublication) {
+            artifactId = rootProject.name + "-" + project.name
+            artifact(remapJar) { classifier null }
+            afterEvaluate {
+                artifact(remapSourcesJar.output) {
+                    builtBy remapSourcesJar
+                    classifier "sources"
+                }
+            }
+        }
+        ["api", "default-plugin"].forEach { projectName ->
+            create(projectName + "Fabric", MavenPublication.class) { publication ->
+                publication.artifactId = rootProject.name + "-" + projectName + "-forge"
+                project.afterEvaluate {
+                    def project = project(":" + projectName)
+                    publication.artifact(project.fakeJar) { classifier null }
+                    def remapSourcesJarTask = project.remapSourcesJar
+                    publication.artifact(remapSourcesJarTask.output) {
+                        builtBy remapSourcesJarTask
+                        classifier "sources"
+                    }
+                }
+            }
+        }
+    }
 }
 
 curseforge {
