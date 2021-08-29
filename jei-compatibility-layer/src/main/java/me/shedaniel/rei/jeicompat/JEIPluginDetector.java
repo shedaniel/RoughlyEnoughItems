@@ -349,6 +349,10 @@ public class JEIPluginDetector {
             backingPlugin.registerCategories(wrapCategoryRegistration(registry, category -> {
                 categories.put(category, new ArrayList<>());
                 
+                DisplayRegistry.getInstance().registerFiller((Class<Object>) category.getRecipeClass(), ((JEIWrappedCategory<Object>) category)::handlesRecipe,
+                        recipe -> new JEIWrappedDisplay(category, recipe));
+                DisplayRegistry.getInstance().registerFiller(JEIWrappedDisplay.class, display -> display.getCategoryIdentifier().getIdentifier().equals(category.getIdentifier()), Function.identity());
+                
                 post.add(() -> {
                     if (Recipe.class.isAssignableFrom(category.getRecipeClass())) {
                         DisplaySerializerRegistry.getInstance().register(category.getCategoryIdentifier(), new DisplaySerializer<JEIWrappedDisplay<?>>() {
@@ -390,7 +394,7 @@ public class JEIPluginDetector {
         
         @Override
         public void registerDisplays(DisplayRegistry registry) {
-            backingPlugin.registerRecipes(JEIRecipeRegistration.INSTANCE);
+            backingPlugin.registerRecipes(new JEIRecipeRegistration(post));
             backingPlugin.registerAdvanced(JEIAdvancedRegistration.INSTANCE);
             if (!registry.getVisibilityPredicates().contains(JEIRecipeManager.INSTANCE.displayPredicate)) {
                 registry.registerVisibilityPredicate(JEIRecipeManager.INSTANCE.displayPredicate);
@@ -411,11 +415,6 @@ public class JEIPluginDetector {
         public void postRegister() {
             for (Map.Entry<DisplayCategory<?>, List<Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>>>> entry : categories.entrySet()) {
                 DisplayCategory<?> category = entry.getKey();
-                if (category instanceof JEIWrappedCategory) {
-                    DisplayRegistry.getInstance().registerFiller((Class<Object>) ((JEIWrappedCategory<?>) category).getRecipeClass(), ((JEIWrappedCategory<Object>) category)::handlesRecipe,
-                            recipe -> new JEIWrappedDisplay((JEIWrappedCategory<?>) category, recipe));
-                }
-                DisplayRegistry.getInstance().registerFiller(JEIWrappedDisplay.class, display -> display.getCategoryIdentifier().getIdentifier().equals(category.getIdentifier()), Function.identity());
                 for (Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>> pair : entry.getValue()) {
 //                    DisplayRegistry.getInstance().registerFiller(pair.getLeft(), pair.getMiddle(), );
                 }

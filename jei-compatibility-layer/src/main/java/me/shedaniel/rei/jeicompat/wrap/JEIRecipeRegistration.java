@@ -48,8 +48,12 @@ import java.util.List;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapList;
 
-public enum JEIRecipeRegistration implements IRecipeRegistration {
-    INSTANCE;
+public class JEIRecipeRegistration implements IRecipeRegistration {
+    private final List<Runnable> post;
+    
+    public JEIRecipeRegistration(List<Runnable> post) {
+        this.post = post;
+    }
     
     @Override
     @NotNull
@@ -71,11 +75,13 @@ public enum JEIRecipeRegistration implements IRecipeRegistration {
     
     @Override
     public void addRecipes(@NotNull Collection<?> recipes, @NotNull ResourceLocation categoryId) {
-        CategoryRegistry.CategoryConfiguration<Display> config = CategoryRegistry.getInstance().get(CategoryIdentifier.of(categoryId));
-        DisplayCategory<?> category = config.getCategory();
-        for (Object recipe : recipes) {
-            DisplayRegistry.getInstance().add(recipe);
-        }
+        post.add(() -> {
+            CategoryRegistry.CategoryConfiguration<Display> config = CategoryRegistry.getInstance().get(CategoryIdentifier.of(categoryId));
+            DisplayCategory<?> category = config.getCategory();
+            for (Object recipe : recipes) {
+                DisplayRegistry.getInstance().add(recipe);
+            }
+        });
     }
     
     @Override
