@@ -3,3 +3,33 @@ archivesBaseName = rootProject.name + "-" + project.name
 dependencies {
     forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
 }
+
+loom {
+    // mixinConfig "rei-jei-internals-workaround.mixins.json"
+}
+
+/*curseforge {
+    if (project.hasProperty('danielshe_curse_api_key') || System.getenv('danielshe_curse_api_key') != null) {
+        apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
+        project {
+            id = "521393"
+            releaseType = "beta"
+            changelogType = "html"
+            changelog = rootProject.releaseChangelog
+            addGameVersion "1.16.4"
+            addGameVersion "1.16.5"
+            addGameVersion "Java 8"
+            addGameVersion "Forge"
+            relations {
+                requiredDependency "roughly-enough-items-forge"
+            }
+            mainArtifact(tasks.getByName("remapJar")) {
+                displayName = "[Forge $project.supported_version] v$project.version"
+            }
+        }
+    }
+    options {
+        forgeGradleIntegration = false
+        javaVersionAutoDetect = false
+    }
+}*/
