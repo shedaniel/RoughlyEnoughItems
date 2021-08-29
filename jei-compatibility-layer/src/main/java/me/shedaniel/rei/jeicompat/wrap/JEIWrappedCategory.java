@@ -167,7 +167,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
             public void render(PoseStack arg, int i, int j, float f) {
                 arg.pushPose();
                 arg.translate(bounds.x + 4, bounds.y + 4, getZ());
-                backingCategory.draw(display.getBackingRecipe(), arg, i, j);
+                backingCategory.draw(display.getBackingRecipe(), arg, i - bounds.x, j - bounds.y);
                 arg.popPose();
                 
                 Point mouse = PointHelper.ofMouse();
