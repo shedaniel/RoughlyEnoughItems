@@ -76,8 +76,6 @@ public class JEIRecipeRegistration implements IRecipeRegistration {
     @Override
     public void addRecipes(@NotNull Collection<?> recipes, @NotNull ResourceLocation categoryId) {
         post.add(() -> {
-            CategoryRegistry.CategoryConfiguration<Display> config = CategoryRegistry.getInstance().get(CategoryIdentifier.of(categoryId));
-            DisplayCategory<?> category = config.getCategory();
             for (Object recipe : recipes) {
                 DisplayRegistry.getInstance().add(recipe);
             }
