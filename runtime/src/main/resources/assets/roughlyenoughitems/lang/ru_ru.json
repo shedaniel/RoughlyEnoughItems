@@ -7,6 +7,8 @@
   "text.rei.cheating_limited_creative_enabled": "§aЧиты включены (Включён Творческий режим)",
   "text.rei.no_permission_cheat": "Для читерства требуются права оператора",
   "text.rei.search.field.suggestion": "Поиск...",
+  "text.rei.feedback.link": "Нажмите сюда, чтобы посмотреть Google Form",
+  "text.rei.not.fully.initialized": "REI ещё не полностью инициализирован!",
   "category.rei.crafting": "Создание",
   "category.rei.smelting": "Плавление",
   "category.rei.smelting.fuel": "Топливо",
