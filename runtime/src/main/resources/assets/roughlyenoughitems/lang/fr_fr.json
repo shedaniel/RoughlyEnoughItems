@@ -9,6 +9,8 @@
   "text.rei.search.field.suggestion": "Rechercher...",
   "text.rei.feedback": "Avez-vous des retours à faire au developeur de REI ? %s pour envoyer vos retours!",
   "text.rei.feedback.link": "Clickez ici pour visiter le formulaire Google",
+  "text.rei.not.fully.initialized": "REI pas encore complètement initialisé !",
+  "text.rei.not.fully.initialized.tooltip": "Étapes manquantes : %s\nSi cela ne disparaît pas,\nessayez de chercher de l'aide avec les logs !",
   "category.rei.crafting": "Fabrication",
   "category.rei.smelting": "Cuisson",
   "category.rei.smelting.fuel": "Combustible",
