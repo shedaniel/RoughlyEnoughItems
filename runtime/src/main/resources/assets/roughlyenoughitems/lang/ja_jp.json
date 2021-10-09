@@ -9,8 +9,6 @@
   "text.rei.search.field.suggestion": "検索...",
   "text.rei.feedback": "REI 開発者にフィードバックを送信したいですか？ %s からフィードバックを送信できます！",
   "text.rei.feedback.link": "クリックでGoogle フォームにアクセス",
-  "text.rei.not.fully.initialized": "gohan",
-  "text.rei.not.fully.initialized.tooltip": "rice = gohan",
   "category.rei.crafting": "クラフト",
   "category.rei.smelting": "製錬（かまど）",
   "category.rei.smelting.fuel": "燃料",
