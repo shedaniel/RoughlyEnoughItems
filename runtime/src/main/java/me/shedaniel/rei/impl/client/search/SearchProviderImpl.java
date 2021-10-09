@@ -28,6 +28,9 @@ import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.search.argument.Argument;
 import me.shedaniel.rei.impl.client.search.argument.CompoundArgument;
+import me.shedaniel.rei.impl.client.util.CrashReportUtils;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
 
 import java.util.List;
 import java.util.Objects;
@@ -54,7 +57,18 @@ public class SearchProviderImpl implements SearchProvider {
         
         @Override
         public boolean test(EntryStack<?> stack) {
-            return Argument.matches(stack, arguments);
+            try {
+                return Argument.matches(stack, arguments);
+            } catch (Throwable throwable) {
+                CrashReport report = CrashReportUtils.essential(throwable, "Testing entry with search filter");
+                CrashReportCategory category = report.addCategory("Search entry details");
+                try {
+                    stack.fillCrashReport(report, category);
+                } catch (Throwable throwable1) {
+                    category.setDetailError("Filling Report", throwable1);
+                }
+                throw CrashReportUtils.throwReport(report);
+            }
         }
         
         @Override
