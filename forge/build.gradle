@@ -2,13 +2,17 @@ plugins {
     id "com.github.johnrengelman.shadow" version "5.0.0"
 }
 
-configurations {
-    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
-}
-
 architectury {
     platformSetupLoomIde()
     forge()
+}
+
+configurations {
+    common
+    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentForge.extendsFrom common
 }
 
 processResources {
@@ -37,8 +41,10 @@ loom {
         }
     }
 
-    localMods {
+    forge {
+        localMods {
         it.add(project(":jei-internals-workaround").sourceSets.main)
+        }
     }
 }
 
@@ -49,16 +55,13 @@ dependencies {
     modApi("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
     modApi("me.shedaniel:architectury-forge:${architectury_version}")
 
-    implementation(project(path: ":jei-compatibility-layer")) { transitive = false }
-    implementation(project(path: ":jei-internals-workaround")) { transitive = false }
-    developmentForge(project(path: ":jei-compatibility-layer")) { transitive = false }
-
-    shadowCommon(project(path: ":jei-compatibility-layer")) { transitive = false }
+    common(project(path: ":jei-compatibility-layer", configuration: "dev")) { transitive false }
+    shadowCommon(project(path: ":jei-compatibility-layer", configuration: "dev")) { transitive false }
+    common(project(path: ":jei-internals-workaround", configuration: "dev")) { transitive = false }
 
     depProjects.forEach {
-        implementation(project(path: it)) { transitive = false }
-        developmentForge(project(path: it)) { transitive = false }
-        shadowCommon(project(path: it, configuration: "transformProductionForge")) { transitive = false }
+        common(project(path: it, configuration: "dev")) { transitive false }
+        shadowCommon(project(path: it, configuration: "transformProductionForge")) { transitive false }
     }
 
     modRuntime("curse.maven:chiselsbits-231095:3176033")
@@ -89,7 +92,7 @@ shadowJar {
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier "forge"
+    classifier null
 }
 
 jar {
@@ -110,17 +113,17 @@ sourcesJar {
     }
 }
 
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
+
 publishing {
     publications {
         mavenFabric(MavenPublication) {
             artifactId = rootProject.name + "-" + project.name
-            artifact(remapJar) { classifier null }
-            afterEvaluate {
-                artifact(remapSourcesJar.output) {
-                    builtBy remapSourcesJar
-                    classifier "sources"
-                }
-            }
+            from components.java
         }
         ["api", "default-plugin"].forEach { projectName ->
             create(projectName + "Fabric", MavenPublication.class) { publication ->

@@ -2,13 +2,17 @@ plugins {
     id "com.github.johnrengelman.shadow" version "7.0.0"
 }
 
-configurations {
-    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
-}
-
 architectury {
     platformSetupLoomIde()
     fabric()
+}
+
+configurations {
+    common
+    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentFabric.extendsFrom common
 }
 
 processResources {
@@ -19,26 +23,23 @@ processResources {
 }
 
 loom {
-    accessWidener = file("src/main/resources/roughlyenoughitems.accessWidener")
+    accessWidenerPath = file("src/main/resources/roughlyenoughitems.accessWidener")
 }
 
 def depProjects = [":api", ":runtime", ":default-plugin"]
 
 dependencies {
     modApi("net.fabricmc:fabric-loader:${project.fabricloader_version}")
-    modRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}")
+    modApi("net.fabricmc.fabric-api:fabric-api:${project.fabric_api}")
     modApi("me.shedaniel.cloth:cloth-config-fabric:${cloth_config_version}") {
         exclude(module: "fabric-api")
     }
-    modRuntime("com.terraformersmc:modmenu:${modmenu_version}") {
-        transitive(false)
-    }
+    modRuntime("com.terraformersmc:modmenu:${modmenu_version}") { transitive false }
     modApi("me.shedaniel:architectury-fabric:${architectury_version}")
 
     depProjects.forEach {
-        implementation(project(path: it)) { transitive = false }
-        developmentFabric(project(path: it)) { transitive = false }
-        shadowCommon(project(path: it, configuration: "transformProductionFabric")) { transitive = false }
+        common(project(path: it, configuration: "dev")) { transitive false }
+        shadowCommon(project(path: it, configuration: "transformProductionFabric")) { transitive false }
     }
 }
 
@@ -50,7 +51,7 @@ shadowJar {
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
-    classifier "fabric"
+    classifier null
 }
 
 jar {
@@ -71,17 +72,17 @@ sourcesJar {
     }
 }
 
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
+
 publishing {
     publications {
         mavenFabric(MavenPublication) {
             artifactId = rootProject.name + "-" + project.name
-            artifact(remapJar) { classifier null }
-            afterEvaluate {
-                artifact(remapSourcesJar.output) {
-                    builtBy remapSourcesJar
-                    classifier "sources"
-                }
-            }
+            from components.java
         }
         ["api", "default-plugin", "runtime"].forEach { projectName ->
             create(projectName + "Fabric", MavenPublication.class) { publication ->

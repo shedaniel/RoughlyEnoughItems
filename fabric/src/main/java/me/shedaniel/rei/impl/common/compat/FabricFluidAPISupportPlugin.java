@@ -23,27 +23,41 @@
 
 package me.shedaniel.rei.impl.common.compat;
 
-import alexiil.mc.lib.attributes.fluid.FluidAttributes;
-import alexiil.mc.lib.attributes.fluid.GroupedFluidInvView;
-import alexiil.mc.lib.attributes.fluid.amount.FluidAmount;
+import dev.architectury.event.CompoundEventResult;
+import dev.architectury.fluid.FluidStack;
 import me.shedaniel.architectury.event.CompoundEventResult;
 import me.shedaniel.architectury.utils.Fraction;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.minecraft.world.item.ItemStack;
 
-public class LBASupportPlugin implements REIServerPlugin {
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+public class FabricFluidAPISupportPlugin implements REIServerPlugin {
     @Override
     public void registerFluidSupport(FluidSupportProvider support) {
         support.register(entry -> {
-            GroupedFluidInvView view = FluidAttributes.GROUPED_INV_VIEW.get(entry.getValue());
-            if (view.getStoredFluids().size() > 0)
-                return CompoundEventResult.interruptTrue(view.getStoredFluids().stream()
-                        .filter(fluidKey -> !fluidKey.isEmpty() && fluidKey.getRawFluid() != null)
-                        .map(fluidKey -> {
-                            FluidAmount amount = view.getAmount_F(fluidKey);
-                            return EntryStacks.of(fluidKey.getRawFluid(), Fraction.of(amount.numerator, amount.denominator));
-                        }));
+            ItemStack stack = entry.getValue().copy();
+            Storage<FluidVariant> storage = FluidStorage.ITEM.find(stack, ContainerItemContext.withInitial(stack));
+            List<EntryStack<FluidStack>> result;
+            try (Transaction transaction = Transaction.openOuter()) {
+                result = StreamSupport.stream(storage.iterable(transaction).spliterator(), false)
+                        .filter(view -> !view.isResourceBlank() && !view.getResource().isBlank())
+                        .map(view -> EntryStacks.of(FluidStack.create(view.getResource().getFluid(), view.getAmount(), view.getResource().getNbt())))
+                        .collect(Collectors.toList());
+            }
+            if (!result.isEmpty()) {
+                return CompoundEventResult.interruptTrue(result.stream());
+            }
             return CompoundEventResult.pass();
         });
     }
