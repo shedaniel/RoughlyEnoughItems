@@ -48,6 +48,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -176,7 +177,7 @@ public final class InternalWidgets {
                             str.add(errorTooltip[0].get(0).copy().withStyle(ChatFormatting.RED));
                         }
                     }
-                    if (Minecraft.getInstance().options.advancedItemTooltips && displaySupplier.get().getDisplayLocation().isPresent()) {
+                    if ((Minecraft.getInstance().options.advancedItemTooltips || Screen.hasShiftDown()) && displaySupplier.get().getDisplayLocation().isPresent()) {
                         str.add(new TranslatableComponent("text.rei.recipe_id", "", new TextComponent(displaySupplier.get().getDisplayLocation().get().toString()).withStyle(ChatFormatting.GRAY)).withStyle(ChatFormatting.GRAY));
                     }
                     return str.toArray(new Component[0]);
