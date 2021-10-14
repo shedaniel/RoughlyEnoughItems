@@ -69,7 +69,6 @@ import me.shedaniel.rei.impl.client.gui.widget.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
-import me.shedaniel.rei.impl.client.search.argument.Argument;
 import me.shedaniel.rei.impl.common.util.Weather;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -218,7 +217,6 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public void init() {
-        Argument.SEARCH_CACHE.clear();
         draggingStack.set(DraggableStackProvider.from(() -> ScreenRegistry.getInstance().getDraggableProviders()),
                 DraggableStackVisitor.from(() -> ScreenRegistry.getInstance().getDraggableVisitors()));
         
