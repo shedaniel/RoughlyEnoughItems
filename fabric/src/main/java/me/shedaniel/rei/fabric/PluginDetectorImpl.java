@@ -100,7 +100,7 @@ public class PluginDetectorImpl {
         loadPlugin(REIServerPlugin.class, ((PluginView<REIServerPlugin>) PluginManager.getServerInstance())::registerPlugin);
         if (FabricLoader.getInstance().isModLoaded("libblockattributes-fluids")) {
             try {
-                PluginView.getServerInstance().registerPlugin((REIServerPlugin) Class.forName("me.shedaniel.rei.impl.common.compat.LBASupportPlugin").getConstructor().newInstance());
+                PluginView.getServerInstance().registerPlugin((REIServerPlugin) Class.forName("me.shedaniel.rei.impl.common.compat.FabricFluidAPISupportPlugin").getConstructor().newInstance());
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
             }

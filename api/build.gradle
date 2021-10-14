@@ -2,8 +2,8 @@ archivesBaseName = rootProject.name + "-" + project.name
 
 dependencies {
     modCompileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
-    modCompileOnly("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
-    modCompileOnly("dev.architectury:architectury:${architectury_version}")
+    modApi("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
+    modApi("dev.architectury:architectury:${architectury_version}")
 }
 
 architectury {
@@ -11,13 +11,15 @@ architectury {
 }
 
 remapJar {
-    afterEvaluate {
-        remapAccessWidener.set(false)
-    }
+    remapAccessWidener = false
 }
 
-java {
-    withSourcesJar()
+configurations {
+    dev
+}
+
+remapJar {
+    classifier "raw"
 }
 
 task fakeJar(type: Jar, dependsOn: remapJar) {
@@ -25,20 +27,25 @@ task fakeJar(type: Jar, dependsOn: remapJar) {
     from(rootProject.file("fake/fabric.mod.json")) {
         into ""
     }
-    archiveClassifier.set "fake"
+    classifier null
+}
+
+artifacts {
+    dev(jar)
+    apiElements(fakeJar)
+    runtimeElements(fakeJar)
+}
+
+afterEvaluate {
+    configurations.apiElements.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(tasks.remapJar) }
+    configurations.runtimeElements.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(tasks.remapJar) }
 }
 
 publishing {
     publications {
         mavenCommon(MavenPublication) {
             artifactId = rootProject.name + "-" + project.name
-            artifact(fakeJar) { classifier null }
-            afterEvaluate {
-                artifact(remapSourcesJar.output) {
-                    builtBy remapSourcesJar
-                    classifier "sources"
-                }
-            }
+            from components.java
         }
     }
 }

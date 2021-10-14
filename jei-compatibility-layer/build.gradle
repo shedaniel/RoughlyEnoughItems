@@ -8,3 +8,11 @@ dependencies {
     compileOnly(project(path: ":default-plugin")) { transitive = false }
     compileOnly('com.google.code.findbugs:jsr305:3.0.2')
 }
+
+configurations {
+    dev
+}
+
+artifacts {
+    dev(jar)
+}
