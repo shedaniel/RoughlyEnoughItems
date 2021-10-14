@@ -41,19 +41,21 @@ import java.util.List;
 public class DefaultPotionEffectExclusionZones implements ExclusionZonesProvider<EffectRenderingInventoryScreen<?>> {
     @Override
     public Collection<Rectangle> provide(EffectRenderingInventoryScreen<?> screen) {
-        if (!screen.doRenderEffects)
+        if (!screen.canSeeEffects())
             return Collections.emptyList();
         Collection<MobEffectInstance> activePotionEffects = Minecraft.getInstance().player.getActiveEffects();
-        if (activePotionEffects.isEmpty())
+        int x = screen.leftPos + screen.imageWidth + 2;
+        int availableWidth = screen.width - x;
+        if (activePotionEffects.isEmpty() || availableWidth < 32)
             return Collections.emptyList();
+        boolean fullWidth = availableWidth >= 120;
         List<Rectangle> zones = new ArrayList<>();
-        int x = screen.leftPos - 124;
         int y = screen.topPos;
         int height = 33;
         if (activePotionEffects.size() > 5)
             height = 132 / (activePotionEffects.size() - 1);
         for (MobEffectInstance instance : Ordering.natural().sortedCopy(activePotionEffects)) {
-            zones.add(new Rectangle(x, y, 166, height));
+            zones.add(new Rectangle(x, y, fullWidth ? 120 : 32, 32));
             y += height;
         }
         return zones;

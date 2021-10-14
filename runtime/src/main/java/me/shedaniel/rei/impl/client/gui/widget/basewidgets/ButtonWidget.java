@@ -291,10 +291,10 @@ public class ButtonWidget extends Button {
         // 9 Patch Texture
         
         // Four Corners
-        blit(matrices, x, y, getBlitOffset(), 0, textureOffset * 80, 8, 8, 512, 256);
-        blit(matrices, x + width - 8, y, getBlitOffset(), 248, textureOffset * 80, 8, 8, 512, 256);
-        blit(matrices, x, y + height - 8, getBlitOffset(), 0, textureOffset * 80 + 72, 8, 8, 512, 256);
-        blit(matrices, x + width - 8, y + height - 8, getBlitOffset(), 248, textureOffset * 80 + 72, 8, 8, 512, 256);
+        blit(matrices, x, y, getBlitOffset(), 0, textureOffset * 80, 8, 8, 256, 512);
+        blit(matrices, x + width - 8, y, getBlitOffset(), 248, textureOffset * 80, 8, 8, 256, 512);
+        blit(matrices, x, y + height - 8, getBlitOffset(), 0, textureOffset * 80 + 72, 8, 8, 256, 512);
+        blit(matrices, x + width - 8, y + height - 8, getBlitOffset(), 248, textureOffset * 80 + 72, 8, 8, 256, 512);
         
         Matrix4f matrix = matrices.last().pose();
         // Sides
