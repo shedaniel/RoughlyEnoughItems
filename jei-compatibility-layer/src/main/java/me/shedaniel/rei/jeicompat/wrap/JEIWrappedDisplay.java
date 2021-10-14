@@ -30,7 +30,9 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.IIngredients;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -150,5 +152,14 @@ public class JEIWrappedDisplay<T> implements Display {
     @Override
     public List<EntryIngredient> getOutputEntries() {
         return compiledOutputs;
+    }
+    
+    @Override
+    public Optional<ResourceLocation> getDisplayLocation() {
+        if (backingRecipe instanceof Recipe<?>) {
+            return Optional.ofNullable(((Recipe<?>) backingRecipe).getId());
+        }
+
+        return Optional.empty();
     }
 }

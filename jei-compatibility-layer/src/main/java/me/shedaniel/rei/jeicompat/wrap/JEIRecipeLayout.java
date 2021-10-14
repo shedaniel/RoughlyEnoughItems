@@ -33,7 +33,6 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
-import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupFluid;
@@ -136,7 +135,7 @@ public abstract class JEIRecipeLayout<T> implements IRecipeLayout {
                 wrapper.slot.highlightEnabled(!wrapper.isEmpty());
                 
                 if (wrapper.background != null) {
-                    widgets.add(Widgets.wrapRenderer(wrapper.slot.getInnerBounds().clone(), wrapDrawable(wrapper.background)));
+                    widgets.add(Widgets.withTranslate(Widgets.wrapRenderer(wrapper.slot.getInnerBounds().clone(), wrapDrawable(wrapper.background)), -1, -1, 0));
                 }
                 
                 widgets.add(Widgets.withTranslate(wrapper.slot, 0, 0, 10));

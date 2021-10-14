@@ -29,6 +29,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -46,6 +47,9 @@ import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
@@ -67,7 +71,11 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagCollection;
+import net.minecraft.tags.TagContainer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -246,8 +254,12 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             int displayWidth = getCurrentCategory().getDisplayWidth(displaySupplier.get());
             final Rectangle displayBounds = new Rectangle(getBounds().getCenterX() - displayWidth / 2, getBounds().getCenterY() + 16 - recipeHeight * (getRecipesPerPage() + 1) / 2 - 2 * (getRecipesPerPage() + 1) + recipeHeight * i + 4 * i, displayWidth, recipeHeight);
             List<Widget> setupDisplay = getCurrentCategory().setupDisplay(display, displayBounds);
+            setupTags(setupDisplay);
             transformIngredientNotice(setupDisplay, ingredientStackToNotice);
             transformResultNotice(setupDisplay, resultStackToNotice);
+            for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
+                widget.removeTagMatch = true;
+            }
             recipeBounds.put(displayBounds, setupDisplay);
             this.widgets.addAll(setupDisplay);
             if (supplier.isPresent() && supplier.get().get(displayBounds) != null)
@@ -285,6 +297,37 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         _children().addAll(tabs);
         _children().addAll(widgets);
         _children().addAll(preWidgets);
+    }
+    
+    private void setupTags(List<Widget> widgets) {
+        TagContainer tags = Minecraft.getInstance().getConnection().getTags();
+        outer:
+        for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
+            widget.removeTagMatch = false;
+            if (widget.getEntries().size() <= 1) continue;
+            EntryType<?> type = null;
+            for (EntryStack<?> entry : widget.getEntries()) {
+                if (type == null) {
+                    type = entry.getType();
+                } else if (type != entry.getType()) {
+                    continue outer;
+                }
+            }
+            // TODO: Don't hardcode
+            TagCollection<?> collection;
+            List<Object> objects;
+            if (type == VanillaEntryTypes.ITEM) {
+                collection = tags.getItems();
+                objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<ItemStack>castValue().getItem());
+            } else if (type == VanillaEntryTypes.FLUID) {
+                collection = tags.getFluids();
+                objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<FluidStack>castValue().getFluid());
+            } else continue;
+            Map.Entry<ResourceLocation, ? extends Tag<?>> firstOrNull = CollectionUtils.findFirstOrNull(collection.getAllTags().entrySet(), entry -> entry.getValue().getValues().equals(objects));
+            if (firstOrNull != null) {
+                widget.tagMatch = firstOrNull.getKey();
+            }
+        }
     }
     
     public List<Widget> getWidgets() {
