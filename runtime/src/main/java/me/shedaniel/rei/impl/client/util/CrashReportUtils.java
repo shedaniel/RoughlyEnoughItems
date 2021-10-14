@@ -35,8 +35,8 @@ public class CrashReportUtils {
         Throwable temp = throwable;
         while (temp != null) {
             temp = temp.getCause();
-            if (temp instanceof ReportedException reportedException) {
-                return essential(reportedException, task);
+            if (temp instanceof ReportedException) {
+                return essential(temp, task);
             }
         }
         CrashReport report = CrashReport.forThrowable(throwable, task);
