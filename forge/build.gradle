@@ -57,7 +57,7 @@ dependencies {
 
     common(project(path: ":jei-compatibility-layer", configuration: "dev")) { transitive false }
     shadowCommon(project(path: ":jei-compatibility-layer", configuration: "dev")) { transitive false }
-    // common(project(path: ":jei-internals-workaround")) { transitive = false }
+    // runtimeClasspath(project(path: ":jei-internals-workaround", configuration: "dev")) { transitive = false }
 
     depProjects.forEach {
         common(project(path: it, configuration: "dev")) { transitive false }
@@ -82,6 +82,8 @@ dependencies {
     // modRuntime("curse.maven:jep-417645:3198370")
     // modRuntime("curse.maven:simple-storage-network-268495:3257204")
     // modRuntime("curse.maven:create-328085:3278516")
+    modRuntime("curse.maven:industrial-foregoing-266515:3446262")
+    modRuntime("curse.maven:titanium-287342:3346366")
 }
 
 shadowJar {

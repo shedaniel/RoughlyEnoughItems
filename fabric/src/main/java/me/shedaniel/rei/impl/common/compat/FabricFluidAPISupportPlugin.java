@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -50,7 +51,7 @@ public class FabricFluidAPISupportPlugin implements REIServerPlugin {
             try (Transaction transaction = Transaction.openOuter()) {
                 result = StreamSupport.stream(storage.iterable(transaction).spliterator(), false)
                         .filter(view -> !view.isResourceBlank() && !view.getResource().isBlank())
-                        .map(view -> EntryStacks.of(FluidStack.create(view.getResource().getFluid(), view.getAmount(), view.getResource().getNbt())))
+                        .map(view -> EntryStacks.of(FluidStack.create(view.getResource().getFluid(), Fraction.of(view.getAmount(), FluidConstants.BUCKET), view.getResource().getNbt())))
                         .collect(Collectors.toList());
             }
             if (!result.isEmpty()) {
