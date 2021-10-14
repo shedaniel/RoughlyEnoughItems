@@ -5,7 +5,17 @@ dependencies {
 }
 
 loom {
-    // mixinConfig "rei-jei-internals-workaround.mixins.json"
+    forge {
+        // mixinConfig "rei-jei-internals-workaround.mixins.json"
+    }
+}
+
+configurations {
+    dev
+}
+
+artifacts {
+    dev(jar)
 }
 
 /*curseforge {
