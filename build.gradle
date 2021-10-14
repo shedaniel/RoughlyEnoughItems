@@ -32,7 +32,8 @@ subprojects {
         minecraft("com.mojang:minecraft:${rootProject.minecraft_version}")
         mappings(loom.layered {
             officialMojangMappings()
-//            crane("dev.architectury:crane:1.17+build.11")
+            parchment("org.parchmentmc.data:parchment-1.17.1:2021.10.10@zip")
+            crane("dev.architectury:crane:1.17+build.11")
         })
     }
 }
@@ -46,6 +47,7 @@ allprojects {
 
     repositories {
         maven { url "https://maven.shedaniel.me" }
+        maven { url "https://maven.parchmentmc.org" }
         maven { url "https://maven.terraformersmc.com/releases" }
     }
     
