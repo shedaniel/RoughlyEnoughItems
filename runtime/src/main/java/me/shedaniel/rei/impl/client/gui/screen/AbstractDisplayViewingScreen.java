@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.architectury.fluid.FluidStack;
+import dev.architectury.fluid.FluidStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
@@ -43,6 +43,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
@@ -179,10 +180,10 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             TagCollection<?> collection;
             List<Object> objects;
             if (type == VanillaEntryTypes.ITEM) {
-                collection = tags.getItems();
+                collection = tags.getOrEmpty(Registry.ITEM_REGISTRY);
                 objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<ItemStack>castValue().getItem());
             } else if (type == VanillaEntryTypes.FLUID) {
-                collection = tags.getFluids();
+                collection = tags.getOrEmpty(Registry.FLUID_REGISTRY);
                 objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<FluidStack>castValue().getFluid());
             } else continue;
             Map.Entry<ResourceLocation, ? extends Tag<?>> firstOrNull = CollectionUtils.findFirstOrNull(collection.getAllTags().entrySet(), entry -> entry.getValue().getValues().equals(objects));
