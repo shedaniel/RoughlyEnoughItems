@@ -493,7 +493,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
             private EntryPanelOrderingConfig entryPanelOrdering = EntryPanelOrderingConfig.REGISTRY_ASCENDING;
             @Comment("Declares the maximum amount of recipes displayed in a page if possible.") @ConfigEntry.BoundedDiscrete(min = 2, max = 99)
-            private int maxRecipesPerPage = 15;
+            private int maxRecipesPerPage = 3;
             @Comment("Declares whether entry rendering time should be debugged.") private boolean debugRenderTimeRequired = false;
         }
         
