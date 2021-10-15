@@ -8,7 +8,7 @@ license = "MIT"
 [[mods]]
 modId = "roughlyenoughitems"
 version = "${version}"
-displayName = "Roughly Enough Items"
+displayName = "Roughly Enough Items (REI)"
 description = '''
 To allow players to view items and recipes.
 '''
