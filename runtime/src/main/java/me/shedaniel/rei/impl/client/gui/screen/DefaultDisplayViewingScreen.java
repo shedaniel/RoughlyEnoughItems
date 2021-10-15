@@ -160,7 +160,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 category -> (category.getDisplayHeight() + 4) * Math.max(1, getRecipesPerPage(largestHeight, category) + 1) + 36, Comparator.naturalOrder()).orElse(66));
         int totalDisplayHeight = (getCurrentCategory().getDisplayHeight() + 4) * Math.max(1, getRecipesPerPage(maxHeight, getCurrentCategory()) + 1) + 36;
         int guiWidth = Math.max(maxWidthDisplay + 10, 190);
-        this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - maxHeight / 2, guiWidth, Math.min(maxHeight, totalDisplayHeight));
+        this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - maxHeight / 2, guiWidth, maxHeight);
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
             this.bounds.setLocation(this.bounds.getX(), this.bounds.getY() + 15);
             this.bounds.setSize(this.bounds.getWidth(), this.bounds.getHeight() - 10);
