@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.registry.display.reason.DisplayAdditionReason;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -51,6 +52,7 @@ import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
+import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
@@ -318,6 +320,7 @@ public class JEIPluginDetector {
     
     public static class JEIPluginWrapper implements REIClientPlugin {
         public final List<String> modIds;
+        public final boolean mainThread;
         public final IModPlugin backingPlugin;
         
         public final Map<DisplayCategory<?>, List<Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>>>> categories = new HashMap<>();
@@ -326,6 +329,8 @@ public class JEIPluginDetector {
         public JEIPluginWrapper(List<String> modIds, IModPlugin backingPlugin) {
             this.modIds = modIds;
             this.backingPlugin = backingPlugin;
+            // JER why are you reloading twice
+            this.mainThread = modIds.contains("jeresources");
         }
         
         @Override
@@ -349,8 +354,11 @@ public class JEIPluginDetector {
             backingPlugin.registerCategories(wrapCategoryRegistration(registry, category -> {
                 categories.put(category, new ArrayList<>());
                 
-                DisplayRegistry.getInstance().registerFiller((Class<Object>) category.getRecipeClass(), ((JEIWrappedCategory<Object>) category)::handlesRecipe,
-                        recipe -> new JEIWrappedDisplay(category, recipe));
+                DisplayRegistry.getInstance().registerFiller((Class<Object>) category.getRecipeClass(), (o, reason) ->
+                                ((JEIWrappedCategory<Object>) category).handlesRecipe(o) && !reason.has(DisplayAdditionReason.RECIPE_MANAGER),
+                        recipe -> {
+                            return new JEIWrappedDisplay<>((JEIWrappedCategory<Object>) category, recipe);
+                        });
                 DisplayRegistry.getInstance().registerFiller(JEIWrappedDisplay.class, display -> display.getCategoryIdentifier().getIdentifier().equals(category.getIdentifier()), Function.identity());
                 
                 post.add(() -> {
@@ -429,6 +437,11 @@ public class JEIPluginDetector {
         @Override
         public String getPluginProviderName() {
             return "JEI Plugin [" + backingPlugin.getPluginUid() + "]";
+        }
+        
+        @Override
+        public boolean shouldBeForcefullyDoneOnMainThread(Reloadable<?> reloadable) {
+            return mainThread;
         }
     }
 }

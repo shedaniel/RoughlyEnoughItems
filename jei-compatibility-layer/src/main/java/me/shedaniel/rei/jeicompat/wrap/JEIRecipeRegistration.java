@@ -44,6 +44,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapList;
@@ -77,7 +78,13 @@ public class JEIRecipeRegistration implements IRecipeRegistration {
     public void addRecipes(@NotNull Collection<?> recipes, @NotNull ResourceLocation categoryId) {
         post.add(() -> {
             for (Object recipe : recipes) {
-                DisplayRegistry.getInstance().add(recipe);
+                DisplayRegistry registry = DisplayRegistry.getInstance();
+                Collection<Display> displays = registry.tryFillDisplay(recipe);
+                for (Display display : displays) {
+                    if (Objects.equals(display.getCategoryIdentifier().getIdentifier(), categoryId)) {
+                        registry.add(display, recipe);
+                    }
+                }
             }
         });
     }

@@ -111,7 +111,6 @@ public abstract class JEIRecipeLayout<T> implements IRecipeLayout {
     
     @Override
     public void moveRecipeTransferButton(int posX, int posY) {
-        throw TODO();
     }
     
     @Override

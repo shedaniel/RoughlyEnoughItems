@@ -29,6 +29,7 @@ import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
+import me.shedaniel.rei.api.common.registry.Reloadable;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
@@ -106,5 +107,11 @@ public interface REIPlugin<P extends REIPlugin<?>> extends Comparable<REIPlugin<
     @Override
     default Collection<P> provide() {
         return Collections.singletonList((P) this);
+    }
+    
+    @ApiStatus.Internal
+    @ApiStatus.Experimental
+    default boolean shouldBeForcefullyDoneOnMainThread(Reloadable<?> reloadable) {
+        return false;
     }
 }

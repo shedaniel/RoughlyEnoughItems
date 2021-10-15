@@ -31,6 +31,7 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
@@ -43,6 +44,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.LazyLoadedValue;
 import org.jetbrains.annotations.Nullable;
@@ -146,23 +148,35 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
     @Override
     public List<Widget> setupDisplay(JEIWrappedDisplay<T> display, Rectangle bounds) {
         List<Widget> widgets = new ArrayList<>();
-        widgets.add(Widgets.createRecipeBase(bounds));
         IDrawable[] background = {this.background.get()};
-        JEIRecipeLayout<T> layout = createLayout(display, new Value<IDrawable>() {
+        JEIRecipeLayout<T> layout;
+        try {
+            layout = createLayout(display, new Value<IDrawable>() {
+                @Override
+                public void accept(IDrawable iDrawable) {
+                    background[0] = iDrawable;
+                }
+        
+                @Override
+                public IDrawable get() {
+                    return background[0];
+                }
+            });
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            widgets.add(Widgets.createRecipeBase(bounds).color(0xFFFF0000));
+            widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() - 8), new TextComponent("Failed to initiate JEI integration setRecipe")));
+            widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() + 1), new TextComponent("Check console for error")));
+            return widgets;
+        }
+        widgets.add(Widgets.createRecipeBase(bounds));
+        widgets.add(Widgets.withTranslate(Widgets.wrapRenderer(bounds, wrapDrawable(background[0])), 4, 4, 0));
+        widgets.add(new WidgetWithBounds() {
             @Override
-            public void accept(IDrawable iDrawable) {
-                background[0] = iDrawable;
+            public Rectangle getBounds() {
+                return bounds;
             }
-            
-            @Override
-            public IDrawable get() {
-                return background[0];
-            }
-        });
-        widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            background[0].draw(matrices, bounds.x + 4, bounds.y + 4);
-        }));
-        widgets.add(new Widget() {
+    
             @Override
             public void render(PoseStack arg, int i, int j, float f) {
                 arg.pushPose();
