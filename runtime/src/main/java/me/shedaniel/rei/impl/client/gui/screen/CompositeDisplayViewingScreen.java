@@ -160,9 +160,9 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         } catch (Throwable throwable) {
             throwable.printStackTrace();
             setupDisplay = new ArrayList<>();
-            setupDisplay.add(Widgets.createRecipeBase(bounds).color(0xFFBB0000));
-            setupDisplay.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() - 8), new TextComponent("Failed to initiate setupDisplay")));
-            setupDisplay.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() + 1), new TextComponent("Check console for error")));
+            setupDisplay.add(Widgets.createRecipeBase(recipeBounds).color(0xFFBB0000));
+            setupDisplay.add(Widgets.createLabel(new Point(recipeBounds.getCenterX(), recipeBounds.getCenterY() - 8), new TextComponent("Failed to initiate setupDisplay")));
+            setupDisplay.add(Widgets.createLabel(new Point(recipeBounds.getCenterX(), recipeBounds.getCenterY() + 1), new TextComponent("Check console for error")));
         }
         setupTags(setupDisplay);
         transformIngredientNotice(setupDisplay, ingredientStackToNotice);
