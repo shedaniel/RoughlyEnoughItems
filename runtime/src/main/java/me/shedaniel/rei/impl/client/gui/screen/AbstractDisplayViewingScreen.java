@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.google.common.collect.Lists;
+import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
@@ -33,12 +34,20 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagCollection;
+import net.minecraft.tags.TagContainer;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -148,6 +157,37 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                         break;
                     }
                 }
+            }
+        }
+    }
+    
+    protected void setupTags(List<Widget> widgets) {
+        TagContainer tags = Minecraft.getInstance().getConnection().getTags();
+        outer:
+        for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
+            widget.removeTagMatch = false;
+            if (widget.getEntries().size() <= 1) continue;
+            EntryType<?> type = null;
+            for (EntryStack<?> entry : widget.getEntries()) {
+                if (type == null) {
+                    type = entry.getType();
+                } else if (type != entry.getType()) {
+                    continue outer;
+                }
+            }
+            // TODO: Don't hardcode
+            TagCollection<?> collection;
+            List<Object> objects;
+            if (type == VanillaEntryTypes.ITEM) {
+                collection = tags.getItems();
+                objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<ItemStack>castValue().getItem());
+            } else if (type == VanillaEntryTypes.FLUID) {
+                collection = tags.getFluids();
+                objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<FluidStack>castValue().getFluid());
+            } else continue;
+            Map.Entry<ResourceLocation, ? extends Tag<?>> firstOrNull = CollectionUtils.findFirstOrNull(collection.getAllTags().entrySet(), entry -> entry.getValue().getValues().equals(objects));
+            if (firstOrNull != null) {
+                widget.tagMatch = firstOrNull.getKey();
             }
         }
     }

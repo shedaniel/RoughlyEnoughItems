@@ -23,10 +23,13 @@
 
 package me.shedaniel.rei.impl.common.plugins;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
+import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.utils.Env;
+import me.shedaniel.architectury.utils.EnvExecutor;
+import me.shedaniel.architectury.utils.GameInstance;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
@@ -36,8 +39,11 @@ import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.server.MinecraftServer;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 import java.util.*;
@@ -103,7 +109,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     @Override
     public void registerPlugin(REIPluginProvider<? extends P> plugin) {
         plugins.add((REIPluginProvider<P>) plugin);
-        RoughlyEnoughItemsCore.LOGGER.info("Registered plugin provider %s for %s", plugin.getPluginProviderName(), pluginClass.getSimpleName());
+        RoughlyEnoughItemsCore.LOGGER.info("Registered plugin provider %s for %s", plugin.getPluginProviderName(), name(pluginClass));
     }
     
     @Override
@@ -139,14 +145,31 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         return new SectionClosable(sectionData, section);
     }
     
-    private void pluginSection(MutablePair<Stopwatch, String> sectionData, String sectionName, List<P> list, Consumer<P> consumer) {
+    private void pluginSection(MutablePair<Stopwatch, String> sectionData, String sectionName, List<P> list, @Nullable Reloadable<?> reloadable, Consumer<P> consumer) {
         for (P plugin : list) {
             try (SectionClosable section = section(sectionData, sectionName + " for " + plugin.getPluginProviderName())) {
-                consumer.accept(plugin);
+                if (reloadable == null || !plugin.shouldBeForcefullyDoneOnMainThread(reloadable)) {
+                    consumer.accept(plugin);
+                } else if (Platform.getEnvironment() == Env.CLIENT) {
+                    EnvExecutor.runInEnv(Env.CLIENT, () -> () -> queueExecutionClient(() -> consumer.accept(plugin)));
+                } else {
+                    queueExecution(() -> consumer.accept(plugin));
+                }
             } catch (Throwable throwable) {
                 RoughlyEnoughItemsCore.LOGGER.error(plugin.getPluginProviderName() + " plugin failed to " + sectionName + "!", throwable);
             }
         }
+    }
+    
+    private void queueExecution(Runnable runnable) {
+        MinecraftServer server = GameInstance.getServer();
+        if (server != null) {
+            server.executeBlocking(runnable);
+        }
+    }
+    
+    private void queueExecutionClient(Runnable runnable) {
+        Minecraft.getInstance().executeBlocking(runnable);
     }
     
     @Override
@@ -155,7 +178,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         plugins.sort(Comparator.comparingDouble(P::getPriority).reversed());
         Collections.reverse(plugins);
         MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
-        pluginSection(sectionData, "pre-register", plugins, REIPlugin::preRegister);
+        pluginSection(sectionData, "pre-register", plugins, null, REIPlugin::preRegister);
     }
     
     @Override
@@ -164,7 +187,13 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         plugins.sort(Comparator.comparingDouble(P::getPriority).reversed());
         Collections.reverse(plugins);
         MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
-        pluginSection(sectionData, "post-register", plugins, REIPlugin::postRegister);
+        pluginSection(sectionData, "post-register", plugins, null, REIPlugin::postRegister);
+    }
+    
+    private static String name(Class<?> clazz) {
+        String simpleName = clazz.getSimpleName();
+        if (simpleName.isEmpty()) return clazz.getName();
+        return simpleName;
     }
     
     @Override
@@ -176,7 +205,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
             
             for (Reloadable<P> reloadable : reloadables) {
                 Class<?> reloadableClass = reloadable.getClass();
-                try (SectionClosable startReload = section(sectionData, "start-reload-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()))) {
+                try (SectionClosable startReload = section(sectionData, "start-reload-" + name(reloadableClass))) {
                     reloadable.startReload(stage);
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
@@ -185,17 +214,17 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
             
             List<P> plugins = new ArrayList<>(getPlugins().toList());
             plugins.sort(Comparator.comparingDouble(P::getPriority).reversed());
-            RoughlyEnoughItemsCore.LOGGER.info("Reloading Plugin Manager [%s] stage [%s], registered %d plugins: %s", pluginClass.getSimpleName(), stage.toString(), plugins.size(), CollectionUtils.mapAndJoinToString(plugins, REIPlugin::getPluginProviderName, ", "));
+            RoughlyEnoughItemsCore.LOGGER.info("Reloading Plugin Manager [%s] stage [%s], registered %d plugins: %s", name(pluginClass), stage.toString(), plugins.size(), CollectionUtils.mapAndJoinToString(plugins, REIPlugin::getPluginProviderName, ", "));
             Collections.reverse(plugins);
             
             for (Reloadable<P> reloadable : getReloadables()) {
                 Class<?> reloadableClass = reloadable.getClass();
-                pluginSection(sectionData, "reloadable-plugin-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()), plugins, plugin -> reloadable.acceptPlugin(plugin, stage));
+                pluginSection(sectionData, "reloadable-plugin-" + name(reloadableClass), plugins, reloadable, plugin -> reloadable.acceptPlugin(plugin, stage));
             }
             
             for (Reloadable<P> reloadable : reloadables) {
                 Class<?> reloadableClass = reloadable.getClass();
-                try (SectionClosable endReload = section(sectionData, "end-reload-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()))) {
+                try (SectionClosable endReload = section(sectionData, "end-reload-" + name(reloadableClass))) {
                     reloadable.endReload(stage);
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();

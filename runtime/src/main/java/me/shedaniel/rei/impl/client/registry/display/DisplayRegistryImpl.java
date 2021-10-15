@@ -31,6 +31,8 @@ import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.display.DynamicDisplayGenerator;
+import me.shedaniel.rei.api.client.registry.display.reason.DisplayAdditionReason;
+import me.shedaniel.rei.api.client.registry.display.reason.DisplayAdditionReasons;
 import me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibilityPredicate;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
@@ -42,6 +44,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -141,8 +144,13 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     }
     
     @Override
+    public <T, D extends Display> void registerFiller(Class<T> typeClass, BiPredicate<? extends T, DisplayAdditionReasons> predicate, Function<? extends T, D> filler) {
+        fillers.add(new DisplayFiller<>((o, s) -> typeClass.isInstance(o) && ((BiPredicate<Object, DisplayAdditionReasons>) predicate).test(o, s), (Function<Object, D>) filler));
+    }
+    
+    @Override
     public <D extends Display> void registerFiller(Predicate<?> predicate, Function<?, D> filler) {
-        fillers.add(new DisplayFiller<>((Predicate<Object>) predicate, (Function<Object, D>) filler));
+        fillers.add(new DisplayFiller<>((o, s) -> ((Predicate<Object>) predicate).test(o), (Function<Object, D>) filler));
     }
     
     @Override
@@ -161,17 +169,18 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
             List<Recipe<?>> allSortedRecipes = getAllSortedRecipes();
             for (int i = allSortedRecipes.size() - 1; i >= 0; i--) {
                 Recipe<?> recipe = allSortedRecipes.get(i);
-                add(recipe);
+                addWithReason(recipe, DisplayAdditionReason.RECIPE_MANAGER);
             }
         }
     }
     
     @Override
-    public <T> Collection<Display> tryFillDisplay(T value) {
+    public <T> Collection<Display> tryFillDisplay(T value, DisplayAdditionReason... reason) {
         if (value instanceof Display) return Collections.singleton((Display) value);
         List<Display> displays = null;
+        DisplayAdditionReasons reasons = reason.length == 0 ? DisplayAdditionReasons.Impl.EMPTY : new DisplayAdditionReasons.Impl(reason);
         for (DisplayFiller<?> filler : fillers) {
-            Display display = tryFillDisplayGenerics(filler, value);
+            Display display = tryFillDisplayGenerics(filler, value, reasons);
             if (display != null) {
                 if (displays == null) displays = Collections.singletonList(display);
                 else {
@@ -186,9 +195,9 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
         return Collections.emptyList();
     }
     
-    private <D extends Display> D tryFillDisplayGenerics(DisplayFiller<D> filler, Object value) {
+    private <D extends Display> D tryFillDisplayGenerics(DisplayFiller<D> filler, Object value, DisplayAdditionReasons reasons) {
         try {
-            if (filler.predicate.test(value)) {
+            if (filler.predicate.test(value, reasons)) {
                 return filler.mappingFunction.apply(value);
             }
         } catch (Throwable e) {
@@ -205,10 +214,10 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     }
     
     private static class DisplayFiller<D extends Display> {
-        private final Predicate<Object> predicate;
+        private final BiPredicate<Object, DisplayAdditionReasons> predicate;
         private final Function<Object, D> mappingFunction;
         
-        public DisplayFiller(Predicate<Object> predicate, Function<Object, D> mappingFunction) {
+        public DisplayFiller(BiPredicate<Object, DisplayAdditionReasons> predicate, Function<Object, D> mappingFunction) {
             this.predicate = predicate;
             this.mappingFunction = mappingFunction;
         }
