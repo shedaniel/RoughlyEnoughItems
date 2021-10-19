@@ -24,12 +24,12 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapCategoryId;
 
 public enum JEIRecipeCatalystRegistration implements IRecipeCatalystRegistration {
     INSTANCE;
@@ -37,7 +37,7 @@ public enum JEIRecipeCatalystRegistration implements IRecipeCatalystRegistration
     @Override
     public void addRecipeCatalyst(@NotNull Object ingredient, @NotNull ResourceLocation @NotNull ... categoryIds) {
         for (ResourceLocation id : categoryIds) {
-            CategoryRegistry.getInstance().addWorkstations(CategoryIdentifier.of(id), wrap(ingredient));
+            CategoryRegistry.getInstance().addWorkstations(wrapCategoryId(id), wrap(ingredient));
         }
     }
 }

@@ -37,7 +37,6 @@ import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
-import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.Minecraft;
@@ -53,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapCategoryId;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapDrawable;
 
 public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<T>> {
@@ -63,7 +63,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
     public JEIWrappedCategory(IRecipeCategory<T> backingCategory) {
         this.backingCategory = backingCategory;
         this.background = new LazyLoadedValue<>(backingCategory::getBackground);
-        this.identifier = CategoryIdentifier.of(backingCategory.getUid());
+        this.identifier = wrapCategoryId(backingCategory.getUid());
     }
     
     public Class<? extends T> getRecipeClass() {
@@ -156,7 +156,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
                 public void accept(IDrawable iDrawable) {
                     background[0] = iDrawable;
                 }
-        
+                
                 @Override
                 public IDrawable get() {
                     return background[0];
@@ -176,7 +176,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
             public Rectangle getBounds() {
                 return bounds;
             }
-    
+            
             @Override
             public void render(PoseStack arg, int i, int j, float f) {
                 arg.pushPose();

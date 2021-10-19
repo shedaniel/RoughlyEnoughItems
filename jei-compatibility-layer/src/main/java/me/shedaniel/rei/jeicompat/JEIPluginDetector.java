@@ -57,6 +57,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
 import me.shedaniel.rei.jeicompat.wrap.*;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -150,7 +151,7 @@ public class JEIPluginDetector {
             @Override
             @NotNull
             public <T> List<T> getRecipes(@NotNull IRecipeCategory<T> recipeCategory) {
-                CategoryIdentifier<Display> categoryId = CategoryIdentifier.of(recipeCategory.getUid());
+                CategoryIdentifier<Display> categoryId = wrapCategoryId(recipeCategory.getUid());
                 return wrapRecipes(categoryId, false);
             }
         };
@@ -208,6 +209,28 @@ public class JEIPluginDetector {
     
     public static ComparisonContext wrapContext(UidContext context) {
         return context == UidContext.Recipe ? ComparisonContext.FUZZY : ComparisonContext.EXACT;
+    }
+    
+    public static final Map<ResourceLocation, CategoryIdentifier<?>> CATEGORY_ID_MAP = new HashMap<>();
+    
+    static {
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "crafting"), BuiltinPlugin.CRAFTING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "stonecutting"), BuiltinPlugin.STONE_CUTTING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "furnace"), BuiltinPlugin.SMELTING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "smoking"), BuiltinPlugin.SMOKING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "blasting"), BuiltinPlugin.BLASTING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "campfire"), BuiltinPlugin.CAMPFIRE);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "brewing"), BuiltinPlugin.BREWING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "anvil"), BuiltinPlugin.ANVIL);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "smithing"), BuiltinPlugin.SMITHING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "compostable"), BuiltinPlugin.COMPOSTING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "information"), BuiltinPlugin.INFO);
+    }
+    
+    public static <T extends Display> CategoryIdentifier<T> wrapCategoryId(ResourceLocation id) {
+        CategoryIdentifier<?> identifier = CATEGORY_ID_MAP.get(id);
+        if (identifier != null) return (CategoryIdentifier<T>) identifier;
+        return CategoryIdentifier.of(id);
     }
     
     public static <T> EntryStack<T> wrap(IIngredientType<T> type, T stack) {

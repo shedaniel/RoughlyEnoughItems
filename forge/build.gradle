@@ -88,6 +88,8 @@ dependencies {
     // modRuntime("curse.maven:titanium-287342:3346366")
     // modRuntime("curse.maven:extended-crafting-268387:3470453")
     // modRuntime("curse.maven:cucumber-272335:3349690")
+    // modRuntime("curse.maven:crafttweaker-239197:3494644")
+    // modRuntime("curse.maven:jeitweaker-368718:3468722")
 }
 
 shadowJar {
