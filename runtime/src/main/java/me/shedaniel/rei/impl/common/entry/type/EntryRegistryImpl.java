@@ -34,10 +34,12 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextImpl;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextType;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -46,6 +48,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -58,8 +61,8 @@ import java.util.stream.Stream;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class EntryRegistryImpl implements EntryRegistry {
-    private final List<EntryStack<?>> preFilteredList = Lists.newCopyOnWriteArrayList();
-    private final List<EntryStack<?>> entries = Lists.newCopyOnWriteArrayList();
+    private List<EntryStack<?>> preFilteredList = Lists.newCopyOnWriteArrayList();
+    private List<EntryStack<?>> entries = Lists.newCopyOnWriteArrayList();
     @Nullable
     private List<HashedEntryStackWrapper> reloadingRegistry;
     private boolean reloading;
@@ -76,22 +79,17 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     public void startReload() {
-        entries.clear();
-        if (reloadingRegistry != null) {
-            reloadingRegistry.clear();
-        }
+        entries = Lists.newCopyOnWriteArrayList();
         reloadingRegistry = Lists.newArrayListWithCapacity(Registry.ITEM.keySet().size() + 100);
-        preFilteredList.clear();
+        preFilteredList = Lists.newCopyOnWriteArrayList();
         reloading = true;
     }
     
     @Override
     public void endReload() {
         reloading = false;
-        preFilteredList.clear();
-        reloadingRegistry.removeIf(HashedEntryStackWrapper::isEmpty);
-        entries.clear();
-        entries.addAll(CollectionUtils.map(reloadingRegistry, HashedEntryStackWrapper::unwrap));
+        preFilteredList = Lists.newCopyOnWriteArrayList();
+        entries = Lists.newCopyOnWriteArrayList(CollectionUtils.filterAndMap(reloadingRegistry, ((Predicate<HashedEntryStackWrapper>) HashedEntryStackWrapper::isEmpty).negate(), HashedEntryStackWrapper::unwrap));
         reloadingRegistry = null;
         refilter();
     }
@@ -127,15 +125,13 @@ public class EntryRegistryImpl implements EntryRegistry {
         
         Set<HashedEntryStackWrapper> hiddenStacks = context.stacks.get(FilteringContextType.HIDDEN);
         if (hiddenStacks.isEmpty()) {
-            preFilteredList.clear();
-            preFilteredList.addAll(entries);
+            preFilteredList = Lists.newCopyOnWriteArrayList(entries);
         } else {
-            preFilteredList.clear();
-            preFilteredList.addAll(entries.parallelStream()
+            preFilteredList = entries.parallelStream()
                     .map(HashedEntryStackWrapper::new)
                     .filter(not(hiddenStacks::contains))
                     .map(HashedEntryStackWrapper::unwrap)
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toCollection(Lists::newCopyOnWriteArrayList));
         }
         
         RoughlyEnoughItemsCore.LOGGER.debug("Refiltered %d entries with %d rules in %s.", entries.size() - preFilteredList.size(), rules.size(), stopwatch.stop().toString());
@@ -168,6 +164,8 @@ public class EntryRegistryImpl implements EntryRegistry {
                 reloadingRegistry.add(index, new HashedEntryStackWrapper(stack));
             } else reloadingRegistry.add(new HashedEntryStackWrapper(stack));
         } else {
+            preFilteredList.addAll(refilterNew(Collections.singletonList(stack)));
+            queueSearchUpdate();
             if (afterEntry != null) {
                 int index = entries.lastIndexOf(afterEntry);
                 entries.add(index, stack);
@@ -183,10 +181,47 @@ public class EntryRegistryImpl implements EntryRegistry {
                 reloadingRegistry.addAll(index, CollectionUtils.mapParallel(stacks, HashedEntryStackWrapper::new));
             } else reloadingRegistry.addAll(CollectionUtils.mapParallel(stacks, HashedEntryStackWrapper::new));
         } else {
+            preFilteredList.addAll(refilterNew((Collection<EntryStack<?>>) stacks));
+            queueSearchUpdate();
             if (afterEntry != null) {
                 int index = entries.lastIndexOf(afterEntry);
                 entries.addAll(index, stacks);
             } else entries.addAll(stacks);
+        }
+    }
+    
+    private void queueSearchUpdate() {
+        if (REIRuntimeImpl.getSearchField() != null) {
+            ScreenOverlayImpl.getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
+        }
+    }
+    
+    private MutableLong lastRefilterWarning = new MutableLong(-1);
+    
+    private Collection<EntryStack<?>> refilterNew(Collection<EntryStack<?>> entries) {
+        if (lastRefilterWarning != null) {
+            if (lastRefilterWarning.getValue() > 0 && System.currentTimeMillis() - lastRefilterWarning.getValue() > 5000) {
+                RoughlyEnoughItemsCore.LOGGER.warn("Detected runtime EntryRegistry modification, this can be extremely dangerous, or be extremely inefficient!");
+            }
+            lastRefilterWarning.setValue(System.currentTimeMillis());
+        }
+        
+        FilteringContextImpl context = new FilteringContextImpl(entries);
+        List<FilteringRule<?>> rules = ((ConfigObjectImpl) ConfigObject.getInstance()).getFilteringRules();
+        for (int i = rules.size() - 1; i >= 0; i--) {
+            FilteringRule<?> rule = rules.get(i);
+            context.handleResult(rule.processFilteredStacks(context));
+        }
+        
+        Set<HashedEntryStackWrapper> hiddenStacks = context.stacks.get(FilteringContextType.HIDDEN);
+        if (hiddenStacks.isEmpty()) {
+            return entries;
+        } else {
+            return entries.parallelStream()
+                    .map(HashedEntryStackWrapper::new)
+                    .filter(not(hiddenStacks::contains))
+                    .map(HashedEntryStackWrapper::unwrap)
+                    .collect(Collectors.toList());
         }
     }
     
@@ -203,6 +238,7 @@ public class EntryRegistryImpl implements EntryRegistry {
         if (reloading) {
             return reloadingRegistry.remove(new HashedEntryStackWrapper(stack));
         } else {
+            preFilteredList.remove(stack);
             return entries.remove(stack);
         }
     }
@@ -212,6 +248,7 @@ public class EntryRegistryImpl implements EntryRegistry {
         if (reloading) {
             return reloadingRegistry.removeIf(wrapper -> ((Predicate<EntryStack<?>>) predicate).test(wrapper.unwrap()));
         } else {
+            preFilteredList.removeIf((Predicate<EntryStack<?>>) predicate);
             return entries.removeIf((Predicate<EntryStack<?>>) predicate);
         }
     }
@@ -221,6 +258,7 @@ public class EntryRegistryImpl implements EntryRegistry {
         if (reloading) {
             return reloadingRegistry.removeIf(wrapper -> predicate.test(wrapper.hashExact()));
         } else {
+            preFilteredList.removeIf(stack -> predicate.test(EntryStacks.hashExact(stack)));
             return entries.removeIf(stack -> predicate.test(EntryStacks.hashExact(stack)));
         }
     }
@@ -230,6 +268,7 @@ public class EntryRegistryImpl implements EntryRegistry {
         if (reloading) {
             return reloadingRegistry.removeIf(wrapper -> predicate.test(EntryStacks.hashFuzzy(wrapper.unwrap())));
         } else {
+            preFilteredList.removeIf(stack -> predicate.test(EntryStacks.hashFuzzy(stack)));
             return entries.removeIf(stack -> predicate.test(EntryStacks.hashFuzzy(stack)));
         }
     }
