@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.common.plugins;
 
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
@@ -61,18 +62,18 @@ public interface PluginView<P extends REIPlugin<?>> {
             }
             
             @Override
-            public void pre() {
-                PluginView.this.pre();
+            public void pre(ReloadStage stage) {
+                PluginView.this.pre(stage);
             }
             
             @Override
-            public void post() {
-                PluginView.this.post();
+            public void post(ReloadStage stage) {
+                PluginView.this.post(stage);
             }
         };
     }
     
-    void pre();
+    void pre(ReloadStage stage);
     
-    void post();
+    void post(ReloadStage stage);
 }

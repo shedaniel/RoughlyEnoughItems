@@ -123,12 +123,14 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     }
     
     private static class SectionClosable implements Closeable {
+        private ReloadStage stage;
         private MutablePair<Stopwatch, String> sectionData;
         
-        public SectionClosable(MutablePair<Stopwatch, String> sectionData, String section) {
-            this.sectionData = sectionData;
+        public SectionClosable(ReloadStage stage, String section) {
+            this.stage = stage;
+            this.sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
             sectionData.setRight(section);
-            RoughlyEnoughItemsCore.LOGGER.debug("Reloading Section: \"%s\"", section);
+            RoughlyEnoughItemsCore.LOGGER.debug("[" + stage + "] Reloading Section: \"%s\"", section);
             sectionData.getLeft().reset().start();
         }
         
@@ -136,18 +138,18 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         public void close() {
             sectionData.getLeft().stop();
             String section = sectionData.getRight();
-            RoughlyEnoughItemsCore.LOGGER.debug("Reloading Section: \"%s\" done in %s", section, sectionData.getLeft().toString());
+            RoughlyEnoughItemsCore.LOGGER.debug("[" + stage + "] Reloading Section: \"%s\" done in %s", section, sectionData.getLeft().toString());
             sectionData.getLeft().reset();
         }
     }
     
-    private SectionClosable section(MutablePair<Stopwatch, String> sectionData, String section) {
-        return new SectionClosable(sectionData, section);
+    private SectionClosable section(ReloadStage stage, String section) {
+        return new SectionClosable(stage, section);
     }
     
-    private void pluginSection(MutablePair<Stopwatch, String> sectionData, String sectionName, List<P> list, @Nullable Reloadable<?> reloadable, Consumer<P> consumer) {
+    private void pluginSection(ReloadStage stage, String sectionName, List<P> list, @Nullable Reloadable<?> reloadable, Consumer<P> consumer) {
         for (P plugin : list) {
-            try (SectionClosable section = section(sectionData, sectionName + " for " + plugin.getPluginProviderName())) {
+            try (SectionClosable section = section(stage, sectionName + plugin.getPluginProviderName() + "/")) {
                 if (reloadable == null || !plugin.shouldBeForcefullyDoneOnMainThread(reloadable)) {
                     consumer.accept(plugin);
                 } else if (Platform.getEnvironment() == Env.CLIENT) {
@@ -173,21 +175,29 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     }
     
     @Override
-    public void pre() {
+    public void pre(ReloadStage stage) {
         List<P> plugins = new ArrayList<>(getPlugins().toList());
         plugins.sort(Comparator.comparingDouble(P::getPriority).reversed());
         Collections.reverse(plugins);
-        MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
-        pluginSection(sectionData, "pre-register", plugins, null, REIPlugin::preRegister);
+        try (SectionClosable preRegister = section(stage, "pre-register/")) {
+            pluginSection(stage, "pre-register/", plugins, null, plugin -> {
+                plugin.preRegister();
+                ((REIPlugin<P>) plugin).preStage(this, stage);
+            });
+        }
     }
     
     @Override
-    public void post() {
+    public void post(ReloadStage stage) {
         List<P> plugins = new ArrayList<>(getPlugins().toList());
         plugins.sort(Comparator.comparingDouble(P::getPriority).reversed());
         Collections.reverse(plugins);
-        MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
-        pluginSection(sectionData, "post-register", plugins, null, REIPlugin::postRegister);
+        try (SectionClosable postRegister = section(stage, "post-register/")) {
+            pluginSection(stage, "post-register/", plugins, null, plugin -> {
+                plugin.postRegister();
+                ((REIPlugin<P>) plugin).postStage(this, stage);
+            });
+        }
     }
     
     private static String name(Class<?> clazz) {
@@ -201,14 +211,15 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         try {
             reloading = true;
             long startTime = Util.getMillis();
-            MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
             
-            for (Reloadable<P> reloadable : reloadables) {
-                Class<?> reloadableClass = reloadable.getClass();
-                try (SectionClosable startReload = section(sectionData, "start-reload-" + name(reloadableClass))) {
-                    reloadable.startReload(stage);
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
+            try (SectionClosable startReloadAll = section(stage, "start-reload/")) {
+                for (Reloadable<P> reloadable : reloadables) {
+                    Class<?> reloadableClass = reloadable.getClass();
+                    try (SectionClosable startReload = section(stage, "start-reload/" + name(reloadableClass) + "/")) {
+                        reloadable.startReload(stage);
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
                 }
             }
             
@@ -219,15 +230,19 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
             
             for (Reloadable<P> reloadable : getReloadables()) {
                 Class<?> reloadableClass = reloadable.getClass();
-                pluginSection(sectionData, "reloadable-plugin-" + name(reloadableClass), plugins, reloadable, plugin -> reloadable.acceptPlugin(plugin, stage));
+                try (SectionClosable reloadablePlugin = section(stage, "reloadable-plugin/" + name(reloadableClass) + "/")) {
+                    pluginSection(stage, "reloadable-plugin/" + name(reloadableClass) + "/", plugins, reloadable, plugin -> reloadable.acceptPlugin(plugin, stage));
+                }
             }
             
-            for (Reloadable<P> reloadable : reloadables) {
-                Class<?> reloadableClass = reloadable.getClass();
-                try (SectionClosable endReload = section(sectionData, "end-reload-" + name(reloadableClass))) {
-                    reloadable.endReload(stage);
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
+            try (SectionClosable endReloadAll = section(stage, "end-reload/")) {
+                for (Reloadable<P> reloadable : reloadables) {
+                    Class<?> reloadableClass = reloadable.getClass();
+                    try (SectionClosable endReload = section(stage, "end-reload/" + name(reloadableClass) + "/")) {
+                        reloadable.endReload(stage);
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
                 }
             }
             
