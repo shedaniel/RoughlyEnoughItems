@@ -49,9 +49,12 @@ import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
@@ -254,6 +257,18 @@ public class JEIPluginDetector {
         return EntryIngredients.of(definition, stack);
     }
     
+    public static <T> EntryType<T> wrapEntryType(IIngredientType<T> type) {
+        if (type.getIngredientClass() == FluidStack.class) {
+            return VanillaEntryTypes.FLUID.cast();
+        }
+        for (EntryDefinition<?> definition : EntryTypeRegistry.getInstance().values()) {
+            if (Objects.equals(definition.getValueType(), type.getIngredientClass())) {
+                return definition.getType().cast();
+            }
+        }
+        throw new IllegalArgumentException("Unknown JEI Ingredient Type! " + type.getIngredientClass().getName());
+    }
+    
     public static <T> EntryDefinition<T> wrapEntryDefinition(IIngredientType<T> type) {
         if (type.getIngredientClass() == FluidStack.class) {
             return VanillaEntryTypes.FLUID.getDefinition().cast();
@@ -441,20 +456,22 @@ public class JEIPluginDetector {
         public void registerTransferHandlers(TransferHandlerRegistry registry) {
             backingPlugin.registerRecipeTransferHandlers(new JEIRecipeTransferRegistration(post::add));
         }
-        
+    
         @Override
-        public void postRegister() {
-            for (Map.Entry<DisplayCategory<?>, List<Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>>>> entry : categories.entrySet()) {
-                DisplayCategory<?> category = entry.getKey();
-                for (Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>> pair : entry.getValue()) {
+        public void postStage(PluginManager<REIClientPlugin> manager, ReloadStage stage) {
+            if (stage == ReloadStage.END && Objects.equals(manager, PluginManager.getClientInstance())) {
+                for (Map.Entry<DisplayCategory<?>, List<Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>>>> entry : categories.entrySet()) {
+                    DisplayCategory<?> category = entry.getKey();
+                    for (Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>> pair : entry.getValue()) {
 //                    DisplayRegistry.getInstance().registerFiller(pair.getLeft(), pair.getMiddle(), );
+                    }
                 }
+                backingPlugin.onRuntimeAvailable(JEIJeiRuntime.INSTANCE);
+                for (Runnable runnable : post) {
+                    runnable.run();
+                }
+                post.clear();
             }
-            backingPlugin.onRuntimeAvailable(JEIJeiRuntime.INSTANCE);
-            for (Runnable runnable : post) {
-                runnable.run();
-            }
-            post.clear();
         }
         
         @Override

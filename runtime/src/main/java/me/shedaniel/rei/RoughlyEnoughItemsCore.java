@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei;
 
+import com.google.common.collect.ImmutableList;
 import dev.architectury.platform.Platform;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.utils.Env;
@@ -50,6 +51,10 @@ import me.shedaniel.rei.impl.common.entry.comparison.ItemComparatorRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.comparison.NbtHasherProviderImpl;
 import me.shedaniel.rei.impl.common.entry.type.EntryTypeRegistryImpl;
 import me.shedaniel.rei.impl.common.fluid.FluidSupportProviderImpl;
+import me.shedaniel.rei.impl.common.logging.FileLogger;
+import me.shedaniel.rei.impl.common.logging.Log4JLogger;
+import me.shedaniel.rei.impl.common.logging.Logger;
+import me.shedaniel.rei.impl.common.logging.MultiLogger;
 import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
 import me.shedaniel.rei.impl.common.registry.RecipeManagerContextImpl;
 import me.shedaniel.rei.impl.common.transfer.MenuInfoRegistryImpl;
@@ -58,7 +63,6 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Function;
@@ -67,7 +71,10 @@ import java.util.function.UnaryOperator;
 @ApiStatus.Internal
 public class RoughlyEnoughItemsCore {
     @ApiStatus.Internal
-    public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
+    public static final Logger LOGGER = new MultiLogger(ImmutableList.of(
+            new FileLogger(Platform.getGameFolder().resolve("logs/rei.log")),
+            new Log4JLogger(LogManager.getFormatterLogger("REI"))
+    ));
     
     static {
         attachCommonInternals();
@@ -123,13 +130,13 @@ public class RoughlyEnoughItemsCore {
         }
         try {
             for (PluginManager<? extends REIPlugin<?>> instance : PluginManager.getActiveInstances()) {
-                instance.view().pre();
+                instance.view().pre(stage);
             }
             for (PluginManager<? extends REIPlugin<?>> instance : PluginManager.getActiveInstances()) {
                 instance.startReload(stage);
             }
             for (PluginManager<? extends REIPlugin<?>> instance : PluginManager.getActiveInstances()) {
-                instance.view().post();
+                instance.view().post(stage);
             }
         } catch (Throwable throwable) {
             throwable.printStackTrace();

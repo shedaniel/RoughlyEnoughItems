@@ -23,12 +23,11 @@
 
 package me.shedaniel.rei.impl.common.entry.comparison;
 
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparatorRegistry;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.IdentityHashMap;
@@ -36,14 +35,13 @@ import java.util.Map;
 
 @ApiStatus.Internal
 public abstract class EntryComparatorRegistryImpl<T, S> implements EntryComparatorRegistry<T, S> {
-    private static final Logger LOGGER = LogManager.getLogger(EntryComparatorRegistryImpl.class);
     private final Map<S, EntryComparator<T>> comparators = new IdentityHashMap<>();
     
     @Override
     public void register(EntryComparator<T> comparator, S entry) {
         EntryComparator<T> put = this.comparators.put(entry, comparator);
         if (put != null) {
-            LOGGER.warn("[REI] Overriding " + put + "entry comparator with " + comparator + "for " + entry + "! This may result in unwanted comparisons!");
+            RoughlyEnoughItemsCore.LOGGER.warn("[REI] Overriding " + put + "entry comparator with " + comparator + "for " + entry + "! This may result in unwanted comparisons!");
         }
     }
     

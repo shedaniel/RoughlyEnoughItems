@@ -27,7 +27,7 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -52,9 +52,9 @@ public enum JEIIngredientManager implements IIngredientManager {
     @Override
     @NotNull
     public <V> Collection<V> getAllIngredients(@NotNull IIngredientType<V> ingredientType) {
-        EntryDefinition<V> definition = wrapEntryDefinition(ingredientType);
+        EntryType<V> definition = wrapEntryType(ingredientType);
         return EntryRegistry.getInstance().getEntryStacks()
-                .filter(stack -> Objects.equals(stack.getDefinition(), definition))
+                .filter(stack -> Objects.equals(stack.getType(), definition))
                 .<EntryStack<V>>map(EntryStack::cast)
                 .map(JEIPluginDetector::unwrap)
                 .collect(Collectors.toList());
