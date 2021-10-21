@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.config.entries;
+package me.shedaniel.rei.impl.client.gui.performance.entry;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.Window;
@@ -30,6 +30,7 @@ import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.impl.client.gui.performance.PerformanceScreen;
 import me.shedaniel.rei.impl.client.gui.screen.ConfigReloadingScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -45,28 +46,17 @@ import java.util.List;
 import java.util.Optional;
 
 @ApiStatus.Internal
-public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
+public class PerformanceEntry extends AbstractConfigListEntry<Unit> {
     private int width;
     private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
-        RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
-        RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
-    }) {
-        @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            if (PluginManager.areAnyReloading()) {
-                Screen screen = Minecraft.getInstance().screen;
-                Minecraft.getInstance().setScreen(new ConfigReloadingScreen(() -> Minecraft.getInstance().setScreen(screen)));
-            } else {
-                super.render(matrices, mouseX, mouseY, delta);
-            }
-        }
-    };
+        Minecraft.getInstance().setScreen(new PerformanceScreen(Minecraft.getInstance().screen));
+    });
     private List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
-    public ReloadPluginsEntry(int width) {
+    public PerformanceEntry(int width) {
         super(NarratorChatListener.NO_TITLE, false);
         this.width = width;
-        buttonWidget.setMessage(new TranslatableComponent("text.rei.reload_config"));
+        buttonWidget.setMessage(new TranslatableComponent("text.rei.performance"));
     }
     
     @Override

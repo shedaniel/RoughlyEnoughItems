@@ -55,6 +55,8 @@ import me.shedaniel.rei.impl.common.logging.FileLogger;
 import me.shedaniel.rei.impl.common.logging.Log4JLogger;
 import me.shedaniel.rei.impl.common.logging.Logger;
 import me.shedaniel.rei.impl.common.logging.MultiLogger;
+import me.shedaniel.rei.impl.common.logging.performance.PerformanceLogger;
+import me.shedaniel.rei.impl.common.logging.performance.PerformanceLoggerImpl;
 import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
 import me.shedaniel.rei.impl.common.registry.RecipeManagerContextImpl;
 import me.shedaniel.rei.impl.common.transfer.MenuInfoRegistryImpl;
@@ -75,6 +77,7 @@ public class RoughlyEnoughItemsCore {
             new FileLogger(Platform.getGameFolder().resolve("logs/rei.log")),
             new Log4JLogger(LogManager.getFormatterLogger("REI"))
     ));
+    public static final PerformanceLogger PERFORMANCE_LOGGER = new PerformanceLoggerImpl();
     
     static {
         attachCommonInternals();
@@ -151,7 +154,10 @@ public class RoughlyEnoughItemsCore {
         if (Platform.getEnvironment() == Env.SERVER) {
             MutableLong lastReload = new MutableLong(-1);
             ReloadListeners.registerReloadListener(PackType.SERVER_DATA, (preparationBarrier, resourceManager, profilerFiller, profilerFiller2, executor, executor2) -> {
-                return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(() -> RoughlyEnoughItemsCore._reloadPlugins(null), executor2);
+                return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(() -> {
+                    PERFORMANCE_LOGGER.clear();
+                    RoughlyEnoughItemsCore._reloadPlugins(null);
+                }, executor2);
             });
         }
     }
