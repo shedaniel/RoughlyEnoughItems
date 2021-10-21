@@ -38,6 +38,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
@@ -58,6 +59,11 @@ import java.util.stream.Collectors;
 @ApiStatus.Internal
 public class ViewsImpl implements Views {
     public static Map<DisplayCategory<?>, List<Display>> buildMapFor(ViewSearchBuilder builder) {
+        if (PluginManager.areAnyReloading()) {
+            RoughlyEnoughItemsCore.LOGGER.info("Cancelled Views buildMap since plugins have not finished reloading.");
+            return Maps.newLinkedHashMap();
+        }
+        
         Stopwatch stopwatch = Stopwatch.createStarted();
         Set<CategoryIdentifier<?>> categories = builder.getCategories();
         List<EntryStack<?>> recipesFor = builder.getRecipesFor();
@@ -131,11 +137,11 @@ public class ViewsImpl implements Views {
             if (CategoryRegistry.getInstance().isCategoryInvisible(category)) continue;
             Set<Display> set = new LinkedHashSet<>();
             generatorsCount += entry.getValue().size();
-    
+            
             for (DynamicDisplayGenerator<Display> generator : (List<DynamicDisplayGenerator<Display>>) (List<? extends DynamicDisplayGenerator<?>>) entry.getValue()) {
                 generateLiveDisplays(displayRegistry, generator, builder, set::add);
             }
-    
+            
             if (!set.isEmpty()) {
                 CollectionUtils.getOrPutEmptyList(result, category).addAll(set);
             }
@@ -194,6 +200,10 @@ public class ViewsImpl implements Views {
     
     @Override
     public Collection<EntryStack<?>> findCraftableEntriesByMaterials() {
+        if (PluginManager.areAnyReloading()) {
+            return Collections.emptySet();
+        }
+        
         AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
         Set<EntryStack<?>> craftables = new HashSet<>();
         for (Map.Entry<CategoryIdentifier<?>, List<Display>> entry : DisplayRegistry.getInstance().getAll().entrySet()) {

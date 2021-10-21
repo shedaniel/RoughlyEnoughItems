@@ -52,8 +52,10 @@ public final class IssuesDetector {
                     if (ignoreFile.exists()) {
                         return;
                     }
+                    RoughlyEnoughItemsState.warn(issue.getRight());
+                } else {
+                    RoughlyEnoughItemsState.error(issue.getRight());
                 }
-                RoughlyEnoughItemsState.warn(issue.getRight());
                 RoughlyEnoughItemsState.onContinue(() -> {
                     try {
                         if (issue.getMiddle() != null) {

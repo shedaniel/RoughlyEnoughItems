@@ -306,7 +306,20 @@ public class CollectionUtils {
             @Override
             public List<T> next() {
                 int cursor = i++ * size;
-                return list.subList(cursor, cursor + Math.min(list.size() - cursor, size));
+                int realSize = Math.min(list.size() - cursor, size);
+                return new AbstractList<T>() {
+                    @Override
+                    public T get(int index) {
+                        if (index < 0 || index >= realSize)
+                            throw new IndexOutOfBoundsException(String.format("Index %s out of bounds for length %s", index, realSize));
+                        return list.get(cursor + index);
+                    }
+                    
+                    @Override
+                    public int size() {
+                        return realSize;
+                    }
+                };
             }
         };
     }

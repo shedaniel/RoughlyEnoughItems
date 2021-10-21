@@ -33,6 +33,13 @@ public class MultiLogger implements Logger {
     }
     
     @Override
+    public void throwException(Throwable throwable) {
+        for (Logger logger : loggers) {
+            logger.throwException(throwable);
+        }
+    }
+    
+    @Override
     public void log(Level level, String message) {
         for (Logger logger : loggers) {
             logger.log(level, message);

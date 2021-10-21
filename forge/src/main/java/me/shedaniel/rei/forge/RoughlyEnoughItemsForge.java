@@ -38,7 +38,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.objectweb.asm.Type;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;

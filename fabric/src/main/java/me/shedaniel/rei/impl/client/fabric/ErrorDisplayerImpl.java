@@ -23,16 +23,29 @@
 
 package me.shedaniel.rei.impl.client.fabric;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 public class ErrorDisplayerImpl {
     public static List<Consumer<Screen>> consumerList = new ArrayList<>();
     
-    public static void registerGuiInit(Consumer<Screen> consumer) {
-        consumerList.add(consumer);
+    public static void registerGuiInit(UnaryOperator<Screen> consumer) {
+        consumerList.add(screen -> {
+            Screen screen1 = consumer.apply(screen);
+            if (screen1 != null) {
+                Minecraft minecraft = Minecraft.getInstance();
+                try {
+                    if (minecraft.screen != null) minecraft.screen.removed();
+                } catch (Throwable ignored) {
+                }
+                minecraft.screen = null;
+                minecraft.setScreen(screen1);
+            }
+        });
     }
 }
