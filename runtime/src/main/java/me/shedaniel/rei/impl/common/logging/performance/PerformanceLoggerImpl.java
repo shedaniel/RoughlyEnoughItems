@@ -76,6 +76,7 @@ public class PerformanceLoggerImpl implements PerformanceLogger {
         public void close() {
             stopwatch.stop();
             totalTime += stopwatch.elapsed(TimeUnit.NANOSECONDS);
+            stopwatch.reset();
         }
         
         @Override
