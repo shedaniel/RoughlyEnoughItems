@@ -21,31 +21,17 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat;
+package me.shedaniel.rei.jeicompat.imitator;
 
-import me.shedaniel.rei.jeicompat.wrap.JEIIngredientFilter;
-import me.shedaniel.rei.jeicompat.wrap.JEIIngredientManager;
-import me.shedaniel.rei.jeicompat.wrap.JEIJeiHelpers;
-import me.shedaniel.rei.jeicompat.wrap.JEIJeiRuntime;
-import mezz.jei.api.helpers.IJeiHelpers;
-import mezz.jei.api.runtime.IIngredientFilter;
-import mezz.jei.api.runtime.IIngredientManager;
-import mezz.jei.api.runtime.IJeiRuntime;
+import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
-public class JEIInternalsImitator {
-    public static IJeiHelpers getHelpers() {
-        return JEIJeiHelpers.INSTANCE;
-    }
+public interface JEIInternalsClickedIngredient<V> {
+    V getValue();
     
-    public static IJeiRuntime getRuntime() {
-        return JEIJeiRuntime.INSTANCE;
-    }
+    @Nullable
+    Rect2i getArea();
     
-    public static IIngredientManager getIngredientManager() {
-        return JEIIngredientManager.INSTANCE;
-    }
-    
-    public static IIngredientFilter getIngredientFilter() {
-        return JEIIngredientFilter.INSTANCE;
-    }
+    ItemStack getCheatItemStack();
 }

@@ -21,33 +21,39 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.forge;
+package mezz.jei.util;
 
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraftforge.client.event.GuiOpenEvent;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.language.LanguageInfo;
+import net.minecraft.client.resources.language.LanguageManager;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.UnaryOperator;
+import java.util.Locale;
 
-public class ErrorDisplayerImpl {
-    private static final List<UnaryOperator<Screen>> CONSUMERS = new ArrayList<>();
-    
-    static {
-        MinecraftForge.EVENT_BUS.addListener(ErrorDisplayerImpl::onGuiOpen);
+public class Translator {
+    public static String translateToLocal(String key) {
+        return I18n.get(key);
     }
     
-    public static void registerGuiInit(UnaryOperator<Screen> consumer) {
-        CONSUMERS.add(consumer);
+    public static String translateToLocalFormatted(String key, Object... format) {
+        return I18n.get(key, format);
     }
     
-    public static void onGuiOpen(GuiOpenEvent event) {
-        for (UnaryOperator<Screen> consumer : CONSUMERS) {
-            Screen screen = consumer.apply(event.getGui());
-            if (screen != null) {
-                event.setGui(screen);
+    public static String toLowercaseWithLocale(String string) {
+        return string.toLowerCase(getLocale());
+    }
+    
+    private static Locale getLocale() {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft != null) {
+            LanguageManager languageManager = minecraft.getLanguageManager();
+            if (languageManager != null) {
+                LanguageInfo currentLanguage = languageManager.getSelected();
+                if (currentLanguage != null) {
+                    return currentLanguage.getJavaLocale();
+                }
             }
         }
+        return Locale.getDefault();
     }
 }

@@ -39,12 +39,15 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
     private Boolean isDev;
     
     public InternalsRemapperTransformer() {
-        classToInterface("mezz/jei/Internal", "me/shedaniel/rei/jeicompat/JEIInternalsImitator");
+        classToInterface("mezz/jei/Internal", "me/shedaniel/rei/jeicompat/imitator/JEIInternalsImitator");
         classToInterface("mezz/jei/runtime/JeiHelpers", "mezz/jei/api/helpers/IJeiHelpers");
         classToInterface("mezz/jei/runtime/JeiRuntime", "mezz/jei/api/runtime/IJeiRuntime");
         classToInterface("mezz/jei/ingredients/IngredientManager", "mezz/jei/api/runtime/IIngredientManager");
         classToInterface("mezz/jei/ingredients/IngredientFilter", "mezz/jei/api/runtime/IIngredientFilter");
         classToInterface("mezz/jei/gui/Focus", "mezz/jei/api/recipe/IFocus");
+        classToInterface("mezz/jei/input/IClickedIngredient", "me/shedaniel/rei/jeicompat/imitator/JEIInternalsClickedIngredient");
+        classToInterface("mezz/jei/input/ClickedIngredient", "me/shedaniel/rei/jeicompat/imitator/JEIInternalsClickedIngredientImpl");
+        classToInterface("mezz/jei/api/runtime/IIngredientFilter", "me/shedaniel/rei/jeicompat/imitator/JEIInternalsIngredientFilter");
     }
     
     private void classToInterface(String oldName, String newName) {
@@ -64,6 +67,12 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
         }
         
         return isDev;
+    }
+    
+    @Override
+    public String mapSignature(String signature, boolean typeSignature) {
+        if (signature == null || signature.isEmpty()) return signature;
+        return super.mapSignature(signature, typeSignature);
     }
     
     @Override

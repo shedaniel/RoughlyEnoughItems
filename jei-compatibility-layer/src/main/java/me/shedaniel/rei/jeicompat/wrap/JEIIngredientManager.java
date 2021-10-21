@@ -29,9 +29,11 @@ import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
+import me.shedaniel.rei.jeicompat.imitator.JEIInternalsIngredientFilter;
 import me.shedaniel.rei.jeicompat.unwrap.JEIIngredientHelper;
 import me.shedaniel.rei.jeicompat.unwrap.JEIIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientHelper;
@@ -114,5 +116,15 @@ public enum JEIIngredientManager implements IIngredientManager {
     @NotNull
     public <V> IIngredientType<V> getIngredientType(@NotNull Class<? extends V> ingredientClass) {
         return () -> ingredientClass;
+    }
+    
+    @Override
+    public <V> boolean isIngredientVisible(V ingredient, JEIInternalsIngredientFilter ingredientFilter) {
+        EntryStack<?> stack = wrap(ingredient);
+        if (PluginManager.areAnyReloading()) {
+            return !stack.isEmpty();
+        } else {
+            return !EntryRegistry.getInstance().alreadyContain(stack) || EntryRegistry.getInstance().getPreFilteredList().contains(stack);
+        }
     }
 }

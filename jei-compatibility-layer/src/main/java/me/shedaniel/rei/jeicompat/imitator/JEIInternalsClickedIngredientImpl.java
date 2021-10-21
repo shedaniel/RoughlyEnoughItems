@@ -21,33 +21,49 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.forge;
+package me.shedaniel.rei.jeicompat.imitator;
 
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraftforge.client.event.GuiOpenEvent;
-import net.minecraftforge.common.MinecraftForge;
+import me.shedaniel.architectury.fluid.FluidStack;
+import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.UnaryOperator;
-
-public class ErrorDisplayerImpl {
-    private static final List<UnaryOperator<Screen>> CONSUMERS = new ArrayList<>();
+public class JEIInternalsClickedIngredientImpl<V> implements JEIInternalsClickedIngredient<V> {
+    private final V value;
+    private final Rect2i area;
     
-    static {
-        MinecraftForge.EVENT_BUS.addListener(ErrorDisplayerImpl::onGuiOpen);
+    public JEIInternalsClickedIngredientImpl(V value, Rect2i area) {
+        this.value = value;
+        this.area = area;
     }
     
-    public static void registerGuiInit(UnaryOperator<Screen> consumer) {
-        CONSUMERS.add(consumer);
+    public static <V> JEIInternalsClickedIngredient<V> create(V value, Rect2i area) {
+        return new JEIInternalsClickedIngredientImpl<>(value, area);
     }
     
-    public static void onGuiOpen(GuiOpenEvent event) {
-        for (UnaryOperator<Screen> consumer : CONSUMERS) {
-            Screen screen = consumer.apply(event.getGui());
-            if (screen != null) {
-                event.setGui(screen);
+    @Override
+    public V getValue() {
+        return value;
+    }
+    
+    @Override
+    @Nullable
+    public Rect2i getArea() {
+        return area;
+    }
+    
+    @Override
+    public ItemStack getCheatItemStack() {
+        if (value instanceof FluidStack) {
+            FluidStack value = (FluidStack) getValue();
+            Item bucketItem = value.getFluid().getBucket();
+            if (bucketItem != null) {
+                return new ItemStack(bucketItem);
             }
+        } else if (value instanceof ItemStack) {
+            return (ItemStack) value;
         }
+        return null;
     }
 }

@@ -21,33 +21,21 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.forge;
+package mezz.jei.config;
 
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraftforge.client.event.GuiOpenEvent;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.UnaryOperator;
-
-public class ErrorDisplayerImpl {
-    private static final List<UnaryOperator<Screen>> CONSUMERS = new ArrayList<>();
+public final class Constants {
+    public static final String TEXTURE_GUI_PATH = "textures/gui/";
+    public static final String TEXTURE_GUI_VANILLA = Constants.TEXTURE_GUI_PATH + "gui_vanilla.png";
     
-    static {
-        MinecraftForge.EVENT_BUS.addListener(ErrorDisplayerImpl::onGuiOpen);
-    }
+    public static final ResourceLocation RECIPE_GUI_VANILLA = new ResourceLocation("jei", TEXTURE_GUI_VANILLA);
     
-    public static void registerGuiInit(UnaryOperator<Screen> consumer) {
-        CONSUMERS.add(consumer);
-    }
+    public static final int MAX_TOOLTIP_WIDTH = 150;
     
-    public static void onGuiOpen(GuiOpenEvent event) {
-        for (UnaryOperator<Screen> consumer : CONSUMERS) {
-            Screen screen = consumer.apply(event.getGui());
-            if (screen != null) {
-                event.setGui(screen);
-            }
-        }
+    public static final ResourceLocation UNIVERSAL_RECIPE_TRANSFER_UID = new ResourceLocation("jei", "universal_recipe_transfer_handler");
+    public static final ResourceLocation LOCATION_JEI_GUI_TEXTURE_ATLAS = new ResourceLocation("jei", "textures/atlas/gui.png");
+    
+    private Constants() {
     }
 }

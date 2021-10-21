@@ -90,6 +90,7 @@ dependencies {
     // modRuntime("curse.maven:cucumber-272335:3349690")
     // modRuntime("curse.maven:crafttweaker-239197:3494644")
     // modRuntime("curse.maven:jeitweaker-368718:3468722")
+    modRuntime("curse.maven:eidolon-429625:3157832")
 }
 
 shadowJar {

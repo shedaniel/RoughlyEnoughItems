@@ -1,5 +1,6 @@
 package mezz.jei.api.runtime;
 
+import me.shedaniel.rei.jeicompat.imitator.JEIInternalsIngredientFilter;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.ingredients.IIngredientHelper;
@@ -66,4 +67,7 @@ public interface IIngredientManager {
      * Helper method to get ingredient type from a legacy ingredient class.
      */
     <V> IIngredientType<V> getIngredientType(Class<? extends V> ingredientClass);
+    
+    @Deprecated
+    <V> boolean isIngredientVisible(V ingredient, JEIInternalsIngredientFilter ingredientFilter);
 }

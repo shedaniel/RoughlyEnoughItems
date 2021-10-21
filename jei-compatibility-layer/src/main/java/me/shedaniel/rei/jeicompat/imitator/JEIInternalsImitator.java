@@ -21,33 +21,31 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.forge;
+package me.shedaniel.rei.jeicompat.imitator;
 
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraftforge.client.event.GuiOpenEvent;
-import net.minecraftforge.common.MinecraftForge;
+import me.shedaniel.rei.jeicompat.wrap.JEIIngredientFilter;
+import me.shedaniel.rei.jeicompat.wrap.JEIIngredientManager;
+import me.shedaniel.rei.jeicompat.wrap.JEIJeiHelpers;
+import me.shedaniel.rei.jeicompat.wrap.JEIJeiRuntime;
+import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.runtime.IIngredientFilter;
+import mezz.jei.api.runtime.IIngredientManager;
+import mezz.jei.api.runtime.IJeiRuntime;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.UnaryOperator;
-
-public class ErrorDisplayerImpl {
-    private static final List<UnaryOperator<Screen>> CONSUMERS = new ArrayList<>();
-    
-    static {
-        MinecraftForge.EVENT_BUS.addListener(ErrorDisplayerImpl::onGuiOpen);
+public class JEIInternalsImitator {
+    public static IJeiHelpers getHelpers() {
+        return JEIJeiHelpers.INSTANCE;
     }
     
-    public static void registerGuiInit(UnaryOperator<Screen> consumer) {
-        CONSUMERS.add(consumer);
+    public static IJeiRuntime getRuntime() {
+        return JEIJeiRuntime.INSTANCE;
     }
     
-    public static void onGuiOpen(GuiOpenEvent event) {
-        for (UnaryOperator<Screen> consumer : CONSUMERS) {
-            Screen screen = consumer.apply(event.getGui());
-            if (screen != null) {
-                event.setGui(screen);
-            }
-        }
+    public static IIngredientManager getIngredientManager() {
+        return JEIIngredientManager.INSTANCE;
+    }
+    
+    public static IIngredientFilter getIngredientFilter() {
+        return JEIIngredientFilter.INSTANCE;
     }
 }

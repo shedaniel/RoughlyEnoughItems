@@ -29,7 +29,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -45,6 +44,11 @@ public class FileLogger implements Logger {
         } catch (IOException exception) {
             throw new UncheckedIOException(exception);
         }
+    }
+    
+    @Override
+    public void throwException(Throwable throwable) {
+        throwable.printStackTrace(new PrintWriter(writer, true));
     }
     
     @Override

@@ -26,6 +26,8 @@ package me.shedaniel.rei.impl.common.logging;
 import org.apache.logging.log4j.Level;
 
 public interface Logger {
+    void throwException(Throwable throwable);
+    
     void log(Level level, String message);
     
     void log(Level level, String message, Throwable throwable);

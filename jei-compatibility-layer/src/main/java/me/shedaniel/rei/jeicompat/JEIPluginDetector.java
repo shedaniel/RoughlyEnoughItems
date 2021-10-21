@@ -58,6 +58,7 @@ import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
+import me.shedaniel.rei.jeicompat.imitator.JEIInternalsClickedIngredient;
 import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
 import me.shedaniel.rei.jeicompat.wrap.*;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
@@ -282,6 +283,9 @@ public class JEIPluginDetector {
     }
     
     public static EntryStack<?> wrap(Object stack) {
+        if (stack instanceof JEIInternalsClickedIngredient) {
+            return wrap(((JEIInternalsClickedIngredient<?>) stack).getValue());
+        }
         return wrap(findEntryDefinition(stack).cast(), stack);
     }
     
@@ -367,8 +371,8 @@ public class JEIPluginDetector {
         public JEIPluginWrapper(List<String> modIds, IModPlugin backingPlugin) {
             this.modIds = modIds;
             this.backingPlugin = backingPlugin;
-            // JER why are you reloading twice
-            this.mainThread = modIds.contains("jeresources");
+            // why are you reloading twice
+            this.mainThread = CollectionUtils.anyMatch(Arrays.asList("jeresources", "jepb"), modIds::contains);
         }
         
         @Override
@@ -456,7 +460,7 @@ public class JEIPluginDetector {
         public void registerTransferHandlers(TransferHandlerRegistry registry) {
             backingPlugin.registerRecipeTransferHandlers(new JEIRecipeTransferRegistration(post::add));
         }
-    
+        
         @Override
         public void postStage(PluginManager<REIClientPlugin> manager, ReloadStage stage) {
             if (stage == ReloadStage.END && Objects.equals(manager, PluginManager.getClientInstance())) {

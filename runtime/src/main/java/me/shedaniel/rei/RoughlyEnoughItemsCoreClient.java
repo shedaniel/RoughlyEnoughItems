@@ -118,6 +118,9 @@ public class RoughlyEnoughItemsCoreClient {
     private static final ExecutorService RELOAD_PLUGINS = Executors.newSingleThreadScheduledExecutor(task -> {
         Thread thread = new Thread(task, "REI-ReloadPlugins");
         thread.setDaemon(true);
+        thread.setUncaughtExceptionHandler(($, exception) -> {
+            RoughlyEnoughItemsCore.LOGGER.throwException(exception);
+        });
         return thread;
     });
     
