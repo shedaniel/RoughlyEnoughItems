@@ -33,6 +33,11 @@ public class Log4JLogger implements Logger {
     }
     
     @Override
+    public void throwException(Throwable throwable) {
+        logger.throwing(throwable);
+    }
+    
+    @Override
     public void log(Level level, String message) {
         logger.log(level, message);
     }

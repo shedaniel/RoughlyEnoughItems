@@ -23,7 +23,9 @@
 
 package me.shedaniel.rei.forge;
 
+import me.shedaniel.rei.RoughlyEnoughItemsState;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 
@@ -33,6 +35,9 @@ public class RoughlyEnoughItemsInitializerImpl {
     }
     
     public static void checkMods() {
+        if (ModList.get().isLoaded("moreoverlays")) {
+            RoughlyEnoughItemsState.error("REI is not compatible with MoreOverlays, and actually contains Builtin Inventory Highlighting, other features can be installed via different mods!");
+        }
     }
     
     public static boolean isDev() {
