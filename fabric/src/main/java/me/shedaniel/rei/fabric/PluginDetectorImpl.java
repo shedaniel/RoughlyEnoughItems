@@ -80,7 +80,8 @@ public class PluginDetectorImpl {
             } catch (Throwable t) {
                 Throwable throwable = t;
                 while (throwable != null) {
-                    if (throwable.getMessage() != null && throwable.getMessage().contains("environment type SERVER") && !RoughlyEnoughItemsInitializer.isClient()) continue out;
+                    if (throwable.getMessage() != null && throwable.getMessage().contains("environment type SERVER") && !RoughlyEnoughItemsInitializer.isClient())
+                        continue out;
                     throwable = throwable.getCause();
                 }
                 String error = "Could not create REI Plugin [" + getSimpleName(pluginClass) + "] due to errors, provided by '" + container.getProvider().getMetadata().getId() + "'!";
@@ -98,12 +99,10 @@ public class PluginDetectorImpl {
     
     public static void detectServerPlugins() {
         loadPlugin(REIServerPlugin.class, ((PluginView<REIServerPlugin>) PluginManager.getServerInstance())::registerPlugin);
-        if (FabricLoader.getInstance().isModLoaded("libblockattributes-fluids")) {
-            try {
-                PluginView.getServerInstance().registerPlugin((REIServerPlugin) Class.forName("me.shedaniel.rei.impl.common.compat.FabricFluidAPISupportPlugin").getConstructor().newInstance());
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
+        try {
+            PluginView.getServerInstance().registerPlugin((REIServerPlugin) Class.forName("me.shedaniel.rei.impl.common.compat.FabricFluidAPISupportPlugin").getConstructor().newInstance());
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
         }
     }
     

@@ -83,6 +83,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.fluids.FluidStack;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.tuple.Triple;
+import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -106,10 +107,10 @@ public class JEIPluginDetector {
         }
     };
     
-    public static void detect(BiConsumer<Class<?>, BiConsumer<List<String>, Supplier<?>>> annotationScanner, Consumer<REIPluginProvider> pluginAdder) {
-        annotationScanner.accept(JeiPlugin.class, (modIds, plugin) -> {
+    public static void detect(BiConsumer<Class<?>, TriConsumer<List<String>, Supplier<?>, Class<?>>> annotationScanner, Consumer<REIPluginProvider> pluginAdder) {
+        annotationScanner.accept(JeiPlugin.class, (modIds, plugin, clazz) -> {
             Supplier<JEIPluginWrapper> value = () -> new JEIPluginWrapper(modIds, (IModPlugin) plugin.get());
-            pluginAdder.accept(new JEIPluginProvider(modIds, value));
+            pluginAdder.accept(new JEIPluginProvider(modIds, value, clazz));
         });
     }
     
@@ -325,11 +326,13 @@ public class JEIPluginDetector {
     public static class JEIPluginProvider implements REIPluginProvider<REIClientPlugin> {
         private final List<String> modIds;
         public final Supplier<JEIPluginWrapper> supplier;
+        private final Class<?> clazz;
         public JEIPluginWrapper wrapper;
         
-        public JEIPluginProvider(List<String> modIds, Supplier<JEIPluginWrapper> supplier) {
+        public JEIPluginProvider(List<String> modIds, Supplier<JEIPluginWrapper> supplier, Class<?> clazz) {
             this.modIds = modIds;
             this.supplier = supplier;
+            this.clazz = clazz;
         }
         
         @Override
@@ -337,8 +340,10 @@ public class JEIPluginDetector {
             if (wrapper != null) {
                 return wrapper.getPluginProviderName();
             }
-            
-            return "JEI Plugin [" + String.join(", ", modIds) + "]";
+    
+            String simpleName = clazz.getSimpleName();
+            simpleName = simpleName == null ? clazz.getName() : simpleName;
+            return "JEI Plugin [" + simpleName + "]";
         }
         
         @Override
@@ -480,7 +485,10 @@ public class JEIPluginDetector {
         
         @Override
         public String getPluginProviderName() {
-            return "JEI Plugin [" + backingPlugin.getPluginUid() + "]";
+            Class<?> pluginClass = backingPlugin.getClass();
+            String simpleName = pluginClass.getSimpleName();
+            simpleName = simpleName == null ? pluginClass.getName() : simpleName;
+            return "JEI Plugin [" + simpleName + ":" + backingPlugin.getPluginUid() + "]";
         }
         
         @Override

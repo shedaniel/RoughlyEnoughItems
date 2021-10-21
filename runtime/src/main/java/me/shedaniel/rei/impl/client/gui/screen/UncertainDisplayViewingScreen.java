@@ -34,6 +34,7 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
@@ -146,6 +147,7 @@ public class UncertainDisplayViewingScreen extends Screen {
                     } else if (allModsUsingJEI != null && jeiEnabled) {
                         ConfigManagerImpl.getInstance().getConfig().setJEICompatibilityLayerEnabled(jeiEnabled);
                         ConfigManager.getInstance().saveConfig();
+                        RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
                         RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
                         Minecraft.getInstance().setScreen(new ConfigReloadingScreen(() -> callback.accept(original)));
                     } else {

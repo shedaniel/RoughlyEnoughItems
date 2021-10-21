@@ -48,6 +48,7 @@
   "text.rei.failed_cheat_items": "§cFailed to give items.",
   "text.rei.too_long_nbt": "§cItem NBT is too long to be applied in multiplayer.",
   "text.rei.tag_match": "Tag: %s",
+  "text.rei.performance": "Performance Analysis",
   "ordering.rei.ascending": "Ascending",
   "ordering.rei.descending": "Descending",
   "ordering.rei.registry": "Registry",

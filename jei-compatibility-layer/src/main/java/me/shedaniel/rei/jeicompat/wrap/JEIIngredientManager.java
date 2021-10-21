@@ -33,12 +33,12 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import me.shedaniel.rei.jeicompat.imitator.JEIInternalsIngredientFilter;
 import me.shedaniel.rei.jeicompat.unwrap.JEIIngredientHelper;
 import me.shedaniel.rei.jeicompat.unwrap.JEIIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.runtime.IIngredientFilter;
 import mezz.jei.api.runtime.IIngredientManager;
 import org.jetbrains.annotations.NotNull;
 
@@ -119,7 +119,7 @@ public enum JEIIngredientManager implements IIngredientManager {
     }
     
     @Override
-    public <V> boolean isIngredientVisible(V ingredient, JEIInternalsIngredientFilter ingredientFilter) {
+    public <V> boolean isIngredientVisible(V ingredient, IIngredientFilter ingredientFilter) {
         EntryStack<?> stack = wrap(ingredient);
         if (PluginManager.areAnyReloading()) {
             return !stack.isEmpty();

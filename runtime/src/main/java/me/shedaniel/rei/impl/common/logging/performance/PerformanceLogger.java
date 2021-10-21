@@ -21,8 +21,36 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat.imitator;
+package me.shedaniel.rei.impl.common.logging.performance;
 
-// stub class
-public class JEIInternalsIngredientFilter {
+import com.mojang.datafixers.util.Pair;
+import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
+
+import java.util.Map;
+
+public interface PerformanceLogger {
+    Plugin stage(String stage);
+    
+    void clear();
+    
+    Map<String, Plugin> getStages();
+    
+    interface Plugin extends AutoCloseable {
+        Inner stage(String stage);
+        
+        Inner plugin(Pair<REIPluginProvider<?>, REIPlugin<?>> plugin);
+        
+        long totalNano();
+        
+        @Override
+        void close();
+        
+        Map<Object, Long> times();
+        
+        interface Inner extends AutoCloseable {
+            @Override
+            void close();
+        }
+    }
 }

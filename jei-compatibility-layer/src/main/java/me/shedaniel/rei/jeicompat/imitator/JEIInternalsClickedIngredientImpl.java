@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.imitator;
 
-import me.shedaniel.architectury.fluid.FluidStack;
+import dev.architectury.fluid.FluidStack;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;

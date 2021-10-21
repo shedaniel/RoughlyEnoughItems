@@ -1,11 +1,11 @@
 package mezz.jei.api.runtime;
 
-import me.shedaniel.rei.jeicompat.imitator.JEIInternalsIngredientFilter;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 
@@ -69,5 +69,6 @@ public interface IIngredientManager {
     <V> IIngredientType<V> getIngredientType(Class<? extends V> ingredientClass);
     
     @Deprecated
-    <V> boolean isIngredientVisible(V ingredient, JEIInternalsIngredientFilter ingredientFilter);
+    @ApiStatus.Internal
+    <V> boolean isIngredientVisible(V ingredient, IIngredientFilter ingredientFilter);
 }

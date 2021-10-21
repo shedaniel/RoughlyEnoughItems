@@ -47,7 +47,6 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
         classToInterface("mezz/jei/gui/Focus", "mezz/jei/api/recipe/IFocus");
         classToInterface("mezz/jei/input/IClickedIngredient", "me/shedaniel/rei/jeicompat/imitator/JEIInternalsClickedIngredient");
         classToInterface("mezz/jei/input/ClickedIngredient", "me/shedaniel/rei/jeicompat/imitator/JEIInternalsClickedIngredientImpl");
-        classToInterface("mezz/jei/api/runtime/IIngredientFilter", "me/shedaniel/rei/jeicompat/imitator/JEIInternalsIngredientFilter");
     }
     
     private void classToInterface(String oldName, String newName) {

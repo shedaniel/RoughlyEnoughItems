@@ -63,6 +63,7 @@ import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
+import me.shedaniel.rei.impl.client.gui.performance.entry.PerformanceEntry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -340,6 +341,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 builder.setGlobalizedExpanded(false);
                 if (Minecraft.getInstance().getConnection() != null && Minecraft.getInstance().getConnection().getRecipeManager() != null) {
                     builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new ReloadPluginsEntry(220));
+                    builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new PerformanceEntry(220));
                 }
                 return builder.setAfterInitConsumer(screen -> {
                     TextListEntry feedbackEntry = ConfigEntryBuilder.create().startTextDescription(
