@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.client.plugins;
 
+import me.shedaniel.rei.api.client.entry.renderer.EntryRendererRegistry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
@@ -38,6 +39,16 @@ import org.jetbrains.annotations.ApiStatus;
 
 @Environment(EnvType.CLIENT)
 public interface REIClientPlugin extends REIPlugin<REIClientPlugin> {
+    /**
+     * Registers new entry renderers
+     *
+     * @param registry the entry renderer registry
+     */
+    @ApiStatus.OverrideOnly
+    @ApiStatus.Experimental
+    default void registerEntryRenderers(EntryRendererRegistry registry) {
+    }
+    
     /**
      * Registers new categories
      *

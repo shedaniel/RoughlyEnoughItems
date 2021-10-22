@@ -23,45 +23,45 @@
 
 package me.shedaniel.rei.api.client.entry.renderer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
-import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.ClientInternals;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.registry.Reloadable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * A renderer to render a {@link EntryStack}.
- * Use {@link me.shedaniel.rei.api.client.util.ClientEntryStacks#setRenderer} to change the {@link EntryRenderer} for a {@link EntryStack}.
- *
- * @param <T> the entry type
- * @see BatchedEntryRenderer
- * @see EntryRendererRegistry
+ * Registry to transform {@link EntryRenderer} for stacks at a global level.
+ * For specific stacks, you can use {@link me.shedaniel.rei.api.client.util.ClientEntryStacks#setRenderer}
  */
-@Environment(EnvType.CLIENT)
-public interface EntryRenderer<T> extends EntryRendererProvider<T> {
-    static <T> EntryRenderer<T> empty() {
-        return ClientInternals.getEmptyEntryRenderer();
+@ApiStatus.Experimental
+public interface EntryRendererRegistry extends Reloadable<REIClientPlugin> {
+    static EntryRendererRegistry getInstance() {
+        return PluginManager.getClientInstance().get(EntryRendererRegistry.class);
     }
     
-    @Environment(EnvType.CLIENT)
-    void render(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta);
+    <T> void register(EntryType<T> type, EntryRendererProvider<T> provider);
     
-    @Nullable
-    @Environment(EnvType.CLIENT)
-    Tooltip getTooltip(EntryStack<T> entry, Point mouse);
-    
-    @ApiStatus.NonExtendable
-    default <O> EntryRenderer<O> cast() {
-        return (EntryRenderer<O>) this;
+    default <T> void transformTooltip(EntryType<T> type, TooltipTransformer<T> transformer) {
+        register(type, (entry, last) -> {
+            return new ForwardingEntryRenderer<T>(last) {
+                @Override
+                @Nullable
+                public Tooltip getTooltip(EntryStack<T> entry, Point mouse) {
+                    return transformer.transform(entry, mouse, super.getTooltip(entry, mouse));
+                }
+            };
+        });
     }
     
-    @Override
-    default EntryRenderer<T> provide(EntryStack<T> entry, EntryRenderer<T> last) {
-        return this;
+    <T> EntryRenderer<T> get(EntryStack<T> stack);
+    
+    @FunctionalInterface
+    interface TooltipTransformer<T> {
+        @Nullable
+        Tooltip transform(EntryStack<T> entry, Point mouse, @Nullable Tooltip tooltip);
     }
 }
