@@ -48,15 +48,17 @@ public class FabricFluidAPISupportPlugin implements REIServerPlugin {
         support.register(entry -> {
             ItemStack stack = entry.getValue().copy();
             Storage<FluidVariant> storage = FluidStorage.ITEM.find(stack, ContainerItemContext.withInitial(stack));
-            List<EntryStack<FluidStack>> result;
-            try (Transaction transaction = Transaction.openOuter()) {
-                result = StreamSupport.stream(storage.iterable(transaction).spliterator(), false)
+            if (storage != null) {
+                List<EntryStack<FluidStack>> result;
+                try (Transaction transaction = Transaction.openOuter()) {
+                    result = StreamSupport.stream(storage.iterable(transaction).spliterator(), false)
                         .filter(view -> !view.isResourceBlank() && !view.getResource().isBlank())
                         .map(view -> EntryStacks.of(FluidStack.create(view.getResource().getFluid(), Fraction.of(view.getAmount(), FluidConstants.BUCKET), view.getResource().getNbt())))
-                        .collect(Collectors.toList());
-            }
-            if (!result.isEmpty()) {
-                return CompoundEventResult.interruptTrue(result.stream());
+                            .collect(Collectors.toList());
+                }
+                if (!result.isEmpty()) {
+                    return CompoundEventResult.interruptTrue(result.stream());
+                }
             }
             return CompoundEventResult.pass();
         });
