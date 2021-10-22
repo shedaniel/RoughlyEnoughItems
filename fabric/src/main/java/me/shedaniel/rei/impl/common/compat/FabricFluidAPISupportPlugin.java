@@ -30,7 +30,6 @@ import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
-import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -47,15 +46,17 @@ public class FabricFluidAPISupportPlugin implements REIServerPlugin {
         support.register(entry -> {
             ItemStack stack = entry.getValue().copy();
             Storage<FluidVariant> storage = FluidStorage.ITEM.find(stack, ContainerItemContext.withInitial(stack));
-            List<EntryStack<FluidStack>> result;
-            try (Transaction transaction = Transaction.openOuter()) {
-                result = StreamSupport.stream(storage.iterable(transaction).spliterator(), false)
-                        .filter(view -> !view.isResourceBlank())
-                        .map(view -> EntryStacks.of(FluidStack.create(view.getResource().getFluid(), view.getAmount(), view.getResource().getNbt())))
-                        .collect(Collectors.toList());
-            }
-            if (!result.isEmpty()) {
-                return CompoundEventResult.interruptTrue(result.stream());
+            if (storage != null) {
+                List<EntryStack<FluidStack>> result;
+                try (Transaction transaction = Transaction.openOuter()) {
+                    result = StreamSupport.stream(storage.iterable(transaction).spliterator(), false)
+                            .filter(view -> !view.isResourceBlank())
+                            .map(view -> EntryStacks.of(FluidStack.create(view.getResource().getFluid(), view.getAmount(), view.getResource().getNbt())))
+                            .collect(Collectors.toList());
+                }
+                if (!result.isEmpty()) {
+                    return CompoundEventResult.interruptTrue(result.stream());
+                }
             }
             return CompoundEventResult.pass();
         });
