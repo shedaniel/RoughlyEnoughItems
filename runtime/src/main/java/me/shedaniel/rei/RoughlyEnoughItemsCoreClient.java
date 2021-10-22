@@ -56,6 +56,7 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.client.entry.renderer.EntryRendererRegistryImpl;
 import me.shedaniel.rei.impl.client.favorites.DelegatingFavoriteEntryProviderImpl;
 import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
@@ -176,6 +177,7 @@ public class RoughlyEnoughItemsCoreClient {
                             usedTime
                     );
                 },
+                new EntryRendererRegistryImpl(),
                 new ViewsImpl(),
                 new SearchProviderImpl(),
                 new ConfigManagerImpl(),

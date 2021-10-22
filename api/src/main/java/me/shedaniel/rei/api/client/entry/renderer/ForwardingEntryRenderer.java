@@ -28,40 +28,23 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.ClientInternals;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * A renderer to render a {@link EntryStack}.
- * Use {@link me.shedaniel.rei.api.client.util.ClientEntryStacks#setRenderer} to change the {@link EntryRenderer} for a {@link EntryStack}.
- *
- * @param <T> the entry type
- * @see BatchedEntryRenderer
- * @see EntryRendererRegistry
- */
-@Environment(EnvType.CLIENT)
-public interface EntryRenderer<T> extends EntryRendererProvider<T> {
-    static <T> EntryRenderer<T> empty() {
-        return ClientInternals.getEmptyEntryRenderer();
-    }
+public abstract class ForwardingEntryRenderer<T> implements EntryRenderer<T> {
+    protected EntryRenderer<T> next;
     
-    @Environment(EnvType.CLIENT)
-    void render(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta);
-    
-    @Nullable
-    @Environment(EnvType.CLIENT)
-    Tooltip getTooltip(EntryStack<T> entry, Point mouse);
-    
-    @ApiStatus.NonExtendable
-    default <O> EntryRenderer<O> cast() {
-        return (EntryRenderer<O>) this;
+    public ForwardingEntryRenderer(EntryRenderer<T> next) {
+        this.next = next;
     }
     
     @Override
-    default EntryRenderer<T> provide(EntryStack<T> entry, EntryRenderer<T> last) {
-        return this;
+    public void render(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        this.next.render(entry, matrices, bounds, mouseX, mouseY, delta);
+    }
+    
+    @Override
+    @Nullable
+    public Tooltip getTooltip(EntryStack<T> entry, Point mouse) {
+        return this.next.getTooltip(entry, mouse);
     }
 }

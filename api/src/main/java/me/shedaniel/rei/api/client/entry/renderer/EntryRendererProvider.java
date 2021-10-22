@@ -23,45 +23,32 @@
 
 package me.shedaniel.rei.api.client.entry.renderer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.math.Point;
-import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
 /**
- * A renderer to render a {@link EntryStack}.
- * Use {@link me.shedaniel.rei.api.client.util.ClientEntryStacks#setRenderer} to change the {@link EntryRenderer} for a {@link EntryStack}.
+ * A functional interface to provide {@link EntryRenderer} for {@link EntryStack}.
  *
  * @param <T> the entry type
- * @see BatchedEntryRenderer
- * @see EntryRendererRegistry
+ * @see EntryRenderer
  */
+@FunctionalInterface
 @Environment(EnvType.CLIENT)
-public interface EntryRenderer<T> extends EntryRendererProvider<T> {
-    static <T> EntryRenderer<T> empty() {
-        return ClientInternals.getEmptyEntryRenderer();
+public interface EntryRendererProvider<T> {
+    static <T> EntryRendererProvider<T> empty() {
+        return EntryRenderer.empty();
     }
     
-    @Environment(EnvType.CLIENT)
-    void render(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta);
-    
-    @Nullable
-    @Environment(EnvType.CLIENT)
-    Tooltip getTooltip(EntryStack<T> entry, Point mouse);
-    
-    @ApiStatus.NonExtendable
-    default <O> EntryRenderer<O> cast() {
-        return (EntryRenderer<O>) this;
-    }
-    
-    @Override
-    default EntryRenderer<T> provide(EntryStack<T> entry, EntryRenderer<T> last) {
-        return this;
-    }
+    /**
+     * Returns a new {@link EntryRenderer} for a specific {@link EntryStack},
+     * a previous {@link EntryRenderer} will be provided, this may be an empty renderer.
+     * {@code null} is not an accepted value, return the previous renderer if this provider
+     * does not modify the renderer.
+     *
+     * @param entry the entry stack to render for, do not store or cache this
+     * @param last the previous entry renderer
+     * @return the new entry renderer, {@code null} is not accepted here
+     */
+    EntryRenderer<T> provide(EntryStack<T> entry, EntryRenderer<T> last);
 }
