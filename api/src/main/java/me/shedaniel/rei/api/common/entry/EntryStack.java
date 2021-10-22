@@ -28,6 +28,7 @@ import me.shedaniel.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.client.entry.renderer.EntryRendererRegistry;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
@@ -182,7 +183,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         
         static {
             EnvExecutor.runInEnv(Env.CLIENT, () -> () -> {
-                RENDERER = new Settings<>(stack -> stack.getDefinition().getRenderer());
+                RENDERER = new Settings<>(stack -> EntryRendererRegistry.getInstance().get(stack));
                 TOOLTIP_PROCESSOR = new Settings<>((stack, tooltip) -> tooltip);
                 TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
                 FLUID_RENDER_RATIO = new Settings<>(1.0F);
