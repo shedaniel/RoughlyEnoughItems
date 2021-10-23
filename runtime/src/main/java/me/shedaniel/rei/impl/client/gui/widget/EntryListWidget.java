@@ -144,6 +144,21 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         return fit;
     }
     
+    private boolean containsChecked(Point point) {
+        return containsChecked(point.x, point.y);
+    }
+    
+    private boolean containsChecked(double x, double y) {
+        if (!containsMouse(x, y)) return false;
+        Minecraft instance = Minecraft.getInstance();
+        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(instance.screen)) {
+            InteractionResult result = decider.isInZone(x, y);
+            if (result != InteractionResult.PASS)
+                return result == InteractionResult.SUCCESS;
+        }
+        return true;
+    }
+    
     private static Rectangle updateInnerBounds(Rectangle bounds) {
         bounds = bounds.clone();
         int widthReduction = (int) Math.round(bounds.width * (1 - ConfigObject.getInstance().getHorizontalEntriesBoundaries()));
@@ -289,7 +304,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             matrices.popPose();
         }
         
-        if (containsMouse(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
+        if (containsChecked(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
             EntryStack<?> stack = EntryStacks.of(minecraft.player.inventory.getCarried().copy());
             if (stack.getValueType() == FluidStack.class) {
                 Item bucketItem = ((FluidStack) stack.getValue()).getFluid().getBucket();
@@ -334,7 +349,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (containsMouse(PointHelper.ofMouse()))
+        if (containsChecked(PointHelper.ofMouse()))
             for (Widget widget : widgets)
                 if (widget.keyPressed(int_1, int_2, int_3))
                     return true;
@@ -464,7 +479,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (containsMouse(mouseX, mouseY)) {
+        if (containsChecked(mouseX, mouseY)) {
             LocalPlayer player = minecraft.player;
             if (ClientHelper.getInstance().isCheating() && player != null && player.containerMenu != null && !player.inventory.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
                 ClientHelper.getInstance().sendDeletePacket();
@@ -513,7 +528,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         
         @Override
         public boolean containsMouse(double mouseX, double mouseY) {
-            return super.containsMouse(mouseX, mouseY) && bounds.contains(mouseX, mouseY);
+            return super.containsMouse(mouseX, mouseY) && containsChecked(mouseX, mouseY);
         }
     }
 }
