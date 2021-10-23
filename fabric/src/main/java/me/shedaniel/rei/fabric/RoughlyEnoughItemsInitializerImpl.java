@@ -28,6 +28,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsState;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.SemanticVersion;
+import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.VersionParsingException;
 
 public class RoughlyEnoughItemsInitializerImpl {
@@ -59,6 +60,16 @@ public class RoughlyEnoughItemsInitializerImpl {
         }
         if (!FabricLoader.getInstance().isModLoaded("architectury")) {
             RoughlyEnoughItemsState.error("Architectury API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/architectury-fabric/files/all");
+        } else {
+            Version version = FabricLoader.getInstance().getModContainer("architectury").get().getMetadata().getVersion();
+    
+            try {
+                if (version instanceof SemanticVersion && SemanticVersion.parse("1.24.0").compareTo((SemanticVersion) version) > 0) {
+                    RoughlyEnoughItemsState.error("Architectury API is too old, please update!", "https://www.curseforge.com/minecraft/mc-mods/architectury-fabric/files/all");
+                }
+            } catch (VersionParsingException e) {
+                e.printStackTrace();
+            }
         }
         if (isClient()) {
             try {
