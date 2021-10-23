@@ -27,7 +27,9 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -93,6 +95,7 @@ public class EntryRegistryImpl implements EntryRegistry {
         entries = Lists.newCopyOnWriteArrayList(CollectionUtils.filterAndMap(reloadingRegistry, ((Predicate<HashedEntryStackWrapper>) HashedEntryStackWrapper::isEmpty).negate(), HashedEntryStackWrapper::unwrap));
         reloadingRegistry = null;
         refilter();
+        REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
     }
     
     @Override
