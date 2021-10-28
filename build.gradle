@@ -70,6 +70,10 @@ allprojects {
         options.encoding = "UTF-8"
         options.release = 16
     }
+
+    tasks.withType(GenerateModuleMetadata) {
+        enabled = false
+    }
 }
 
 subprojects {

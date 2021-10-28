@@ -5,6 +5,7 @@ import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 
@@ -66,4 +67,8 @@ public interface IIngredientManager {
      * Helper method to get ingredient type from a legacy ingredient class.
      */
     <V> IIngredientType<V> getIngredientType(Class<? extends V> ingredientClass);
+    
+    @Deprecated
+    @ApiStatus.Internal
+    <V> boolean isIngredientVisible(V ingredient, IIngredientFilter ingredientFilter);
 }

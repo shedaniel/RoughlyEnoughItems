@@ -56,6 +56,7 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.client.entry.renderer.EntryRendererRegistryImpl;
 import me.shedaniel.rei.impl.client.favorites.DelegatingFavoriteEntryProviderImpl;
 import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
@@ -118,6 +119,9 @@ public class RoughlyEnoughItemsCoreClient {
     private static final ExecutorService RELOAD_PLUGINS = Executors.newSingleThreadScheduledExecutor(task -> {
         Thread thread = new Thread(task, "REI-ReloadPlugins");
         thread.setDaemon(true);
+        thread.setUncaughtExceptionHandler(($, exception) -> {
+            RoughlyEnoughItemsCore.LOGGER.throwException(exception);
+        });
         return thread;
     });
     
@@ -173,6 +177,7 @@ public class RoughlyEnoughItemsCoreClient {
                             usedTime
                     );
                 },
+                new EntryRendererRegistryImpl(),
                 new ViewsImpl(),
                 new SearchProviderImpl(),
                 new ConfigManagerImpl(),
@@ -269,8 +274,14 @@ public class RoughlyEnoughItemsCoreClient {
         final ResourceLocation recipeButtonTex = new ResourceLocation("textures/gui/recipe_button.png");
         MutableLong startReload = new MutableLong(-1);
         MutableLong endReload = new MutableLong(-1);
-        PRE_UPDATE_RECIPES.register(recipeManager -> reloadPlugins(startReload, ReloadStage.START));
-        ClientRecipeUpdateEvent.EVENT.register(recipeManager -> reloadPlugins(endReload, Platform.isFabric() ? ReloadStage.END : null));
+        PRE_UPDATE_RECIPES.register(recipeManager -> {
+            RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
+            reloadPlugins(startReload, ReloadStage.START);
+        });
+        ClientRecipeUpdateEvent.EVENT.register(recipeManager -> {
+            if (!Platform.isFabric()) RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
+            reloadPlugins(endReload, Platform.isFabric() ? ReloadStage.END : null);
+        });
         ClientGuiEvent.INIT_POST.register((screen, access) -> {
             REIRuntimeImpl.getInstance().setPreviousScreen(screen);
             if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen) {

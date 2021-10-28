@@ -37,13 +37,15 @@ repositories {
 loom {
     launches {
         all {
-            // arg "--mixin", "rei-jei-internals-workaround.mixins.json"
+            arg "--mixin", "rei-jei-internals-workaround.mixins.json"
         }
     }
 
     forge {
         localMods {
-            // it.add(project(":jei-internals-workaround").sourceSets.main)
+            jeiInternalsWorkaround {
+                add(project(":jei-internals-workaround").sourceSets.main)
+            }
         }
     }
 }
@@ -57,7 +59,7 @@ dependencies {
 
     common(project(path: ":jei-compatibility-layer", configuration: "dev")) { transitive false }
     shadowCommon(project(path: ":jei-compatibility-layer", configuration: "dev")) { transitive false }
-    // common(project(path: ":jei-internals-workaround")) { transitive = false }
+    runtimeClasspath(project(path: ":jei-internals-workaround", configuration: "dev")) { transitive = false }
 
     depProjects.forEach {
         common(project(path: it, configuration: "dev")) { transitive false }
@@ -82,6 +84,13 @@ dependencies {
     // modRuntime("curse.maven:jep-417645:3198370")
     // modRuntime("curse.maven:simple-storage-network-268495:3257204")
     // modRuntime("curse.maven:create-328085:3278516")
+    // modRuntime("curse.maven:industrial-foregoing-266515:3446262")
+    // modRuntime("curse.maven:titanium-287342:3346366")
+    // modRuntime("curse.maven:extended-crafting-268387:3470453")
+    // modRuntime("curse.maven:cucumber-272335:3349690")
+    // modRuntime("curse.maven:crafttweaker-239197:3494644")
+    // modRuntime("curse.maven:jeitweaker-368718:3468722")
+    modRuntime("curse.maven:eidolon-429625:3157832")
 }
 
 shadowJar {
@@ -157,6 +166,7 @@ curseforge {
             relations {
                 requiredDependency "architectury-forge"
                 requiredDependency "cloth-config-forge"
+                requiredDependency "roughly-enough-items-hacks"
             }
             mainArtifact(tasks.getByName("remapJar")) {
                 displayName = "[Forge $project.supported_version] v$project.version"

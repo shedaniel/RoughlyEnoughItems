@@ -29,6 +29,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import me.shedaniel.rei.api.client.gui.config.SearchMode;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -40,6 +41,7 @@ import me.shedaniel.rei.impl.client.search.argument.type.ArgumentTypesRegistry;
 import me.shedaniel.rei.impl.client.search.result.ArgumentApplicableResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.Unit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.Mutable;
@@ -50,6 +52,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,7 +61,8 @@ import java.util.regex.Pattern;
 @Environment(EnvType.CLIENT)
 public class Argument<T, R> {
     public static final String SPACE = " ", EMPTY = "";
-    public static final Short2ObjectMap<Long2ObjectMap<Object>> SEARCH_CACHE = new Short2ObjectOpenHashMap<>();
+    public static final Short2ObjectMap<Long2ObjectMap<Object>> SEARCH_CACHE = Short2ObjectMaps.synchronize(new Short2ObjectOpenHashMap<>());
+    private static final AtomicReference<String> lastLanguage = new AtomicReference<>();
     static final Argument<Unit, Unit> ALWAYS = new Argument<>(AlwaysMatchingArgumentType.INSTANCE, EMPTY, true, -1, -1, true);
     private ArgumentType<T, R> argumentType;
     private String text;
@@ -169,6 +174,10 @@ public class Argument<T, R> {
     @ApiStatus.Internal
     public static boolean matches(EntryStack<?> stack, List<CompoundArgument> compoundArguments) {
         if (compoundArguments.isEmpty()) return true;
+        String newLanguage = Minecraft.getInstance().options.languageCode;
+        if (!Objects.equals(lastLanguage.getAndSet(newLanguage), newLanguage)) {
+            SEARCH_CACHE.clear();
+        }
         Mutable<?> mutable = new MutableObject<>();
         
         a:

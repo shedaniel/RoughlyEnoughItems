@@ -34,7 +34,6 @@ import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
@@ -62,6 +61,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapCategoryId;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapRecipe;
 
 public class JEIRecipeTransferRegistration implements IRecipeTransferRegistration {
@@ -120,7 +120,7 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
     @Override
     public <C extends AbstractContainerMenu> void addRecipeTransferHandler(IRecipeTransferInfo<C> info) {
         post.accept(() -> {
-            MenuInfoRegistry.getInstance().register(CategoryIdentifier.of(info.getRecipeCategoryUid()), info.getContainerClass(),
+            MenuInfoRegistry.getInstance().register(wrapCategoryId(info.getRecipeCategoryUid()), info.getContainerClass(),
                     (categoryId, menuClass) -> Optional.of(new JEITransferMenuInfo.Client<>(menu -> new JEIRecipeTransferData<>(info, menu), info)));
         });
     }

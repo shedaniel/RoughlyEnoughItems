@@ -25,6 +25,8 @@ package me.shedaniel.rei.api.client.registry.display;
 
 import com.google.common.base.Predicates;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.display.reason.DisplayAdditionReason;
+import me.shedaniel.rei.api.client.registry.display.reason.DisplayAdditionReasons;
 import me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibilityPredicate;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
@@ -34,9 +36,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -100,10 +104,20 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param object the object to be filled
      */
     default void add(Object object) {
+        addWithReason(object, DisplayAdditionReason.NONE);
+    }
+    
+    /**
+     * Registers a display by the object provided, to be filled during {@link #tryFillDisplay(Object)}.
+     *
+     * @param object the object to be filled
+     */
+    @ApiStatus.Experimental
+    default void addWithReason(Object object, DisplayAdditionReason... reasons) {
         if (object instanceof Display) {
             add((Display) object, null);
         } else {
-            for (Display display : tryFillDisplay(object)) {
+            for (Display display : tryFillDisplay(object, reasons)) {
                 add(display, object);
             }
         }
@@ -275,6 +289,21 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * Vanilla {@link Recipe} are by default filled, display filters
      * can be used to automatically generate displaies for vanilla {@link Recipe}.
      *
+     * @param typeClass the type of {@code T}
+     * @param predicate the predicate of {@code T} and reason
+     * @param filler    the filler, taking a {@code T} and returning a {@code D}
+     * @param <T>       the type of object
+     * @param <D>       the type of display
+     */
+    @ApiStatus.Experimental
+    <T, D extends Display> void registerFiller(Class<T> typeClass, BiPredicate<? extends T, DisplayAdditionReasons> predicate, Function<? extends T, D> filler);
+    
+    /**
+     * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
+     * <p>
+     * Vanilla {@link Recipe} are by default filled, display filters
+     * can be used to automatically generate displaies for vanilla {@link Recipe}.
+     *
      * @param predicate the predicate of the object
      * @param filler    the filler, taking an object and returning a {@code D}
      * @param <D>       the type of display
@@ -288,7 +317,19 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param <T>   the type of object
      * @return the collection of displays
      */
-    <T> Collection<Display> tryFillDisplay(T value);
+    default <T> Collection<Display> tryFillDisplay(T value) {
+        return tryFillDisplay(value, DisplayAdditionReason.NONE);
+    }
+    
+    /**
+     * Tries to fill displays from {@code T}.
+     *
+     * @param value the object
+     * @param <T>   the type of object
+     * @return the collection of displays
+     */
+    @ApiStatus.Experimental
+    <T> Collection<Display> tryFillDisplay(T value, DisplayAdditionReason... reasons);
     
     @Nullable
     Object getDisplayOrigin(Display display);

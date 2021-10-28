@@ -27,10 +27,12 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZonesProvider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -50,7 +52,7 @@ public class ExclusionZonesImpl implements ExclusionZones {
     private static final Comparator<? super Rectangle> RECTANGLE_COMPARER = Comparator.comparingLong(Rectangle::hashCode);
     
     private long lastArea = -1;
-    private Multimap<Class<?>, Supplier<Collection<Rectangle>>> list = HashMultimap.create();
+    private final Multimap<Class<?>, Supplier<Collection<Rectangle>>> list = HashMultimap.create();
     
     @Override
     public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
@@ -66,12 +68,14 @@ public class ExclusionZonesImpl implements ExclusionZones {
     public InteractionResult isInZone(double mouseX, double mouseY) {
         Class<? extends Screen> screenClass = Minecraft.getInstance().screen.getClass();
         
-        for (Map.Entry<Class<?>, Collection<Supplier<Collection<Rectangle>>>> collectionEntry : list.asMap().entrySet()) {
-            if (collectionEntry.getKey().isAssignableFrom(screenClass)) {
-                for (Supplier<Collection<Rectangle>> listSupplier : collectionEntry.getValue()) {
-                    for (Rectangle zone : listSupplier.get()) {
-                        if (zone.contains(mouseX, mouseY)) {
-                            return InteractionResult.FAIL;
+        synchronized (list) {
+            for (Map.Entry<Class<?>, Collection<Supplier<Collection<Rectangle>>>> collectionEntry : list.asMap().entrySet()) {
+                if (collectionEntry.getKey().isAssignableFrom(screenClass)) {
+                    for (Supplier<Collection<Rectangle>> listSupplier : collectionEntry.getValue()) {
+                        for (Rectangle zone : listSupplier.get()) {
+                            if (zone.contains(mouseX, mouseY)) {
+                                return InteractionResult.FAIL;
+                            }
                         }
                     }
                 }
@@ -98,10 +102,12 @@ public class ExclusionZonesImpl implements ExclusionZones {
     @Override
     public List<Rectangle> getExclusionZones(Class<?> currentScreenClass, boolean sort) {
         List<Rectangle> rectangles = Lists.newArrayList();
-        for (Map.Entry<Class<?>, Collection<Supplier<Collection<Rectangle>>>> collectionEntry : list.asMap().entrySet()) {
-            if (collectionEntry.getKey().isAssignableFrom(currentScreenClass)) {
-                for (Supplier<Collection<Rectangle>> listSupplier : collectionEntry.getValue()) {
-                    rectangles.addAll(listSupplier.get());
+        synchronized (list) {
+            for (Map.Entry<Class<?>, Collection<Supplier<Collection<Rectangle>>>> collectionEntry : list.asMap().entrySet()) {
+                if (collectionEntry.getKey().isAssignableFrom(currentScreenClass)) {
+                    for (Supplier<Collection<Rectangle>> listSupplier : collectionEntry.getValue()) {
+                        rectangles.addAll(listSupplier.get());
+                    }
                 }
             }
         }
@@ -118,7 +124,13 @@ public class ExclusionZonesImpl implements ExclusionZones {
     
     @Override
     public <T> void register(Class<? extends T> screenClass, ExclusionZonesProvider<? extends T> provider) {
-        list.put(screenClass, () -> ((ExclusionZonesProvider<T>) provider).provide((T) Minecraft.getInstance().screen));
+        synchronized (list) {
+            list.put(screenClass, () -> ((ExclusionZonesProvider<T>) provider).provide((T) Minecraft.getInstance().screen));
+        }
+        
+        if (!PluginManager.areAnyReloading()) {
+            RoughlyEnoughItemsCore.LOGGER.warn("Detected ExclusionZonesImpl modification at runtime, this may cause issues, a single ExclusionZonesProvider can dynamically provide boundaries instead!", new RuntimeException());
+        }
     }
     
     private long areasHashCode(Rectangle rectangle, List<Rectangle> exclusionZones) {

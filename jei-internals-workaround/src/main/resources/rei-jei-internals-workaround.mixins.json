@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "me.shedaniel.rei.jeiinternalsworkaround.mixin",
+  "plugin": "me.shedaniel.rei.jeiinternalsworkaround.JEIInternalsMixinPlugin",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+  ],
+  "mixins": [
+  ],
+  "injectors": {
+    "maxShiftBy": 5,
+    "defaultRequire": 1
+  }
+}

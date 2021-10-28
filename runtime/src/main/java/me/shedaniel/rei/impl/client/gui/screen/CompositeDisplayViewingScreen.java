@@ -47,6 +47,7 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
+import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
 import net.minecraft.client.Minecraft;
@@ -61,6 +62,7 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -152,9 +154,22 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         this.widgets.add(Widgets.createSlotBase(scrollListBounds));
         
         Rectangle recipeBounds = new Rectangle(bounds.x + 100 + (guiWidth - 100) / 2 - category.getDisplayWidth(display) / 2, bounds.y + bounds.height / 2 - category.getDisplayHeight() / 2, category.getDisplayWidth(display), category.getDisplayHeight());
-        List<Widget> setupDisplay = category.setupDisplay(display, recipeBounds);
+        List<Widget> setupDisplay;
+        try {
+            setupDisplay = category.setupDisplay(display, recipeBounds);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            setupDisplay = new ArrayList<>();
+            setupDisplay.add(Widgets.createRecipeBase(recipeBounds).color(0xFFBB0000));
+            setupDisplay.add(Widgets.createLabel(new Point(recipeBounds.getCenterX(), recipeBounds.getCenterY() - 8), new TextComponent("Failed to initiate setupDisplay")));
+            setupDisplay.add(Widgets.createLabel(new Point(recipeBounds.getCenterX(), recipeBounds.getCenterY() + 1), new TextComponent("Check console for error")));
+        }
+        setupTags(setupDisplay);
         transformIngredientNotice(setupDisplay, ingredientStackToNotice);
         transformResultNotice(setupDisplay, resultStackToNotice);
+        for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
+            widget.removeTagMatch = true;
+        }
         this.widgets.addAll(setupDisplay);
         Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getPlusButtonArea();
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)

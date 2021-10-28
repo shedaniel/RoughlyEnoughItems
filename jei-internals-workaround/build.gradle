@@ -1,3 +1,5 @@
+import java.util.zip.ZipFile
+
 archivesBaseName = rootProject.name + "-" + project.name
 
 dependencies {
@@ -5,10 +7,27 @@ dependencies {
 }
 
 loom {
-    // mixinConfig "rei-jei-internals-workaround.mixins.json"
+    forge {
+        mixinConfig "rei-jei-internals-workaround.mixins.json"
+    }
 }
 
-/*curseforge {
+configurations {
+    dev
+}
+
+artifacts {
+    dev(jar)
+}
+
+processResources {
+    filesMatching("META-INF/mods.toml") {
+        expand "version": project.version
+    }
+    inputs.property "version", project.version
+}
+
+curseforge {
     if (project.hasProperty('danielshe_curse_api_key') || System.getenv('danielshe_curse_api_key') != null) {
         apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
         project {
@@ -16,8 +35,8 @@ loom {
             releaseType = "beta"
             changelogType = "html"
             changelog = rootProject.releaseChangelog
-            addGameVersion "1.16.4"
-            addGameVersion "1.16.5"
+            addGameVersion "1.17"
+            addGameVersion "1.17.1"
             addGameVersion "Java 8"
             addGameVersion "Forge"
             relations {
@@ -32,4 +51,28 @@ loom {
         forgeGradleIntegration = false
         javaVersionAutoDetect = false
     }
-}*/
+}
+
+task updateJEIAssets {
+    doLast {
+        File jeiZip = file("build/jei.zip")
+        jeiZip.delete()
+        jeiZip.parentFile.mkdirs()
+        jeiZip.withOutputStream { out ->
+            new URL("https://github.com/mezz/JustEnoughItems/archive/refs/heads/1.17.zip").withInputStream { from -> out << from; }
+        }
+        new ZipFile(jeiZip).withCloseable { ZipFile zip ->
+            zip.stream().forEach { entry ->
+                String path = entry.name.substring(entry.name.indexOf('/') + 1)
+                if (path.startsWith("src/main/resources/assets") && !entry.isDirectory()) {
+                    File newFile = file(path)
+                    newFile.delete()
+                    newFile.parentFile.mkdirs()
+                    newFile.withOutputStream { out ->
+                        out << zip.getInputStream(entry)
+                    }
+                }
+            }
+        }
+    }
+}

@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.registry.display.reason.DisplayAdditionReason;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -48,13 +49,19 @@ import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
+import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
+import me.shedaniel.rei.jeicompat.imitator.JEIInternalsClickedIngredient;
 import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
 import me.shedaniel.rei.jeicompat.wrap.*;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -76,6 +83,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraftforge.fluids.FluidStack;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.tuple.Triple;
+import org.apache.logging.log4j.util.TriConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -99,10 +107,10 @@ public class JEIPluginDetector {
         }
     };
     
-    public static void detect(BiConsumer<Class<?>, BiConsumer<List<String>, Supplier<?>>> annotationScanner, Consumer<REIPluginProvider> pluginAdder) {
-        annotationScanner.accept(JeiPlugin.class, (modIds, plugin) -> {
+    public static void detect(BiConsumer<Class<?>, TriConsumer<List<String>, Supplier<?>, Class<?>>> annotationScanner, Consumer<REIPluginProvider> pluginAdder) {
+        annotationScanner.accept(JeiPlugin.class, (modIds, plugin, clazz) -> {
             Supplier<JEIPluginWrapper> value = () -> new JEIPluginWrapper(modIds, (IModPlugin) plugin.get());
-            pluginAdder.accept(new JEIPluginProvider(modIds, value));
+            pluginAdder.accept(new JEIPluginProvider(modIds, value, clazz));
         });
     }
     
@@ -148,7 +156,7 @@ public class JEIPluginDetector {
             @Override
             @NotNull
             public <T> List<T> getRecipes(@NotNull IRecipeCategory<T> recipeCategory) {
-                CategoryIdentifier<Display> categoryId = CategoryIdentifier.of(recipeCategory.getUid());
+                CategoryIdentifier<Display> categoryId = wrapCategoryId(recipeCategory.getUid());
                 return wrapRecipes(categoryId, false);
             }
         };
@@ -208,6 +216,28 @@ public class JEIPluginDetector {
         return context == UidContext.Recipe ? ComparisonContext.FUZZY : ComparisonContext.EXACT;
     }
     
+    public static final Map<ResourceLocation, CategoryIdentifier<?>> CATEGORY_ID_MAP = new HashMap<>();
+    
+    static {
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "crafting"), BuiltinPlugin.CRAFTING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "stonecutting"), BuiltinPlugin.STONE_CUTTING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "furnace"), BuiltinPlugin.SMELTING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "smoking"), BuiltinPlugin.SMOKING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "blasting"), BuiltinPlugin.BLASTING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "campfire"), BuiltinPlugin.CAMPFIRE);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "brewing"), BuiltinPlugin.BREWING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "anvil"), BuiltinPlugin.ANVIL);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "smithing"), BuiltinPlugin.SMITHING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "compostable"), BuiltinPlugin.COMPOSTING);
+        CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "information"), BuiltinPlugin.INFO);
+    }
+    
+    public static <T extends Display> CategoryIdentifier<T> wrapCategoryId(ResourceLocation id) {
+        CategoryIdentifier<?> identifier = CATEGORY_ID_MAP.get(id);
+        if (identifier != null) return (CategoryIdentifier<T>) identifier;
+        return CategoryIdentifier.of(id);
+    }
+    
     public static <T> EntryStack<T> wrap(IIngredientType<T> type, T stack) {
         return wrap(wrapEntryDefinition(type), stack);
     }
@@ -229,6 +259,18 @@ public class JEIPluginDetector {
         return EntryIngredients.of(definition, stack);
     }
     
+    public static <T> EntryType<T> wrapEntryType(IIngredientType<T> type) {
+        if (type.getIngredientClass() == FluidStack.class) {
+            return VanillaEntryTypes.FLUID.cast();
+        }
+        for (EntryDefinition<?> definition : EntryTypeRegistry.getInstance().values()) {
+            if (Objects.equals(definition.getValueType(), type.getIngredientClass())) {
+                return definition.getType().cast();
+            }
+        }
+        throw new IllegalArgumentException("Unknown JEI Ingredient Type! " + type.getIngredientClass().getName());
+    }
+    
     public static <T> EntryDefinition<T> wrapEntryDefinition(IIngredientType<T> type) {
         if (type.getIngredientClass() == FluidStack.class) {
             return VanillaEntryTypes.FLUID.getDefinition().cast();
@@ -242,6 +284,9 @@ public class JEIPluginDetector {
     }
     
     public static EntryStack<?> wrap(Object stack) {
+        if (stack instanceof JEIInternalsClickedIngredient) {
+            return wrap(((JEIInternalsClickedIngredient<?>) stack).getValue());
+        }
         return wrap(findEntryDefinition(stack).cast(), stack);
     }
     
@@ -281,11 +326,13 @@ public class JEIPluginDetector {
     public static class JEIPluginProvider implements REIPluginProvider<REIClientPlugin> {
         private final List<String> modIds;
         public final Supplier<JEIPluginWrapper> supplier;
+        private final Class<?> clazz;
         public JEIPluginWrapper wrapper;
         
-        public JEIPluginProvider(List<String> modIds, Supplier<JEIPluginWrapper> supplier) {
+        public JEIPluginProvider(List<String> modIds, Supplier<JEIPluginWrapper> supplier, Class<?> clazz) {
             this.modIds = modIds;
             this.supplier = supplier;
+            this.clazz = clazz;
         }
         
         @Override
@@ -293,8 +340,10 @@ public class JEIPluginDetector {
             if (wrapper != null) {
                 return wrapper.getPluginProviderName();
             }
-            
-            return "JEI Plugin [" + String.join(", ", modIds) + "]";
+    
+            String simpleName = clazz.getSimpleName();
+            simpleName = simpleName == null ? clazz.getName() : simpleName;
+            return "JEI Plugin [" + simpleName + "]";
         }
         
         @Override
@@ -318,6 +367,7 @@ public class JEIPluginDetector {
     
     public static class JEIPluginWrapper implements REIClientPlugin {
         public final List<String> modIds;
+        public final boolean mainThread;
         public final IModPlugin backingPlugin;
         
         public final Map<DisplayCategory<?>, List<Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>>>> categories = new HashMap<>();
@@ -326,6 +376,8 @@ public class JEIPluginDetector {
         public JEIPluginWrapper(List<String> modIds, IModPlugin backingPlugin) {
             this.modIds = modIds;
             this.backingPlugin = backingPlugin;
+            // why are you reloading twice
+            this.mainThread = CollectionUtils.anyMatch(Arrays.asList("jeresources", "jepb"), modIds::contains);
         }
         
         @Override
@@ -349,8 +401,11 @@ public class JEIPluginDetector {
             backingPlugin.registerCategories(wrapCategoryRegistration(registry, category -> {
                 categories.put(category, new ArrayList<>());
                 
-                DisplayRegistry.getInstance().registerFiller((Class<Object>) category.getRecipeClass(), ((JEIWrappedCategory<Object>) category)::handlesRecipe,
-                        recipe -> new JEIWrappedDisplay(category, recipe));
+                DisplayRegistry.getInstance().registerFiller((Class<Object>) category.getRecipeClass(), (o, reason) ->
+                                ((JEIWrappedCategory<Object>) category).handlesRecipe(o) && !reason.has(DisplayAdditionReason.RECIPE_MANAGER),
+                        recipe -> {
+                            return new JEIWrappedDisplay<>((JEIWrappedCategory<Object>) category, recipe);
+                        });
                 DisplayRegistry.getInstance().registerFiller(JEIWrappedDisplay.class, display -> display.getCategoryIdentifier().getIdentifier().equals(category.getIdentifier()), Function.identity());
                 
                 post.add(() -> {
@@ -412,23 +467,33 @@ public class JEIPluginDetector {
         }
         
         @Override
-        public void postRegister() {
-            for (Map.Entry<DisplayCategory<?>, List<Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>>>> entry : categories.entrySet()) {
-                DisplayCategory<?> category = entry.getKey();
-                for (Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>> pair : entry.getValue()) {
+        public void postStage(PluginManager<REIClientPlugin> manager, ReloadStage stage) {
+            if (stage == ReloadStage.END && Objects.equals(manager, PluginManager.getClientInstance())) {
+                for (Map.Entry<DisplayCategory<?>, List<Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>>>> entry : categories.entrySet()) {
+                    DisplayCategory<?> category = entry.getKey();
+                    for (Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>> pair : entry.getValue()) {
 //                    DisplayRegistry.getInstance().registerFiller(pair.getLeft(), pair.getMiddle(), );
+                    }
                 }
+                backingPlugin.onRuntimeAvailable(JEIJeiRuntime.INSTANCE);
+                for (Runnable runnable : post) {
+                    runnable.run();
+                }
+                post.clear();
             }
-            backingPlugin.onRuntimeAvailable(JEIJeiRuntime.INSTANCE);
-            for (Runnable runnable : post) {
-                runnable.run();
-            }
-            post.clear();
         }
         
         @Override
         public String getPluginProviderName() {
-            return "JEI Plugin [" + backingPlugin.getPluginUid() + "]";
+            Class<?> pluginClass = backingPlugin.getClass();
+            String simpleName = pluginClass.getSimpleName();
+            simpleName = simpleName == null ? pluginClass.getName() : simpleName;
+            return "JEI Plugin [" + simpleName + ":" + backingPlugin.getPluginUid() + "]";
+        }
+        
+        @Override
+        public boolean shouldBeForcefullyDoneOnMainThread(Reloadable<?> reloadable) {
+            return mainThread;
         }
     }
 }

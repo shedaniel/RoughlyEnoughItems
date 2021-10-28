@@ -48,7 +48,10 @@ import java.util.Optional;
 @ApiStatus.Internal
 public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     private int width;
-    private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> RoughlyEnoughItemsCoreClient.reloadPlugins(null, null)) {
+    private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
+        RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
+        RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
+    }) {
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             if (PluginManager.areAnyReloading()) {

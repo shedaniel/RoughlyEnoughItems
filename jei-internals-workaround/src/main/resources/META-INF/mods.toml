@@ -1,0 +1,22 @@
+modLoader = "javafml"
+loaderVersion = "[33,)"
+issueTrackerURL = "https://github.com/shedaniel/RoughlyEnoughItems/issues"
+logoFile = "icon.png"
+authors = "shedaniel"
+license = "MIT"
+
+[[mods]]
+modId = "rei_internals_workaround"
+version = "${version}"
+displayName = "REI Internals Workaround"
+description = '''
+An external REI module to workaround issues brought forward by mods accessing JEI internals, by remapping these code back to their api equivalent code.
+This module is extremely unstable, invokes terrible hacks, and should be used as a last resort.
+'''
+
+[[dependencies.rei_internals_workaround]]
+modId = "roughlyenoughitems"
+mandatory = true
+versionRange = "[6,)"
+ordering = "NONE"
+side = "BOTH"

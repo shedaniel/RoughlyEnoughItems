@@ -71,10 +71,7 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
@@ -115,9 +112,9 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             return true;
         }
         if (keyCode == 258 && !minecraft.options.keyInventory.matches(keyCode, scanCode)) {
-            boolean boolean_1 = !hasShiftDown();
-            if (!this.changeFocus(boolean_1))
-                this.changeFocus(boolean_1);
+            boolean next = !hasShiftDown();
+            if (!this.changeFocus(next))
+                this.changeFocus(next);
             return true;
         }
         if (choosePageActivated)
@@ -152,26 +149,30 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     @Override
     public void init() {
         super.init();
-        boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
-        int tabSize = isCompactTabs ? 24 : 28;
         this.children().clear();
         this.recipeBounds.clear();
         this.tabs.clear();
         this.preWidgets.clear();
         this.widgets.clear();
-        int largestWidth = width - 100;
         int largestHeight = Math.max(height - 34 - 30, 100);
         int maxWidthDisplay = CollectionUtils.mapAndMax(getCurrentDisplayed(), getCurrentCategory()::getDisplayWidth, Comparator.naturalOrder()).orElse(150);
-        int guiWidth = Math.max(maxWidthDisplay + 40, 190);
-        this.tabsPerPage = Math.max(5, Mth.floor((guiWidth - 20d) / tabSize));
-        if (this.categoryPages == -1) {
-            this.categoryPages = Math.max(0, selectedCategoryIndex / tabsPerPage);
-        }
-        this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - largestHeight / 2, guiWidth, largestHeight);
+        int maxHeight = Math.min(largestHeight, CollectionUtils.<DisplayCategory<?>, Integer>mapAndMax(categories, 
+                category -> (category.getDisplayHeight() + 4) * Math.max(1, Math.min(getRecipesPerPage(largestHeight, category) + 1, Math.max(categoryMap.get(category).size(), ConfigObject.getInstance().getMaxRecipePerPage()))) + 36, Comparator.naturalOrder()).orElse(66));
+        int totalDisplayHeight = (getCurrentCategory().getDisplayHeight() + 4) * Math.max(1, getRecipesPerPage(maxHeight, getCurrentCategory()) + 1) + 36;
+        int guiWidth = Math.max(maxWidthDisplay + 10, 190);
+        this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - maxHeight / 2, guiWidth, maxHeight);
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
             this.bounds.setLocation(this.bounds.getX(), this.bounds.getY() + 15);
             this.bounds.setSize(this.bounds.getWidth(), this.bounds.getHeight() - 10);
         }
+    
+        boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
+        int tabSize = isCompactTabs ? 24 : 28;
+        this.tabsPerPage = Math.max(5, Mth.floor((guiWidth - 20d) / tabSize));
+        if (this.categoryPages == -1) {
+            this.categoryPages = Math.max(0, selectedCategoryIndex / tabsPerPage);
+        }
+        
         this.page = Mth.clamp(page, 0, getCurrentTotalPages() - 1);
         this.widgets.add(Widgets.createButton(new Rectangle(bounds.x, bounds.y - 16, 10, 10), new TranslatableComponent("text.rei.left_arrow"))
                 .onClick(button -> {
@@ -189,75 +190,97 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                     DefaultDisplayViewingScreen.this.init();
                 })
                 .enabled(categories.size() > tabsPerPage));
-        widgets.add(categoryBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.left_arrow"))
+        this.widgets.add(categoryBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.left_arrow"))
                 .onClick(button -> previousCategory()).tooltipLine(new TranslatableComponent("text.rei.previous_category")));
-        widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), getCurrentCategory().getTitle(), clickableLabelWidget -> {
+        this.widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), getCurrentCategory().getTitle(), clickableLabelWidget -> {
             ViewSearchBuilder.builder().addAllCategories().open();
         }).tooltipLine(I18n.get("text.rei.view_all_categories")));
-        widgets.add(categoryNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
+        this.widgets.add(categoryNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
                 .onClick(button -> nextCategory()).tooltipLine(new TranslatableComponent("text.rei.next_category")));
-        categoryBack.setEnabled(categories.size() > 1);
-        categoryNext.setEnabled(categories.size() > 1);
-        
-        widgets.add(recipeBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 19, 12, 12), new TranslatableComponent("text.rei.left_arrow"))
+        this.categoryBack.setEnabled(categories.size() > 1);
+        this.categoryNext.setEnabled(categories.size() > 1);
+    
+        this.widgets.add(recipeBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 19, 12, 12), new TranslatableComponent("text.rei.left_arrow"))
                 .onClick(button -> {
                     page--;
                     if (page < 0)
                         page = getCurrentTotalPages() - 1;
                     DefaultDisplayViewingScreen.this.init();
                 }).tooltipLine(new TranslatableComponent("text.rei.previous_page")));
-        widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 21), NarratorChatListener.NO_TITLE, label -> {
+        this.widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 21), NarratorChatListener.NO_TITLE, label -> {
             DefaultDisplayViewingScreen.this.choosePageActivated = true;
             DefaultDisplayViewingScreen.this.init();
         }).onRender((matrices, label) -> {
             label.setMessage(new ImmutableTextComponent(String.format("%d/%d", page + 1, getCurrentTotalPages())));
             label.setClickable(getCurrentTotalPages() > 1);
         }).tooltipSupplier(label -> label.isClickable() ? I18n.get("text.rei.choose_page") : null));
-        widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
+        this.widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
                 .onClick(button -> {
                     page++;
                     if (page >= getCurrentTotalPages())
                         page = 0;
                     DefaultDisplayViewingScreen.this.init();
                 }).tooltipLine(new TranslatableComponent("text.rei.next_page")));
-        recipeBack.setEnabled(getCurrentTotalPages() > 1);
-        recipeNext.setEnabled(getCurrentTotalPages() > 1);
-        int tabV = isCompactTabs ? 166 : 192;
-        for (int i = 0; i < tabsPerPage; i++) {
-            int j = i + categoryPages * tabsPerPage;
-            if (categories.size() > j) {
+        this.recipeBack.setEnabled(getCurrentTotalPages() > 1);
+        this.recipeNext.setEnabled(getCurrentTotalPages() > 1);
+        for (int id = 0; id < tabsPerPage; id++) {
+            int tabIndex = id + categoryPages * tabsPerPage;
+            if (categories.size() > tabIndex) {
                 TabWidget tab;
-                tabs.add(tab = TabWidget.create(i, tabSize, bounds.x + bounds.width / 2 - Math.min(categories.size() - categoryPages * tabsPerPage, tabsPerPage) * tabSize / 2, bounds.y, 0, tabV, widget -> {
+                tabs.add(tab = TabWidget.create(id, tabSize, bounds.x + bounds.width / 2 - Math.min(categories.size() - categoryPages * tabsPerPage, tabsPerPage) * tabSize / 2, bounds.y, 0, isCompactTabs ? 166 : 192, widget -> {
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     if (widget.getId() + categoryPages * tabsPerPage == selectedCategoryIndex)
                         return false;
                     ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(widget.getId() + categoryPages * tabsPerPage).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
                     return true;
                 }));
-                tab.setRenderer(categories.get(j), categories.get(j).getIcon(), categories.get(j).getTitle(), tab.getId() + categoryPages * tabsPerPage == selectedCategoryIndex);
+                tab.setRenderer(categories.get(tabIndex), categories.get(tabIndex).getIcon(), categories.get(tabIndex).getTitle(), tab.getId() + categoryPages * tabsPerPage == selectedCategoryIndex);
             }
         }
-        Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(getCurrentCategoryId()).getPlusButtonArea();
-        int recipeHeight = getCurrentCategory().getDisplayHeight();
+    
+        choosePageWidget = choosePageActivated ? new DefaultDisplayChoosePageWidget(this, page, getCurrentTotalPages()) : null;
+        initDisplays();
+        initWorkstations(preWidgets);
+        
+        _children().addAll(tabs);
+        _children().addAll(widgets);
+        _children().addAll(preWidgets);
+    }
+    
+    private void initDisplays() {
+        Optional<ButtonArea> plusButtonArea = CategoryRegistry.getInstance().get(getCurrentCategoryId()).getPlusButtonArea();
+        int displayHeight = getCurrentCategory().getDisplayHeight();
         List<Display> currentDisplayed = getCurrentDisplayed();
         for (int i = 0; i < currentDisplayed.size(); i++) {
             final Display display = currentDisplayed.get(i);
             final Supplier<Display> displaySupplier = () -> display;
             int displayWidth = getCurrentCategory().getDisplayWidth(displaySupplier.get());
-            final Rectangle displayBounds = new Rectangle(getBounds().getCenterX() - displayWidth / 2, getBounds().getCenterY() + 16 - recipeHeight * (getRecipesPerPage() + 1) / 2 - 2 * (getRecipesPerPage() + 1) + recipeHeight * i + 4 * i, displayWidth, recipeHeight);
-            List<Widget> setupDisplay = getCurrentCategory().setupDisplay(display, displayBounds);
+            final Rectangle displayBounds = new Rectangle(getBounds().getCenterX() - displayWidth / 2, getBounds().getCenterY() + 16 - displayHeight * (getRecipesPerPage() + 1) / 2 - 2 * (getRecipesPerPage() + 1) + displayHeight * i + 4 * i, displayWidth, displayHeight);
+            List<Widget> setupDisplay;
+            try {
+                setupDisplay = getCurrentCategory().setupDisplay(display, displayBounds);
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+                setupDisplay = new ArrayList<>();
+                setupDisplay.add(Widgets.createRecipeBase(displayBounds).color(0xFFBB0000));
+                setupDisplay.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() - 8), new TextComponent("Failed to initiate setupDisplay")));
+                setupDisplay.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() + 1), new TextComponent("Check console for error")));
+            }
+            setupTags(setupDisplay);
             transformIngredientNotice(setupDisplay, ingredientStackToNotice);
             transformResultNotice(setupDisplay, resultStackToNotice);
-            recipeBounds.put(displayBounds, setupDisplay);
+            for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
+                widget.removeTagMatch = true;
+            }
+            this.recipeBounds.put(displayBounds, setupDisplay);
             this.widgets.addAll(setupDisplay);
-            if (supplier.isPresent() && supplier.get().get(displayBounds) != null)
-                this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, supplier.get().get(displayBounds), new TextComponent(supplier.get().getButtonText()), displaySupplier, setupDisplay, getCurrentCategory()));
+            if (plusButtonArea.isPresent() && plusButtonArea.get().get(displayBounds) != null) {
+                this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, plusButtonArea.get().get(displayBounds), new TextComponent(plusButtonArea.get().getButtonText()), displaySupplier, setupDisplay, getCurrentCategory()));
+            }
         }
-        if (choosePageActivated)
-            choosePageWidget = new DefaultDisplayChoosePageWidget(this, page, getCurrentTotalPages());
-        else
-            choosePageWidget = null;
-        
+    }
+    
+    private void initWorkstations(List<Widget> preWidgets) {
         workingStationsBaseWidget = null;
         List<EntryIngredient> workstations = CategoryRegistry.getInstance().get(getCurrentCategoryId()).getWorkstations();
         if (!workstations.isEmpty()) {
@@ -281,10 +304,6 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 }
             }
         }
-        
-        _children().addAll(tabs);
-        _children().addAll(widgets);
-        _children().addAll(preWidgets);
     }
     
     public List<Widget> getWidgets() {
@@ -312,11 +331,14 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     }
     
     private int getRecipesPerPage() {
-        DisplayCategory<Display> selectedCategory = getCurrentCategory();
-        if (selectedCategory.getFixedDisplaysPerPage() > 0)
-            return selectedCategory.getFixedDisplaysPerPage() - 1;
-        int height = selectedCategory.getDisplayHeight();
-        return Mth.clamp(Mth.floor(((double) this.bounds.getHeight() - 36) / ((double) height + 4)) - 1, 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, selectedCategory.getMaximumDisplaysPerPage() - 1));
+        return getRecipesPerPage(this.bounds.height, getCurrentCategory());
+    }
+    
+    private static int getRecipesPerPage(int totalHeight, DisplayCategory<?> category) {
+        if (category.getFixedDisplaysPerPage() > 0)
+            return category.getFixedDisplaysPerPage() - 1;
+        int height = category.getDisplayHeight();
+        return Mth.clamp(Mth.floor(((double) totalHeight - 36) / ((double) height + 4)) - 1, 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, category.getMaximumDisplaysPerPage() - 1));
     }
     
     @Override

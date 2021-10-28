@@ -32,6 +32,13 @@ import net.minecraft.client.gui.screens.Screen;
 
 public class CrashReportUtils {
     public static CrashReport essential(Throwable throwable, String task) {
+        Throwable temp = throwable;
+        while (temp != null) {
+            temp = temp.getCause();
+            if (temp instanceof ReportedException) {
+                return essential(temp, task);
+            }
+        }
         CrashReport report = CrashReport.forThrowable(throwable, task);
         screen(report, Minecraft.getInstance().screen);
         return report;

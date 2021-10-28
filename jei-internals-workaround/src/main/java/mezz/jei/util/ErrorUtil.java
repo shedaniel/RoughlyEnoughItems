@@ -21,31 +21,12 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat;
+package mezz.jei.util;
 
-import me.shedaniel.rei.jeicompat.wrap.JEIIngredientFilter;
-import me.shedaniel.rei.jeicompat.wrap.JEIIngredientManager;
-import me.shedaniel.rei.jeicompat.wrap.JEIJeiHelpers;
-import me.shedaniel.rei.jeicompat.wrap.JEIJeiRuntime;
-import mezz.jei.api.helpers.IJeiHelpers;
-import mezz.jei.api.runtime.IIngredientFilter;
-import mezz.jei.api.runtime.IIngredientManager;
-import mezz.jei.api.runtime.IJeiRuntime;
-
-public class JEIInternalsImitator {
-    public static IJeiHelpers getHelpers() {
-        return JEIJeiHelpers.INSTANCE;
-    }
-    
-    public static IJeiRuntime getRuntime() {
-        return JEIJeiRuntime.INSTANCE;
-    }
-    
-    public static IIngredientManager getIngredientManager() {
-        return JEIIngredientManager.INSTANCE;
-    }
-    
-    public static IIngredientFilter getIngredientFilter() {
-        return JEIIngredientFilter.INSTANCE;
+public class ErrorUtil {
+    public static void checkNotNull(Object object, String name) {
+        if (object == null) {
+            throw new NullPointerException(name + " must not be null.");
+        }
     }
 }

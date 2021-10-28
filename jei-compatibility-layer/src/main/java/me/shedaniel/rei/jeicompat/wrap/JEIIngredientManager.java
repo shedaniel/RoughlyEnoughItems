@@ -27,8 +27,9 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
@@ -37,6 +38,7 @@ import me.shedaniel.rei.jeicompat.unwrap.JEIIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.runtime.IIngredientFilter;
 import mezz.jei.api.runtime.IIngredientManager;
 import org.jetbrains.annotations.NotNull;
 
@@ -52,9 +54,9 @@ public enum JEIIngredientManager implements IIngredientManager {
     @Override
     @NotNull
     public <V> Collection<V> getAllIngredients(@NotNull IIngredientType<V> ingredientType) {
-        EntryDefinition<V> definition = wrapEntryDefinition(ingredientType);
+        EntryType<V> definition = wrapEntryType(ingredientType);
         return EntryRegistry.getInstance().getEntryStacks()
-                .filter(stack -> Objects.equals(stack.getDefinition(), definition))
+                .filter(stack -> Objects.equals(stack.getType(), definition))
                 .<EntryStack<V>>map(EntryStack::cast)
                 .map(JEIPluginDetector::unwrap)
                 .collect(Collectors.toList());
@@ -114,5 +116,15 @@ public enum JEIIngredientManager implements IIngredientManager {
     @NotNull
     public <V> IIngredientType<V> getIngredientType(@NotNull Class<? extends V> ingredientClass) {
         return () -> ingredientClass;
+    }
+    
+    @Override
+    public <V> boolean isIngredientVisible(V ingredient, IIngredientFilter ingredientFilter) {
+        EntryStack<?> stack = wrap(ingredient);
+        if (PluginManager.areAnyReloading()) {
+            return !stack.isEmpty();
+        } else {
+            return !EntryRegistry.getInstance().alreadyContain(stack) || EntryRegistry.getInstance().getPreFilteredList().contains(stack);
+        }
     }
 }

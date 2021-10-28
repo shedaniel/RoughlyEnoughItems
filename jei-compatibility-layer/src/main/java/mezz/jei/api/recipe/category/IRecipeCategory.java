@@ -10,7 +10,6 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.IIngredients;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.Recipe;
 
 import java.util.Collections;
 import java.util.List;
@@ -117,10 +116,6 @@ public interface IRecipeCategory<T> {
      * @since JEI 7.2.0
      */
     default boolean isHandled(T recipe) {
-        if (recipe instanceof Recipe) {
-            Recipe<?> iRecipe = (Recipe<?>) recipe;
-            return !iRecipe.isSpecial();
-        }
         return true;
     }
 }
