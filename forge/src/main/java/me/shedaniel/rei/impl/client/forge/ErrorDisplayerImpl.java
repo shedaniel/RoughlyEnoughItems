@@ -24,10 +24,30 @@
 package me.shedaniel.rei.impl.client.forge;
 
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraftforge.client.event.GuiOpenEvent;
+import net.minecraftforge.common.MinecraftForge;
 
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.UnaryOperator;
 
 public class ErrorDisplayerImpl {
-    public static void registerGuiInit(Consumer<Screen> consumer) {
+    private static final List<UnaryOperator<Screen>> CONSUMERS = new ArrayList<>();
+    
+    static {
+        MinecraftForge.EVENT_BUS.addListener(ErrorDisplayerImpl::onGuiOpen);
+    }
+    
+    public static void registerGuiInit(UnaryOperator<Screen> consumer) {
+        CONSUMERS.add(consumer);
+    }
+    
+    public static void onGuiOpen(GuiOpenEvent event) {
+        for (UnaryOperator<Screen> consumer : CONSUMERS) {
+            Screen screen = consumer.apply(event.getGui());
+            if (screen != null) {
+                event.setGui(screen);
+            }
+        }
     }
 }

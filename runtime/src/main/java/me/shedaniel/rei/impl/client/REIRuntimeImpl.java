@@ -43,6 +43,7 @@ import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
+import me.shedaniel.rei.impl.client.search.argument.Argument;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -216,6 +217,7 @@ public class REIRuntimeImpl implements REIRuntime {
     
     @Override
     public void startReload() {
+        Argument.SEARCH_CACHE.clear();
         getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
         lastDisplayScreen.clear();
     }
@@ -227,6 +229,7 @@ public class REIRuntimeImpl implements REIRuntime {
     
     @Override
     public void endReload(ReloadStage stage) {
+        Argument.SEARCH_CACHE.clear();
         getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
     }
     

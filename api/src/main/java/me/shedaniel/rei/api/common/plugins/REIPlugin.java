@@ -29,10 +29,13 @@ import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
+import me.shedaniel.rei.api.common.registry.Reloadable;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 
 /**
  * Base interface for a REI plugin.
@@ -96,15 +99,39 @@ public interface REIPlugin<P extends REIPlugin<?>> extends Comparable<REIPlugin<
     }
     
     @ApiStatus.OverrideOnly
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     default void preRegister() {
     }
     
     @ApiStatus.OverrideOnly
+    default void preStage(PluginManager<P> manager, ReloadStage stage) {
+        if (stage == ReloadStage.START && Objects.equals(manager, PluginManager.getInstance())) {
+            preRegister();
+        }
+    }
+    
+    @ApiStatus.OverrideOnly
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     default void postRegister() {
+    }
+    
+    @ApiStatus.OverrideOnly
+    default void postStage(PluginManager<P> manager, ReloadStage stage) {
+        if (stage == ReloadStage.END && (this instanceof REIServerPlugin ? Objects.equals(manager, PluginManager.getServerInstance()) : !Objects.equals(manager, PluginManager.getInstance()))) {
+            preRegister();
+        }
     }
     
     @Override
     default Collection<P> provide() {
         return Collections.singletonList((P) this);
+    }
+    
+    @ApiStatus.Internal
+    @ApiStatus.Experimental
+    default boolean shouldBeForcefullyDoneOnMainThread(Reloadable<?> reloadable) {
+        return false;
     }
 }

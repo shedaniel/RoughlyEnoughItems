@@ -23,10 +23,14 @@
 
 package me.shedaniel.rei.impl.common.plugins;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
+import com.mojang.datafixers.util.Pair;
+import dev.architectury.platform.Platform;
+import dev.architectury.utils.Env;
+import dev.architectury.utils.EnvExecutor;
+import dev.architectury.utils.GameInstance;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
@@ -35,9 +39,13 @@ import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.common.logging.performance.PerformanceLogger;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.server.MinecraftServer;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
 import java.util.*;
@@ -103,7 +111,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     @Override
     public void registerPlugin(REIPluginProvider<? extends P> plugin) {
         plugins.add((REIPluginProvider<P>) plugin);
-        RoughlyEnoughItemsCore.LOGGER.info("Registered plugin provider %s for %s", plugin.getPluginProviderName(), pluginClass.getSimpleName());
+        RoughlyEnoughItemsCore.LOGGER.info("Registered plugin provider %s for %s", plugin.getPluginProviderName(), name(pluginClass));
     }
     
     @Override
@@ -116,13 +124,39 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         return FluentIterable.concat(Iterables.transform(plugins, REIPluginProvider::provide));
     }
     
+    private static class PluginWrapper<P extends REIPlugin<?>> {
+        private final P plugin;
+        private final REIPluginProvider<P> provider;
+        
+        public PluginWrapper(P plugin, REIPluginProvider<P> provider) {
+            this.plugin = plugin;
+            this.provider = provider;
+        }
+        
+        public double getPriority() {
+            return plugin.getPriority();
+        }
+        
+        public String getPluginProviderName() {
+            return provider.getPluginProviderName();
+        }
+    }
+    
+    @SuppressWarnings("RedundantTypeArguments")
+    public FluentIterable<PluginWrapper<P>> getPluginWrapped() {
+        return FluentIterable.<PluginWrapper<P>>concat(Iterables.<REIPluginProvider<P>, Iterable<PluginWrapper<P>>>transform(plugins, input -> Iterables.<P, PluginWrapper<P>>transform(input.provide(),
+                plugin -> new PluginWrapper(plugin, input))));
+    }
+    
     private static class SectionClosable implements Closeable {
+        private ReloadStage stage;
         private MutablePair<Stopwatch, String> sectionData;
         
-        public SectionClosable(MutablePair<Stopwatch, String> sectionData, String section) {
-            this.sectionData = sectionData;
+        public SectionClosable(ReloadStage stage, String section) {
+            this.stage = stage;
+            this.sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
             sectionData.setRight(section);
-            RoughlyEnoughItemsCore.LOGGER.debug("Reloading Section: \"%s\"", section);
+            RoughlyEnoughItemsCore.LOGGER.debug("[" + stage + "] Reloading Section: \"%s\"", section);
             sectionData.getLeft().reset().start();
         }
         
@@ -130,41 +164,78 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         public void close() {
             sectionData.getLeft().stop();
             String section = sectionData.getRight();
-            RoughlyEnoughItemsCore.LOGGER.debug("Reloading Section: \"%s\" done in %s", section, sectionData.getLeft().toString());
+            RoughlyEnoughItemsCore.LOGGER.debug("[" + stage + "] Reloading Section: \"%s\" done in %s", section, sectionData.getLeft().toString());
             sectionData.getLeft().reset();
         }
     }
     
-    private SectionClosable section(MutablePair<Stopwatch, String> sectionData, String section) {
-        return new SectionClosable(sectionData, section);
+    private SectionClosable section(ReloadStage stage, String section) {
+        return new SectionClosable(stage, section);
     }
     
-    private void pluginSection(MutablePair<Stopwatch, String> sectionData, String sectionName, List<P> list, Consumer<P> consumer) {
-        for (P plugin : list) {
-            try (SectionClosable section = section(sectionData, sectionName + " for " + plugin.getPluginProviderName())) {
-                consumer.accept(plugin);
+    private void pluginSection(ReloadStage stage, String sectionName, List<PluginWrapper<P>> list, @Nullable Reloadable<?> reloadable, Consumer<PluginWrapper<P>> consumer) {
+        for (PluginWrapper<P> wrapper : list) {
+            try (SectionClosable section = section(stage, sectionName + wrapper.getPluginProviderName() + "/")) {
+                if (reloadable == null || !wrapper.plugin.shouldBeForcefullyDoneOnMainThread(reloadable)) {
+                    consumer.accept(wrapper);
+                } else if (Platform.getEnvironment() == Env.CLIENT) {
+                    EnvExecutor.runInEnv(Env.CLIENT, () -> () -> queueExecutionClient(() -> consumer.accept(wrapper)));
+                } else {
+                    queueExecution(() -> consumer.accept(wrapper));
+                }
             } catch (Throwable throwable) {
-                RoughlyEnoughItemsCore.LOGGER.error(plugin.getPluginProviderName() + " plugin failed to " + sectionName + "!", throwable);
+                RoughlyEnoughItemsCore.LOGGER.error(wrapper.getPluginProviderName() + " plugin failed to " + sectionName + "!", throwable);
             }
         }
     }
     
-    @Override
-    public void pre() {
-        List<P> plugins = new ArrayList<>(getPlugins().toList());
-        plugins.sort(Comparator.comparingDouble(P::getPriority).reversed());
-        Collections.reverse(plugins);
-        MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
-        pluginSection(sectionData, "pre-register", plugins, REIPlugin::preRegister);
+    private void queueExecution(Runnable runnable) {
+        MinecraftServer server = GameInstance.getServer();
+        if (server != null) {
+            server.executeBlocking(runnable);
+        }
+    }
+    
+    private void queueExecutionClient(Runnable runnable) {
+        Minecraft.getInstance().executeBlocking(runnable);
     }
     
     @Override
-    public void post() {
-        List<P> plugins = new ArrayList<>(getPlugins().toList());
-        plugins.sort(Comparator.comparingDouble(P::getPriority).reversed());
+    public void pre(ReloadStage stage) {
+        List<PluginWrapper<P>> plugins = new ArrayList<>(getPluginWrapped().toList());
+        plugins.sort(Comparator.comparingDouble(PluginWrapper<P>::getPriority).reversed());
         Collections.reverse(plugins);
-        MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
-        pluginSection(sectionData, "post-register", plugins, REIPlugin::postRegister);
+        try (SectionClosable preRegister = section(stage, "pre-register/");
+             PerformanceLogger.Plugin perfLogger = RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.stage("Pre Registration")) {
+            pluginSection(stage, "pre-register/", plugins, null, plugin -> {
+                try (PerformanceLogger.Plugin.Inner inner = perfLogger.plugin(new Pair<>(plugin.provider, plugin.plugin))) {
+                    plugin.plugin.preRegister();
+                    ((REIPlugin<P>) plugin.plugin).preStage(this, stage);
+                }
+            });
+        }
+    }
+    
+    @Override
+    public void post(ReloadStage stage) {
+        List<PluginWrapper<P>> plugins = new ArrayList<>(getPluginWrapped().toList());
+        plugins.sort(Comparator.comparingDouble(PluginWrapper<P>::getPriority).reversed());
+        Collections.reverse(plugins);
+        try (SectionClosable postRegister = section(stage, "post-register/");
+             PerformanceLogger.Plugin perfLogger = RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.stage("Post Registration")) {
+            pluginSection(stage, "post-register/", plugins, null, plugin -> {
+                try (PerformanceLogger.Plugin.Inner inner = perfLogger.plugin(new Pair<>(plugin.provider, plugin.plugin))) {
+                    plugin.plugin.postRegister();
+                    ((REIPlugin<P>) plugin.plugin).postStage(this, stage);
+                }
+            });
+        }
+    }
+    
+    private static String name(Class<?> clazz) {
+        String simpleName = clazz.getSimpleName();
+        if (simpleName.isEmpty()) return clazz.getName();
+        return simpleName;
     }
     
     @Override
@@ -172,33 +243,47 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         try {
             reloading = true;
             long startTime = Util.getMillis();
-            MutablePair<Stopwatch, String> sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
             
-            for (Reloadable<P> reloadable : reloadables) {
-                Class<?> reloadableClass = reloadable.getClass();
-                try (SectionClosable startReload = section(sectionData, "start-reload-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()))) {
-                    reloadable.startReload(stage);
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
+            try (SectionClosable startReloadAll = section(stage, "start-reload/");
+                 PerformanceLogger.Plugin perfLogger = RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.stage("Reload Initialization")) {
+                for (Reloadable<P> reloadable : reloadables) {
+                    Class<?> reloadableClass = reloadable.getClass();
+                    try (SectionClosable startReload = section(stage, "start-reload/" + name(reloadableClass) + "/");
+                         PerformanceLogger.Plugin.Inner inner = perfLogger.stage(name(reloadableClass))) {
+                        reloadable.startReload(stage);
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
                 }
             }
             
-            List<P> plugins = new ArrayList<>(getPlugins().toList());
-            plugins.sort(Comparator.comparingDouble(P::getPriority).reversed());
-            RoughlyEnoughItemsCore.LOGGER.info("Reloading Plugin Manager [%s] stage [%s], registered %d plugins: %s", pluginClass.getSimpleName(), stage.toString(), plugins.size(), CollectionUtils.mapAndJoinToString(plugins, REIPlugin::getPluginProviderName, ", "));
+            List<PluginWrapper<P>> plugins = new ArrayList<>(getPluginWrapped().toList());
+            plugins.sort(Comparator.comparingDouble(PluginWrapper<P>::getPriority).reversed());
+            RoughlyEnoughItemsCore.LOGGER.info("Reloading Plugin Manager [%s] stage [%s], registered %d plugins: %s", name(pluginClass), stage.toString(), plugins.size(), CollectionUtils.mapAndJoinToString(plugins, PluginWrapper::getPluginProviderName, ", "));
             Collections.reverse(plugins);
             
             for (Reloadable<P> reloadable : getReloadables()) {
                 Class<?> reloadableClass = reloadable.getClass();
-                pluginSection(sectionData, "reloadable-plugin-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()), plugins, plugin -> reloadable.acceptPlugin(plugin, stage));
+                try (SectionClosable reloadablePlugin = section(stage, "reloadable-plugin/" + name(reloadableClass) + "/");
+                     PerformanceLogger.Plugin perfLogger = RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.stage(name(reloadableClass))) {
+                    pluginSection(stage, "reloadable-plugin/" + name(reloadableClass) + "/", plugins, reloadable, plugin -> {
+                        try (PerformanceLogger.Plugin.Inner inner = perfLogger.plugin(new Pair<>(plugin.provider, plugin.plugin))) {
+                            reloadable.acceptPlugin(plugin.plugin, stage);
+                        }
+                    });
+                }
             }
             
-            for (Reloadable<P> reloadable : reloadables) {
-                Class<?> reloadableClass = reloadable.getClass();
-                try (SectionClosable endReload = section(sectionData, "end-reload-" + MoreObjects.firstNonNull(reloadableClass.getSimpleName(), reloadableClass.getName()))) {
-                    reloadable.endReload(stage);
-                } catch (Throwable throwable) {
-                    throwable.printStackTrace();
+            try (SectionClosable endReloadAll = section(stage, "end-reload/");
+                 PerformanceLogger.Plugin perfLogger = RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.stage("Reload Finalization")) {
+                for (Reloadable<P> reloadable : reloadables) {
+                    Class<?> reloadableClass = reloadable.getClass();
+                    try (SectionClosable endReload = section(stage, "end-reload/" + name(reloadableClass) + "/");
+                         PerformanceLogger.Plugin.Inner inner = perfLogger.stage(name(reloadableClass))) {
+                        reloadable.endReload(stage);
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
                 }
             }
             

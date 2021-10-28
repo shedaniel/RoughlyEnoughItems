@@ -40,9 +40,10 @@ import org.jetbrains.annotations.Nullable;
  *
  * @param <T> the entry type
  * @see BatchedEntryRenderer
+ * @see EntryRendererRegistry
  */
 @Environment(EnvType.CLIENT)
-public interface EntryRenderer<T> {
+public interface EntryRenderer<T> extends EntryRendererProvider<T> {
     static <T> EntryRenderer<T> empty() {
         return ClientInternals.getEmptyEntryRenderer();
     }
@@ -57,5 +58,10 @@ public interface EntryRenderer<T> {
     @ApiStatus.NonExtendable
     default <O> EntryRenderer<O> cast() {
         return (EntryRenderer<O>) this;
+    }
+    
+    @Override
+    default EntryRenderer<T> provide(EntryStack<T> entry, EntryRenderer<T> last) {
+        return this;
     }
 }

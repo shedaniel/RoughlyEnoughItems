@@ -46,7 +46,7 @@ public class FilteringContextImpl implements FilteringContext {
     public final Map<FilteringContextType, Set<HashedEntryStackWrapper>> stacks;
     private final Map<FilteringContextType, Collection<EntryStack<?>>> cachedStacks;
     
-    public FilteringContextImpl(List<EntryStack<?>> allStacks) {
+    public FilteringContextImpl(Collection<EntryStack<?>> allStacks) {
         this.stacks = Maps.newHashMap();
         this.cachedStacks = Maps.newHashMap();
         for (FilteringContextType type : FilteringContextType.values()) {

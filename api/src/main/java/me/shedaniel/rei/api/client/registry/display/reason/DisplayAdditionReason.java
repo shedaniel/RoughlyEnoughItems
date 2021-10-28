@@ -1,0 +1,44 @@
+/*
+ * This file is licensed under the MIT License, part of Roughly Enough Items.
+ * Copyright (c) 2018, 2019, 2020, 2021 shedaniel
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package me.shedaniel.rei.api.client.registry.display.reason;
+
+import org.jetbrains.annotations.ApiStatus;
+
+/**
+ * Reason for adding a display, used for {@link me.shedaniel.rei.api.client.registry.display.DisplayRegistry#tryFillDisplay(Object, DisplayAdditionReason...)}
+ * Plugins may filter their filler with reasons, this class can be implemented to provide additional context to fillers.
+ */
+@ApiStatus.Experimental
+public interface DisplayAdditionReason {
+    DisplayAdditionReason[] NONE = new DisplayAdditionReason[0];
+    /**
+     * Denotes that the display is added automatically by REI's RecipeManager,
+     * fillers which do not wish to be added with this should filter with this.
+     */
+    DisplayAdditionReason RECIPE_MANAGER = simple();
+    
+    static DisplayAdditionReason simple() {
+        return new DisplayAdditionReason() {};
+    }
+}

@@ -276,7 +276,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     
     @Override
     public Stream<DraggableStackVisitor.BoundsProvider> getDraggableAcceptingBounds(DraggingContext<Screen> context, DraggableStack stack) {
-        return checkDraggedStacks(context, stack).isPresent() ? Stream.of(DraggableStackVisitor.BoundsProvider.ofShape(buildBounds())) : Stream.empty();
+        return Stream.empty();
     }
     
     private VoxelShape buildBounds() {

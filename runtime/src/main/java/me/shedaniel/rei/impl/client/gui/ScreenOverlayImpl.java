@@ -58,7 +58,6 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
-import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
@@ -70,29 +69,24 @@ import me.shedaniel.rei.impl.client.gui.widget.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
-import me.shedaniel.rei.impl.client.search.argument.Argument;
 import me.shedaniel.rei.impl.common.util.Weather;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
@@ -102,8 +96,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class ScreenOverlayImpl extends ScreenOverlay {
@@ -225,7 +217,6 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public void init() {
-        Argument.SEARCH_CACHE.clear();
         draggingStack.set(DraggableStackProvider.from(() -> ScreenRegistry.getInstance().getDraggableProviders()),
                 DraggableStackVisitor.from(() -> ScreenRegistry.getInstance().getDraggableVisitors()));
         

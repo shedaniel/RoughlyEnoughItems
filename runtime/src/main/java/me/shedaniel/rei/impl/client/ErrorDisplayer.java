@@ -29,7 +29,7 @@ import me.shedaniel.rei.impl.client.gui.screen.WarningAndErrorScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 
-import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 public class ErrorDisplayer {
     public void onInitializeClient() {
@@ -46,18 +46,15 @@ public class ErrorDisplayer {
                     }
                 });
                 warningAndErrorScreen.setParent(screen);
-                try {
-                    if (minecraft.screen != null) minecraft.screen.removed();
-                } catch (Throwable ignored) {
-                }
-                minecraft.screen = null;
-                minecraft.setScreen(warningAndErrorScreen);
+                return warningAndErrorScreen;
             }
+            
+            return null;
         });
     }
     
     @ExpectPlatform
-    public static void registerGuiInit(Consumer<Screen> consumer) {
+    public static void registerGuiInit(UnaryOperator<Screen> consumer) {
         throw new AssertionError();
     }
 }
