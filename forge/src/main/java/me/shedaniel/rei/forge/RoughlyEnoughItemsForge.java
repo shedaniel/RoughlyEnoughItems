@@ -66,7 +66,7 @@ public class RoughlyEnoughItemsForge {
                     .map(IModInfo::getModId)
                     .collect(Collectors.toList());
             for (ModFileScanData.AnnotationData annotation : data.getAnnotations()) {
-                if (annotationType.equals(annotation.targetType())) {
+                if (annotationType.equals(annotation.annotationType())) {
                     try {
                         Class<T> clazz = (Class<T>) Class.forName(annotation.memberName());
                         if (predicate.test(clazz)) {
