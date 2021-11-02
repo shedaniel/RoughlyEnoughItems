@@ -55,16 +55,24 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
     private Iterable<SlotAccessor> inventoryStacks;
     private ServerPlayer player;
     
-    private InputSlotCrafter(CategoryIdentifier<D> category, T container, CompoundTag display, MenuInfo<T, D> menuInfo) {
+    private InputSlotCrafter(CategoryIdentifier<D> category, T container) {
         this.category = category;
         this.container = container;
+    }
+    
+    public void setDisplay(D display) {
+        this.display = display;
+    }
+    
+    public void setMenuInfo(MenuInfo<T, D> menuInfo) {
         this.menuInfo = menuInfo;
-        this.display = menuInfo.read(this, display);
     }
     
     public static <T extends AbstractContainerMenu, C extends Container, D extends Display> InputSlotCrafter<T, C, D> start(CategoryIdentifier<D> category, T menu, ServerPlayer player, CompoundTag display, boolean hasShift) {
-        MenuInfo<T, D> menuInfo = Objects.requireNonNull(MenuInfoRegistry.getInstance().get(category, (Class<T>) menu.getClass()), "Container Info does not exist on the server!");
-        InputSlotCrafter<T, C, D> crafter = new InputSlotCrafter<>(category, menu, display, menuInfo);
+        InputSlotCrafter<T, C, D> crafter = new InputSlotCrafter<>(category, menu);
+        MenuInfo<T, D> menuInfo = Objects.requireNonNull(MenuInfoRegistry.getInstance().get(category, menu, crafter, display), "Container Info does not exist on the server!");
+        crafter.setMenuInfo(menuInfo);
+        crafter.setDisplay(menuInfo.read(crafter, display));
         crafter.fillInputSlots(player, hasShift);
         return crafter;
     }

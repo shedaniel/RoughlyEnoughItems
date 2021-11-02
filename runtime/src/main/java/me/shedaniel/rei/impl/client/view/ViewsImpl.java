@@ -280,44 +280,46 @@ public class ViewsImpl implements Views {
         AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
         Set<EntryStack<?>> craftables = new HashSet<>();
         for (Map.Entry<CategoryIdentifier<?>, List<Display>> entry : DisplayRegistry.getInstance().getAll().entrySet()) {
-            MenuInfo<AbstractContainerMenu, Display> info = menu != null ?
-                    (MenuInfo<AbstractContainerMenu, Display>) MenuInfoRegistry.getInstance().get(entry.getKey(), menu.getClass())
-                    : null;
-            
-            class InfoContext implements MenuInfoContext<AbstractContainerMenu, LocalPlayer, Display> {
-                private Display display;
-                
-                @Override
-                public AbstractContainerMenu getMenu() {
-                    return menu;
-                }
-                
-                @Override
-                public LocalPlayer getPlayerEntity() {
-                    return Minecraft.getInstance().player;
-                }
-                
-                @Override
-                public MenuInfo<AbstractContainerMenu, Display> getContainerInfo() {
-                    return info;
-                }
-                
-                @Override
-                public CategoryIdentifier<Display> getCategoryIdentifier() {
-                    return (CategoryIdentifier<Display>) entry.getKey();
-                }
-                
-                @Override
-                public Display getDisplay() {
-                    return display;
-                }
-            }
-            
-            InfoContext context = new InfoContext();
-            
             List<Display> displays = entry.getValue();
             for (Display display : displays) {
-                context.display = display;
+                MenuInfo<AbstractContainerMenu, Display> info = menu != null ?
+                        MenuInfoRegistry.getInstance().getClient(display, menu)
+                        : null;
+                
+                class InfoContext implements MenuInfoContext<AbstractContainerMenu, LocalPlayer, Display> {
+                    private Display display;
+                    
+                    public InfoContext(Display display) {
+                        this.display = display;
+                    }
+                    
+                    @Override
+                    public AbstractContainerMenu getMenu() {
+                        return menu;
+                    }
+                    
+                    @Override
+                    public LocalPlayer getPlayerEntity() {
+                        return Minecraft.getInstance().player;
+                    }
+                    
+                    @Override
+                    public MenuInfo<AbstractContainerMenu, Display> getContainerInfo() {
+                        return info;
+                    }
+                    
+                    @Override
+                    public CategoryIdentifier<Display> getCategoryIdentifier() {
+                        return (CategoryIdentifier<Display>) entry.getKey();
+                    }
+                    
+                    @Override
+                    public Display getDisplay() {
+                        return display;
+                    }
+                }
+                
+                InfoContext context = new InfoContext(display);
                 Iterable<SlotAccessor> inputSlots = info != null ? info.getInputSlots(context) : Collections.emptySet();
                 int slotsCraftable = 0;
                 List<EntryIngredient> requiredInput = display.getRequiredEntries();

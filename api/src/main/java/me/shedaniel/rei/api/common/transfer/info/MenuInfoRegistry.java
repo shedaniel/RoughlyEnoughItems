@@ -28,7 +28,11 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.registry.Reloadable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -45,7 +49,17 @@ public interface MenuInfoRegistry extends Reloadable<REIServerPlugin> {
     
     <D extends Display> void registerGeneric(Predicate<CategoryIdentifier<?>> categoryPredicate, MenuInfoProvider<?, D> menuInfo);
     
-    @Nullable <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> get(CategoryIdentifier<D> category, Class<C> menuClass);
+    @Nullable
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
+    <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> get(CategoryIdentifier<D> category, Class<C> menuClass);
+    
+    @Nullable
+    @Environment(EnvType.CLIENT)
+    <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> getClient(D display, C menu);
+    
+    @Nullable
+    <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> get(CategoryIdentifier<D> category, C menu, MenuSerializationProviderContext<C, ?, D> context, CompoundTag tag);
     
     int infoSize();
 }
