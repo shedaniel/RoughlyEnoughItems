@@ -47,6 +47,8 @@
   "text.rei.cheat_items": "已将 {item_count} 个 [{item_name}§f] 给予 {player_name}",
   "text.rei.failed_cheat_items": "§c物品给予失败",
   "text.rei.too_long_nbt": "§c物品 NBT 太长，不能应用于多人游戏.",
+  "text.rei.tag_match": "标签： %s",
+  "text.rei.performance": "性能分析",
   "ordering.rei.ascending": "顺序",
   "ordering.rei.descending": "倒序",
   "ordering.rei.registry": "物品ID循序",

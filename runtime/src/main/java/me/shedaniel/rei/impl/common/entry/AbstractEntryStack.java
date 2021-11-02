@@ -193,10 +193,10 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
                 }
             } else {
                 final String modName = ClientHelper.getInstance().getModFromModId(location.getNamespace());
-                Iterator<Tooltip.Entry> iterator = tooltip.getValue().entries().iterator();
+                Iterator<Component> iterator = tooltip.getValue().getText().iterator();
                 while (iterator.hasNext()) {
-                    Tooltip.Entry s = iterator.next();
-                    if (s.isText() && FormattingUtils.stripFormatting(s.getAsText().getString()).equalsIgnoreCase(modName)) {
+                    Component s = iterator.next();
+                    if (FormattingUtils.stripFormatting(s.getString()).equalsIgnoreCase(modName)) {
                         iterator.remove();
                     }
                 }
