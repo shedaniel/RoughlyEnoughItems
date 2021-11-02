@@ -200,7 +200,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     private void queueSearchUpdate() {
         if (REIRuntimeImpl.getSearchField() != null) {
-            ScreenOverlayImpl.getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
+            ScreenOverlayImpl.getInstance().queueReloadSearch();
         }
     }
     

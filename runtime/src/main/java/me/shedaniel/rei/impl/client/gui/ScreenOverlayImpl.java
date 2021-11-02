@@ -106,6 +106,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     private static FavoritesListWidget favoritesListWidget = null;
     private final List<Widget> widgets = Lists.newLinkedList();
     public boolean shouldReload = false;
+    public boolean shouldReloadSearch = false;
     private Rectangle bounds;
     private Window window;
     private Button leftButton, rightButton;
@@ -207,6 +208,10 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         shouldReload = true;
     }
     
+    public void queueReloadSearch() {
+        shouldReloadSearch = true;
+    }
+    
     @Override
     public DraggingContext<?> getDraggingContext() {
         return draggingStack;
@@ -221,6 +226,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 DraggableStackVisitor.from(() -> ScreenRegistry.getInstance().getDraggableVisitors()));
         
         this.shouldReload = false;
+        this.shouldReloadSearch = false;
         //Update Variables
         this.children().clear();
         this.closeOverlayMenu();
@@ -469,7 +475,8 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 }
             }
         }
-        if (ConfigManager.getInstance().isCraftableOnlyEnabled() && CraftableFilter.INSTANCE.wasDirty()) {
+        if (shouldReloadSearch || (ConfigManager.getInstance().isCraftableOnlyEnabled() && CraftableFilter.INSTANCE.wasDirty())) {
+            shouldReloadSearch = false;
             ENTRY_LIST_WIDGET.updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
         }
         if (OverlaySearchField.isHighlighting) {
