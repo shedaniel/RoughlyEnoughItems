@@ -32,8 +32,10 @@ import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.TransferDisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.DisplayMerger;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
@@ -44,13 +46,14 @@ import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public class DefaultCraftingCategory implements TransferDisplayCategory<DefaultCraftingDisplay> {
+public class DefaultCraftingCategory implements TransferDisplayCategory<DefaultCraftingDisplay<?>> {
     @Override
-    public CategoryIdentifier<? extends DefaultCraftingDisplay> getCategoryIdentifier() {
+    public CategoryIdentifier<? extends DefaultCraftingDisplay<?>> getCategoryIdentifier() {
         return BuiltinPlugin.CRAFTING;
     }
     
@@ -65,7 +68,7 @@ public class DefaultCraftingCategory implements TransferDisplayCategory<DefaultC
     }
     
     @Override
-    public List<Widget> setupDisplay(DefaultCraftingDisplay display, Rectangle bounds) {
+    public List<Widget> setupDisplay(DefaultCraftingDisplay<?> display, Rectangle bounds) {
         Point startPoint = new Point(bounds.getCenterX() - 58, bounds.getCenterY() - 27);
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));
@@ -89,9 +92,9 @@ public class DefaultCraftingCategory implements TransferDisplayCategory<DefaultC
     }
     
     @Override
-    public void renderRedSlots(PoseStack matrices, List<Widget> widgets, Rectangle bounds, DefaultCraftingDisplay display, IntList redSlots) {
+    public void renderRedSlots(PoseStack matrices, List<Widget> widgets, Rectangle bounds, DefaultCraftingDisplay<?> display, IntList redSlots) {
 //        @Nullable
-//        Screen previousScreen = REIHelper.getInstance().getPreviousScreen();
+//        Screen previousScreen = REIRuntime.getInstance().getPreviousScreen();
 //        if (!(previousScreen instanceof AbstractContainerScreen)) return;
 //        AbstractContainerMenu containerMenu = ((AbstractContainerScreen<?>) previousScreen).getMenu();
 //        MenuInfo<AbstractContainerMenu, DefaultCraftingDisplay> info = (MenuInfo<AbstractContainerMenu, DefaultCraftingDisplay>) MenuInfoRegistry.getInstance().get(getCategoryIdentifier(), containerMenu.getClass());
@@ -108,5 +111,11 @@ public class DefaultCraftingCategory implements TransferDisplayCategory<DefaultC
 //            GuiComponent.fill(matrices, startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, startPoint.x + 1 + x * 18 + 16, startPoint.y + 1 + y * 18 + 16, 0x60ff0000);
 //        }
 //        matrices.popPose();
+    }
+    
+    @Override
+    @Nullable
+    public DisplayMerger<DefaultCraftingDisplay<?>> getDisplayMerger() {
+        return DisplayCategory.getContentMerger();
     }
 }
