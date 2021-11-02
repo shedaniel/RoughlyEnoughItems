@@ -121,12 +121,27 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
     public <C extends AbstractContainerMenu> void addRecipeTransferHandler(IRecipeTransferInfo<C> info) {
         post.accept(() -> {
             MenuInfoRegistry.getInstance().register(wrapCategoryId(info.getRecipeCategoryUid()), info.getContainerClass(),
-                    (categoryId, menuClass) -> Optional.of(new JEITransferMenuInfo.Client<>(menu -> new JEIRecipeTransferData<>(info, menu), info)));
+                    new MenuInfoProvider<C, Display>() {
+                        @Override
+                        public Optional<MenuInfo<C, Display>> provideClient(Display display, C menu) {
+                            return Optional.of(new JEITransferMenuInfo<>(new JEIRecipeTransferData<>(info, menu, (R) wrapRecipe(display))));
+                        }
+                        
+                        @Override
+                        public Optional<MenuInfo<C, Display>> provide(CategoryIdentifier<Display> display, C menu, MenuSerializationProviderContext<C, ?, Display> context, CompoundTag networkTag) {
+                            return Optional.of(new JEITransferMenuInfo<>(JEIRecipeTransferData.read(menu, networkTag)));
+                        }
+                        
+                        @Override
+                        public Optional<MenuInfo<C, Display>> provide(CategoryIdentifier<Display> categoryId, Class<C> menuClass) {
+                            throw new UnsupportedOperationException();
+                        }
+                    });
         });
     }
     
     @Override
-    public void addRecipeTransferHandler(IRecipeTransferHandler<?> recipeTransferHandler, ResourceLocation recipeCategoryUid) {
+    public <C extends AbstractContainerMenu, R> void addRecipeTransferHandler(IRecipeTransferHandler<C, R> recipeTransferHandler, ResourceLocation recipeCategoryUid) {
         TransferHandlerRegistry.getInstance().register(context -> {
             if (recipeTransferHandler.getContainerClass().isInstance(context.getMenu())) {
                 Display display = context.getDisplay();
