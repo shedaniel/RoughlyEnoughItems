@@ -29,6 +29,7 @@ import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import mezz.jei.api.ingredients.IIngredientHelper;
+import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -41,6 +42,11 @@ public class JEIIngredientHelper<T> implements IIngredientHelper<T> {
     
     public JEIIngredientHelper(EntryDefinition<T> definition) {
         this.definition = definition;
+    }
+    
+    @Override
+    public IIngredientType<T> getIngredientType() {
+        return definition::getValueType;
     }
     
     @Nullable

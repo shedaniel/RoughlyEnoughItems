@@ -24,10 +24,13 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import me.shedaniel.rei.plugin.common.displays.anvil.AnvilRecipe;
+import mezz.jei.api.recipe.vanilla.IJeiAnvilRecipe;
 import mezz.jei.api.recipe.vanilla.IJeiBrewingRecipe;
 import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,13 +39,13 @@ public enum JEIVanillaRecipeFactory implements IVanillaRecipeFactory {
     INSTANCE;
     
     @Override
-    public Object createAnvilRecipe(ItemStack leftInput, List<ItemStack> rightInputs, List<ItemStack> outputs) {
-        return new AnvilRecipe(null, Collections.singletonList(leftInput), rightInputs, outputs);
+    public IJeiAnvilRecipe createAnvilRecipe(ItemStack leftInput, List<ItemStack> rightInputs, List<ItemStack> outputs) {
+        return new JEIAnvilRecipe(null, Collections.singletonList(leftInput), rightInputs, outputs);
     }
     
     @Override
-    public Object createAnvilRecipe(List<ItemStack> leftInputs, List<ItemStack> rightInputs, List<ItemStack> outputs) {
-        return new AnvilRecipe(null, leftInputs, rightInputs, outputs);
+    public IJeiAnvilRecipe createAnvilRecipe(List<ItemStack> leftInputs, List<ItemStack> rightInputs, List<ItemStack> outputs) {
+        return new JEIAnvilRecipe(null, leftInputs, rightInputs, outputs);
     }
     
     @Override
@@ -53,5 +56,11 @@ public enum JEIVanillaRecipeFactory implements IVanillaRecipeFactory {
     @Override
     public IJeiBrewingRecipe createBrewingRecipe(List<ItemStack> ingredients, List<ItemStack> potionInputs, ItemStack potionOutput) {
         return new JEIBrewingRecipe(Ingredient.of(potionInputs.toArray(new ItemStack[0])), Ingredient.of(ingredients.toArray(new ItemStack[0])), potionOutput);
+    }
+    
+    private static class JEIAnvilRecipe extends AnvilRecipe implements IJeiAnvilRecipe {
+        public JEIAnvilRecipe(@Nullable ResourceLocation id, List<ItemStack> leftInput, List<ItemStack> rightInputs, List<ItemStack> outputs) {
+            super(id, leftInput, rightInputs, outputs);
+        }
     }
 }

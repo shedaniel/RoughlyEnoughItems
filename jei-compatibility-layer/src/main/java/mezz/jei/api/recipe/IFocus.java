@@ -2,7 +2,7 @@ package mezz.jei.api.recipe;
 
 /**
  * The current search focus.
- * Set by the player when they look up the recipe. The object being looked up is the focus.
+ * Set by the player when they look up the recipe. The ingredient being looked up is the focus.
  * This class is immutable, the value and mode do not change.
  * <p>
  * Create a focus with {@link IRecipeManager#createFocus(Mode, Object)}.
@@ -16,7 +16,7 @@ public interface IFocus<V> {
     }
     
     /**
-     * The object being focused on.
+     * The ingredient that is being focused on.
      */
     V getValue();
     

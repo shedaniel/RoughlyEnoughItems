@@ -34,10 +34,14 @@ import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfoProvider;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
+import me.shedaniel.rei.api.common.transfer.info.MenuSerializationProviderContext;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.jeicompat.transfer.JEIRecipeTransferData;
@@ -52,6 +56,7 @@ import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import mezz.jei.api.recipe.transfer.IRecipeTransferInfo;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.NotNull;
@@ -85,10 +90,15 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
     
     @Override
     public <C extends AbstractContainerMenu> void addRecipeTransferHandler(Class<C> containerClass, ResourceLocation recipeCategoryUid, int recipeSlotStart, int recipeSlotCount, int inventorySlotStart, int inventorySlotCount) {
-        addRecipeTransferHandler(new IRecipeTransferInfo<C>() {
+        addRecipeTransferHandler(new IRecipeTransferInfo<C, Object>() {
             @Override
             public Class<C> getContainerClass() {
                 return containerClass;
+            }
+            
+            @Override
+            public Class<Object> getRecipeClass() {
+                return Object.class;
             }
             
             @Override
@@ -97,19 +107,19 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
             }
             
             @Override
-            public boolean canHandle(C container) {
+            public boolean canHandle(C container, Object recipe) {
                 return getContainerClass().isInstance(container);
             }
             
             @Override
-            public List<net.minecraft.world.inventory.Slot> getRecipeSlots(C container) {
+            public List<net.minecraft.world.inventory.Slot> getRecipeSlots(C container, Object recipe) {
                 return IntStream.range(recipeSlotStart, recipeSlotStart + recipeSlotCount)
                         .mapToObj(container::getSlot)
                         .collect(Collectors.toList());
             }
             
             @Override
-            public List<net.minecraft.world.inventory.Slot> getInventorySlots(C container) {
+            public List<net.minecraft.world.inventory.Slot> getInventorySlots(C container, Object recipe) {
                 return IntStream.range(inventorySlotStart, inventorySlotStart + inventorySlotCount)
                         .mapToObj(container::getSlot)
                         .collect(Collectors.toList());
@@ -118,7 +128,7 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
     }
     
     @Override
-    public <C extends AbstractContainerMenu> void addRecipeTransferHandler(IRecipeTransferInfo<C> info) {
+    public <C extends AbstractContainerMenu, R> void addRecipeTransferHandler(IRecipeTransferInfo<C, R> info) {
         post.accept(() -> {
             MenuInfoRegistry.getInstance().register(wrapCategoryId(info.getRecipeCategoryUid()), info.getContainerClass(),
                     new MenuInfoProvider<C, Display>() {
@@ -168,7 +178,7 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                     if (context.isActuallyCrafting()) {
                         context.getMinecraft().setScreen(context.getContainerScreen());
                     }
-                    IRecipeTransferError error = ((IRecipeTransferHandler<AbstractContainerMenu>) recipeTransferHandler).transferRecipe(context.getMenu(), wrapRecipe(context.getDisplay()), layout, context.getMinecraft().player, Screen.hasShiftDown(), context.isActuallyCrafting());
+                    IRecipeTransferError error = ((IRecipeTransferHandler<AbstractContainerMenu, Object>) recipeTransferHandler).transferRecipe(context.getMenu(), wrapRecipe(context.getDisplay()), layout, context.getMinecraft().player, Screen.hasShiftDown(), context.isActuallyCrafting());
                     if (error == null) {
                         return TransferHandler.Result.createSuccessful();
                     } else if (error instanceof JEIRecipeTransferError) {
@@ -219,7 +229,7 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
     }
     
     @Override
-    public void addUniversalRecipeTransferHandler(IRecipeTransferHandler<?> recipeTransferHandler) {
+    public <C extends AbstractContainerMenu, R> void addUniversalRecipeTransferHandler(IRecipeTransferHandler<C, R> recipeTransferHandler) {
         addRecipeTransferHandler(recipeTransferHandler, null);
     }
 }

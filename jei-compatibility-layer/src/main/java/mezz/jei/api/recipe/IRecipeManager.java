@@ -2,6 +2,7 @@ package mezz.jei.api.recipe;
 
 import mezz.jei.api.constants.VanillaRecipeCategoryUid;
 import mezz.jei.api.gui.IRecipeLayoutDrawable;
+import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
@@ -10,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
-
 /**
  * The IRecipeManager offers several functions for retrieving and handling recipes.
  * Get the instance from {@link IJeiRuntime#getRecipeManager()}.
@@ -62,7 +62,7 @@ public interface IRecipeManager {
     /**
      * Returns an unmodifiable collection of ingredients that can craft the recipes from recipeCategory.
      * For instance, the crafting table ItemStack is returned here for Crafting recipe category.
-     * These are registered with {@link IRecipeCatalystRegistration#addRecipeCatalyst(Object, ResourceLocation...)}.
+     * These are registered with {@link IRecipeCatalystRegistration#addRecipeCatalyst(IIngredientType, Object, ResourceLocation...)}.
      *
      * @since JEI 7.7.1
      */

@@ -29,6 +29,7 @@ import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.runtime.IRecipesGui;
 import net.minecraft.client.Minecraft;
@@ -38,8 +39,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
 
 public enum JEIRecipesGui implements IRecipesGui {
     INSTANCE;
@@ -63,13 +63,14 @@ public enum JEIRecipesGui implements IRecipesGui {
     
     @Override
     @Nullable
-    public Object getIngredientUnderMouse() {
-        Object ingredient = JEIJeiRuntime.INSTANCE.getIngredientListOverlay().getIngredientUnderMouse();
+    public <T> T getIngredientUnderMouse(IIngredientType<T> ingredientType) {
+        T ingredient = JEIJeiRuntime.INSTANCE.getIngredientListOverlay().getIngredientUnderMouse(ingredientType);
         if (ingredient != null) return ingredient;
-        ingredient = JEIJeiRuntime.INSTANCE.getBookmarkOverlay().getIngredientUnderMouse();
+        ingredient = JEIJeiRuntime.INSTANCE.getBookmarkOverlay().getIngredientUnderMouse(ingredientType);
         if (ingredient != null) return ingredient;
         EntryStack<?> focusedStack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen, PointHelper.ofMouse());
         if (focusedStack == null) return null;
-        return unwrap(focusedStack);
+        if (focusedStack.getType() != wrapEntryType(ingredientType)) return null;
+        return unwrap(focusedStack.cast());
     }
 }

@@ -1,6 +1,7 @@
 package mezz.jei.api.gui.ingredient;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import org.jetbrains.annotations.Nullable;
@@ -14,6 +15,11 @@ import java.util.List;
  * Get these from {@link IGuiIngredientGroup#getGuiIngredients()}.
  */
 public interface IGuiIngredient<T> {
+    /**
+     * @return The ingredient type for this {@link IGuiIngredient}.
+     */
+    IIngredientType<T> getIngredientType();
+    
     /**
      * The ingredient variation that is shown at this moment.
      * For ingredients that rotate through several values, this will change over time.

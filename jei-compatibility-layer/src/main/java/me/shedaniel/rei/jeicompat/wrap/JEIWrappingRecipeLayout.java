@@ -26,20 +26,10 @@ package me.shedaniel.rei.jeicompat.wrap;
 import dev.architectury.utils.value.Value;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
 import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.recipe.category.IRecipeCategory;
 
 public class JEIWrappingRecipeLayout<T extends Display> extends JEIRecipeLayout<T> {
-    private final IRecipeCategory<T> category;
-    
     public JEIWrappingRecipeLayout(DisplayCategory<T> category, Value<IDrawable> background) {
         super(background);
-        this.category = new JEIUnwrappedCategory<>(category);
-    }
-    
-    @Override
-    public IRecipeCategory<T> getRecipeCategory() {
-        return category;
     }
 }

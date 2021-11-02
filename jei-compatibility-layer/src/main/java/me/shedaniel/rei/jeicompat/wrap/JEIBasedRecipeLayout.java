@@ -25,8 +25,6 @@ package me.shedaniel.rei.jeicompat.wrap;
 
 import dev.architectury.utils.value.Value;
 import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.recipe.category.IRecipeCategory;
-import org.jetbrains.annotations.NotNull;
 
 public class JEIBasedRecipeLayout<T> extends JEIRecipeLayout<T> {
     private final JEIWrappedCategory<T> category;
@@ -36,11 +34,5 @@ public class JEIBasedRecipeLayout<T> extends JEIRecipeLayout<T> {
         super(background);
         this.category = category;
         this.display = display;
-    }
-    
-    @Override
-    @NotNull
-    public IRecipeCategory<?> getRecipeCategory() {
-        return category.getBackingCategory();
     }
 }

@@ -1,5 +1,6 @@
 package mezz.jei.api.runtime;
 
+import mezz.jei.api.ingredients.IIngredientType;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -11,6 +12,5 @@ public interface IBookmarkOverlay {
     /**
      * @return the ingredient that's currently under the mouse, or null if there is none.
      */
-    @Nullable
-    Object getIngredientUnderMouse();
+    @Nullable <T> T getIngredientUnderMouse(IIngredientType<T> ingredientType);
 }

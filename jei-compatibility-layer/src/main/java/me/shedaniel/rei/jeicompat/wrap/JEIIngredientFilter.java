@@ -27,12 +27,17 @@ import com.google.common.collect.ImmutableList;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
+import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.runtime.IIngredientFilter;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.List;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapEntryType;
 
 public enum JEIIngredientFilter implements IIngredientFilter {
     INSTANCE;
@@ -49,14 +54,16 @@ public enum JEIIngredientFilter implements IIngredientFilter {
     }
     
     @Override
-    @NotNull
-    public ImmutableList<Object> getFilteredIngredients() {
+    public <T> List<T> getFilteredIngredients(IIngredientType<T> ingredientType) {
         List<EntryStack<?>> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
-        Object[] filtered = new Object[filteredStacks.size()];
+        EntryType<T> type = wrapEntryType(ingredientType);
+        T[] filtered = (T[]) Array.newInstance(ingredientType.getIngredientClass(), filteredStacks.size());
         int i = 0;
         for (EntryStack<?> stack : filteredStacks) {
-            filtered[i++] = unwrap(stack);
+            if (stack.getType() == type) {
+                filtered[i++] = unwrap(stack.cast());
+            }
         }
-        return ImmutableList.copyOf(filtered);
+        return ImmutableList.copyOf(Arrays.copyOf(filtered, i));
     }
 }

@@ -27,25 +27,28 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.runtime.IBookmarkOverlay;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapEntryType;
 
 public enum JEIBookmarkOverlay implements IBookmarkOverlay {
     INSTANCE;
     
     @Override
     @Nullable
-    public Object getIngredientUnderMouse() {
+    public <T> T getIngredientUnderMouse(IIngredientType<T> ingredientType) {
         if (!REIRuntime.getInstance().isOverlayVisible()) return null;
         ScreenOverlay overlay = REIRuntime.getInstance().getOverlay().get();
         Optional<OverlayListWidget> favoritesList = overlay.getFavoritesList();
         if (!favoritesList.isPresent()) return null;
         EntryStack<?> stack = favoritesList.get().getFocusedStack();
         if (stack.isEmpty()) return null;
-        return unwrap(stack);
+        if (stack.getType() != wrapEntryType(ingredientType)) return null;
+        return unwrap(stack.cast());
     }
 }
