@@ -38,7 +38,7 @@ dependencies {
     modApi("me.shedaniel:architectury-fabric:${architectury_version}")
 
     depProjects.forEach {
-        common(project(path: it, configuration: "dev")) { transitive false }
+        common(project(path: it, configuration: "namedElements")) { transitive false }
         shadowCommon(project(path: it, configuration: "transformProductionFabric")) { transitive false }
     }
 }

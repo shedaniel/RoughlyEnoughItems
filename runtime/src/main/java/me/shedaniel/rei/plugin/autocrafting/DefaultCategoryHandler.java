@@ -61,7 +61,7 @@ public class DefaultCategoryHandler implements TransferHandler {
             return Result.createNotApplicable();
         }
         AbstractContainerMenu menu = context.getMenu();
-        MenuInfo<AbstractContainerMenu, Display> menuInfo = MenuInfoRegistry.getInstance().get((CategoryIdentifier<Display>) display.getCategoryIdentifier(), (Class<AbstractContainerMenu>) menu.getClass());
+        MenuInfo<AbstractContainerMenu, Display> menuInfo = MenuInfoRegistry.getInstance().getClient(display, menu);
         if (menuInfo == null) {
             return Result.createNotApplicable();
         }

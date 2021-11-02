@@ -55,12 +55,12 @@ dependencies {
     modApi("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
     modApi("me.shedaniel:architectury-forge:${architectury_version}")
 
-    common(project(path: ":jei-compatibility-layer", configuration: "dev")) { transitive false }
-    shadowCommon(project(path: ":jei-compatibility-layer", configuration: "dev")) { transitive false }
-    runtimeClasspath(project(path: ":jei-internals-workaround", configuration: "dev")) { transitive = false }
+    common(project(path: ":jei-compatibility-layer", configuration: "namedElements")) { transitive false }
+    shadowCommon(project(path: ":jei-compatibility-layer", configuration: "namedElements")) { transitive false }
+    runtimeClasspath(project(path: ":jei-internals-workaround", configuration: "namedElements")) { transitive false }
 
     depProjects.forEach {
-        common(project(path: it, configuration: "dev")) { transitive false }
+        common(project(path: it, configuration: "namedElements")) { transitive false }
         shadowCommon(project(path: it, configuration: "transformProductionForge")) { transitive false }
     }
 

@@ -14,10 +14,6 @@ remapJar {
     remapAccessWidener = false
 }
 
-configurations {
-    dev
-}
-
 remapJar {
     classifier "raw"
 }
@@ -31,7 +27,6 @@ task fakeJar(type: Jar, dependsOn: remapJar) {
 }
 
 artifacts {
-    dev(jar)
     apiElements(fakeJar)
     runtimeElements(fakeJar)
 }

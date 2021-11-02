@@ -16,15 +16,11 @@ dependencies {
     modCompileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
     modApi("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
     modApi("me.shedaniel:architectury:${architectury_version}")
-    compileClasspath(project(path: ":api", configuration: "dev"))
+    compileClasspath(project(path: ":api", configuration: "namedElements"))
 }
 
 remapJar {
     remapAccessWidener = false
-}
-
-configurations {
-    dev
 }
 
 remapJar {
@@ -40,7 +36,6 @@ task fakeJar(type: Jar, dependsOn: remapJar) {
 }
 
 artifacts {
-    dev(jar)
     apiElements(fakeJar)
     runtimeElements(fakeJar)
 }
