@@ -110,6 +110,8 @@ curseforge {
             changelogType = "html"
             changelog = rootProject.releaseChangelog
             addGameVersion "1.17"
+            addGameVersion "1.17-Snapshot"
+            addGameVersion "1.17.1"
             addGameVersion "Fabric"
             relations {
                 requiredDependency "architectury-fabric"
