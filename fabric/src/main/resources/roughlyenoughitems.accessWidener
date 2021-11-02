@@ -26,7 +26,6 @@ accessible    field  net/minecraft/world/item/crafting/UpgradeRecipe            
 accessible    field  net/minecraft/world/item/crafting/UpgradeRecipe                           base                    Lnet/minecraft/world/item/crafting/Ingredient;
 accessible    field  net/minecraft/world/item/CreativeModeTab                                  langId                  Ljava/lang/String;
 accessible    method net/minecraft/client/gui/GuiComponent                                     innerBlit               (Lcom/mojang/math/Matrix4f;IIIIIFFFF)V
-accessible    method net/minecraft/client/gui/screens/Screen                                   addButton               (Lnet/minecraft/client/gui/components/AbstractWidget;)Lnet/minecraft/client/gui/components/AbstractWidget;
 accessible    method net/minecraft/client/gui/screens/Screen                                   addWidget               (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
 accessible    method net/minecraft/client/gui/screens/Screen                                   init                    ()V
 accessible    method net/minecraft/client/gui/screens/Screen                                   insertText              (Ljava/lang/String;Z)V
