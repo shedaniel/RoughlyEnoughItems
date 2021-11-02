@@ -328,22 +328,24 @@ public class JEIPluginDetector {
         public final Supplier<JEIPluginWrapper> supplier;
         private final Class<?> clazz;
         public JEIPluginWrapper wrapper;
+        private String nameSuffix;
         
         public JEIPluginProvider(List<String> modIds, Supplier<JEIPluginWrapper> supplier, Class<?> clazz) {
             this.modIds = modIds;
             this.supplier = supplier;
             this.clazz = clazz;
+            this.nameSuffix = " [" + String.join(", ", modIds) + "]";
         }
         
         @Override
         public String getPluginProviderName() {
             if (wrapper != null) {
-                return wrapper.getPluginProviderName();
+                return wrapper.getPluginProviderName() + nameSuffix;
             }
-    
+            
             String simpleName = clazz.getSimpleName();
             simpleName = simpleName == null ? clazz.getName() : simpleName;
-            return "JEI Plugin [" + simpleName + "]";
+            return "JEI Plugin [" + simpleName + "]" + nameSuffix;
         }
         
         @Override
