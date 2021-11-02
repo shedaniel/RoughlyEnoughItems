@@ -25,8 +25,12 @@ package me.shedaniel.rei.api.common.display;
 
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,7 +41,7 @@ import java.util.Optional;
  * @see me.shedaniel.rei.api.common.display.basic.BasicDisplay
  * @see me.shedaniel.rei.api.client.registry.display.DisplayRegistry
  */
-public interface Display {
+public interface Display extends DisplaySpec {
     /**
      * @return a list of inputs
      */
@@ -71,5 +75,22 @@ public interface Display {
      */
     default Optional<ResourceLocation> getDisplayLocation() {
         return Optional.empty();
+    }
+    
+    @Override
+    @ApiStatus.NonExtendable
+    default Display provideInternalDisplay() {
+        return this;
+    }
+    
+    @Override
+    @ApiStatus.NonExtendable
+    default Collection<ResourceLocation> provideInternalDisplayIds() {
+        Optional<ResourceLocation> location = getDisplayLocation();
+        if (location.isPresent()) {
+            return Collections.singletonList(location.get());
+        } else {
+            return Collections.emptyList();
+        }
     }
 }

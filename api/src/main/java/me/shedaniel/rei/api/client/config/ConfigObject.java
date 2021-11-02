@@ -111,6 +111,8 @@ public interface ConfigObject {
     
     boolean doDebugRenderTimeRequired();
     
+    boolean doMergeDisplayUnderOne();
+    
     ModifierKeyCode getFavoriteKeyCode();
     
     ModifierKeyCode getRecipeKeybind();

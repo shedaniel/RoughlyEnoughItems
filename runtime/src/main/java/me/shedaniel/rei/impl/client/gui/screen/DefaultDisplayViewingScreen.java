@@ -56,6 +56,7 @@ import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.PanelWidget;
+import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -89,7 +90,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     private Panel workingStationsBaseWidget;
     private Button recipeBack, recipeNext, categoryBack, categoryNext;
     
-    public DefaultDisplayViewingScreen(Map<DisplayCategory<?>, List<Display>> categoriesMap, @Nullable CategoryIdentifier<?> category) {
+    public DefaultDisplayViewingScreen(Map<DisplayCategory<?>, List<DisplaySpec>> categoriesMap, @Nullable CategoryIdentifier<?> category) {
         super(categoriesMap, category, 5);
         this.bounds = new Rectangle(0, 0, 176, 150);
     }
@@ -155,7 +156,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         this.preWidgets.clear();
         this.widgets.clear();
         int largestHeight = Math.max(height - 34 - 30, 100);
-        int maxWidthDisplay = CollectionUtils.mapAndMax(getCurrentDisplayed(), getCurrentCategory()::getDisplayWidth, Comparator.naturalOrder()).orElse(150);
+        int maxWidthDisplay = CollectionUtils.<DisplaySpec, Integer>mapAndMax(getCurrentDisplayed(), display -> getCurrentCategory().getDisplayWidth(display.provideInternalDisplay()), Comparator.naturalOrder()).orElse(150);
         int maxHeight = Math.min(largestHeight, CollectionUtils.<DisplayCategory<?>, Integer>mapAndMax(categories, 
                 category -> (category.getDisplayHeight() + 4) * Math.max(1, Math.min(getRecipesPerPage(largestHeight, category) + 1, Math.max(categoryMap.get(category).size(), ConfigObject.getInstance().getMaxRecipePerPage()))) + 36, Comparator.naturalOrder()).orElse(66));
         int totalDisplayHeight = (getCurrentCategory().getDisplayHeight() + 4) * Math.max(1, getRecipesPerPage(maxHeight, getCurrentCategory()) + 1) + 36;
@@ -250,15 +251,15 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     private void initDisplays() {
         Optional<ButtonArea> plusButtonArea = CategoryRegistry.getInstance().get(getCurrentCategoryId()).getPlusButtonArea();
         int displayHeight = getCurrentCategory().getDisplayHeight();
-        List<Display> currentDisplayed = getCurrentDisplayed();
+        List<DisplaySpec> currentDisplayed = getCurrentDisplayed();
         for (int i = 0; i < currentDisplayed.size(); i++) {
-            final Display display = currentDisplayed.get(i);
-            final Supplier<Display> displaySupplier = () -> display;
+            final DisplaySpec display = currentDisplayed.get(i);
+            final Supplier<Display> displaySupplier = display::provideInternalDisplay;
             int displayWidth = getCurrentCategory().getDisplayWidth(displaySupplier.get());
             final Rectangle displayBounds = new Rectangle(getBounds().getCenterX() - displayWidth / 2, getBounds().getCenterY() + 16 - displayHeight * (getRecipesPerPage() + 1) / 2 - 2 * (getRecipesPerPage() + 1) + displayHeight * i + 4 * i, displayWidth, displayHeight);
             List<Widget> setupDisplay;
             try {
-                setupDisplay = getCurrentCategory().setupDisplay(display, displayBounds);
+                setupDisplay = getCurrentCategory().setupDisplay(display.provideInternalDisplay(), displayBounds);
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
                 setupDisplay = new ArrayList<>();
@@ -275,7 +276,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             this.recipeBounds.put(displayBounds, setupDisplay);
             this.widgets.addAll(setupDisplay);
             if (plusButtonArea.isPresent() && plusButtonArea.get().get(displayBounds) != null) {
-                this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, plusButtonArea.get().get(displayBounds), new TextComponent(plusButtonArea.get().getButtonText()), displaySupplier, setupDisplay, getCurrentCategory()));
+                this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, plusButtonArea.get().get(displayBounds), new TextComponent(plusButtonArea.get().getButtonText()), displaySupplier, display::provideInternalDisplayIds, setupDisplay, getCurrentCategory()));
             }
         }
     }
@@ -310,10 +311,10 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         return widgets;
     }
     
-    public List<Display> getCurrentDisplayed() {
-        List<Display> list = Lists.newArrayList();
+    public List<DisplaySpec> getCurrentDisplayed() {
+        List<DisplaySpec> list = Lists.newArrayList();
         int recipesPerPage = getRecipesPerPage();
-        List<Display> displays = categoryMap.get(getCurrentCategory());
+        List<DisplaySpec> displays = categoryMap.get(getCurrentCategory());
         for (int i = 0; i <= recipesPerPage; i++) {
             if (page * (recipesPerPage + 1) + i < displays.size()) {
                 list.add(displays.get(page * (recipesPerPage + 1) + i));

@@ -222,6 +222,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public boolean doMergeDisplayUnderOne() {
+        return advanced.layout.mergeDisplayUnderOne;
+    }
+    
+    @Override
     public ModifierKeyCode getFavoriteKeyCode() {
         return basics.keyBindings.favoriteKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.favoriteKeybind;
     }
@@ -495,6 +500,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares the maximum amount of recipes displayed in a page if possible.") @ConfigEntry.BoundedDiscrete(min = 2, max = 99)
             private int maxRecipesPerPage = 3;
             @Comment("Declares whether entry rendering time should be debugged.") private boolean debugRenderTimeRequired = false;
+            @Comment("Merges displays with equal contents under 1 display.") private boolean mergeDisplayUnderOne = true;
         }
         
         public static class Accessibility {

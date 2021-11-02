@@ -31,12 +31,11 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.display.DisplaySpec;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public interface ViewSearchBuilder {
     static ViewSearchBuilder builder() {
@@ -66,7 +65,18 @@ public interface ViewSearchBuilder {
     @Nullable
     CategoryIdentifier<?> getPreferredOpenedCategory();
     
-    Map<DisplayCategory<?>, List<Display>> buildMap();
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    default Map<DisplayCategory<?>, List<Display>> buildMap() {
+        Map<DisplayCategory<?>, List<Display>> map = new HashMap<>();
+        for (Map.Entry<DisplayCategory<?>, List<DisplaySpec>> entry : buildMapInternal().entrySet()) {
+            map.put(entry.getKey(), CollectionUtils.map(entry.getValue(), DisplaySpec::provideInternalDisplay));
+        }
+        return map;
+    }
+    
+    @ApiStatus.Internal
+    Map<DisplayCategory<?>, List<DisplaySpec>> buildMapInternal();
     
     default boolean open() {
         return ClientHelper.getInstance().openView(this);

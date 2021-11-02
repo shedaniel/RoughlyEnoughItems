@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.display.DisplayMerger;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
@@ -47,8 +48,10 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
+import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -58,7 +61,7 @@ import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class ViewsImpl implements Views {
-    public static Map<DisplayCategory<?>, List<Display>> buildMapFor(ViewSearchBuilder builder) {
+    public static Map<DisplayCategory<?>, List<DisplaySpec>> buildMapFor(ViewSearchBuilder builder) {
         if (PluginManager.areAnyReloading()) {
             RoughlyEnoughItemsCore.LOGGER.info("Cancelled Views buildMap since plugins have not finished reloading.");
             return Maps.newLinkedHashMap();
@@ -155,6 +158,76 @@ public class ViewsImpl implements Views {
             generateLiveDisplays(displayRegistry, generator, builder, displayConsumer);
         }
         
+        Map<DisplayCategory<?>, List<DisplaySpec>> resultSpeced = (Map<DisplayCategory<?>, List<DisplaySpec>>) (Map) new LinkedHashMap<>(result);
+        // optimize displays
+        if (ConfigObject.getInstance().doMergeDisplayUnderOne()) {
+            for (Map.Entry<DisplayCategory<?>, List<Display>> entry : result.entrySet()) {
+                DisplayMerger<Display> merger = (DisplayMerger<Display>) entry.getKey().getDisplayMerger();
+                
+                if (merger != null) {
+                    class Wrapped implements DisplaySpec {
+                        private Display display;
+                        private List<ResourceLocation> ids = null;
+                        
+                        public Wrapped(Display display) {
+                            this.display = display;
+                        }
+                        
+                        @Override
+                        public boolean equals(Object o) {
+                            if (this == o) return true;
+                            if (!(o instanceof Wrapped)) return false;
+                            Wrapped wrapped = (Wrapped) o;
+                            return merger.canMerge(display, wrapped.display);
+                        }
+                        
+                        @Override
+                        public int hashCode() {
+                            return merger.hashOf(display);
+                        }
+                        
+                        @Override
+                        public Display provideInternalDisplay() {
+                            return display;
+                        }
+                        
+                        @Override
+                        public Collection<ResourceLocation> provideInternalDisplayIds() {
+                            if (ids == null) {
+                                ids = new ArrayList<>();
+                                Optional<ResourceLocation> location = display.getDisplayLocation();
+                                if (location.isPresent()) {
+                                    ids.add(location.get());
+                                }
+                            }
+                            return ids;
+                        }
+                        
+                        public void add(Display display) {
+                            Optional<ResourceLocation> location = display.getDisplayLocation();
+                            if (location.isPresent()) {
+                                provideInternalDisplayIds().add(location.get());
+                            }
+                        }
+                    }
+                    Map<Wrapped, Wrapped> wrappedSet = new LinkedHashMap<>();
+                    List<Wrapped> wrappeds = new ArrayList<>();
+                    
+                    for (Display display : entry.getValue()) {
+                        Wrapped wrapped = new Wrapped(display);
+                        if (wrappedSet.containsKey(wrapped)) {
+                            wrappedSet.get(wrapped).add(display);
+                        } else {
+                            wrappedSet.put(wrapped, wrapped);
+                            wrappeds.add(wrapped);
+                        }
+                    }
+                    
+                    resultSpeced.put(entry.getKey(), (List<DisplaySpec>) (List) wrappeds);
+                }
+            }
+        }
+        
         String message = String.format("Built Recipe View in %s for %d categories, %d recipes for, %d usages for and %d live recipe generators.",
                 stopwatch.stop(), categories.size(), recipesFor.size(), usagesFor.size(), generatorsCount);
         if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
@@ -162,7 +235,7 @@ public class ViewsImpl implements Views {
         } else {
             RoughlyEnoughItemsCore.LOGGER.trace(message);
         }
-        return result;
+        return resultSpeced;
     }
     
     private static <T extends Display> void generateLiveDisplays(DisplayRegistry displayRegistry, DynamicDisplayGenerator<T> generator, ViewSearchBuilder builder, Consumer<T> displayConsumer) {

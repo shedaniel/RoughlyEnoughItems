@@ -59,6 +59,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -68,7 +69,7 @@ import java.util.function.Supplier;
 public final class InternalWidgets {
     private InternalWidgets() {}
     
-    public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Component text, Supplier<Display> displaySupplier, List<Widget> setupDisplay, DisplayCategory<?> category) {
+    public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Component text, Supplier<Display> displaySupplier, Supplier<Collection<ResourceLocation>> idsSupplier, List<Widget> setupDisplay, DisplayCategory<?> category) {
         AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
         boolean[] visible = {false};
         List<Component>[] errorTooltip = new List[]{null};
@@ -177,8 +178,18 @@ public final class InternalWidgets {
                             str.add(errorTooltip[0].get(0).copy().withStyle(ChatFormatting.RED));
                         }
                     }
-                    if ((Minecraft.getInstance().options.advancedItemTooltips || Screen.hasShiftDown()) && displaySupplier.get().getDisplayLocation().isPresent()) {
-                        str.add(new TranslatableComponent("text.rei.recipe_id", "", new TextComponent(displaySupplier.get().getDisplayLocation().get().toString()).withStyle(ChatFormatting.GRAY)).withStyle(ChatFormatting.GRAY));
+                    if (Minecraft.getInstance().options.advancedItemTooltips || Screen.hasShiftDown()) {
+                        Collection<ResourceLocation> locations = idsSupplier.get();
+                        if (!locations.isEmpty()) {
+                            str.add(new TextComponent(" "));
+                            for (ResourceLocation location : locations) {
+                                String t = I18n.get("text.rei.recipe_id", "", new TextComponent(location.toString()).withStyle(ChatFormatting.GRAY));
+                                if (t.startsWith("\n")) {
+                                    t = t.substring("\n".length());
+                                }
+                                str.add(new TextComponent(t).withStyle(ChatFormatting.GRAY));
+                            }
+                        }
                     }
                     return str.toArray(new Component[0]);
                 });
