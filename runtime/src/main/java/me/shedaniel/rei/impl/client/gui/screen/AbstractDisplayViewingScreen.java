@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -57,7 +58,7 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractDisplayViewingScreen extends Screen implements DisplayScreen {
-    protected final Map<DisplayCategory<?>, List<Display>> categoryMap;
+    protected final Map<DisplayCategory<?>, List<DisplaySpec>> categoryMap;
     protected final List<DisplayCategory<?>> categories;
     protected List<EntryStack<?>> ingredientStackToNotice = new ArrayList<>();
     protected List<EntryStack<?>> resultStackToNotice = new ArrayList<>();
@@ -65,7 +66,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     protected int tabsPerPage;
     protected Rectangle bounds;
     
-    protected AbstractDisplayViewingScreen(Map<DisplayCategory<?>, List<Display>> categoryMap, @Nullable CategoryIdentifier<?> category, int tabsPerPage) {
+    protected AbstractDisplayViewingScreen(Map<DisplayCategory<?>, List<DisplaySpec>> categoryMap, @Nullable CategoryIdentifier<?> category, int tabsPerPage) {
         super(NarratorChatListener.NO_TITLE);
         this.categoryMap = categoryMap;
         this.categories = Lists.newArrayList(categoryMap.keySet());

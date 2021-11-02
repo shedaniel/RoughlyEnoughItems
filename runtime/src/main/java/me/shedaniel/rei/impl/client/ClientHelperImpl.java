@@ -50,6 +50,7 @@ import me.shedaniel.rei.impl.client.gui.screen.CompositeDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.UncertainDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
+import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -245,7 +246,7 @@ public class ClientHelperImpl implements ClientHelper {
     }
     
     @ApiStatus.Internal
-    public void openRecipeViewingScreen(Map<DisplayCategory<?>, List<Display>> map, @Nullable CategoryIdentifier<?> category, List<EntryStack<?>> ingredientNotice, List<EntryStack<?>> resultNotice) {
+    public void openRecipeViewingScreen(Map<DisplayCategory<?>, List<DisplaySpec>> map, @Nullable CategoryIdentifier<?> category, List<EntryStack<?>> ingredientNotice, List<EntryStack<?>> resultNotice) {
         LegacyWrapperViewSearchBuilder builder = new LegacyWrapperViewSearchBuilder(map);
         for (EntryStack<?> stack : ingredientNotice) {
             builder.addInputNotice(stack);
@@ -258,7 +259,7 @@ public class ClientHelperImpl implements ClientHelper {
     
     @Override
     public boolean openView(ViewSearchBuilder builder) {
-        Map<DisplayCategory<?>, List<Display>> map = builder.buildMap();
+        Map<DisplayCategory<?>, List<DisplaySpec>> map = builder.buildMapInternal();
         if (map.isEmpty()) return false;
         Screen screen;
         if (ConfigObject.getInstance().getRecipeScreenType() == DisplayScreenType.COMPOSITE) {
@@ -315,7 +316,7 @@ public class ClientHelperImpl implements ClientHelper {
         private final List<EntryStack<?>> usagesFor = new ArrayList<>();
         @Nullable
         private CategoryIdentifier<?> preferredOpenedCategory = null;
-        private final Supplier<Map<DisplayCategory<?>, List<Display>>> map = Suppliers.memoize(() -> ViewsImpl.buildMapFor(this));
+        private final Supplier<Map<DisplayCategory<?>, List<DisplaySpec>>> map = Suppliers.memoize(() -> ViewsImpl.buildMapFor(this));
         
         @Override
         public ViewSearchBuilder addCategory(CategoryIdentifier<?> category) {
@@ -369,14 +370,14 @@ public class ClientHelperImpl implements ClientHelper {
         }
         
         @Override
-        public Map<DisplayCategory<?>, List<Display>> buildMap() {
+        public Map<DisplayCategory<?>, List<DisplaySpec>> buildMapInternal() {
             fillPreferredOpenedCategory();
             return this.map.get();
         }
     }
     
     public static final class LegacyWrapperViewSearchBuilder extends AbstractViewSearchBuilder {
-        private final Map<DisplayCategory<?>, List<Display>> map;
+        private final Map<DisplayCategory<?>, List<DisplaySpec>> map;
         @Nullable
         private EntryStack<?> inputNotice;
         @Nullable
@@ -384,7 +385,7 @@ public class ClientHelperImpl implements ClientHelper {
         @Nullable
         private CategoryIdentifier<?> preferredOpenedCategory = null;
         
-        public LegacyWrapperViewSearchBuilder(Map<DisplayCategory<?>, List<Display>> map) {
+        public LegacyWrapperViewSearchBuilder(Map<DisplayCategory<?>, List<DisplaySpec>> map) {
             this.map = map;
         }
         
@@ -446,7 +447,7 @@ public class ClientHelperImpl implements ClientHelper {
         }
         
         @Override
-        public Map<DisplayCategory<?>, List<Display>> buildMap() {
+        public Map<DisplayCategory<?>, List<DisplaySpec>> buildMapInternal() {
             fillPreferredOpenedCategory();
             return this.map;
         }

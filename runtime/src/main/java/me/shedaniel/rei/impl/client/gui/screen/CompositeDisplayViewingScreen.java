@@ -50,6 +50,7 @@ import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
+import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -95,7 +96,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
     private long scrollBarAlphaFutureTime = -1;
     private int tabsPage = -1;
     
-    public CompositeDisplayViewingScreen(Map<DisplayCategory<?>, List<Display>> categoryMap, @Nullable CategoryIdentifier<?> category) {
+    public CompositeDisplayViewingScreen(Map<DisplayCategory<?>, List<DisplaySpec>> categoryMap, @Nullable CategoryIdentifier<?> category) {
         super(categoryMap, category, 8);
     }
     
@@ -118,8 +119,8 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         int largestWidth = width - 100;
         int largestHeight = height - 40;
         DisplayCategory<Display> category = (DisplayCategory<Display>) categories.get(selectedCategoryIndex);
-        Display display = categoryMap.get(category).get(selectedRecipeIndex);
-        int guiWidth = Mth.clamp(category.getDisplayWidth(display) + 30, 0, largestWidth) + 100;
+        DisplaySpec display = categoryMap.get(category).get(selectedRecipeIndex);
+        int guiWidth = Mth.clamp(category.getDisplayWidth(display.provideInternalDisplay()) + 30, 0, largestWidth) + 100;
         int guiHeight = Mth.clamp(category.getDisplayHeight() + 40, 166, largestHeight);
         this.tabsPerPage = Math.max(5, Mth.floor((guiWidth - 20d) / tabSize));
         if (this.tabsPage == -1) {
@@ -153,10 +154,10 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         this.scrollListBounds = new Rectangle(bounds.x + 4, bounds.y + 17, 97 + 5, guiHeight - 17 - 7);
         this.widgets.add(Widgets.createSlotBase(scrollListBounds));
         
-        Rectangle recipeBounds = new Rectangle(bounds.x + 100 + (guiWidth - 100) / 2 - category.getDisplayWidth(display) / 2, bounds.y + bounds.height / 2 - category.getDisplayHeight() / 2, category.getDisplayWidth(display), category.getDisplayHeight());
+        Rectangle recipeBounds = new Rectangle(bounds.x + 100 + (guiWidth - 100) / 2 - category.getDisplayWidth(display.provideInternalDisplay()) / 2, bounds.y + bounds.height / 2 - category.getDisplayHeight() / 2, category.getDisplayWidth(display.provideInternalDisplay()), category.getDisplayHeight());
         List<Widget> setupDisplay;
         try {
-            setupDisplay = category.setupDisplay(display, recipeBounds);
+            setupDisplay = category.setupDisplay(display.provideInternalDisplay(), recipeBounds);
         } catch (Throwable throwable) {
             throwable.printStackTrace();
             setupDisplay = new ArrayList<>();
@@ -173,13 +174,13 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         this.widgets.addAll(setupDisplay);
         Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getPlusButtonArea();
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
-            this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), new TextComponent(supplier.get().getButtonText()), () -> display, setupDisplay, category));
+            this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), new TextComponent(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category));
         
         int index = 0;
-        for (Display recipeDisplay : categoryMap.get(category)) {
+        for (DisplaySpec recipeDisplay : categoryMap.get(category)) {
             int finalIndex = index;
             DisplayRenderer displayRenderer;
-            displayRenderers.add(displayRenderer = category.getDisplayRenderer(recipeDisplay));
+            displayRenderers.add(displayRenderer = category.getDisplayRenderer(recipeDisplay.provideInternalDisplay()));
             buttonList.add(Widgets.createButton(new Rectangle(bounds.x + 5, 0, displayRenderer.getWidth(), displayRenderer.getHeight()), NarratorChatListener.NO_TITLE)
                     .onClick(button -> {
                         selectedRecipeIndex = finalIndex;

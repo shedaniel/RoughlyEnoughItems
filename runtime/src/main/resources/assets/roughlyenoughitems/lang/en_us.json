@@ -167,6 +167,7 @@
   "config.roughlyenoughitems.layout.configButtonLocation": "Config Button Position:",
   "config.roughlyenoughitems.layout.configButtonLocation.upper": "Upper",
   "config.roughlyenoughitems.layout.configButtonLocation.lower": "Lower",
+  "config.roughlyenoughitems.layout.mergeDisplayUnderOne": "Merge Displays with Equal Contents:",
   "config.roughlyenoughitems.filteredEntries.selectAll": "Select All",
   "config.roughlyenoughitems.filteredEntries.selectNone": "Unselect All",
   "config.roughlyenoughitems.filteredEntries.hide": "Hide Selected",
