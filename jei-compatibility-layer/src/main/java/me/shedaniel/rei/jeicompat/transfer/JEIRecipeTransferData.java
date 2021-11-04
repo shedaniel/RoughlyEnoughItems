@@ -37,7 +37,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JEIRecipeTransferData<C extends AbstractContainerMenu> {
+public class JEIRecipeTransferData<C extends AbstractContainerMenu, R> {
     /**
      * Return the recipe category that this container can handle.
      */
@@ -66,12 +66,12 @@ public class JEIRecipeTransferData<C extends AbstractContainerMenu> {
     }
     
     @OnlyIn(Dist.CLIENT)
-    public JEIRecipeTransferData(IRecipeTransferInfo<C> info, C container) {
-        this(info.getRecipeCategoryUid(), info.getRecipeSlots(container),
-                info.getInventorySlots(container), info.requireCompleteSets());
+    public JEIRecipeTransferData(IRecipeTransferInfo<C, R> info, C container, R recipe) {
+        this(info.getRecipeCategoryUid(), info.getRecipeSlots(container, recipe),
+                info.getInventorySlots(container, recipe), info.requireCompleteSets(container, recipe));
     }
     
-    public static <C extends AbstractContainerMenu> JEIRecipeTransferData<C> read(C menu, CompoundTag tag) {
+    public static <C extends AbstractContainerMenu, R> JEIRecipeTransferData<C, R> read(C menu, CompoundTag tag) {
         ResourceLocation recipeCategoryUid = ResourceLocation.tryParse(tag.getString("recipeCategoryUid"));
         List<Slot> recipeSlots = readSlots(menu, tag.getList("recipeSlots", NbtType.COMPOUND));
         List<Slot> inventorySlots = readSlots(menu, tag.getList("inventorySlots", NbtType.COMPOUND));

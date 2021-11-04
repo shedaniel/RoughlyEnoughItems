@@ -23,22 +23,25 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import com.google.common.collect.ImmutableList;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.runtime.IIngredientListOverlay;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapEntryType;
 
 public enum JEIIngredientListOverlay implements IIngredientListOverlay {
     INSTANCE;
     
-    @Override
     @Nullable
     public Object getIngredientUnderMouse() {
         if (!REIRuntime.getInstance().isOverlayVisible()) return null;
@@ -68,11 +71,14 @@ public enum JEIIngredientListOverlay implements IIngredientListOverlay {
     
     @Override
     @NotNull
-    public ImmutableList<Object> getVisibleIngredients() {
+    public <T> List<T> getVisibleIngredients(IIngredientType<T> ingredientType) {
         if (REIRuntime.getInstance().isOverlayVisible()) {
+            EntryType<T> type = wrapEntryType(ingredientType);
             ScreenOverlay overlay = REIRuntime.getInstance().getOverlay().get();
-            return overlay.getEntryList().getEntries().map(JEIPluginDetector::unwrap)
-                    .collect(ImmutableList.toImmutableList());
+            return (List<T>) overlay.getEntryList().getEntries()
+                    .filter(entryStack -> entryStack.getType() == type)
+                    .map(JEIPluginDetector::unwrap)
+                    .collect(Collectors.toList());
         }
         return null;
     }

@@ -21,23 +21,19 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat.wrap;
+package me.shedaniel.rei.impl.display;
 
-import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
-import mezz.jei.api.ingredients.IIngredientType;
-import mezz.jei.api.registration.IRecipeCatalystRegistration;
+import me.shedaniel.rei.api.common.display.Display;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapCategoryId;
+import java.util.Collection;
 
-public enum JEIRecipeCatalystRegistration implements IRecipeCatalystRegistration {
-    INSTANCE;
+@ApiStatus.Internal
+public interface DisplaySpec {
+    @ApiStatus.Internal
+    Display provideInternalDisplay();
     
-    @Override
-    public <T> void addRecipeCatalyst(IIngredientType<T> ingredientType, T ingredient, ResourceLocation... categoryIds) {
-        for (ResourceLocation id : categoryIds) {
-            CategoryRegistry.getInstance().addWorkstations(wrapCategoryId(id), wrap(ingredientType, ingredient));
-        }
-    }
+    @ApiStatus.Internal
+    Collection<ResourceLocation> provideInternalDisplayIds();
 }

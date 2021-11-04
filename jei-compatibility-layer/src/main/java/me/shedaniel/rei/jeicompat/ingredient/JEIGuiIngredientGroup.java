@@ -160,6 +160,12 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
         }
         
         @Override
+        @NotNull
+        public IIngredientType<T> getIngredientType() {
+            return type;
+        }
+        
+        @Override
         @Nullable
         public T getDisplayedIngredient() {
             return unwrap(slot.getCurrentEntry().cast());

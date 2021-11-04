@@ -12,14 +12,6 @@ loom {
     }
 }
 
-configurations {
-    dev
-}
-
-artifacts {
-    dev(jar)
-}
-
 processResources {
     filesMatching("META-INF/mods.toml") {
         expand "version": project.version

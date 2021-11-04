@@ -25,9 +25,19 @@ package me.shedaniel.rei.jeicompat;
 
 import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfoProvider;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
+import me.shedaniel.rei.api.common.transfer.info.MenuSerializationProviderContext;
+import me.shedaniel.rei.jeicompat.transfer.JEIRecipeTransferData;
 import me.shedaniel.rei.jeicompat.transfer.JEITransferMenuInfo;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.Optional;
 
@@ -35,7 +45,24 @@ public class JEIExtraPlugin implements REIServerPlugin {
     @Override
     public void registerMenuInfo(MenuInfoRegistry registry) {
         if (Platform.getEnvironment() == Env.SERVER) {
-            registry.registerGeneric(id -> true, (categoryId, menuClass) -> Optional.of(new JEITransferMenuInfo<>()));
+            registry.registerGeneric(id -> true, new MenuInfoProvider<AbstractContainerMenu, Display>() {
+                @Override
+                @OnlyIn(Dist.CLIENT)
+                public Optional<MenuInfo<AbstractContainerMenu, Display>> provideClient(Display display, AbstractContainerMenu menu) {
+                    throw new UnsupportedOperationException();
+                }
+                
+                @Override
+                public Optional<MenuInfo<AbstractContainerMenu, Display>> provide(CategoryIdentifier<Display> display, AbstractContainerMenu menu, MenuSerializationProviderContext<AbstractContainerMenu, ?, Display> context, CompoundTag networkTag) {
+                    JEIRecipeTransferData<AbstractContainerMenu, Display> data = JEIRecipeTransferData.read(context.getMenu(), networkTag.getCompound(JEITransferMenuInfo.KEY));
+                    return Optional.of(new JEITransferMenuInfo<>(data));
+                }
+                
+                @Override
+                public Optional<MenuInfo<AbstractContainerMenu, Display>> provide(CategoryIdentifier<Display> categoryId, Class<AbstractContainerMenu> menuClass) {
+                    throw new UnsupportedOperationException();
+                }
+            });
         }
     }
 }

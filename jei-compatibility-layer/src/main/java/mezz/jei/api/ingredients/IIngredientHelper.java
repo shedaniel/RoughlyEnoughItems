@@ -20,6 +20,11 @@ import java.util.Collections;
  */
 public interface IIngredientHelper<V> {
     /**
+     * @return The ingredient type for this {@link IIngredientHelper}.
+     */
+    IIngredientType<V> getIngredientType();
+    
+    /**
      * Change one focus into a different focus.
      * This can be used to treat lookups of one focus as if it were something else.
      * <p>

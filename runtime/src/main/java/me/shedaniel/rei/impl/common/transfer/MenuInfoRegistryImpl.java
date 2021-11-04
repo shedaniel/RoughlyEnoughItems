@@ -31,12 +31,17 @@ import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoProvider;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
+import me.shedaniel.rei.api.common.transfer.info.MenuSerializationProviderContext;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class MenuInfoRegistryImpl implements MenuInfoRegistry {
@@ -58,11 +63,28 @@ public class MenuInfoRegistryImpl implements MenuInfoRegistry {
     @Override
     @Nullable
     public <T extends AbstractContainerMenu, D extends Display> MenuInfo<T, D> get(CategoryIdentifier<D> category, Class<T> menuClass) {
+        return getInternal(category, menuClass, provider -> provider.provide(category, menuClass));
+    }
+    
+    @Override
+    @Nullable
+    @Environment(EnvType.CLIENT)
+    public <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> getClient(D display, C menu) {
+        return getInternal((CategoryIdentifier<D>) display.getCategoryIdentifier(), (Class<C>) menu.getClass(), provider -> provider.provideClient(display, menu));
+    }
+    
+    @Override
+    @Nullable
+    public <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> get(CategoryIdentifier<D> category, C menu, MenuSerializationProviderContext<C, ?, D> context, CompoundTag tag) {
+        return getInternal(category, (Class<C>) menu.getClass(), provider -> provider.provide(category, menu, context, tag));
+    }
+    
+    private <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> getInternal(CategoryIdentifier<D> category, Class<C> menuClass, Function<MenuInfoProvider<C, D>, Optional<MenuInfo<C, D>>> function) {
         Map<Class<? extends AbstractContainerMenu>, List<MenuInfoProvider<?, ?>>> infoMap = map.get(category);
         if (infoMap != null && !infoMap.isEmpty()) {
             if (infoMap.containsKey(menuClass)) {
                 for (MenuInfoProvider<?, ?> provider : infoMap.get(menuClass)) {
-                    Optional<MenuInfo<T, D>> info = ((MenuInfoProvider<T, D>) provider).provide(category, menuClass);
+                    Optional<MenuInfo<C, D>> info = function.apply((MenuInfoProvider<C, D>) provider);
                     if (info.isPresent()) {
                         return info.get();
                     }
@@ -71,7 +93,7 @@ public class MenuInfoRegistryImpl implements MenuInfoRegistry {
             for (Map.Entry<Class<? extends AbstractContainerMenu>, List<MenuInfoProvider<?, ?>>> entry : infoMap.entrySet()) {
                 if (entry.getKey().isAssignableFrom(menuClass)) {
                     for (MenuInfoProvider<?, ?> provider : entry.getValue()) {
-                        Optional<MenuInfo<T, D>> info = ((MenuInfoProvider<T, D>) provider).provide(category, menuClass);
+                        Optional<MenuInfo<C, D>> info = function.apply((MenuInfoProvider<C, D>) provider);
                         if (info.isPresent()) {
                             return info.get();
                         }
@@ -84,7 +106,7 @@ public class MenuInfoRegistryImpl implements MenuInfoRegistry {
             if (entry.getKey().test(category) && !entry.getValue().isEmpty()) {
                 List<MenuInfoProvider<?, ?>> infoList = entry.getValue();
                 if (!infoList.isEmpty()) {
-                    Optional<MenuInfo<T, D>> info = ((MenuInfoProvider<T, D>) infoList.get(0)).provide(category, menuClass);
+                    Optional<MenuInfo<C, D>> info = function.apply((MenuInfoProvider<C, D>) infoList.get(0));
                     if (info.isPresent()) {
                         return info.get();
                     }

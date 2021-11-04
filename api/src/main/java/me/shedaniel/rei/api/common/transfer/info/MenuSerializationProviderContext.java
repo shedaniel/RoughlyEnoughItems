@@ -21,23 +21,23 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat.wrap;
+package me.shedaniel.rei.api.common.transfer.info;
 
-import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
-import mezz.jei.api.ingredients.IIngredientType;
-import mezz.jei.api.registration.IRecipeCatalystRegistration;
-import net.minecraft.resources.ResourceLocation;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapCategoryId;
-
-public enum JEIRecipeCatalystRegistration implements IRecipeCatalystRegistration {
-    INSTANCE;
+/**
+ * Context for menu display serialization.
+ *
+ * @param <T> the type of {@link AbstractContainerMenu}
+ * @param <P> the type of {@link Player}, server sided contexts may pass {@link net.minecraft.server.level.ServerPlayer} instead
+ */
+public interface MenuSerializationProviderContext<T extends AbstractContainerMenu, P extends Player, D extends Display> {
+    T getMenu();
     
-    @Override
-    public <T> void addRecipeCatalyst(IIngredientType<T> ingredientType, T ingredient, ResourceLocation... categoryIds) {
-        for (ResourceLocation id : categoryIds) {
-            CategoryRegistry.getInstance().addWorkstations(wrapCategoryId(id), wrap(ingredientType, ingredient));
-        }
-    }
+    P getPlayerEntity();
+    
+    CategoryIdentifier<D> getCategoryIdentifier();
 }

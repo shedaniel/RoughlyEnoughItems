@@ -1,5 +1,6 @@
 package mezz.jei.api.runtime;
 
+import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IRecipeManager;
 import net.minecraft.resources.ResourceLocation;
@@ -30,6 +31,5 @@ public interface IRecipesGui {
     /**
      * @return the ingredient that's currently under the mouse in this gui, or null if there is none.
      */
-    @Nullable
-    Object getIngredientUnderMouse();
+    @Nullable <T> T getIngredientUnderMouse(IIngredientType<T> ingredientType);
 }

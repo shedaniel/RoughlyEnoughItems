@@ -89,7 +89,6 @@ public abstract class JEIRecipeLayout<T> implements IRecipeLayout {
         });
     }
     
-    @Override
     @Nullable
     public IFocus<?> getFocus() {
         DisplayScreen screen = (DisplayScreen) Minecraft.getInstance().screen;

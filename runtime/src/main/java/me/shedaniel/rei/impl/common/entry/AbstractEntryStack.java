@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -52,6 +53,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 @ApiStatus.Internal
 public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
@@ -184,10 +186,19 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
             tooltip.getValue().addAllTexts(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
             tooltip.setValue(get(Settings.TOOLTIP_PROCESSOR).apply(this, tooltip.getValue()));
             if (tooltip.getValue() == null) return null;
+            ResourceLocation location = getIdentifier();
             if (appendModName) {
-                ResourceLocation location = getIdentifier();
                 if (location != null) {
                     ClientHelper.getInstance().appendModIdToTooltips(tooltip.getValue(), location.getNamespace());
+                }
+            } else {
+                final String modName = ClientHelper.getInstance().getModFromModId(location.getNamespace());
+                Iterator<Tooltip.Entry> iterator = tooltip.getValue().entries().iterator();
+                while (iterator.hasNext()) {
+                    Tooltip.Entry s = iterator.next();
+                    if (s.isText() && FormattingUtils.stripFormatting(s.getAsText().getString()).equalsIgnoreCase(modName)) {
+                        iterator.remove();
+                    }
                 }
             }
             return tooltip.getValue();
