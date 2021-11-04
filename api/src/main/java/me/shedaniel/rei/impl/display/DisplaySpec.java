@@ -21,28 +21,19 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.transfer.info;
+package me.shedaniel.rei.impl.display;
 
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 
-/**
- * Context for menu display serialization.
- *
- * @param <T> the type of {@link AbstractContainerMenu}
- * @param <P> the type of {@link Player}, server sided contexts may pass {@link net.minecraft.server.level.ServerPlayer} instead
- */
-public interface MenuSerializationContext<T extends AbstractContainerMenu, P extends Player, D extends Display> extends MenuSerializationProviderContext<T, P, D> {
-    @Override
-    T getMenu();
+import java.util.Collection;
+
+@ApiStatus.Internal
+public interface DisplaySpec {
+    @ApiStatus.Internal
+    Display provideInternalDisplay();
     
-    @Override
-    P getPlayerEntity();
-    
-    MenuInfo<T, D> getContainerInfo();
-    
-    @Override
-    CategoryIdentifier<D> getCategoryIdentifier();
+    @ApiStatus.Internal
+    Collection<ResourceLocation> provideInternalDisplayIds();
 }

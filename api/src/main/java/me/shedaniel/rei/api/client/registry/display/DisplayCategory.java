@@ -31,12 +31,14 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.display.DisplayMerger;
 import me.shedaniel.rei.api.common.util.Identifiable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -118,6 +120,28 @@ public interface DisplayCategory<T extends Display> extends Identifiable {
     }
     
     CategoryIdentifier<? extends T> getCategoryIdentifier();
+    
+    @Nullable
+    default DisplayMerger<T> getDisplayMerger() {
+        return null;
+    }
+    
+    static <T extends Display> DisplayMerger<T> getContentMerger() {
+        return new DisplayMerger<T>() {
+            @Override
+            public boolean canMerge(T first, T second) {
+                if (!first.getCategoryIdentifier().equals(second.getCategoryIdentifier())) return false;
+                if (!first.getInputEntries().equals(second.getInputEntries())) return false;
+                if (!first.getOutputEntries().equals(second.getOutputEntries())) return false;
+                return true;
+            }
+            
+            @Override
+            public int hashOf(T display) {
+                return display.getCategoryIdentifier().hashCode() * 31 * 31 * 31 + display.getInputEntries().hashCode() * 31 * 31 + display.getOutputEntries().hashCode();
+            }
+        };
+    }
     
     @Override
     default ResourceLocation getIdentifier() {

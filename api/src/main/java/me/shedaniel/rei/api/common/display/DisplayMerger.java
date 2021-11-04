@@ -21,28 +21,10 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.transfer.info;
+package me.shedaniel.rei.api.common.display;
 
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.display.Display;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-
-/**
- * Context for menu display serialization.
- *
- * @param <T> the type of {@link AbstractContainerMenu}
- * @param <P> the type of {@link Player}, server sided contexts may pass {@link net.minecraft.server.level.ServerPlayer} instead
- */
-public interface MenuSerializationContext<T extends AbstractContainerMenu, P extends Player, D extends Display> extends MenuSerializationProviderContext<T, P, D> {
-    @Override
-    T getMenu();
+public interface DisplayMerger<T extends Display> {
+    boolean canMerge(T first, T second);
     
-    @Override
-    P getPlayerEntity();
-    
-    MenuInfo<T, D> getContainerInfo();
-    
-    @Override
-    CategoryIdentifier<D> getCategoryIdentifier();
+    int hashOf(T display);
 }

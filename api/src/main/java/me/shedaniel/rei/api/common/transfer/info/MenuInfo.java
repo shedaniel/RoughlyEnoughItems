@@ -34,6 +34,8 @@ import me.shedaniel.rei.api.common.transfer.info.clean.InputCleanHandler;
 import me.shedaniel.rei.api.common.transfer.info.simple.SimplePlayerInventoryMenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -109,6 +111,7 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
      * @throws MenuTransferException the exception to throw if something is wrong,
      *                               this exception should be caught by the invoker
      */
+    @Environment(EnvType.CLIENT)
     default void validate(MenuInfoContext<T, ?, D> context) throws MenuTransferException {
     }
     
@@ -133,6 +136,7 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
      * @return the {@link CompoundTag} serialized
      */
     default CompoundTag save(MenuSerializationContext<T, ?, D> context, D display) {
+        // TODO Remove this, replace with getDisplay()
         return DisplaySerializerRegistry.getInstance().save(display, new CompoundTag());
     }
     
