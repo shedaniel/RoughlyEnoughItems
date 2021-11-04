@@ -58,5 +58,8 @@
       "Norwegian": ["CanslerW"],
       "Turkish": ["NOYB"]
     }
+  },
+  "depends": {
+    "minecraft": "1.18-alpha.21.44.a"
   }
 }
