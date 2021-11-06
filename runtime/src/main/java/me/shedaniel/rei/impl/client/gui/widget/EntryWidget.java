@@ -474,7 +474,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
         if (!getCurrentEntry().isEmpty() && containsMouse(mouseX, mouseY)) {
             return new DraggableStack() {
-                EntryStack<?> stack = getCurrentEntry().copy();
+                EntryStack<?> stack = getCurrentEntry().copy()
+                        .removeSetting(EntryStack.Settings.RENDERER)
+                        .removeSetting(EntryStack.Settings.FLUID_RENDER_RATIO);
                 
                 @Override
                 public EntryStack<?> getStack() {

@@ -315,7 +315,7 @@ public class CollectionUtils {
                     @Override
                     public T get(int index) {
                         if (index < 0 || index >= realSize)
-                            throw new IndexOutOfBoundsException(String.format("Index %s out of bounds for length %s", index, realSize));
+                            return null;
                         return list.get(cursor + index);
                     }
                     
