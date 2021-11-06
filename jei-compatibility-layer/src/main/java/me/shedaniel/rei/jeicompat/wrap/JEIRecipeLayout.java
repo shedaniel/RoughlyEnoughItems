@@ -154,7 +154,7 @@ public abstract class JEIRecipeLayout<T> implements IRecipeLayout {
                 }
                 
                 if (wrapper.overlay != null) {
-                    widgets.add(Widgets.withTranslate(Widgets.wrapRenderer(wrapper.slot.getInnerBounds().clone(), wrapDrawable(wrapper.overlay)), 0, 251, 0));
+                    widgets.add(Widgets.withTranslate(Widgets.wrapRenderer(wrapper.slot.getInnerBounds().clone(), wrapDrawable(wrapper.overlay)), 0, 0, 10));
                 }
                 
                 List<ITooltipCallback<Object>> tooltipCallbacks = (List<ITooltipCallback<Object>>) (List) group.tooltipCallbacks;
