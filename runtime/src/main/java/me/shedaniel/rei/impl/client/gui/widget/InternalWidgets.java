@@ -183,7 +183,7 @@ public final class InternalWidgets {
                         if (!locations.isEmpty()) {
                             str.add(new TextComponent(" "));
                             for (ResourceLocation location : locations) {
-                                String t = I18n.get("text.rei.recipe_id", "", new TextComponent(location.toString()).withStyle(ChatFormatting.GRAY));
+                                String t = I18n.get("text.rei.recipe_id", "", location.toString());
                                 if (t.startsWith("\n")) {
                                     t = t.substring("\n".length());
                                 }
