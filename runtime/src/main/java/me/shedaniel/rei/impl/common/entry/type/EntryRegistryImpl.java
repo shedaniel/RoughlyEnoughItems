@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
@@ -119,6 +120,14 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     public void refilter() {
+        ConfigObject config = ConfigObject.getInstance();
+        if (config.getFilteredStackProviders() != null) {
+            List<EntryStack<?>> normalizedFilteredStacks = CollectionUtils.map(config.getFilteredStackProviders(), EntryStackProvider::provide);
+            normalizedFilteredStacks.removeIf(EntryStack::isEmpty);
+            config.getFilteredStackProviders().clear();
+            config.getFilteredStackProviders().addAll(CollectionUtils.map(normalizedFilteredStacks, EntryStackProvider::ofStack));
+        }
+        
         Stopwatch stopwatch = Stopwatch.createStarted();
         
         FilteringContextImpl context = new FilteringContextImpl(entries);

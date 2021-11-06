@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.client.config;
 
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
+import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.*;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -142,7 +143,11 @@ public interface ConfigObject {
     @ApiStatus.Experimental
     List<FavoriteEntry> getFavoriteEntries();
     
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
     List<EntryStack<?>> getFilteredStacks();
+    
+    List<EntryStackProvider<?>> getFilteredStackProviders();
     
     @ApiStatus.Experimental
     boolean shouldAsyncSearch();
