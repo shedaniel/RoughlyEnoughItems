@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat
 archivesBaseName = "RoughlyEnoughItems"
 
 def runNumber = System.getenv("GITHUB_RUN_NUMBER") ?: "9999"
-version = rootProject.base_version + "." + runNumber + (rootProject.unstable ? "-alpha" : "")
+version = rootProject.base_version + "." + runNumber + (rootProject.unstable.toBoolean() ? "-alpha" : "")
 
 group = "me.shedaniel"
 
