@@ -162,6 +162,10 @@ public class CollectionUtils {
         return list.parallelStream().map(function).collect(Collectors.toCollection(supplier));
     }
     
+    public static <T, R, C extends Collection<R>> C filterAndMapParallel(Collection<T> list, Predicate<T> filter, Function<T, R> function, Supplier<C> supplier) {
+        return list.parallelStream().filter(filter).map(function).collect(Collectors.toCollection(supplier));
+    }
+    
     public static <T, R> List<R> map(T[] list, Function<T, R> function) {
         List<R> l = new ArrayList<>(list.length + 1);
         for (T t : list) {

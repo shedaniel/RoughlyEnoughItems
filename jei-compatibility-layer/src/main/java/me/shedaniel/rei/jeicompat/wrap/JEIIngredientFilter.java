@@ -26,6 +26,7 @@ package me.shedaniel.rei.jeicompat.wrap;
 import com.google.common.collect.ImmutableList;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import mezz.jei.api.ingredients.IIngredientType;
@@ -55,12 +56,13 @@ public enum JEIIngredientFilter implements IIngredientFilter {
     
     @Override
     public <T> List<T> getFilteredIngredients(IIngredientType<T> ingredientType) {
-        List<EntryStack<?>> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
+        List<EntryStackProvider<?>> filteredStacks = ConfigObject.getInstance().getFilteredStackProviders();
         EntryType<T> type = wrapEntryType(ingredientType);
         T[] filtered = (T[]) Array.newInstance(ingredientType.getIngredientClass(), filteredStacks.size());
         int i = 0;
-        for (EntryStack<?> stack : filteredStacks) {
-            if (stack.getType() == type) {
+        for (EntryStackProvider<?> provider : filteredStacks) {
+            EntryStack<?> stack = provider.provide();
+            if (stack.getType() == type && !stack.isEmpty()) {
                 filtered[i++] = unwrap(stack.cast());
             }
         }

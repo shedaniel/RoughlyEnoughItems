@@ -32,9 +32,11 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.*;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -46,6 +48,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @ApiStatus.Internal
@@ -303,6 +306,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public List<EntryStack<?>> getFilteredStacks() {
+        return Collections.unmodifiableList(CollectionUtils.map(advanced.filtering.filteredStacks, EntryStackProvider::provide));
+    }
+    
+    @Override
+    public List<EntryStackProvider<?>> getFilteredStackProviders() {
         return advanced.filtering.filteredStacks;
     }
     
@@ -541,7 +549,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         }
         
         public static class Filtering {
-            @UseFilteringScreen private List<EntryStack<?>> filteredStacks = new ArrayList<>();
+            @UseFilteringScreen private List<EntryStackProvider<?>> filteredStacks = new ArrayList<>();
             @ConfigEntry.Gui.Excluded public List<FilteringRule<?>> filteringRules = new ArrayList<>();
         }
     }
