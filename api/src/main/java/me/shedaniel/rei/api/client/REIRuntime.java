@@ -54,10 +54,14 @@ public interface REIRuntime extends Reloadable<REIClientPlugin> {
     void toggleOverlayVisible();
     
     default Optional<ScreenOverlay> getOverlay() {
-        return getOverlay(false);
+        return getOverlay(false, false);
     }
     
-    Optional<ScreenOverlay> getOverlay(boolean reset);
+    default Optional<ScreenOverlay> getOverlay(boolean reset) {
+        return getOverlay(reset, true);
+    }
+    
+    Optional<ScreenOverlay> getOverlay(boolean reset, boolean init);
     
     @Nullable
     AbstractContainerScreen<?> getPreviousContainerScreen();

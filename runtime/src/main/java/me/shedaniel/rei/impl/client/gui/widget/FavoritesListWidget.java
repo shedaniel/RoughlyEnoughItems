@@ -23,18 +23,13 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.math.Vector4f;
-import it.unimi.dsi.fastutil.ints.*;
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -43,26 +38,25 @@ import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
-import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
-import me.shedaniel.rei.api.client.gui.drag.*;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
+import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
-import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
-import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.Animator;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.modules.Menu;
-import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
+import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
+import me.shedaniel.rei.impl.client.gui.widget.region.RegionDraggableStack;
+import me.shedaniel.rei.impl.client.gui.widget.region.RegionListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -70,81 +64,42 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
-import net.minecraft.util.Unit;
-import net.minecraft.world.phys.shapes.BooleanOp;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.entrySize;
 import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.notSteppingOnExclusionZones;
 
 @ApiStatus.Internal
-public class FavoritesListWidget extends WidgetWithBounds implements DraggableStackProviderWidget, DraggableStackVisitorWidget, OverlayListWidget {
-    protected final ScrollingContainer scrolling = new ScrollingContainer() {
-        @Override
-        public Rectangle getBounds() {
-            return currentBounds;
-        }
-        
-        @Override
-        public int getMaxScrollHeight() {
-            return Mth.ceil((entries.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
-        }
-        
-        @Override
-        public int getScrollBarX() {
-            if (!ConfigObject.getInstance().isLeftHandSidePanel())
-                return fullBounds.x + 1;
-            return fullBounds.getMaxX() - 7;
-        }
-    };
-    protected int blockedCount;
-    private Rectangle fullBounds, currentBounds = new Rectangle(), innerBounds;
-    private final Int2ObjectMap<Entry> entries = new Int2ObjectLinkedOpenHashMap<>();
-    private final Int2ObjectMap<Entry> removedEntries = new Int2ObjectLinkedOpenHashMap<>();
-    private List<EntryListEntry> entriesList = Lists.newArrayList();
-    private List<Widget> children = Lists.newArrayList();
+public class FavoritesListWidget extends WidgetWithBounds implements DraggableStackProviderWidget, OverlayListWidget, RegionListener<FavoriteEntry> {
+    private Rectangle fullBounds;
+    private EntryStacksRegionWidget<FavoriteEntry> region = new EntryStacksRegionWidget<>(this);
     
     public final AddFavoritePanel favoritePanel = new AddFavoritePanel(this);
     public final ToggleAddFavoritePanelButton favoritePanelButton = new ToggleAddFavoritePanelButton(this);
-    
-    private static Rectangle updateInnerBounds(Rectangle bounds) {
-        int entrySize = entrySize();
-        int width = Math.max(Mth.floor((bounds.width - 2 - 6) / (float) entrySize), 1);
-        if (!ConfigObject.getInstance().isLeftHandSidePanel())
-            return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f) + 3), bounds.y, width * entrySize, bounds.height);
-        return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f) - 3), bounds.y, width * entrySize, bounds.height);
-    }
+    private List<Widget> children = ImmutableList.of(favoritePanel, favoritePanelButton, region);
     
     @Override
-    public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        if (currentBounds.contains(double_1, double_2)) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (fullBounds.contains(mouseX, mouseY)) {
             if (Screen.hasControlDown()) {
                 ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
-                if (config.setEntrySize(config.getEntrySize() + double_3 * 0.075)) {
+                if (config.setEntrySize(config.getEntrySize() + amount * 0.075)) {
                     ConfigManager.getInstance().saveConfig();
                     REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
                     return true;
                 }
-            } else {
-                if (favoritePanel.mouseScrolled(double_1, double_2, double_3)) {
-                    return true;
-                }
-                scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
+            } else if (favoritePanel.mouseScrolled(mouseX, mouseY, amount)) {
                 return true;
             }
         }
-        return super.mouseScrolled(double_1, double_2, double_3);
+        return super.mouseScrolled(mouseX, mouseY, amount);
     }
     
     @Override
@@ -152,24 +107,42 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         return fullBounds;
     }
     
+    public EntryStacksRegionWidget<FavoriteEntry> getRegion() {
+        return region;
+    }
+    
+    @Override
+    public void onDrop(Stream<FavoriteEntry> entries) {
+        if (ConfigObject.getInstance().isFavoritesEnabled()) {
+            List<FavoriteEntry> favorites = ConfigObject.getInstance().getFavoriteEntries();
+            favorites.clear();
+            entries.forEach(entry -> {
+                favorites.add(entry.copy());
+            });
+            
+            ConfigManager.getInstance().saveConfig();
+        }
+    }
+    
+    @Override
+    @Nullable
+    public FavoriteEntry convertDraggableStack(DraggingContext<Screen> context, DraggableStack stack) {
+        return FavoriteEntry.fromEntryStack(stack.getStack().copy());
+    }
+    
     @Override
     @Nullable
     public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
-        if (innerBounds.contains(mouseX, mouseY)) {
-            for (Entry entry : entries.values()) {
-                if (entry.getWidget().containsMouse(mouseX, mouseY)) {
-                    return new FavoriteDraggableStack(entry, null);
-                }
-            }
-        }
+        DraggableStack stack = region.getHoveredStack(context, mouseX, mouseY);
+        if (stack != null) return stack;
         if (favoritePanel.bounds.contains(mouseX, mouseY)) {
             for (AddFavoritePanel.Row row : favoritePanel.rows.get()) {
                 if (row instanceof AddFavoritePanel.SectionEntriesRow) {
                     for (AddFavoritePanel.SectionEntriesRow.SectionFavoriteWidget widget : ((AddFavoritePanel.SectionEntriesRow) row).widgets) {
                         if (widget.containsMouse(mouseX, mouseY)) {
-                            Entry entry = new Entry(widget.entry.copy(), entrySize());
+                            RealRegionEntry<FavoriteEntry> entry = new RealRegionEntry<>(region, widget.entry.copy(), entrySize());
                             entry.size.setAs(entrySize() * 100);
-                            return new FavoriteDraggableStack(entry, widget);
+                            return new RegionDraggableStack<>(entry, widget);
                         }
                     }
                 }
@@ -181,13 +154,8 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     @Override
     public EntryStack<?> getFocusedStack() {
         Point mouse = PointHelper.ofMouse();
-        if (innerBounds.contains(mouse)) {
-            for (Entry entry : entries.values()) {
-                if (entry.getWidget().containsMouse(mouse)) {
-                    return entry.getWidget().getCurrentEntry().copy();
-                }
-            }
-        }
+        EntryStack<?> stack = region.getFocusedStack();
+        if (stack != null && !stack.isEmpty()) return stack;
         if (favoritePanel.bounds.contains(mouse)) {
             for (AddFavoritePanel.Row row : favoritePanel.rows.get()) {
                 if (row instanceof AddFavoritePanel.SectionEntriesRow) {
@@ -204,123 +172,18 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     
     @Override
     public Stream<EntryStack<?>> getEntries() {
-        return (Stream<EntryStack<?>>) (Stream<? extends EntryStack<?>>) entriesList.stream()
-                .filter(entry -> entry.getBounds().getMaxY() >= this.currentBounds.getY() && entry.getBounds().y <= this.currentBounds.getMaxY())
-                .map(EntryWidget::getCurrentEntry)
-                .filter(entry -> !entry.isEmpty());
-    }
-    
-    public class FavoriteDraggableStack implements DraggableStack {
-        private Entry entry;
-        private FavoriteEntry favoriteEntry;
-        private EntryStack<?> stack;
-        private WidgetWithBounds showcaseWidget;
-        
-        public FavoriteDraggableStack(Entry entry, WidgetWithBounds showcaseWidget) {
-            this.entry = entry;
-            this.favoriteEntry = entry.getEntry();
-            this.stack = ClientEntryStacks.of(favoriteEntry.getRenderer(false));
-            this.showcaseWidget = showcaseWidget;
-        }
-        
-        @Override
-        public EntryStack<?> getStack() {
-            return stack;
-        }
-        
-        @Override
-        public void drag() {
-            if (showcaseWidget == null) {
-                entries.remove(entry.hashIgnoreAmount());
-                applyNewFavorites(CollectionUtils.map(entries.values(), Entry::getEntry));
-            }
-        }
-        
-        @Override
-        public void release(boolean accepted) {
-            if (!accepted) {
-                if (showcaseWidget != null) {
-                    DraggingContext.getInstance().renderBackToPosition(this, DraggingContext.getInstance().getCurrentPosition(),
-                            () -> new Point(showcaseWidget.getBounds().x, showcaseWidget.getBounds().y));
-                } else {
-                    drop(entry, this, favoriteEntry);
-                }
-            }
-        }
-    }
-    
-    public Optional<Tuple<Entry, FavoriteEntry>> checkDraggedStacks(DraggingContext<Screen> context, DraggableStack stack) {
-        EntrySerializer<?> serializer = stack.getStack().getDefinition().getSerializer();
-        if (stack instanceof FavoriteDraggableStack || (serializer.supportReading() && serializer.supportSaving())) {
-            try {
-                FavoriteEntry favoriteEntry = stack instanceof FavoriteDraggableStack ? ((FavoriteDraggableStack) stack).favoriteEntry.copy()
-                        : FavoriteEntry.fromEntryStack(stack.getStack().copy());
-                Entry entry = new Entry(favoriteEntry, entrySize());
-                entry.size.setAs(entrySize() * 100);
-                return Optional.of(new Tuple<>(entry, favoriteEntry));
-            } catch (Throwable ignored) {
-            }
-        }
-        return Optional.empty();
-    }
-    
-    @Override
-    public boolean acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
-        return checkDraggedStacks(context, stack)
-                .filter(tuple -> innerBounds.contains(context.getCurrentPosition()))
-                .map(tuple -> {
-                    drop(tuple.getA(), stack, tuple.getB());
-                    return Unit.INSTANCE;
-                }).isPresent();
-    }
-    
-    @Override
-    public Stream<DraggableStackVisitor.BoundsProvider> getDraggableAcceptingBounds(DraggingContext<Screen> context, DraggableStack stack) {
-        return checkDraggedStacks(context, stack).isPresent() ? Stream.of(DraggableStackVisitor.BoundsProvider.ofShape(buildBounds())) : Stream.empty();
-    }
-    
-    private VoxelShape buildBounds() {
-        Class<? extends Screen> screenClass = Minecraft.getInstance().screen.getClass();
-        VoxelShape shape = DraggableStackVisitor.BoundsProvider.fromRectangle(innerBounds);
-        for (Rectangle zone : ScreenRegistry.getInstance().exclusionZones().getExclusionZones(screenClass)) {
-            shape = Shapes.joinUnoptimized(shape, DraggableStackVisitor.BoundsProvider.fromRectangle(zone), BooleanOp.ONLY_FIRST);
-        }
-        return shape.optimize();
+        return region.getEntries();
     }
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (fullBounds.isEmpty() || currentBounds.isEmpty())
+        if (fullBounds.isEmpty())
             return;
-        int entrySize = entrySize();
-        boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
-        updateEntriesPosition(entry -> true);
-        for (Entry entry : entries.values()) {
-            entry.update(delta);
-        }
-        ObjectIterator<Entry> removedEntriesIterator = removedEntries.values().iterator();
-        while (removedEntriesIterator.hasNext()) {
-            Entry removedEntry = removedEntriesIterator.next();
-            removedEntry.update(delta);
-            
-            if (removedEntry.size.doubleValue() <= 300) {
-                removedEntriesIterator.remove();
-                this.entriesList.remove(removedEntry.getWidget());
-                this.children.remove(removedEntry.getWidget());
-            }
-        }
-        ScissorsHandler.INSTANCE.scissor(currentBounds);
         
-        Stream<EntryListEntry> entryStream = this.entriesList.stream()
-                .filter(entry -> entry.getBounds().getMaxY() >= this.currentBounds.getY() && entry.getBounds().y <= this.currentBounds.getMaxY());
-        
-        new BatchedEntryRendererManager(entryStream.collect(Collectors.toList()))
-                .render(matrices, mouseX, mouseY, delta);
-        
-        updatePosition(delta);
-        scrolling.renderScrollBar(0, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
-        ScissorsHandler.INSTANCE.removeLastScissor();
-        
+        if (favoritePanel.getBounds().height > 20)
+            region.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y, this.fullBounds.width, this.fullBounds.height - (this.fullBounds.getMaxY() - this.favoritePanel.bounds.y) - 4);
+        else region.getBounds().setBounds(this.fullBounds);
+        region.render(matrices, mouseX, mouseY, delta);
         renderAddFavorite(matrices, mouseX, mouseY, delta);
     }
     
@@ -330,28 +193,10 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     }
     
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int int_1, double double_3, double double_4) {
-        if (scrolling.mouseDragged(mouseX, mouseY, int_1, double_3, double_4, ConfigObject.getInstance().doesSnapToRows(), entrySize()))
-            return true;
-        return super.mouseDragged(mouseX, mouseY, int_1, double_3, double_4);
-    }
-    
-    private void updatePosition(float delta) {
-        if (ConfigObject.getInstance().doesSnapToRows() && scrolling.scrollTarget >= 0 && scrolling.scrollTarget <= scrolling.getMaxScroll()) {
-            double nearestRow = Math.round(scrolling.scrollTarget / (double) entrySize()) * (double) entrySize();
-            if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(scrolling.scrollTarget, nearestRow, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
-                scrolling.scrollTarget += (nearestRow - scrolling.scrollTarget) * Math.min(delta / 2.0, 1.0);
-            else
-                scrolling.scrollTarget = nearestRow;
-        }
-        scrolling.updatePosition(delta);
-    }
-    
-    @Override
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (containsMouse(PointHelper.ofMouse()))
             for (Widget widget : children())
-                if (widget.keyPressed(int_1, int_2, int_3))
+                if (widget.keyPressed(keyCode, scanCode, modifiers))
                     return true;
         return false;
     }
@@ -362,88 +207,8 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     
     public void updateSearch() {
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
-            applyNewFavorites(CollectionUtils.map(ConfigObject.getInstance().getFavoriteEntries(), FavoriteEntry::copy));
-        } else applyNewFavorites(Collections.emptyList());
-    }
-    
-    public void applyNewFavorites(List<FavoriteEntry> newFavorites) {
-        newFavorites = Lists.newArrayList(newFavorites);
-        newFavorites.removeIf(FavoriteEntry::isEntryInvalid);
-        
-        int entrySize = entrySize();
-        IntSet newFavoritesHash = new IntOpenHashSet(CollectionUtils.mapToInt(newFavorites, FavoriteEntry::hashCode));
-        List<Entry> removedEntries = Lists.newArrayList(this.entries.values());
-        removedEntries.removeIf(entry -> newFavoritesHash.contains(entry.hashIgnoreAmount()));
-        
-        for (Entry removedEntry : removedEntries) {
-            removedEntry.remove();
-            this.removedEntries.put(removedEntry.hashIgnoreAmount(), removedEntry);
-        }
-        
-        Int2ObjectMap<Entry> prevEntries = new Int2ObjectOpenHashMap<>(entries);
-        this.entries.clear();
-        
-        for (FavoriteEntry favorite : newFavorites) {
-            Entry entry = prevEntries.get(favorite.hashCode());
-            
-            if (entry == null) {
-                entry = new Entry(favorite, entrySize);
-            }
-            
-            if (!ConfigObject.getInstance().isFavoritesAnimated()) entry.size.setAs(entrySize * 100);
-            else entry.size.setTo(entrySize * 100, 300);
-            entries.put(entry.hashIgnoreAmount(), entry);
-        }
-        
-        applyNewEntriesList();
-        updateEntriesPosition(entry -> prevEntries.containsKey(entry.hashIgnoreAmount()));
-    }
-    
-    public void applyNewEntriesList() {
-        this.entriesList = Stream.concat(entries.values().stream().map(Entry::getWidget), removedEntries.values().stream().map(Entry::getWidget)).collect(Collectors.toList());
-        this.children = Stream.<Stream<Widget>>of(
-                entries.values().stream().map(Entry::getWidget),
-                removedEntries.values().stream().map(Entry::getWidget),
-                Stream.of(favoritePanelButton, favoritePanel)
-        ).flatMap(Function.identity()).collect(Collectors.toList());
-    }
-    
-    public void updateEntriesPosition(Predicate<Entry> animated) {
-        int entrySize = entrySize();
-        this.blockedCount = 0;
-        if (favoritePanel.getBounds().height > 20)
-            this.currentBounds.setBounds(this.fullBounds.x, this.fullBounds.y, this.fullBounds.width, this.fullBounds.height - (this.fullBounds.getMaxY() - this.favoritePanel.bounds.y) - 4);
-        else this.currentBounds.setBounds(this.fullBounds);
-        this.innerBounds = updateInnerBounds(currentBounds);
-        int width = innerBounds.width / entrySize;
-        int currentX = 0;
-        int currentY = 0;
-        int releaseIndex = getReleaseIndex();
-        
-        int slotIndex = 0;
-        for (Entry entry : this.entries.values()) {
-            while (true) {
-                int xPos = currentX * entrySize + innerBounds.x;
-                int yPos = currentY * entrySize + innerBounds.y;
-                
-                currentX++;
-                if (currentX >= width) {
-                    currentX = 0;
-                    currentY++;
-                }
-                
-                if (notSteppingOnExclusionZones(xPos, yPos - (int) scrolling.scrollAmount, entrySize, entrySize, innerBounds)) {
-                    if (slotIndex++ == releaseIndex) {
-                        continue;
-                    }
-                    
-                    entry.moveTo(animated.test(entry), xPos, yPos);
-                    break;
-                } else {
-                    blockedCount++;
-                }
-            }
-        }
+            region.setEntries(CollectionUtils.map(ConfigObject.getInstance().getFavoriteEntries(), FavoriteEntry::copy));
+        } else region.setEntries(Collections.emptyList());
     }
     
     @Override
@@ -451,123 +216,9 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         return children;
     }
     
-    public int getReleaseIndex() {
-        DraggingContext<?> context = DraggingContext.getInstance();
-        Point position = context.getCurrentPosition();
-        if (context.isDraggingStack() && currentBounds.contains(position) && checkDraggedStacks(context.cast(), context.getCurrentStack()).isPresent()) {
-            int entrySize = entrySize();
-            int width = innerBounds.width / entrySize;
-            int currentX = 0;
-            int currentY = 0;
-            List<Tuple<Entry, Point>> entriesPoints = Lists.newArrayList();
-            for (Entry entry : this.entries.values()) {
-                while (true) {
-                    int xPos = currentX * entrySize + innerBounds.x;
-                    int yPos = currentY * entrySize + innerBounds.y;
-                    
-                    currentX++;
-                    if (currentX >= width) {
-                        currentX = 0;
-                        currentY++;
-                    }
-                    
-                    if (notSteppingOnExclusionZones(xPos, yPos - (int) scrolling.scrollAmount, entrySize, entrySize, innerBounds)) {
-                        entriesPoints.add(new Tuple<>(entry, new Point(xPos, yPos)));
-                        break;
-                    } else {
-                        blockedCount++;
-                    }
-                }
-            }
-            
-            int maxSize = entriesPoints.size();
-            if (currentX != 0) {
-                int xPos = currentX * entrySize + innerBounds.x;
-                int yPos = currentY * entrySize + innerBounds.y;
-                
-                if (notSteppingOnExclusionZones(xPos, yPos - (int) scrolling.scrollAmount, entrySize, entrySize, innerBounds)) {
-                    entriesPoints.add(new Tuple<>(null, new Point(xPos, yPos)));
-                }
-            }
-            
-            double x = position.x - 8;
-            double y = position.y + scrolling.scrollAmount - 8;
-            
-            return Mth.clamp(entriesPoints.stream()
-                            .filter(value -> {
-                                double otherY = value.getB().y;
-                                
-                                return otherY <= y + entrySize / 2 && otherY + entrySize > y + entrySize / 2;
-                            })
-                            .min(Comparator.comparingDouble(value -> {
-                                double otherX = value.getB().x;
-                                double otherY = value.getB().y;
-                                
-                                return (x - otherX) * (x - otherX) + (y - otherY) * (y - otherY);
-                            }))
-                            .map(entriesPoints::indexOf)
-                            .orElse(maxSize),
-                    0, entriesPoints.size());
-        }
-        
-        return -2;
-    }
-    
-    public void drop(Entry entry, DraggableStack stack, FavoriteEntry favoriteEntry) {
-        DraggingContext<?> context = DraggingContext.getInstance();
-        double x = context.getCurrentPosition().x;
-        double y = context.getCurrentPosition().y + scrolling.scrollAmount;
-        entry.startedDraggingPosition = null;
-        
-        entry.x.setAs(x - 8);
-        entry.y.setAs(y - 8);
-        
-        boolean contains = currentBounds.contains(PointHelper.ofMouse());
-        int newIndex = contains ? getReleaseIndex() : Math.max(0, Iterables.indexOf(entries.values(), e -> e == entry));
-        
-        if (entries.size() - 1 <= newIndex) {
-            Entry remove = this.entries.remove(entry.hashIgnoreAmount());
-            if (remove != null) {
-                remove.remove();
-                this.removedEntries.put(remove.hashIgnoreAmount(), remove);
-            }
-            this.entries.put(entry.hashIgnoreAmount(), entry);
-        } else {
-            Int2ObjectMap<Entry> prevEntries = new Int2ObjectLinkedOpenHashMap<>(entries);
-            this.entries.clear();
-            
-            int index = 0;
-            for (Int2ObjectMap.Entry<Entry> entryEntry : prevEntries.int2ObjectEntrySet()) {
-                if (index == newIndex) {
-                    this.entries.put(entry.hashIgnoreAmount(), entry);
-                }
-                if (entryEntry.getIntKey() != entry.hashIgnoreAmount()) {
-                    this.entries.put(entryEntry.getIntKey(), entryEntry.getValue());
-                    index++;
-                }
-            }
-        }
-        
-        applyNewEntriesList();
-        
-        if (ConfigObject.getInstance().isFavoritesEnabled()) {
-            List<FavoriteEntry> favorites = ConfigObject.getInstance().getFavoriteEntries();
-            favorites.clear();
-            for (Entry value : this.entries.values()) {
-                favorites.add(value.entry.copy());
-            }
-            
-            ConfigManager.getInstance().saveConfig();
-        }
-        
-        applyNewFavorites(this.entries.values().stream()
-                .map(Entry::getEntry)
-                .collect(Collectors.toList()));
-    }
-    
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (scrolling.updateDraggingState(mouseX, mouseY, button))
+        if (region.mouseClicked(mouseX, mouseY, button))
             return true;
         for (Widget widget : children())
             if (widget.mouseClicked(mouseX, mouseY, button))
@@ -583,163 +234,6 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                     return true;
         }
         return false;
-    }
-    
-    public class Entry {
-        private FavoriteEntry entry;
-        private final EntryListEntry widget;
-        private boolean hidden;
-        private Point startedDraggingPosition;
-        private Animator x = new Animator();
-        private Animator y = new Animator();
-        private Animator size = new Animator();
-        
-        public Entry(FavoriteEntry entry, int entrySize) {
-            this.entry = entry;
-            this.widget = (EntryListEntry) new EntryListEntry(this, 0, 0, entrySize, entry).noBackground();
-        }
-        
-        public void remove() {
-            if (!hidden) {
-                this.hidden = true;
-                if (!ConfigObject.getInstance().isFavoritesAnimated()) this.size.setAs(0);
-                else this.size.setTo(0, 400);
-            }
-        }
-        
-        public void update(double delta) {
-            this.size.update(delta);
-            this.x.update(delta);
-            this.y.update(delta);
-            this.getWidget().getBounds().width = this.getWidget().getBounds().height = (int) Math.round(this.size.doubleValue() / 100);
-            double offsetSize = (entrySize() - this.size.doubleValue() / 100) / 2;
-            this.getWidget().getBounds().x = (int) Math.round(x.doubleValue() + offsetSize);
-            this.getWidget().getBounds().y = (int) Math.round(y.doubleValue() + offsetSize) - (int) scrolling.scrollAmount;
-        }
-        
-        public EntryListEntry getWidget() {
-            return widget;
-        }
-        
-        public boolean isHidden() {
-            return hidden;
-        }
-        
-        public int hashIgnoreAmount() {
-            return entry.hashCode();
-        }
-        
-        public FavoriteEntry getEntry() {
-            return entry;
-        }
-        
-        public void moveTo(boolean animated, int xPos, int yPos) {
-            if (animated && ConfigObject.getInstance().isFavoritesAnimated()) {
-                x.setTo(xPos, 200);
-                y.setTo(yPos, 200);
-            } else {
-                x.setAs(xPos);
-                y.setAs(yPos);
-            }
-        }
-    }
-    
-    private class EntryListEntry extends EntryListEntryWidget {
-        private final Entry entry;
-        private final FavoriteEntry favoriteEntry;
-        
-        private EntryListEntry(Entry entry, int x, int y, int entrySize, FavoriteEntry favoriteEntry) {
-            super(new Point(x, y), entrySize);
-            this.entry = entry;
-            this.favoriteEntry = favoriteEntry;
-            this.clearEntries().entry(ClientEntryStacks.of(this.favoriteEntry.getRenderer(false)));
-        }
-        
-        @Override
-        protected FavoriteEntry asFavoriteEntry() {
-            return favoriteEntry.copy();
-        }
-        
-        @Override
-        public boolean containsMouse(double mouseX, double mouseY) {
-            return super.containsMouse(mouseX, mouseY) && currentBounds.contains(mouseX, mouseY);
-        }
-        
-        @Override
-        protected boolean reverseFavoritesAction() {
-            return true;
-        }
-        
-        @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            Optional<ScreenOverlay> overlayOptional = REIRuntime.getInstance().getOverlay();
-            Optional<Supplier<Collection<FavoriteMenuEntry>>> menuEntries = favoriteEntry.getMenuEntries();
-            if (Math.abs(entry.x.doubleValue() - entry.x.target()) < 1 && Math.abs(entry.y.doubleValue() - entry.y.target()) < 1 && overlayOptional.isPresent() && menuEntries.isPresent()) {
-                ScreenOverlayImpl overlay = (ScreenOverlayImpl) overlayOptional.get();
-                UUID uuid = favoriteEntry.getUuid();
-                
-                boolean isOpened = overlay.isMenuOpened(uuid);
-                if (isOpened || !overlay.isAnyMenuOpened()) {
-                    boolean inBounds = containsMouse(mouseX, mouseY) || overlay.isMenuInBounds(uuid);
-                    if (isOpened != inBounds) {
-                        if (inBounds) {
-                            Menu menu = new Menu(new Point(getBounds().x, getBounds().getMaxY()),
-                                    CollectionUtils.map(menuEntries.get().get(), entry -> new MenuEntry() {
-                                        @Override
-                                        public List<? extends GuiEventListener> children() {
-                                            return Collections.singletonList(entry);
-                                        }
-                                        
-                                        @Override
-                                        public void render(PoseStack poseStack, int i, int j, float f) {
-                                            entry.render(poseStack, i, j, f);
-                                        }
-                                        
-                                        @Override
-                                        public int getEntryWidth() {
-                                            return entry.getEntryWidth();
-                                        }
-                                        
-                                        @Override
-                                        public int getEntryHeight() {
-                                            return entry.getEntryHeight();
-                                        }
-                                        
-                                        @Override
-                                        public void updateInformation(int xPos, int yPos, boolean selected, boolean containsMouse, boolean rendering, int width) {
-                                            entry.closeMenu = overlay::closeOverlayMenu;
-                                            entry.updateInformation(xPos, yPos, selected, containsMouse, rendering, width);
-                                        }
-                                        
-                                        @Override
-                                        public int getZ() {
-                                            return entry.getZ();
-                                        }
-                                        
-                                        @Override
-                                        public void setZ(int z) {
-                                            entry.setZ(z);
-                                        }
-                                    }));
-                            if (ConfigObject.getInstance().isLeftHandSidePanel()) {
-                                menu.menuStartPoint.x -= menu.getBounds().width - getBounds().width;
-                            }
-                            overlay.openMenu(uuid, menu, this::containsMouse, point -> entries.containsKey(entry.hashIgnoreAmount()) && !removedEntries.containsKey(entry.hashIgnoreAmount()));
-                        } else {
-                            overlay.closeOverlayMenu();
-                        }
-                    }
-                }
-            }
-            Vector4f vector4f = new Vector4f(mouseX, mouseY, 0, 1.0F);
-            vector4f.transform(matrices.last().pose());
-            super.render(matrices, (int) vector4f.x(), (int) vector4f.y(), delta);
-        }
-        
-        @Override
-        protected boolean doAction(double mouseX, double mouseY, int button) {
-            return favoriteEntry.doAction(button);
-        }
     }
     
     public static class ToggleAddFavoritePanelButton extends FadingFavoritePanelButton {

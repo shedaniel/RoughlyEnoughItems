@@ -49,6 +49,11 @@ allprojects {
         maven { url "https://maven.shedaniel.me" }
         maven { url "https://maven.parchmentmc.org" }
         maven { url "https://maven.terraformersmc.com/releases" }
+        mavenLocal()
+    }
+
+    architectury {
+        transformerVersion = "5.1.9999"
     }
     
     license {

@@ -282,6 +282,7 @@ public class RoughlyEnoughItemsCoreClient {
             reloadPlugins(endReload, Platform.isFabric() ? ReloadStage.END : null);
         });
         GuiEvent.INIT_POST.register((screen, widgets, children) -> {
+            REIRuntime.getInstance().getOverlay(false, true);
             REIRuntimeImpl.getInstance().setPreviousScreen(screen);
             if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen) {
                 widgets.removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));

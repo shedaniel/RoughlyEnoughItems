@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.common.entry.comparison;
 
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparatorRegistry;
@@ -39,10 +38,11 @@ public abstract class EntryComparatorRegistryImpl<T, S> implements EntryComparat
     
     @Override
     public void register(EntryComparator<T> comparator, S entry) {
-        EntryComparator<T> put = this.comparators.put(entry, comparator);
-        if (put != null) {
-            RoughlyEnoughItemsCore.LOGGER.warn("[REI] Overriding " + put + "entry comparator with " + comparator + "for " + entry + "! This may result in unwanted comparisons!");
+        EntryComparator<T> existing = this.comparators.get(entry);
+        if (existing != null) {
+            comparator = existing.then(comparator);
         }
+        this.comparators.put(entry, comparator);
     }
     
     @Override

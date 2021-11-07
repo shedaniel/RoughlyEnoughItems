@@ -25,13 +25,16 @@ package me.shedaniel.rei.api.client.favorites;
 
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
+import me.shedaniel.rei.api.client.entry.region.RegionEntry;
 import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -41,7 +44,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
-public abstract class FavoriteEntry {
+public abstract class FavoriteEntry implements RegionEntry<FavoriteEntry> {
     public static final String TYPE_KEY = "type";
     private final UUID uuid = UUID.randomUUID();
     
@@ -71,8 +74,15 @@ public abstract class FavoriteEntry {
         return delegateResult(() -> FavoriteEntryType.registry().get(FavoriteEntryType.ENTRY_STACK).fromArgsResult(stack), null);
     }
     
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
     public static boolean isEntryInvalid(@Nullable FavoriteEntry entry) {
         return entry == null || entry.isInvalid();
+    }
+    
+    @Override
+    public boolean isEntryInvalid() {
+        return isInvalid();
     }
     
     public CompoundTag save(CompoundTag tag) {
@@ -80,6 +90,7 @@ public abstract class FavoriteEntry {
         return Objects.requireNonNull(Objects.requireNonNull(FavoriteEntryType.registry().get(getType())).save(this, tag));
     }
     
+    @Override
     public UUID getUuid() {
         return uuid;
     }
@@ -88,14 +99,17 @@ public abstract class FavoriteEntry {
     
     public abstract Renderer getRenderer(boolean showcase);
     
+    @Override
     public abstract boolean doAction(int button);
     
+    @Override
     public Optional<Supplier<Collection<FavoriteMenuEntry>>> getMenuEntries() {
         return Optional.empty();
     }
     
     public abstract long hashIgnoreAmount();
     
+    @Override
     public abstract FavoriteEntry copy();
     
     public abstract ResourceLocation getType();
@@ -127,5 +141,15 @@ public abstract class FavoriteEntry {
     
     public FavoriteEntry getUnwrapped() {
         return this;
+    }
+    
+    @Override
+    public EntryStack<?> toStack() {
+        return ClientEntryStacks.of(getRenderer(false));
+    }
+    
+    @Override
+    public FavoriteEntry asFavorite() {
+        return copy();
     }
 }
