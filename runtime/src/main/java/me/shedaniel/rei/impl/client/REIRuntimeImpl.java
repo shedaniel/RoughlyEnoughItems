@@ -137,8 +137,8 @@ public class REIRuntimeImpl implements REIRuntime {
     }
     
     @Override
-    public Optional<ScreenOverlay> getOverlay(boolean reset) {
-        if (overlay == null || reset) {
+    public Optional<ScreenOverlay> getOverlay(boolean reset, boolean init) {
+        if ((overlay == null && init) || reset) {
             overlay = new ScreenOverlayImpl();
             overlay.init();
             getSearchField().setFocused(false);
@@ -240,7 +240,7 @@ public class REIRuntimeImpl implements REIRuntime {
             return EventResult.pass();
         });
         ClientTickEvent.CLIENT_POST.register(minecraft -> {
-            if (isOverlayVisible()) {
+            if (isOverlayVisible() && REIRuntime.getInstance().getOverlay().isPresent()) {
                 ScreenOverlayImpl.getInstance().tick();
             }
         });

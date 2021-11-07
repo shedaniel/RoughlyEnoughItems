@@ -420,7 +420,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         }
         FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
         if (favoritesListWidget != null) {
-            favoritesListWidget.updateEntriesPosition(entry -> true);
+            favoritesListWidget.getRegion().updateEntriesPosition(entry -> true);
         }
     }
     
