@@ -82,6 +82,7 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     
     @Override
     public <R extends Screen> List<OverlayDecider> getDeciders(R screen) {
+        if (screen == null) return Collections.emptyList();
         Class<? extends Screen> screenClass = screen.getClass();
         List<OverlayDecider> possibleCached = cache.get(screenClass);
         if (possibleCached != null) {

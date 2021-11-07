@@ -1,0 +1,143 @@
+/*
+ * This file is licensed under the MIT License, part of Roughly Enough Items.
+ * Copyright (c) 2018, 2019, 2020, 2021 shedaniel
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package me.shedaniel.rei.impl.client.gui.widget.region;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector4f;
+import me.shedaniel.math.Point;
+import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.entry.region.RegionEntry;
+import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.modules.Menu;
+import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
+import me.shedaniel.rei.impl.client.gui.widget.EntryListEntryWidget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+
+import java.util.*;
+import java.util.function.Supplier;
+
+public class RegionEntryListEntry<T extends RegionEntry<T>> extends EntryListEntryWidget {
+    private final RealRegionEntry<T> entry;
+    
+    RegionEntryListEntry(RealRegionEntry<T> entry, int x, int y, int entrySize) {
+        super(new Point(x, y), entrySize);
+        this.entry = entry;
+        this.clearEntries().entry(entry.getEntry().toStack());
+    }
+    
+    @Override
+    protected FavoriteEntry asFavoriteEntry() {
+        return entry.getEntry().asFavorite();
+    }
+    
+    @Override
+    public boolean containsMouse(double mouseX, double mouseY) {
+        return super.containsMouse(mouseX, mouseY) && entry.region.containsMouse(mouseX, mouseY);
+    }
+    
+    @Override
+    protected boolean reverseFavoritesAction() {
+        return true;
+    }
+    
+    @Override
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        Optional<ScreenOverlay> overlayOptional = REIRuntime.getInstance().getOverlay();
+        Optional<Supplier<Collection<FavoriteMenuEntry>>> menuEntries = entry.getEntry().getMenuEntries();
+        if (Math.abs(entry.x.doubleValue() - entry.x.target()) < 1 && Math.abs(entry.y.doubleValue() - entry.y.target()) < 1 && overlayOptional.isPresent() && menuEntries.isPresent()) {
+            ScreenOverlayImpl overlay = (ScreenOverlayImpl) overlayOptional.get();
+            UUID uuid = entry.getEntry().getUuid();
+            
+            boolean isOpened = overlay.isMenuOpened(uuid);
+            if (isOpened || !overlay.isAnyMenuOpened()) {
+                boolean inBounds = containsMouse(mouseX, mouseY) || overlay.isMenuInBounds(uuid);
+                if (isOpened != inBounds) {
+                    if (inBounds) {
+                        Menu menu = new Menu(new Point(getBounds().x, getBounds().getMaxY()),
+                                CollectionUtils.map(menuEntries.get().get(), entry -> convertMenu(overlay, entry)));
+                        if (ConfigObject.getInstance().isLeftHandSidePanel()) {
+                            menu.menuStartPoint.x -= menu.getBounds().width - getBounds().width;
+                        }
+                        overlay.openMenu(uuid, menu, this::containsMouse, point -> entry.region.has(entry));
+                    } else {
+                        overlay.closeOverlayMenu();
+                    }
+                }
+            }
+        }
+        Vector4f vector4f = new Vector4f(mouseX, mouseY, 0, 1.0F);
+        vector4f.transform(matrices.last().pose());
+        super.render(matrices, (int) vector4f.x(), (int) vector4f.y(), delta);
+    }
+    
+    private MenuEntry convertMenu(ScreenOverlayImpl overlay, FavoriteMenuEntry entry) {
+        return new MenuEntry() {
+            @Override
+            public List<? extends GuiEventListener> children() {
+                return Collections.singletonList(entry);
+            }
+            
+            @Override
+            public void render(PoseStack poseStack, int i, int j, float f) {
+                entry.render(poseStack, i, j, f);
+            }
+            
+            @Override
+            public int getEntryWidth() {
+                return entry.getEntryWidth();
+            }
+            
+            @Override
+            public int getEntryHeight() {
+                return entry.getEntryHeight();
+            }
+            
+            @Override
+            public void updateInformation(int xPos, int yPos, boolean selected, boolean containsMouse, boolean rendering, int width) {
+                entry.closeMenu = overlay::closeOverlayMenu;
+                entry.updateInformation(xPos, yPos, selected, containsMouse, rendering, width);
+            }
+            
+            @Override
+            public int getZ() {
+                return entry.getZ();
+            }
+            
+            @Override
+            public void setZ(int z) {
+                entry.setZ(z);
+            }
+        };
+    }
+    
+    @Override
+    protected boolean doAction(double mouseX, double mouseY, int button) {
+        return entry.getEntry().doAction(button);
+    }
+}
