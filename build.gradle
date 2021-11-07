@@ -52,10 +52,6 @@ allprojects {
         mavenLocal()
     }
 
-    architectury {
-        transformerVersion = "5.1.9999"
-    }
-    
     license {
         header rootProject.file("HEADER")
         include "**/*.java"
