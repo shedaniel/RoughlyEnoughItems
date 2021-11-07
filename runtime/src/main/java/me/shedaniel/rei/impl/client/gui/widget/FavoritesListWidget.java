@@ -38,6 +38,7 @@ import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.client.favorites.SystemFavoriteEntryProvider;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
@@ -54,8 +55,10 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
+import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
 import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionDraggableStack;
+import me.shedaniel.rei.impl.client.gui.widget.region.RegionEntryListEntry;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionListener;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -64,12 +67,15 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
+import org.apache.commons.lang3.mutable.MutableLong;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -79,11 +85,40 @@ import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.notSteppin
 @ApiStatus.Internal
 public class FavoritesListWidget extends WidgetWithBounds implements DraggableStackProviderWidget, OverlayListWidget, RegionListener<FavoriteEntry> {
     private Rectangle fullBounds;
+    private EntryStacksRegionWidget<FavoriteEntry> systemRegion = new EntryStacksRegionWidget<>(new RegionListener<FavoriteEntry>() {
+        @Override
+        @Nullable
+        public FavoriteEntry convertDraggableStack(DraggingContext<Screen> context, DraggableStack stack) {
+            return FavoriteEntry.fromEntryStack(stack.getStack().copy());
+        }
+        
+        @Override
+        public boolean canAcceptDrop(RealRegionEntry<FavoriteEntry> entry) {
+            return false;
+        }
+        
+        @Override
+        @Nullable
+        public FavoriteEntry asFavorite(RealRegionEntry<FavoriteEntry> entry) {
+            return null;
+        }
+        
+        @Override
+        public boolean canBeDragged(RealRegionEntry<FavoriteEntry> entry) {
+            return RegionListener.super.canBeDragged(entry);
+        }
+        
+        @Override
+        public boolean removeOnDrag() {
+            return false;
+        }
+    });
     private EntryStacksRegionWidget<FavoriteEntry> region = new EntryStacksRegionWidget<>(this);
+    private List<FavoriteEntry> lastSystemEntries = new ArrayList<>();
     
     public final AddFavoritePanel favoritePanel = new AddFavoritePanel(this);
     public final ToggleAddFavoritePanelButton favoritePanelButton = new ToggleAddFavoritePanelButton(this);
-    private List<Widget> children = ImmutableList.of(favoritePanel, favoritePanelButton, region);
+    private List<Widget> children = ImmutableList.of(favoritePanel, favoritePanelButton, systemRegion, region);
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
@@ -111,6 +146,10 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         return region;
     }
     
+    public EntryStacksRegionWidget<FavoriteEntry> getSystemRegion() {
+        return systemRegion;
+    }
+    
     @Override
     public void onDrop(Stream<FavoriteEntry> entries) {
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
@@ -135,6 +174,8 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
         DraggableStack stack = region.getHoveredStack(context, mouseX, mouseY);
         if (stack != null) return stack;
+        stack = systemRegion.getHoveredStack(context, mouseX, mouseY);
+        if (stack != null) return stack;
         if (favoritePanel.bounds.contains(mouseX, mouseY)) {
             for (AddFavoritePanel.Row row : favoritePanel.rows.get()) {
                 if (row instanceof AddFavoritePanel.SectionEntriesRow entriesRow) {
@@ -155,6 +196,8 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     public EntryStack<?> getFocusedStack() {
         Point mouse = PointHelper.ofMouse();
         EntryStack<?> stack = region.getFocusedStack();
+        if (stack != null && !stack.isEmpty()) return stack;
+        stack = systemRegion.getFocusedStack();
         if (stack != null && !stack.isEmpty()) return stack;
         if (favoritePanel.bounds.contains(mouse)) {
             for (AddFavoritePanel.Row row : favoritePanel.rows.get()) {
@@ -180,11 +223,72 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         if (fullBounds.isEmpty())
             return;
         
+        updateSystemRegion();
+//        systemRegion.getBounds().setBounds(this.fullBounds.x + 1, this.fullBounds.y - 1 + 14, this.fullBounds.width - 1, Math.max(1, systemRegion.scrolling.getMaxScrollHeight()));
+        systemRegion.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + 1, this.fullBounds.width, Math.max(1, systemRegion.scrolling.getMaxScrollHeight()));
+        int systemHeight = systemRegion.getBounds().getHeight();
+        if (systemHeight > 1 && !region.isEmpty()) {
+            Rectangle innerBounds = systemRegion.getInnerBounds();
+//            font.draw(matrices, new TranslatableComponent("System Favorites").withStyle(ChatFormatting.UNDERLINE), innerBounds.x - 1 + 4, fullBounds.y - 1 + 4, 0xFFFFFFFF);
+            fillGradient(matrices, innerBounds.x + 1, this.fullBounds.y + systemHeight + 2, innerBounds.getMaxX() - 1, this.fullBounds.y + systemHeight + 3, 0xFF777777, 0xFF777777);
+//            fillGradient(matrices, innerBounds.x - 2, this.fullBounds.y - 1, innerBounds.getMaxX() + 2, this.fullBounds.y + systemHeight + 1 + 14, 0x34FFFFFF, 0x34FFFFFF);
+//            systemHeight += 4 + 14;
+            systemHeight += 4;
+        }
         if (favoritePanel.getBounds().height > 20)
-            region.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y, this.fullBounds.width, this.fullBounds.height - (this.fullBounds.getMaxY() - this.favoritePanel.bounds.y) - 4);
-        else region.getBounds().setBounds(this.fullBounds);
+            region.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + systemHeight, this.fullBounds.width, this.fullBounds.height - systemHeight - (this.fullBounds.getMaxY() - this.favoritePanel.bounds.y) - 4);
+        else region.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + systemHeight, this.fullBounds.width, this.fullBounds.height - systemHeight);
+        systemRegion.render(matrices, mouseX, mouseY, delta);
         region.render(matrices, mouseX, mouseY, delta);
         renderAddFavorite(matrices, mouseX, mouseY, delta);
+    }
+    
+    private void updateSystemRegion() {
+        boolean updated = false;
+        List<Triple<SystemFavoriteEntryProvider<?>, MutableLong, List<FavoriteEntry>>> providers = ((FavoriteEntryTypeRegistryImpl) FavoriteEntryType.registry()).getSystemProviders();
+        
+        for (Triple<SystemFavoriteEntryProvider<?>, MutableLong, List<FavoriteEntry>> pair : providers) {
+            SystemFavoriteEntryProvider<?> provider = pair.getLeft();
+            MutableLong mutableLong = pair.getMiddle();
+            List<FavoriteEntry> entries = pair.getRight();
+            
+            if (mutableLong.getValue() == -1 || mutableLong.getValue() < System.currentTimeMillis()) {
+                mutableLong.setValue(System.currentTimeMillis() + provider.updateInterval());
+                List<FavoriteEntry> provide = (List<FavoriteEntry>) provider.provide();
+                if (!provide.equals(entries)) {
+                    entries.clear();
+                    entries.addAll(provide);
+                    updated = true;
+                }
+            }
+        }
+        
+        if (updated) {
+            lastSystemEntries = CollectionUtils.flatMap(providers, Triple::getRight);
+            setSystemRegionEntries();
+        }
+    }
+    
+    private void setSystemRegionEntries() {
+        systemRegion.setEntries(CollectionUtils.filterToList(lastSystemEntries, entry -> {
+            if (region.has(entry)) return false;
+            if (DraggingContext.getInstance().isDraggingStack()) {
+                DraggableStack currentStack = DraggingContext.getInstance().getCurrentStack();
+                if (currentStack instanceof RegionDraggableStack) {
+                    RegionDraggableStack<?> stack = (RegionDraggableStack<?>) currentStack;
+                    
+                    if (stack.getEntry().region == region && Objects.equals(stack.getEntry().getEntry(), entry)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }));
+    }
+    
+    @Override
+    public void onSetNewEntries(List<RegionEntryListEntry<FavoriteEntry>> regionEntryListEntries) {
+        setSystemRegionEntries();
     }
     
     private void renderAddFavorite(PoseStack matrices, int mouseX, int mouseY, float delta) {
@@ -218,7 +322,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (region.mouseClicked(mouseX, mouseY, button))
+        if (systemRegion.mouseClicked(mouseX, mouseY, button) || region.mouseClicked(mouseX, mouseY, button))
             return true;
         for (Widget widget : children())
             if (widget.mouseClicked(mouseX, mouseY, button))

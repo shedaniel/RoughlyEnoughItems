@@ -48,7 +48,7 @@ public class RegionDraggableStack<T extends RegionEntry<T>> implements Draggable
     
     @Override
     public void drag() {
-        if (showcaseWidget == null) {
+        if (showcaseWidget == null && entry.region.listener.removeOnDrag()) {
             entry.region.remove(entry);
         }
     }
@@ -60,7 +60,10 @@ public class RegionDraggableStack<T extends RegionEntry<T>> implements Draggable
     @Override
     public void release(boolean accepted) {
         if (!accepted) {
-            if (showcaseWidget != null) {
+            if (!entry.region.listener.removeOnDrag()) {
+                DraggingContext.getInstance().renderBackToPosition(this, DraggingContext.getInstance().getCurrentPosition(),
+                        () -> new Point(entry.x.doubleValue(), entry.y.doubleValue()));
+            } else if (showcaseWidget != null) {
                 DraggingContext.getInstance().renderBackToPosition(this, DraggingContext.getInstance().getCurrentPosition(),
                         () -> new Point(showcaseWidget.getBounds().x, showcaseWidget.getBounds().y));
             } else {
