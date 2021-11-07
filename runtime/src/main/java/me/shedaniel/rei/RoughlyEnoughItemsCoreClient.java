@@ -378,7 +378,7 @@ public class RoughlyEnoughItemsCoreClient {
     public static void reloadPlugins(MutableLong lastReload, @Nullable ReloadStage start) {
         if (lastReload != null) {
             if (lastReload.getValue() > 0 && System.currentTimeMillis() - lastReload.getValue() <= 5000) {
-                RoughlyEnoughItemsCore.LOGGER.warn("Suppressing Reload Plugins!");
+                RoughlyEnoughItemsCore.LOGGER.warn("Suppressing Reload Plugins of stage " + start);
                 return;
             }
             lastReload.setValue(System.currentTimeMillis());

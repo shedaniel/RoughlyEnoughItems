@@ -213,6 +213,8 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
                     ((REIPlugin<P>) plugin.plugin).preStage(this, stage);
                 }
             });
+        } catch (Throwable throwable) {
+            new RuntimeException("Failed to run pre registration").printStackTrace();
         }
     }
     
@@ -229,6 +231,8 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
                     ((REIPlugin<P>) plugin.plugin).postStage(this, stage);
                 }
             });
+        } catch (Throwable throwable) {
+            new RuntimeException("Failed to run post registration").printStackTrace();
         }
     }
     
