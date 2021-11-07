@@ -150,7 +150,11 @@ public class PerformanceScreen extends Screen {
             inner.times().forEach((obj, time) -> {
                 entries.add(new EntryListEntry(new TextComponent(obj instanceof Pair ? ((Pair<REIPluginProvider<?>, REIPlugin<?>>) obj).getFirst().getPluginProviderName() : Objects.toString(obj)), time));
             });
-            long separateTime = inner.times().values().stream().collect(Collectors.summarizingLong(value -> value)).getSum();
+            Collection<Long> values = inner.times().values();
+            long separateTime;
+            synchronized (inner.times()) {
+                separateTime = values.stream().collect(Collectors.summarizingLong(value -> value)).getSum();
+            }
             if ((inner.totalNano() - separateTime) > 1000000) {
                 entries.add(new EntryListEntry(new TextComponent("Miscellaneous Operations"), inner.totalNano() - separateTime));
             }
