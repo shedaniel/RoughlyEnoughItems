@@ -53,7 +53,7 @@ public class RegionEntryListEntry<T extends RegionEntry<T>> extends EntryListEnt
     
     @Override
     protected FavoriteEntry asFavoriteEntry() {
-        return entry.getEntry().asFavorite();
+        return entry.region.listener.asFavorite(entry);
     }
     
     @Override

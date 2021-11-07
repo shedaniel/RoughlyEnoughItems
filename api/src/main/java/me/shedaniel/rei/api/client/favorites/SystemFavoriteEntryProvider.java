@@ -21,46 +21,18 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.widget.region;
+package me.shedaniel.rei.api.client.favorites;
 
-import me.shedaniel.rei.api.client.entry.region.RegionEntry;
-import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
-import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
-import net.minecraft.client.gui.screens.Screen;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
-import java.util.stream.Stream;
 
-public interface RegionListener<T extends RegionEntry<T>> {
-    default void onDrop(Stream<T> entries) {}
+@FunctionalInterface
+@ApiStatus.Experimental
+public interface SystemFavoriteEntryProvider<T extends FavoriteEntry> {
+    List<T> provide();
     
-    @Nullable
-    default T convertDraggableStack(DraggingContext<Screen> context, DraggableStack stack) {
-        return null;
+    default long updateInterval() {
+        return 250;
     }
-    
-    default boolean canAcceptDrop(RealRegionEntry<T> entry) {
-        return true;
-    }
-    
-    @Nullable
-    default FavoriteEntry asFavorite(RealRegionEntry<T> entry) {
-        return entry.getEntry().asFavorite();
-    }
-    
-    default boolean canBeDragged(RealRegionEntry<T> entry) {
-        return true;
-    }
-    
-    default boolean removeOnDrag() {
-        return true;
-    }
-    
-    default void onRemove(RealRegionEntry<T> entry) {}
-    
-    default void onAdd(RealRegionEntry<T> entry) {}
-    
-    default void onSetNewEntries(List<RegionEntryListEntry<T>> entries) {}
 }
