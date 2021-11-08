@@ -23,25 +23,22 @@
 
 package me.shedaniel.rei.api.client.gui.drag;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.common.entry.EntryStack;
-import org.jetbrains.annotations.ApiStatus;
-
-public interface DraggableStack {
-    EntryStack<?> getStack();
-    
-    void drag();
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default void release(boolean consumed) {}
-    
-    default void release(DraggedAcceptorResult result) {
-        release(result != DraggedAcceptorResult.PASS);
-    }
-    
-    default void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-        getStack().render(matrices, bounds, mouseX, mouseY, delta);
-    }
+/**
+ * The result of the visitor, this is used to determine if the visitor consumed the stack or not.
+ */
+public enum DraggedAcceptorResult {
+    /**
+     * The visitor consumed the stack, the stack will not be returned to the original stack.
+     */
+    CONSUMED,
+    /**
+     * The visitor did not consume the stack, the stack will be returned to the original stack,
+     * other visitors will not be called.
+     */
+    ACCEPTED,
+    /**
+     * The visitor did not consume the stack, the stack will be passed to the next visitor.
+     */
+    PASS,
+    ;
 }

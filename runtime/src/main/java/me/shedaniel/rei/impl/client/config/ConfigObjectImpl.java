@@ -170,6 +170,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public int getMaxRecipesPageHeight() {
+        return advanced.layout.maxRecipesPageHeight;
+    }
+    
+    @Override
     public boolean doesDisableRecipeBook() {
         return functionality.disableRecipeBook;
     }
@@ -349,14 +354,37 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @ApiStatus.Experimental
     @Override
-    public double getHorizontalEntriesBoundaries() {
+    public double getHorizontalEntriesBoundariesPercentage() {
         return Mth.clamp(appearance.horizontalEntriesBoundaries, 0.1, 1);
     }
     
     @ApiStatus.Experimental
     @Override
-    public double getVerticalEntriesBoundaries() {
+    public double getVerticalEntriesBoundariesPercentage() {
         return Mth.clamp(appearance.verticalEntriesBoundaries, 0.1, 1);
+    }
+    
+    @ApiStatus.Experimental
+    @Override
+    public double getHorizontalEntriesBoundariesColumns() {
+        return Mth.clamp(appearance.horizontalEntriesBoundariesColumns, 1, 1000);
+    }
+    
+    @ApiStatus.Experimental
+    @Override
+    public double getVerticalEntriesBoundariesRows() {
+        return Mth.clamp(appearance.verticalEntriesBoundariesRows, 1, 1000);
+    }
+    
+    @ApiStatus.Experimental
+    @Override
+    public double getFavoritesHorizontalEntriesBoundariesPercentage() {
+        return Mth.clamp(appearance.favoritesHorizontalEntriesBoundaries, 0.1, 1);
+    }
+    
+    @Override
+    public double getFavoritesHorizontalEntriesBoundariesColumns() {
+        return Mth.clamp(appearance.favoritesHorizontalEntriesBoundariesColumns, 1, 1000);
     }
     
     @Override
@@ -469,6 +497,10 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         
         @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double horizontalEntriesBoundaries = 1.0;
         @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double verticalEntriesBoundaries = 1.0;
+        private int horizontalEntriesBoundariesColumns = 50;
+        private int verticalEntriesBoundariesRows = 1000;
+        @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double favoritesHorizontalEntriesBoundaries = 1.0;
+        private int favoritesHorizontalEntriesBoundariesColumns = 50;
         @UseSpecialSearchFilterSyntaxHighlightingScreen private SyntaxHighlightingMode syntaxHighlightingMode = SyntaxHighlightingMode.COLORFUL;
     }
     
@@ -506,7 +538,9 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
             private EntryPanelOrderingConfig entryPanelOrdering = EntryPanelOrderingConfig.REGISTRY_ASCENDING;
             @Comment("Declares the maximum amount of recipes displayed in a page if possible.") @ConfigEntry.BoundedDiscrete(min = 2, max = 99)
-            private int maxRecipesPerPage = 3;
+            private int maxRecipesPerPage = 8;
+            @Comment("Declares the maximum amount of recipes displayed in a page if possible.") @ConfigEntry.BoundedDiscrete(min = 100, max = 1000)
+            private int maxRecipesPageHeight = 300;
             @Comment("Declares whether entry rendering time should be debugged.") private boolean debugRenderTimeRequired = false;
             @Comment("Merges displays with equal contents under 1 display.") private boolean mergeDisplayUnderOne = true;
         }

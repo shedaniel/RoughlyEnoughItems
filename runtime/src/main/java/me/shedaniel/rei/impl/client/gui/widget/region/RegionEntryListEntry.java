@@ -140,4 +140,8 @@ public class RegionEntryListEntry<T extends RegionEntry<T>> extends EntryListEnt
     protected boolean doAction(double mouseX, double mouseY, int button) {
         return entry.getEntry().doAction(button);
     }
+    
+    public RealRegionEntry<T> getEntry() {
+        return entry;
+    }
 }

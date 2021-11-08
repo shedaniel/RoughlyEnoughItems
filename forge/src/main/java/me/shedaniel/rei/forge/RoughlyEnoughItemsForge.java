@@ -26,6 +26,7 @@ package me.shedaniel.rei.forge;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsInitializer;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DatagenModLoader;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
@@ -50,8 +51,10 @@ public class RoughlyEnoughItemsForge {
     public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
     
     public RoughlyEnoughItemsForge() {
-        RoughlyEnoughItemsInitializer.onInitialize();
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> RoughlyEnoughItemsInitializer::onInitializeClient);
+        if (!DatagenModLoader.isRunningDataGen()) {
+            RoughlyEnoughItemsInitializer.onInitialize();
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> RoughlyEnoughItemsInitializer::onInitializeClient);
+        }
     }
     
     public static <A, T> void scanAnnotation(Class<A> clazz, Predicate<Class<T>> predicate, TriConsumer<List<String>, Supplier<T>, Class<T>> consumer) {

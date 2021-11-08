@@ -43,6 +43,11 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.EntryPanelOrdering;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
+import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
+import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
@@ -81,7 +86,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ApiStatus.Internal
-public class EntryListWidget extends WidgetWithBounds implements OverlayListWidget {
+public class EntryListWidget extends WidgetWithBounds implements OverlayListWidget, DraggableStackVisitorWidget {
     static final Comparator<? super EntryStack<?>> ENTRY_NAME_COMPARER = Comparator.comparing(stack -> stack.asFormatStrippedText().getString());
     static final Comparator<? super EntryStack<?>> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
         if (stack.getType() == VanillaEntryTypes.ITEM) {
@@ -161,12 +166,14 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     
     private static Rectangle updateInnerBounds(Rectangle bounds) {
         bounds = bounds.clone();
-        int widthReduction = (int) Math.round(bounds.width * (1 - ConfigObject.getInstance().getHorizontalEntriesBoundaries()));
-        int heightReduction = (int) Math.round(bounds.width * (1 - ConfigObject.getInstance().getVerticalEntriesBoundaries()));
-        bounds.x += widthReduction;
-        bounds.width -= widthReduction;
+        int heightReduction = (int) Math.round(bounds.height * (1 - ConfigObject.getInstance().getVerticalEntriesBoundariesPercentage()));
         bounds.y += heightReduction / 2;
         bounds.height -= heightReduction;
+        int maxHeight = (int) Math.ceil(entrySize() * ConfigObject.getInstance().getVerticalEntriesBoundariesRows());
+        if (bounds.height > maxHeight) {
+            bounds.y += (bounds.height - maxHeight) / 2;
+            bounds.height = maxHeight;
+        }
         int entrySize = entrySize();
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             int width = Math.max(Mth.floor((bounds.width - 2 - 6) / (float) entrySize), 1);
@@ -178,6 +185,18 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             int width = Math.max(Mth.floor((bounds.width - 2) / (float) entrySize), 1);
             int height = Math.max(Mth.floor((bounds.height - 2) / (float) entrySize), 1);
             return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f)), (int) (bounds.getCenterY() - height * (entrySize / 2f)), width * entrySize, height * entrySize);
+        }
+    }
+    
+    @Override
+    public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<Screen> context, DraggableStack stack) {
+        if (innerBounds.contains(context.getCurrentPosition())) {
+            Point currentPosition = context.getCurrentPosition();
+            Rectangle targetBounds = new Rectangle(currentPosition.x, currentPosition.y, 1, 1);
+            context.renderBackToPosition(stack, new Rectangle(currentPosition.x - 8, currentPosition.y - 8, 16, 16), () -> targetBounds);
+            return DraggedAcceptorResult.CONSUMED;
+        } else {
+            return DraggedAcceptorResult.PASS;
         }
     }
     
@@ -304,7 +323,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             matrices.popPose();
         }
         
-        if (containsChecked(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !minecraft.player.inventory.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
+        if (containsChecked(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && !minecraft.player.inventory.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
             EntryStack<?> stack = EntryStacks.of(minecraft.player.inventory.getCarried().copy());
             if (stack.getValueType() == FluidStack.class) {
                 Item bucketItem = ((FluidStack) stack.getValue()).getFluid().getBucket();
@@ -356,8 +375,8 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         return false;
     }
     
-    public void updateArea(String searchTerm) {
-        this.bounds = REIRuntime.getInstance().calculateEntryListArea();
+    public void updateArea(Rectangle bounds, String searchTerm) {
+        this.bounds = REIRuntime.getInstance().calculateEntryListArea(bounds);
         FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
         if (favoritesListWidget != null) {
             favoritesListWidget.updateFavoritesBounds(searchTerm);
@@ -482,7 +501,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (containsChecked(mouseX, mouseY)) {
             LocalPlayer player = minecraft.player;
-            if (ClientHelper.getInstance().isCheating() && player != null && player.containerMenu != null && !player.inventory.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
+            if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && player != null && player.containerMenu != null && !player.inventory.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
                 ClientHelper.getInstance().sendDeletePacket();
                 return true;
             }

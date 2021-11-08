@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
+import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -488,8 +489,8 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 }
                 
                 @Override
-                public void release(boolean accepted) {
-                    if (!accepted) {
+                public void release(DraggedAcceptorResult result) {
+                    if (result == DraggedAcceptorResult.PASS) {
                         context.renderBackToPosition(this, DraggingContext.getInstance().getCurrentPosition(), () -> new Point(getBounds().x, getBounds().y));
                     }
                 }

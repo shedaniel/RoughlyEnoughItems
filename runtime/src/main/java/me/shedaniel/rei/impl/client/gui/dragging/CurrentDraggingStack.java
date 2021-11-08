@@ -28,10 +28,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
-import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.drag.*;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.common.util.Animator;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
@@ -119,12 +116,12 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
         while (iterator.hasNext()) {
             RenderBackEntry renderBackEntry = iterator.next();
             renderBackEntry.update(delta);
-            if (Math.abs(renderBackEntry.x.doubleValue() - renderBackEntry.x.target()) <= 2 && Math.abs(renderBackEntry.y.doubleValue() - renderBackEntry.y.target()) <= 2) {
+            if (renderBackEntry.width.doubleValue() < 2 || renderBackEntry.height.doubleValue() < 2 || (Math.abs(renderBackEntry.x.doubleValue() - renderBackEntry.x.target()) <= 2 && Math.abs(renderBackEntry.y.doubleValue() - renderBackEntry.y.target()) <= 2 && Math.abs(renderBackEntry.width.doubleValue() - renderBackEntry.width.target()) <= 1 && Math.abs(renderBackEntry.height.doubleValue() - renderBackEntry.height.target()) <= 1)) {
                 iterator.remove();
             } else {
                 matrices.pushPose();
                 matrices.translate(0, 0, 600);
-                renderBackEntry.stack.render(matrices, new Rectangle(renderBackEntry.x.intValue(), renderBackEntry.y.intValue(), 16, 16), mouseX, mouseY, delta);
+                renderBackEntry.stack.render(matrices, new Rectangle(Math.round(renderBackEntry.x.floatValue()), Math.round(renderBackEntry.y.floatValue()), Math.round(renderBackEntry.width.floatValue()), Math.round(renderBackEntry.height.floatValue())), mouseX, mouseY, delta);
                 matrices.popPose();
             }
         }
@@ -157,8 +154,8 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     private boolean drop() {
         if (entry != null && entry.dragging) {
-            boolean released = visitor.acceptDraggedStack(this, entry.stack);
-            entry.stack.release(released);
+            DraggedAcceptorResult result = visitor.acceptDraggedStackWithResult(this, entry.stack);
+            entry.stack.release(result);
             entry = null;
             return true;
         }
@@ -186,7 +183,15 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     @Override
     public void renderBackToPosition(DraggableStack stack, Point initialPosition, Supplier<Point> position) {
-        backToOriginals.add(new RenderBackEntry(stack, initialPosition, position));
+        backToOriginals.add(new RenderBackEntry(stack, new Rectangle(initialPosition.x - 8, initialPosition.y - 8, 16, 16), () -> {
+            Point point = position.get();
+            return new Rectangle(point.x, point.y, 16, 16);
+        }));
+    }
+    
+    @Override
+    public void renderBackToPosition(DraggableStack stack, Rectangle initialPosition, Supplier<Rectangle> bounds) {
+        backToOriginals.add(new RenderBackEntry(stack, initialPosition, bounds));
     }
     
     private class DraggableEntry {
@@ -239,30 +244,38 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     private static class RenderBackEntry {
         private final DraggableStack stack;
-        private final Supplier<Point> position;
+        private final Supplier<Rectangle> position;
         private Animator x = new Animator();
         private Animator y = new Animator();
+        private Animator width = new Animator();
+        private Animator height = new Animator();
         private int lastDestination = -1;
         
-        public RenderBackEntry(DraggableStack stack, Point initialPosition, Supplier<Point> position) {
+        public RenderBackEntry(DraggableStack stack, Rectangle initialPosition, Supplier<Rectangle> position) {
             this.stack = stack;
-            this.x.setAs(initialPosition.x - 8);
-            this.y.setAs(initialPosition.y - 8);
+            this.x.setAs(initialPosition.x);
+            this.y.setAs(initialPosition.y);
+            this.width.setAs(initialPosition.width);
+            this.height.setAs(initialPosition.height);
             this.position = position;
         }
         
-        public Point getPosition() {
+        public Rectangle getPosition() {
             return position.get();
         }
         
         public void update(double delta) {
             this.x.update(delta);
             this.y.update(delta);
-            Point position = getPosition();
+            this.width.update(delta);
+            this.height.update(delta);
+            Rectangle position = getPosition();
             if (lastDestination != position.hashCode()) {
                 lastDestination = position.hashCode();
                 this.x.setTo(position.x, 200);
                 this.y.setTo(position.y, 200);
+                this.width.setTo(position.width, 200);
+                this.height.setTo(position.height, 200);
             }
         }
     }

@@ -24,18 +24,22 @@
 package me.shedaniel.rei.api.client;
 
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -80,7 +84,13 @@ public interface REIRuntime extends Reloadable<REIClientPlugin> {
     
     SearchFieldLocation getContextualSearchFieldLocation();
     
-    Rectangle calculateEntryListArea();
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
+    default Rectangle calculateEntryListArea() {
+        return calculateEntryListArea(ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation(), Minecraft.getInstance().screen));
+    }
+    
+    Rectangle calculateEntryListArea(Rectangle bounds);
     
     Rectangle calculateFavoritesListArea();
 }

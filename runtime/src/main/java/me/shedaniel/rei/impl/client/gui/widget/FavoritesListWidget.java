@@ -161,6 +161,15 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     }
     
     @Override
+    public void onRemove(RealRegionEntry<FavoriteEntry> entry) {
+        if (ConfigObject.getInstance().isFavoritesEnabled()) {
+            List<FavoriteEntry> favorites = ConfigObject.getInstance().getFavoriteEntries();
+            favorites.removeIf(favoriteEntry -> Objects.equals(entry.getEntry(), favoriteEntry));
+            ConfigManager.getInstance().saveConfig();
+        }
+    }
+    
+    @Override
     @Nullable
     public FavoriteEntry convertDraggableStack(DraggingContext<Screen> context, DraggableStack stack) {
         return FavoriteEntry.fromEntryStack(stack.getStack().copy());

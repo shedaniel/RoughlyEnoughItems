@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.client.gui.drag;
 
 import me.shedaniel.math.Point;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
@@ -81,6 +82,16 @@ public interface DraggingContext<S extends Screen> {
      * @param position        the position supplier of the destination
      */
     void renderBackToPosition(DraggableStack stack, Point initialPosition, Supplier<Point> position);
+    
+    /**
+     * Renders the draggable stack back to the bounds {@code bounds}.
+     * This may be used to animate an unaccepted draggable stack returning to its initial position.
+     *
+     * @param stack           the stack to use for render
+     * @param initialPosition the initial bounds of the stack
+     * @param bounds          the boundary supplier of the destination
+     */
+    void renderBackToPosition(DraggableStack stack, Rectangle initialPosition, Supplier<Rectangle> bounds);
     
     default <T extends Screen> DraggingContext<T> cast() {
         return (DraggingContext<T>) this;

@@ -38,6 +38,7 @@ import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
+import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -226,7 +227,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         
         @Override
         public boolean doAction(int button) {
-            if (!ClientHelper.getInstance().isCheating()) return false;
+            if (!(ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen))) return false;
             EntryStack<?> entry = stack.copy();
             if (!entry.isEmpty()) {
                 if (entry.getValueType() == FluidStack.class) {

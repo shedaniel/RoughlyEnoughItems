@@ -31,7 +31,6 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZonesProvider;
-import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -95,8 +94,7 @@ public class ExclusionZonesImpl implements ExclusionZones {
     }
     
     private long currentHashCode(DisplayPanelLocation location) {
-        return areasHashCode(ScreenRegistry.getInstance().getOverlayBounds(location, Minecraft.getInstance().screen),
-                getExclusionZones(Minecraft.getInstance().screen.getClass(), false));
+        return areasHashCode(getExclusionZones(Minecraft.getInstance().screen.getClass(), false));
     }
     
     @Override
@@ -133,8 +131,8 @@ public class ExclusionZonesImpl implements ExclusionZones {
         }
     }
     
-    private long areasHashCode(Rectangle rectangle, List<Rectangle> exclusionZones) {
-        int hashCode = 31 + (rectangle == null ? 0 : rectangle.hashCode());
+    private long areasHashCode(List<Rectangle> exclusionZones) {
+        int hashCode = 31;
         for (Rectangle e : exclusionZones)
             hashCode = 31 * hashCode + (e == null ? 0 : e.hashCode());
         return hashCode;

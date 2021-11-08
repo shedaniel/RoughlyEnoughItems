@@ -51,6 +51,7 @@ import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.RecipeDisplayExporter;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.DefaultDisplayChoosePageWidget;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
@@ -60,6 +61,7 @@ import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -84,8 +86,6 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     private final List<TabWidget> tabs = Lists.newArrayList();
     public int page;
     public int categoryPages = -1;
-    public boolean choosePageActivated = false;
-    public DefaultDisplayChoosePageWidget choosePageWidget;
     @Nullable
     private Panel workingStationsBaseWidget;
     private Button recipeBack, recipeNext, categoryBack, categoryNext;
@@ -107,20 +107,12 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 256 && choosePageActivated) {
-            choosePageActivated = false;
-            init();
-            return true;
-        }
         if (keyCode == 258 && !minecraft.options.keyInventory.matches(keyCode, scanCode)) {
             boolean next = !hasShiftDown();
             if (!this.changeFocus(next))
                 this.changeFocus(next);
             return true;
-        }
-        if (choosePageActivated)
-            return choosePageWidget.keyPressed(keyCode, scanCode, modifiers);
-        else if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(keyCode, scanCode)) {
+        } else if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(keyCode, scanCode)) {
             if (recipeNext.isEnabled())
                 recipeNext.onClick();
             return recipeNext.isEnabled();
@@ -155,9 +147,9 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         this.tabs.clear();
         this.preWidgets.clear();
         this.widgets.clear();
-        int largestHeight = Math.max(height - 34 - 30, 100);
+        int largestHeight = Math.min(Math.max(height - 34 - 30, 100), ConfigObject.getInstance().getMaxRecipesPageHeight());
         int maxWidthDisplay = CollectionUtils.<DisplaySpec, Integer>mapAndMax(getCurrentDisplayed(), display -> getCurrentCategory().getDisplayWidth(display.provideInternalDisplay()), Comparator.naturalOrder()).orElse(150);
-        int maxHeight = Math.min(largestHeight, CollectionUtils.<DisplayCategory<?>, Integer>mapAndMax(categories, 
+        int maxHeight = Math.min(largestHeight, CollectionUtils.<DisplayCategory<?>, Integer>mapAndMax(categories,
                 category -> (category.getDisplayHeight() + 4) * Math.max(1, Math.min(getRecipesPerPage(largestHeight, category) + 1, Math.max(categoryMap.get(category).size(), ConfigObject.getInstance().getMaxRecipePerPage()))) + 36, Comparator.naturalOrder()).orElse(66));
         int totalDisplayHeight = (getCurrentCategory().getDisplayHeight() + 4) * Math.max(1, getRecipesPerPage(maxHeight, getCurrentCategory()) + 1) + 36;
         int guiWidth = Math.max(maxWidthDisplay + 10, 190);
@@ -166,7 +158,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             this.bounds.setLocation(this.bounds.getX(), this.bounds.getY() + 15);
             this.bounds.setSize(this.bounds.getWidth(), this.bounds.getHeight() - 10);
         }
-    
+        
         boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
         int tabSize = isCompactTabs ? 24 : 28;
         this.tabsPerPage = Math.max(5, Mth.floor((guiWidth - 20d) / tabSize));
@@ -200,7 +192,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 .onClick(button -> nextCategory()).tooltipLine(new TranslatableComponent("text.rei.next_category")));
         this.categoryBack.setEnabled(categories.size() > 1);
         this.categoryNext.setEnabled(categories.size() > 1);
-    
+        
         this.widgets.add(recipeBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 19, 12, 12), new TranslatableComponent("text.rei.left_arrow"))
                 .onClick(button -> {
                     page--;
@@ -209,12 +201,19 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                     DefaultDisplayViewingScreen.this.init();
                 }).tooltipLine(new TranslatableComponent("text.rei.previous_page")));
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 21), NarratorChatListener.NO_TITLE, label -> {
-            DefaultDisplayViewingScreen.this.choosePageActivated = true;
-            DefaultDisplayViewingScreen.this.init();
+            if (!Screen.hasShiftDown()) {
+                page = 0;
+                DefaultDisplayViewingScreen.this.init();
+            } else {
+                ScreenOverlayImpl.getInstance().choosePageWidget = new DefaultDisplayChoosePageWidget(page -> {
+                    DefaultDisplayViewingScreen.this.page = page;
+                    DefaultDisplayViewingScreen.this.init();
+                }, page, getCurrentTotalPages());
+            }
         }).onRender((matrices, label) -> {
             label.setMessage(new ImmutableTextComponent(String.format("%d/%d", page + 1, getCurrentTotalPages())));
             label.setClickable(getCurrentTotalPages() > 1);
-        }).tooltipSupplier(label -> label.isClickable() ? I18n.get("text.rei.choose_page") : null));
+        }).tooltipSupplier(label -> label.isClickable() ? I18n.get("text.rei.go_back_first_page") + "\n \n§7" + I18n.get("text.rei.shift_click_to", I18n.get("text.rei.choose_page")) : null));
         this.widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
                 .onClick(button -> {
                     page++;
@@ -238,8 +237,6 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 tab.setRenderer(categories.get(tabIndex), categories.get(tabIndex).getIcon(), categories.get(tabIndex).getTitle(), tab.getId() + categoryPages * tabsPerPage == selectedCategoryIndex);
             }
         }
-    
-        choosePageWidget = choosePageActivated ? new DefaultDisplayChoosePageWidget(this, page, getCurrentTotalPages()) : null;
         initDisplays();
         initWorkstations(preWidgets);
         
@@ -392,12 +389,6 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 }
             }
         }
-        if (choosePageActivated) {
-            setBlitOffset(500);
-            this.fillGradient(matrices, 0, 0, this.width, this.height, -1072689136, -804253680);
-            setBlitOffset(0);
-            choosePageWidget.render(matrices, mouseX, mouseY, delta);
-        }
     }
     
     @Override
@@ -425,9 +416,6 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     
     @Override
     public boolean charTyped(char char_1, int int_1) {
-        if (choosePageActivated) {
-            return choosePageWidget.charTyped(char_1, int_1);
-        }
         for (GuiEventListener listener : children())
             if (listener.charTyped(char_1, int_1))
                 return true;
@@ -436,9 +424,6 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     
     @Override
     public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
-        if (choosePageActivated) {
-            return choosePageWidget.mouseDragged(double_1, double_2, int_1, double_3, double_4);
-        }
         for (GuiEventListener entry : children())
             if (entry.mouseDragged(double_1, double_2, int_1, double_3, double_4))
                 return true;
@@ -447,17 +432,13 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (choosePageActivated) {
-            return choosePageWidget.mouseReleased(mouseX, mouseY, button);
-        } else {
-            ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
-            if (export.matchesMouse(button)) {
-                for (Map.Entry<Rectangle, List<Widget>> entry : recipeBounds.entrySet()) {
-                    Rectangle bounds = entry.getKey();
-                    if (bounds.contains(PointHelper.ofMouse())) {
-                        RecipeDisplayExporter.exportRecipeDisplay(bounds, entry.getValue());
-                        break;
-                    }
+        ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
+        if (export.matchesMouse(button)) {
+            for (Map.Entry<Rectangle, List<Widget>> entry : recipeBounds.entrySet()) {
+                Rectangle bounds = entry.getKey();
+                if (bounds.contains(PointHelper.ofMouse())) {
+                    RecipeDisplayExporter.exportRecipeDisplay(bounds, entry.getValue());
+                    break;
                 }
             }
         }
@@ -494,15 +475,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (choosePageActivated) {
-            if (choosePageWidget.containsMouse(mouseX, mouseY)) {
-                return choosePageWidget.mouseClicked(mouseX, mouseY, button);
-            } else {
-                choosePageActivated = false;
-                init();
-                return false;
-            }
-        } else if (ConfigObject.getInstance().getNextPageKeybind().matchesMouse(button)) {
+        if (ConfigObject.getInstance().getNextPageKeybind().matchesMouse(button)) {
             if (recipeNext.isEnabled())
                 recipeNext.onClick();
             return recipeNext.isEnabled();
@@ -519,13 +492,6 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
-    }
-    
-    @Override
-    public GuiEventListener getFocused() {
-        if (choosePageActivated)
-            return choosePageWidget;
-        return super.getFocused();
     }
     
     public static class WorkstationSlotWidget extends EntryWidget {
