@@ -112,7 +112,7 @@ public final class InternalWidgets {
                             if (result.isSuccessful()) {
                                 button.setEnabled(true);
                                 error = null;
-                                color = 0;
+                                color = result.getColor();
                                 redSlots = null;
                             } else if (result.isApplicable()) {
                                 if (error == null) {

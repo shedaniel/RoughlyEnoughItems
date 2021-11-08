@@ -69,7 +69,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
          * Creates a successful result, no further handlers will be called.
          */
         static Result createSuccessful() {
-            return new ResultImpl();
+            return new ResultImpl().color(0x00000000);
         }
         
         /**
@@ -77,7 +77,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
          * This will also mark the handler as not applicable.
          */
         static Result createNotApplicable() {
-            return new ResultImpl(false);
+            return new ResultImpl(false).color(0x00000000);
         }
         
         /**
@@ -86,7 +86,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
          * @param error The error itself
          */
         static Result createFailed(Component error) {
-            return new ResultImpl(error, new IntArrayList(), 1744764928);
+            return new ResultImpl(error, new IntArrayList(), 0x67ff0000);
         }
         
         /**
@@ -107,7 +107,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
          * @param redSlots A list of slots to be marked as red. Will be passed to {@link TransferDisplayCategory}.
          */
         static Result createFailed(Component error, IntList redSlots) {
-            return new ResultImpl(error, redSlots, 1744764928);
+            return new ResultImpl(error, redSlots, 0x67ff0000);
         }
         
         /**
@@ -138,6 +138,11 @@ public interface TransferHandler extends Comparable<TransferHandler> {
          * @return the color in which the button should be displayed in.
          */
         int getColor();
+    
+        /**
+         * Sets the color in which the button should be displayed in.
+         */
+        Result color(int color);
         
         /**
          * @return whether this handler has successfully handled the transfer.
@@ -241,6 +246,12 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         @Override
         public int getColor() {
             return color;
+        }
+        
+        @Override
+        public TransferHandler.Result color(int color) {
+            this.color = color;
+            return this;
         }
         
         @Override

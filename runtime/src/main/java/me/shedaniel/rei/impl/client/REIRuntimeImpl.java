@@ -33,6 +33,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
@@ -54,6 +55,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+
+import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.entrySize;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
@@ -194,8 +197,7 @@ public class REIRuntimeImpl implements REIRuntime {
     }
     
     @Override
-    public Rectangle calculateEntryListArea() {
-        Rectangle bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation(), Minecraft.getInstance().screen);
+    public Rectangle calculateEntryListArea(Rectangle bounds) {
         SearchFieldLocation searchFieldLocation = getContextualSearchFieldLocation();
         
         int yOffset = 2;
@@ -212,7 +214,20 @@ public class REIRuntimeImpl implements REIRuntime {
         
         int yOffset = 8;
         if (!ConfigObject.getInstance().isLowerConfigButton()) yOffset += 25;
-        return new Rectangle(bounds.x, bounds.y + yOffset, bounds.width, bounds.height - 3 - yOffset);
+        bounds = new Rectangle(bounds.x, bounds.y + yOffset, bounds.width, bounds.height - 3 - yOffset);
+        
+        int widthReduction = (int) Math.round(bounds.width * (1 - ConfigObject.getInstance().getFavoritesHorizontalEntriesBoundariesPercentage()));
+        if (ConfigObject.getInstance().getDisplayPanelLocation() == DisplayPanelLocation.LEFT)
+            bounds.x += widthReduction;
+        bounds.width -= widthReduction;
+        int maxWidth = (int) Math.ceil(entrySize() * ConfigObject.getInstance().getFavoritesHorizontalEntriesBoundariesColumns() + entrySize() * 0.75) + 8;
+        if (bounds.width > maxWidth) {
+            if (ConfigObject.getInstance().getDisplayPanelLocation() == DisplayPanelLocation.LEFT)
+                bounds.x += bounds.width - maxWidth;
+            bounds.width = maxWidth;
+        }
+        
+        return bounds;
     }
     
     @Override

@@ -24,7 +24,10 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector4f;
+import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import mezz.jei.api.gui.ITickTimer;
@@ -96,7 +99,15 @@ public class JEIDrawableBuilder implements IDrawableBuilder {
             public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset, int maskTop, int maskBottom, int maskLeft, int maskRight) {
                 matrixStack.pushPose();
                 matrixStack.translate(xOffset + paddingLeft, yOffset + paddingTop, 0);
+                
+                Vector4f vector4f = new Vector4f(maskLeft, maskTop, 0, 1.0F);
+                vector4f.transform(matrixStack.last().pose());
+                Vector4f vector4f2 = new Vector4f(width - maskRight, height - maskBottom, 0, 1.0F);
+                vector4f2.transform(matrixStack.last().pose());
+                
+                ScissorsHandler.INSTANCE.scissor(new Rectangle(Math.round(vector4f.x()), Math.round(vector4f.y()), Math.round(vector4f2.x()) - Math.round(vector4f.x()), Math.round(vector4f2.y()) - Math.round(vector4f.y())));
                 widget.render(matrixStack, PointHelper.getMouseX(), PointHelper.getMouseY(), 0);
+                ScissorsHandler.INSTANCE.removeLastScissor();
                 matrixStack.popPose();
             }
             

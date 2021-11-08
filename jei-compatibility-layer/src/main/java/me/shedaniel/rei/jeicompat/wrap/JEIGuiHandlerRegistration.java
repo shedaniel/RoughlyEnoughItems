@@ -27,6 +27,7 @@ import dev.architectury.event.CompoundEventResult;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
+import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.registry.screen.DisplayBoundsProvider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
@@ -121,11 +122,11 @@ public enum JEIGuiHandlerRegistration implements IGuiHandlerRegistration {
             }
             
             @Override
-            public boolean acceptDraggedStack(DraggingContext<T> context, DraggableStack stack) {
+            public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<T> context, DraggableStack stack) {
                 return canAccept(context, stack).map(target -> {
                     target.accept(unwrap(stack.getStack().copy()));
                     return Unit.INSTANCE;
-                }).isPresent();
+                }).isPresent() ? DraggedAcceptorResult.ACCEPTED : DraggedAcceptorResult.PASS;
             }
             
             @Override

@@ -57,6 +57,7 @@ import mezz.jei.api.recipe.transfer.IRecipeTransferInfo;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.NotNull;
@@ -181,10 +182,14 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                     IRecipeTransferError error = ((IRecipeTransferHandler<AbstractContainerMenu, Object>) recipeTransferHandler).transferRecipe(context.getMenu(), wrapRecipe(context.getDisplay()), layout, context.getMinecraft().player, Screen.hasShiftDown(), context.isActuallyCrafting());
                     if (error == null) {
                         return TransferHandler.Result.createSuccessful();
-                    } else if (error instanceof JEIRecipeTransferError) {
-                        IntArrayList redSlots = ((JEIRecipeTransferError) error).getRedSlots();
+                    } else if (error instanceof IRecipeTransferError) {
+                        IRecipeTransferError.Type type = error.getType();
+                        if (type == IRecipeTransferError.Type.COSMETIC) {
+                            return TransferHandler.Result.createSuccessful().color(0x6700E1FF);
+                        }
+                        IntArrayList redSlots = error instanceof JEIRecipeTransferError ? ((JEIRecipeTransferError) error).getRedSlots() : null;
                         if (redSlots == null) redSlots = new IntArrayList();
-                        return TransferHandler.Result.createFailed(((JEIRecipeTransferError) error).getText(), redSlots);
+                        return TransferHandler.Result.createFailed(error instanceof JEIRecipeTransferError ? ((JEIRecipeTransferError) error).getText() : new TranslatableComponent("text.auto_craft.move_items"), redSlots);
                     }
                 }
             }
@@ -210,7 +215,6 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                         IGuiIngredientGroup<Object> group = layout.getIngredientsGroup(type.getDefinition()::getValueType);
                         int[] i = new int[]{getNextId(group.getGuiIngredients().keySet())};
                         entry.getValue().stream().map(map -> map.get(type))
-                                .filter(collection -> !collection.isEmpty())
                                 .forEach(stacks -> {
                                     group.set(i[0], CollectionUtils.map(stacks, JEIPluginDetector::unwrap));
                                     group.init(i[0], entry.getKey(), 0, 0);

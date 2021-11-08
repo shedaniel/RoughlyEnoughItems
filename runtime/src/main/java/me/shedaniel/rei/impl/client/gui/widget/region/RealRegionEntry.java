@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.region;
 
-import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
 import me.shedaniel.rei.api.common.util.Animator;
@@ -36,7 +35,6 @@ public class RealRegionEntry<T extends RegionEntry<T>> {
     private T entry;
     private final RegionEntryListEntry<T> widget;
     private boolean hidden;
-    public Point startedDraggingPosition;
     public Animator x = new Animator();
     public Animator y = new Animator();
     public Animator size = new Animator();
