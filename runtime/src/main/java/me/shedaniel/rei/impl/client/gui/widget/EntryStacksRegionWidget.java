@@ -38,10 +38,7 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
-import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.drag.*;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
@@ -223,15 +220,18 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     }
     
     @Override
-    public boolean acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
+    public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<Screen> context, DraggableStack stack) {
         return checkDraggedStacks(context, stack)
                 .filter(entry -> innerBounds.contains(context.getCurrentPosition()))
                 .flatMap(entry -> {
+                    if (stack instanceof RegionDraggableStack && ((RegionDraggableStack<?>) stack).getEntry().region == this && ((RegionDraggableStack<?>) stack).getShowcaseWidget() == null) {
+                        return Optional.empty();
+                    }
                     if (!drop(entry)) {
                         return Optional.empty();
                     }
                     return Optional.of(Unit.INSTANCE);
-                }).isPresent();
+                }).isPresent() ? DraggedAcceptorResult.CONSUMED : DraggedAcceptorResult.PASS;
     }
     
     public Optional<RealRegionEntry<T>> checkDraggedStacks(DraggingContext<Screen> context, DraggableStack stack) {
@@ -283,16 +283,19 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         
         applyNewEntriesList();
         updateEntriesPosition(entry -> prevEntries.containsKey(entry.hashIgnoreAmount()));
-    
+        
         for (RealRegionEntry<T> removedEntry : removedEntries) {
             this.listener.onRemove(removedEntry);
         }
-    
+        
         for (RealRegionEntry<T> addedEntry : addedEntries) {
             this.listener.onAdd(addedEntry);
         }
         
         this.listener.onSetNewEntries(entriesList);
+        this.listener.onSetNewEntries(entriesList.stream()
+                .map(RegionEntryListEntry::getEntry)
+                .map(RealRegionEntry::getEntry));
     }
     
     public boolean isEmpty() {
@@ -314,7 +317,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         int width = innerBounds.width / entrySize;
         int currentX = 0;
         int currentY = 0;
-        int releaseIndex = getReleaseIndex();
+        int releaseIndex = getReleaseIndex(null);
         
         int slotIndex = 0;
         for (RealRegionEntry<T> entry : this.entries.values()) {
@@ -342,9 +345,9 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         }
     }
     
-    private int getReleaseIndex() {
+    private int getReleaseIndex(@Nullable Point position) {
         DraggingContext<?> context = DraggingContext.getInstance();
-        Point position = context.getCurrentPosition();
+        if (position == null) position = context.getCurrentPosition();
         if (context.isDraggingStack() && bounds.contains(position) && checkDraggedStacks(context.cast(), context.getCurrentStack()).isPresent()) {
             int entrySize = entrySize();
             int width = innerBounds.width / entrySize;
@@ -413,20 +416,26 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     }
     
     public boolean drop(RealRegionEntry<T> entry) {
+        DraggingContext<?> context = DraggingContext.getInstance();
+        double x = context.getCurrentPosition().x;
+        double y = context.getCurrentPosition().y + scrolling.scrollAmount;
+        return drop(entry, x, y);
+    }
+    
+    public boolean drop(RealRegionEntry<T> entry, double x, double y) {
+        boolean contains = bounds.contains(x, y);
+        int newIndex = contains ? getReleaseIndex(new Point(x, y)) : Math.max(0, Iterables.indexOf(entries.values(), e -> e == entry));
+        return drop(entry, x, y, newIndex < 0 ? entries.size() : newIndex);
+    }
+    
+    public boolean drop(RealRegionEntry<T> entry, double x, double y, int newIndex) {
+        if (newIndex < 0) return drop(entry, x, y);
         if (!listener.canAcceptDrop(entry)) {
             return false;
         }
         
-        DraggingContext<?> context = DraggingContext.getInstance();
-        double x = context.getCurrentPosition().x;
-        double y = context.getCurrentPosition().y + scrolling.scrollAmount;
-        entry.startedDraggingPosition = null;
-        
         entry.x.setAs(x - 8);
         entry.y.setAs(y - 8);
-        
-        boolean contains = bounds.contains(PointHelper.ofMouse());
-        int newIndex = contains ? getReleaseIndex() : Math.max(0, Iterables.indexOf(entries.values(), e -> e == entry));
         
         if (entries.size() <= newIndex) {
             RealRegionEntry<T> remove = this.entries.remove(entry.hashIgnoreAmount());
@@ -460,6 +469,10 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                 .map(RealRegionEntry::getEntry)
                 .collect(Collectors.toList()));
         return true;
+    }
+    
+    public int indexOf(RealRegionEntry<T> entry) {
+        return entriesList.indexOf(entry.getWidget());
     }
     
     public void remove(RealRegionEntry<T> entry) {

@@ -89,6 +89,8 @@ public interface ConfigObject {
     
     int getMaxRecipePerPage();
     
+    int getMaxRecipesPageHeight();
+    
     boolean doesDisableRecipeBook();
     
     boolean doesFixTabCloseContainer();
@@ -163,10 +165,22 @@ public interface ConfigObject {
     boolean isInventoryHighlightingAllowed();
     
     @ApiStatus.Experimental
-    double getHorizontalEntriesBoundaries();
+    double getHorizontalEntriesBoundariesPercentage();
     
     @ApiStatus.Experimental
-    double getVerticalEntriesBoundaries();
+    double getVerticalEntriesBoundariesPercentage();
+    
+    @ApiStatus.Experimental
+    double getHorizontalEntriesBoundariesColumns();
+    
+    @ApiStatus.Experimental
+    double getVerticalEntriesBoundariesRows();
+    
+    @ApiStatus.Experimental
+    double getFavoritesHorizontalEntriesBoundariesPercentage();
+    
+    @ApiStatus.Experimental
+    double getFavoritesHorizontalEntriesBoundariesColumns();
     
     @ApiStatus.Experimental
     SyntaxHighlightingMode getSyntaxHighlightingMode();

@@ -33,7 +33,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.TextFieldWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -43,6 +43,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.IntConsumer;
 
 @ApiStatus.Internal
 public class DefaultDisplayChoosePageWidget extends DraggableWidget {
@@ -51,14 +52,14 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
     private int maxPage;
     private Rectangle bounds, grabBounds, dragBounds;
     private List<Widget> widgets;
-    private DefaultDisplayViewingScreen screen;
+    private IntConsumer callback;
     private TextFieldWidget textFieldWidget;
     private Panel base1, base2;
     private Button btnDone;
     
-    public DefaultDisplayChoosePageWidget(DefaultDisplayViewingScreen screen, int currentPage, int maxPage) {
+    public DefaultDisplayChoosePageWidget(IntConsumer callback, int currentPage, int maxPage) {
         super(getPointFromConfig());
-        this.screen = screen;
+        this.callback = callback;
         this.currentPage = currentPage;
         this.maxPage = maxPage;
         initWidgets(getMidPoint());
@@ -110,7 +111,7 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
         this.widgets.add(base2 = Widgets.createCategoryBase(bounds));
         this.widgets.add(new Widget() {
             
-            private TranslatableComponent text;
+            private TranslatableComponent text = new TranslatableComponent("text.rei.choose_page");
             
             @Override
             public List<Widget> children() {
@@ -119,7 +120,6 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
             
             @Override
             public void render(PoseStack matrices, int i, int i1, float v) {
-                text = new TranslatableComponent("text.rei.choose_page");
                 font.draw(matrices, text.getVisualOrderText(), bounds.x + 5, bounds.y + 5, REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
                 String endString = String.format(" /%d", maxPage);
                 int width = font.width(endString);
@@ -145,9 +145,8 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
         textFieldWidget.setText(String.valueOf(currentPage + 1));
         widgets.add(btnDone = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20), new TranslatableComponent("gui.done"))
                 .onClick(button -> {
-                    screen.page = Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, screen.getCurrentTotalPages() - 1);
-                    screen.choosePageActivated = false;
-                    screen.init();
+                    callback.accept(Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, maxPage - 1));
+                    ScreenOverlayImpl.getInstance().choosePageWidget = null;
                 }));
         textFieldWidget.setFocused(true);
     }
@@ -183,9 +182,8 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
     @Override
     public boolean keyPressed(int int_1, int int_2, int int_3) {
         if (int_1 == 335 || int_1 == 257) {
-            screen.page = Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, screen.getCurrentTotalPages() - 1);
-            screen.choosePageActivated = false;
-            screen.init();
+            callback.accept(Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, maxPage - 1));
+            ScreenOverlayImpl.getInstance().choosePageWidget = null;
             return true;
         }
         for (Widget widget : widgets)

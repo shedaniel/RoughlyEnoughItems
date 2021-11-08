@@ -39,9 +39,12 @@ public interface DraggableStackVisitorWidget {
     static DraggableStackVisitorWidget from(Function<DraggingContext<Screen>, Iterable<DraggableStackVisitorWidget>> providers) {
         return new DraggableStackVisitorWidget() {
             @Override
-            public boolean acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
+            public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<Screen> context, DraggableStack stack) {
                 return StreamSupport.stream(providers.apply(context).spliterator(), false)
-                        .anyMatch(visitor -> visitor.acceptDraggedStack(context, stack));
+                        .map(visitor -> visitor.acceptDraggedStackWithResult(context, stack))
+                        .filter(result -> result != DraggedAcceptorResult.PASS)
+                        .findFirst()
+                        .orElse(DraggedAcceptorResult.PASS);
             }
             
             @Override
@@ -66,6 +69,8 @@ public interface DraggableStackVisitorWidget {
      * @param stack   the stack being dragged
      * @return whether the stack is accepted by the widget
      */
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
     default boolean acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
         Optional<DraggableStackVisitor.Acceptor> acceptor = visitDraggedStack(context, stack);
         if (acceptor.isPresent()) {
@@ -74,6 +79,18 @@ public interface DraggableStackVisitorWidget {
         } else {
             return false;
         }
+    }
+    
+    /**
+     * Accepts a dragged stack, implementations of this function should check if the {@code context} is within
+     * boundaries of the widget.
+     *
+     * @param context the context of the current dragged stack on the overlay
+     * @param stack   the stack being dragged
+     * @return the result of the visitor
+     */
+    default DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<Screen> context, DraggableStack stack) {
+        return acceptDraggedStack(context, stack) ? DraggedAcceptorResult.CONSUMED : DraggedAcceptorResult.PASS;
     }
     
     /**
@@ -95,8 +112,8 @@ public interface DraggableStackVisitorWidget {
     static DraggableStackVisitor<Screen> toVisitor(DraggableStackVisitorWidget widget, double priority) {
         return new DraggableStackVisitor<>() {
             @Override
-            public boolean acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
-                return widget.acceptDraggedStack(context, stack);
+            public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<Screen> context, DraggableStack stack) {
+                return widget.acceptDraggedStackWithResult(context, stack);
             }
             
             @Override

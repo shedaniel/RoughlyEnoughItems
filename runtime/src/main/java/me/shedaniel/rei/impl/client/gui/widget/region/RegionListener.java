@@ -63,4 +63,6 @@ public interface RegionListener<T extends RegionEntry<T>> {
     default void onAdd(RealRegionEntry<T> entry) {}
     
     default void onSetNewEntries(List<RegionEntryListEntry<T>> entries) {}
+    
+    default void onSetNewEntries(Stream<T> entries) {}
 }
