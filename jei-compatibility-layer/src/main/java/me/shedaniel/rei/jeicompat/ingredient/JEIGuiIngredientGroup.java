@@ -28,6 +28,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.utils.value.Value;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
@@ -50,8 +51,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.WILL_NOT_BE_IMPLEMENTED;
 
+@ExtensionMethod(JEIPluginDetector.class)
 public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     private static final Method m_93179_ = ObfuscationReflectionHelper.findMethod(GuiComponent.class, "m_93179_",
             PoseStack.class, Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE);
@@ -82,12 +84,12 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
             if (slotWrapper.slot.getNoticeMark() == Slot.INPUT) {
                 if (inputIndex < inputs.size()) {
                     slotWrapper.slot.clearEntries();
-                    slotWrapper.slot.entries(JEIPluginDetector.wrapList(type, inputs.get(inputIndex++)));
+                    slotWrapper.slot.entries(type.unwrapList(inputs.get(inputIndex++)));
                 }
             } else if (slotWrapper.slot.getNoticeMark() == Slot.OUTPUT) {
                 if (outputIndex < outputs.size()) {
                     slotWrapper.slot.clearEntries();
-                    slotWrapper.slot.entries(JEIPluginDetector.wrapList(type, outputs.get(outputIndex++)));
+                    slotWrapper.slot.entries(type.unwrapList(outputs.get(outputIndex++)));
                 }
             }
         }
@@ -97,14 +99,14 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     public void set(int slotIndex, @Nullable List<T> ingredients) {
         Slot slot = getSlot(slotIndex).slot;
         slot.clearEntries();
-        slot.entries(JEIPluginDetector.wrapList(type, ingredients));
+        slot.entries(type.unwrapList(ingredients));
     }
     
     @Override
     public void set(int slotIndex, @Nullable T ingredient) {
         Slot slot = getSlot(slotIndex).slot;
         slot.clearEntries();
-        slot.entry(wrap(type, ingredient));
+        slot.entry(ingredient.unwrapStack(type));
     }
     
     @Override
@@ -168,7 +170,7 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
         @Override
         @Nullable
         public T getDisplayedIngredient() {
-            return unwrap(slot.getCurrentEntry().cast());
+            return slot.getCurrentEntry().<T>cast().jeiValue();
         }
         
         @Override
@@ -200,7 +202,7 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
         
         @Override
         public T get(int index) {
-            return unwrap(slot.getEntries().get(index).cast());
+            return slot.getEntries().get(index).<T>cast().jeiValue();
         }
         
         @Override
@@ -215,7 +217,7 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
         
         @Override
         public void add(int index, T element) {
-            slot.entry(wrap(type, element));
+            slot.entry(element.unwrapStack(type));
         }
     }
 }

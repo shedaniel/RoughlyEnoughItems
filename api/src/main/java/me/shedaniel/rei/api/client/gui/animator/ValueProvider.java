@@ -21,33 +21,53 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat.wrap;
+package me.shedaniel.rei.api.client.gui.animator;
 
-import lombok.experimental.ExtensionMethod;
-import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
-import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import mezz.jei.api.helpers.IStackHelper;
-import mezz.jei.api.ingredients.subtypes.UidContext;
-import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.ApiStatus;
 
-@ExtensionMethod(JEIPluginDetector.class)
-public enum JEIStackHelper implements IStackHelper {
-    INSTANCE;
-    
-    @Override
-    public boolean isEquivalent(@Nullable ItemStack lhs, @Nullable ItemStack rhs, @NotNull UidContext context) {
-        if (context == UidContext.Ingredient) {
-            return EntryStacks.equalsExact(lhs.unwrapStack(), rhs.unwrapStack());
-        }
-        return EntryStacks.equalsFuzzy(lhs.unwrapStack(), rhs.unwrapStack());
+/**
+ * A value provider is used to provide a value for animation.
+ *
+ * @param <T> the type of the value
+ * @see ValueAnimator
+ */
+@ApiStatus.Experimental
+public interface ValueProvider<T> {
+    /**
+     * Returns a constant value provider, which always returns the same value.
+     *
+     * @param value the value to return
+     * @param <T>   the type of the value
+     * @return the constant value provider
+     */
+    static <T> ValueProvider<T> constant(T value) {
+        return new ConstantValueProvider<>(value);
     }
     
-    @Override
-    @NotNull
-    public String getUniqueIdentifierForStack(@NotNull ItemStack stack, @NotNull UidContext context) {
-        return String.valueOf(ItemComparatorRegistry.getInstance().hashOf(context.unwrapContext(), stack));
-    }
+    /**
+     * Returns the current value of the provider.
+     *
+     * @return the current value
+     */
+    T value();
+    
+    /**
+     * Returns the target value of the provider.
+     *
+     * @return the target value
+     */
+    T target();
+    
+    /**
+     * Completes the animation immediately.
+     * This will set the current value to the target value.
+     */
+    void completeImmediately();
+    
+    /**
+     * Updates the current value of the provider by the tick delta.
+     *
+     * @param delta the tick delta
+     */
+    void update(double delta);
 }

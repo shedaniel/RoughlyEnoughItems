@@ -21,33 +21,50 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat.wrap;
+package me.shedaniel.rei.api.client.gui.animator;
 
-import lombok.experimental.ExtensionMethod;
-import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
-import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import mezz.jei.api.helpers.IStackHelper;
-import mezz.jei.api.ingredients.subtypes.UidContext;
-import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.ApiStatus;
 
-@ExtensionMethod(JEIPluginDetector.class)
-public enum JEIStackHelper implements IStackHelper {
-    INSTANCE;
+@ApiStatus.Internal
+abstract class ValueAnimatorAsNumberAnimator<T extends Number> extends NumberAnimator<T> {
+    private final ValueAnimator<T> animator;
     
-    @Override
-    public boolean isEquivalent(@Nullable ItemStack lhs, @Nullable ItemStack rhs, @NotNull UidContext context) {
-        if (context == UidContext.Ingredient) {
-            return EntryStacks.equalsExact(lhs.unwrapStack(), rhs.unwrapStack());
-        }
-        return EntryStacks.equalsFuzzy(lhs.unwrapStack(), rhs.unwrapStack());
+    ValueAnimatorAsNumberAnimator(ValueAnimator<T> animator) {
+        this.animator = animator;
     }
     
     @Override
-    @NotNull
-    public String getUniqueIdentifierForStack(@NotNull ItemStack stack, @NotNull UidContext context) {
-        return String.valueOf(ItemComparatorRegistry.getInstance().hashOf(context.unwrapContext(), stack));
+    public int intValue() {
+        return animator.value().intValue();
+    }
+    
+    @Override
+    public long longValue() {
+        return animator.value().longValue();
+    }
+    
+    @Override
+    public float floatValue() {
+        return animator.value().floatValue();
+    }
+    
+    @Override
+    public double doubleValue() {
+        return animator.value().doubleValue();
+    }
+    
+    @Override
+    public T value() {
+        return animator.value();
+    }
+    
+    @Override
+    public T target() {
+        return animator.target();
+    }
+    
+    @Override
+    public void update(double delta) {
+        animator.update(delta);
     }
 }

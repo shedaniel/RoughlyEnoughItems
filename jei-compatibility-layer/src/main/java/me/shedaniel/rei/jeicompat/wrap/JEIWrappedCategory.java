@@ -24,6 +24,7 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import lombok.experimental.ExtensionMethod;
 import dev.architectury.utils.value.Value;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -37,6 +38,7 @@ import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.Minecraft;
@@ -52,9 +54,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapCategoryId;
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapDrawable;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<T>> {
     private final IRecipeCategory<T> backingCategory;
     private final LazyLoadedValue<IDrawable> background;
@@ -63,7 +63,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
     public JEIWrappedCategory(IRecipeCategory<T> backingCategory) {
         this.backingCategory = backingCategory;
         this.background = new LazyLoadedValue<>(backingCategory::getBackground);
-        this.identifier = wrapCategoryId(backingCategory.getUid());
+        this.identifier = backingCategory.getUid().categoryId().cast();
     }
     
     public Class<? extends T> getRecipeClass() {
@@ -78,7 +78,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
     public Renderer getIcon() {
         IDrawable icon = backingCategory.getIcon();
         if (icon != null) {
-            return wrapDrawable(icon);
+            return icon.unwrapRenderer();
         }
         
         List<EntryIngredient> workstations = CategoryRegistry.getInstance().get(getCategoryIdentifier()).getWorkstations();
@@ -170,7 +170,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
             return widgets;
         }
         widgets.add(Widgets.createRecipeBase(bounds));
-        widgets.add(Widgets.withTranslate(Widgets.wrapRenderer(bounds, wrapDrawable(background[0])), 4, 4, 0));
+        widgets.add(Widgets.withTranslate(Widgets.wrapRenderer(bounds, background[0].unwrapRenderer()), 4, 4, 0));
         widgets.add(new WidgetWithBounds() {
             @Override
             public Rectangle getBounds() {

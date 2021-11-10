@@ -93,6 +93,12 @@ public interface DraggingContext<S extends Screen> {
      */
     void renderBackToPosition(DraggableStack stack, Rectangle initialPosition, Supplier<Rectangle> bounds);
     
+    default void renderToVoid(DraggableStack stack) {
+        Point currentPosition = getCurrentPosition();
+        Rectangle targetBounds = new Rectangle(currentPosition.x, currentPosition.y, 1, 1);
+        renderBackToPosition(stack, new Rectangle(currentPosition.x - 8, currentPosition.y - 8, 16, 16), () -> targetBounds);
+    }
+    
     default <T extends Screen> DraggingContext<T> cast() {
         return (DraggingContext<T>) this;
     }

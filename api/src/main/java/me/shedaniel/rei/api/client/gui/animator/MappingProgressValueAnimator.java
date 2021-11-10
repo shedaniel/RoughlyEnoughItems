@@ -21,33 +21,48 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat.wrap;
+package me.shedaniel.rei.api.client.gui.animator;
 
-import lombok.experimental.ExtensionMethod;
-import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
-import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import mezz.jei.api.helpers.IStackHelper;
-import mezz.jei.api.ingredients.subtypes.UidContext;
-import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.ApiStatus;
 
-@ExtensionMethod(JEIPluginDetector.class)
-public enum JEIStackHelper implements IStackHelper {
-    INSTANCE;
+import java.util.function.Function;
+
+@ApiStatus.Internal
+final class MappingProgressValueAnimator<R> implements ProgressValueAnimator<R> {
+    private final ValueAnimator<Double> parent;
+    private final Function<Double, R> converter;
+    private final Function<R, Double> backwardsConverter;
     
-    @Override
-    public boolean isEquivalent(@Nullable ItemStack lhs, @Nullable ItemStack rhs, @NotNull UidContext context) {
-        if (context == UidContext.Ingredient) {
-            return EntryStacks.equalsExact(lhs.unwrapStack(), rhs.unwrapStack());
-        }
-        return EntryStacks.equalsFuzzy(lhs.unwrapStack(), rhs.unwrapStack());
+    MappingProgressValueAnimator(ValueAnimator<Double> parent, Function<Double, R> converter, Function<R, Double> backwardsConverter) {
+        this.parent = parent;
+        this.converter = converter;
+        this.backwardsConverter = backwardsConverter;
     }
     
     @Override
-    @NotNull
-    public String getUniqueIdentifierForStack(@NotNull ItemStack stack, @NotNull UidContext context) {
-        return String.valueOf(ItemComparatorRegistry.getInstance().hashOf(context.unwrapContext(), stack));
+    public ProgressValueAnimator<R> setTo(R value, long duration) {
+        parent.setTo(backwardsConverter.apply(value), duration);
+        return this;
+    }
+    
+    @Override
+    public R target() {
+        return converter.apply(parent.target());
+    }
+    
+    @Override
+    public R value() {
+        return converter.apply(parent.value());
+    }
+    
+    @Override
+    public void update(double delta) {
+        parent.update(delta);
+    }
+    
+    
+    @Override
+    public double progress() {
+        return parent.value() / 100;
     }
 }

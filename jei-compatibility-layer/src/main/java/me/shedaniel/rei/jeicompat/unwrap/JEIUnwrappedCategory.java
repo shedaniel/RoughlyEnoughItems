@@ -23,8 +23,10 @@
 
 package me.shedaniel.rei.jeicompat.unwrap;
 
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.jeicompat.wrap.JEIWrappedCategory;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -37,6 +39,7 @@ import org.jetbrains.annotations.NotNull;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.WILL_NOT_BE_IMPLEMENTED;
 
+@ExtensionMethod(JEIPluginDetector.class)
 public class JEIUnwrappedCategory<T, D extends Display> implements IRecipeCategory<T> {
     private final DisplayCategory<D> backingCategory;
     

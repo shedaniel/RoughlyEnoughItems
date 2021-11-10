@@ -27,6 +27,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import dev.architectury.utils.value.Value;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -67,9 +68,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapCategoryId;
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapRecipe;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public class JEIRecipeTransferRegistration implements IRecipeTransferRegistration {
     private final Consumer<Runnable> post;
     
@@ -131,11 +130,11 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
     @Override
     public <C extends AbstractContainerMenu, R> void addRecipeTransferHandler(IRecipeTransferInfo<C, R> info) {
         post.accept(() -> {
-            MenuInfoRegistry.getInstance().register(wrapCategoryId(info.getRecipeCategoryUid()), info.getContainerClass(),
+            MenuInfoRegistry.getInstance().register(info.getRecipeCategoryUid().categoryId(), info.getContainerClass(),
                     new MenuInfoProvider<C, Display>() {
                         @Override
                         public Optional<MenuInfo<C, Display>> provideClient(Display display, C menu) {
-                            return Optional.of(new JEITransferMenuInfo<>(new JEIRecipeTransferData<>(info, menu, (R) wrapRecipe(display))));
+                            return Optional.of(new JEITransferMenuInfo<>(new JEIRecipeTransferData<>(info, menu, (R) display.jeiValue())));
                         }
                         
                         @Override
@@ -179,7 +178,7 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                     if (context.isActuallyCrafting()) {
                         context.getMinecraft().setScreen(context.getContainerScreen());
                     }
-                    IRecipeTransferError error = ((IRecipeTransferHandler<AbstractContainerMenu, Object>) recipeTransferHandler).transferRecipe(context.getMenu(), wrapRecipe(context.getDisplay()), layout, context.getMinecraft().player, Screen.hasShiftDown(), context.isActuallyCrafting());
+                    IRecipeTransferError error = ((IRecipeTransferHandler<AbstractContainerMenu, Object>) recipeTransferHandler).transferRecipe(context.getMenu(), context.getDisplay().jeiValue(), layout, context.getMinecraft().player, Screen.hasShiftDown(), context.isActuallyCrafting());
                     if (error == null) {
                         return TransferHandler.Result.createSuccessful();
                     } else if (error instanceof IRecipeTransferError) {
@@ -216,7 +215,7 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                         int[] i = new int[]{getNextId(group.getGuiIngredients().keySet())};
                         entry.getValue().stream().map(map -> map.get(type))
                                 .forEach(stacks -> {
-                                    group.set(i[0], CollectionUtils.map(stacks, JEIPluginDetector::unwrap));
+                                    group.set(i[0], CollectionUtils.map(stacks, JEIPluginDetector::jeiValue));
                                     group.init(i[0], entry.getKey(), 0, 0);
                                     i[0]++;
                                 });

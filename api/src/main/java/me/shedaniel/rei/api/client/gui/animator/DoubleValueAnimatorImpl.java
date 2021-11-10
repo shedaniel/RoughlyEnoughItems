@@ -21,44 +21,41 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.util;
+package me.shedaniel.rei.api.client.gui.animator;
 
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import net.minecraft.Util;
 import org.jetbrains.annotations.ApiStatus;
 
-/**
- * @see me.shedaniel.rei.api.client.gui.animator.ValueAnimator
- */
-@Deprecated
-@ApiStatus.ScheduledForRemoval
-public final class Animator extends Number {
+@ApiStatus.Internal
+final class DoubleValueAnimatorImpl extends NumberAnimator<Double> {
     private double amount;
     private double target;
     private long start;
     private long duration;
     
-    public Animator() {
+    DoubleValueAnimatorImpl() {
     }
     
-    public Animator(double amount) {
+    DoubleValueAnimatorImpl(double amount) {
         setAs(amount);
     }
     
-    public void setAs(double value) {
-        this.set(value, false, 0);
+    @Override
+    public NumberAnimator<Double> setToNumber(Number value, long duration) {
+        double doubleValue = value.doubleValue();
+        if (target != doubleValue) {
+            this.set(doubleValue, duration);
+        }
+        
+        return this;
     }
     
-    public void setTo(double value, long duration) {
-        if (target != value)
-            this.set(value, true, duration);
-    }
-    
-    private void set(double value, boolean animated, long duration) {
+    private void set(double value, long duration) {
         this.target = value;
         this.start = Util.getMillis();
         
-        if (animated) {
+        if (duration > 0) {
             this.duration = duration;
         } else {
             this.duration = 0;
@@ -66,6 +63,7 @@ public final class Animator extends Number {
         }
     }
     
+    @Override
     public void update(double delta) {
         if (duration != 0) {
             if (amount < target) {
@@ -100,7 +98,12 @@ public final class Animator extends Number {
         return amount;
     }
     
-    public double target() {
+    public Double target() {
         return target;
+    }
+    
+    @Override
+    public Double value() {
+        return amount;
     }
 }

@@ -26,15 +26,16 @@ package me.shedaniel.rei.jeicompat.wrap;
 import dev.architectury.utils.value.Value;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupFluid;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupItem;
@@ -55,8 +56,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 
+@ExtensionMethod(JEIPluginDetector.class)
 public abstract class JEIRecipeLayout<T> implements IRecipeLayout {
     private final Map<EntryType<?>, IGuiIngredientGroup<?>> groups = new HashMap<>();
     public final Value<IDrawable> background;
@@ -80,7 +82,7 @@ public abstract class JEIRecipeLayout<T> implements IRecipeLayout {
     @Override
     @NotNull
     public <T> IGuiIngredientGroup<T> getIngredientsGroup(@NotNull IIngredientType<T> ingredientType) {
-        return (IGuiIngredientGroup<T>) groups.computeIfAbsent(wrapEntryType(ingredientType), type -> {
+        return (IGuiIngredientGroup<T>) groups.computeIfAbsent(ingredientType.unwrapType(), type -> {
             if (Objects.equals(ingredientType.getIngredientClass(), ItemStack.class))
                 return new JEIGuiIngredientGroupItem(ingredientType.cast(), background);
             if (Objects.equals(ingredientType.getIngredientClass(), FluidStack.class))
@@ -94,11 +96,11 @@ public abstract class JEIRecipeLayout<T> implements IRecipeLayout {
         DisplayScreen screen = (DisplayScreen) Minecraft.getInstance().screen;
         List<EntryStack<?>> notice = screen.getIngredientsToNotice();
         if (!notice.isEmpty()) {
-            return new JEIFocus<>(IFocus.Mode.INPUT, unwrap(notice.get(0).cast())).wrap();
+            return new JEIFocus<>(IFocus.Mode.INPUT, notice.get(0).cast().jeiValue()).wrap();
         }
         notice = screen.getResultsToNotice();
         if (!notice.isEmpty()) {
-            return new JEIFocus<>(IFocus.Mode.OUTPUT, unwrap(notice.get(0).cast())).wrap();
+            return new JEIFocus<>(IFocus.Mode.OUTPUT, notice.get(0).cast().jeiValue()).wrap();
         }
         return null;
     }
@@ -134,7 +136,7 @@ public abstract class JEIRecipeLayout<T> implements IRecipeLayout {
                 wrapper.slot.highlightEnabled(!wrapper.isEmpty());
                 
                 if (wrapper.background != null) {
-                    widgets.add(Widgets.withTranslate(Widgets.wrapRenderer(wrapper.slot.getInnerBounds().clone(), wrapDrawable(wrapper.background)), -1, -1, 0));
+                    widgets.add(Widgets.withTranslate(Widgets.wrapRenderer(wrapper.slot.getInnerBounds().clone(), wrapper.background.unwrapRenderer()), -1, -1, 0));
                 }
                 
                 widgets.add(Widgets.withTranslate(wrapper.slot, 0, 0, 10));
@@ -154,7 +156,7 @@ public abstract class JEIRecipeLayout<T> implements IRecipeLayout {
                 }
                 
                 if (wrapper.overlay != null) {
-                    widgets.add(Widgets.withTranslate(Widgets.wrapRenderer(wrapper.slot.getInnerBounds().clone(), wrapDrawable(wrapper.overlay)), 0, 0, 10));
+                    widgets.add(Widgets.withTranslate(Widgets.wrapRenderer(wrapper.slot.getInnerBounds().clone(), wrapper.overlay.unwrapRenderer()), 0, 0, 10));
                 }
                 
                 List<ITooltipCallback<Object>> tooltipCallbacks = (List<ITooltipCallback<Object>>) (List) group.tooltipCallbacks;
@@ -163,7 +165,7 @@ public abstract class JEIRecipeLayout<T> implements IRecipeLayout {
                         Object ingredient = null;
                         for (ITooltipCallback<Object> callback : tooltipCallbacks) {
                             if (ingredient == null) {
-                                ingredient = unwrap(stack);
+                                ingredient = stack.jeiValue();
                             }
                             callback.onTooltip(integer, wrapper.isInput(), ingredient, tooltip.getText());
                         }

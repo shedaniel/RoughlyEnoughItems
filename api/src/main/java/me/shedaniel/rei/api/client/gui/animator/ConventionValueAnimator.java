@@ -21,33 +21,47 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat.wrap;
+package me.shedaniel.rei.api.client.gui.animator;
 
-import lombok.experimental.ExtensionMethod;
-import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
-import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import mezz.jei.api.helpers.IStackHelper;
-import mezz.jei.api.ingredients.subtypes.UidContext;
-import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.ApiStatus;
 
-@ExtensionMethod(JEIPluginDetector.class)
-public enum JEIStackHelper implements IStackHelper {
-    INSTANCE;
+import java.util.Objects;
+import java.util.function.Supplier;
+
+@ApiStatus.Internal
+final class ConventionValueAnimator<T> implements ValueAnimator<T> {
+    private final ValueAnimator<T> parent;
+    private final Supplier<T> convention;
+    private final long duration;
     
-    @Override
-    public boolean isEquivalent(@Nullable ItemStack lhs, @Nullable ItemStack rhs, @NotNull UidContext context) {
-        if (context == UidContext.Ingredient) {
-            return EntryStacks.equalsExact(lhs.unwrapStack(), rhs.unwrapStack());
-        }
-        return EntryStacks.equalsFuzzy(lhs.unwrapStack(), rhs.unwrapStack());
+    ConventionValueAnimator(ValueAnimator<T> parent, Supplier<T> convention, long duration) {
+        this.parent = parent;
+        this.convention = convention;
+        this.duration = duration;
+        setAs(convention.get());
     }
     
     @Override
-    @NotNull
-    public String getUniqueIdentifierForStack(@NotNull ItemStack stack, @NotNull UidContext context) {
-        return String.valueOf(ItemComparatorRegistry.getInstance().hashOf(context.unwrapContext(), stack));
+    public ValueAnimator<T> setTo(T value, long duration) {
+        return parent.setTo(value, duration);
+    }
+    
+    @Override
+    public T target() {
+        return convention.get();
+    }
+    
+    @Override
+    public T value() {
+        return parent.value();
+    }
+    
+    @Override
+    public void update(double delta) {
+        parent.update(delta);
+        T target = target();
+        if (!Objects.equals(parent.target(), target)) {
+            setTo(target, duration);
+        }
     }
 }

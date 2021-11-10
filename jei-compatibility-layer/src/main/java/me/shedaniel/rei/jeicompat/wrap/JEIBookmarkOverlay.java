@@ -23,19 +23,19 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.runtime.IBookmarkOverlay;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapEntryType;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public enum JEIBookmarkOverlay implements IBookmarkOverlay {
     INSTANCE;
     
@@ -48,7 +48,7 @@ public enum JEIBookmarkOverlay implements IBookmarkOverlay {
         if (!favoritesList.isPresent()) return null;
         EntryStack<?> stack = favoritesList.get().getFocusedStack();
         if (stack.isEmpty()) return null;
-        if (stack.getType() != wrapEntryType(ingredientType)) return null;
-        return unwrap(stack.cast());
+        if (stack.getType() != ingredientType.unwrapType()) return null;
+        return stack.<T>cast().jeiValue();
     }
 }

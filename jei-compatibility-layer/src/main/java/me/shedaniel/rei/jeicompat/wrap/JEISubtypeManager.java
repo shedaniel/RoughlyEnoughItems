@@ -23,17 +23,18 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import lombok.experimental.ExtensionMethod;
 import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.subtypes.ISubtypeManager;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapContext;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public enum JEISubtypeManager implements ISubtypeManager {
     INSTANCE;
     
@@ -41,7 +42,7 @@ public enum JEISubtypeManager implements ISubtypeManager {
     @Nullable
     public String getSubtypeInfo(ItemStack itemStack, UidContext context) {
         if (ItemComparatorRegistry.getInstance().containsComparator(itemStack.getItem())) {
-            return String.valueOf(ItemComparatorRegistry.getInstance().hashOf(wrapContext(context), itemStack));
+            return String.valueOf(ItemComparatorRegistry.getInstance().hashOf(context.unwrapContext(), itemStack));
         }
         return null;
     }
@@ -50,7 +51,7 @@ public enum JEISubtypeManager implements ISubtypeManager {
     @Nullable
     public String getSubtypeInfo(FluidStack fluidStack, UidContext context) {
         if (FluidComparatorRegistry.getInstance().containsComparator(fluidStack.getFluid())) {
-            return String.valueOf(FluidComparatorRegistry.getInstance().hashOf(wrapContext(context), FluidStackHooksForge.fromForge(fluidStack)));
+            return String.valueOf(FluidComparatorRegistry.getInstance().hashOf(context.unwrapContext(), FluidStackHooksForge.fromForge(fluidStack)));
         }
         return null;
     }

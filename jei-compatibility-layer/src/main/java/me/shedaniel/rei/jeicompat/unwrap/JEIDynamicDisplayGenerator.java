@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.unwrap;
 
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DynamicDisplayGenerator;
 import me.shedaniel.rei.api.common.display.Display;
@@ -40,8 +41,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public class JEIDynamicDisplayGenerator implements DynamicDisplayGenerator<Display> {
     private final IRecipeManagerPlugin plugin;
     
@@ -50,14 +50,14 @@ public class JEIDynamicDisplayGenerator implements DynamicDisplayGenerator<Displ
     }
     
     private Optional<List<Display>> getDisplays(EntryStack<?> entry, IFocus.Mode mode) {
-        JEIFocus<?> focus = new JEIFocus<>(mode, unwrap(entry));
+        JEIFocus<?> focus = new JEIFocus<>(mode, entry.jeiValue());
         List<ResourceLocation> categoryIds = plugin.getRecipeCategoryUids(focus);
         if (categoryIds.isEmpty()) {
             return Optional.empty();
         }
         List<Display> displays = null;
         for (ResourceLocation categoryId : categoryIds) {
-            IRecipeCategory<Object> category = (IRecipeCategory<Object>) unwrapCategory(CategoryRegistry.getInstance().get(wrapCategoryId(categoryId)).getCategory());
+            IRecipeCategory<Object> category = (IRecipeCategory<Object>) (CategoryRegistry.getInstance().get(categoryId.categoryId()).getCategory().wrapCategory());
             List<Object> recipes = plugin.getRecipes(category, focus);
             if (recipes != null && !recipes.isEmpty()) {
                 if (displays == null) displays = CollectionUtils.flatMap(recipes, JEIPluginDetector::createDisplayFrom);

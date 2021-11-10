@@ -23,21 +23,21 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import net.minecraft.resources.ResourceLocation;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapCategoryId;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public enum JEIRecipeCatalystRegistration implements IRecipeCatalystRegistration {
     INSTANCE;
     
     @Override
     public <T> void addRecipeCatalyst(IIngredientType<T> ingredientType, T ingredient, ResourceLocation... categoryIds) {
         for (ResourceLocation id : categoryIds) {
-            CategoryRegistry.getInstance().addWorkstations(wrapCategoryId(id), wrap(ingredientType, ingredient));
+            CategoryRegistry.getInstance().addWorkstations(id.categoryId(), ingredient.unwrapStack(ingredientType));
         }
     }
 }

@@ -39,12 +39,13 @@ import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
+import me.shedaniel.rei.api.client.gui.animator.NumberAnimator;
+import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.api.common.util.Animator;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
@@ -82,7 +83,7 @@ public class UncertainDisplayViewingScreen extends Screen {
     private Screen parent;
     private Widget slider;
     private boolean showTips;
-    private Animator scroll = new Animator();
+    public NumberAnimator<Double> scroll = ValueAnimator.ofDouble();
     private List<String> allModsUsingJEI = null;
     private boolean jeiEnabled = false;
     

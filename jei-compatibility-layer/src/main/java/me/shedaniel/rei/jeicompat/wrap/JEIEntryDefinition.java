@@ -24,6 +24,7 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import lombok.experimental.ExtensionMethod;
 import dev.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -35,6 +36,7 @@ import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
@@ -52,8 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapContext;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public class JEIEntryDefinition<T> implements EntryDefinition<T> {
     private final EntryType<T> type;
     private final IIngredientType<T> ingredientType;
@@ -107,7 +108,7 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
     
     @Override
     public long hash(EntryStack<T> entry, T value, ComparisonContext context) {
-        return hashCode(ingredientHelper.getUniqueId(value, wrapContext(context)));
+        return hashCode(ingredientHelper.getUniqueId(value, context.wrapContext()));
     }
     
     private static long hashCode(String id) {
@@ -120,7 +121,7 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
     
     @Override
     public boolean equals(T o1, T o2, ComparisonContext context) {
-        return Objects.equals(ingredientHelper.getUniqueId(o1, wrapContext(context)), ingredientHelper.getUniqueId(o2, wrapContext(context)));
+        return Objects.equals(ingredientHelper.getUniqueId(o1, context.wrapContext()), ingredientHelper.getUniqueId(o2, context.wrapContext()));
     }
     
     @Override

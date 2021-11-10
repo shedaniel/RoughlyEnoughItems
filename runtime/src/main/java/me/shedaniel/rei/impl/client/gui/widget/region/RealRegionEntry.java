@@ -23,9 +23,11 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.region;
 
+import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
-import me.shedaniel.rei.api.common.util.Animator;
+import me.shedaniel.rei.api.client.gui.animator.NumberAnimator;
+import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
 import me.shedaniel.rei.impl.client.gui.widget.EntryStacksRegionWidget;
 
 import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.entrySize;
@@ -35,9 +37,8 @@ public class RealRegionEntry<T extends RegionEntry<T>> {
     private T entry;
     private final RegionEntryListEntry<T> widget;
     private boolean hidden;
-    public Animator x = new Animator();
-    public Animator y = new Animator();
-    public Animator size = new Animator();
+    public ValueAnimator<FloatingPoint> pos = ValueAnimator.ofFloatingPoint();
+    public NumberAnimator<Double> size = ValueAnimator.ofDouble();
     
     public RealRegionEntry(EntryStacksRegionWidget<T> region, T entry, int entrySize) {
         this.region = region;
@@ -54,13 +55,12 @@ public class RealRegionEntry<T extends RegionEntry<T>> {
     }
     
     public void update(double delta) {
+        this.pos.update(delta);
         this.size.update(delta);
-        this.x.update(delta);
-        this.y.update(delta);
         this.getWidget().getBounds().width = this.getWidget().getBounds().height = (int) Math.round(this.size.doubleValue() / 100);
         double offsetSize = (entrySize() - this.size.doubleValue() / 100) / 2;
-        this.getWidget().getBounds().x = (int) Math.round(x.doubleValue() + offsetSize);
-        this.getWidget().getBounds().y = (int) Math.round(y.doubleValue() + offsetSize) - (int) region.getScrollAmount();
+        this.getWidget().getBounds().x = (int) Math.round(pos.value().x + offsetSize);
+        this.getWidget().getBounds().y = (int) Math.round(pos.value().y + offsetSize) - (int) region.getScrollAmount();
     }
     
     public RegionEntryListEntry<T> getWidget() {
@@ -80,12 +80,6 @@ public class RealRegionEntry<T extends RegionEntry<T>> {
     }
     
     public void moveTo(boolean animated, int xPos, int yPos) {
-        if (animated && ConfigObject.getInstance().isFavoritesAnimated()) {
-            x.setTo(xPos, 200);
-            y.setTo(yPos, 200);
-        } else {
-            x.setAs(xPos);
-            y.setAs(yPos);
-        }
+        pos.setTo(new FloatingPoint(xPos, yPos), animated && ConfigObject.getInstance().isFavoritesAnimated() ? 200 : -1);
     }
 }

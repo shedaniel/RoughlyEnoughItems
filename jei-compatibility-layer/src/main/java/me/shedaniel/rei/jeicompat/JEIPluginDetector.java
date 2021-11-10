@@ -122,7 +122,7 @@ public class JEIPluginDetector {
         return new UnsupportedOperationException("This operation will not be implemented in REI's JEI Compatibility Layer!");
     }
     
-    public static Renderer wrapDrawable(IDrawable drawable) {
+    public static Renderer unwrapRenderer(IDrawable drawable) {
         if (drawable == null) return emptyRenderer();
         return new AbstractRenderer() {
             @Override
@@ -156,13 +156,13 @@ public class JEIPluginDetector {
             @Override
             @NotNull
             public <T> List<T> getRecipes(@NotNull IRecipeCategory<T> recipeCategory) {
-                CategoryIdentifier<Display> categoryId = wrapCategoryId(recipeCategory.getUid());
+                CategoryIdentifier<Display> categoryId = categoryId(recipeCategory.getUid());
                 return wrapRecipes(categoryId, false);
             }
         };
     }
     
-    public static <T> List<T> wrapRecipes(CategoryIdentifier<?> id, boolean checkVisible) {
+    public static <A extends Display, T> List<T> wrapRecipes(CategoryIdentifier<A> id, boolean checkVisible) {
         return wrapRecipes(CategoryRegistry.getInstance().get(id).getCategory(), DisplayRegistry.getInstance().get(id), checkVisible);
     }
     
@@ -180,7 +180,7 @@ public class JEIPluginDetector {
         }
     }
     
-    public static <A extends Display> Object wrapRecipe(A display) {
+    public static <A extends Display> Object jeiValue(A display) {
         boolean isWrappedCategory = display instanceof JEIWrappedDisplay;
         if (isWrappedCategory) {
             return ((JEIWrappedDisplay<?>) display).getBackingRecipe();
@@ -193,14 +193,14 @@ public class JEIPluginDetector {
         return DisplayRegistry.getInstance().tryFillDisplay(object);
     }
     
-    public static IRecipeCategory<?> unwrapCategory(DisplayCategory<?> category) {
+    public static IRecipeCategory<?> wrapCategory(DisplayCategory<?> category) {
         if (category instanceof JEIWrappedCategory) {
             return ((JEIWrappedCategory<?>) category).getBackingCategory();
         }
         return new JEIUnwrappedCategory<>(category);
     }
     
-    public static <T> T unwrap(EntryStack<T> stack) {
+    public static <T> T jeiValue(EntryStack<T> stack) {
         T value = stack.getValue();
         if (value instanceof dev.architectury.fluid.FluidStack) {
             return (T) FluidStackHooksForge.toForge((dev.architectury.fluid.FluidStack) value);
@@ -212,7 +212,7 @@ public class JEIPluginDetector {
         return context == ComparisonContext.FUZZY ? UidContext.Recipe : UidContext.Ingredient;
     }
     
-    public static ComparisonContext wrapContext(UidContext context) {
+    public static ComparisonContext unwrapContext(UidContext context) {
         return context == UidContext.Recipe ? ComparisonContext.FUZZY : ComparisonContext.EXACT;
     }
     
@@ -232,34 +232,34 @@ public class JEIPluginDetector {
         CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "information"), BuiltinPlugin.INFO);
     }
     
-    public static <T extends Display> CategoryIdentifier<T> wrapCategoryId(ResourceLocation id) {
+    public static <T extends Display> CategoryIdentifier<T> categoryId(ResourceLocation id) {
         CategoryIdentifier<?> identifier = CATEGORY_ID_MAP.get(id);
-        if (identifier != null) return (CategoryIdentifier<T>) identifier;
+        if (identifier != null) return identifier.cast();
         return CategoryIdentifier.of(id);
     }
     
-    public static <T> EntryStack<T> wrap(IIngredientType<T> type, T stack) {
-        return wrap(wrapEntryDefinition(type), stack);
+    public static <T> EntryStack<T> unwrapStack(T stack, IIngredientType<T> type) {
+        return unwrapStack(stack, unwrapType(type).getDefinition());
     }
     
-    public static <T> EntryStack<T> wrap(EntryDefinition<T> definition, T stack) {
+    public static <T> EntryStack<T> unwrapStack(T stack, EntryDefinition<T> definition) {
         if (stack == null) return EntryStack.empty().cast();
         if (definition.getType() == VanillaEntryTypes.FLUID)
             return EntryStack.of(definition, (T) FluidStackHooksForge.fromForge((FluidStack) stack));
         return EntryStack.of(definition, stack);
     }
     
-    public static <T> EntryIngredient wrapList(IIngredientType<T> type, List<T> stack) {
-        return wrapList(wrapEntryDefinition(type), stack);
+    public static <T> EntryIngredient unwrapList(IIngredientType<T> type, List<T> stack) {
+        return unwrapList(unwrapType(type).getDefinition(), stack);
     }
     
-    public static <T> EntryIngredient wrapList(EntryDefinition<T> definition, List<T> stack) {
+    public static <T> EntryIngredient unwrapList(EntryDefinition<T> definition, List<T> stack) {
         if (definition.getType() == VanillaEntryTypes.FLUID)
             return EntryIngredients.of(definition, CollectionUtils.filterAndMap(stack, Predicates.notNull(), s -> (T) FluidStackHooksForge.fromForge((FluidStack) s)));
         return EntryIngredients.of(definition, stack);
     }
     
-    public static <T> EntryType<T> wrapEntryType(IIngredientType<T> type) {
+    public static <T> EntryType<T> unwrapType(IIngredientType<T> type) {
         if (type.getIngredientClass() == FluidStack.class) {
             return VanillaEntryTypes.FLUID.cast();
         }
@@ -271,37 +271,33 @@ public class JEIPluginDetector {
         throw new IllegalArgumentException("Unknown JEI Ingredient Type! " + type.getIngredientClass().getName());
     }
     
-    public static <T> EntryDefinition<T> wrapEntryDefinition(IIngredientType<T> type) {
-        if (type.getIngredientClass() == FluidStack.class) {
-            return VanillaEntryTypes.FLUID.getDefinition().cast();
-        }
-        for (EntryDefinition<?> definition : EntryTypeRegistry.getInstance().values()) {
-            if (Objects.equals(definition.getValueType(), type.getIngredientClass())) {
-                return definition.cast();
-            }
-        }
-        throw new IllegalArgumentException("Unknown JEI Ingredient Type! " + type.getIngredientClass().getName());
+    public static <T> EntryDefinition<T> unwrapDefinition(IIngredientType<T> type) {
+        return unwrapType(type).getDefinition();
     }
     
-    public static EntryStack<?> wrap(Object stack) {
+    public static EntryStack<?> unwrapStack(Object stack) {
         if (stack instanceof JEIInternalsClickedIngredient) {
-            return wrap(((JEIInternalsClickedIngredient<?>) stack).getValue());
+            return unwrapStack(((JEIInternalsClickedIngredient<?>) stack).getValue());
         }
-        return wrap(findEntryDefinition(stack).cast(), stack);
+        return unwrapStack(stack, unwrapDefinition(stack).cast());
     }
     
-    public static EntryDefinition<?> findEntryDefinition(Object stack) {
+    public static EntryType<?> unwrapType(Object stack) {
         if (stack instanceof ItemStack) {
-            return VanillaEntryTypes.ITEM.getDefinition();
+            return VanillaEntryTypes.ITEM;
         } else if (stack instanceof FluidStack) {
-            return VanillaEntryTypes.FLUID.getDefinition();
+            return VanillaEntryTypes.FLUID;
         }
         for (EntryDefinition<?> definition : EntryTypeRegistry.getInstance().values()) {
             if (definition.getValueType().isInstance(stack)) {
-                return definition.cast();
+                return definition.cast().getType();
             }
         }
-        throw new IllegalArgumentException("Failed to find EntryDefinition of " + stack + "!");
+        throw new IllegalArgumentException("Failed to find EntryType of " + stack + "!");
+    }
+    
+    public static EntryDefinition<?> unwrapDefinition(Object stack) {
+        return unwrapType(stack).getDefinition();
     }
     
     public static IRecipeCategoryRegistration wrapCategoryRegistration(CategoryRegistry registry, Consumer<JEIWrappedCategory<?>> added) {
