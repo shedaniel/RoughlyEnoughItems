@@ -29,7 +29,8 @@ import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
-import me.shedaniel.rei.api.common.util.Animator;
+import me.shedaniel.rei.api.client.gui.animator.NumberAnimator;
+import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -40,7 +41,7 @@ import java.util.function.IntSupplier;
 
 @Environment(EnvType.CLIENT)
 public class CompoundFavoriteRenderer extends AbstractRenderer {
-    protected Animator offset = new Animator(0);
+    protected NumberAnimator<Double> offset = ValueAnimator.ofDouble();
     protected Rectangle scissorArea = new Rectangle();
     protected long nextSwitch = -1;
     protected IntFunction<Renderer> renderers;
@@ -114,7 +115,7 @@ public class CompoundFavoriteRenderer extends AbstractRenderer {
             }
             if (Util.getMillis() - nextSwitch > 1000) {
                 nextSwitch = Util.getMillis();
-                offset.setTo(((int) offset.target() + 1) % count, 500);
+                offset.setTo((offset.target().intValue() + 1) % count, 500);
             }
         } else {
             offset.setTo(supplier.getAsInt() % count, 500);

@@ -25,9 +25,12 @@ package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.LazyResettable;
+import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
+import me.shedaniel.rei.api.client.gui.animator.ValueProvider;
 import me.shedaniel.rei.api.client.gui.widgets.Label;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -49,14 +52,23 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class LabelWidget extends Label {
-    
+    private boolean hovered = false;
     private boolean focused = false;
     private boolean clickable = false;
     private int horizontalAlignment = Label.CENTER;
     private boolean hasShadow = true;
     private boolean focusable = true;
-    private int color = REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : -1;
-    private int hoveredColor = REIRuntime.getInstance().isDarkThemeEnabled() ? -1 : 0xFF66FFCC;
+    private ValueProvider<Color> color = ValueAnimator.ofColor()
+            .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : -1), ValueAnimator.typicalTransitionTime());
+    private ValueProvider<Color> hoveredColor = ValueAnimator.ofColor()
+            .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? -1 : 0xFF66FFCC), 50);
+    private final ValueProvider<Color> finalColor = ValueAnimator.ofColor()
+            .withConvention(() -> {
+                if (!hovered) {
+                    return color.value();
+                }
+                return hoveredColor.value();
+            }, ValueAnimator.typicalTransitionTime() / 2);
     private Point point;
     @Nullable private Function<Label, @Nullable String> tooltip;
     @Nullable private Consumer<Label> onClick;
@@ -147,22 +159,24 @@ public final class LabelWidget extends Label {
     
     @Override
     public final int getColor() {
-        return color;
+        return color.value().getColor();
     }
     
     @Override
     public final void setColor(int color) {
-        this.color = color;
+        this.color = ValueProvider.constant(Color.ofTransparent(color));
+        this.finalColor.completeImmediately();
     }
     
     @Override
     public final int getHoveredColor() {
-        return hoveredColor;
+        return hoveredColor.value().getColor();
     }
     
     @Override
     public final void setHoveredColor(int hoveredColor) {
-        this.hoveredColor = hoveredColor;
+        this.hoveredColor = ValueProvider.constant(Color.ofTransparent(hoveredColor));
+        this.finalColor.completeImmediately();
     }
     
     @Override
@@ -204,11 +218,13 @@ public final class LabelWidget extends Label {
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        this.color.update(delta);
+        this.hoveredColor.update(delta);
+        this.finalColor.update(delta);
         if (getOnRender() != null)
             getOnRender().accept(matrices, this);
-        int color = getColor();
-        if (isClickable() && isHovered(mouseX, mouseY))
-            color = getHoveredColor();
+        int color = finalColor.value().getColor();
+        hovered = isClickable() && isHovered(mouseX, mouseY);
         Point pos = getPoint();
         FormattedCharSequence sequence = orderedText.get();
         if (rainbow) sequence = TextTransformations.applyRainbow(sequence, pos.x, pos.y);

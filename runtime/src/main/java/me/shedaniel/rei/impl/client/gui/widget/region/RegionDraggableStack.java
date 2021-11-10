@@ -65,7 +65,7 @@ public class RegionDraggableStack<T extends RegionEntry<T>> implements Draggable
         if (result != DraggedAcceptorResult.CONSUMED) {
             if (!entry.region.listener.removeOnDrag()) {
                 DraggingContext.getInstance().renderBackToPosition(this, DraggingContext.getInstance().getCurrentPosition(),
-                        () -> new Point(entry.x.doubleValue(), entry.y.doubleValue()));
+                        () -> entry.pos.value().getLocation());
             } else if (showcaseWidget != null) {
                 DraggingContext.getInstance().renderBackToPosition(this, DraggingContext.getInstance().getCurrentPosition(),
                         () -> new Point(showcaseWidget.getBounds().x, showcaseWidget.getBounds().y));

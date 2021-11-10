@@ -191,9 +191,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     @Override
     public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<Screen> context, DraggableStack stack) {
         if (innerBounds.contains(context.getCurrentPosition())) {
-            Point currentPosition = context.getCurrentPosition();
-            Rectangle targetBounds = new Rectangle(currentPosition.x, currentPosition.y, 1, 1);
-            context.renderBackToPosition(stack, new Rectangle(currentPosition.x - 8, currentPosition.y - 8, 16, 16), () -> targetBounds);
+            context.renderToVoid(stack);
             return DraggedAcceptorResult.CONSUMED;
         } else {
             return DraggedAcceptorResult.PASS;

@@ -21,38 +21,53 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.category;
+package me.shedaniel.rei.api.client.gui.animator;
 
-import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.util.Identifiable;
-import me.shedaniel.rei.impl.Internals;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.NonExtendable
-public interface CategoryIdentifier<D extends Display> extends Identifiable {
-    static <D extends Display> CategoryIdentifier<D> of(String str) {
-        return Internals.getCategoryIdentifier(str);
+/**
+ * A value provider is used to provide a value for animation.
+ *
+ * @param <T> the type of the value
+ * @see ValueAnimator
+ */
+@ApiStatus.Experimental
+public interface ValueProvider<T> {
+    /**
+     * Returns a constant value provider, which always returns the same value.
+     *
+     * @param value the value to return
+     * @param <T>   the type of the value
+     * @return the constant value provider
+     */
+    static <T> ValueProvider<T> constant(T value) {
+        return new ConstantValueProvider<>(value);
     }
     
-    static <D extends Display> CategoryIdentifier<D> of(String namespace, String path) {
-        return of(namespace + ":" + path);
-    }
+    /**
+     * Returns the current value of the provider.
+     *
+     * @return the current value
+     */
+    T value();
     
-    static <D extends Display> CategoryIdentifier<D> of(ResourceLocation identifier) {
-        return of(identifier.toString());
-    }
+    /**
+     * Returns the target value of the provider.
+     *
+     * @return the target value
+     */
+    T target();
     
-    default String getNamespace() {
-        return getIdentifier().getNamespace();
-    }
+    /**
+     * Completes the animation immediately.
+     * This will set the current value to the target value.
+     */
+    void completeImmediately();
     
-    default String getPath() {
-        return getIdentifier().getPath();
-    }
-    
-    @ApiStatus.NonExtendable
-    default <O extends Display> CategoryIdentifier<O> cast() {
-        return (CategoryIdentifier<O>) this;
-    }
+    /**
+     * Updates the current value of the provider by the tick delta.
+     *
+     * @param delta the tick delta
+     */
+    void update(double delta);
 }

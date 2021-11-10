@@ -30,6 +30,7 @@ import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
+import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -40,9 +41,10 @@ import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.favorites.SystemFavoriteEntryProvider;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
-import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.animator.NumberAnimator;
+import me.shedaniel.rei.api.client.gui.animator.ProgressValueAnimator;
+import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
+import me.shedaniel.rei.api.client.gui.drag.*;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
@@ -50,7 +52,6 @@ import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.Animator;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
@@ -83,7 +84,7 @@ import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.entrySize;
 import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.notSteppingOnExclusionZones;
 
 @ApiStatus.Internal
-public class FavoritesListWidget extends WidgetWithBounds implements DraggableStackProviderWidget, OverlayListWidget, RegionListener<FavoriteEntry> {
+public class FavoritesListWidget extends WidgetWithBounds implements DraggableStackProviderWidget, DraggableStackVisitorWidget, OverlayListWidget, RegionListener<FavoriteEntry> {
     private Rectangle fullBounds;
     private EntryStacksRegionWidget<FavoriteEntry> systemRegion = new EntryStacksRegionWidget<>(new RegionListener<FavoriteEntry>() {
         @Override
@@ -117,6 +118,13 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     private List<FavoriteEntry> lastSystemEntries = new ArrayList<>();
     
     public final AddFavoritePanel favoritePanel = new AddFavoritePanel(this);
+    private final NumberAnimator<Double> trashBoundsHeight = ValueAnimator.ofDouble().withConvention(() -> {
+        if (DraggingContext.getInstance().isDraggingStack() && fullBounds.contains(DraggingContext.getInstance().getCurrentPosition())) {
+            return Math.min(60D, fullBounds.height * 0.15D);
+        }
+        return 0D;
+    }, ValueAnimator.typicalTransitionTime());
+    private final Rectangle trashBounds = new Rectangle();
     public final ToggleAddFavoritePanelButton favoritePanelButton = new ToggleAddFavoritePanelButton(this);
     private List<Widget> children = ImmutableList.of(favoritePanel, favoritePanelButton, systemRegion, region);
     
@@ -202,6 +210,19 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     }
     
     @Override
+    public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<Screen> context, DraggableStack stack) {
+        if (favoritePanel.bounds.contains(context.getCurrentPosition()) || trashBounds.contains(context.getCurrentPosition())) {
+            context.renderToVoid(stack);
+            return DraggedAcceptorResult.CONSUMED;
+        }
+        return Stream.of(region, systemRegion)
+                .map(visitor -> visitor.acceptDraggedStackWithResult(context, stack))
+                .filter(result -> result != DraggedAcceptorResult.PASS)
+                .findFirst()
+                .orElse(DraggedAcceptorResult.PASS);
+    }
+    
+    @Override
     public EntryStack<?> getFocusedStack() {
         Point mouse = PointHelper.ofMouse();
         EntryStack<?> stack = region.getFocusedStack();
@@ -232,6 +253,29 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         if (fullBounds.isEmpty())
             return;
         
+        this.trashBoundsHeight.update(delta);
+        double trashBoundsHeight = this.trashBoundsHeight.value();
+        if (trashBoundsHeight > 0) {
+            double trashBoundsHeightTarget = Math.min(150D, fullBounds.height * 0.15D);
+            double progress = Math.pow(Mth.clamp(trashBoundsHeight / trashBoundsHeightTarget, 0, 1), 7);
+            int y = this.fullBounds.getMaxY() - 4 - favoritePanel.getBounds().height;
+            trashBounds.setBounds(this.fullBounds.x + 4, (int) Math.round(y - trashBoundsHeight), this.fullBounds.width - 8, (int) Math.round(trashBoundsHeight - 4));
+            int alpha = 0x12 + (int) (0x22 * progress * (Mth.cos((float) (System.currentTimeMillis() % 2000 / 1000F * Math.PI)) + 1) / 2);
+            fillGradient(matrices, this.trashBounds.x, this.trashBounds.y, this.trashBounds.getMaxX(), this.trashBounds.getMaxY(), 0xFFFFFF | (alpha << 24), 0xFFFFFF | (alpha << 24));
+            int lineColor = (int) (0x60 * progress) << 24 | 0xFFFFFF;
+            fillGradient(matrices, this.trashBounds.x, this.trashBounds.y, this.trashBounds.getMaxX(), this.trashBounds.y + 1, lineColor, lineColor);
+            fillGradient(matrices, this.trashBounds.x, this.trashBounds.getMaxY() - 1, this.trashBounds.getMaxX(), this.trashBounds.getMaxY(), lineColor, lineColor);
+            
+            fillGradient(matrices, this.trashBounds.x, this.trashBounds.y + 1, this.trashBounds.x + 1, this.trashBounds.getMaxY() - 1, lineColor, lineColor);
+            fillGradient(matrices, this.trashBounds.getMaxX() - 1, this.trashBounds.y + 1, this.trashBounds.getMaxX(), this.trashBounds.getMaxY() - 1, lineColor, lineColor);
+            
+            Component text = new TranslatableComponent("text.rei.dispose_here");
+            if (0xAA * progress > 0x4) {
+                font.draw(matrices, text, this.trashBounds.getCenterX() - font.width(text) / 2, this.trashBounds.getCenterY() - 4F, (int) (0xAA * progress) << 24 | 0xFFFFFF);
+            }
+        } else {
+            trashBounds.setBounds(0, 0, 0, 0);
+        }
         updateSystemRegion();
 //        systemRegion.getBounds().setBounds(this.fullBounds.x + 1, this.fullBounds.y - 1 + 14, this.fullBounds.width - 1, Math.max(1, systemRegion.scrolling.getMaxScrollHeight()));
         systemRegion.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + 1, this.fullBounds.width, Math.max(1, systemRegion.scrolling.getMaxScrollHeight()));
@@ -245,8 +289,9 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             systemHeight += 4;
         }
         if (favoritePanel.getBounds().height > 20)
-            region.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + systemHeight, this.fullBounds.width, this.fullBounds.height - systemHeight - (this.fullBounds.getMaxY() - this.favoritePanel.bounds.y) - 4);
-        else region.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + systemHeight, this.fullBounds.width, this.fullBounds.height - systemHeight);
+            region.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + systemHeight, this.fullBounds.width, this.fullBounds.height - systemHeight - (this.fullBounds.getMaxY() - this.favoritePanel.bounds.y) - 4 - (trashBoundsHeight <= 0 ? 0 : trashBoundsHeight));
+        else
+            region.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + systemHeight, this.fullBounds.width, this.fullBounds.height - systemHeight - (trashBoundsHeight <= 0 ? 0 : trashBoundsHeight + 24));
         systemRegion.render(matrices, mouseX, mouseY, delta);
         region.render(matrices, mouseX, mouseY, delta);
         renderAddFavorite(matrices, mouseX, mouseY, delta);
@@ -356,7 +401,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         
         @Override
         protected void onClick() {
-            widget.favoritePanel.expendState.setTo(widget.favoritePanel.expendState.target() == 1 ? 0 : 1, 1500);
+            widget.favoritePanel.expendState.setTo(!widget.favoritePanel.expendState.target(), 1500);
             widget.favoritePanel.resetRows();
         }
         
@@ -372,20 +417,20 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         
         @Override
         protected boolean isAvailable(int mouseX, int mouseY) {
-            float expendProgress = widget.favoritePanel.expendState.floatValue();
-            return widget.fullBounds.contains(mouseX, mouseY) || REIRuntime.getInstance().getOverlay().orElseThrow().getEntryList().containsMouse(new Point(mouseX, mouseY)) || expendProgress > .1f;
+            boolean expended = widget.favoritePanel.expendState.value();
+            return widget.fullBounds.contains(mouseX, mouseY) || REIRuntime.getInstance().getOverlay().orElseThrow().getEntryList().containsMouse(new Point(mouseX, mouseY)) || expended;
         }
         
         @Override
         protected void renderButtonText(PoseStack matrices, MultiBufferSource.BufferSource bufferSource) {
-            float expendProgress = widget.favoritePanel.expendState.floatValue();
+            float expendProgress = (float) widget.favoritePanel.expendState.progress();
             if (expendProgress < .9f) {
                 int textColor = 0xFFFFFF | (Math.round(0xFF * alpha.floatValue() * (1 - expendProgress)) << 24);
                 font.drawInBatch("+", bounds.getCenterX() - 2.5f, bounds.getCenterY() - 3, textColor, false, matrices.last().pose(), bufferSource, false, 0, 15728880);
             }
             if (expendProgress > .1f) {
                 int textColor = 0xFFFFFF | (Math.round(0xFF * alpha.floatValue() * expendProgress) << 24);
-                font.drawInBatch("-", bounds.getCenterX() - 2.5f, bounds.getCenterY() - 3, textColor, false, matrices.last().pose(), bufferSource, false, 0, 15728880);
+                font.drawInBatch("+", bounds.getCenterX() - 2.5f, bounds.getCenterY() - 3, textColor, false, matrices.last().pose(), bufferSource, false, 0, 15728880);
             }
         }
     }
@@ -393,7 +438,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     public abstract static class FadingFavoritePanelButton extends WidgetWithBounds {
         protected final FavoritesListWidget widget;
         public boolean wasClicked = false;
-        public final Animator alpha = new Animator(0);
+        public final NumberAnimator<Double> alpha = ValueAnimator.ofDouble(0);
         
         public final Rectangle bounds = new Rectangle();
         
@@ -469,7 +514,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     
     public static class AddFavoritePanel extends WidgetWithBounds {
         private final FavoritesListWidget widget;
-        public final Animator expendState = new Animator(0);
+        public final ProgressValueAnimator<Boolean> expendState = ValueAnimator.ofBoolean(0.1, false);
         private final Rectangle bounds = new Rectangle();
         private final Rectangle scrollBounds = new Rectangle();
         private final LazyResettable<List<Row>> rows = new LazyResettable<>(() -> {
@@ -507,11 +552,11 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             this.bounds.setBounds(updatePanelArea(widget.fullBounds));
             this.scrollBounds.setBounds(bounds.x + 4, bounds.y + 4, bounds.width - 8, bounds.height - 20);
             this.expendState.update(delta);
-            int buttonColor = 0xFFFFFF | (Math.round(0x34 * Math.min(expendState.floatValue() * 2, 1)) << 24);
+            int buttonColor = 0xFFFFFF | (Math.round(0x34 * Math.min((float) expendState.progress() * 2, 1)) << 24);
             fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), buttonColor, buttonColor);
             scroller.updatePosition(delta);
             
-            if (expendState.floatValue() > 0.1f) {
+            if (expendState.progress() > 0.1f) {
                 ScissorsHandler.INSTANCE.scissor(scrollBounds);
                 matrices.pushPose();
                 matrices.translate(0, scroller.scrollAmount, 0);
@@ -526,8 +571,8 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         }
         
         private Rectangle updatePanelArea(Rectangle fullArea) {
-            int currentWidth = 16 + Math.round(Math.min(expendState.floatValue(), 1) * (fullArea.getWidth() - 16 - 8));
-            int currentHeight = 16 + Math.round(expendState.floatValue() * (fullArea.getHeight() * 0.4f - 16 - 8));
+            int currentWidth = 16 + Math.round(Math.min((float) expendState.progress(), 1) * (fullArea.getWidth() - 16 - 8));
+            int currentHeight = 16 + Math.round((float) expendState.progress() * (fullArea.getHeight() * 0.4f - 16 - 8));
             return new Rectangle(fullArea.x + 4, fullArea.getMaxY() - currentHeight - 4, currentWidth, currentHeight);
         }
         
@@ -649,9 +694,8 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             }
             
             private class SectionFavoriteWidget extends EntryListEntryWidget {
-                private Animator x = new Animator();
-                private Animator y = new Animator();
-                private Animator size = new Animator();
+                private ValueAnimator<FloatingPoint> pos = ValueAnimator.ofFloatingPoint();
+                private NumberAnimator<Double> size = ValueAnimator.ofDouble();
                 private FavoriteEntry entry;
                 
                 protected SectionFavoriteWidget(Point point, int entrySize, FavoriteEntry entry) {
@@ -662,23 +706,16 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 }
                 
                 public void moveTo(boolean animated, int xPos, int yPos) {
-                    if (animated) {
-                        x.setTo(xPos, 200);
-                        y.setTo(yPos, 200);
-                    } else {
-                        x.setAs(xPos);
-                        y.setAs(yPos);
-                    }
+                    pos.setTo(new FloatingPoint(xPos, yPos), animated ? 200 : -1);
                 }
                 
                 public void update(float delta) {
+                    this.pos.update(delta);
                     this.size.update(delta);
-                    this.x.update(delta);
-                    this.y.update(delta);
                     this.getBounds().width = this.getBounds().height = (int) Math.round(this.size.doubleValue() / 100);
                     double offsetSize = (entrySize() - this.size.doubleValue() / 100) / 2;
-                    this.getBounds().x = (int) Math.round(x.doubleValue() + offsetSize);
-                    this.getBounds().y = (int) Math.round(y.doubleValue() + offsetSize) + lastY;
+                    this.getBounds().x = (int) Math.round(pos.value().x + offsetSize);
+                    this.getBounds().y = (int) Math.round(pos.value().y + offsetSize) + lastY;
                 }
                 
                 @Override

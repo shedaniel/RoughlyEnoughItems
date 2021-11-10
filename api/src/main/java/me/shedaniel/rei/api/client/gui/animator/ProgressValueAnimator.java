@@ -21,38 +21,26 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.category;
+package me.shedaniel.rei.api.client.gui.animator;
 
-import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.util.Identifiable;
-import me.shedaniel.rei.impl.Internals;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.NonExtendable
-public interface CategoryIdentifier<D extends Display> extends Identifiable {
-    static <D extends Display> CategoryIdentifier<D> of(String str) {
-        return Internals.getCategoryIdentifier(str);
+import java.util.function.Function;
+
+@ApiStatus.Experimental
+public interface ProgressValueAnimator<T> extends ValueAnimator<T> {
+    double progress();
+    
+    @Override
+    default ProgressValueAnimator<T> setAs(T value) {
+        ValueAnimator.super.setAs(value);
+        return this;
     }
     
-    static <D extends Display> CategoryIdentifier<D> of(String namespace, String path) {
-        return of(namespace + ":" + path);
-    }
+    @Override
+    ProgressValueAnimator<T> setTo(T value, long duration);
     
-    static <D extends Display> CategoryIdentifier<D> of(ResourceLocation identifier) {
-        return of(identifier.toString());
-    }
-    
-    default String getNamespace() {
-        return getIdentifier().getNamespace();
-    }
-    
-    default String getPath() {
-        return getIdentifier().getPath();
-    }
-    
-    @ApiStatus.NonExtendable
-    default <O extends Display> CategoryIdentifier<O> cast() {
-        return (CategoryIdentifier<O>) this;
+    static <R> ProgressValueAnimator<R> mapProgress(NumberAnimator<?> parent, Function<Double, R> converter, Function<R, Double> backwardsConverter) {
+        return new MappingProgressValueAnimator<>(parent.asDouble(), converter, backwardsConverter);
     }
 }

@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.client.gui.widget.region;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector4f;
+import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -70,7 +71,9 @@ public class RegionEntryListEntry<T extends RegionEntry<T>> extends EntryListEnt
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         Optional<ScreenOverlay> overlayOptional = REIRuntime.getInstance().getOverlay();
         Optional<Supplier<Collection<FavoriteMenuEntry>>> menuEntries = entry.getEntry().getMenuEntries();
-        if (Math.abs(entry.x.doubleValue() - entry.x.target()) < 1 && Math.abs(entry.y.doubleValue() - entry.y.target()) < 1 && overlayOptional.isPresent() && menuEntries.isPresent()) {
+        FloatingPoint value = entry.pos.value();
+        FloatingPoint target = entry.pos.target();
+        if (Math.abs(value.x - target.x) < 1 && Math.abs(value.y - target.y) < 1 && overlayOptional.isPresent() && menuEntries.isPresent()) {
             ScreenOverlayImpl overlay = (ScreenOverlayImpl) overlayOptional.get();
             UUID uuid = entry.getEntry().getUuid();
             

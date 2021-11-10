@@ -21,38 +21,33 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.category;
+package me.shedaniel.rei.api.client.gui.animator;
 
-import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.util.Identifiable;
-import me.shedaniel.rei.impl.Internals;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.NonExtendable
-public interface CategoryIdentifier<D extends Display> extends Identifiable {
-    static <D extends Display> CategoryIdentifier<D> of(String str) {
-        return Internals.getCategoryIdentifier(str);
+@ApiStatus.Internal
+final class ConstantValueProvider<T> implements ValueProvider<T> {
+    private final T value;
+    
+    public ConstantValueProvider(T value) {
+        this.value = value;
     }
     
-    static <D extends Display> CategoryIdentifier<D> of(String namespace, String path) {
-        return of(namespace + ":" + path);
+    @Override
+    public T value() {
+        return value;
     }
     
-    static <D extends Display> CategoryIdentifier<D> of(ResourceLocation identifier) {
-        return of(identifier.toString());
+    @Override
+    public T target() {
+        return value;
     }
     
-    default String getNamespace() {
-        return getIdentifier().getNamespace();
+    @Override
+    public void completeImmediately() {
     }
     
-    default String getPath() {
-        return getIdentifier().getPath();
-    }
-    
-    @ApiStatus.NonExtendable
-    default <O extends Display> CategoryIdentifier<O> cast() {
-        return (CategoryIdentifier<O>) this;
+    @Override
+    public void update(double delta) {
     }
 }
