@@ -21,38 +21,47 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.category;
+package me.shedaniel.rei.api.client.gui.animator;
 
-import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.util.Identifiable;
-import me.shedaniel.rei.impl.Internals;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.NonExtendable
-public interface CategoryIdentifier<D extends Display> extends Identifiable {
-    static <D extends Display> CategoryIdentifier<D> of(String str) {
-        return Internals.getCategoryIdentifier(str);
+import java.util.Objects;
+import java.util.function.Supplier;
+
+@ApiStatus.Internal
+final class ConventionValueAnimator<T> implements ValueAnimator<T> {
+    private final ValueAnimator<T> parent;
+    private final Supplier<T> convention;
+    private final long duration;
+    
+    ConventionValueAnimator(ValueAnimator<T> parent, Supplier<T> convention, long duration) {
+        this.parent = parent;
+        this.convention = convention;
+        this.duration = duration;
+        setAs(convention.get());
     }
     
-    static <D extends Display> CategoryIdentifier<D> of(String namespace, String path) {
-        return of(namespace + ":" + path);
+    @Override
+    public ValueAnimator<T> setTo(T value, long duration) {
+        return parent.setTo(value, duration);
     }
     
-    static <D extends Display> CategoryIdentifier<D> of(ResourceLocation identifier) {
-        return of(identifier.toString());
+    @Override
+    public T target() {
+        return convention.get();
     }
     
-    default String getNamespace() {
-        return getIdentifier().getNamespace();
+    @Override
+    public T value() {
+        return parent.value();
     }
     
-    default String getPath() {
-        return getIdentifier().getPath();
-    }
-    
-    @ApiStatus.NonExtendable
-    default <O extends Display> CategoryIdentifier<O> cast() {
-        return (CategoryIdentifier<O>) this;
+    @Override
+    public void update(double delta) {
+        parent.update(delta);
+        T target = target();
+        if (!Objects.equals(parent.target(), target)) {
+            setTo(target, duration);
+        }
     }
 }

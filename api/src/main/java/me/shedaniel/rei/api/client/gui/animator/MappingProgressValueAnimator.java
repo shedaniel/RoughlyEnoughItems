@@ -21,38 +21,48 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.category;
+package me.shedaniel.rei.api.client.gui.animator;
 
-import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.util.Identifiable;
-import me.shedaniel.rei.impl.Internals;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.NonExtendable
-public interface CategoryIdentifier<D extends Display> extends Identifiable {
-    static <D extends Display> CategoryIdentifier<D> of(String str) {
-        return Internals.getCategoryIdentifier(str);
+import java.util.function.Function;
+
+@ApiStatus.Internal
+final class MappingProgressValueAnimator<R> implements ProgressValueAnimator<R> {
+    private final ValueAnimator<Double> parent;
+    private final Function<Double, R> converter;
+    private final Function<R, Double> backwardsConverter;
+    
+    MappingProgressValueAnimator(ValueAnimator<Double> parent, Function<Double, R> converter, Function<R, Double> backwardsConverter) {
+        this.parent = parent;
+        this.converter = converter;
+        this.backwardsConverter = backwardsConverter;
     }
     
-    static <D extends Display> CategoryIdentifier<D> of(String namespace, String path) {
-        return of(namespace + ":" + path);
+    @Override
+    public ProgressValueAnimator<R> setTo(R value, long duration) {
+        parent.setTo(backwardsConverter.apply(value), duration);
+        return this;
     }
     
-    static <D extends Display> CategoryIdentifier<D> of(ResourceLocation identifier) {
-        return of(identifier.toString());
+    @Override
+    public R target() {
+        return converter.apply(parent.target());
     }
     
-    default String getNamespace() {
-        return getIdentifier().getNamespace();
+    @Override
+    public R value() {
+        return converter.apply(parent.value());
     }
     
-    default String getPath() {
-        return getIdentifier().getPath();
+    @Override
+    public void update(double delta) {
+        parent.update(delta);
     }
     
-    @ApiStatus.NonExtendable
-    default <O extends Display> CategoryIdentifier<O> cast() {
-        return (CategoryIdentifier<O>) this;
+    
+    @Override
+    public double progress() {
+        return parent.value() / 100;
     }
 }

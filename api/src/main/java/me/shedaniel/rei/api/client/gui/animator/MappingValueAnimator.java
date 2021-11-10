@@ -21,38 +21,42 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.category;
+package me.shedaniel.rei.api.client.gui.animator;
 
-import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.util.Identifiable;
-import me.shedaniel.rei.impl.Internals;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.NonExtendable
-public interface CategoryIdentifier<D extends Display> extends Identifiable {
-    static <D extends Display> CategoryIdentifier<D> of(String str) {
-        return Internals.getCategoryIdentifier(str);
+import java.util.function.Function;
+
+@ApiStatus.Internal
+final class MappingValueAnimator<T, R> implements ValueAnimator<R> {
+    private final ValueAnimator<T> parent;
+    private final Function<T, R> converter;
+    private final Function<R, T> backwardsConverter;
+    
+    MappingValueAnimator(ValueAnimator<T> parent, Function<T, R> converter, Function<R, T> backwardsConverter) {
+        this.parent = parent;
+        this.converter = converter;
+        this.backwardsConverter = backwardsConverter;
     }
     
-    static <D extends Display> CategoryIdentifier<D> of(String namespace, String path) {
-        return of(namespace + ":" + path);
+    @Override
+    public ValueAnimator<R> setTo(R value, long duration) {
+        parent.setTo(backwardsConverter.apply(value), duration);
+        return this;
     }
     
-    static <D extends Display> CategoryIdentifier<D> of(ResourceLocation identifier) {
-        return of(identifier.toString());
+    @Override
+    public R target() {
+        return converter.apply(parent.target());
     }
     
-    default String getNamespace() {
-        return getIdentifier().getNamespace();
+    @Override
+    public R value() {
+        return converter.apply(parent.value());
     }
     
-    default String getPath() {
-        return getIdentifier().getPath();
-    }
-    
-    @ApiStatus.NonExtendable
-    default <O extends Display> CategoryIdentifier<O> cast() {
-        return (CategoryIdentifier<O>) this;
+    @Override
+    public void update(double delta) {
+        parent.update(delta);
     }
 }

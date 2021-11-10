@@ -21,38 +21,50 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.category;
+package me.shedaniel.rei.api.client.gui.animator;
 
-import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.util.Identifiable;
-import me.shedaniel.rei.impl.Internals;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.NonExtendable
-public interface CategoryIdentifier<D extends Display> extends Identifiable {
-    static <D extends Display> CategoryIdentifier<D> of(String str) {
-        return Internals.getCategoryIdentifier(str);
+@ApiStatus.Internal
+abstract class ValueAnimatorAsNumberAnimator<T extends Number> extends NumberAnimator<T> {
+    private final ValueAnimator<T> animator;
+    
+    ValueAnimatorAsNumberAnimator(ValueAnimator<T> animator) {
+        this.animator = animator;
     }
     
-    static <D extends Display> CategoryIdentifier<D> of(String namespace, String path) {
-        return of(namespace + ":" + path);
+    @Override
+    public int intValue() {
+        return animator.value().intValue();
     }
     
-    static <D extends Display> CategoryIdentifier<D> of(ResourceLocation identifier) {
-        return of(identifier.toString());
+    @Override
+    public long longValue() {
+        return animator.value().longValue();
     }
     
-    default String getNamespace() {
-        return getIdentifier().getNamespace();
+    @Override
+    public float floatValue() {
+        return animator.value().floatValue();
     }
     
-    default String getPath() {
-        return getIdentifier().getPath();
+    @Override
+    public double doubleValue() {
+        return animator.value().doubleValue();
     }
     
-    @ApiStatus.NonExtendable
-    default <O extends Display> CategoryIdentifier<O> cast() {
-        return (CategoryIdentifier<O>) this;
+    @Override
+    public T value() {
+        return animator.value();
+    }
+    
+    @Override
+    public T target() {
+        return animator.target();
+    }
+    
+    @Override
+    public void update(double delta) {
+        animator.update(delta);
     }
 }

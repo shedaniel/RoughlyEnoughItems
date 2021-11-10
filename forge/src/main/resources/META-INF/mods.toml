@@ -31,6 +31,6 @@ side = "BOTH"
 [[dependencies.roughlyenoughitems]]
 modId = "cloth-config"
 mandatory = true
-versionRange = "[4.11.18,)"
+versionRange = "[4.12,)"
 ordering = "NONE"
 side = "BOTH"

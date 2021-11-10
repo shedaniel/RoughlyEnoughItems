@@ -32,6 +32,7 @@ import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
 import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
+import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -424,7 +425,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     
     public boolean drop(RealRegionEntry<T> entry, double x, double y) {
         boolean contains = bounds.contains(x, y);
-        int newIndex = contains ? getReleaseIndex(new Point(x, y)) : Math.max(0, Iterables.indexOf(entries.values(), e -> e == entry));
+        int newIndex = contains ? getReleaseIndex(new Point(x, y)) : Math.max(-1, Iterables.indexOf(entries.values(), e -> e == entry));
         return drop(entry, x, y, newIndex < 0 ? entries.size() : newIndex);
     }
     
@@ -434,8 +435,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
             return false;
         }
         
-        entry.x.setAs(x - 8);
-        entry.y.setAs(y - 8);
+        entry.pos.setAs(new FloatingPoint(x - 8, y - 8));
         
         if (entries.size() <= newIndex) {
             RealRegionEntry<T> remove = this.entries.remove(entry.hashIgnoreAmount());

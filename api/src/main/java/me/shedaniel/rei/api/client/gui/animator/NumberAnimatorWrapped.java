@@ -21,38 +21,60 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.category;
+package me.shedaniel.rei.api.client.gui.animator;
 
-import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.util.Identifiable;
-import me.shedaniel.rei.impl.Internals;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.NonExtendable
-public interface CategoryIdentifier<D extends Display> extends Identifiable {
-    static <D extends Display> CategoryIdentifier<D> of(String str) {
-        return Internals.getCategoryIdentifier(str);
+import java.util.function.Function;
+
+@ApiStatus.Internal
+final class NumberAnimatorWrapped<T extends Number, R extends Number> extends NumberAnimator<T> {
+    private final NumberAnimator<R> parent;
+    private final Function<R, T> converter;
+    
+    NumberAnimatorWrapped(NumberAnimator<R> parent, Function<R, T> converter) {
+        this.parent = parent;
+        this.converter = converter;
     }
     
-    static <D extends Display> CategoryIdentifier<D> of(String namespace, String path) {
-        return of(namespace + ":" + path);
+    @Override
+    public NumberAnimator<T> setToNumber(Number value, long duration) {
+        this.parent.setToNumber(value, duration);
+        return this;
     }
     
-    static <D extends Display> CategoryIdentifier<D> of(ResourceLocation identifier) {
-        return of(identifier.toString());
+    @Override
+    public T target() {
+        return converter.apply(parent.target());
     }
     
-    default String getNamespace() {
-        return getIdentifier().getNamespace();
+    @Override
+    public T value() {
+        return converter.apply(parent.value());
     }
     
-    default String getPath() {
-        return getIdentifier().getPath();
+    @Override
+    public void update(double delta) {
+        parent.update(delta);
     }
     
-    @ApiStatus.NonExtendable
-    default <O extends Display> CategoryIdentifier<O> cast() {
-        return (CategoryIdentifier<O>) this;
+    @Override
+    public int intValue() {
+        return parent.intValue();
+    }
+    
+    @Override
+    public long longValue() {
+        return parent.longValue();
+    }
+    
+    @Override
+    public float floatValue() {
+        return parent.floatValue();
+    }
+    
+    @Override
+    public double doubleValue() {
+        return parent.doubleValue();
     }
 }
