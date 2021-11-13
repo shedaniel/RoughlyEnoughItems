@@ -29,6 +29,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fmllegacy.DatagenModLoader;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -50,8 +51,10 @@ public class RoughlyEnoughItemsForge {
     public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
     
     public RoughlyEnoughItemsForge() {
-        RoughlyEnoughItemsInitializer.onInitialize();
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> RoughlyEnoughItemsInitializer::onInitializeClient);
+        if (!DatagenModLoader.isRunningDataGen()) {
+            RoughlyEnoughItemsInitializer.onInitialize();
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> RoughlyEnoughItemsInitializer::onInitializeClient);
+        }
     }
     
     public static <A, T> void scanAnnotation(Class<A> clazz, Predicate<Class<T>> predicate, TriConsumer<List<String>, Supplier<T>, Class<T>> consumer) {

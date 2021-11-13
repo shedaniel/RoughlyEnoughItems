@@ -26,13 +26,20 @@ package me.shedaniel.rei.api.client.gui.drag;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import org.jetbrains.annotations.ApiStatus;
 
 public interface DraggableStack {
     EntryStack<?> getStack();
     
     void drag();
     
-    void release(boolean accepted);
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    default void release(boolean consumed) {}
+    
+    default void release(DraggedAcceptorResult result) {
+        release(result != DraggedAcceptorResult.PASS);
+    }
     
     default void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         getStack().render(matrices, bounds, mouseX, mouseY, delta);

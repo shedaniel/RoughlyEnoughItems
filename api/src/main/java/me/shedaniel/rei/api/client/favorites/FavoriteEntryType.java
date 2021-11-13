@@ -76,7 +76,8 @@ public interface FavoriteEntryType<T extends FavoriteEntry> {
     interface Registry extends Reloadable<REIClientPlugin> {
         void register(ResourceLocation id, FavoriteEntryType<?> type);
         
-        @Nullable <A extends FavoriteEntry> FavoriteEntryType<A> get(ResourceLocation id);
+        @Nullable
+        <A extends FavoriteEntry> FavoriteEntryType<A> get(ResourceLocation id);
         
         @Nullable
         ResourceLocation getId(FavoriteEntryType<?> type);
@@ -84,6 +85,8 @@ public interface FavoriteEntryType<T extends FavoriteEntry> {
         Section getOrCrateSection(Component text);
         
         Iterable<Section> sections();
+        
+        <A extends FavoriteEntry> void registerSystemFavorites(SystemFavoriteEntryProvider<A> provider);
     }
     
     @ApiStatus.NonExtendable

@@ -113,7 +113,7 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
             completableFutures.add(CompletableFuture.supplyAsync(() -> {
                 List<EntryStack<?>> output = Lists.newArrayList();
                 for (EntryStack<?> stack : partitionStacks) {
-                    if (filter.test(stack)) {
+                    if (stack != null && filter.test(stack)) {
                         output.add(stack);
                     }
                 }

@@ -29,6 +29,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -51,14 +52,14 @@ public interface DraggableStackVisitor<T extends Screen> extends Comparable<Drag
             }
             
             @Override
-            public boolean acceptDraggedStack(DraggingContext<T> context, DraggableStack stack) {
+            public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<T> context, DraggableStack stack) {
                 for (DraggableStackVisitor<T> visitor : visitors.get()) {
                     if (visitor.isHandingScreen(context.getScreen())) {
-                        boolean visited = visitor.acceptDraggedStack(context, stack);
-                        if (visited) return true;
+                        DraggedAcceptorResult result = Objects.requireNonNull(visitor.acceptDraggedStackWithResult(context, stack));
+                        if (result != DraggedAcceptorResult.PASS) return result;
                     }
                 }
-                return false;
+                return DraggedAcceptorResult.PASS;
             }
             
             @Override
@@ -84,6 +85,8 @@ public interface DraggableStackVisitor<T extends Screen> extends Comparable<Drag
      * @param stack   the stack being dragged
      * @return whether the stack is accepted by the visitor
      */
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
     default boolean acceptDraggedStack(DraggingContext<T> context, DraggableStack stack) {
         Optional<Acceptor> acceptor = visitDraggedStack(context, stack);
         if (acceptor.isPresent()) {
@@ -92,6 +95,18 @@ public interface DraggableStackVisitor<T extends Screen> extends Comparable<Drag
         } else {
             return false;
         }
+    }
+    
+    /**
+     * Accepts a dragged stack, implementations of this function should check if the {@code context} is within
+     * boundaries of the accepting boundaries.
+     *
+     * @param context the context of the current dragged stack on the overlay
+     * @param stack   the stack being dragged
+     * @return the result of the visitor
+     */
+    default DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<T> context, DraggableStack stack) {
+        return acceptDraggedStack(context, stack) ? DraggedAcceptorResult.CONSUMED : DraggedAcceptorResult.PASS;
     }
     
     /**

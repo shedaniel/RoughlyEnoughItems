@@ -103,7 +103,7 @@ public class AsyncSearchManager {
                         futures.add(CompletableFuture.supplyAsync(() -> {
                             List<EntryStack<?>> filtered = Lists.newArrayList();
                             for (EntryStack<?> stack : partitionStacks) {
-                                if (matches(stack) && additionalPredicate.test(stack)) {
+                                if (stack != null && matches(stack) && additionalPredicate.test(stack)) {
                                     filtered.add(transformer.apply(stack));
                                 }
                             }

@@ -112,7 +112,7 @@ public final class InternalWidgets {
                             if (result.isSuccessful()) {
                                 button.setEnabled(true);
                                 error = null;
-                                color = 0;
+                                color = result.getColor();
                                 redSlots = null;
                             } else if (result.isApplicable()) {
                                 if (error == null) {
@@ -183,7 +183,7 @@ public final class InternalWidgets {
                         if (!locations.isEmpty()) {
                             str.add(new TextComponent(" "));
                             for (ResourceLocation location : locations) {
-                                String t = I18n.get("text.rei.recipe_id", "", new TextComponent(location.toString()).withStyle(ChatFormatting.GRAY));
+                                String t = I18n.get("text.rei.recipe_id", "", location.toString());
                                 if (t.startsWith("\n")) {
                                     t = t.substring("\n".length());
                                 }

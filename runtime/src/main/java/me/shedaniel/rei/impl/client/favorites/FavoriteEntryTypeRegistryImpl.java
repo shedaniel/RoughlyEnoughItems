@@ -25,15 +25,20 @@ package me.shedaniel.rei.impl.client.favorites;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.client.favorites.SystemFavoriteEntryProvider;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.apache.commons.lang3.mutable.MutableLong;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,6 +50,7 @@ import java.util.Map;
 @ApiStatus.Internal
 public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry {
     private final BiMap<ResourceLocation, FavoriteEntryType<?>> registry = HashBiMap.create();
+    private final List<Triple<SystemFavoriteEntryProvider<?>, MutableLong, List<FavoriteEntry>>> systemFavorites = Lists.newArrayList();
     private final Map<Component, FavoriteEntryType.Section> sections = Maps.newLinkedHashMap();
     
     @Override
@@ -84,8 +90,18 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
     }
     
     @Override
+    public <A extends FavoriteEntry> void registerSystemFavorites(SystemFavoriteEntryProvider<A> provider) {
+        this.systemFavorites.add(Triple.of(provider, new MutableLong(-1), new ArrayList<>()));
+    }
+    
+    public List<Triple<SystemFavoriteEntryProvider<?>, MutableLong, List<FavoriteEntry>>> getSystemProviders() {
+        return this.systemFavorites;
+    }
+    
+    @Override
     public void startReload() {
         this.registry.clear();
+        this.systemFavorites.clear();
         this.sections.clear();
     }
     

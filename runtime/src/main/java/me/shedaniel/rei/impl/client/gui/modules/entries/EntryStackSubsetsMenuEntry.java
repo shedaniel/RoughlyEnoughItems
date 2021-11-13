@@ -30,9 +30,9 @@ import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
@@ -96,11 +96,11 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
                 clickedLast = true;
                 if (!getParent().scrolling.draggingScrollBar) {
                     minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                    List<EntryStack<?>> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
+                    List<EntryStackProvider<?>> filteredStacks = ConfigObject.getInstance().getFilteredStackProviders();
                     if (isFiltered()) {
-                        filteredStacks.removeIf(next -> EntryStacks.equalsExact(next, stack));
+                        filteredStacks.removeIf(next -> EntryStacks.equalsExact(next.provide(), stack));
                     } else {
-                        filteredStacks.add(stack.normalize());
+                        filteredStacks.add(EntryStackProvider.ofStack(stack.normalize()));
                     }
                     Menu menu = ((ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().get()).getOverlayMenu();
                     if (menu != null)
@@ -138,8 +138,12 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
     
     public boolean isFiltered() {
         if (isFiltered == null) {
-            List<EntryStack<?>> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
-            isFiltered = CollectionUtils.findFirstOrNullEqualsExact(filteredStacks, stack) != null;
+            isFiltered = false;
+            List<EntryStackProvider<?>> filteredStacks = ConfigObject.getInstance().getFilteredStackProviders();
+            for (EntryStackProvider<?> provider : filteredStacks) {
+                if (EntryStacks.equalsExact(provider.provide(), stack))
+                    return isFiltered = true;
+            }
         }
         return isFiltered;
     }

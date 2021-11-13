@@ -48,7 +48,7 @@ public class CraftableFilter {
             return true;
         }
         
-        return Minecraft.getInstance().player.containerMenu != null;
+        return false;
     }
     
     public void tick() {

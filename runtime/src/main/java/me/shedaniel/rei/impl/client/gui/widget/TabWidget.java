@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
+import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -150,8 +151,8 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
                 }
                 
                 @Override
-                public void release(boolean accepted) {
-                    if (!accepted) {
+                public void release(DraggedAcceptorResult result) {
+                    if (result == DraggedAcceptorResult.PASS) {
                         context.renderBackToPosition(this, DraggingContext.getInstance().getCurrentPosition(), () -> new Point(getBounds().getCenterX() - 8, getBounds().getCenterY() - 8));
                     }
                 }
