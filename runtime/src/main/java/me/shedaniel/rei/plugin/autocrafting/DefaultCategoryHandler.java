@@ -61,11 +61,11 @@ public class DefaultCategoryHandler implements TransferHandler {
             return Result.createNotApplicable();
         }
         AbstractContainerMenu menu = context.getMenu();
-        MenuInfo<AbstractContainerMenu, Display> menuInfo = MenuInfoRegistry.getInstance().getClient(display, menu);
+        MenuInfoContext<AbstractContainerMenu, Player, Display> menuInfoContext = ofContext(menu, display);
+        MenuInfo<AbstractContainerMenu, Display> menuInfo = MenuInfoRegistry.getInstance().getClient(display, menuInfoContext, menu);
         if (menuInfo == null) {
             return Result.createNotApplicable();
         }
-        MenuInfoContext<AbstractContainerMenu, Player, Display> menuInfoContext = ofContext(menu, menuInfo, display);
         try {
             menuInfo.validate(menuInfoContext);
         } catch (MenuTransferException e) {
@@ -76,7 +76,7 @@ public class DefaultCategoryHandler implements TransferHandler {
             }
         }
         List<List<ItemStack>> input = menuInfo.getInputs(menuInfoContext);
-        IntList intList = hasItems(menu, menuInfo, display, input);
+        IntList intList = hasItems(menuInfoContext, menu, menuInfo, display, input);
         if (!intList.isEmpty()) {
             return Result.createFailed(new TranslatableComponent("error.rei.not.enough.materials"), intList);
         }
@@ -105,7 +105,7 @@ public class DefaultCategoryHandler implements TransferHandler {
         return -10;
     }
     
-    private static MenuInfoContext<AbstractContainerMenu, Player, Display> ofContext(AbstractContainerMenu menu, MenuInfo<AbstractContainerMenu, Display> info, Display display) {
+    private static MenuInfoContext<AbstractContainerMenu, Player, Display> ofContext(AbstractContainerMenu menu, Display display) {
         return new MenuInfoContext<AbstractContainerMenu, Player, Display>() {
             @Override
             public AbstractContainerMenu getMenu() {
@@ -115,11 +115,6 @@ public class DefaultCategoryHandler implements TransferHandler {
             @Override
             public Player getPlayerEntity() {
                 return Minecraft.getInstance().player;
-            }
-            
-            @Override
-            public MenuInfo<AbstractContainerMenu, Display> getContainerInfo() {
-                return info;
             }
             
             @Override
@@ -134,10 +129,10 @@ public class DefaultCategoryHandler implements TransferHandler {
         };
     }
     
-    public IntList hasItems(AbstractContainerMenu menu, MenuInfo<AbstractContainerMenu, Display> info, Display display, List<List<ItemStack>> inputs) {
+    public IntList hasItems(MenuInfoContext<AbstractContainerMenu, Player, Display> menuInfoContext, AbstractContainerMenu menu, MenuInfo<AbstractContainerMenu, Display> info, Display display, List<List<ItemStack>> inputs) {
         // Create a clone of player's inventory, and count
         RecipeFinder recipeFinder = new RecipeFinder();
-        info.getRecipeFinderPopulator().populate(ofContext(menu, info, display), recipeFinder);
+        info.getRecipeFinderPopulator().populate(menuInfoContext, recipeFinder);
         IntList intList = new IntArrayList();
         for (int i = 0; i < inputs.size(); i++) {
             List<ItemStack> possibleStacks = inputs.get(i);

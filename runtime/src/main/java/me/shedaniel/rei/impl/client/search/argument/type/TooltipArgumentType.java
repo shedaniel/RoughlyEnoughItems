@@ -28,10 +28,8 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchMode;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.Unit;
@@ -40,6 +38,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
+import java.util.StringJoiner;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
@@ -80,7 +79,13 @@ public final class TooltipArgumentType extends ArgumentType<Unit, String> {
     public static String tryGetEntryStackTooltip(EntryStack<?> stack) {
         Tooltip tooltip = stack.getTooltip(new Point(), false);
         if (tooltip != null) {
-            return CollectionUtils.mapAndJoinToString(tooltip.getText(), Component::getString, "\n");
+            StringJoiner joiner = new StringJoiner("\n");
+            for (Tooltip.Entry entry : tooltip.entries()) {
+                if (entry.isText()) {
+                    joiner.add(entry.getAsText().getString());
+                }
+            }
+            return joiner.toString();
         }
         return "";
     }

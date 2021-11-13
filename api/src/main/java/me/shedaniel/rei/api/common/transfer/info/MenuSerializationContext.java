@@ -34,15 +34,34 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
  * @param <T> the type of {@link AbstractContainerMenu}
  * @param <P> the type of {@link Player}, server sided contexts may pass {@link net.minecraft.server.level.ServerPlayer} instead
  */
-public interface MenuSerializationContext<T extends AbstractContainerMenu, P extends Player, D extends Display> extends MenuSerializationProviderContext<T, P, D> {
-    @Override
+public interface MenuSerializationContext<T extends AbstractContainerMenu, P extends Player, D extends Display> {
     T getMenu();
     
-    @Override
     P getPlayerEntity();
     
-    MenuInfo<T, D> getContainerInfo();
-    
-    @Override
     CategoryIdentifier<D> getCategoryIdentifier();
+    
+    default MenuInfoContext<T, P, D> withDisplay(D display) {
+        return new MenuInfoContext<T, P, D>() {
+            @Override
+            public D getDisplay() {
+                return display;
+            }
+            
+            @Override
+            public T getMenu() {
+                return MenuSerializationContext.this.getMenu();
+            }
+            
+            @Override
+            public P getPlayerEntity() {
+                return MenuSerializationContext.this.getPlayerEntity();
+            }
+            
+            @Override
+            public CategoryIdentifier<D> getCategoryIdentifier() {
+                return MenuSerializationContext.this.getCategoryIdentifier();
+            }
+        };
+    }
 }

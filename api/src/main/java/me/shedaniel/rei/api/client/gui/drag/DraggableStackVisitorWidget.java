@@ -24,9 +24,7 @@
 package me.shedaniel.rei.api.client.gui.drag;
 
 import net.minecraft.client.gui.screens.Screen;
-import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -39,9 +37,9 @@ public interface DraggableStackVisitorWidget {
     static DraggableStackVisitorWidget from(Function<DraggingContext<Screen>, Iterable<DraggableStackVisitorWidget>> providers) {
         return new DraggableStackVisitorWidget() {
             @Override
-            public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<Screen> context, DraggableStack stack) {
+            public DraggedAcceptorResult acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
                 return StreamSupport.stream(providers.apply(context).spliterator(), false)
-                        .map(visitor -> visitor.acceptDraggedStackWithResult(context, stack))
+                        .map(visitor -> visitor.acceptDraggedStack(context, stack))
                         .filter(result -> result != DraggedAcceptorResult.PASS)
                         .findFirst()
                         .orElse(DraggedAcceptorResult.PASS);
@@ -55,32 +53,6 @@ public interface DraggableStackVisitorWidget {
         };
     }
     
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated(forRemoval = true)
-    default Optional<DraggableStackVisitor.Acceptor> visitDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
-        return Optional.empty();
-    }
-    
-    /**
-     * Accepts a dragged stack, implementations of this function should check if the {@code context} is within
-     * boundaries of the widget.
-     *
-     * @param context the context of the current dragged stack on the overlay
-     * @param stack   the stack being dragged
-     * @return whether the stack is accepted by the widget
-     */
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    default boolean acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
-        Optional<DraggableStackVisitor.Acceptor> acceptor = visitDraggedStack(context, stack);
-        if (acceptor.isPresent()) {
-            acceptor.get().accept(stack);
-            return true;
-        } else {
-            return false;
-        }
-    }
-    
     /**
      * Accepts a dragged stack, implementations of this function should check if the {@code context} is within
      * boundaries of the widget.
@@ -89,8 +61,8 @@ public interface DraggableStackVisitorWidget {
      * @param stack   the stack being dragged
      * @return the result of the visitor
      */
-    default DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<Screen> context, DraggableStack stack) {
-        return acceptDraggedStack(context, stack) ? DraggedAcceptorResult.CONSUMED : DraggedAcceptorResult.PASS;
+    default DraggedAcceptorResult acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
+        return DraggedAcceptorResult.PASS;
     }
     
     /**
@@ -112,8 +84,8 @@ public interface DraggableStackVisitorWidget {
     static DraggableStackVisitor<Screen> toVisitor(DraggableStackVisitorWidget widget, double priority) {
         return new DraggableStackVisitor<>() {
             @Override
-            public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<Screen> context, DraggableStack stack) {
-                return widget.acceptDraggedStackWithResult(context, stack);
+            public DraggedAcceptorResult acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
+                return widget.acceptDraggedStack(context, stack);
             }
             
             @Override

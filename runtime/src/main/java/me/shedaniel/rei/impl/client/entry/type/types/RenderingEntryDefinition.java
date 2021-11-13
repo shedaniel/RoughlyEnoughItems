@@ -47,8 +47,12 @@ public class RenderingEntryDefinition {
         @Override
         public Component asFormattedText(EntryStack<Renderer> entry, Renderer value) {
             Tooltip tooltip = value.getTooltip(PointHelper.ofMouse());
-            if (tooltip != null && !tooltip.getText().isEmpty()) {
-                return tooltip.getText().get(0);
+            if (tooltip != null) {
+                for (Tooltip.Entry e : tooltip.entries()) {
+                    if (e.isText()) {
+                        return e.getAsText();
+                    }
+                }
             }
             return super.asFormattedText(entry, value);
         }

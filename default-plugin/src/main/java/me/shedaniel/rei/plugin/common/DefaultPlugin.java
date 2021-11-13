@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.api.common.transfer.info.simple.RecipeBookGridMenuInfo;
+import me.shedaniel.rei.api.common.transfer.info.simple.SimpleMenuInfoProvider;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.displays.*;
 import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconBaseDisplay;
@@ -127,11 +128,11 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
     
     @Override
     public void registerMenuInfo(MenuInfoRegistry registry) {
-        registry.register(BuiltinPlugin.CRAFTING, CraftingMenu.class, new RecipeBookGridMenuInfo<>());
-        registry.register(BuiltinPlugin.CRAFTING, InventoryMenu.class, new RecipeBookGridMenuInfo<>());
-        registry.register(BuiltinPlugin.SMELTING, FurnaceMenu.class, new RecipeBookGridMenuInfo<>());
-        registry.register(BuiltinPlugin.SMOKING, SmokerMenu.class, new RecipeBookGridMenuInfo<>());
-        registry.register(BuiltinPlugin.BLASTING, BlastFurnaceMenu.class, new RecipeBookGridMenuInfo<>());
+        registry.register(BuiltinPlugin.CRAFTING, CraftingMenu.class, SimpleMenuInfoProvider.of(RecipeBookGridMenuInfo::new));
+        registry.register(BuiltinPlugin.CRAFTING, InventoryMenu.class, SimpleMenuInfoProvider.of(RecipeBookGridMenuInfo::new));
+        registry.register(BuiltinPlugin.SMELTING, FurnaceMenu.class, SimpleMenuInfoProvider.of(RecipeBookGridMenuInfo::new));
+        registry.register(BuiltinPlugin.SMOKING, SmokerMenu.class, SimpleMenuInfoProvider.of(RecipeBookGridMenuInfo::new));
+        registry.register(BuiltinPlugin.BLASTING, BlastFurnaceMenu.class, SimpleMenuInfoProvider.of(RecipeBookGridMenuInfo::new));
     }
     
     @Override

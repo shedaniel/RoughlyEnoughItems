@@ -25,12 +25,11 @@ package me.shedaniel.rei.api.common.transfer.info;
 
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.transfer.info.simple.SimpleMenuInfoProvider;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
 
@@ -39,43 +38,11 @@ import java.util.Optional;
  *
  * @param <T> the type of the menu
  * @param <D> the type of display
+ * @see SimpleMenuInfoProvider
  */
-@FunctionalInterface
 public interface MenuInfoProvider<T extends AbstractContainerMenu, D extends Display> {
     @Environment(EnvType.CLIENT)
-    default Optional<MenuInfo<T, D>> provideClient(D display, T menu) {
-        return provide((CategoryIdentifier<D>) display.getCategoryIdentifier(), (Class<T>) menu.getClass());
-    }
+    Optional<MenuInfo<T, D>> provideClient(D display, MenuSerializationContext<T, ?, D> context, T menu);
     
-    default Optional<MenuInfo<T, D>> provide(CategoryIdentifier<D> display, T menu, MenuSerializationProviderContext<T, ?, D> context, CompoundTag networkTag) {
-        Optional<MenuInfo<T, D>> menuInfo = provide(display, (Class<T>) menu.getClass());
-        if (menuInfo.isPresent()) {
-            menuInfo.get().read(new MenuSerializationContext<T, Player, D>() {
-                @Override
-                public MenuInfo<T, D> getContainerInfo() {
-                    return menuInfo.get();
-                }
-                
-                @Override
-                public T getMenu() {
-                    return context.getMenu();
-                }
-                
-                @Override
-                public Player getPlayerEntity() {
-                    return context.getPlayerEntity();
-                }
-                
-                @Override
-                public CategoryIdentifier<D> getCategoryIdentifier() {
-                    return context.getCategoryIdentifier();
-                }
-            }, networkTag);
-        }
-        return menuInfo;
-    }
-    
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    Optional<MenuInfo<T, D>> provide(CategoryIdentifier<D> categoryId, Class<T> menuClass);
+    Optional<MenuInfo<T, D>> provide(CategoryIdentifier<D> category, T menu, MenuSerializationContext<T, ?, D> context, CompoundTag networkTag);
 }

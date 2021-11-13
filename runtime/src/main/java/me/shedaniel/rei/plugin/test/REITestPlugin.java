@@ -30,6 +30,8 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -53,7 +55,7 @@ public class REITestPlugin implements REIClientPlugin {
     private Random random = new Random();
     
     @Override
-    public void preRegister() {
+    public void preStage(PluginManager<REIClientPlugin> manager, ReloadStage stage) {
         LogManager.getLogger().error("REI Test Plugin is enabled! If you see this unintentionally, please report this!");
     }
     

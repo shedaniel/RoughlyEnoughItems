@@ -24,7 +24,6 @@
 package me.shedaniel.rei.api.client.favorites;
 
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.Lifecycle;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
@@ -50,25 +49,9 @@ public interface FavoriteEntryType<T extends FavoriteEntry> {
         return PluginManager.getClientInstance().get(FavoriteEntryType.Registry.class);
     }
     
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    default T read(CompoundTag object) {
-        throw new UnsupportedOperationException("Implementation of FavoriteEntryType must override #read or #readResult");
-    }
+    DataResult<T> read(CompoundTag object);
     
-    default DataResult<T> readResult(CompoundTag object) {
-        return DataResult.success(read(object), Lifecycle.stable());
-    }
-    
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    default T fromArgs(Object... args) {
-        throw new UnsupportedOperationException("Implementation of FavoriteEntryType must override #fromArgs or #fromArgsResult");
-    }
-    
-    default DataResult<T> fromArgsResult(Object... args) {
-        return DataResult.success(fromArgs(args), Lifecycle.stable());
-    }
+    DataResult<T> fromArgs(Object... args);
     
     CompoundTag save(T entry, CompoundTag tag);
     
@@ -76,8 +59,7 @@ public interface FavoriteEntryType<T extends FavoriteEntry> {
     interface Registry extends Reloadable<REIClientPlugin> {
         void register(ResourceLocation id, FavoriteEntryType<?> type);
         
-        @Nullable
-        <A extends FavoriteEntry> FavoriteEntryType<A> get(ResourceLocation id);
+        @Nullable <A extends FavoriteEntry> FavoriteEntryType<A> get(ResourceLocation id);
         
         @Nullable
         ResourceLocation getId(FavoriteEntryType<?> type);

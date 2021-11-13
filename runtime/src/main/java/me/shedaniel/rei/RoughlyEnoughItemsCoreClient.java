@@ -135,7 +135,7 @@ public class RoughlyEnoughItemsCoreClient {
             ResourceLocation id = new ResourceLocation(type);
             FavoriteEntryType<FavoriteEntry> entryType = FavoriteEntryType.registry().get(id);
             if (entryType == null) return DataResult.error("Unknown favorite type: " + id + ", json: " + object);
-            return entryType.readResult(object);
+            return entryType.read(object);
         }, "favoriteEntryFromJson");
         ClientInternals.attachInstance((BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip>) QueuedTooltip::impl, "tooltipProvider");
         ClientInternals.attachInstance((Function<Object, Tooltip.Entry>) QueuedTooltip.TooltipEntryImpl::new, "tooltipEntryProvider");

@@ -189,7 +189,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     }
     
     @Override
-    public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<Screen> context, DraggableStack stack) {
+    public DraggedAcceptorResult acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
         if (innerBounds.contains(context.getCurrentPosition())) {
             context.renderToVoid(stack);
             return DraggedAcceptorResult.CONSUMED;

@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.api.common.transfer.info;
 
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -43,7 +42,6 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Provider of information for {@link AbstractContainerMenu}, for the default REI {@link me.shedaniel.rei.api.client.registry.transfer.TransferHandler}.
@@ -55,12 +53,7 @@ import java.util.Optional;
  * @see me.shedaniel.rei.api.common.transfer.info.simple.SimplePlayerInventoryMenuInfo
  * @see me.shedaniel.rei.api.common.transfer.info.simple.SimpleGridMenuInfo
  */
-public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> extends MenuInfoProvider<T, D> {
-    @Override
-    default Optional<MenuInfo<T, D>> provide(CategoryIdentifier<D> categoryId, Class<T> menuClass) {
-        return Optional.of(this);
-    }
-    
+public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> {
     /**
      * Returns a {@link RecipeFinderPopulator}, used to populate a {@link RecipeFinder} with
      * available ingredients.
@@ -136,18 +129,13 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
      * @return the {@link CompoundTag} serialized
      */
     default CompoundTag save(MenuSerializationContext<T, ?, D> context, D display) {
-        // TODO Remove this, replace with getDisplay()
         return DisplaySerializerRegistry.getInstance().save(display, new CompoundTag());
     }
     
     /**
-     * Deserializes the {@link Display} from {@link CompoundTag}, sent from the client for further info of the transfer.
+     * Returns the {@link Display} for this menu info.
      *
-     * @param context the context of the transfer
-     * @param tag     the nbt tag to deserialize from
-     * @return the {@link Display} deserialized
+     * @return the {@link Display}
      */
-    default D read(MenuSerializationContext<T, ?, D> context, CompoundTag tag) {
-        return DisplaySerializerRegistry.getInstance().read(context.getCategoryIdentifier(), tag);
-    }
+    D getDisplay();
 }

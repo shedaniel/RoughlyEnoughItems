@@ -221,7 +221,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     }
     
     @Override
-    public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<Screen> context, DraggableStack stack) {
+    public DraggedAcceptorResult acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
         return checkDraggedStacks(context, stack)
                 .filter(entry -> innerBounds.contains(context.getCurrentPosition()))
                 .flatMap(entry -> {

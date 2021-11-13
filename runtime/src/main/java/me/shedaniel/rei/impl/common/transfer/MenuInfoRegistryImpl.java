@@ -31,7 +31,7 @@ import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoProvider;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
-import me.shedaniel.rei.api.common.transfer.info.MenuSerializationProviderContext;
+import me.shedaniel.rei.api.common.transfer.info.MenuSerializationContext;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
@@ -62,20 +62,14 @@ public class MenuInfoRegistryImpl implements MenuInfoRegistry {
     
     @Override
     @Nullable
-    public <T extends AbstractContainerMenu, D extends Display> MenuInfo<T, D> get(CategoryIdentifier<D> category, Class<T> menuClass) {
-        return getInternal(category, menuClass, provider -> provider.provide(category, menuClass));
-    }
-    
-    @Override
-    @Nullable
     @Environment(EnvType.CLIENT)
-    public <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> getClient(D display, C menu) {
-        return getInternal((CategoryIdentifier<D>) display.getCategoryIdentifier(), (Class<C>) menu.getClass(), provider -> provider.provideClient(display, menu));
+    public <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> getClient(D display, MenuSerializationContext<C, ?, D> context, C menu) {
+        return getInternal((CategoryIdentifier<D>) display.getCategoryIdentifier(), (Class<C>) menu.getClass(), provider -> provider.provideClient(display, context, menu));
     }
     
     @Override
     @Nullable
-    public <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> get(CategoryIdentifier<D> category, C menu, MenuSerializationProviderContext<C, ?, D> context, CompoundTag tag) {
+    public <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> get(CategoryIdentifier<D> category, C menu, MenuSerializationContext<C, ?, D> context, CompoundTag tag) {
         return getInternal(category, (Class<C>) menu.getClass(), provider -> provider.provide(category, menu, context, tag));
     }
     

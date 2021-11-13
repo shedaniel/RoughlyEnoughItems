@@ -178,7 +178,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         }
         
         @Override
-        public DataResult<EntryStackFavoriteEntry> readResult(CompoundTag object) {
+        public DataResult<EntryStackFavoriteEntry> read(CompoundTag object) {
             EntryStack<?> stack;
             try {
                 stack = EntryStack.read(object.getCompound(key));
@@ -189,7 +189,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         }
         
         @Override
-        public DataResult<EntryStackFavoriteEntry> fromArgsResult(Object... args) {
+        public DataResult<EntryStackFavoriteEntry> fromArgs(Object... args) {
             if (args.length == 0) return DataResult.error("Cannot create EntryStackFavoriteEntry from empty args!");
             if (!(args[0] instanceof EntryStack<?> stack))
                 return DataResult.error("Creation of EntryStackFavoriteEntry from args expected EntryStack as the first argument!");

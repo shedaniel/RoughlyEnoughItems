@@ -41,8 +41,8 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
-import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
+import me.shedaniel.rei.api.common.transfer.info.MenuSerializationContext;
 import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
@@ -280,47 +280,32 @@ public class ViewsImpl implements Views {
         AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
         Set<EntryStack<?>> craftables = new HashSet<>();
         for (Map.Entry<CategoryIdentifier<?>, List<Display>> entry : DisplayRegistry.getInstance().getAll().entrySet()) {
+            class InfoSerializationContext implements MenuSerializationContext<AbstractContainerMenu, LocalPlayer, Display> {
+                @Override
+                public AbstractContainerMenu getMenu() {
+                    return menu;
+                }
+                
+                @Override
+                public LocalPlayer getPlayerEntity() {
+                    return Minecraft.getInstance().player;
+                }
+                
+                @Override
+                public CategoryIdentifier<Display> getCategoryIdentifier() {
+                    return (CategoryIdentifier<Display>) entry.getKey();
+                }
+            }
+            
+            InfoSerializationContext context = new InfoSerializationContext();
+            
             List<Display> displays = entry.getValue();
             for (Display display : displays) {
                 MenuInfo<AbstractContainerMenu, Display> info = menu != null ?
-                        MenuInfoRegistry.getInstance().getClient(display, menu)
+                        MenuInfoRegistry.getInstance().getClient(display, context, menu)
                         : null;
                 
-                class InfoContext implements MenuInfoContext<AbstractContainerMenu, LocalPlayer, Display> {
-                    private Display display;
-                    
-                    public InfoContext(Display display) {
-                        this.display = display;
-                    }
-                    
-                    @Override
-                    public AbstractContainerMenu getMenu() {
-                        return menu;
-                    }
-                    
-                    @Override
-                    public LocalPlayer getPlayerEntity() {
-                        return Minecraft.getInstance().player;
-                    }
-                    
-                    @Override
-                    public MenuInfo<AbstractContainerMenu, Display> getContainerInfo() {
-                        return info;
-                    }
-                    
-                    @Override
-                    public CategoryIdentifier<Display> getCategoryIdentifier() {
-                        return (CategoryIdentifier<Display>) entry.getKey();
-                    }
-                    
-                    @Override
-                    public Display getDisplay() {
-                        return display;
-                    }
-                }
-                
-                InfoContext context = new InfoContext(display);
-                Iterable<SlotAccessor> inputSlots = info != null ? info.getInputSlots(context) : Collections.emptySet();
+                Iterable<SlotAccessor> inputSlots = info != null ? info.getInputSlots(context.withDisplay(display)) : Collections.emptySet();
                 int slotsCraftable = 0;
                 List<EntryIngredient> requiredInput = display.getRequiredEntries();
                 for (EntryIngredient slot : requiredInput) {

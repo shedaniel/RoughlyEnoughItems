@@ -34,7 +34,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -71,13 +70,7 @@ public abstract class FavoriteEntry implements RegionEntry<FavoriteEntry> {
     }
     
     public static FavoriteEntry fromEntryStack(EntryStack<?> stack) {
-        return delegateResult(() -> FavoriteEntryType.registry().get(FavoriteEntryType.ENTRY_STACK).fromArgsResult(stack), null);
-    }
-    
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    public static boolean isEntryInvalid(@Nullable FavoriteEntry entry) {
-        return entry == null || entry.isInvalid();
+        return delegateResult(() -> FavoriteEntryType.registry().get(FavoriteEntryType.ENTRY_STACK).fromArgs(stack), null);
     }
     
     @Override

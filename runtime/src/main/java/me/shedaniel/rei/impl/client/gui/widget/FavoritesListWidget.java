@@ -210,13 +210,13 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     }
     
     @Override
-    public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<Screen> context, DraggableStack stack) {
+    public DraggedAcceptorResult acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
         if (favoritePanel.bounds.contains(context.getCurrentPosition()) || trashBounds.contains(context.getCurrentPosition())) {
             context.renderToVoid(stack);
             return DraggedAcceptorResult.CONSUMED;
         }
         return Stream.of(region, systemRegion)
-                .map(visitor -> visitor.acceptDraggedStackWithResult(context, stack))
+                .map(visitor -> visitor.acceptDraggedStack(context, stack))
                 .filter(result -> result != DraggedAcceptorResult.PASS)
                 .findFirst()
                 .orElse(DraggedAcceptorResult.PASS);
