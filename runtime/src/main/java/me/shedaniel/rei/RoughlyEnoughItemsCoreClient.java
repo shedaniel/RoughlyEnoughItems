@@ -283,6 +283,7 @@ public class RoughlyEnoughItemsCoreClient {
             reloadPlugins(endReload, Platform.isFabric() ? ReloadStage.END : null);
         });
         ClientGuiEvent.INIT_POST.register((screen, access) -> {
+            REIRuntime.getInstance().getOverlay(false, true);
             REIRuntimeImpl.getInstance().setPreviousScreen(screen);
             if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen) {
                 access.getRenderables().removeIf(widget -> widget instanceof ImageButton button && button.resourceLocation.equals(recipeButtonTex));
@@ -380,7 +381,7 @@ public class RoughlyEnoughItemsCoreClient {
     public static void reloadPlugins(MutableLong lastReload, @Nullable ReloadStage start) {
         if (lastReload != null) {
             if (lastReload.getValue() > 0 && System.currentTimeMillis() - lastReload.getValue() <= 5000) {
-                RoughlyEnoughItemsCore.LOGGER.warn("Suppressing Reload Plugins!");
+                RoughlyEnoughItemsCore.LOGGER.warn("Suppressing Reload Plugins of stage " + start);
                 return;
             }
             lastReload.setValue(System.currentTimeMillis());

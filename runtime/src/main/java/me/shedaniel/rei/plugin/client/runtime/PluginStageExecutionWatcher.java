@@ -40,7 +40,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class PluginStageExecutionWatcher implements HintProvider {
-    private Map<PluginManager<?>, Set<ReloadStage>> allStages = new HashMap<>();
+    private final Map<PluginManager<?>, Set<ReloadStage>> allStages = new HashMap<>();
     
     public <T extends REIPlugin<?>> Reloadable<? extends T> reloadable(PluginManager<?> manager) {
         return new Reloadable<>() {
@@ -53,17 +53,21 @@ public class PluginStageExecutionWatcher implements HintProvider {
             
             @Override
             public void startReload(ReloadStage stage) {
-                Set<ReloadStage> stages = allStages.computeIfAbsent(manager, $ -> new HashSet<>());
-                if (stage.ordinal() == 0) stages.clear();
-                stages.add(stage);
+                synchronized (allStages) {
+                    Set<ReloadStage> stages = allStages.computeIfAbsent(manager, $ -> new HashSet<>());
+                    if (stage.ordinal() == 0) stages.clear();
+                    stages.add(stage);
+                }
             }
         };
     }
     
     public Set<ReloadStage> notVisited() {
-        Set<ReloadStage> notVisited = new HashSet<>(Arrays.asList(ReloadStage.values()));
-        notVisited.removeIf(stage -> allStages.values().stream().allMatch(stages -> stages.contains(stage)));
-        return notVisited;
+        synchronized (allStages) {
+            Set<ReloadStage> notVisited = new HashSet<>(Arrays.asList(ReloadStage.values()));
+            notVisited.removeIf(stage -> allStages.values().stream().allMatch(stages -> stages.contains(stage)));
+            return notVisited;
+        }
     }
     
     @Override

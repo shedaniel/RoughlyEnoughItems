@@ -50,4 +50,9 @@ public interface CategoryIdentifier<D extends Display> extends Identifiable {
     default String getPath() {
         return getIdentifier().getPath();
     }
+    
+    @ApiStatus.NonExtendable
+    default <O extends Display> CategoryIdentifier<O> cast() {
+        return (CategoryIdentifier<O>) this;
+    }
 }

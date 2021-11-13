@@ -28,8 +28,10 @@ import dev.architectury.fluid.FluidStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -51,7 +53,7 @@ public abstract class EntryListEntryWidget extends EntryWidget {
     
     @Override
     public void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (ClientHelper.getInstance().isCheating() && !minecraft.player.containerMenu.getCarried().isEmpty()) {
+        if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && !minecraft.player.containerMenu.getCarried().isEmpty()) {
             return;
         }
         super.queueTooltip(matrices, mouseX, mouseY, delta);
@@ -74,7 +76,7 @@ public abstract class EntryListEntryWidget extends EntryWidget {
     }
     
     protected boolean doAction(double mouseX, double mouseY, int button) {
-        if (!ClientHelper.getInstance().isCheating()) return false;
+        if (!(ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen))) return false;
         EntryStack<?> entry = getCurrentEntry().copy();
         if (!entry.isEmpty()) {
             if (entry.getValueType() == FluidStack.class) {
@@ -96,7 +98,7 @@ public abstract class EntryListEntryWidget extends EntryWidget {
     protected boolean cancelDeleteItems(EntryStack<?> stack) {
         if (!interactable || !ConfigObject.getInstance().isGrabbingItems())
             return super.cancelDeleteItems(stack);
-        if (ClientHelper.getInstance().isCheating()) {
+        if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
             EntryStack<?> entry = getCurrentEntry().copy();
             if (!entry.isEmpty()) {
                 if (entry.getValueType() == FluidStack.class) {

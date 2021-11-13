@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -36,9 +37,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapEntryType;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public enum JEIIngredientListOverlay implements IIngredientListOverlay {
     INSTANCE;
     
@@ -48,7 +47,7 @@ public enum JEIIngredientListOverlay implements IIngredientListOverlay {
         ScreenOverlay overlay = REIRuntime.getInstance().getOverlay().get();
         EntryStack<?> stack = overlay.getEntryList().getFocusedStack();
         if (stack.isEmpty()) return null;
-        return unwrap(stack);
+        return stack.jeiValue();
     }
     
     @Override
@@ -73,11 +72,11 @@ public enum JEIIngredientListOverlay implements IIngredientListOverlay {
     @NotNull
     public <T> List<T> getVisibleIngredients(IIngredientType<T> ingredientType) {
         if (REIRuntime.getInstance().isOverlayVisible()) {
-            EntryType<T> type = wrapEntryType(ingredientType);
+            EntryType<T> type = ingredientType.unwrapType();
             ScreenOverlay overlay = REIRuntime.getInstance().getOverlay().get();
             return (List<T>) overlay.getEntryList().getEntries()
                     .filter(entryStack -> entryStack.getType() == type)
-                    .map(JEIPluginDetector::unwrap)
+                    .map(JEIPluginDetector::jeiValue)
                     .collect(Collectors.toList());
         }
         return null;

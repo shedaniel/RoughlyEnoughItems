@@ -7,4 +7,5 @@ dependencies {
     compileOnly(project(path: ":api")) { transitive false }
     compileOnly(project(path: ":default-plugin")) { transitive false }
     compileOnly('com.google.code.findbugs:jsr305:3.0.2')
+    compileClasspath(annotationProcessor("org.projectlombok:lombok:1.18.22"))
 }

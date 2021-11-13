@@ -23,31 +23,31 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.helpers.IStackHelper;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapContext;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public enum JEIStackHelper implements IStackHelper {
     INSTANCE;
     
     @Override
     public boolean isEquivalent(@Nullable ItemStack lhs, @Nullable ItemStack rhs, @NotNull UidContext context) {
         if (context == UidContext.Ingredient) {
-            return EntryStacks.equalsExact(wrap(lhs), wrap(rhs));
+            return EntryStacks.equalsExact(lhs.unwrapStack(), rhs.unwrapStack());
         }
-        return EntryStacks.equalsFuzzy(wrap(lhs), wrap(rhs));
+        return EntryStacks.equalsFuzzy(lhs.unwrapStack(), rhs.unwrapStack());
     }
     
     @Override
     @NotNull
     public String getUniqueIdentifierForStack(@NotNull ItemStack stack, @NotNull UidContext context) {
-        return String.valueOf(ItemComparatorRegistry.getInstance().hashOf(wrapContext(context), stack));
+        return String.valueOf(ItemComparatorRegistry.getInstance().hashOf(context.unwrapContext(), stack));
     }
 }

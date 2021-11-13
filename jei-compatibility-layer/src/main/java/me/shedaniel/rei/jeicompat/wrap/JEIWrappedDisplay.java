@@ -23,10 +23,12 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.IIngredients;
@@ -37,8 +39,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapList;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public class JEIWrappedDisplay<T> implements Display {
     private final JEIWrappedCategory<T> backingCategory;
     private final T backingRecipe;
@@ -112,13 +113,13 @@ public class JEIWrappedDisplay<T> implements Display {
     private void compileIngredients(Map<IIngredientType<?>, List<? extends List<?>>> inputs, Map<IIngredientType<?>, List<? extends List<?>>> outputs) {
         for (Map.Entry<IIngredientType<?>, List<? extends List<?>>> entry : inputs.entrySet()) {
             for (List<?> slot : entry.getValue()) {
-                compiledInput.add(wrapList((IIngredientType<Object>) entry.getKey(), (List<Object>) slot));
+                compiledInput.add(((IIngredientType<Object>) entry.getKey()).unwrapList((List<Object>) slot));
             }
         }
         
         for (Map.Entry<IIngredientType<?>, List<? extends List<?>>> entry : outputs.entrySet()) {
             for (List<?> slot : entry.getValue()) {
-                compiledOutputs.add(wrapList((IIngredientType<Object>) entry.getKey(), (List<Object>) slot));
+                compiledOutputs.add(((IIngredientType<Object>) entry.getKey()).unwrapList((List<Object>) slot));
             }
         }
     }
@@ -159,7 +160,7 @@ public class JEIWrappedDisplay<T> implements Display {
         if (backingRecipe instanceof Recipe<?>) {
             return Optional.ofNullable(((Recipe<?>) backingRecipe).getId());
         }
-
+        
         return Optional.empty();
     }
 }

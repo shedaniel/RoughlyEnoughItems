@@ -23,6 +23,9 @@
 
 package me.shedaniel.rei.plugin.test;
 
+import com.google.common.collect.ImmutableList;
+import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -30,10 +33,13 @@ import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameType;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.TestOnly;
 
@@ -75,5 +81,23 @@ public class REITestPlugin implements REIClientPlugin {
         CompoundTag tag = stack.getValue().getOrCreateTag();
         tag.putInt("Whatever", random.nextInt(Integer.MAX_VALUE));
         return stack;
+    }
+    
+    @Override
+    public void registerFavorites(FavoriteEntryType.Registry registry) {
+        registry.registerSystemFavorites(() -> {
+            GameType mode = Minecraft.getInstance().gameMode.getPlayerMode();
+            switch (mode) {
+                case SURVIVAL:
+                    return ImmutableList.of(FavoriteEntry.fromEntryStack(EntryStacks.of(Items.STONE)));
+                case CREATIVE:
+                    return ImmutableList.of(FavoriteEntry.fromEntryStack(EntryStacks.of(Items.PACKED_ICE)));
+                case ADVENTURE:
+                    return ImmutableList.of(FavoriteEntry.fromEntryStack(EntryStacks.of(Items.ANVIL)));
+                case SPECTATOR:
+                default:
+                    return ImmutableList.of();
+            }
+        });
     }
 }

@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import lombok.experimental.ExtensionMethod;
 import dev.architectury.event.EventResult;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.category.visibility.CategoryVisibilityPredicate;
@@ -44,8 +45,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 
+@ExtensionMethod(JEIPluginDetector.class)
 public enum JEIRecipeManager implements IRecipeManager {
     INSTANCE;
     
@@ -58,7 +60,7 @@ public enum JEIRecipeManager implements IRecipeManager {
     @Nullable
     public IRecipeCategory<?> getRecipeCategory(ResourceLocation recipeCategoryUid, boolean includeHidden) {
         try {
-            DisplayCategory<Display> category = CategoryRegistry.getInstance().get(wrapCategoryId(recipeCategoryUid)).getCategory();
+            DisplayCategory<Display> category = CategoryRegistry.getInstance().get(recipeCategoryUid.categoryId()).getCategory();
             if (CategoryRegistry.getInstance().isCategoryVisible(category)) {
                 return new JEIUnwrappedCategory<>(category);
             }
@@ -88,14 +90,14 @@ public enum JEIRecipeManager implements IRecipeManager {
     @Override
     public <T, V> List<T> getRecipes(IRecipeCategory<T> recipeCategory, @Nullable IFocus<V> focus, boolean includeHidden) {
         if (focus != null) throw TODO();
-        return wrapRecipes(wrapCategoryId(recipeCategory.getUid()), !includeHidden);
+        return JEIPluginDetector.wrapRecipes(recipeCategory.getUid().categoryId(), !includeHidden);
     }
     
     @Override
     public List<Object> getRecipeCatalysts(IRecipeCategory<?> recipeCategory, boolean includeHidden) {
         List<Object> objects = new ArrayList<>();
-        for (EntryIngredient stacks : CategoryRegistry.getInstance().get(wrapCategoryId(recipeCategory.getUid())).getWorkstations()) {
-            objects.addAll(CollectionUtils.map(stacks, JEIPluginDetector::unwrap));
+        for (EntryIngredient stacks : CategoryRegistry.getInstance().get(recipeCategory.getUid().categoryId()).getWorkstations()) {
+            objects.addAll(CollectionUtils.map(stacks, JEIPluginDetector::jeiValue));
         }
         return objects;
     }
@@ -108,13 +110,13 @@ public enum JEIRecipeManager implements IRecipeManager {
     
     @Override
     public <T> void hideRecipe(T recipe, ResourceLocation recipeCategoryUid) {
-        Set<Object> recipes = hiddenRecipes.computeIfAbsent(wrapCategoryId(recipeCategoryUid), $ -> new HashSet<>());
+        Set<Object> recipes = hiddenRecipes.computeIfAbsent(recipeCategoryUid.categoryId(), $ -> new HashSet<>());
         recipes.add(recipe);
     }
     
     @Override
     public <T> void unhideRecipe(T recipe, ResourceLocation recipeCategoryUid) {
-        CategoryIdentifier<Display> categoryIdentifier = wrapCategoryId(recipeCategoryUid);
+        CategoryIdentifier<Display> categoryIdentifier = recipeCategoryUid.categoryId();
         Set<Object> recipes = hiddenRecipes.computeIfAbsent(categoryIdentifier, $ -> new HashSet<>());
         recipes.remove(recipe);
         if (recipes.isEmpty()) {
@@ -124,17 +126,17 @@ public enum JEIRecipeManager implements IRecipeManager {
     
     @Override
     public void hideRecipeCategory(ResourceLocation recipeCategoryUid) {
-        this.hiddenCategories.add(wrapCategoryId(recipeCategoryUid));
+        this.hiddenCategories.add(recipeCategoryUid.categoryId());
     }
     
     @Override
     public void unhideRecipeCategory(ResourceLocation recipeCategoryUid) {
-        this.hiddenCategories.remove(wrapCategoryId(recipeCategoryUid));
+        this.hiddenCategories.remove(recipeCategoryUid.categoryId());
     }
     
     @Override
     public <T> void addRecipe(T recipe, ResourceLocation recipeCategoryUid) {
-        Collection<Display> displays = createDisplayFrom(recipe);
+        Collection<Display> displays = recipe.createDisplayFrom();
         for (Display display : displays) {
             if (Objects.equals(display.getCategoryIdentifier().getIdentifier(), recipeCategoryUid)) {
                 DisplayRegistry.getInstance().add(display, recipe);
@@ -146,7 +148,7 @@ public enum JEIRecipeManager implements IRecipeManager {
         @Override
         public EventResult handleDisplay(DisplayCategory<?> category, Display display) {
             Set<Object> hidden = hiddenRecipes.get(category.getCategoryIdentifier());
-            if (hidden != null && hidden.contains(wrapRecipe(display))) {
+            if (hidden != null && hidden.contains(display.jeiValue())) {
                 return EventResult.interruptFalse();
             }
             return EventResult.pass();

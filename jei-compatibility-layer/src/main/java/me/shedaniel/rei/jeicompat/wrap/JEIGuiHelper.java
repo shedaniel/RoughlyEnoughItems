@@ -24,11 +24,13 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.gui.ITickTimer;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.drawable.IDrawableAnimated;
@@ -40,8 +42,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public enum JEIGuiHelper implements IGuiHelper {
     INSTANCE;
     
@@ -54,7 +55,18 @@ public enum JEIGuiHelper implements IGuiHelper {
     @Override
     @NotNull
     public IDrawableAnimated createAnimatedDrawable(@NotNull IDrawableStatic drawable, int ticksPerCycle, @NotNull IDrawableAnimated.StartDirection startDirection, boolean inverted) {
-        // TODO Implement Animation
+        if (inverted) {
+            if (startDirection == IDrawableAnimated.StartDirection.LEFT)
+                startDirection = IDrawableAnimated.StartDirection.RIGHT;
+            else if (startDirection == IDrawableAnimated.StartDirection.RIGHT)
+                startDirection = IDrawableAnimated.StartDirection.LEFT;
+            else if (startDirection == IDrawableAnimated.StartDirection.TOP)
+                startDirection = IDrawableAnimated.StartDirection.BOTTOM;
+            else if (startDirection == IDrawableAnimated.StartDirection.BOTTOM)
+                startDirection = IDrawableAnimated.StartDirection.TOP;
+        }
+        boolean vertical = startDirection == IDrawableAnimated.StartDirection.TOP || startDirection == IDrawableAnimated.StartDirection.BOTTOM;
+        IDrawableAnimated.StartDirection dir = startDirection;
         return new IDrawableAnimated() {
             @Override
             public int getWidth() {
@@ -68,7 +80,25 @@ public enum JEIGuiHelper implements IGuiHelper {
             
             @Override
             public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset) {
-                drawable.draw(matrixStack, xOffset, yOffset);
+                float maskTop = 0, maskBottom = 0, maskLeft = 0, maskRight = 0;
+                long currentTime = System.currentTimeMillis();
+                long msPassed = currentTime % (ticksPerCycle * 50L);
+                float value = msPassed / (ticksPerCycle * 50F);
+                switch (dir) {
+                    case TOP:
+                        maskBottom = (1 - value) * getHeight();
+                        break;
+                    case BOTTOM:
+                        maskTop = (1 - value) * getHeight();
+                        break;
+                    case LEFT:
+                        maskRight = (1 - value) * getWidth();
+                        break;
+                    case RIGHT:
+                        maskLeft = (1 - value) * getWidth();
+                        break;
+                }
+                drawable.draw(matrixStack, xOffset, yOffset, Math.round(maskTop), Math.round(maskBottom), Math.round(maskLeft), Math.round(maskRight));
             }
         };
     }
@@ -130,7 +160,7 @@ public enum JEIGuiHelper implements IGuiHelper {
     @Override
     @NotNull
     public <V> IDrawable createDrawableIngredient(@NotNull V ingredient) {
-        EntryStack<?> stack = wrap(ingredient);
+        EntryStack<?> stack = ingredient.unwrapStack();
         return new IDrawable() {
             @Override
             public int getWidth() {

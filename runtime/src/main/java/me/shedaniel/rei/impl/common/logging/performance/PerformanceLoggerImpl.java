@@ -28,14 +28,16 @@ import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import it.unimi.dsi.fastutil.objects.Object2LongLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMaps;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class PerformanceLoggerImpl implements PerformanceLogger {
-    private final Map<String, PluginImpl> stages = Maps.newLinkedHashMap();
+    private final Map<String, PluginImpl> stages = Collections.synchronizedMap(Maps.newLinkedHashMap());
     
     @Override
     public Plugin stage(String stage) {
@@ -52,7 +54,7 @@ public class PerformanceLoggerImpl implements PerformanceLogger {
     private static class PluginImpl implements Plugin {
         private final Stopwatch stopwatch = Stopwatch.createUnstarted();
         private long totalTime = 0;
-        private Object2LongMap<Object> times = new Object2LongLinkedOpenHashMap<>();
+        private Object2LongMap<Object> times = Object2LongMaps.synchronize(new Object2LongLinkedOpenHashMap<>());
         
         @Override
         public Inner stage(String stage) {

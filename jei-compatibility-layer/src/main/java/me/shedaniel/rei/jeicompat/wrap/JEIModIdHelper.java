@@ -23,8 +23,10 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import net.minecraft.network.chat.Component;
@@ -33,8 +35,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public enum JEIModIdHelper implements IModIdHelper {
     INSTANCE;
     
@@ -60,7 +61,7 @@ public enum JEIModIdHelper implements IModIdHelper {
     @Override
     @NotNull
     public <T> List<Component> addModNameToIngredientTooltip(@NotNull List<Component> tooltip, @NotNull T ingredient, @NotNull IIngredientHelper<T> ingredientHelper) {
-        ResourceLocation location = wrap(ingredient).getIdentifier();
+        ResourceLocation location = ingredient.unwrapStack().getIdentifier();
         if (location != null) {
             ClientHelper.getInstance().appendModIdToTooltips(tooltip, location.getNamespace());
         }

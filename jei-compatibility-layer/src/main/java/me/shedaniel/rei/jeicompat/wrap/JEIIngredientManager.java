@@ -25,6 +25,7 @@ package me.shedaniel.rei.jeicompat.wrap;
 
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
@@ -46,44 +47,43 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public enum JEIIngredientManager implements IIngredientManager {
     INSTANCE;
     
     @Override
     @NotNull
     public <V> Collection<V> getAllIngredients(@NotNull IIngredientType<V> ingredientType) {
-        EntryType<V> definition = wrapEntryType(ingredientType);
+        EntryType<V> definition = ingredientType.unwrapType();
         return EntryRegistry.getInstance().getEntryStacks()
                 .filter(stack -> Objects.equals(stack.getType(), definition))
                 .<EntryStack<V>>map(EntryStack::cast)
-                .map(JEIPluginDetector::unwrap)
+                .map(JEIPluginDetector::jeiValue)
                 .collect(Collectors.toList());
     }
     
     @Override
     @NotNull
     public <V> IIngredientHelper<V> getIngredientHelper(@NotNull V ingredient) {
-        return new JEIIngredientHelper<>(findEntryDefinition(ingredient).cast());
+        return new JEIIngredientHelper<>(ingredient.unwrapDefinition().cast());
     }
     
     @Override
     @NotNull
     public <V> IIngredientHelper<V> getIngredientHelper(@NotNull IIngredientType<V> ingredientType) {
-        return new JEIIngredientHelper<>(findEntryDefinition(ingredientType).cast());
+        return new JEIIngredientHelper<>(ingredientType.unwrapDefinition().cast());
     }
     
     @Override
     @NotNull
     public <V> IIngredientRenderer<V> getIngredientRenderer(@NotNull V ingredient) {
-        return getIngredientRenderer(findEntryDefinition(ingredient).<V>cast()::getValueType);
+        return getIngredientRenderer(ingredient.unwrapDefinition().<V>cast()::getValueType);
     }
     
     @Override
     @NotNull
     public <V> IIngredientRenderer<V> getIngredientRenderer(@NotNull IIngredientType<V> ingredientType) {
-        return new JEIIngredientRenderer<>(ingredientType, wrapEntryDefinition(ingredientType).<V>cast().getRenderer());
+        return new JEIIngredientRenderer<>(ingredientType, ingredientType.unwrapDefinition().<V>cast().getRenderer());
     }
     
     @Override
@@ -94,14 +94,14 @@ public enum JEIIngredientManager implements IIngredientManager {
     
     @Override
     public <V> void addIngredientsAtRuntime(@NotNull IIngredientType<V> ingredientType, @NotNull Collection<V> ingredients) {
-        EntryRegistry.getInstance().addEntries(CollectionUtils.map(ingredients, v -> wrap(ingredientType, v)));
+        EntryRegistry.getInstance().addEntries(CollectionUtils.map(ingredients, v -> v.unwrapStack( ingredientType)));
     }
     
     @Override
     public <V> void removeIngredientsAtRuntime(@NotNull IIngredientType<V> ingredientType, @NotNull Collection<V> ingredients) {
         LongSet hash = new LongOpenHashSet();
         for (V ingredient : ingredients) {
-            hash.add(EntryStacks.hashExact(wrap(ingredientType, ingredient)));
+            hash.add(EntryStacks.hashExact(ingredient.unwrapStack( ingredientType)));
         }
         EntryRegistry.getInstance().removeEntryExactHashIf(hash::contains);
     }
@@ -109,7 +109,7 @@ public enum JEIIngredientManager implements IIngredientManager {
     @Override
     @NotNull
     public <V> IIngredientType<V> getIngredientType(@NotNull V ingredient) {
-        return wrap(ingredient).getDefinition().<V>cast()::getValueType;
+        return ingredient.unwrapStack().getDefinition().<V>cast()::getValueType;
     }
     
     @Override
@@ -120,7 +120,7 @@ public enum JEIIngredientManager implements IIngredientManager {
     
     @Override
     public <V> boolean isIngredientVisible(V ingredient, IIngredientFilter ingredientFilter) {
-        EntryStack<?> stack = wrap(ingredient);
+        EntryStack<?> stack = ingredient.unwrapStack();
         if (PluginManager.areAnyReloading()) {
             return !stack.isEmpty();
         } else {

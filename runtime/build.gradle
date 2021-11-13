@@ -16,6 +16,7 @@ dependencies {
     modCompileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
     modApi("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
     modApi("dev.architectury:architectury:${architectury_version}")
+    compileClasspath(annotationProcessor("org.projectlombok:lombok:1.18.22"))
     compileClasspath(project(path: ":api", configuration: "namedElements"))
 }
 

@@ -24,11 +24,13 @@
 package me.shedaniel.rei.jeicompat.unwrap;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
 import net.minecraft.client.Minecraft;
@@ -40,8 +42,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public class JEIIngredientRenderer<T> implements IIngredientRenderer<T> {
     private final IIngredientType<T> type;
     private final EntryRenderer<T> renderer;
@@ -54,14 +55,14 @@ public class JEIIngredientRenderer<T> implements IIngredientRenderer<T> {
     @Override
     public void render(@NotNull PoseStack matrices, int xPosition, int yPosition, @Nullable T ingredient) {
         Point point = PointHelper.ofMouse();
-        renderer.render(wrap(type, ingredient), matrices, new Rectangle(xPosition, yPosition, 16, 16),
+        renderer.render(ingredient.unwrapStack( type), matrices, new Rectangle(xPosition, yPosition, 16, 16),
                 point.x, point.y, Minecraft.getInstance().getDeltaFrameTime());
     }
     
     @Override
     @NotNull
     public List<Component> getTooltip(@NotNull T ingredient, @NotNull TooltipFlag tooltipFlag) {
-        Tooltip tooltip = renderer.getTooltip(wrap(type, ingredient), PointHelper.ofMouse());
+        Tooltip tooltip = renderer.getTooltip(ingredient.unwrapStack( type), PointHelper.ofMouse());
         if (tooltip != null) {
             return tooltip.getText();
         }

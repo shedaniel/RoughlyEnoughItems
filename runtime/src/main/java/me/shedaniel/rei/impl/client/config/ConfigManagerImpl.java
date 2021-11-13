@@ -49,6 +49,7 @@ import me.shedaniel.clothconfig2.gui.entries.TextListEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
+import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
@@ -82,6 +83,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 import static me.shedaniel.autoconfig.util.Utils.getUnsafely;
 import static me.shedaniel.autoconfig.util.Utils.setUnsafely;
@@ -116,11 +118,17 @@ public class ConfigManagerImpl implements ConfigManager {
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
                         Collections.singletonList(new SearchFilterSyntaxHighlightingEntry(new TranslatableComponent(i13n), getUnsafely(field, config, SyntaxHighlightingMode.COLORFUL), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
                 , (field) -> field.getType() == SyntaxHighlightingMode.class, ConfigObjectImpl.UseSpecialSearchFilterSyntaxHighlightingScreen.class);
-        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
-                        REIRuntime.getInstance().getPreviousContainerScreen() == null || Minecraft.getInstance().getConnection() == null || Minecraft.getInstance().getConnection().getRecipeManager() == null ?
-                                Collections.singletonList(new NoFilteringEntry(220, getUnsafely(field, config, new ArrayList<>()), getUnsafely(field, defaults), list -> setUnsafely(field, config, list)))
-                                :
-                                Collections.singletonList(new FilteringEntry(220, getUnsafely(field, config, new ArrayList<>()), ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules, getUnsafely(field, defaults), list -> setUnsafely(field, config, list), list -> ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules = Lists.newArrayList(list)))
+        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
+                    List<EntryStack<?>> value = CollectionUtils.map(Utils.<List<EntryStackProvider<?>>>getUnsafely(field, config, new ArrayList<>()), EntryStackProvider::provide);
+                    List<EntryStack<?>> defaultValue = CollectionUtils.map(Utils.<List<EntryStackProvider<?>>>getUnsafely(field, defaults), EntryStackProvider::provide);
+                    Consumer<List<EntryStack<?>>> saveConsumer = (newValue) -> {
+                        setUnsafely(field, config, CollectionUtils.map(newValue, EntryStackProvider::ofStack));
+                    };
+                    return REIRuntime.getInstance().getPreviousContainerScreen() == null || Minecraft.getInstance().getConnection() == null || Minecraft.getInstance().getConnection().getRecipeManager() == null ?
+                            Collections.singletonList(new NoFilteringEntry(220, value, defaultValue, saveConsumer))
+                            :
+                            Collections.singletonList(new FilteringEntry(220, value, ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules, defaultValue, saveConsumer, list -> ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules = Lists.newArrayList(list)));
+                }
                 , (field) -> field.getType() == List.class, ConfigObjectImpl.UseFilteringScreen.class);
         saveConfig();
         RoughlyEnoughItemsCore.LOGGER.info("Config loaded.");
@@ -165,8 +173,8 @@ public class ConfigManagerImpl implements ConfigManager {
             }
         });
         
-        // EntryStack
-        builder.registerSerializer(EntryStack.class, (stack, marshaller) -> {
+        // EntryStackProvider
+        builder.registerSerializer(EntryStackProvider.class, (stack, marshaller) -> {
             try {
                 return marshaller.serialize(stack.save());
             } catch (Exception e) {
@@ -174,20 +182,15 @@ public class ConfigManagerImpl implements ConfigManager {
                 return JsonNull.INSTANCE;
             }
         });
-        builder.registerDeserializer(Tag.class, EntryStack.class, (value, marshaller) -> {
-            try {
-                return EntryStack.read((CompoundTag) value);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return EntryStack.empty();
-            }
+        builder.registerDeserializer(Tag.class, EntryStackProvider.class, (value, marshaller) -> {
+            return EntryStackProvider.defer((CompoundTag) value);
         });
-        builder.registerDeserializer(String.class, EntryStack.class, (value, marshaller) -> {
+        builder.registerDeserializer(String.class, EntryStackProvider.class, (value, marshaller) -> {
             try {
-                return EntryStack.read(TagParser.parseTag(value));
-            } catch (Exception e) {
+                return EntryStackProvider.defer(TagParser.parseTag(value));
+            } catch (CommandSyntaxException e) {
                 e.printStackTrace();
-                return EntryStack.empty();
+                return EntryStackProvider.ofStack(EntryStack.empty());
             }
         });
         
@@ -254,12 +257,6 @@ public class ConfigManagerImpl implements ConfigManager {
     public void saveConfig() {
         if (getConfig().getFavoriteEntries() != null) {
             getConfig().getFavoriteEntries().removeIf(Objects::isNull);
-        }
-        if (getConfig().getFilteredStacks() != null) {
-            getConfig().getFilteredStacks().removeIf(EntryStack::isEmpty);
-            List<EntryStack<?>> normalizedFilteredStacks = CollectionUtils.map(getConfig().getFilteredStacks(), EntryStack::normalize);
-            getConfig().getFilteredStacks().clear();
-            getConfig().getFilteredStacks().addAll(normalizedFilteredStacks);
         }
         if (getConfig().getFilteringRules().stream().noneMatch(filteringRule -> filteringRule instanceof ManualFilteringRule)) {
             getConfig().getFilteringRules().add(new ManualFilteringRule());

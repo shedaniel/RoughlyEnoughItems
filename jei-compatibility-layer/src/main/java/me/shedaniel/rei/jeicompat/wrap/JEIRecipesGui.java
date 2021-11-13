@@ -23,12 +23,14 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.runtime.IRecipesGui;
@@ -39,15 +41,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.*;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public enum JEIRecipesGui implements IRecipesGui {
     INSTANCE;
     
     @Override
     public <V> void show(IFocus<V> focus) {
         ViewSearchBuilder builder = ViewSearchBuilder.builder();
-        EntryStack<?> stack = wrap(focus.getValue());
+        EntryStack<?> stack = focus.getValue().unwrapStack();
         if (focus.getMode() == IFocus.Mode.INPUT) {
             builder.addUsagesFor(stack);
         } else {
@@ -70,7 +71,7 @@ public enum JEIRecipesGui implements IRecipesGui {
         if (ingredient != null) return ingredient;
         EntryStack<?> focusedStack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen, PointHelper.ofMouse());
         if (focusedStack == null) return null;
-        if (focusedStack.getType() != wrapEntryType(ingredientType)) return null;
-        return unwrap(focusedStack.cast());
+        if (focusedStack.getType() != ingredientType.unwrapType()) return null;
+        return focusedStack.<T>cast().jeiValue();
     }
 }

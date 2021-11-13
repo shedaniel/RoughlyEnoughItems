@@ -23,10 +23,12 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import lombok.experimental.ExtensionMethod;
 import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.world.item.Item;
@@ -35,8 +37,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapContext;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public enum JEISubtypeRegistration implements ISubtypeRegistration {
     INSTANCE;
     
@@ -71,10 +72,10 @@ public enum JEISubtypeRegistration implements ISubtypeRegistration {
     }
     
     private static EntryComparator<ItemStack> wrapItemComparator(IIngredientSubtypeInterpreter<ItemStack> interpreter) {
-        return (context, stack) -> interpreter.apply(stack, wrapContext(context)).hashCode();
+        return (context, stack) -> interpreter.apply(stack, context.wrapContext()).hashCode();
     }
     
     private static EntryComparator<dev.architectury.fluid.FluidStack> wrapFluidComparator(IIngredientSubtypeInterpreter<FluidStack> interpreter) {
-        return (context, stack) -> interpreter.apply(FluidStackHooksForge.toForge(stack), wrapContext(context)).hashCode();
+        return (context, stack) -> interpreter.apply(FluidStackHooksForge.toForge(stack), context.wrapContext()).hashCode();
     }
 }

@@ -23,15 +23,18 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import lombok.experimental.ExtensionMethod;
 import dev.architectury.event.CompoundEventResult;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
+import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.registry.screen.DisplayBoundsProvider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.gui.handlers.*;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import net.minecraft.client.gui.screens.Screen;
@@ -50,9 +53,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrap;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public enum JEIGuiHandlerRegistration implements IGuiHandlerRegistration {
     INSTANCE;
     
@@ -97,7 +98,7 @@ public enum JEIGuiHandlerRegistration implements IGuiHandlerRegistration {
             Object ingredient = focusedStack.apply((T) screen, (double) mouse.x, (double) mouse.y);
             if (ingredient == null) return CompoundEventResult.pass();
             
-            return CompoundEventResult.interruptTrue(wrap(ingredient));
+            return CompoundEventResult.interruptTrue(ingredient.unwrapStack());
         });
     }
     
@@ -111,7 +112,7 @@ public enum JEIGuiHandlerRegistration implements IGuiHandlerRegistration {
     public <T extends Screen> void addGhostIngredientHandler(@NotNull Class<T> guiClass, @NotNull IGhostIngredientHandler<T> handler) {
         ScreenRegistry.getInstance().registerDraggableStackVisitor(new DraggableStackVisitor<T>() {
             public Optional<IGhostIngredientHandler.Target<Object>> canAccept(DraggingContext<T> context, DraggableStack stack) {
-                List<IGhostIngredientHandler.Target<Object>> list = handler.getTargets(context.getScreen(), unwrap(stack.getStack()), true);
+                List<IGhostIngredientHandler.Target<Object>> list = handler.getTargets(context.getScreen(), stack.getStack().jeiValue(), true);
                 for (IGhostIngredientHandler.Target<Object> target : list) {
                     if (target.getArea().contains(context.getCurrentPosition().x, context.getCurrentPosition().y)) {
                         return Optional.of(target);
@@ -121,16 +122,16 @@ public enum JEIGuiHandlerRegistration implements IGuiHandlerRegistration {
             }
             
             @Override
-            public boolean acceptDraggedStack(DraggingContext<T> context, DraggableStack stack) {
+            public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<T> context, DraggableStack stack) {
                 return canAccept(context, stack).map(target -> {
-                    target.accept(unwrap(stack.getStack().copy()));
+                    target.accept(stack.getStack().copy().jeiValue());
                     return Unit.INSTANCE;
-                }).isPresent();
+                }).isPresent() ? DraggedAcceptorResult.ACCEPTED : DraggedAcceptorResult.PASS;
             }
             
             @Override
             public Stream<BoundsProvider> getDraggableAcceptingBounds(DraggingContext<T> context, DraggableStack stack) {
-                return Stream.of(BoundsProvider.ofRectangles(() -> handler.getTargets(context.getScreen(), unwrap(stack.getStack()), true).stream()
+                return Stream.of(BoundsProvider.ofRectangles(() -> handler.getTargets(context.getScreen(), stack.getStack().jeiValue(), true).stream()
                         .map(IGhostIngredientHandler.Target::getArea)
                         .map(rect2i -> new Rectangle(rect2i.getX(), rect2i.getY(), rect2i.getWidth(), rect2i.getHeight()))
                         .iterator()));

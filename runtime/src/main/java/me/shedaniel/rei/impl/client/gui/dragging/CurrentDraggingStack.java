@@ -24,16 +24,15 @@
 package me.shedaniel.rei.impl.client.gui.dragging;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.math.FloatingRectangle;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
-import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.animator.NumberAnimator;
+import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
+import me.shedaniel.rei.api.client.gui.drag.*;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.common.util.Animator;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -101,7 +100,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
             while (iterator.hasNext()) {
                 ShapeBounds bounds = iterator.next();
                 bounds.update(delta);
-                if (bounds.alpha.target() == 0 && bounds.alpha.doubleValue() <= 2) {
+                if (bounds.alpha.target() == 0 && bounds.alpha.value() <= 2) {
                     iterator.remove();
                 } else {
                     bounds.shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
@@ -118,12 +117,14 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
         while (iterator.hasNext()) {
             RenderBackEntry renderBackEntry = iterator.next();
             renderBackEntry.update(delta);
-            if (Math.abs(renderBackEntry.x.doubleValue() - renderBackEntry.x.target()) <= 2 && Math.abs(renderBackEntry.y.doubleValue() - renderBackEntry.y.target()) <= 2) {
+            FloatingRectangle value = renderBackEntry.bounds.value();
+            FloatingRectangle target = renderBackEntry.bounds.target();
+            if (value.width < 2 || value.height < 2 || (Math.abs(value.x - target.x) <= 2 && Math.abs(value.y - target.y) <= 2 && Math.abs(value.width - target.width) <= 1 && Math.abs(value.height - target.height) <= 1)) {
                 iterator.remove();
             } else {
                 matrices.pushPose();
                 matrices.translate(0, 0, 600);
-                renderBackEntry.stack.render(matrices, new Rectangle(renderBackEntry.x.intValue(), renderBackEntry.y.intValue(), 16, 16), mouseX, mouseY, delta);
+                renderBackEntry.stack.render(matrices, value.getBounds(), mouseX, mouseY, delta);
                 matrices.popPose();
             }
         }
@@ -156,8 +157,8 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     private boolean drop() {
         if (entry != null && entry.dragging) {
-            boolean released = visitor.acceptDraggedStack(this, entry.stack);
-            entry.stack.release(released);
+            DraggedAcceptorResult result = visitor.acceptDraggedStackWithResult(this, entry.stack);
+            entry.stack.release(result);
             entry = null;
             return true;
         }
@@ -185,7 +186,15 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     @Override
     public void renderBackToPosition(DraggableStack stack, Point initialPosition, Supplier<Point> position) {
-        backToOriginals.add(new RenderBackEntry(stack, initialPosition, position));
+        backToOriginals.add(new RenderBackEntry(stack, new Rectangle(initialPosition.x - 8, initialPosition.y - 8, 16, 16), () -> {
+            Point point = position.get();
+            return new Rectangle(point.x, point.y, 16, 16);
+        }));
+    }
+    
+    @Override
+    public void renderBackToPosition(DraggableStack stack, Rectangle initialPosition, Supplier<Rectangle> bounds) {
+        backToOriginals.add(new RenderBackEntry(stack, initialPosition, bounds));
     }
     
     private class DraggableEntry {
@@ -210,12 +219,12 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     private static class ShapeBounds {
         private VoxelShape shape;
-        private Animator alpha;
+        private NumberAnimator<Double> alpha;
         private int hash;
         
         public ShapeBounds(VoxelShape shape) {
             this.shape = shape;
-            this.alpha = new Animator(0);
+            this.alpha = ValueAnimator.ofDouble(0);
             this.hash = shape.toAabbs().hashCode();
         }
         
@@ -238,31 +247,23 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     private static class RenderBackEntry {
         private final DraggableStack stack;
-        private final Supplier<Point> position;
-        private Animator x = new Animator();
-        private Animator y = new Animator();
+        private final Supplier<Rectangle> position;
+        private ValueAnimator<FloatingRectangle> bounds = ValueAnimator.ofFloatingRectangle();
         private int lastDestination = -1;
         
-        public RenderBackEntry(DraggableStack stack, Point initialPosition, Supplier<Point> position) {
+        public RenderBackEntry(DraggableStack stack, Rectangle initialPosition, Supplier<Rectangle> position) {
             this.stack = stack;
-            this.x.setAs(initialPosition.x - 8);
-            this.y.setAs(initialPosition.y - 8);
+            this.bounds.setAs(new FloatingRectangle(initialPosition));
             this.position = position;
         }
         
-        public Point getPosition() {
+        public Rectangle getPosition() {
             return position.get();
         }
         
         public void update(double delta) {
-            this.x.update(delta);
-            this.y.update(delta);
-            Point position = getPosition();
-            if (lastDestination != position.hashCode()) {
-                lastDestination = position.hashCode();
-                this.x.setTo(position.x, 200);
-                this.y.setTo(position.y, 200);
-            }
+            this.bounds.update(delta);
+            this.bounds.setTo(new FloatingRectangle(getPosition()), 200);
         }
     }
 }

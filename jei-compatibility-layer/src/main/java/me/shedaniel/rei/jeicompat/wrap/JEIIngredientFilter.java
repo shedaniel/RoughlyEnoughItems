@@ -24,10 +24,13 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import com.google.common.collect.ImmutableList;
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.runtime.IIngredientFilter;
 import org.jetbrains.annotations.NotNull;
@@ -36,9 +39,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.unwrap;
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.wrapEntryType;
-
+@ExtensionMethod(JEIPluginDetector.class)
 public enum JEIIngredientFilter implements IIngredientFilter {
     INSTANCE;
     
@@ -55,13 +56,14 @@ public enum JEIIngredientFilter implements IIngredientFilter {
     
     @Override
     public <T> List<T> getFilteredIngredients(IIngredientType<T> ingredientType) {
-        List<EntryStack<?>> filteredStacks = ConfigObject.getInstance().getFilteredStacks();
-        EntryType<T> type = wrapEntryType(ingredientType);
+        List<EntryStackProvider<?>> filteredStacks = ConfigObject.getInstance().getFilteredStackProviders();
+        EntryType<T> type = ingredientType.unwrapType();
         T[] filtered = (T[]) Array.newInstance(ingredientType.getIngredientClass(), filteredStacks.size());
         int i = 0;
-        for (EntryStack<?> stack : filteredStacks) {
-            if (stack.getType() == type) {
-                filtered[i++] = unwrap(stack.cast());
+        for (EntryStackProvider<?> provider : filteredStacks) {
+            EntryStack<?> stack = provider.provide();
+            if (stack.getType() == type && !stack.isEmpty()) {
+                filtered[i++] = stack.<T>cast().jeiValue();
             }
         }
         return ImmutableList.copyOf(Arrays.copyOf(filtered, i));
