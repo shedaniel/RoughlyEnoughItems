@@ -27,10 +27,8 @@ import me.shedaniel.math.Rectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -52,10 +50,10 @@ public interface DraggableStackVisitor<T extends Screen> extends Comparable<Drag
             }
             
             @Override
-            public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<T> context, DraggableStack stack) {
+            public DraggedAcceptorResult acceptDraggedStack(DraggingContext<T> context, DraggableStack stack) {
                 for (DraggableStackVisitor<T> visitor : visitors.get()) {
                     if (visitor.isHandingScreen(context.getScreen())) {
-                        DraggedAcceptorResult result = Objects.requireNonNull(visitor.acceptDraggedStackWithResult(context, stack));
+                        DraggedAcceptorResult result = Objects.requireNonNull(visitor.acceptDraggedStack(context, stack));
                         if (result != DraggedAcceptorResult.PASS) return result;
                     }
                 }
@@ -71,32 +69,6 @@ public interface DraggableStackVisitor<T extends Screen> extends Comparable<Drag
         };
     }
     
-    @Deprecated(forRemoval = true)
-    @ApiStatus.ScheduledForRemoval
-    default Optional<Acceptor> visitDraggedStack(DraggingContext<T> context, DraggableStack stack) {
-        return Optional.empty();
-    }
-    
-    /**
-     * Accepts a dragged stack, implementations of this function should check if the {@code context} is within
-     * boundaries of the accepting boundaries.
-     *
-     * @param context the context of the current dragged stack on the overlay
-     * @param stack   the stack being dragged
-     * @return whether the stack is accepted by the visitor
-     */
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    default boolean acceptDraggedStack(DraggingContext<T> context, DraggableStack stack) {
-        Optional<Acceptor> acceptor = visitDraggedStack(context, stack);
-        if (acceptor.isPresent()) {
-            acceptor.get().accept(stack);
-            return true;
-        } else {
-            return false;
-        }
-    }
-    
     /**
      * Accepts a dragged stack, implementations of this function should check if the {@code context} is within
      * boundaries of the accepting boundaries.
@@ -105,8 +77,8 @@ public interface DraggableStackVisitor<T extends Screen> extends Comparable<Drag
      * @param stack   the stack being dragged
      * @return the result of the visitor
      */
-    default DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<T> context, DraggableStack stack) {
-        return acceptDraggedStack(context, stack) ? DraggedAcceptorResult.CONSUMED : DraggedAcceptorResult.PASS;
+    default DraggedAcceptorResult acceptDraggedStack(DraggingContext<T> context, DraggableStack stack) {
+        return DraggedAcceptorResult.PASS;
     }
     
     /**

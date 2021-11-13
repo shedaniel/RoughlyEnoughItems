@@ -209,7 +209,6 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
              PerformanceLogger.Plugin perfLogger = RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.stage("Pre Registration")) {
             pluginSection(stage, "pre-register/", plugins, null, plugin -> {
                 try (PerformanceLogger.Plugin.Inner inner = perfLogger.plugin(new Pair<>(plugin.provider, plugin.plugin))) {
-                    plugin.plugin.preRegister();
                     ((REIPlugin<P>) plugin.plugin).preStage(this, stage);
                 }
             });
@@ -227,7 +226,6 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
              PerformanceLogger.Plugin perfLogger = RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.stage("Post Registration")) {
             pluginSection(stage, "post-register/", plugins, null, plugin -> {
                 try (PerformanceLogger.Plugin.Inner inner = perfLogger.plugin(new Pair<>(plugin.provider, plugin.plugin))) {
-                    plugin.plugin.postRegister();
                     ((REIPlugin<P>) plugin.plugin).postStage(this, stage);
                 }
             });

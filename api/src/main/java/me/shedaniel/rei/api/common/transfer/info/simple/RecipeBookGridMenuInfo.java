@@ -29,6 +29,12 @@ import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 
 public class RecipeBookGridMenuInfo<T extends RecipeBookMenu<?>, D extends SimpleGridMenuDisplay> implements SimpleGridMenuInfo<T, D> {
+    private final D display;
+    
+    public RecipeBookGridMenuInfo(D display) {
+        this.display = display;
+    }
+    
     @Override
     public int getCraftingResultSlotIndex(T menu) {
         return menu.getResultSlotIndex();
@@ -57,5 +63,10 @@ public class RecipeBookGridMenuInfo<T extends RecipeBookMenu<?>, D extends Simpl
                 finder.addNormalItem(stack);
             }
         });
+    }
+    
+    @Override
+    public D getDisplay() {
+        return display;
     }
 }

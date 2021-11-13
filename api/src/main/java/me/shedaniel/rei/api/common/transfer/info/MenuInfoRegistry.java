@@ -32,7 +32,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -50,16 +49,10 @@ public interface MenuInfoRegistry extends Reloadable<REIServerPlugin> {
     <D extends Display> void registerGeneric(Predicate<CategoryIdentifier<?>> categoryPredicate, MenuInfoProvider<?, D> menuInfo);
     
     @Nullable
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> get(CategoryIdentifier<D> category, Class<C> menuClass);
-    
-    @Nullable
     @Environment(EnvType.CLIENT)
-    <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> getClient(D display, C menu);
+    <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> getClient(D display, MenuSerializationContext<C, ?, D> context, C menu);
     
-    @Nullable
-    <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> get(CategoryIdentifier<D> category, C menu, MenuSerializationProviderContext<C, ?, D> context, CompoundTag tag);
+    @Nullable <C extends AbstractContainerMenu, D extends Display> MenuInfo<C, D> get(CategoryIdentifier<D> category, C menu, MenuSerializationContext<C, ?, D> context, CompoundTag tag);
     
     int infoSize();
 }

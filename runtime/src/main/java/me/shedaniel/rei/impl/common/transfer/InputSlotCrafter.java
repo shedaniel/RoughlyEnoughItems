@@ -49,7 +49,6 @@ import java.util.Objects;
 public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Container, D extends Display> implements MenuInfoContext<T, ServerPlayer, D> {
     protected CategoryIdentifier<D> category;
     protected T container;
-    protected D display;
     protected MenuInfo<T, D> menuInfo;
     private Iterable<SlotAccessor> inputStacks;
     private Iterable<SlotAccessor> inventoryStacks;
@@ -60,10 +59,6 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
         this.container = container;
     }
     
-    public void setDisplay(D display) {
-        this.display = display;
-    }
-    
     public void setMenuInfo(MenuInfo<T, D> menuInfo) {
         this.menuInfo = menuInfo;
     }
@@ -72,7 +67,6 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
         InputSlotCrafter<T, C, D> crafter = new InputSlotCrafter<>(category, menu);
         MenuInfo<T, D> menuInfo = Objects.requireNonNull(MenuInfoRegistry.getInstance().get(category, menu, crafter, display), "Container Info does not exist on the server!");
         crafter.setMenuInfo(menuInfo);
-        crafter.setDisplay(menuInfo.read(crafter, display));
         crafter.fillInputSlots(player, hasShift);
         return crafter;
     }
@@ -192,13 +186,8 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
     }
     
     @Override
-    public MenuInfo<T, D> getContainerInfo() {
-        return menuInfo;
-    }
-    
-    @Override
     public D getDisplay() {
-        return display;
+        return menuInfo.getDisplay();
     }
     
     @Override

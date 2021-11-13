@@ -190,14 +190,14 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         INSTANCE;
         
         @Override
-        public DataResult<GameModeFavoriteEntry> readResult(CompoundTag object) {
+        public DataResult<GameModeFavoriteEntry> read(CompoundTag object) {
             String stringValue = object.getString(KEY);
             GameType type = stringValue.equals("NOT_SET") ? null : GameType.valueOf(stringValue);
             return DataResult.success(new GameModeFavoriteEntry(type), Lifecycle.stable());
         }
         
         @Override
-        public DataResult<GameModeFavoriteEntry> fromArgsResult(Object... args) {
+        public DataResult<GameModeFavoriteEntry> fromArgs(Object... args) {
             if (args.length == 0) return DataResult.error("Cannot create GameModeFavoriteEntry from empty args!");
             if (!(args[0] instanceof GameType type))
                 return DataResult.error("Creation of GameModeFavoriteEntry from args expected GameType as the first argument!");

@@ -197,14 +197,14 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
         INSTANCE;
         
         @Override
-        public DataResult<WeatherFavoriteEntry> readResult(CompoundTag object) {
+        public DataResult<WeatherFavoriteEntry> read(CompoundTag object) {
             String stringValue = object.getString(KEY);
             Weather weather = stringValue.equals("NOT_SET") ? null : Weather.valueOf(stringValue);
             return DataResult.success(new WeatherFavoriteEntry(weather), Lifecycle.stable());
         }
         
         @Override
-        public DataResult<WeatherFavoriteEntry> fromArgsResult(Object... args) {
+        public DataResult<WeatherFavoriteEntry> fromArgs(Object... args) {
             if (args.length == 0) return DataResult.error("Cannot create WeatherFavoriteEntry from empty args!");
             if (!(args[0] instanceof Weather weather))
                 return DataResult.error("Creation of WeatherFavoriteEntry from args expected Weather as the first argument!");

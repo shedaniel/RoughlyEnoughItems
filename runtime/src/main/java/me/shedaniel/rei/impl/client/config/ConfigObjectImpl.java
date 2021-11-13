@@ -35,8 +35,6 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.*;
-import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -48,7 +46,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @ApiStatus.Internal
@@ -307,11 +304,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public List<FavoriteEntry> getFavoriteEntries() {
         return basics.favorites;
-    }
-    
-    @Override
-    public List<EntryStack<?>> getFilteredStacks() {
-        return Collections.unmodifiableList(CollectionUtils.map(advanced.filtering.filteredStacks, EntryStackProvider::provide));
     }
     
     @Override

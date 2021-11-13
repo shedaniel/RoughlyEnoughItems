@@ -87,10 +87,6 @@ public interface Tooltip {
     
     int getY();
     
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    List<Component> getText();
-    
     List<Entry> entries();
     
     List<TooltipComponent> components();
