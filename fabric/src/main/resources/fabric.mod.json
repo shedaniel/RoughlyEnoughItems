@@ -35,28 +35,81 @@
   ],
   "custom": {
     "rei:translators": {
-      "English": ["shedaniel"],
-      "Japanese": ["swordglowsblue", "hinataaki"],
+      "English": [
+        {
+          "name": "shedaniel",
+          "proofreader": true
+        }
+      ],
+      "Japanese": ["swordglowsblue", "hinataaki", "LiuTed", "wolf0023"],
       "Chinese Simplified": [
         "XuyuEre", "shedaniel", "SciUniv_Moring", "Takakura-Anri", "liushuyu", "lkxian17084", "MynameisTT", "detiam", "Snapshot_light", "JerryHan", "WarrenWN",
-        "Lograthmic"
+        "Lograthmic", "LiuTed", "judema", "SmallMAZ", "ChengBing", "HCIO", "WeiHengYi"
       ],
-      "Chinese Traditional": ["hugoalh", "gxy17886", "shedaniel", "961111ray"],
-      "French": ["Yanis48", "Koockies", "dagdar", "samnamstyle123"],
-      "German": ["MelanX", "guntram7", "tabmeier12", "Siphalor", "M-S-72", "SirClaver", "bugginggg", "wohlhabend", "Eiim", "valoeghese", "luro02"],
-      "Estonian": ["Madis0"],
-      "Portuguese": ["thiagokenis", "KewaiiGamer"],
-      "Portuguese Brazilian": ["thiagokenis", "joaoh1", "yuriob262", "Pinkstyles", "felipemk67", "Stevolaff", "stann0x"],
-      "LOLCAT": ["shedaniel", "RaxedMC", "lkxian17084"],
-      "Upside Down English": ["shedaniel", "magnusk28", "scarzdz"],
+      "Chinese Traditional": [
+        "hugoalh", "gxy17886", {
+          "name": "shedaniel",
+          "proofreader": true
+        }, "961111ray", "s36845283", "sileence114"
+      ],
+      "Chinese Traditional Hong Kong": [
+        {
+          "name": "shedaniel",
+          "proofreader": true
+        }, "timo301105", "Limeboy0603"
+      ],
+      "French": [
+        "Yanis48", "Koockies", "dagdar", "samnamstyle123", "Hugman76", "AdriaAyl", "schlaft", "YanisBft", "jean.jarno", "Juknum",
+        "JustSky", "Myuui"
+      ],
+      "German": [
+        "MelanX", "guntram7", "tabmeier12", "Siphalor", "M-S-72", "SirClaver", "bugginggg", "wohlhabend", "Eiim", "valoeghese", "luro02", "MrPiggo",
+        "firippukun", "ProManu09", "HeikoHDE", "Slav_Anime_Blin", "maunben", "Mari_023", "cctitan53", "Jummit"
+      ],
+      "Estonian": [
+        {
+          "name": "MadisO",
+          "proofreader": true
+        }
+      ],
+      "Portuguese": ["thiagokenis", "KewaiiGamer", "manuel.canhoto"],
+      "Portuguese Brazilian": [
+        "thiagokenis", "joaoh1", "yuriob262", "Pinkstyles", "felipemk67", "Stevolaff", "stann0x", "_ImKing", "filipesn1512", {
+          "name": "Maneschy",
+          "proofreader": true
+        },
+        "zLuket", "MathrusRibeiro0770"
+      ],
+      "LOLCAT": [
+        {
+          "name": "shedaniel",
+          "proofreader": true
+        }, "RaxedMC", "lkxian17084"
+      ],
+      "Upside Down English": [
+        {
+          "name": "shedaniel",
+          "proofreader": true
+        }, "magnusk28", "scarzdz"
+      ],
       "Bulgarian": ["geniiii", "Dremski"],
       "Russian": [
+        {
+          "name": "alicecarroll",
+          "proofreader": true
+        },
         "MrYonter", "kwmika1girl", "LimyChitou", "Great_Manalal", "s3rbug", "TheByKotik", "ebogish", "xqr.", "scarzdz", "JCat", "map788", "kyrtion", "CanslerW",
-        "MinerChAI", "nef1k"
+        "MinerChAI", "nef1k", "Romz24", "zhesnyovskyy", "FormerlyAndying", "aiexz", "parkurnic", "axelBaher", "Martden", "CherryBloom"
       ],
-      "Polish": ["mikolajkazmierczak", "Piteriuz", "BeetMacol"],
+      "Polish": ["mikolajkazmierczak", "Piteriuz", "BeetMacol", "Sebuniasty", "agarman12345", "ArtSnail", "K0RR"],
       "Norwegian": ["CanslerW"],
-      "Turkish": ["NOYB"]
+      "Turkish": ["NOYB", "ege_e", "Winnerxl", "MrEnoX"],
+      "Ukrainian": ["bilchuk.radomyr"],
+      "Spanish": ["jeremysolis33", "acookienot", "The_Biome", "itzsara200707", "Ekain06", "DEStruyyec", "holakasecabra"],
+      "Italian": ["luciobortoletto", "b.carmelo.92"],
+      "Czech": ["stanik123"],
+      "Danish": ["ChristianLW"],
+      "Hebrew": ["avivyona", "OddedC"]
     }
   },
   "depends": {

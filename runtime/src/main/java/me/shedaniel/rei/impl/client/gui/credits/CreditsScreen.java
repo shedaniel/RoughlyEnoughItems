@@ -25,16 +25,19 @@ package me.shedaniel.rei.impl.client.gui.credits;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.platform.Platform;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TextCreditsItem;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Tuple;
@@ -65,29 +68,32 @@ public class CreditsScreen extends Screen {
         return super.keyPressed(int_1, int_2, int_3);
     }
     
+    public static class TranslatorEntry {
+        private final String name;
+        private final boolean proofreader;
+        
+        public TranslatorEntry(String name) {
+            this(name, false);
+        }
+        
+        public TranslatorEntry(String name, boolean proofreader) {
+            this.name = name;
+            this.proofreader = proofreader;
+        }
+        
+        public String getName() {
+            return name;
+        }
+    }
+    
     @Override
     public void init() {
         addWidget(entryListWidget = new CreditsEntryListWidget(minecraft, width, height, 32, height - 32));
         entryListWidget.creditsClearEntries();
-        List<Tuple<String, String>> translators = Lists.newArrayList();
+        List<Tuple<String, List<TranslatorEntry>>> translators = Lists.newArrayList();
         Exception[] exception = {null};
-        /*FabricLoader.getInstance().getModContainer("roughlyenoughitems").ifPresent(rei -> {
-            try {
-                if (rei.getMetadata().containsCustomValue("rei:translators")) {
-                    CustomValue.CvObject jsonObject = rei.getMetadata().getCustomValue("rei:translators").getAsObject();
-                    jsonObject.forEach(entry -> {
-                        CustomValue value = entry.getValue();
-                        String behind = value.getType() == CustomValue.CvType.ARRAY ? Lists.newArrayList(value.getAsArray().iterator()).stream().map(CustomValue::getAsString).sorted(String::compareToIgnoreCase).collect(Collectors.joining(", ")) : value.getAsString();
-                        translators.add(new Tuple<>(entry.getKey(), behind));
-                    });
-                }
-                translators.sort(Comparator.comparing(Tuple::getA, String::compareToIgnoreCase));
-            } catch (Exception e) {
-                exception[0] = e;
-                e.printStackTrace();
-            }
-        });*/
-        List<Tuple<String, String>> translatorsMapped = translators.stream().map(pair -> {
+        fillTranslators(exception, translators);
+        List<Tuple<String, List<TranslatorEntry>>> translatorsMapped = translators.stream().map(pair -> {
             return new Tuple<>(
                     "  " + (I18n.exists("language.roughlyenoughitems." + pair.getA().toLowerCase(Locale.ROOT).replace(' ', '_')) ? I18n.get("language.roughlyenoughitems." + pair.getA().toLowerCase(Locale.ROOT).replace(' ', '_')) : pair.getA()),
                     pair.getB()
@@ -102,8 +108,20 @@ public class CreditsScreen extends Screen {
                         entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableTextComponent("  at " + traceElement)));
                 } else {
                     int maxWidth = translatorsMapped.stream().mapToInt(pair -> font.width(pair.getA())).max().orElse(0) + 5;
-                    for (Tuple<String, String> pair : translatorsMapped) {
-                        entryListWidget.creditsAddEntry(new TranslationCreditsItem(new TranslatableComponent(pair.getA()), new TranslatableComponent(pair.getB()), i - maxWidth - 10, maxWidth));
+                    for (Tuple<String, List<TranslatorEntry>> pair : translatorsMapped) {
+                        MutableComponent text = new TextComponent("");
+                        boolean isFirst = true;
+                        for (TranslatorEntry entry : pair.getB()) {
+                            if (!isFirst) {
+                                text = text.append(new TextComponent(", "));
+                            }
+                            isFirst = false;
+                            MutableComponent component = new TextComponent(entry.getName());
+                            if (entry.proofreader)
+                                component = component.withStyle(ChatFormatting.GOLD);
+                            text = text.append(component);
+                        }
+                        entryListWidget.creditsAddEntry(new TranslationCreditsItem(new TranslatableComponent(pair.getA()), text, i - maxWidth - 10, maxWidth));
                     }
                 }
             } else entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableTextComponent(line)));
@@ -113,6 +131,11 @@ public class CreditsScreen extends Screen {
         entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableTextComponent("Support the project via Patreon!"), "https://patreon.com/shedaniel", entryListWidget.getItemWidth(), true));
         entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorChatListener.NO_TITLE));
         addRenderableWidget(buttonDone = new Button(width / 2 - 100, height - 26, 200, 20, new TranslatableComponent("gui.done"), button -> openPrevious()));
+    }
+    
+    @ExpectPlatform
+    private static void fillTranslators(Exception[] exception, List<Tuple<String, List<TranslatorEntry>>> translators) {
+        throw new AssertionError();
     }
     
     private void openPrevious() {
