@@ -260,6 +260,7 @@
   "language.roughlyenoughitems.japanese": "日文",
   "language.roughlyenoughitems.chinese_simplified": "簡體中文",
   "language.roughlyenoughitems.chinese_traditional": "繁體中文",
+  "language.roughlyenoughitems.chinese_traditional_hong_kong": "繁體中文（香港）",
   "language.roughlyenoughitems.french": "法文",
   "language.roughlyenoughitems.german": "德文",
   "language.roughlyenoughitems.estonian": "愛沙尼亞文",
@@ -269,5 +270,13 @@
   "language.roughlyenoughitems.upside_down_english": "顛倒英文",
   "language.roughlyenoughitems.bulgarian": "保加利亞文",
   "language.roughlyenoughitems.russian": "俄文",
-  "language.roughlyenoughitems.polish": "波蘭文"
+  "language.roughlyenoughitems.polish": "波蘭文",
+  "language.roughlyenoughitems.norwegian": "挪威文",
+  "language.roughlyenoughitems.turkish": "土耳其文",
+  "language.roughlyenoughitems.ukrainian": "烏克蘭文",
+  "language.roughlyenoughitems.spanish": "西班牙文",
+  "language.roughlyenoughitems.italian": "義大利文",
+  "language.roughlyenoughitems.czech": "捷克文",
+  "language.roughlyenoughitems.danish": "丹麥文",
+  "language.roughlyenoughitems.hebrew": "希伯來文"
 }
