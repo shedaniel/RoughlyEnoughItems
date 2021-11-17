@@ -60,6 +60,6 @@
     }
   },
   "depends": {
-    "minecraft": "1.18-beta.1"
+    "minecraft": "1.18-beta.2"
   }
 }
