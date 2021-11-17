@@ -265,6 +265,7 @@
   "language.roughlyenoughitems.japanese": "Japanese",
   "language.roughlyenoughitems.chinese_simplified": "Chinese Simplified",
   "language.roughlyenoughitems.chinese_traditional": "Chinese Traditional",
+  "language.roughlyenoughitems.chinese_traditional_hong_kong": "Chinese Traditional, Hong Kong",
   "language.roughlyenoughitems.french": "French",
   "language.roughlyenoughitems.german": "German",
   "language.roughlyenoughitems.estonian": "Estonian",
@@ -274,5 +275,13 @@
   "language.roughlyenoughitems.upside_down_english": "Upside Down English",
   "language.roughlyenoughitems.bulgarian": "Bulgarian",
   "language.roughlyenoughitems.russian": "Russian",
-  "language.roughlyenoughitems.polish": "Polish"
+  "language.roughlyenoughitems.polish": "Polish",
+  "language.roughlyenoughitems.norwegian": "Norwegian",
+  "language.roughlyenoughitems.turkish": "Turkish",
+  "language.roughlyenoughitems.ukrainian": "Ukrainian",
+  "language.roughlyenoughitems.spanish": "Spanish",
+  "language.roughlyenoughitems.italian": "Italian",
+  "language.roughlyenoughitems.czech": "Czech",
+  "language.roughlyenoughitems.danish": "Danish",
+  "language.roughlyenoughitems.hebrew": "Hebrew"
 }
