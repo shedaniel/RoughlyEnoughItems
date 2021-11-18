@@ -95,6 +95,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ComposterBlock;
+import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
@@ -146,7 +147,8 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 new DefaultCraftingCategory(),
                 new DefaultCookingCategory(SMELTING, EntryStacks.of(Items.FURNACE), "category.rei.smelting"),
                 new DefaultCookingCategory(SMOKING, EntryStacks.of(Items.SMOKER), "category.rei.smoking"),
-                new DefaultCookingCategory(BLASTING, EntryStacks.of(Items.BLAST_FURNACE), "category.rei.blasting"), new DefaultCampfireCategory(),
+                new DefaultCookingCategory(BLASTING, EntryStacks.of(Items.BLAST_FURNACE), "category.rei.blasting"),
+                new DefaultCampfireCategory(),
                 new DefaultStoneCuttingCategory(),
                 new DefaultFuelCategory(),
                 new DefaultBrewingCategory(),
@@ -158,6 +160,10 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 new DefaultBeaconPaymentCategory(),
                 new DefaultTillingCategory(),
                 new DefaultPathingCategory(),
+                new DefaultWaxingCategory(),
+                new DefaultWaxScrapingCategory(),
+                new DefaultOxidizingCategory(),
+                new DefaultOxidationScrapingCategory(),
                 new DefaultInformationCategory()
         );
         
@@ -169,6 +175,10 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.removePlusButton(STRIPPING);
         registry.removePlusButton(TILLING);
         registry.removePlusButton(PATHING);
+        registry.removePlusButton(WAXING);
+        registry.removePlusButton(WAX_SCRAPING);
+        registry.removePlusButton(OXIDIZING);
+        registry.removePlusButton(OXIDATION_SCRAPING);
         
         registry.addWorkstations(CRAFTING, EntryStacks.of(Items.CRAFTING_TABLE));
         registry.addWorkstations(SMELTING, EntryStacks.of(Items.FURNACE));
@@ -183,11 +193,14 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.addWorkstations(SMITHING, EntryStacks.of(Items.SMITHING_TABLE));
         registry.addWorkstations(BEACON_BASE, EntryStacks.of(Items.BEACON));
         registry.addWorkstations(BEACON_PAYMENT, EntryStacks.of(Items.BEACON));
+        registry.addWorkstations(WAXING, EntryStacks.of(Items.HONEYCOMB));
         
         Set<Item> axes = Sets.newHashSet(), hoes = Sets.newHashSet(), shovels = Sets.newHashSet();
         EntryRegistry.getInstance().getEntryStacks().filter(stack -> stack.getValueType() == ItemStack.class).map(stack -> ((ItemStack) stack.getValue()).getItem()).forEach(item -> {
             if (item instanceof AxeItem && axes.add(item)) {
                 registry.addWorkstations(STRIPPING, EntryStacks.of(item));
+                registry.addWorkstations(WAX_SCRAPING, EntryStacks.of(item));
+                registry.addWorkstations(OXIDATION_SCRAPING, EntryStacks.of(item));
             }
             if (item instanceof HoeItem && hoes.add(item)) {
                 registry.addWorkstations(TILLING, EntryStacks.of(item));
@@ -200,7 +213,11 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         Tag<Item> axesTag = itemTagCollection.getTag(new ResourceLocation("c", "axes"));
         if (axesTag != null) {
             for (Item item : axesTag.getValues()) {
-                if (axes.add(item)) registry.addWorkstations(STRIPPING, EntryStacks.of(item));
+                if (axes.add(item)) {
+                    registry.addWorkstations(STRIPPING, EntryStacks.of(item));
+                    registry.addWorkstations(WAX_SCRAPING, EntryStacks.of(item));
+                    registry.addWorkstations(OXIDATION_SCRAPING, EntryStacks.of(item));
+                }
             }
         }
         Tag<Item> hoesTag = itemTagCollection.getTag(new ResourceLocation("c", "hoes"));
@@ -268,6 +285,18 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         });
         registry.add(new DefaultBeaconBaseDisplay(CollectionUtils.map(Lists.newArrayList(BlockTags.BEACON_BASE_BLOCKS.getValues()), ItemStack::new)));
         registry.add(new DefaultBeaconPaymentDisplay(CollectionUtils.map(Lists.newArrayList(ItemTags.BEACON_PAYMENT_ITEMS.getValues()), ItemStack::new)));
+        HoneycombItem.WAXABLES.get().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
+            registry.add(new DefaultWaxingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
+        });
+        HoneycombItem.WAX_OFF_BY_BLOCK.get().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
+            registry.add(new DefaultWaxScrapingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
+        });
+        WeatheringCopper.NEXT_BY_BLOCK.get().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
+            registry.add(new DefaultOxidizingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
+        });
+        WeatheringCopper.PREVIOUS_BY_BLOCK.get().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
+            registry.add(new DefaultOxidationScrapingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
+        });
         if (Platform.isFabric()) {
             Set<Potion> potions = Sets.newLinkedHashSet();
             for (Ingredient container : PotionBrewing.ALLOWED_CONTAINERS) {
