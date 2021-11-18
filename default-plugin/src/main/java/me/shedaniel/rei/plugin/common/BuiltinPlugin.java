@@ -51,5 +51,9 @@ public interface BuiltinPlugin {
     CategoryIdentifier<DefaultBeaconPaymentDisplay> BEACON_PAYMENT = CategoryIdentifier.of("minecraft", "plugins/beacon_payment");
     CategoryIdentifier<DefaultTillingDisplay> TILLING = CategoryIdentifier.of("minecraft", "plugins/tilling");
     CategoryIdentifier<DefaultPathingDisplay> PATHING = CategoryIdentifier.of("minecraft", "plugins/pathing");
+    CategoryIdentifier<DefaultWaxingDisplay> WAXING = CategoryIdentifier.of("minecraft", "plugins/waxing");
+    CategoryIdentifier<DefaultWaxScrapingDisplay> WAX_SCRAPING = CategoryIdentifier.of("minecraft", "plugins/wax_scraping");
+    CategoryIdentifier<DefaultOxidizingDisplay> OXIDIZING = CategoryIdentifier.of("minecraft", "plugins/oxidizing");
+    CategoryIdentifier<DefaultOxidationScrapingDisplay> OXIDATION_SCRAPING = CategoryIdentifier.of("minecraft", "plugins/oxidation_scraping");
     CategoryIdentifier<DefaultInformationDisplay> INFO = CategoryIdentifier.of("roughlyenoughitems", "plugins/information");
 }
