@@ -23,14 +23,7 @@
 
 package me.shedaniel.rei.plugin.client.categories;
 
-import java.util.List;
-
 import com.google.common.collect.Lists;
-
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.world.item.Items;
-
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.Renderer;
@@ -40,9 +33,15 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
-import me.shedaniel.rei.plugin.common.displays.DefaultStrippingDisplay;
 import me.shedaniel.rei.plugin.common.displays.DefaultWaxScrapingDisplay;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.item.Items;
+import org.jetbrains.annotations.ApiStatus;
 
+import java.util.List;
+
+@ApiStatus.Experimental
 public class DefaultWaxScrapingCategory implements DisplayCategory<DefaultWaxScrapingDisplay> {
     @Override
     public CategoryIdentifier<? extends DefaultWaxScrapingDisplay> getCategoryIdentifier() {
@@ -75,5 +74,4 @@ public class DefaultWaxScrapingCategory implements DisplayCategory<DefaultWaxScr
     public int getDisplayHeight() {
         return 36;
     }
-    
 }

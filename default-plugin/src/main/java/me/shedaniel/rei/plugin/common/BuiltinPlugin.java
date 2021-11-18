@@ -33,6 +33,7 @@ import me.shedaniel.rei.plugin.common.displays.cooking.DefaultBlastingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmeltingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
+import org.jetbrains.annotations.ApiStatus;
 
 public interface BuiltinPlugin {
     CategoryIdentifier<DefaultCraftingDisplay<?>> CRAFTING = CategoryIdentifier.of("minecraft", "plugins/crafting");
@@ -51,9 +52,13 @@ public interface BuiltinPlugin {
     CategoryIdentifier<DefaultBeaconPaymentDisplay> BEACON_PAYMENT = CategoryIdentifier.of("minecraft", "plugins/beacon_payment");
     CategoryIdentifier<DefaultTillingDisplay> TILLING = CategoryIdentifier.of("minecraft", "plugins/tilling");
     CategoryIdentifier<DefaultPathingDisplay> PATHING = CategoryIdentifier.of("minecraft", "plugins/pathing");
+    @ApiStatus.Experimental
     CategoryIdentifier<DefaultWaxingDisplay> WAXING = CategoryIdentifier.of("minecraft", "plugins/waxing");
+    @ApiStatus.Experimental
     CategoryIdentifier<DefaultWaxScrapingDisplay> WAX_SCRAPING = CategoryIdentifier.of("minecraft", "plugins/wax_scraping");
+    @ApiStatus.Experimental
     CategoryIdentifier<DefaultOxidizingDisplay> OXIDIZING = CategoryIdentifier.of("minecraft", "plugins/oxidizing");
+    @ApiStatus.Experimental
     CategoryIdentifier<DefaultOxidationScrapingDisplay> OXIDATION_SCRAPING = CategoryIdentifier.of("minecraft", "plugins/oxidation_scraping");
     CategoryIdentifier<DefaultInformationDisplay> INFO = CategoryIdentifier.of("roughlyenoughitems", "plugins/information");
 }
