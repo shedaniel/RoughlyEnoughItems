@@ -23,20 +23,22 @@
 
 package me.shedaniel.rei.plugin.common.displays;
 
-import java.util.Collections;
-import java.util.List;
-
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
+import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Collections;
+import java.util.List;
+
+@ApiStatus.Experimental
 public class DefaultWaxScrapingDisplay extends BasicDisplay {
     public DefaultWaxScrapingDisplay(EntryStack<?> in, EntryStack<?> out) {
         this(Collections.singletonList(EntryIngredient.of(in)), Collections.singletonList(EntryIngredient.of(out)));
     }
-
+    
     public DefaultWaxScrapingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs) {
         super(inputs, outputs);
     }
