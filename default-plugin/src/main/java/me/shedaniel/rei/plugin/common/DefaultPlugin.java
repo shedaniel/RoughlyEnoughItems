@@ -123,6 +123,10 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
         registry.register(BEACON_PAYMENT, DefaultBeaconDisplay.serializer(DefaultBeaconPaymentDisplay::new));
         registry.register(TILLING, DefaultTillingDisplay.serializer());
         registry.register(PATHING, DefaultPathingDisplay.serializer());
+        registry.register(WAXING, DefaultWaxingDisplay.serializer());
+        registry.register(WAX_SCRAPING, DefaultWaxScrapingDisplay.serializer());
+        registry.register(OXIDIZING, DefaultOxidizingDisplay.serializer());
+        registry.register(OXIDATION_SCRAPING, DefaultOxidationScrapingDisplay.serializer());
         registry.register(INFO, DefaultInformationDisplay.serializer());
     }
     
