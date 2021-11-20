@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
-import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -34,13 +33,12 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.client.registry.display.TransferDisplayCategory;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerErrorRenderer;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.ClientInternals;
-import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.toast.CopyRecipeIdentifierToast;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.*;
 import net.fabricmc.api.EnvType;
@@ -48,14 +46,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
+import org.apache.commons.lang3.mutable.Mutable;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -71,8 +67,7 @@ public final class InternalWidgets {
     
     public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Component text, Supplier<Display> displaySupplier, Supplier<Collection<ResourceLocation>> idsSupplier, List<Widget> setupDisplay, DisplayCategory<?> category) {
         AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
-        boolean[] visible = {false};
-        List<Component>[] errorTooltip = new List[]{null};
+        Mutable<List<Component>> errorTooltip = new MutableObject<>(new ArrayList<>());
         Button autoCraftingButton = Widgets.createButton(rectangle, text)
                 .focusable(false)
                 .onClick(button -> {
@@ -92,93 +87,10 @@ public final class InternalWidgets {
                     Minecraft.getInstance().setScreen(containerScreen);
                     REIRuntime.getInstance().getOverlay().get().queueReloadOverlay();
                 })
-                .onRender((matrices, button) -> {
-                    button.setEnabled(false);
-                    if (containerScreen == null) {
-                        button.setTint(0);
-                        return;
-                    }
-                    List<Component> error = null;
-                    int color = 0;
-                    visible[0] = false;
-                    IntList redSlots = null;
-                    TransferHandler.Context context = TransferHandler.Context.create(false, containerScreen, displaySupplier.get());
-                    for (TransferHandler transferHandler : TransferHandlerRegistry.getInstance()) {
-                        try {
-                            TransferHandler.Result result = transferHandler.handle(context);
-                            if (result.isApplicable()) {
-                                visible[0] = true;
-                            }
-                            if (result.isSuccessful()) {
-                                button.setEnabled(true);
-                                error = null;
-                                color = result.getColor();
-                                redSlots = null;
-                            } else if (result.isApplicable()) {
-                                if (error == null) {
-                                    error = Lists.newArrayList();
-                                }
-                                error.add(result.getError());
-                                color = result.getColor();
-                                if (result.getIntegers() != null && !result.getIntegers().isEmpty())
-                                    redSlots = result.getIntegers();
-                            }
-                            
-                            if (result.isBlocking()) break;
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    if (!visible[0]) {
-                        button.setEnabled(false);
-                        if (error == null) {
-                            error = Lists.newArrayList();
-                        } else {
-                            error.clear();
-                        }
-                        error.add(new TranslatableComponent("error.rei.no.handlers.applicable"));
-                    }
-                    if ((button.containsMouse(PointHelper.ofMouse()) || button.isFocused()) && category instanceof TransferDisplayCategory && redSlots != null) {
-                        ((TransferDisplayCategory<Display>) category).renderRedSlots(matrices, setupDisplay, displayBounds, displaySupplier.get(), redSlots);
-                    }
-                    errorTooltip[0] = error == null || error.isEmpty() ? null : Lists.newArrayList();
-                    if (errorTooltip[0] != null) {
-                        for (Component s : error) {
-                            if (!CollectionUtils.anyMatch(errorTooltip[0], ss -> ss.getString().equalsIgnoreCase(s.getString()))) {
-                                errorTooltip[0].add(s);
-                            }
-                        }
-                    }
-                    button.setTint(color);
-                })
-                .textColor((button, mouse) -> {
-                    if (!visible[0]) {
-                        return 10526880;
-                    } else if (button.isEnabled() && (button.containsMouse(mouse) || button.isFocused())) {
-                        return 16777120;
-                    }
-                    return 14737632;
-                })
-                .textureId((button, mouse) -> !visible[0] ? 0 : (button.containsMouse(mouse) || button.isFocused()) && button.isEnabled() ? 4 : 1)
                 .tooltipSupplier(button -> {
-                    List<Component> str = new ArrayList<>();
-                    if (errorTooltip[0] == null) {
-                        if (ClientHelperImpl.getInstance().isYog.get()) {
-                            str.add(new TranslatableComponent("text.auto_craft.move_items.yog"));
-                        } else {
-                            str.add(new TranslatableComponent("text.auto_craft.move_items"));
-                        }
-                    } else {
-                        if (errorTooltip[0].size() > 1) {
-                            str.add(new TranslatableComponent("error.rei.multi.errors").withStyle(ChatFormatting.RED));
-                            for (Component component : errorTooltip[0]) {
-                                str.add(new TranslatableComponent("- ").withStyle(ChatFormatting.RED).append(component.copy().withStyle(ChatFormatting.RED)));
-                            }
-                        } else if (errorTooltip[0].size() == 1) {
-                            str.add(errorTooltip[0].get(0).copy().withStyle(ChatFormatting.RED));
-                        }
-                    }
-                    if (Minecraft.getInstance().options.advancedItemTooltips || Screen.hasShiftDown()) {
+                    List<Component> str = new ArrayList<>(errorTooltip.getValue());
+                    
+                    if (Minecraft.getInstance().options.advancedItemTooltips) {
                         Collection<ResourceLocation> locations = idsSupplier.get();
                         if (!locations.isEmpty()) {
                             str.add(new TextComponent(" "));
@@ -194,9 +106,104 @@ public final class InternalWidgets {
                     return str.toArray(new Component[0]);
                 });
         return new DelegateWidget(autoCraftingButton) {
+            boolean didJustRender = false;
+            @Override
+            public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+                didJustRender = false;
+                autoCraftingButton.setEnabled(false);
+                autoCraftingButton.setTint(0);
+                
+                if (containerScreen == null) {
+                    errorTooltip.setValue(Lists.newArrayList(new TranslatableComponent("error.rei.not.supported.move.items").withStyle(ChatFormatting.RED)));
+                    renderIf(false, poses, mouseX, mouseY, delta);
+                    return;
+                }
+                
+                List<TransferHandler.Result> errors = new ArrayList<>();
+                boolean hasApplicable = false;
+                TransferHandlerErrorRenderer errorRenderer = null;
+                TransferHandler.Context context = TransferHandler.Context.create(false, containerScreen, displaySupplier.get());
+                for (TransferHandler transferHandler : TransferHandlerRegistry.getInstance()) {
+                    try {
+                        TransferHandler.Result result = transferHandler.handle(context);
+                        if (result.isApplicable()) {
+                            hasApplicable = true;
+                            autoCraftingButton.setTint(result.getColor());
+                            
+                            if (result.isSuccessful()) {
+                                errors.clear();
+                                autoCraftingButton.setEnabled(true);
+                                errorRenderer = null;
+                                break;
+                            }
+                            
+                            errors.add(result);
+                            TransferHandlerErrorRenderer transferHandlerErrorRenderer = result.getErrorRenderer(transferHandler, context);
+                            if (transferHandlerErrorRenderer != null) {
+                                errorRenderer = transferHandlerErrorRenderer;
+                            }
+                            
+                            if (result.isBlocking()) {
+                                break;
+                            }
+                        }
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                }
+                
+                if (!hasApplicable) {
+                    errorTooltip.setValue(Lists.newArrayList(new TranslatableComponent("error.rei.not.supported.move.items").withStyle(ChatFormatting.RED)));
+                    renderIf(false, poses, mouseX, mouseY, delta);
+                    return;
+                }
+                
+                if ((containsMouse(mouseX, mouseY) || autoCraftingButton.isFocused()) && errorRenderer != null) {
+                    errorRenderer.render(poses, mouseX, mouseY, delta, setupDisplay, displayBounds, displaySupplier.get());
+                }
+                if (errors.isEmpty()) {
+                    errorTooltip.setValue(Lists.newArrayList(new TranslatableComponent("text.auto_craft.move_items")));
+                } else {
+                    errorTooltip.setValue(Lists.newArrayList());
+                    List<Component> tooltipsFilled = new ArrayList<>();
+                    for (TransferHandler.Result error : errors) {
+                        error.fillTooltip(tooltipsFilled);
+                    }
+                    
+                    if (errors.size() == 1) {
+                        for (Component tooltipFilled : tooltipsFilled) {
+                            MutableComponent colored = tooltipFilled.copy().withStyle(ChatFormatting.RED);
+                            if (!CollectionUtils.anyMatch(errorTooltip.getValue(), ss -> ss.getString().equalsIgnoreCase(tooltipFilled.getString()))) {
+                                errorTooltip.getValue().add(colored);
+                            }
+                        }
+                    } else {
+                        errorTooltip.getValue().add(new TranslatableComponent("error.rei.multi.errors").withStyle(ChatFormatting.RED));
+                        for (Component tooltipFilled : tooltipsFilled) {
+                            MutableComponent colored = new TextComponent("- ").withStyle(ChatFormatting.RED)
+                                    .append(tooltipFilled.copy().withStyle(ChatFormatting.RED));
+                            if (!CollectionUtils.anyMatch(errorTooltip.getValue(), ss -> ss.getString().equalsIgnoreCase(colored.getString()))) {
+                                errorTooltip.getValue().add(colored);
+                            }
+                        }
+                    }
+                }
+                renderIf(true, poses, mouseX, mouseY, delta);
+            }
+            
+            private void renderIf(boolean should, PoseStack poseStack, int mouseX, int mouseY, float delta) {
+                if (should) {
+                    didJustRender = true;
+                    this.widget.render(poseStack, mouseX, mouseY, delta);
+                } else if (Minecraft.getInstance().options.advancedItemTooltips) {
+                    didJustRender = true;
+                    this.widget.render(poseStack, mouseX, mouseY, delta);
+                }
+            }
+            
             @Override
             public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(keyCode, scanCode) && containsMouse(PointHelper.ofMouse())) {
+                if (didJustRender && displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(keyCode, scanCode) && containsMouse(PointHelper.ofMouse())) {
                     minecraft.keyboardHandler.setClipboard(displaySupplier.get().getDisplayLocation().get().toString());
                     if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
                         CopyRecipeIdentifierToast.addToast(I18n.get("msg.rei.copied_recipe_id"), I18n.get("msg.rei.recipe_id_details", displaySupplier.get().getDisplayLocation().get().toString()));
@@ -208,7 +215,7 @@ public final class InternalWidgets {
             
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesMouse(button) && containsMouse(PointHelper.ofMouse())) {
+                if (didJustRender && displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesMouse(button) && containsMouse(PointHelper.ofMouse())) {
                     minecraft.keyboardHandler.setClipboard(displaySupplier.get().getDisplayLocation().get().toString());
                     if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
                         CopyRecipeIdentifierToast.addToast(I18n.get("msg.rei.copied_recipe_id"), I18n.get("msg.rei.recipe_id_details", displaySupplier.get().getDisplayLocation().get().toString()));

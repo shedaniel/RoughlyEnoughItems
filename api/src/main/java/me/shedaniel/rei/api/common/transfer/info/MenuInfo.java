@@ -23,6 +23,11 @@
 
 package me.shedaniel.rei.api.common.transfer.info;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import it.unimi.dsi.fastutil.ints.IntList;
+import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
@@ -36,10 +41,12 @@ import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
@@ -119,13 +126,27 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
      * Returns the inputs of the {@link Display}. The nested lists are possible stacks for that specific slot.
      *
      * @param context the context of the transfer
+     * @param fill    whether this call is for a fill or not, if it is for a fill, the returned list should be aligned for the menu,
+     *                otherwise it should be aligned for the display category
      * @return the list of lists of items
      */
-    default List<List<ItemStack>> getInputs(MenuInfoContext<T, ?, D> context) {
+    default List<List<ItemStack>> getInputs(MenuInfoContext<T, ?, D> context, boolean fill) {
         if (context.getDisplay() == null) return Collections.emptyList();
-        return CollectionUtils.map(context.getDisplay().getInputEntries(), inputEntry ->
+        return CollectionUtils.map(context.getDisplay().getInputEntries(context, this, fill), inputEntry ->
                 CollectionUtils.<EntryStack<?>, ItemStack>filterAndMap(inputEntry,
                         stack -> stack.getType() == VanillaEntryTypes.ITEM, EntryStack::castValue));
+    }
+    
+    /**
+     * Returns the inputs of the {@link Display}. The nested lists are possible stacks for that specific slot.
+     *
+     * @param context the context of the transfer
+     * @return the list of lists of items
+     */
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    default List<List<ItemStack>> getInputs(MenuInfoContext<T, ?, D> context) {
+        return getInputs(context, false);
     }
     
     /**
@@ -149,5 +170,36 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
      */
     default D read(MenuSerializationContext<T, ?, D> context, CompoundTag tag) {
         return DisplaySerializerRegistry.getInstance().read(context.getCategoryIdentifier(), tag);
+    }
+    
+    /**
+     * Renders the missing ingredients of the transfer.
+     * The indices of the missing stacks are provided, this aligns with the list returned by {@link #getInputs(MenuInfoContext, boolean)}.
+     *
+     * @param context        the context of the transfer
+     * @param inputs         the list of inputs
+     * @param missingIndices the indices of the missing stacks
+     * @param matrices       the rendering transforming matrices
+     * @param mouseX         the mouse x position
+     * @param mouseY         the mouse y position
+     * @param delta          the delta frame time
+     * @param widgets        the widgets set-up by the category
+     * @param bounds         the bounds of the display
+     */
+    @Environment(EnvType.CLIENT)
+    default void renderMissingInput(MenuInfoContext<T, ?, D> context, List<List<ItemStack>> inputs, IntList missingIndices, PoseStack matrices, int mouseX, int mouseY,
+            float delta, List<Widget> widgets, Rectangle bounds) {
+        int i = 0;
+        for (Widget widget : widgets) {
+            if (widget instanceof Slot && ((Slot) widget).getNoticeMark() == Slot.INPUT) {
+                if (missingIndices.contains(i++)) {
+                    matrices.pushPose();
+                    matrices.translate(0, 0, 400);
+                    Rectangle innerBounds = ((Slot) widget).getInnerBounds();
+                    GuiComponent.fill(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), 0x40ff0000);
+                    matrices.popPose();
+                }
+            }
+        }
     }
 }

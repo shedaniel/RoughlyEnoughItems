@@ -29,6 +29,8 @@ import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
+import me.shedaniel.rei.api.common.transfer.info.MenuSerializationContext;
 import me.shedaniel.rei.api.common.transfer.info.simple.SimpleGridMenuInfo;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
@@ -93,5 +95,18 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     public static BasicDisplay.Serializer<DefaultCraftingDisplay<?>> serializer() {
         return BasicDisplay.Serializer.<DefaultCraftingDisplay<?>>ofSimple(DefaultCustomDisplay::simple)
                 .inputProvider(display -> display.getOrganisedInputEntries(3, 3));
+    }
+    
+    @Override
+    public List<EntryIngredient> getInputEntries(MenuSerializationContext<?, ?, ?> context, MenuInfo<?, ?> info, boolean fill) {
+        List<EntryIngredient> list = new ArrayList<>(3 * 3);
+        for (int i = 0; i < 3 * 3; i++) {
+            list.add(EntryIngredient.empty());
+        }
+        List<EntryIngredient> inputEntries = getInputEntries();
+        for (int i = 0; i < inputEntries.size(); i++) {
+            list.set(getSlotWithSize(this, i, 3), inputEntries.get(i));
+        }
+        return list;
     }
 }

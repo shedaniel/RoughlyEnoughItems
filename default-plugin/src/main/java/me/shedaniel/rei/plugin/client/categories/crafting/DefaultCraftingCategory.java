@@ -24,8 +24,6 @@
 package me.shedaniel.rei.plugin.client.categories.crafting;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
-import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.Renderer;
@@ -33,7 +31,6 @@ import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.client.registry.display.TransferDisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.DisplayMerger;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -51,7 +48,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public class DefaultCraftingCategory implements TransferDisplayCategory<DefaultCraftingDisplay<?>> {
+public class DefaultCraftingCategory implements DisplayCategory<DefaultCraftingDisplay<?>> {
     @Override
     public CategoryIdentifier<? extends DefaultCraftingDisplay<?>> getCategoryIdentifier() {
         return BuiltinPlugin.CRAFTING;
@@ -89,28 +86,6 @@ public class DefaultCraftingCategory implements TransferDisplayCategory<DefaultC
         widgets.addAll(slots);
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 95, startPoint.y + 19)).entries(display.getOutputEntries().get(0)).disableBackground().markOutput());
         return widgets;
-    }
-    
-    @Override
-    public void renderRedSlots(PoseStack matrices, List<Widget> widgets, Rectangle bounds, DefaultCraftingDisplay<?> display, IntList redSlots) {
-//        @Nullable
-//        Screen previousScreen = REIRuntime.getInstance().getPreviousScreen();
-//        if (!(previousScreen instanceof AbstractContainerScreen)) return;
-//        AbstractContainerMenu containerMenu = ((AbstractContainerScreen<?>) previousScreen).getMenu();
-//        MenuInfo<AbstractContainerMenu, DefaultCraftingDisplay> info = (MenuInfo<AbstractContainerMenu, DefaultCraftingDisplay>) MenuInfoRegistry.getInstance().get(getCategoryIdentifier(), containerMenu.getClass());
-//        if (info == null) {
-//            return;
-//        }
-//        matrices.pushPose();
-//        matrices.translate(0, 0, 400);
-//        Point startPoint = new Point(bounds.getCenterX() - 58, bounds.getCenterY() - 27);
-//        int width = info.getCraftingWidth(containerMenu);
-//        for (int slot : redSlots) {
-//            int x = slot % width;
-//            int y = Mth.floor(slot / (float) width);
-//            GuiComponent.fill(matrices, startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18, startPoint.x + 1 + x * 18 + 16, startPoint.y + 1 + y * 18 + 16, 0x60ff0000);
-//        }
-//        matrices.popPose();
     }
     
     @Override
