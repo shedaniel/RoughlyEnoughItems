@@ -265,6 +265,19 @@ public class CollectionUtils {
         return l == null ? Collections.emptyList() : l;
     }
     
+    public static <T, R> List<R> mapAndFilter(Iterable<T> list, Predicate<R> predicate, Function<T, R> function) {
+        List<R> l = null;
+        for (T t : list) {
+            R r = function.apply(t);
+            if (predicate.test(r)) {
+                if (l == null)
+                    l = Lists.newArrayList();
+                l.add(r);
+            }
+        }
+        return l == null ? Collections.emptyList() : l;
+    }
+    
     public static <T> int sumInt(Iterable<T> list, Function<T, Integer> function) {
         int sum = 0;
         for (T t : list) {
