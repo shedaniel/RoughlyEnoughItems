@@ -255,7 +255,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         
         this.trashBoundsHeight.update(delta);
         double trashBoundsHeight = this.trashBoundsHeight.value();
-        if (trashBoundsHeight > 0) {
+        if (Math.round(trashBoundsHeight) > 0) {
             double trashBoundsHeightTarget = Math.min(150D, fullBounds.height * 0.15D);
             double progress = Math.pow(Mth.clamp(trashBoundsHeight / trashBoundsHeightTarget, 0, 1), 7);
             int y = this.fullBounds.getMaxY() - 4 - favoritePanel.getBounds().height;
@@ -289,9 +289,9 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             systemHeight += 4;
         }
         if (favoritePanel.getBounds().height > 20)
-            region.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + systemHeight, this.fullBounds.width, this.fullBounds.height - systemHeight - (this.fullBounds.getMaxY() - this.favoritePanel.bounds.y) - 4 - (trashBoundsHeight <= 0 ? 0 : trashBoundsHeight));
+            region.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + systemHeight, this.fullBounds.width, this.fullBounds.height - systemHeight - (this.fullBounds.getMaxY() - this.favoritePanel.bounds.y) - 4 - (Math.round(trashBoundsHeight) <= 0 ? 0 : trashBoundsHeight));
         else
-            region.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + systemHeight, this.fullBounds.width, this.fullBounds.height - systemHeight - (trashBoundsHeight <= 0 ? 0 : trashBoundsHeight + 24));
+            region.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + systemHeight, this.fullBounds.width, this.fullBounds.height - systemHeight - (Math.round(trashBoundsHeight) <= 0 ? 0 : trashBoundsHeight + 24));
         systemRegion.render(matrices, mouseX, mouseY, delta);
         region.render(matrices, mouseX, mouseY, delta);
         renderAddFavorite(matrices, mouseX, mouseY, delta);
