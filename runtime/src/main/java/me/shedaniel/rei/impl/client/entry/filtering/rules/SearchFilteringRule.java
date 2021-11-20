@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.entries.FilteringEntry;
 import me.shedaniel.rei.impl.client.config.entries.FilteringRuleOptionsScreen;
 import me.shedaniel.rei.impl.client.entry.filtering.AbstractFilteringRule;
+import me.shedaniel.rei.impl.client.entry.filtering.FilteringCache;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringContext;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringResult;
 import net.fabricmc.api.EnvType;
@@ -79,7 +80,7 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
     }
     
     @Override
-    public FilteringResult processFilteredStacks(FilteringContext context) {
+    public FilteringResult processFilteredStacks(FilteringContext context, FilteringCache cache, boolean async) {
         List<CompletableFuture<List<EntryStack<?>>>> completableFutures = Lists.newArrayList();
         processList(context.getUnsetStacks(), completableFutures);
         if (show) processList(context.getHiddenStacks(), completableFutures);

@@ -249,6 +249,7 @@
   "config.roughlyenoughitems.syntaxHighlightingMode.plain_underscored": "Plain (Underscored)",
   "config.roughlyenoughitems.syntaxHighlightingMode.colorful": "Colorful",
   "config.roughlyenoughitems.syntaxHighlightingMode.colorful_underscored": "Colorful (Underscored)",
+  "config.roughlyenoughitems.filtering.shouldFilterDisplays": "Should Filter Displays:",
   "config.roughlyenoughitems.filteringScreen": "Customized Filtering",
   "config.roughlyenoughitems.filteringRulesScreen": "Customized Filtering Rules",
   "config.roughlyenoughitems.filteringRulesScreen.new": "Create Filtering Rule",

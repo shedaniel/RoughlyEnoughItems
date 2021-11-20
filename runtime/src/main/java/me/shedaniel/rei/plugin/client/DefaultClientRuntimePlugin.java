@@ -43,6 +43,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.DisplayBoundsProvider;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
@@ -61,6 +62,7 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.screen.AbstractDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.widget.FavoritesListWidget;
+import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -81,6 +83,8 @@ import java.util.function.Function;
 @Environment(EnvType.CLIENT)
 @ApiStatus.Internal
 public class DefaultClientRuntimePlugin implements REIClientPlugin {
+    private final FilteredStacksVisibilityHandler filteredStacksVisibilityHandler = new FilteredStacksVisibilityHandler();
+    
     @SuppressWarnings("rawtypes")
     public DefaultClientRuntimePlugin() {
         PluginStageExecutionWatcher watcher = new PluginStageExecutionWatcher();
@@ -110,6 +114,14 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                 }
             }));
         }
+        
+        ((EntryRegistryImpl) registry).refilterListener.add(filteredStacksVisibilityHandler::reset);
+    }
+    
+    @Override
+    public void registerDisplays(DisplayRegistry registry) {
+        filteredStacksVisibilityHandler.reset();
+        registry.registerVisibilityPredicate(filteredStacksVisibilityHandler);
     }
     
     @Override
