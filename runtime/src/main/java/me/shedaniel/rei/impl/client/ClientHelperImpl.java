@@ -76,15 +76,6 @@ import java.util.function.Supplier;
 @Environment(EnvType.CLIENT)
 public class ClientHelperImpl implements ClientHelper {
     @ApiStatus.Internal
-    public final LazyLoadedValue<Boolean> isYog = new LazyLoadedValue<>(() -> {
-        try {
-            if (Minecraft.getInstance().getUser().getGameProfile().getId().equals(UUID.fromString("f9546389-9415-4358-9c29-2c26b25bff5b")))
-                return true;
-        } catch (Throwable ignored) {
-        }
-        return false;
-    });
-    @ApiStatus.Internal
     public final LazyLoadedValue<Boolean> isAprilFools = new LazyLoadedValue<>(() -> {
         try {
             LocalDateTime now = LocalDateTime.now();

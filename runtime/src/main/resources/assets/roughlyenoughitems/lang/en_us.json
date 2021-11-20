@@ -61,6 +61,7 @@
   "error.rei.not.enough.materials": "Not enough materials.",
   "error.rei.internal.error": "Internal Error: %s",
   "error.rei.recipe.not.unlocked": "Recipe not unlocked in Recipe Book.",
+  "error.rei.not.supported.move.items": "Move Items is not supported with this recipe and this container.",
   "error.rei.no.handlers.applicable": "No handlers are applicable.",
   "error.rei.multi.errors": "Multiple Errors:",
   "rei.rei.no.slot.in.inv": "Can't find any space for item in the inventory",

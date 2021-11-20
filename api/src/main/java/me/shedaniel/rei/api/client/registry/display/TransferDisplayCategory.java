@@ -35,6 +35,8 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
+@Deprecated
+@ApiStatus.ScheduledForRemoval
 public interface TransferDisplayCategory<T extends Display> extends DisplayCategory<T> {
     @ApiStatus.OverrideOnly
     @ApiStatus.ScheduledForRemoval

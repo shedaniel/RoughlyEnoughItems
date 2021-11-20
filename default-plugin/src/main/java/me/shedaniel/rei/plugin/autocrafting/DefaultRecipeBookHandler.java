@@ -68,7 +68,7 @@ public class DefaultRecipeBookHandler implements TransferHandler {
                 if (craftingDisplay.getHeight() > h || craftingDisplay.getWidth() > w)
                     return Result.createFailed(new TranslatableComponent("error.rei.transfer.too_small", h, w));
                 if (!context.getMinecraft().player.getRecipeBook().contains(recipe))
-                    return Result.createFailed(new TranslatableComponent("error.rei.recipe.not.unlocked"));
+                    return Result.createNotApplicable();
                 if (!context.isActuallyCrafting())
                     return Result.createSuccessful();
                 context.getMinecraft().setScreen(context.getContainerScreen());
@@ -82,7 +82,7 @@ public class DefaultRecipeBookHandler implements TransferHandler {
             if (defaultDisplay.getOptionalRecipe().isPresent()) {
                 Recipe<?> recipe = (defaultDisplay).getOptionalRecipe().get();
                 if (!context.getMinecraft().player.getRecipeBook().contains(recipe))
-                    return Result.createFailed(new TranslatableComponent("error.rei.recipe.not.unlocked"));
+                    return Result.createNotApplicable();
                 if (!context.isActuallyCrafting())
                     return Result.createSuccessful();
                 context.getMinecraft().setScreen(context.getContainerScreen());

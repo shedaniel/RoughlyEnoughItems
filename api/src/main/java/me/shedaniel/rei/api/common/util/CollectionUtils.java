@@ -323,6 +323,29 @@ public class CollectionUtils {
                     public int size() {
                         return realSize;
                     }
+                    
+                    @Override
+                    public Iterator<T> iterator() {
+                        Iterator<T> iterator = super.iterator();
+                        return new Iterator<T>() {
+                            boolean endReached = false;
+                            
+                            @Override
+                            public boolean hasNext() {
+                                return iterator.hasNext() && !endReached;
+                            }
+                            
+                            @Override
+                            public T next() {
+                                try {
+                                    return iterator.next();
+                                } catch (NoSuchElementException e) {
+                                    endReached = true;
+                                    return null;
+                                }
+                            }
+                        };
+                    }
                 };
             }
         };
