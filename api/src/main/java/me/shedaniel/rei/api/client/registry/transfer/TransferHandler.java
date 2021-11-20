@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.api.client.registry.transfer;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.api.client.registry.display.TransferDisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
@@ -36,6 +35,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -63,6 +63,16 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         return Double.compare(getPriority(), o.getPriority());
     }
     
+    @Environment(EnvType.CLIENT)
+    @Nullable
+    default TransferHandlerErrorRenderer provideErrorRenderer(Context context, Object data) {
+        if (data instanceof IntList) {
+            return TransferHandlerErrorRenderer.forRedSlots((IntList) data);
+        }
+        
+        return null;
+    }
+    
     @ApiStatus.NonExtendable
     interface Result {
         /**
@@ -86,7 +96,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
          * @param error The error itself
          */
         static Result createFailed(Component error) {
-            return new ResultImpl(error, new IntArrayList(), 0x67ff0000);
+            return new ResultImpl(error, 0x67ff0000);
         }
         
         /**
@@ -97,7 +107,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
          * @param color A special color for the button
          */
         static Result createFailedCustomButtonColor(Component error, int color) {
-            return new ResultImpl(error, new IntArrayList(), color);
+            return createFailed(error).color(color);
         }
         
         /**
@@ -107,7 +117,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
          * @param redSlots A list of slots to be marked as red. Will be passed to {@link TransferDisplayCategory}.
          */
         static Result createFailed(Component error, IntList redSlots) {
-            return new ResultImpl(error, redSlots, 0x67ff0000);
+            return createFailed(error).errorRenderer(redSlots);
         }
         
         /**
@@ -119,7 +129,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
          * @param redSlots A list of slots to be marked as red. Will be passed to {@link TransferDisplayCategory}.
          */
         static Result createFailedCustomButtonColor(Component error, IntList redSlots, int color) {
-            return new ResultImpl(error, redSlots, color);
+            return createFailed(error).errorRenderer(redSlots).color(color);
         }
         
         /**
@@ -138,11 +148,16 @@ public interface TransferHandler extends Comparable<TransferHandler> {
          * @return the color in which the button should be displayed in.
          */
         int getColor();
-    
+        
         /**
          * Sets the color in which the button should be displayed in.
          */
         Result color(int color);
+        
+        /**
+         * Sets the error data, to be passed to {@link TransferHandler#provideErrorRenderer(Context, Object)}.
+         */
+        Result errorRenderer(Object data);
         
         /**
          * @return whether this handler has successfully handled the transfer.
@@ -173,10 +188,12 @@ public interface TransferHandler extends Comparable<TransferHandler> {
          */
         Component getError();
         
-        /**
-         * @return a list of slots to be marked as red. Will be passed to {@link TransferDisplayCategory}.
-         */
-        IntList getIntegers();
+        @Environment(EnvType.CLIENT)
+        @ApiStatus.Internal
+        TransferHandlerErrorRenderer getErrorRenderer(TransferHandler handler, Context context);
+        
+        @ApiStatus.Internal
+        void fillTooltip(List<Component> components);
     }
     
     @ApiStatus.NonExtendable
@@ -211,7 +228,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
     final class ResultImpl implements Result {
         private boolean successful, applicable, returningToScreen, blocking;
         private Component error;
-        private IntList integers = new IntArrayList();
+        private Object errorRenderer;
         private int color;
         
         private ResultImpl() {
@@ -227,12 +244,10 @@ public interface TransferHandler extends Comparable<TransferHandler> {
             this.applicable = applicable;
         }
         
-        public ResultImpl(Component error, IntList integers, int color) {
+        public ResultImpl(Component error, int color) {
             this.successful = false;
             this.applicable = true;
             this.error = error;
-            if (integers != null)
-                this.integers = integers;
             this.color = color;
         }
         
@@ -251,6 +266,12 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         @Override
         public TransferHandler.Result color(int color) {
             this.color = color;
+            return this;
+        }
+        
+        @Override
+        public Result errorRenderer(Object data) {
+            this.errorRenderer = data;
             return this;
         }
         
@@ -280,8 +301,17 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         }
         
         @Override
-        public IntList getIntegers() {
-            return integers;
+        @Environment(EnvType.CLIENT)
+        public TransferHandlerErrorRenderer getErrorRenderer(TransferHandler handler, Context context) {
+            if (errorRenderer == null) return null;
+            return handler.provideErrorRenderer(context, errorRenderer);
+        }
+        
+        @Override
+        public void fillTooltip(List<Component> components) {
+            if (!isSuccessful() && isApplicable()) {
+                components.add(getError());
+            }
         }
     }
     

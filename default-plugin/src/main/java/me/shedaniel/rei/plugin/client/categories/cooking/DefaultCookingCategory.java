@@ -24,8 +24,6 @@
 package me.shedaniel.rei.plugin.client.categories.cooking;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
-import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
@@ -33,13 +31,12 @@ import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.SimpleDisplayRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.api.client.registry.display.TransferDisplayCategory;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultCookingDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -48,7 +45,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public class DefaultCookingCategory implements TransferDisplayCategory<DefaultCookingDisplay> {
+public class DefaultCookingCategory implements DisplayCategory<DefaultCookingDisplay> {
     private CategoryIdentifier<? extends DefaultCookingDisplay> identifier;
     private EntryStack<?> logo;
     private String categoryName;
@@ -57,17 +54,6 @@ public class DefaultCookingCategory implements TransferDisplayCategory<DefaultCo
         this.identifier = identifier;
         this.logo = logo;
         this.categoryName = categoryName;
-    }
-    
-    @Override
-    public void renderRedSlots(PoseStack matrices, List<Widget> widgets, Rectangle bounds, DefaultCookingDisplay display, IntList redSlots) {
-        Point startPoint = new Point(bounds.getCenterX() - 41, bounds.y + 10);
-        matrices.pushPose();
-        matrices.translate(0, 0, 400);
-        if (redSlots.contains(0)) {
-            GuiComponent.fill(matrices, startPoint.x + 1, startPoint.y + 1, startPoint.x + 1 + 16, startPoint.y + 1 + 16, 1090453504);
-        }
-        matrices.popPose();
     }
     
     @Override

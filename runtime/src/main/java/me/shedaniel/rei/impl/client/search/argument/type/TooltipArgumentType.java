@@ -88,12 +88,21 @@ public final class TooltipArgumentType extends ArgumentType<Unit, String> {
                 return CollectionUtils.mapAndJoinToString(tooltip.getText(), Component::getString, "\n");
             }
             return "";
-        } catch (ConcurrentModificationException ignored) {
-            // yes, this is a hack
-            if (attempt < 10) {
-                return tryGetEntryStackTooltip(stack, attempt + 1);
+        } catch (Throwable throwable) {
+            Throwable temp = throwable;
+            while (temp != null) {
+                temp = temp.getCause();
+                if (temp instanceof ConcurrentModificationException) {
+                    // yes, this is a hack
+                    if (attempt < 10) {
+                        return tryGetEntryStackTooltip(stack, attempt + 1);
+                    }
+                    
+                    return null;
+                }
             }
-            return null;
+            
+            throw throwable;
         }
     }
     
