@@ -39,6 +39,7 @@ import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ConcurrentModificationException;
 import java.util.Locale;
 
 @ApiStatus.Internal
@@ -71,18 +72,29 @@ public final class TooltipArgumentType extends ArgumentType<Unit, String> {
     @Override
     public boolean matches(Mutable<String> data, EntryStack<?> stack, String searchText, Unit filterData) {
         if (data.getValue() == null) {
-            data.setValue(tryGetEntryStackTooltip(stack).toLowerCase(Locale.ROOT));
+            String tooltip = tryGetEntryStackTooltip(stack, 0);
+            if (tooltip == null) return false;
+            data.setValue(tooltip.toLowerCase(Locale.ROOT));
         }
         String tooltip = data.getValue();
         return tooltip.isEmpty() || tooltip.contains(searchText);
     }
     
-    public static String tryGetEntryStackTooltip(EntryStack<?> stack) {
-        Tooltip tooltip = stack.getTooltip(new Point(), false);
-        if (tooltip != null) {
-            return CollectionUtils.mapAndJoinToString(tooltip.getText(), Component::getString, "\n");
+    @Nullable
+    public static String tryGetEntryStackTooltip(EntryStack<?> stack, int attempt) {
+        try {
+            Tooltip tooltip = stack.getTooltip(new Point(), false);
+            if (tooltip != null) {
+                return CollectionUtils.mapAndJoinToString(tooltip.getText(), Component::getString, "\n");
+            }
+            return "";
+        } catch (ConcurrentModificationException ignored) {
+            // yes, this is a hack
+            if (attempt < 10) {
+                return tryGetEntryStackTooltip(stack, attempt + 1);
+            }
+            return null;
         }
-        return "";
     }
     
     @Override

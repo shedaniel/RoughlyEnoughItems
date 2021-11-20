@@ -40,6 +40,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
+import me.shedaniel.rei.impl.client.entry.filtering.FilteringCacheImpl;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextImpl;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextType;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
@@ -65,6 +66,7 @@ import java.util.stream.Stream;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class EntryRegistryImpl implements EntryRegistry {
+    public List<Runnable> refilterListener = Lists.newCopyOnWriteArrayList();
     private List<EntryStack<?>> preFilteredList = Lists.newCopyOnWriteArrayList();
     private List<EntryStack<?>> entries = Lists.newCopyOnWriteArrayList();
     @Nullable
@@ -83,6 +85,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     public void startReload() {
+        refilterListener.clear();
         entries = Lists.newCopyOnWriteArrayList();
         reloadingRegistry = Lists.newArrayListWithCapacity(Registry.ITEM.keySet().size() + 100);
         preFilteredList = Lists.newCopyOnWriteArrayList();
@@ -131,12 +134,14 @@ public class EntryRegistryImpl implements EntryRegistry {
         Stopwatch stopwatch = Stopwatch.createStarted();
         
         FilteringContextImpl context = new FilteringContextImpl(entries);
+        FilteringCacheImpl cache = new FilteringCacheImpl();
         List<FilteringRule<?>> rules = ((ConfigObjectImpl) ConfigObject.getInstance()).getFilteringRules();
         Stopwatch innerStopwatch = Stopwatch.createStarted();
         for (int i = rules.size() - 1; i >= 0; i--) {
             innerStopwatch.reset().start();
             FilteringRule<?> rule = rules.get(i);
-            context.handleResult(rule.processFilteredStacks(context));
+            cache.setCache(rule, rule.prepareCache(true));
+            context.handleResult(rule.processFilteredStacks(context, cache, true));
             RoughlyEnoughItemsCore.LOGGER.debug("Refiltered rule [%s] in %s.", FilteringRule.REGISTRY.getKey(rule).toString(), innerStopwatch.stop().toString());
         }
         
@@ -152,6 +157,10 @@ public class EntryRegistryImpl implements EntryRegistry {
         }
         
         RoughlyEnoughItemsCore.LOGGER.debug("Refiltered %d entries with %d rules in %s.", entries.size() - preFilteredList.size(), rules.size(), stopwatch.stop().toString());
+        
+        for (Runnable runnable : refilterListener) {
+            runnable.run();
+        }
     }
     
     private static <T> Predicate<T> not(Predicate<? super T> target) {
@@ -224,10 +233,12 @@ public class EntryRegistryImpl implements EntryRegistry {
         }
         
         FilteringContextImpl context = new FilteringContextImpl(entries);
+        FilteringCacheImpl cache = new FilteringCacheImpl();
         List<FilteringRule<?>> rules = ((ConfigObjectImpl) ConfigObject.getInstance()).getFilteringRules();
         for (int i = rules.size() - 1; i >= 0; i--) {
             FilteringRule<?> rule = rules.get(i);
-            context.handleResult(rule.processFilteredStacks(context));
+            cache.setCache(rule, rule.prepareCache(true));
+            context.handleResult(rule.processFilteredStacks(context, cache, true));
         }
         
         Set<HashedEntryStackWrapper> hiddenStacks = context.stacks.get(FilteringContextType.HIDDEN);
