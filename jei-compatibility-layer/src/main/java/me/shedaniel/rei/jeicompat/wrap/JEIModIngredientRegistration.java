@@ -23,8 +23,10 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.helpers.IColorHelper;
 import mezz.jei.api.ingredients.IIngredientHelper;
@@ -66,5 +68,8 @@ public class JEIModIngredientRegistration implements IModIngredientRegistration 
             @NotNull IIngredientRenderer<V> ingredientRenderer) {
         ResourceLocation location = new ResourceLocation(wrapper.backingPlugin.getPluginUid() + "_" + ingredientType.getIngredientClass().getSimpleName().toLowerCase(Locale.ROOT));
         registry.register(location, new JEIEntryDefinition<>(EntryType.deferred(location), ingredientType, ingredientHelper, ingredientRenderer));
+        wrapper.entryRegistry.add(() -> {
+            EntryRegistry.getInstance().addEntries(CollectionUtils.map(allIngredients, JEIPluginDetector::unwrapStack));
+        }); 
     }
 }

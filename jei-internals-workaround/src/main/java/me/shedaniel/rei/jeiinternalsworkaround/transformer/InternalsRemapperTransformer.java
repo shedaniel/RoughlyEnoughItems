@@ -93,6 +93,21 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
                     field.access = field.access | Opcodes.ACC_PUBLIC;
                 }
             }
+            if (classNode.name.endsWith("BrewingRecipeHelper")) {
+                out:
+                for (MethodNode method : classNode.methods) {
+                    if (method.name.startsWith("<")) {
+                        for (AbstractInsnNode instruction : method.instructions) {
+                            if (instruction instanceof LdcInsnNode) {
+                                if (Objects.equals(((LdcInsnNode) instruction).cst, "net.minecraft.potion.PotionBrewing$MixPredicate")) {
+                                    ((LdcInsnNode) instruction).cst = "net.minecraft.world.item.alchemy.PotionBrewing$Mix";
+                                }
+                                break out;
+                            }
+                        }
+                    }
+                }
+            }
         }
         ClassNode newClassNode = new ClassNode(Opcodes.ASM9);
         ClassRemapper remapper = new ClassRemapper(Opcodes.ASM9, newClassNode, this) {
