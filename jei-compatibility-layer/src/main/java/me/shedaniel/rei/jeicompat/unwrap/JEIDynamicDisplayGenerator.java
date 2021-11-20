@@ -69,7 +69,10 @@ public class JEIDynamicDisplayGenerator implements DynamicDisplayGenerator<Displ
                 else displays.addAll(CollectionUtils.flatMap(recipes, JEIPluginDetector::createDisplayFrom));
             }
         }
-        return Optional.ofNullable(CollectionUtils.filterToList(displays, Objects::nonNull));
+        if (displays == null) {
+            return Optional.empty();
+        }
+        return Optional.of(CollectionUtils.filterToList(displays, Objects::nonNull));
     }
     
     @Override
