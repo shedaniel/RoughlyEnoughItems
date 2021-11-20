@@ -30,7 +30,7 @@ import mezz.jei.api.gui.ITickTimer;
 import mezz.jei.api.gui.drawable.IDrawableAnimated;
 import mezz.jei.api.gui.drawable.IDrawableBuilder;
 import mezz.jei.api.gui.drawable.IDrawableStatic;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -99,10 +99,11 @@ public class JEIDrawableBuilder implements IDrawableBuilder {
              */
             @Override
             public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset, int maskTop, int maskBottom, int maskLeft, int maskRight) {
-                Minecraft.getInstance().getTextureManager().bind(texture);
+                RenderSystem.setShaderTexture(0, texture);
                 Matrix4f matrix = matrixStack.last().pose();
+                RenderSystem.setShader(GameRenderer::getPositionTexShader);
                 BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-                bufferBuilder.begin(7, DefaultVertexFormat.POSITION_TEX);
+                bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
                 
                 int xStart = xOffset + JEIDrawableBuilder.this.paddingLeft + maskLeft;
                 int yStart = yOffset + JEIDrawableBuilder.this.paddingTop + maskTop;
@@ -126,7 +127,6 @@ public class JEIDrawableBuilder implements IDrawableBuilder {
                 bufferBuilder.vertex(matrix, xEnd, yStart, z).uv(uEnd, vStart).endVertex();
                 bufferBuilder.vertex(matrix, xStart, yStart, z).uv(uStart, vStart).endVertex();
                 bufferBuilder.end();
-                RenderSystem.enableAlphaTest();
                 BufferUploader.end(bufferBuilder);
             }
             
