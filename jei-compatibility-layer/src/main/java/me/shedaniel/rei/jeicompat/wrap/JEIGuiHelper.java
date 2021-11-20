@@ -81,21 +81,20 @@ public enum JEIGuiHelper implements IGuiHelper {
             @Override
             public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset) {
                 float maskTop = 0, maskBottom = 0, maskLeft = 0, maskRight = 0;
-                long currentTime = System.currentTimeMillis();
-                long msPassed = currentTime % (ticksPerCycle * 50L);
-                float value = msPassed / (ticksPerCycle * 50F);
+                float value = (System.currentTimeMillis() % (ticksPerCycle * 50L)) / (ticksPerCycle * 50F);
+                if (!inverted) value = 1 - value;
                 switch (dir) {
                     case TOP:
-                        maskBottom = (1 - value) * getHeight();
+                        maskBottom = value * getHeight();
                         break;
                     case BOTTOM:
-                        maskTop = (1 - value) * getHeight();
+                        maskTop = value * getHeight();
                         break;
                     case LEFT:
-                        maskRight = (1 - value) * getWidth();
+                        maskRight = value * getWidth();
                         break;
                     case RIGHT:
-                        maskLeft = (1 - value) * getWidth();
+                        maskLeft = value * getWidth();
                         break;
                 }
                 drawable.draw(matrixStack, xOffset, yOffset, Math.round(maskTop), Math.round(maskBottom), Math.round(maskLeft), Math.round(maskRight));
