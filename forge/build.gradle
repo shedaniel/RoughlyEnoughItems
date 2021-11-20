@@ -141,7 +141,7 @@ publishing {
                 publication.artifactId = rootProject.name + "-" + projectName + "-forge"
                 project.afterEvaluate {
                     def project = project(":" + projectName)
-                    publication.artifact(project.fakeJar) { classifier null }
+                    publication.artifact(project.fakeForgeJar) { classifier null }
                     def remapSourcesJarTask = project.remapSourcesJar
                     publication.artifact(remapSourcesJarTask.output) {
                         builtBy remapSourcesJarTask
