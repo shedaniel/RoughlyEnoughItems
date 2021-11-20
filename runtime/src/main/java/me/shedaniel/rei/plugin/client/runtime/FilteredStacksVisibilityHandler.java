@@ -21,13 +21,13 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.client;
+package me.shedaniel.rei.plugin.client.runtime;
 
 import com.google.common.base.Stopwatch;
+import dev.architectury.event.EventResult;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMaps;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
-import me.shedaniel.architectury.event.EventResult;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
