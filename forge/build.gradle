@@ -93,6 +93,10 @@ dependencies {
     // modRuntime("curse.maven:eidolon-429625:3157832")
     modRuntime("curse.maven:token-enchanter-444421:3449483")
     modRuntime("curse.maven:silent-lib-242998:3400030")
+    // modRuntime("curse.maven:resourceful-bees-384508:3485315")
+    // modRuntime("curse.maven:thermal-expansion-69163:3404884")
+    // modRuntime("curse.maven:thermal-foundation-222880:3412300")
+    // modRuntime("curse.maven:cofh-core-69162:3407019")
 }
 
 shadowJar {
