@@ -68,6 +68,7 @@ public class RoughlyEnoughItemsForge {
                     .flatMap(info -> info.getMods().stream())
                     .map(IModInfo::getModId)
                     .collect(Collectors.toList());
+            out:
             for (ModFileScanData.AnnotationData annotation : data.getAnnotations()) {
                 if (annotationType.equals(annotation.annotationType())) {
                     try {
@@ -83,6 +84,12 @@ public class RoughlyEnoughItemsForge {
                             }, clazz));
                         }
                     } catch (Throwable throwable) {
+                        Throwable t = throwable;
+                        while (t != null) {
+                            if (t.getMessage() != null && t.getMessage().contains("invalid dist DEDICATED_SERVER") && !RoughlyEnoughItemsInitializer.isClient())
+                                continue out;
+                            t = t.getCause();
+                        }
                         LOGGER.error("Failed to load plugin: " + annotation.memberName(), throwable);
                     }
                 }
