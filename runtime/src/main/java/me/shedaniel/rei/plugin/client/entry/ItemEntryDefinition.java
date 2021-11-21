@@ -129,6 +129,11 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     }
     
     @Override
+    public ItemStack wildcard(EntryStack<ItemStack> entry, ItemStack value) {
+        return new ItemStack(value.getItem(), 1);
+    }
+    
+    @Override
     public long hash(EntryStack<ItemStack> entry, ItemStack value, ComparisonContext context) {
         int code = 1;
         code = 31 * code + System.identityHashCode(value.getItem());
