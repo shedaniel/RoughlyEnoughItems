@@ -23,6 +23,9 @@
 
 package me.shedaniel.rei.plugin.common.displays.crafting;
 
+import dev.architectury.injectables.annotations.ExpectPlatform;
+import dev.architectury.injectables.annotations.PlatformOnly;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
 import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
@@ -33,13 +36,21 @@ import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuSerializationContext;
 import me.shedaniel.rei.api.common.transfer.info.simple.SimpleGridMenuInfo;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
+import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
+import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,6 +60,37 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     public DefaultCraftingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<C> recipe) {
         super(inputs, outputs, Optional.empty());
         this.recipe = recipe;
+    }
+    
+    @Nullable
+    public static DefaultCraftingDisplay<?> of(Recipe<?> recipe) {
+        if (recipe instanceof ShapelessRecipe) {
+            return new DefaultShapelessDisplay((ShapelessRecipe) recipe);
+        } else if (recipe instanceof ShapedRecipe) {
+            return new DefaultShapedDisplay((ShapedRecipe) recipe);
+        } else if (!recipe.isSpecial()) {
+            NonNullList<Ingredient> ingredients = recipe.getIngredients();
+            Pair<Integer, Integer> size = Platform.isFabric() ? null : getSize(recipe);
+            
+            if (!ingredients.isEmpty()) {
+                if (size == null) {
+                    return new DefaultCustomDisplay(recipe, EntryIngredients.ofIngredients(recipe.getIngredients()),
+                            Collections.singletonList(EntryIngredients.of(recipe.getResultItem())));
+                } else {
+                    return new DefaultCustomShapedDisplay(recipe, EntryIngredients.ofIngredients(recipe.getIngredients()),
+                            Collections.singletonList(EntryIngredients.of(recipe.getResultItem())),
+                            size.getLeft(), size.getRight());
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    @ExpectPlatform
+    @PlatformOnly(PlatformOnly.FORGE)
+    private static Pair<Integer, Integer> getSize(Recipe<?> recipe) {
+        throw new AssertionError();
     }
     
     @Override
