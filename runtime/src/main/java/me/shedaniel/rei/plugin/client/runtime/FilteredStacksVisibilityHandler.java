@@ -92,12 +92,12 @@ public class FilteredStacksVisibilityHandler implements DisplayVisibilityPredica
     
     private boolean checkHiddenStacks(Display display) {
         for (EntryIngredient ingredient : display.getInputEntries()) {
-            if (isEntryIngredientAllHidden(ingredient, cache, filteringRules)) {
+            if (!ingredient.isEmpty() && isEntryIngredientAllHidden(ingredient, cache, filteringRules)) {
                 return false;
             }
         }
         for (EntryIngredient ingredient : display.getOutputEntries()) {
-            if (isEntryIngredientAllHidden(ingredient, cache, filteringRules)) {
+            if (!ingredient.isEmpty() && isEntryIngredientAllHidden(ingredient, cache, filteringRules)) {
                 return false;
             }
         }
