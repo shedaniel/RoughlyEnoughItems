@@ -52,6 +52,7 @@ import java.util.function.Function;
 /**
  * @see me.shedaniel.rei.api.common.util.EntryStacks
  */
+@ApiStatus.NonExtendable
 public interface EntryStack<T> extends TextRepresentable, Renderer {
     static EntryStack<Unit> empty() {
         return Internals.getEntryStackProvider().empty();
@@ -122,13 +123,53 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     
     boolean isEmpty();
     
+    /**
+     * Returns a copy of this stack.
+     * The copied stack will retain the same settings applied, with a copied value.
+     *
+     * @return a copy for an entry
+     */
     EntryStack<T> copy();
     
+    /**
+     * Returns a copy of this stack.
+     * The copied stack will retain the value object, with no settings applied.
+     *
+     * @return a copy for an entry
+     */
     default EntryStack<T> rewrap() {
         return copy();
     }
     
+    /**
+     * Returns a copy of this stack.
+     * The copied stack will have no settings applied.
+     * <p>
+     * The new value should be functionally equivalent to the original value,
+     * but should have a normalized state.
+     * <p>
+     * For example, an {@link net.minecraft.world.item.ItemStack} should have its
+     * amount removed, but its tags kept.
+     *
+     * @return a copy for an entry
+     */
     EntryStack<T> normalize();
+    
+    /**
+     * Returns a copy of this stack.
+     * The copied stack will have no settings applied.
+     * <p>
+     * The new value should be the bare minimum to match the original value.
+     * <p>
+     * For example, an {@link net.minecraft.world.item.ItemStack} should have its
+     * amount and tags removed.
+     *
+     * @return a copy for an entry
+     * @since 6.2
+     */
+    default EntryStack<T> wildcard() {
+        return normalize();
+    }
     
     Collection<ResourceLocation> getTagsFor();
     

@@ -131,9 +131,14 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     public FluidStack normalize(EntryStack<FluidStack> entry, FluidStack value) {
         Fluid fluid = value.getFluid();
         if (fluid instanceof FlowingFluid) fluid = ((FlowingFluid) fluid).getSource();
-        FluidStack copy = FluidStack.create(fluid, value.getAmount(), value.getTag());
-        copy.setAmount(FluidStack.bucketAmount());
-        return copy;
+        return FluidStack.create(fluid, FluidStack.bucketAmount(), value.getTag());
+    }
+    
+    @Override
+    public FluidStack wildcard(EntryStack<FluidStack> entry, FluidStack value) {
+        Fluid fluid = value.getFluid();
+        if (fluid instanceof FlowingFluid) fluid = ((FlowingFluid) fluid).getSource();
+        return FluidStack.create(fluid, FluidStack.bucketAmount());
     }
     
     @Override

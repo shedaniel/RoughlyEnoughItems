@@ -101,6 +101,11 @@ public class BuiltinEntryDefinition<T> implements EntryDefinition<T>, EntrySeria
     }
     
     @Override
+    public T wildcard(EntryStack<T> entry, T value) {
+        return value;
+    }
+    
+    @Override
     public long hash(EntryStack<T> entry, T value, ComparisonContext context) {
         return empty ? 0 : Objects.hash(value.getClass().getName(), value);
     }
