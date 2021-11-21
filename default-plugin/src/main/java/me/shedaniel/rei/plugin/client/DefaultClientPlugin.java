@@ -69,9 +69,8 @@ import me.shedaniel.rei.plugin.common.displays.brewing.DefaultBrewingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultBlastingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmeltingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
+import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomDisplay;
-import me.shedaniel.rei.plugin.common.displays.crafting.DefaultShapedDisplay;
-import me.shedaniel.rei.plugin.common.displays.crafting.DefaultShapelessDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -219,8 +218,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerDisplays(DisplayRegistry registry) {
-        registry.registerRecipeFiller(ShapelessRecipe.class, RecipeType.CRAFTING, DefaultShapelessDisplay::new);
-        registry.registerRecipeFiller(ShapedRecipe.class, RecipeType.CRAFTING, DefaultShapedDisplay::new);
+        registry.registerRecipeFiller(CraftingRecipe.class, RecipeType.CRAFTING, DefaultCraftingDisplay::of);
         registry.registerRecipeFiller(SmeltingRecipe.class, RecipeType.SMELTING, DefaultSmeltingDisplay::new);
         registry.registerRecipeFiller(SmokingRecipe.class, RecipeType.SMOKING, DefaultSmokingDisplay::new);
         registry.registerRecipeFiller(BlastingRecipe.class, RecipeType.BLASTING, DefaultBlastingDisplay::new);
