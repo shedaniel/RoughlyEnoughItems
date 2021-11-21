@@ -178,10 +178,13 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
             try (SectionClosable section = section(stage, sectionName + wrapper.getPluginProviderName() + "/")) {
                 if (reloadable == null || !wrapper.plugin.shouldBeForcefullyDoneOnMainThread(reloadable)) {
                     consumer.accept(wrapper);
-                } else if (Platform.getEnvironment() == Env.CLIENT) {
-                    EnvExecutor.runInEnv(Env.CLIENT, () -> () -> queueExecutionClient(() -> consumer.accept(wrapper)));
                 } else {
-                    queueExecution(() -> consumer.accept(wrapper));
+                    RoughlyEnoughItemsCore.LOGGER.warn("Forcing plugin " + wrapper.getPluginProviderName() + " to run on the main thread for " + sectionName + "! This is extremely dangerous, and have large performance implications.");
+                    if (Platform.getEnvironment() == Env.CLIENT) {
+                        EnvExecutor.runInEnv(Env.CLIENT, () -> () -> queueExecutionClient(() -> consumer.accept(wrapper)));
+                    } else {
+                        queueExecution(() -> consumer.accept(wrapper));
+                    }
                 }
             } catch (Throwable throwable) {
                 RoughlyEnoughItemsCore.LOGGER.error(wrapper.getPluginProviderName() + " plugin failed to " + sectionName + "!", throwable);

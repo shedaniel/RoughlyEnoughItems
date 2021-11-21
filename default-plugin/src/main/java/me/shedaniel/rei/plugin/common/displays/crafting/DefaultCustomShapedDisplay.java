@@ -21,25 +21,32 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.registry.display;
+package me.shedaniel.rei.plugin.common.displays.crafting;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import it.unimi.dsi.fastutil.ints.IntList;
-import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.common.display.Display;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import org.jetbrains.annotations.ApiStatus;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import net.minecraft.world.item.crafting.Recipe;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
-@Deprecated
-@ApiStatus.ScheduledForRemoval
-public interface TransferDisplayCategory<T extends Display> extends DisplayCategory<T> {
-    @ApiStatus.OverrideOnly
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    void renderRedSlots(PoseStack matrices, List<Widget> widgets, Rectangle bounds, T display, IntList redSlots);
+public class DefaultCustomShapedDisplay extends DefaultCraftingDisplay<Recipe<?>> {
+    private int width;
+    private int height;
+    
+    public DefaultCustomShapedDisplay(@Nullable Recipe<?> possibleRecipe, List<EntryIngredient> input, List<EntryIngredient> output, int width, int height) {
+        super(input, output, Optional.ofNullable(possibleRecipe));
+        this.width = width;
+        this.height = height;
+    }
+    
+    @Override
+    public int getWidth() {
+        return width;
+    }
+    
+    @Override
+    public int getHeight() {
+        return height;
+    }
 }

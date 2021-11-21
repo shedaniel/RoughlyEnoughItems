@@ -148,6 +148,9 @@ public interface ConfigObject {
     List<EntryStackProvider<?>> getFilteredStackProviders();
     
     @ApiStatus.Experimental
+    boolean shouldFilterDisplays();
+    
+    @ApiStatus.Experimental
     boolean shouldAsyncSearch();
     
     @ApiStatus.Experimental

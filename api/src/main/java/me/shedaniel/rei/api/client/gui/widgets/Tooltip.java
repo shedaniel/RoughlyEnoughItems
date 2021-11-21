@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.client.gui.widgets;
 
+import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
@@ -130,7 +131,7 @@ public interface Tooltip {
     Tooltip withContextStack(EntryStack<?> stack);
     
     default void queue() {
-        EnvExecutor.runInEnv(EnvType.CLIENT, () -> () -> REIRuntime.getInstance().queueTooltip(this));
+        EnvExecutor.runInEnv(Env.CLIENT, () -> () -> REIRuntime.getInstance().queueTooltip(this));
     }
     
     @ApiStatus.NonExtendable

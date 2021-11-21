@@ -311,6 +311,12 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return advanced.filtering.filteredStacks;
     }
     
+    @ApiStatus.Experimental
+    @Override
+    public boolean shouldFilterDisplays() {
+        return advanced.filtering.shouldFilterDisplays;
+    }
+    
     @ApiStatus.Internal
     public List<FilteringRule<?>> getFilteringRules() {
         return advanced.filtering.filteringRules;
@@ -576,6 +582,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         
         public static class Filtering {
             @UseFilteringScreen private List<EntryStackProvider<?>> filteredStacks = new ArrayList<>();
+            public boolean shouldFilterDisplays = true;
             @ConfigEntry.Gui.Excluded public List<FilteringRule<?>> filteringRules = new ArrayList<>();
         }
     }

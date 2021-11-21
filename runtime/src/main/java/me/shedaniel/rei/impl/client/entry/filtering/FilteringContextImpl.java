@@ -43,20 +43,28 @@ import java.util.concurrent.TimeoutException;
 
 @Environment(EnvType.CLIENT)
 public class FilteringContextImpl implements FilteringContext {
+    private final boolean async;
     public final Map<FilteringContextType, Set<HashedEntryStackWrapper>> stacks;
     private final Map<FilteringContextType, Collection<EntryStack<?>>> cachedStacks;
     
     public FilteringContextImpl(Collection<EntryStack<?>> allStacks) {
+        this(true, allStacks);
+    }
+    
+    public FilteringContextImpl(boolean async, Collection<EntryStack<?>> allStacks) {
+        this.async = async;
         this.stacks = Maps.newHashMap();
         this.cachedStacks = Maps.newHashMap();
         for (FilteringContextType type : FilteringContextType.values()) {
             this.stacks.computeIfAbsent(type, t -> Sets.newHashSet());
         }
-        this.stacks.get(FilteringContextType.DEFAULT).addAll(CollectionUtils.mapParallel(allStacks, HashedEntryStackWrapper::new));
+        this.stacks.get(FilteringContextType.DEFAULT).addAll(async ? CollectionUtils.mapParallel(allStacks, HashedEntryStackWrapper::new)
+                : CollectionUtils.map(allStacks, HashedEntryStackWrapper::new));
         fillCache();
     }
     
     public FilteringContextImpl(Map<FilteringContextType, Set<HashedEntryStackWrapper>> stacks) {
+        this.async = false;
         this.stacks = stacks;
         this.cachedStacks = Maps.newHashMap();
         for (FilteringContextType type : FilteringContextType.values()) {
@@ -81,24 +89,34 @@ public class FilteringContextImpl implements FilteringContext {
         Collection<HashedEntryStackWrapper> hiddenStacks = result.getHiddenStacks();
         Collection<HashedEntryStackWrapper> shownStacks = result.getShownStacks();
         
-        List<CompletableFuture<Void>> completableFutures = Lists.newArrayList();
-        completableFutures.add(CompletableFuture.runAsync(() -> {
+        if (async) {
+            List<CompletableFuture<Void>> completableFutures = Lists.newArrayList();
+            completableFutures.add(CompletableFuture.runAsync(() -> {
+                this.stacks.get(FilteringContextType.DEFAULT).removeAll(hiddenStacks);
+                this.stacks.get(FilteringContextType.DEFAULT).removeAll(shownStacks);
+            }));
+            completableFutures.add(CompletableFuture.runAsync(() -> {
+                this.stacks.get(FilteringContextType.SHOWN).removeAll(hiddenStacks);
+                this.stacks.get(FilteringContextType.SHOWN).addAll(shownStacks);
+            }));
+            completableFutures.add(CompletableFuture.runAsync(() -> {
+                this.stacks.get(FilteringContextType.HIDDEN).addAll(hiddenStacks);
+                this.stacks.get(FilteringContextType.HIDDEN).removeAll(shownStacks);
+            }));
+            try {
+                CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(20, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                e.printStackTrace();
+            }
+        } else {
             this.stacks.get(FilteringContextType.DEFAULT).removeAll(hiddenStacks);
             this.stacks.get(FilteringContextType.DEFAULT).removeAll(shownStacks);
-        }));
-        completableFutures.add(CompletableFuture.runAsync(() -> {
             this.stacks.get(FilteringContextType.SHOWN).removeAll(hiddenStacks);
             this.stacks.get(FilteringContextType.SHOWN).addAll(shownStacks);
-        }));
-        completableFutures.add(CompletableFuture.runAsync(() -> {
             this.stacks.get(FilteringContextType.HIDDEN).addAll(hiddenStacks);
             this.stacks.get(FilteringContextType.HIDDEN).removeAll(shownStacks);
-        }));
-        try {
-            CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(20, TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            e.printStackTrace();
         }
+        
         fillCache();
     }
 }

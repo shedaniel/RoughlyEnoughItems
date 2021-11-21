@@ -66,7 +66,7 @@ public interface FilteringRule<T extends FilteringRule<?>> {
     
     T createFromTag(CompoundTag tag);
     
-    FilteringResult processFilteredStacks(FilteringContext context);
+    FilteringResult processFilteredStacks(FilteringContext context, FilteringCache cache, boolean async);
     
     @ApiStatus.Internal
     default Optional<BiFunction<FilteringEntry, Screen, Screen>> createEntryScreen() {
@@ -79,6 +79,10 @@ public interface FilteringRule<T extends FilteringRule<?>> {
     
     default Component getSubtitle() {
         return Component.nullToEmpty(null);
+    }
+    
+    default Object prepareCache(boolean async) {
+        return null;
     }
     
     T createNew();
