@@ -167,9 +167,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * @return a copy for an entry
      * @since 6.2
      */
-    default EntryStack<T> wildcard() {
-        return normalize();
-    }
+    EntryStack<T> wildcard();
     
     Collection<ResourceLocation> getTagsFor();
     
