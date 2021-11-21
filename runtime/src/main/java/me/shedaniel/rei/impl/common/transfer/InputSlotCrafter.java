@@ -82,7 +82,7 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
         RecipeFinder recipeFinder = new RecipeFinder();
         this.menuInfo.getRecipeFinderPopulator().populate(this, recipeFinder);
         NonNullList<Ingredient> ingredients = NonNullList.create();
-        for (List<ItemStack> itemStacks : this.menuInfo.getInputs(this)) {
+        for (List<ItemStack> itemStacks : this.menuInfo.getInputs(this, true)) {
             ingredients.add(CollectionUtils.toIngredient(itemStacks));
         }
         

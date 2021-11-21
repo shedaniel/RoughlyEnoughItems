@@ -51,6 +51,7 @@ import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiIngredientGroup;
 import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
@@ -211,7 +212,7 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
         for (Map.Entry<Boolean, List<Multimap<EntryType<?>, EntryStack<?>>>> entry : groups.entrySet()) {
             entry.getValue().stream().map(Multimap::keys).flatMap(Collection::stream)
                     .distinct().forEach(type -> {
-                        IGuiIngredientGroup<Object> group = layout.getIngredientsGroup(type.getDefinition()::getValueType);
+                        IGuiIngredientGroup<Object> group = layout.getIngredientsGroup((IIngredientType<Object>) type.getDefinition().jeiType());
                         int[] i = new int[]{getNextId(group.getGuiIngredients().keySet())};
                         entry.getValue().stream().map(map -> map.get(type))
                                 .forEach(stacks -> {

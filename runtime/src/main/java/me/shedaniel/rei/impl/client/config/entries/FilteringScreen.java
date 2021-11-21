@@ -41,6 +41,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
+import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
@@ -320,6 +321,10 @@ public class FilteringScreen extends Screen {
     }
     
     public boolean matches(EntryStack<?> stack) {
+        EntrySerializer<?> serializer = stack.getDefinition().getSerializer();
+        if (serializer == null || !serializer.supportReading() || !serializer.supportSaving()) {
+            return false;
+        }
         return lastFilter.test(stack);
     }
     

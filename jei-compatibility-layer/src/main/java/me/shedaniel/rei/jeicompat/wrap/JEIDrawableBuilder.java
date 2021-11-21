@@ -23,17 +23,14 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector4f;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
 import mezz.jei.api.gui.ITickTimer;
 import mezz.jei.api.gui.drawable.IDrawableAnimated;
 import mezz.jei.api.gui.drawable.IDrawableBuilder;
 import mezz.jei.api.gui.drawable.IDrawableStatic;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -93,22 +90,44 @@ public class JEIDrawableBuilder implements IDrawableBuilder {
     public IDrawableStatic build() {
         int actualWidth = width + paddingLeft + paddingRight;
         int actualHeight = height + paddingTop + paddingBottom;
-        Widget widget = Widgets.createTexturedWidget(texture, 0, 0, u, v, width, height, textureWidth, textureHeight);
         return new IDrawableStatic() {
+            /**
+             * The following method is licensed with The MIT License (MIT)
+             * Copyright (c) 2014-2015 mezz
+             * 
+             * Full license text can be found in the https://github.com/mezz/JustEnoughItems/blob/1.17/LICENSE.txt
+             */
             @Override
             public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset, int maskTop, int maskBottom, int maskLeft, int maskRight) {
-                matrixStack.pushPose();
-                matrixStack.translate(xOffset + paddingLeft, yOffset + paddingTop, 0);
+                RenderSystem.setShaderTexture(0, texture);
+                Matrix4f matrix = matrixStack.last().pose();
+                RenderSystem.setShader(GameRenderer::getPositionTexShader);
+                BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
+                bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
                 
-                Vector4f vector4f = new Vector4f(maskLeft, maskTop, 0, 1.0F);
-                vector4f.transform(matrixStack.last().pose());
-                Vector4f vector4f2 = new Vector4f(width - maskRight, height - maskBottom, 0, 1.0F);
-                vector4f2.transform(matrixStack.last().pose());
+                int xStart = xOffset + JEIDrawableBuilder.this.paddingLeft + maskLeft;
+                int yStart = yOffset + JEIDrawableBuilder.this.paddingTop + maskTop;
+                int u = JEIDrawableBuilder.this.u + maskLeft;
+                int v = JEIDrawableBuilder.this.v + maskTop;
+                int width = JEIDrawableBuilder.this.width - maskRight - maskLeft;
+                int height = JEIDrawableBuilder.this.height - maskBottom - maskTop;
+                float f = 1.0F / JEIDrawableBuilder.this.textureWidth;
+                float f1 = 1.0F / JEIDrawableBuilder.this.textureHeight;
                 
-                ScissorsHandler.INSTANCE.scissor(new Rectangle(Math.round(vector4f.x()), Math.round(vector4f.y()), Math.round(vector4f2.x()) - Math.round(vector4f.x()), Math.round(vector4f2.y()) - Math.round(vector4f.y())));
-                widget.render(matrixStack, PointHelper.getMouseX(), PointHelper.getMouseY(), 0);
-                ScissorsHandler.INSTANCE.removeLastScissor();
-                matrixStack.popPose();
+                float z = 0.0F;
+                float xEnd = xStart + width;
+                float yEnd = yStart + height;
+                float uStart = u * f;
+                float uEnd = (u + width) * f;
+                float vStart = v * f1;
+                float vEnd = (v + height) * f1;
+                
+                bufferBuilder.vertex(matrix, xStart, yEnd, z).uv(uStart, vEnd).endVertex();
+                bufferBuilder.vertex(matrix, xEnd, yEnd, z).uv(uEnd, vEnd).endVertex();
+                bufferBuilder.vertex(matrix, xEnd, yStart, z).uv(uEnd, vStart).endVertex();
+                bufferBuilder.vertex(matrix, xStart, yStart, z).uv(uStart, vStart).endVertex();
+                bufferBuilder.end();
+                BufferUploader.end(bufferBuilder);
             }
             
             @Override

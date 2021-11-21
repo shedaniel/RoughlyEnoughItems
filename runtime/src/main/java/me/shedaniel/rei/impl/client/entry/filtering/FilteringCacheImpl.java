@@ -21,25 +21,24 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.registry.display;
+package me.shedaniel.rei.impl.client.entry.filtering;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import it.unimi.dsi.fastutil.ints.IntList;
-import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.common.display.Display;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
-@Environment(EnvType.CLIENT)
-@Deprecated
-@ApiStatus.ScheduledForRemoval
-public interface TransferDisplayCategory<T extends Display> extends DisplayCategory<T> {
-    @ApiStatus.OverrideOnly
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated
-    void renderRedSlots(PoseStack matrices, List<Widget> widgets, Rectangle bounds, T display, IntList redSlots);
+public class FilteringCacheImpl implements FilteringCache {
+    private final Map<FilteringRule<?>, Optional<?>> CACHE = new HashMap<>();
+    
+    @Override
+    @Nullable
+    public Object getCache(FilteringRule<?> rule) {
+        return CACHE.getOrDefault(rule, Optional.empty()).orElse(null);
+    }
+    
+    public void setCache(FilteringRule<?> rule, @Nullable Object value) {
+        CACHE.put(rule, Optional.ofNullable(value));
+    }
 }

@@ -93,7 +93,7 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
     
     @Override
     public boolean isEmpty(EntryStack<T> entry, T value) {
-        return ingredientHelper.isValidIngredient(value);
+        return !ingredientHelper.isValidIngredient(value);
     }
     
     @Override

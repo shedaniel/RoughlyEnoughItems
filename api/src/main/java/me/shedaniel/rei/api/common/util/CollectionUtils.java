@@ -265,6 +265,19 @@ public class CollectionUtils {
         return l == null ? Collections.emptyList() : l;
     }
     
+    public static <T, R> List<R> mapAndFilter(Iterable<T> list, Predicate<R> predicate, Function<T, R> function) {
+        List<R> l = null;
+        for (T t : list) {
+            R r = function.apply(t);
+            if (predicate.test(r)) {
+                if (l == null)
+                    l = Lists.newArrayList();
+                l.add(r);
+            }
+        }
+        return l == null ? Collections.emptyList() : l;
+    }
+    
     public static <T> int sumInt(Iterable<T> list, Function<T, Integer> function) {
         int sum = 0;
         for (T t : list) {
@@ -322,6 +335,29 @@ public class CollectionUtils {
                     @Override
                     public int size() {
                         return realSize;
+                    }
+                    
+                    @Override
+                    public Iterator<T> iterator() {
+                        Iterator<T> iterator = super.iterator();
+                        return new Iterator<T>() {
+                            boolean endReached = false;
+                            
+                            @Override
+                            public boolean hasNext() {
+                                return iterator.hasNext() && !endReached;
+                            }
+                            
+                            @Override
+                            public T next() {
+                                try {
+                                    return iterator.next();
+                                } catch (NoSuchElementException e) {
+                                    endReached = true;
+                                    return null;
+                                }
+                            }
+                        };
                     }
                 };
             }

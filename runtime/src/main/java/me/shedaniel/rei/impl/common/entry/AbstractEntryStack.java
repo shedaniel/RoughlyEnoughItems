@@ -146,6 +146,11 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
         return wrap(getDefinition().normalize(this, getValue()), false);
     }
     
+    @Override
+    public EntryStack<A> wildcard() {
+        return wrap(getDefinition().wildcard(this, getValue()), false);
+    }
+    
     protected EntryStack<A> wrap(A value, boolean copySettings) {
         TypedEntryStack<A> stack = new TypedEntryStack<>(getDefinition(), value);
         if (copySettings) {

@@ -77,7 +77,7 @@ public enum JEIIngredientManager implements IIngredientManager {
     @Override
     @NotNull
     public <V> IIngredientRenderer<V> getIngredientRenderer(@NotNull V ingredient) {
-        return getIngredientRenderer(ingredient.unwrapDefinition().<V>cast()::getValueType);
+        return getIngredientRenderer(ingredient.unwrapDefinition().<V>cast().jeiType());
     }
     
     @Override
@@ -89,19 +89,19 @@ public enum JEIIngredientManager implements IIngredientManager {
     @Override
     @NotNull
     public Collection<IIngredientType<?>> getRegisteredIngredientTypes() {
-        return CollectionUtils.map(EntryTypeRegistry.getInstance().values(), definition -> definition::getValueType);
+        return CollectionUtils.map(EntryTypeRegistry.getInstance().values(), definition -> definition.jeiType());
     }
     
     @Override
     public <V> void addIngredientsAtRuntime(@NotNull IIngredientType<V> ingredientType, @NotNull Collection<V> ingredients) {
-        EntryRegistry.getInstance().addEntries(CollectionUtils.map(ingredients, v -> v.unwrapStack( ingredientType)));
+        EntryRegistry.getInstance().addEntries(CollectionUtils.map(ingredients, v -> v.unwrapStack(ingredientType)));
     }
     
     @Override
     public <V> void removeIngredientsAtRuntime(@NotNull IIngredientType<V> ingredientType, @NotNull Collection<V> ingredients) {
         LongSet hash = new LongOpenHashSet();
         for (V ingredient : ingredients) {
-            hash.add(EntryStacks.hashExact(ingredient.unwrapStack( ingredientType)));
+            hash.add(EntryStacks.hashExact(ingredient.unwrapStack(ingredientType)));
         }
         EntryRegistry.getInstance().removeEntryExactHashIf(hash::contains);
     }
@@ -109,13 +109,13 @@ public enum JEIIngredientManager implements IIngredientManager {
     @Override
     @NotNull
     public <V> IIngredientType<V> getIngredientType(@NotNull V ingredient) {
-        return ingredient.unwrapStack().getDefinition().<V>cast()::getValueType;
+        return ingredient.unwrapStack().getDefinition().<V>cast().jeiType();
     }
     
     @Override
     @NotNull
     public <V> IIngredientType<V> getIngredientType(@NotNull Class<? extends V> ingredientClass) {
-        return () -> ingredientClass;
+        return (IIngredientType<V>) ingredientClass.jeiType();
     }
     
     @Override

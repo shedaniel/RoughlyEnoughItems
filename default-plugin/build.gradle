@@ -31,6 +31,14 @@ task fakeJar(type: Jar, dependsOn: remapJar) {
     classifier null
 }
 
+task fakeForgeJar(type: Jar, dependsOn: remapJar) {
+    from remapJar.archiveFile.map { zipTree(it) }
+    from(rootProject.file("fake/fabric.mod.json")) {
+        into ""
+    }
+    classifier "fake-forge"
+}
+
 artifacts {
     apiElements(fakeJar)
     runtimeElements(fakeJar)

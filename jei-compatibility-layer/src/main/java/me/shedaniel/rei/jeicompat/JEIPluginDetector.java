@@ -37,6 +37,7 @@ import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.display.reason.DisplayAdditionReason;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -216,6 +217,7 @@ public class JEIPluginDetector {
         return context == UidContext.Recipe ? ComparisonContext.FUZZY : ComparisonContext.EXACT;
     }
     
+    public static final Map<Class<?>, IIngredientType<?>> INGREDIENT_TYPE_MAP = new HashMap<>();
     public static final Map<ResourceLocation, CategoryIdentifier<?>> CATEGORY_ID_MAP = new HashMap<>();
     
     static {
@@ -232,10 +234,24 @@ public class JEIPluginDetector {
         CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "information"), BuiltinPlugin.INFO);
     }
     
+    public static <T> IIngredientType<T> jeiType(EntryDefinition<T> definition) {
+        return jeiType(definition.getValueType());
+    }
+    
+    public static <T> IIngredientType<T> jeiType(Class<? extends T> c) {
+        IIngredientType<T> existingType = (IIngredientType<T>) INGREDIENT_TYPE_MAP.get(c);
+        if (existingType != null) return existingType;
+        IIngredientType<T> type = () -> c;
+        INGREDIENT_TYPE_MAP.put(c, type);
+        return type;
+    }
+    
     public static <T extends Display> CategoryIdentifier<T> categoryId(ResourceLocation id) {
-        CategoryIdentifier<?> identifier = CATEGORY_ID_MAP.get(id);
-        if (identifier != null) return identifier.cast();
-        return CategoryIdentifier.of(id);
+        CategoryIdentifier<?> existingId = CATEGORY_ID_MAP.get(id);
+        if (existingId != null) return existingId.cast();
+        CategoryIdentifier<T> identifier = CategoryIdentifier.of(id);
+        CATEGORY_ID_MAP.put(id, identifier);
+        return identifier;
     }
     
     public static <T> EntryStack<T> unwrapStack(T stack, IIngredientType<T> type) {
@@ -369,6 +385,7 @@ public class JEIPluginDetector {
         public final IModPlugin backingPlugin;
         
         public final Map<DisplayCategory<?>, List<Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>>>> categories = new HashMap<>();
+        public final List<Runnable> entryRegistry = new ArrayList<>();
         public final List<Runnable> post = new ArrayList<>();
         
         public JEIPluginWrapper(List<String> modIds, IModPlugin backingPlugin) {
@@ -381,6 +398,15 @@ public class JEIPluginDetector {
         @Override
         public void registerEntryTypes(EntryTypeRegistry registry) {
             backingPlugin.registerIngredients(new JEIModIngredientRegistration(this, registry));
+        }
+        
+        @Override
+        public void registerEntries(EntryRegistry registry) {
+            for (Runnable runnable : entryRegistry) {
+                runnable.run();
+            }
+            
+            entryRegistry.clear();
         }
         
         @Override
@@ -474,9 +500,22 @@ public class JEIPluginDetector {
                     }
                 }
                 backingPlugin.onRuntimeAvailable(JEIJeiRuntime.INSTANCE);
-                for (Runnable runnable : post) {
-                    runnable.run();
+                for (Runnable runnable : entryRegistry) {
+                    try {
+                        runnable.run();
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
                 }
+                for (Runnable runnable : post) {
+                    try {
+                        runnable.run();
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                    }
+                }
+                
+                entryRegistry.clear();
                 post.clear();
             }
         }

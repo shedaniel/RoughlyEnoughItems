@@ -24,12 +24,16 @@
 package me.shedaniel.rei.plugin.common.displays.crafting;
 
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
-import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.registry.RecipeManagerContext;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
+import me.shedaniel.rei.api.common.transfer.info.MenuSerializationContext;
+import me.shedaniel.rei.api.common.transfer.info.simple.SimpleGridMenuInfo;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.crafting.Recipe;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Optional;
@@ -58,6 +62,28 @@ public class DefaultCustomDisplay extends DefaultCraftingDisplay<Recipe<?>> {
         Recipe<?> optionalRecipe = location.flatMap(resourceLocation -> RecipeManagerContext.getInstance().getRecipeManager().byKey(resourceLocation))
                 .orElse(null);
         return new DefaultCustomDisplay(optionalRecipe, input, output);
+    }
+    
+    @Override
+    public List<EntryIngredient> getInputEntries(MenuSerializationContext<?, ?, ?> context, MenuInfo<?, ?> info, boolean fill) {
+        if (fill && info instanceof SimpleGridMenuInfo) {
+            List<EntryIngredient> out = new ArrayList<>();
+            int craftingWidth = ((SimpleGridMenuInfo<AbstractContainerMenu, ?>) info).getCraftingWidth(context.getMenu());
+            int craftingHeight = ((SimpleGridMenuInfo<AbstractContainerMenu, ?>) info).getCraftingHeight(context.getMenu());
+            for (int i = 0; i < 9; i++) {
+                if (i < inputs.size()) {
+                    int x = i % 3;
+                    if (x < craftingWidth) {
+                        out.add(inputs.get(i));
+                        if (out.size() > craftingWidth * craftingHeight) break;
+                    }
+                }
+            }
+            while (out.size() < craftingWidth * craftingHeight) out.add(EntryIngredient.empty());
+            return out;
+        }
+        
+        return super.getInputEntries(context, info, fill);
     }
     
     @Override

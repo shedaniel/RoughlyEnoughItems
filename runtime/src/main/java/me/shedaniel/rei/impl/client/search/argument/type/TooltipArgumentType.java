@@ -37,6 +37,7 @@ import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ConcurrentModificationException;
 import java.util.Locale;
 import java.util.StringJoiner;
 
@@ -70,15 +71,19 @@ public final class TooltipArgumentType extends ArgumentType<Unit, String> {
     @Override
     public boolean matches(Mutable<String> data, EntryStack<?> stack, String searchText, Unit filterData) {
         if (data.getValue() == null) {
-            data.setValue(tryGetEntryStackTooltip(stack).toLowerCase(Locale.ROOT));
+            String tooltip = tryGetEntryStackTooltip(stack, 0);
+            if (tooltip == null) return false;
+            data.setValue(tooltip.toLowerCase(Locale.ROOT));
         }
         String tooltip = data.getValue();
         return tooltip.isEmpty() || tooltip.contains(searchText);
     }
     
-    public static String tryGetEntryStackTooltip(EntryStack<?> stack) {
-        Tooltip tooltip = stack.getTooltip(new Point(), false);
-        if (tooltip != null) {
+    @Nullable
+    public static String tryGetEntryStackTooltip(EntryStack<?> stack, int attempt) {
+        try {
+            Tooltip tooltip = stack.getTooltip(new Point(), false);
+            if (tooltip != null) {
             StringJoiner joiner = new StringJoiner("\n");
             for (Tooltip.Entry entry : tooltip.entries()) {
                 if (entry.isText()) {
@@ -86,8 +91,24 @@ public final class TooltipArgumentType extends ArgumentType<Unit, String> {
                 }
             }
             return joiner.toString();
+            }
+            return "";
+        } catch (Throwable throwable) {
+            Throwable temp = throwable;
+            while (temp != null) {
+                temp = temp.getCause();
+                if (temp instanceof ConcurrentModificationException) {
+                    // yes, this is a hack
+                    if (attempt < 10) {
+                        return tryGetEntryStackTooltip(stack, attempt + 1);
+                    }
+                    
+                    return null;
+                }
+            }
+            
+            throw throwable;
         }
-        return "";
     }
     
     @Override
