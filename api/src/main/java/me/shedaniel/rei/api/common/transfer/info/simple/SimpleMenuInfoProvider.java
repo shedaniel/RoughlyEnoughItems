@@ -49,18 +49,18 @@ public interface SimpleMenuInfoProvider<T extends AbstractContainerMenu, D exten
     
     @Override
     default Optional<MenuInfo<T, D>> provideClient(D display, MenuSerializationContext<T, ?, D> context, T menu) {
-        return Optional.ofNullable(cloneWithDisplay(display));
+        return Optional.ofNullable(create(display));
     }
     
     @Override
     default Optional<MenuInfo<T, D>> provide(CategoryIdentifier<D> category, T menu, MenuSerializationContext<T, ?, D> context, CompoundTag networkTag) {
         D display = read(category, menu, context, networkTag);
         if (display == null) return Optional.empty();
-        return Optional.ofNullable(cloneWithDisplay(display));
+        return Optional.ofNullable(create(display));
     }
     
     @Nullable
-    MenuInfo<T, D> cloneWithDisplay(D display);
+    MenuInfo<T, D> create(D display);
     
     @Nullable
     default D read(CategoryIdentifier<D> category, T menu, MenuSerializationContext<T, ?, D> context, CompoundTag networkTag) {
