@@ -23,8 +23,6 @@
 
 package me.shedaniel.rei.api.client.registry.transfer;
 
-import it.unimi.dsi.fastutil.ints.IntList;
-import me.shedaniel.rei.api.client.registry.display.TransferDisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -66,10 +64,6 @@ public interface TransferHandler extends Comparable<TransferHandler> {
     @Environment(EnvType.CLIENT)
     @Nullable
     default TransferHandlerErrorRenderer provideErrorRenderer(Context context, Object data) {
-        if (data instanceof IntList) {
-            return TransferHandlerErrorRenderer.forRedSlots((IntList) data);
-        }
-        
         return null;
     }
     
@@ -108,28 +102,6 @@ public interface TransferHandler extends Comparable<TransferHandler> {
          */
         static Result createFailedCustomButtonColor(Component error, int color) {
             return createFailed(error).color(color);
-        }
-        
-        /**
-         * Creates a passing result, further handlers will be called.
-         *
-         * @param error    The error itself
-         * @param redSlots A list of slots to be marked as red. Will be passed to {@link TransferDisplayCategory}.
-         */
-        static Result createFailed(Component error, IntList redSlots) {
-            return createFailed(error).errorRenderer(redSlots);
-        }
-        
-        /**
-         * Creates a passing result, further handlers will be called.
-         * The special color will be applied if this is the last handler.
-         *
-         * @param error    The error itself
-         * @param color    A special color for the button
-         * @param redSlots A list of slots to be marked as red. Will be passed to {@link TransferDisplayCategory}.
-         */
-        static Result createFailedCustomButtonColor(Component error, IntList redSlots, int color) {
-            return createFailed(error).errorRenderer(redSlots).color(color);
         }
         
         /**

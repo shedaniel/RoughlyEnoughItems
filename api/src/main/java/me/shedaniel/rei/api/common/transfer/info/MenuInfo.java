@@ -28,7 +28,6 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -46,7 +45,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
@@ -129,18 +127,6 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> {
         return CollectionUtils.map(context.getDisplay().getInputEntries(context, this, fill), inputEntry ->
                 CollectionUtils.<EntryStack<?>, ItemStack>filterAndMap(inputEntry,
                         stack -> stack.getType() == VanillaEntryTypes.ITEM, EntryStack::castValue));
-    }
-    
-    /**
-     * Returns the inputs of the {@link Display}. The nested lists are possible stacks for that specific slot.
-     *
-     * @param context the context of the transfer
-     * @return the list of lists of items
-     */
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
-    default List<List<ItemStack>> getInputs(MenuInfoContext<T, ?, D> context) {
-        return getInputs(context, false);
     }
     
     /**

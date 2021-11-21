@@ -128,9 +128,7 @@ public interface EntryDefinition<T> {
      * @return a wildcard copy for an entry
      * @since 6.2
      */
-    default T wildcard(EntryStack<T> entry, T value) {
-        return normalize(entry, value);
-    }
+    T wildcard(EntryStack<T> entry, T value);
     
     long hash(EntryStack<T> entry, T value, ComparisonContext context);
     
