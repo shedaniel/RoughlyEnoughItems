@@ -58,6 +58,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class ViewsImpl implements Views {
@@ -69,8 +70,14 @@ public class ViewsImpl implements Views {
         
         Stopwatch stopwatch = Stopwatch.createStarted();
         Set<CategoryIdentifier<?>> categories = builder.getCategories();
-        List<EntryStack<?>> recipesFor = builder.getRecipesFor();
-        List<EntryStack<?>> usagesFor = builder.getUsagesFor();
+        List<EntryStack<?>> recipesForStacks = builder.getRecipesFor();
+        List<EntryStack<?>> usagesForStacks = builder.getUsagesFor();
+        recipesForStacks = Stream.concat(recipesForStacks.stream(), recipesForStacks.stream().map(EntryStack::wildcard))
+                .distinct()
+                .collect(Collectors.toList());
+        usagesForStacks = Stream.concat(usagesForStacks.stream(), usagesForStacks.stream().map(EntryStack::wildcard))
+                .distinct()
+                .collect(Collectors.toList());
         DisplayRegistry displayRegistry = DisplayRegistry.getInstance();
         
         Map<DisplayCategory<?>, List<Display>> result = Maps.newLinkedHashMap();
@@ -94,12 +101,12 @@ public class ViewsImpl implements Views {
             }
             for (Display display : allRecipesFromCategory) {
                 if (!displayRegistry.isDisplayVisible(display)) continue;
-                if (!recipesFor.isEmpty()) {
+                if (!recipesForStacks.isEmpty()) {
                     back:
                     for (List<? extends EntryStack<?>> results : display.getOutputEntries()) {
                         for (EntryStack<?> otherEntry : results) {
-                            for (EntryStack<?> stack : recipesFor) {
-                                if (EntryStacks.equalsFuzzy(otherEntry, stack)) {
+                            for (EntryStack<?> recipesFor : recipesForStacks) {
+                                if (EntryStacks.equalsFuzzy(otherEntry, recipesFor)) {
                                     set.add(display);
                                     break back;
                                 }
@@ -107,12 +114,12 @@ public class ViewsImpl implements Views {
                         }
                     }
                 }
-                if (!usagesFor.isEmpty()) {
+                if (!usagesForStacks.isEmpty()) {
                     back:
                     for (List<? extends EntryStack<?>> input : display.getInputEntries()) {
                         for (EntryStack<?> otherEntry : input) {
-                            for (EntryStack<?> stack : usagesFor) {
-                                if (EntryStacks.equalsFuzzy(otherEntry, stack)) {
+                            for (EntryStack<?> usagesFor : usagesForStacks) {
+                                if (EntryStacks.equalsFuzzy(otherEntry, usagesFor)) {
                                     set.add(display);
                                     break back;
                                 }
@@ -121,8 +128,8 @@ public class ViewsImpl implements Views {
                     }
                 }
             }
-            for (EntryStack<?> stack : usagesFor) {
-                if (isStackWorkStationOfCategory(categoryConfiguration, stack)) {
+            for (EntryStack<?> usagesFor : usagesForStacks) {
+                if (isStackWorkStationOfCategory(categoryConfiguration, usagesFor)) {
                     set.addAll(CollectionUtils.filterToSet(allRecipesFromCategory, displayRegistry::isDisplayVisible));
                     break;
                 }
@@ -229,7 +236,7 @@ public class ViewsImpl implements Views {
         }
         
         String message = String.format("Built Recipe View in %s for %d categories, %d recipes for, %d usages for and %d live recipe generators.",
-                stopwatch.stop(), categories.size(), recipesFor.size(), usagesFor.size(), generatorsCount);
+                stopwatch.stop(), categories.size(), recipesForStacks.size(), usagesForStacks.size(), generatorsCount);
         if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
             RoughlyEnoughItemsCore.LOGGER.info(message);
         } else {
