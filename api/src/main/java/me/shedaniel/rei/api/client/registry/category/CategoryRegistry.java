@@ -24,8 +24,10 @@
 package me.shedaniel.rei.api.client.registry.category;
 
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.category.extension.CategoryExtensionProvider;
 import me.shedaniel.rei.api.client.registry.category.visibility.CategoryVisibilityPredicate;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategoryView;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
@@ -37,6 +39,7 @@ import me.shedaniel.rei.api.common.util.Identifiable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -214,6 +217,12 @@ public interface CategoryRegistry extends Reloadable<REIClientPlugin>, Iterable<
          * @return the identifier of the category
          */
         CategoryIdentifier<?> getCategoryIdentifier();
+        
+        @ApiStatus.Experimental
+        void registerExtension(CategoryExtensionProvider<T> provider);
+        
+        @ApiStatus.Experimental
+        DisplayCategoryView<T> getView(T display);
         
         @Override
         default ResourceLocation getIdentifier() {

@@ -109,6 +109,11 @@ dependencies {
     // modRuntime("curse.maven:cc-tweaked-282001:3434680")
     // modRuntime("curse.maven:ender-storage-245174:3361748")
     // modRuntime("curse.maven:codechicken-242818:3528603")
+    // modRuntime("curse.maven:recipe-stages-280554:3492760")
+    // modRuntime("curse.maven:game-stages-268655:3437962")
+    // modRuntime("curse.maven:bookshelf-228525:3474499")
+    // modRuntime("curse.maven:kubejs-238086:3533307")
+    // modRuntime("curse.maven:rhino-416294:3525704")
 }
 
 shadowJar {

@@ -44,7 +44,7 @@ import java.util.Collections;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public interface DisplayCategory<T extends Display> extends Identifiable {
+public interface DisplayCategory<T extends Display> extends DisplayCategoryView<T>, Identifiable {
     /**
      * Returns the renderer of the icon.
      *
@@ -66,6 +66,7 @@ public interface DisplayCategory<T extends Display> extends Identifiable {
      * @return the display renderer
      */
     @ApiStatus.OverrideOnly
+    @Override
     default DisplayRenderer getDisplayRenderer(T display) {
         return SimpleDisplayRenderer.from(display.getInputEntries(), display.getOutputEntries());
     }
@@ -78,6 +79,7 @@ public interface DisplayCategory<T extends Display> extends Identifiable {
      * @return the list of widgets
      */
     @ApiStatus.OverrideOnly
+    @Override
     default List<Widget> setupDisplay(T display, Rectangle bounds) {
         return Collections.singletonList(Widgets.createRecipeBase(bounds));
     }

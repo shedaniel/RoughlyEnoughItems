@@ -117,7 +117,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         this.tabs.clear();
         int largestWidth = width - 100;
         int largestHeight = height - 40;
-        DisplayCategory<Display> category = (DisplayCategory<Display>) categories.get(selectedCategoryIndex);
+        DisplayCategory<Display> category = getCurrentCategory();
         DisplaySpec display = categoryMap.get(category).get(selectedRecipeIndex);
         int guiWidth = Mth.clamp(category.getDisplayWidth(display.provideInternalDisplay()) + 30, 0, largestWidth) + 100;
         int guiHeight = Mth.clamp(category.getDisplayHeight() + 40, 166, largestHeight);
@@ -156,7 +156,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         Rectangle recipeBounds = new Rectangle(bounds.x + 100 + (guiWidth - 100) / 2 - category.getDisplayWidth(display.provideInternalDisplay()) / 2, bounds.y + bounds.height / 2 - category.getDisplayHeight() / 2, category.getDisplayWidth(display.provideInternalDisplay()), category.getDisplayHeight());
         List<Widget> setupDisplay;
         try {
-            setupDisplay = category.setupDisplay(display.provideInternalDisplay(), recipeBounds);
+            setupDisplay = getCurrentCategoryView(display.provideInternalDisplay()).setupDisplay(display.provideInternalDisplay(), recipeBounds);
         } catch (Throwable throwable) {
             throwable.printStackTrace();
             setupDisplay = new ArrayList<>();
@@ -179,7 +179,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         for (DisplaySpec recipeDisplay : categoryMap.get(category)) {
             int finalIndex = index;
             DisplayRenderer displayRenderer;
-            displayRenderers.add(displayRenderer = category.getDisplayRenderer(recipeDisplay.provideInternalDisplay()));
+            displayRenderers.add(displayRenderer = getCurrentCategoryView(recipeDisplay.provideInternalDisplay()).getDisplayRenderer(recipeDisplay.provideInternalDisplay()));
             buttonList.add(Widgets.createButton(new Rectangle(bounds.x + 5, 0, displayRenderer.getWidth(), displayRenderer.getHeight()), NarratorChatListener.NO_TITLE)
                     .onClick(button -> {
                         selectedRecipeIndex = finalIndex;
