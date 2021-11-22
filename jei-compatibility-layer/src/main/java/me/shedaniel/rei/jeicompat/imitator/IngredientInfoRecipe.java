@@ -27,6 +27,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import mezz.jei.api.ingredients.IIngredientType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TextComponent;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,6 +36,10 @@ public class IngredientInfoRecipe<T> {
     private final List<Component> description;
     private final List<T> ingredients;
     private final IIngredientType<T> ingredientType;
+    
+    public static <T> List<IngredientInfoRecipe<T>> create(List<T> ingredients, IIngredientType<T> ingredientType, String... descriptionComponents) {
+        return create(ingredients, ingredientType, CollectionUtils.map(descriptionComponents, TextComponent::new).toArray(new Component[0]));
+    }
     
     public static <T> List<IngredientInfoRecipe<T>> create(List<T> ingredients, IIngredientType<T> ingredientType, Component... descriptionComponents) {
         return Collections.singletonList(new IngredientInfoRecipe<>(ingredients, ingredientType, CollectionUtils.map(descriptionComponents, Component::copy)));
