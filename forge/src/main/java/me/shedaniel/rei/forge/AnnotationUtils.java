@@ -56,15 +56,15 @@ public class AnnotationUtils {
                     .collect(Collectors.toList());
             out:
             for (ModFileScanData.AnnotationData annotation : data.getAnnotations()) {
-                if (annotationType.equals(annotation.getAnnotationType())) {
+                if (annotationType.equals(annotation.annotationType())) {
                     try {
-                        Class<T> clazz = (Class<T>) Class.forName(annotation.getMemberName());
+                        Class<T> clazz = (Class<T>) Class.forName(annotation.memberName());
                         if (predicate.test(clazz)) {
                             instances.add(new ImmutableTriple<>(modIds, () -> {
                                 try {
                                     return clazz.getDeclaredConstructor().newInstance();
                                 } catch (Throwable throwable) {
-                                    AnnotationUtils.LOGGER.error("Failed to load plugin: " + annotation.getMemberName(), throwable);
+                                    LOGGER.error("Failed to load plugin: " + annotation.memberName(), throwable);
                                     return null;
                                 }
                             }, clazz));
@@ -76,7 +76,7 @@ public class AnnotationUtils {
                                 continue out;
                             t = t.getCause();
                         }
-                        AnnotationUtils.LOGGER.error("Failed to load plugin: " + annotation.getMemberName(), throwable);
+                        LOGGER.error("Failed to load plugin: " + annotation.memberName(), throwable);
                     }
                 }
             }
