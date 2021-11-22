@@ -331,6 +331,12 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
     @ApiStatus.Experimental
     <T> Collection<Display> tryFillDisplay(T value, DisplayAdditionReason... reasons);
     
+    /**
+     * Returns the origin of the display, this may be the recipe which the display was created from.
+     *
+     * @param display the display
+     * @return the origin
+     */
     @Nullable
     Object getDisplayOrigin(Display display);
 }

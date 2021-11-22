@@ -21,22 +21,34 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat;
+package me.shedaniel.rei.api.client.registry.display;
 
-import lombok.experimental.ExtensionMethod;
-import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
-import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
-import me.shedaniel.rei.jeicompat.imitator.IngredientInfoRecipe;
-import me.shedaniel.rei.plugin.common.displays.DefaultInformationDisplay;
+import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.gui.DisplayRenderer;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.common.display.Display;
+import org.jetbrains.annotations.ApiStatus;
 
-@ExtensionMethod(JEIPluginDetector.class)
-public class JEIExtraClientPlugin implements REIClientPlugin {
-    @Override
-    public void registerDisplays(DisplayRegistry registry) {
-        registry.registerFiller((Class<IngredientInfoRecipe<Object>>) (Class<?>) IngredientInfoRecipe.class, (recipe) -> {
-            return DefaultInformationDisplay.createFromEntries(recipe.getIngredientType().unwrapList(recipe.getIngredients()), ImmutableTextComponent.EMPTY.copy())
-                    .lines(recipe.getDescriptionREI());
-        });
-    }
+import java.util.List;
+
+@ApiStatus.Experimental
+public interface DisplayCategoryView<T extends Display> {
+    /**
+     * Gets the recipe renderer for the category, used in {@link me.shedaniel.rei.impl.client.gui.CompositeRecipeViewingScreen} for rendering simple recipes
+     *
+     * @param display the display to render
+     * @return the display renderer
+     */
+    @ApiStatus.OverrideOnly
+    DisplayRenderer getDisplayRenderer(T display);
+    
+    /**
+     * Setup the widgets for displaying the recipe
+     *
+     * @param display the recipe
+     * @param bounds  the bounds of the display, configurable with overriding the width, height methods.
+     * @return the list of widgets
+     */
+    @ApiStatus.OverrideOnly
+    List<Widget> setupDisplay(T display, Rectangle bounds);
 }

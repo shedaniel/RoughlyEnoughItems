@@ -351,6 +351,11 @@ public class JEIPluginDetector {
         
         @Override
         public String getPluginProviderName() {
+            if (modIds.contains("recipestages")) {
+                if (wrapper == null) {
+                    wrapper = supplier.get();
+                }
+            }
             if (wrapper != null) {
                 return wrapper.getPluginProviderName() + nameSuffix;
             }
@@ -382,6 +387,7 @@ public class JEIPluginDetector {
     public static class JEIPluginWrapper implements REIClientPlugin {
         public final List<String> modIds;
         public final boolean mainThread;
+        public final boolean forceRuntime;
         public final IModPlugin backingPlugin;
         
         public final Map<DisplayCategory<?>, List<Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>>>> categories = new HashMap<>();
@@ -393,6 +399,11 @@ public class JEIPluginDetector {
             this.backingPlugin = backingPlugin;
             // why are you reloading twice
             this.mainThread = CollectionUtils.anyMatch(Arrays.asList("jeresources", "jepb"), modIds::contains);
+            this.forceRuntime = CollectionUtils.anyMatch(Arrays.asList("recipestages"), modIds::contains);
+    
+            if (forceRuntime) {
+                backingPlugin.onRuntimeAvailable(JEIJeiRuntime.INSTANCE);
+            }
         }
         
         @Override
@@ -499,7 +510,9 @@ public class JEIPluginDetector {
 //                    DisplayRegistry.getInstance().registerFiller(pair.getLeft(), pair.getMiddle(), );
                     }
                 }
-                backingPlugin.onRuntimeAvailable(JEIJeiRuntime.INSTANCE);
+                if (!forceRuntime) {
+                    backingPlugin.onRuntimeAvailable(JEIJeiRuntime.INSTANCE);
+                }
                 for (Runnable runnable : entryRegistry) {
                     try {
                         runnable.run();

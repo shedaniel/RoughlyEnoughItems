@@ -50,82 +50,85 @@ public class JEIWrappedDisplay<T> implements Display {
     public JEIWrappedDisplay(JEIWrappedCategory<T> backingCategory, T backingRecipe) {
         this.backingCategory = backingCategory;
         this.backingRecipe = backingRecipe;
-        Map<IIngredientType<?>, List<? extends List<?>>> inputs = new HashMap<>();
-        Map<IIngredientType<?>, List<? extends List<?>>> outputs = new HashMap<>();
-        this.ingredients = new IIngredients() {
-            @Override
-            public void setInputIngredients(@NotNull List<Ingredient> inputs) {
-                this.setInputLists(VanillaTypes.ITEM, CollectionUtils.map(inputs, ingredient -> Arrays.asList(ingredient.getItems())));
-            }
-            
-            @Override
-            public <R> void setInput(@NotNull IIngredientType<R> ingredientType, @NotNull R input) {
-                List<List<R>> ingredient = (List<List<R>>) inputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
-                ingredient.add(Collections.singletonList(input));
-            }
-            
-            @Override
-            public <R> void setInputs(@NotNull IIngredientType<R> ingredientType, @NotNull List<R> input) {
-                List<List<R>> ingredient = (List<List<R>>) inputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
-                ingredient.addAll(CollectionUtils.map(input, Collections::singletonList));
-            }
-            
-            @Override
-            public <R> void setInputLists(@NotNull IIngredientType<R> ingredientType, @NotNull List<List<R>> input) {
-                List<List<R>> ingredient = (List<List<R>>) inputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
-                ingredient.addAll(input);
-            }
-            
-            @Override
-            public <R> void setOutput(@NotNull IIngredientType<R> ingredientType, @NotNull R output) {
-                List<List<R>> ingredient = (List<List<R>>) outputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
-                ingredient.add(Collections.singletonList(output));
-            }
-            
-            @Override
-            public <R> void setOutputs(@NotNull IIngredientType<R> ingredientType, @NotNull List<R> output) {
-                List<List<R>> ingredient = (List<List<R>>) outputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
-                ingredient.addAll(CollectionUtils.map(output, Collections::singletonList));
-            }
-            
-            @Override
-            public <R> void setOutputLists(@NotNull IIngredientType<R> ingredientType, @NotNull List<List<R>> output) {
-                List<List<R>> ingredient = (List<List<R>>) outputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
-                ingredient.addAll(output);
-            }
-            
-            @Override
-            @NotNull
-            public <R> List<List<R>> getInputs(@NotNull IIngredientType<R> ingredientType) {
-                return (List<List<R>>) inputs.getOrDefault(ingredientType, Collections.emptyList());
-            }
-            
-            @Override
-            @NotNull
-            public <R> List<List<R>> getOutputs(@NotNull IIngredientType<R> ingredientType) {
-                return (List<List<R>>) outputs.getOrDefault(ingredientType, Collections.emptyList());
-            }
-        };
-        setupIngredients();
-        compileIngredients(inputs, outputs);
+        this.ingredients = createIngredients();
+        backingCategory.getBackingCategory().setIngredients(this.backingRecipe, ingredients);
+        compileIngredients(ingredients, compiledInput, compiledOutputs);
     }
     
-    private void compileIngredients(Map<IIngredientType<?>, List<? extends List<?>>> inputs, Map<IIngredientType<?>, List<? extends List<?>>> outputs) {
-        for (Map.Entry<IIngredientType<?>, List<? extends List<?>>> entry : inputs.entrySet()) {
+    private static class JEIIngredients implements IIngredients {
+        Map<IIngredientType<?>, List<? extends List<?>>> inputs = new HashMap<>();
+        Map<IIngredientType<?>, List<? extends List<?>>> outputs = new HashMap<>();
+        
+        @Override
+        public void setInputIngredients(@NotNull List<Ingredient> inputs) {
+            this.setInputLists(VanillaTypes.ITEM, CollectionUtils.map(inputs, ingredient -> Arrays.asList(ingredient.getItems())));
+        }
+        
+        @Override
+        public <R> void setInput(@NotNull IIngredientType<R> ingredientType, @NotNull R input) {
+            List<List<R>> ingredient = (List<List<R>>) inputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
+            ingredient.add(Collections.singletonList(input));
+        }
+        
+        @Override
+        public <R> void setInputs(@NotNull IIngredientType<R> ingredientType, @NotNull List<R> input) {
+            List<List<R>> ingredient = (List<List<R>>) inputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
+            ingredient.addAll(CollectionUtils.map(input, Collections::singletonList));
+        }
+        
+        @Override
+        public <R> void setInputLists(@NotNull IIngredientType<R> ingredientType, @NotNull List<List<R>> input) {
+            List<List<R>> ingredient = (List<List<R>>) inputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
+            ingredient.addAll(input);
+        }
+        
+        @Override
+        public <R> void setOutput(@NotNull IIngredientType<R> ingredientType, @NotNull R output) {
+            List<List<R>> ingredient = (List<List<R>>) outputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
+            ingredient.add(Collections.singletonList(output));
+        }
+        
+        @Override
+        public <R> void setOutputs(@NotNull IIngredientType<R> ingredientType, @NotNull List<R> output) {
+            List<List<R>> ingredient = (List<List<R>>) outputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
+            ingredient.addAll(CollectionUtils.map(output, Collections::singletonList));
+        }
+        
+        @Override
+        public <R> void setOutputLists(@NotNull IIngredientType<R> ingredientType, @NotNull List<List<R>> output) {
+            List<List<R>> ingredient = (List<List<R>>) outputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
+            ingredient.addAll(output);
+        }
+        
+        @Override
+        @NotNull
+        public <R> List<List<R>> getInputs(@NotNull IIngredientType<R> ingredientType) {
+            return (List<List<R>>) inputs.getOrDefault(ingredientType, Collections.emptyList());
+        }
+        
+        @Override
+        @NotNull
+        public <R> List<List<R>> getOutputs(@NotNull IIngredientType<R> ingredientType) {
+            return (List<List<R>>) outputs.getOrDefault(ingredientType, Collections.emptyList());
+        }
+    }
+    
+    public static IIngredients createIngredients() {
+        return new JEIIngredients();
+    }
+    
+    public static void compileIngredients(IIngredients ingredients, List<EntryIngredient> compiledInput, List<EntryIngredient> compiledOutputs) {
+        for (Map.Entry<IIngredientType<?>, List<? extends List<?>>> entry : ((JEIIngredients) ingredients).inputs.entrySet()) {
             for (List<?> slot : entry.getValue()) {
                 compiledInput.add(((IIngredientType<Object>) entry.getKey()).unwrapList((List<Object>) slot));
             }
         }
         
-        for (Map.Entry<IIngredientType<?>, List<? extends List<?>>> entry : outputs.entrySet()) {
+        for (Map.Entry<IIngredientType<?>, List<? extends List<?>>> entry : ((JEIIngredients) ingredients).outputs.entrySet()) {
             for (List<?> slot : entry.getValue()) {
                 compiledOutputs.add(((IIngredientType<Object>) entry.getKey()).unwrapList((List<Object>) slot));
             }
         }
-    }
-    
-    private void setupIngredients() {
-        backingCategory.getBackingCategory().setIngredients(this.backingRecipe, ingredients);
     }
     
     public IIngredients getIngredients() {

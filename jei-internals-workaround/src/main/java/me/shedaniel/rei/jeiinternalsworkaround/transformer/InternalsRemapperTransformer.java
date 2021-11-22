@@ -39,6 +39,7 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
     private Boolean isDev;
     
     public InternalsRemapperTransformer() {
+        redirect("mezz/jei/plugins/jei/info/IngredientInfoRecipe", "me/shedaniel/rei/jeicompat/imitator/IngredientInfoRecipe");
         classToInterface("mezz/jei/Internal", "me/shedaniel/rei/jeicompat/imitator/JEIInternalsImitator");
         classToInterface("mezz/jei/runtime/JeiHelpers", "mezz/jei/api/helpers/IJeiHelpers");
         classToInterface("mezz/jei/runtime/JeiRuntime", "mezz/jei/api/runtime/IJeiRuntime");
@@ -49,8 +50,12 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
         classToInterface("mezz/jei/input/ClickedIngredient", "me/shedaniel/rei/jeicompat/imitator/JEIInternalsClickedIngredientImpl");
     }
     
-    private void classToInterface(String oldName, String newName) {
+    private void redirect(String oldName, String newName) {
         classMap.put(oldName, newName);
+    }
+    
+    private void classToInterface(String oldName, String newName) {
+        redirect(oldName, newName);
         redirectInvokeVirtual.add(oldName);
     }
     

@@ -27,12 +27,10 @@ import dev.architectury.utils.value.Value;
 import mezz.jei.api.gui.drawable.IDrawable;
 
 public class JEIBasedRecipeLayout<T> extends JEIRecipeLayout<T> {
-    private final JEIWrappedCategory<T> category;
-    private final JEIWrappedDisplay<T> display;
+    private final IRecipeCategory<?> category;
     
-    public JEIBasedRecipeLayout(JEIWrappedCategory<T> category, JEIWrappedDisplay<T> display, Value<IDrawable> background) {
+    public JEIBasedRecipeLayout(IRecipeCategory<?> category, Value<IDrawable> background) {
         super(background);
         this.category = category;
-        this.display = display;
     }
 }
