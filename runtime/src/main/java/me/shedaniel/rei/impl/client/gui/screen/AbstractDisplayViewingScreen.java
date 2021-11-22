@@ -30,7 +30,9 @@ import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategoryView;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -118,6 +120,11 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     @Override
     public DisplayCategory<Display> getCurrentCategory() {
         return (DisplayCategory<Display>) categories.get(selectedCategoryIndex);
+    }
+    
+    protected DisplayCategoryView<Display> getCurrentCategoryView(Display display) {
+        return CategoryRegistry.getInstance().get(categories.get(selectedCategoryIndex).getCategoryIdentifier().cast())
+                .getView(display);
     }
     
     @Override

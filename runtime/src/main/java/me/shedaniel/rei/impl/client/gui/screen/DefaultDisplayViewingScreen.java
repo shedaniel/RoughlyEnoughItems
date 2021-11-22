@@ -256,7 +256,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             final Rectangle displayBounds = new Rectangle(getBounds().getCenterX() - displayWidth / 2, getBounds().getCenterY() + 16 - displayHeight * (getRecipesPerPage() + 1) / 2 - 2 * (getRecipesPerPage() + 1) + displayHeight * i + 4 * i, displayWidth, displayHeight);
             List<Widget> setupDisplay;
             try {
-                setupDisplay = getCurrentCategory().setupDisplay(display.provideInternalDisplay(), displayBounds);
+                setupDisplay = getCurrentCategoryView(display.provideInternalDisplay()).setupDisplay(display.provideInternalDisplay(), displayBounds);
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
                 setupDisplay = new ArrayList<>();
