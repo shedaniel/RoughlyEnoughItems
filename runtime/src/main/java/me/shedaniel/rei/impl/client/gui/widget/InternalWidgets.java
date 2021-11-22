@@ -107,6 +107,7 @@ public final class InternalWidgets {
                 });
         return new DelegateWidget(autoCraftingButton) {
             boolean didJustRender = false;
+            
             @Override
             public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
                 didJustRender = false;

@@ -28,8 +28,10 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.ButtonArea;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.category.extension.CategoryExtensionProvider;
 import me.shedaniel.rei.api.client.registry.category.visibility.CategoryVisibilityPredicate;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategoryView;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
@@ -130,6 +132,7 @@ public class CategoryRegistryImpl implements CategoryRegistry {
     private static class Configuration<T extends Display> implements CategoryConfiguration<T> {
         private final DisplayCategory<T> category;
         private final List<EntryIngredient> workstations = Collections.synchronizedList(new ArrayList<>());
+        private final List<CategoryExtensionProvider<T>> extensionProviders = Collections.synchronizedList(new ArrayList<>());
         
         private Optional<ButtonArea> plusButtonArea = Optional.of(ButtonArea.defaultArea());
         
@@ -165,6 +168,21 @@ public class CategoryRegistryImpl implements CategoryRegistry {
         @Override
         public CategoryIdentifier<?> getCategoryIdentifier() {
             return this.category.getCategoryIdentifier();
+        }
+        
+        @Override
+        public void registerExtension(CategoryExtensionProvider<T> provider) {
+            this.extensionProviders.add(provider);
+        }
+        
+        @Override
+        public DisplayCategoryView<T> getView(T display) {
+            DisplayCategory<T> category = getCategory();
+            DisplayCategoryView<T> view = getCategory();
+            for (CategoryExtensionProvider<T> provider : this.extensionProviders) {
+                view = Objects.requireNonNull(provider.provide(display, category, view));
+            }
+            return view;
         }
     }
 }
