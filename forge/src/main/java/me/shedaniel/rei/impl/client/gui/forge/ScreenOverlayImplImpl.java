@@ -27,12 +27,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fmlclient.gui.GuiUtils;
+import net.minecraftforge.client.ForgeHooksClient;
 
 import java.util.List;
 
@@ -42,10 +41,16 @@ public class ScreenOverlayImplImpl {
         matrices.translate(0, 0, 500);
         EntryStack<?> stack = tooltip.getContextStack();
         ItemStack itemStack = stack.getValue() instanceof ItemStack ? stack.castValue() : ItemStack.EMPTY;
-        GuiUtils.preItemToolTip(itemStack);
-        List<FormattedText> texts = CollectionUtils.flatMap(tooltip.getText(), component -> Minecraft.getInstance().font.getSplitter().splitLines(component, 100000, Style.EMPTY));
-        GuiUtils.drawHoveringText(matrices, texts, mouseX, mouseY, screen.width, screen.height, screen.width, Minecraft.getInstance().font);
-        GuiUtils.postItemToolTip();
+        List<Component> texts = CollectionUtils.filterAndMap(tooltip.entries(), Tooltip.Entry::isText, Tooltip.Entry::getAsText);
+        List<ClientTooltipComponent> components = ForgeHooksClient.gatherTooltipComponents(itemStack, texts, mouseX, screen.width, screen.height, null, screen.getMinecraft().font);
+        for (Tooltip.Entry entry : tooltip.entries()) {
+            if (!entry.isText()) {
+                components.add(1, entry.getAsComponent());
+            }
+        }
+        screen.tooltipStack = itemStack;
+        screen.renderTooltipInternal(matrices, components, mouseX, mouseY);
+        screen.tooltipStack = ItemStack.EMPTY;
         matrices.popPose();
     }
 }
