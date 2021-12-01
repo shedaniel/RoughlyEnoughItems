@@ -24,8 +24,8 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import lombok.experimental.ExtensionMethod;
 import dev.architectury.utils.EnvExecutor;
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
@@ -103,6 +103,11 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
     
     @Override
     public T normalize(EntryStack<T> entry, T value) {
+        return ingredientHelper.normalizeIngredient(value);
+    }
+    
+    @Override
+    public T wildcard(EntryStack<T> entry, T value) {
         return ingredientHelper.normalizeIngredient(value);
     }
     

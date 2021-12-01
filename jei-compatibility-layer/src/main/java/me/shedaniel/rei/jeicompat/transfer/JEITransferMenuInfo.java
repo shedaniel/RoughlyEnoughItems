@@ -36,9 +36,11 @@ import org.jetbrains.annotations.NotNull;
 public class JEITransferMenuInfo<T extends AbstractContainerMenu, R> implements SimplePlayerInventoryMenuInfo<T, Display> {
     public static final String KEY = "REI-JEI-Transfer-Data";
     @NotNull
-    protected JEIRecipeTransferData<T, R> data;
+    protected final Display display;
+    protected final JEIRecipeTransferData<T, R> data;
     
-    public JEITransferMenuInfo(@NotNull JEIRecipeTransferData<T, R> data) {
+    public JEITransferMenuInfo(Display display, @NotNull JEIRecipeTransferData<T, R> data) {
+        this.display = display;
         this.data = data;
     }
     
@@ -60,8 +62,7 @@ public class JEITransferMenuInfo<T extends AbstractContainerMenu, R> implements 
     }
     
     @Override
-    public Display read(MenuSerializationContext<T, ?, Display> context, CompoundTag tag) {
-        data = JEIRecipeTransferData.read(context.getMenu(), tag.getCompound(KEY));
-        return SimplePlayerInventoryMenuInfo.super.read(context, tag);
+    public Display getDisplay() {
+        return display;
     }
 }

@@ -29,12 +29,14 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import lombok.experimental.ExtensionMethod;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupFluid;
@@ -49,12 +51,15 @@ import mezz.jei.api.gui.ingredient.ITooltipCallback;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.IFocus;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 
@@ -167,7 +172,12 @@ public abstract class JEIRecipeLayout<T> implements IRecipeLayout {
                             if (ingredient == null) {
                                 ingredient = stack.jeiValue();
                             }
-                            callback.onTooltip(integer, wrapper.isInput(), ingredient, tooltip.getText());
+                            List<Component> components = CollectionUtils.filterAndMap(tooltip.entries(), Tooltip.Entry::isText, Tooltip.Entry::getAsText);
+                            List<ClientTooltipComponent> tooltipComponents = CollectionUtils.filterAndMap(tooltip.entries(), ((Predicate<Tooltip.Entry>) Tooltip.Entry::isText).negate(), Tooltip.Entry::getAsComponent);
+                            callback.onTooltip(integer, wrapper.isInput(), ingredient, components);
+                            tooltip.entries().clear();
+                            tooltip.addAllTexts(components);
+                            tooltip.addAllComponents(tooltipComponents);
                         }
                         return tooltip;
                     });

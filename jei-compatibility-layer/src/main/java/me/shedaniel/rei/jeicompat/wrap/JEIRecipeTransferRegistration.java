@@ -27,25 +27,30 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import dev.architectury.utils.value.Value;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import lombok.experimental.ExtensionMethod;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategoryView;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerErrorRenderer;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoProvider;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
-import me.shedaniel.rei.api.common.transfer.info.MenuSerializationProviderContext;
+import me.shedaniel.rei.api.common.transfer.info.MenuSerializationContext;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
+import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
 import me.shedaniel.rei.jeicompat.transfer.JEIRecipeTransferData;
 import me.shedaniel.rei.jeicompat.transfer.JEITransferMenuInfo;
 import mezz.jei.api.gui.IRecipeLayout;
@@ -58,12 +63,14 @@ import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import mezz.jei.api.recipe.transfer.IRecipeTransferInfo;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -135,68 +142,106 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
             MenuInfoRegistry.getInstance().register(info.getRecipeCategoryUid().categoryId(), info.getContainerClass(),
                     new MenuInfoProvider<C, Display>() {
                         @Override
-                        public Optional<MenuInfo<C, Display>> provideClient(Display display, C menu) {
-                            return Optional.of(new JEITransferMenuInfo<>(new JEIRecipeTransferData<>(info, menu, (R) display.jeiValue())));
+                        public Optional<MenuInfo<C, Display>> provideClient(Display display, MenuSerializationContext<C, ?, Display> context, C menu) {
+                            return Optional.of(new JEITransferMenuInfo<>(display, new JEIRecipeTransferData<>(info, menu, (R) display.jeiValue())));
                         }
                         
                         @Override
-                        public Optional<MenuInfo<C, Display>> provide(CategoryIdentifier<Display> display, C menu, MenuSerializationProviderContext<C, ?, Display> context, CompoundTag networkTag) {
-                            return Optional.of(new JEITransferMenuInfo<>(JEIRecipeTransferData.read(menu, networkTag)));
-                        }
-                        
-                        @Override
-                        public Optional<MenuInfo<C, Display>> provide(CategoryIdentifier<Display> categoryId, Class<C> menuClass) {
-                            throw new UnsupportedOperationException();
+                        public Optional<MenuInfo<C, Display>> provide(CategoryIdentifier<Display> category, C menu, MenuSerializationContext<C, ?, Display> context, CompoundTag networkTag) {
+                            Display display = read(category, menu, context, networkTag);
+                            if (display == null) return Optional.empty();
+                            return Optional.of(new JEITransferMenuInfo<>(display, JEIRecipeTransferData.read(menu, networkTag.getCompound(JEITransferMenuInfo.KEY))));
                         }
                     });
         });
     }
     
+    @Nullable
+    private static <D extends Display, T extends AbstractContainerMenu> D read(CategoryIdentifier<D> category, T menu, MenuSerializationContext<T, ?, D> context, CompoundTag networkTag) {
+        if (DisplaySerializerRegistry.getInstance().hasSerializer(category)) {
+            return DisplaySerializerRegistry.getInstance().read(category, networkTag);
+        } else {
+            return null;
+        }
+    }
+    
     @Override
     public <C extends AbstractContainerMenu, R> void addRecipeTransferHandler(IRecipeTransferHandler<C, R> recipeTransferHandler, ResourceLocation recipeCategoryUid) {
-        TransferHandlerRegistry.getInstance().register(context -> {
-            if (recipeTransferHandler.getContainerClass().isInstance(context.getMenu())) {
-                Display display = context.getDisplay();
-                if (recipeCategoryUid == null || display.getCategoryIdentifier().getIdentifier().equals(recipeCategoryUid)) {
-                    IRecipeLayout layout;
-                    Value<IDrawable> background = new Value<IDrawable>() {
-                        @Override
-                        public void accept(IDrawable iDrawable) {
+        TransferHandlerRegistry.getInstance().register(new TransferHandler() {
+            @Override
+            public Result handle(Context context) {
+                if (recipeTransferHandler.getContainerClass().isInstance(context.getMenu())) {
+                    Display display = context.getDisplay();
+                    if (recipeCategoryUid == null || display.getCategoryIdentifier().getIdentifier().equals(recipeCategoryUid)) {
+                        IRecipeLayout layout;
+                        Value<IDrawable> background = new Value<IDrawable>() {
+                            @Override
+                            public void accept(IDrawable iDrawable) {
+                            }
+                            
+                            @Override
+                            public IDrawable get() {
+                                return JEIGuiHelper.INSTANCE.createBlankDrawable(0, 0);
+                            }
+                        };
+                        if (display instanceof JEIWrappedDisplay) {
+                            layout = ((JEIWrappedDisplay<Object>) display).getBackingCategory().createLayout((JEIWrappedDisplay<Object>) display, background);
+                        } else {
+                            DisplayCategory<Display> category = CategoryRegistry.getInstance().get(display.getCategoryIdentifier().cast()).getCategory();
+                            DisplayCategoryView<Display> categoryView = CategoryRegistry.getInstance().get(display.getCategoryIdentifier().cast()).getView(display);
+                            layout = new JEIWrappingRecipeLayout<>(category, background);
+                            List<Widget> widgets = categoryView.setupDisplay(display, new Rectangle(0, 0, category.getDisplayWidth(display), category.getDisplayHeight()));
+                            JEIRecipeTransferRegistration.this.addToLayout(layout, widgets);
                         }
-                        
-                        @Override
-                        public IDrawable get() {
-                            return JEIGuiHelper.INSTANCE.createBlankDrawable(0, 0);
+                        if (context.isActuallyCrafting()) {
+                            context.getMinecraft().setScreen(context.getContainerScreen());
                         }
-                    };
-                    if (display instanceof JEIWrappedDisplay) {
-                        layout = ((JEIWrappedDisplay<Object>) display).getBackingCategory().createLayout((JEIWrappedDisplay<Object>) display, background);
-                    } else {
-                        DisplayCategory<Display> category = CategoryRegistry.getInstance().get(display.getCategoryIdentifier().cast()).getCategory();
-                        DisplayCategoryView<Display> categoryView = CategoryRegistry.getInstance().get(display.getCategoryIdentifier().cast()).getView(display);
-                        layout = new JEIWrappingRecipeLayout<>(category, background);
-                        List<Widget> widgets = categoryView.setupDisplay(display, new Rectangle(0, 0, category.getDisplayWidth(display), category.getDisplayHeight()));
-                        addToLayout(layout, widgets);
+                        IRecipeTransferError error = ((IRecipeTransferHandler<AbstractContainerMenu, Object>) recipeTransferHandler).transferRecipe(context.getMenu(), context.getDisplay().jeiValue(), layout, context.getMinecraft().player, Screen.hasShiftDown(), context.isActuallyCrafting());
+                        if (error == null) {
+                            return TransferHandler.Result.createSuccessful();
+                        } else if (error instanceof IRecipeTransferError) {
+                            IRecipeTransferError.Type type = error.getType();
+                            if (type == IRecipeTransferError.Type.COSMETIC) {
+                                return TransferHandler.Result.createSuccessful().color(0x6700E1FF);
+                            }
+                            IntArrayList redSlots = error instanceof JEIRecipeTransferError ? ((JEIRecipeTransferError) error).getRedSlots() : null;
+                            if (redSlots == null) redSlots = new IntArrayList();
+                            return TransferHandler.Result.createFailed(error instanceof JEIRecipeTransferError ? ((JEIRecipeTransferError) error).getText() : new TranslatableComponent("text.auto_craft.move_items"))
+                                    .errorRenderer(redSlots);
+                        }
                     }
-                    if (context.isActuallyCrafting()) {
-                        context.getMinecraft().setScreen(context.getContainerScreen());
-                    }
-                    IRecipeTransferError error = ((IRecipeTransferHandler<AbstractContainerMenu, Object>) recipeTransferHandler).transferRecipe(context.getMenu(), context.getDisplay().jeiValue(), layout, context.getMinecraft().player, Screen.hasShiftDown(), context.isActuallyCrafting());
-                    if (error == null) {
-                        return TransferHandler.Result.createSuccessful();
-                    } else if (error instanceof IRecipeTransferError) {
-                        IRecipeTransferError.Type type = error.getType();
-                        if (type == IRecipeTransferError.Type.COSMETIC) {
-                            return TransferHandler.Result.createSuccessful().color(0x6700E1FF);
-                        }
-                        IntArrayList redSlots = error instanceof JEIRecipeTransferError ? ((JEIRecipeTransferError) error).getRedSlots() : null;
-                        if (redSlots == null) redSlots = new IntArrayList();
-                        return TransferHandler.Result.createFailed(error instanceof JEIRecipeTransferError ? ((JEIRecipeTransferError) error).getText() : new TranslatableComponent("text.auto_craft.move_items"), redSlots);
+                }
+                return TransferHandler.Result.createNotApplicable();
+            }
+            
+            @Override
+            @Nullable
+            public TransferHandlerErrorRenderer provideErrorRenderer(Context context, Object data) {
+                if (data instanceof IntList) {
+                    return forRedSlots((IntList) data);
+                }
+                
+                return null;
+            }
+        });
+    }
+    
+    static TransferHandlerErrorRenderer forRedSlots(IntList redSlots) {
+        return (matrices, mouseX, mouseY, delta, widgets, bounds, display) -> {
+            DisplayCategory<?> category = Objects.requireNonNull(CategoryRegistry.getInstance().get(display.getCategoryIdentifier()))
+                    .getCategory();
+            if (category instanceof JEIWrappedCategory wrappedCategory) {
+                for (JEIGuiIngredientGroup<?>.SlotWrapper slotWrapper : Widgets.<JEIGuiIngredientGroup<?>.SlotWrapper>walk(widgets, widget -> widget instanceof JEIGuiIngredientGroup.SlotWrapper)) {
+                    if (slotWrapper.slot.getNoticeMark() == Slot.INPUT && redSlots.contains(slotWrapper.index)) {
+                        matrices.pushPose();
+                        matrices.translate(0, 0, 400);
+                        Rectangle innerBounds = slotWrapper.slot.getInnerBounds();
+                        GuiComponent.fill(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), 0x40ff0000);
+                        matrices.popPose();
                     }
                 }
             }
-            return TransferHandler.Result.createNotApplicable();
-        });
+        };
     }
     
     private void addToLayout(IRecipeLayout layout, List<Widget> entries) {

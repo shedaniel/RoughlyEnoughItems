@@ -68,7 +68,7 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     }
     
     protected SlotWrapper getSlot(int slotIndex) {
-        return slots.computeIfAbsent(slotIndex, i -> new SlotWrapper(Widgets.createSlot(new Point(0, 0))
+        return slots.computeIfAbsent(slotIndex, i -> new SlotWrapper(i, Widgets.createSlot(new Point(0, 0))
                 .disableBackground()));
     }
     
@@ -156,8 +156,10 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
         public IDrawable background;
         @Nullable
         public IDrawable overlay;
+        public final int index;
         
-        public SlotWrapper(Slot slot) {
+        public SlotWrapper(int index, Slot slot) {
+            this.index = index;
             this.slot = slot;
         }
         

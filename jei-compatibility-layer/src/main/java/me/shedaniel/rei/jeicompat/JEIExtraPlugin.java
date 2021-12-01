@@ -27,11 +27,12 @@ import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoProvider;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
-import me.shedaniel.rei.api.common.transfer.info.MenuSerializationProviderContext;
+import me.shedaniel.rei.api.common.transfer.info.MenuSerializationContext;
 import me.shedaniel.rei.jeicompat.transfer.JEIRecipeTransferData;
 import me.shedaniel.rei.jeicompat.transfer.JEITransferMenuInfo;
 import net.minecraft.nbt.CompoundTag;
@@ -48,21 +49,26 @@ public class JEIExtraPlugin implements REIServerPlugin {
             registry.registerGeneric(id -> true, new MenuInfoProvider<AbstractContainerMenu, Display>() {
                 @Override
                 @OnlyIn(Dist.CLIENT)
-                public Optional<MenuInfo<AbstractContainerMenu, Display>> provideClient(Display display, AbstractContainerMenu menu) {
+                public Optional<MenuInfo<AbstractContainerMenu, Display>> provideClient(Display display, MenuSerializationContext<AbstractContainerMenu, ?, Display> context, AbstractContainerMenu menu) {
                     throw new UnsupportedOperationException();
                 }
                 
                 @Override
-                public Optional<MenuInfo<AbstractContainerMenu, Display>> provide(CategoryIdentifier<Display> display, AbstractContainerMenu menu, MenuSerializationProviderContext<AbstractContainerMenu, ?, Display> context, CompoundTag networkTag) {
+                public Optional<MenuInfo<AbstractContainerMenu, Display>> provide(CategoryIdentifier<Display> category, AbstractContainerMenu menu, MenuSerializationContext<AbstractContainerMenu, ?, Display> context, CompoundTag networkTag) {
+                    Display display = read(category, menu, context, networkTag);
+                    if (display == null) return Optional.empty();
                     JEIRecipeTransferData<AbstractContainerMenu, Display> data = JEIRecipeTransferData.read(context.getMenu(), networkTag.getCompound(JEITransferMenuInfo.KEY));
-                    return Optional.of(new JEITransferMenuInfo<>(data));
-                }
-                
-                @Override
-                public Optional<MenuInfo<AbstractContainerMenu, Display>> provide(CategoryIdentifier<Display> categoryId, Class<AbstractContainerMenu> menuClass) {
-                    throw new UnsupportedOperationException();
+                    return Optional.of(new JEITransferMenuInfo<>(display, data));
                 }
             });
+        }
+    }
+    
+    private static <D extends Display, T extends AbstractContainerMenu> D read(CategoryIdentifier<D> category, T menu, MenuSerializationContext<T, ?, D> context, CompoundTag networkTag) {
+        if (DisplaySerializerRegistry.getInstance().hasSerializer(category)) {
+            return DisplaySerializerRegistry.getInstance().read(category, networkTag);
+        } else {
+            return null;
         }
     }
 }

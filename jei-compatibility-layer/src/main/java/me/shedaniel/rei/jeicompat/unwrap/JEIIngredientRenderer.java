@@ -30,6 +30,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
@@ -64,7 +65,7 @@ public class JEIIngredientRenderer<T> implements IIngredientRenderer<T> {
     public List<Component> getTooltip(@NotNull T ingredient, @NotNull TooltipFlag tooltipFlag) {
         Tooltip tooltip = renderer.getTooltip(ingredient.unwrapStack( type), PointHelper.ofMouse());
         if (tooltip != null) {
-            return tooltip.getText();
+            return CollectionUtils.filterAndMap(tooltip.entries(), Tooltip.Entry::isText, Tooltip.Entry::getAsText);
         }
         return new ArrayList<>();
     }

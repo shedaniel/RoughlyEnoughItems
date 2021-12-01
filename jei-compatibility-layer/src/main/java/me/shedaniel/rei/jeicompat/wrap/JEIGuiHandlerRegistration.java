@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import lombok.experimental.ExtensionMethod;
 import dev.architectury.event.CompoundEventResult;
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
@@ -122,7 +122,7 @@ public enum JEIGuiHandlerRegistration implements IGuiHandlerRegistration {
             }
             
             @Override
-            public DraggedAcceptorResult acceptDraggedStackWithResult(DraggingContext<T> context, DraggableStack stack) {
+            public DraggedAcceptorResult acceptDraggedStack(DraggingContext<T> context, DraggableStack stack) {
                 return canAccept(context, stack).map(target -> {
                     target.accept(stack.getStack().copy().jeiValue());
                     return Unit.INSTANCE;

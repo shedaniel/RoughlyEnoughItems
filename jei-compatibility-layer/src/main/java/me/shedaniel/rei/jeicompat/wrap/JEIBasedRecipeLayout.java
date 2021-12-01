@@ -25,6 +25,7 @@ package me.shedaniel.rei.jeicompat.wrap;
 
 import dev.architectury.utils.value.Value;
 import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.recipe.category.IRecipeCategory;
 
 public class JEIBasedRecipeLayout<T> extends JEIRecipeLayout<T> {
     private final IRecipeCategory<?> category;
