@@ -4,6 +4,7 @@ archivesBaseName = rootProject.name + "-" + project.name
 
 dependencies {
     forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
+    compileClasspath("dev.architectury:mixin-patched:0.8.4.+")
 }
 
 loom {
@@ -19,7 +20,7 @@ processResources {
     inputs.property "version", project.version
 }
 
-curseforge {
+/*curseforge {
     if (project.hasProperty('danielshe_curse_api_key') || System.getenv('danielshe_curse_api_key') != null) {
         apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
         project {
@@ -43,7 +44,7 @@ curseforge {
         forgeGradleIntegration = false
         javaVersionAutoDetect = false
     }
-}
+}*/
 
 task updateJEIAssets {
     doLast {
@@ -51,7 +52,7 @@ task updateJEIAssets {
         jeiZip.delete()
         jeiZip.parentFile.mkdirs()
         jeiZip.withOutputStream { out ->
-            new URL("https://github.com/mezz/JustEnoughItems/archive/refs/heads/1.17.zip").withInputStream { from -> out << from; }
+            new URL("https://github.com/mezz/JustEnoughItems/archive/refs/heads/1.18.zip").withInputStream { from -> out << from; }
         }
         new ZipFile(jeiZip).withCloseable { ZipFile zip ->
             zip.stream().forEach { entry ->
