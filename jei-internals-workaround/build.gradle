@@ -4,7 +4,6 @@ archivesBaseName = rootProject.name + "-" + project.name
 
 dependencies {
     forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
-    compileClasspath("dev.architectury:mixin-patched:0.8.4.+")
 }
 
 loom {
@@ -20,7 +19,7 @@ processResources {
     inputs.property "version", project.version
 }
 
-/*curseforge {
+curseforge {
     if (project.hasProperty('danielshe_curse_api_key') || System.getenv('danielshe_curse_api_key') != null) {
         apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
         project {
@@ -28,9 +27,8 @@ processResources {
             releaseType = "beta"
             changelogType = "html"
             changelog = rootProject.releaseChangelog
-            addGameVersion "1.17"
-            addGameVersion "1.17.1"
-            addGameVersion "Java 8"
+            addGameVersion "1.18"
+            addGameVersion "Java 17"
             addGameVersion "Forge"
             relations {
                 requiredDependency "roughly-enough-items-forge"
@@ -44,7 +42,7 @@ processResources {
         forgeGradleIntegration = false
         javaVersionAutoDetect = false
     }
-}*/
+}
 
 task updateJEIAssets {
     doLast {

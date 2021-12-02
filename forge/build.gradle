@@ -174,9 +174,8 @@ curseforge {
             releaseType = "release"
             changelogType = "html"
             changelog = rootProject.releaseChangelog
-            addGameVersion "1.17"
-            addGameVersion "1.17.1"
-            addGameVersion "Java 8"
+            addGameVersion "1.18"
+            addGameVersion "Java 17"
             addGameVersion "Forge"
             relations {
                 requiredDependency "architectury-forge"

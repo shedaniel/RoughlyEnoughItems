@@ -20,3 +20,10 @@ mandatory = true
 versionRange = "[7,)"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.rei_internals_workaround]]
+modId = "forge"
+mandatory = true
+versionRange = "[38.0.6,)"
+ordering = "NONE"
+side = "BOTH"
