@@ -30,9 +30,6 @@ curseforge {
             addGameVersion "1.18"
             addGameVersion "Java 17"
             addGameVersion "Forge"
-            relations {
-                requiredDependency "roughly-enough-items-forge"
-            }
             mainArtifact(tasks.getByName("remapJar")) {
                 displayName = "[Forge $project.supported_version] v$project.version"
             }
