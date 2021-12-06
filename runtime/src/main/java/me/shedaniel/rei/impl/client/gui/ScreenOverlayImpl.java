@@ -68,6 +68,7 @@ import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.widget.*;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import me.shedaniel.rei.impl.common.util.Weather;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -337,7 +338,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                         ENTRY_LIST_WIDGET.updateEntriesPosition();
                     }, ENTRY_LIST_WIDGET.getPage(), ENTRY_LIST_WIDGET.getTotalPages());
                 }
-            }).tooltipLine(I18n.get("text.rei.go_back_first_page") + "\n \n§7" + I18n.get("text.rei.shift_click_to", I18n.get("text.rei.choose_page"))).focusable(false).onRender((matrices, label) -> {
+            }).tooltip(new TranslatableComponent("text.rei.go_back_first_page"), new TextComponent(" "), new TranslatableComponent("text.rei.shift_click_to", new TranslatableComponent("text.rei.choose_page")).withStyle(ChatFormatting.GRAY)).focusable(false).onRender((matrices, label) -> {
                 label.setClickable(ENTRY_LIST_WIDGET.getTotalPages() > 1);
                 label.setMessage(new TextComponent(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, Math.max(ENTRY_LIST_WIDGET.getTotalPages(), 1))));
             }).rainbow(new Random().nextFloat() < 1.0E-4D || ClientHelperImpl.getInstance().isAprilFools.get()));

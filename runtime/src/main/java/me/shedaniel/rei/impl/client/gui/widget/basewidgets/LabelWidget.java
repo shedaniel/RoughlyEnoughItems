@@ -37,6 +37,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.locale.Language;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.FormattedCharSequence;
@@ -70,7 +71,7 @@ public final class LabelWidget extends Label {
                 return hoveredColor.value();
             }, ValueAnimator.typicalTransitionTime() / 2);
     private Point point;
-    @Nullable private Function<Label, @Nullable String> tooltip;
+    @Nullable private Function<Label, @Nullable Component[]> tooltip;
     @Nullable private Consumer<Label> onClick;
     @Nullable private BiConsumer<PoseStack, Label> onRender;
     private FormattedText text;
@@ -126,14 +127,14 @@ public final class LabelWidget extends Label {
     
     @Override
     @Nullable
-    public final String getTooltip() {
+    public final Component[] getTooltipLines() {
         if (tooltip == null)
             return null;
         return tooltip.apply(this);
     }
     
     @Override
-    public final void setTooltip(@Nullable Function<Label, @Nullable String> tooltip) {
+    public final void setTooltipFunction(@Nullable Function<Label, @Nullable Component[]> tooltip) {
         this.tooltip = tooltip;
     }
     
@@ -251,12 +252,12 @@ public final class LabelWidget extends Label {
                 break;
         }
         if (isHovered(mouseX, mouseY)) {
-            String tooltip = getTooltip();
+            Component[] tooltip = getTooltipLines();
             if (tooltip != null) {
                 if (!focused && containsMouse(mouseX, mouseY))
-                    Tooltip.create(Stream.of(tooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList())).queue();
+                    Tooltip.create(tooltip).queue();
                 else if (focused)
-                    Tooltip.create(point, Stream.of(tooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList())).queue();
+                    Tooltip.create(point, tooltip).queue();
             }
         }
     }
