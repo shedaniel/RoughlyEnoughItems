@@ -58,12 +58,12 @@ import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.PanelWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -187,7 +187,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 .onClick(button -> previousCategory()).tooltipLine(new TranslatableComponent("text.rei.previous_category")));
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), getCurrentCategory().getTitle(), clickableLabelWidget -> {
             ViewSearchBuilder.builder().addAllCategories().open();
-        }).tooltipLine(I18n.get("text.rei.view_all_categories")));
+        }).tooltip(new TranslatableComponent("text.rei.view_all_categories")));
         this.widgets.add(categoryNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
                 .onClick(button -> nextCategory()).tooltipLine(new TranslatableComponent("text.rei.next_category")));
         this.categoryBack.setEnabled(categories.size() > 1);
@@ -213,7 +213,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         }).onRender((matrices, label) -> {
             label.setMessage(new ImmutableTextComponent(String.format("%d/%d", page + 1, getCurrentTotalPages())));
             label.setClickable(getCurrentTotalPages() > 1);
-        }).tooltipSupplier(label -> label.isClickable() ? I18n.get("text.rei.go_back_first_page") + "\n \n§7" + I18n.get("text.rei.shift_click_to", I18n.get("text.rei.choose_page")) : null));
+        }).tooltipFunction(label -> label.isClickable() ? new Component[]{new TranslatableComponent("text.rei.go_back_first_page"), new TextComponent(" "), new TranslatableComponent("text.rei.shift_click_to", new TranslatableComponent("text.rei.choose_page")).withStyle(ChatFormatting.GRAY)} : null));
         this.widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
                 .onClick(button -> {
                     page++;
