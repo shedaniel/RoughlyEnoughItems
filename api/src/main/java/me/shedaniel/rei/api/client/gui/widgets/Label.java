@@ -26,12 +26,16 @@ package me.shedaniel.rei.api.client.gui.widgets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TextComponent;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public abstract class Label extends WidgetWithBounds {
     public static final int LEFT_ALIGNED = -1;
@@ -143,45 +147,139 @@ public abstract class Label extends WidgetWithBounds {
     
     /**
      * @return the tooltip from the current tooltip function, null if no tooltip.
+     * @deprecated use {@link #getTooltipLines}
      */
     @Nullable
-    public abstract String getTooltip();
-    
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    public String getTooltip() {
+        Component[] lines = getTooltipLines();
+        String tooltip = null;
+        if(lines != null) {
+            StringBuilder tooltipBuilder = new StringBuilder();
+            for (Component line:lines) {
+                tooltipBuilder.append(line.getContents()).append("\n");
+            }
+            tooltip = tooltipBuilder.toString();
+        }
+        return tooltip;
+    }
+
+    /**
+     * @return the tooltip from the current tooltip function, null if no tooltip.
+     */
+    @Nullable
+    public abstract Component[] getTooltipLines();
+
+    /**
+     * Sets the tooltip function used to get the tooltip.
+     *
+     * @param tooltip the tooltip function used to get the tooltip.
+     * @deprecated use {@link #setTooltipFunction(Function)}
+     */
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    public void setTooltip(@Nullable Function<Label, @Nullable String> tooltip) {
+        if(tooltip != null) setTooltipFunction((label) -> {
+            String text = tooltip.apply(label);
+            if(text != null) return Stream.of(text.split("\n")).map(TextComponent::new).toArray(Component[]::new);
+            return null;
+        });
+    }
+
     /**
      * Sets the tooltip function used to get the tooltip.
      *
      * @param tooltip the tooltip function used to get the tooltip.
      */
-    public abstract void setTooltip(@Nullable Function<Label, @Nullable String> tooltip);
+    public abstract void setTooltipFunction(@Nullable Function<Label, @Nullable Component[]> tooltip);
+
+    /**
+     * Sets the tooltip.
+     *
+     * @param tooltip the lines of tooltip.
+     */
+    public void setTooltip(Component... tooltip) {
+        setTooltipFunction((label) -> tooltip);
+    }
+
+    /**
+     * Sets the tooltip.
+     *
+     * @param tooltip the tooltip.
+     */
+    public void setTooltip(String... tooltip) {
+        setTooltipFunction((label) -> Stream.of(tooltip).map(TextComponent::new).toArray(Component[]::new));
+    }
     
     /**
      * Sets the tooltip.
      *
      * @param tooltip the lines of tooltip.
      * @return the label itself.
+     * @deprecated use {@link #tooltip(String...)}
      */
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     public final Label tooltipLines(String... tooltip) {
-        return tooltipLine(String.join("\n", tooltip));
+        return tooltip(tooltip);
     }
-    
+
     /**
      * Sets the tooltip.
      *
      * @param tooltip the line of tooltip.
      * @return the label itself.
+     * @deprecated use {@link #tooltip(String...)}
      */
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     public final Label tooltipLine(String tooltip) {
-        return tooltipSupplier(label -> tooltip);
+        return tooltip(tooltip);
     }
-    
+
+    /**
+     * Sets the tooltip.
+     *
+     * @param tooltip the lines of tooltip.
+     * @return the label itself.
+     */
+    public final Label tooltip(String... tooltip) {
+        return tooltipFunction(label -> Stream.of(tooltip).map(TextComponent::new).toArray(Component[]::new));
+    }
+
+    /**
+     * Sets the tooltip.
+     *
+     * @param tooltip the lines of tooltip.
+     * @return the label itself.
+     */
+    public final Label tooltip(Component... tooltip) {
+        return tooltipFunction(label -> tooltip);
+    }
+
+    /**
+     * Sets the tooltip function.
+     *
+     * @param tooltip the tooltip function used to get the tooltip.
+     * @return the label itself.
+     * @deprecated use {@link #tooltipFunction}
+     */
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval(inVersion = "8.0.0")
+    public final Label tooltipSupplier(@Nullable Function<Label, @Nullable String> tooltip) {
+        setTooltip(tooltip);
+        return this;
+    }
+
     /**
      * Sets the tooltip function.
      *
      * @param tooltip the tooltip function used to get the tooltip.
      * @return the label itself.
      */
-    public final Label tooltipSupplier(@Nullable Function<Label, @Nullable String> tooltip) {
-        setTooltip(tooltip);
+    public final Label tooltipFunction(@Nullable Function<Label, @Nullable Component[]> tooltip) {
+        setTooltipFunction(tooltip);
         return this;
     }
     
