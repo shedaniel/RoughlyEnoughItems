@@ -110,6 +110,7 @@ curseforge {
             changelogType = "html"
             changelog = rootProject.releaseChangelog
             addGameVersion "1.18"
+            addGameVersion "1.18.1"
             addGameVersion "1.18-Snapshot"
             addGameVersion "Java 17"
             addGameVersion "Fabric"

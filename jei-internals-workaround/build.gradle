@@ -28,6 +28,7 @@ curseforge {
             changelogType = "html"
             changelog = rootProject.releaseChangelog
             addGameVersion "1.18"
+            addGameVersion "1.18.1"
             addGameVersion "Java 17"
             addGameVersion "Forge"
             mainArtifact(tasks.getByName("remapJar")) {
