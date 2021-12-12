@@ -73,14 +73,14 @@ public class JEIIngredientHelper<T> implements IIngredientHelper<T> {
     @Override
     public String getModId(T ingredient) {
         EntryStack<T> entry = ingredient.unwrapStack(definition);
-        ResourceLocation location = definition.getIdentifier(entry, entry.getValue());
-        return location == null ? "minecraft" : location.getNamespace();
+        String ns = entry.getContainingNamespace();
+        return ns == null ? "minecraft" : ns;
     }
     
     @Override
     public String getResourceId(T ingredient) {
         EntryStack<T> entry = ingredient.unwrapStack(definition);
-        ResourceLocation location = definition.getIdentifier(entry, entry.getValue());
+        ResourceLocation location = entry.getIdentifier();
         return location == null ? "minecraft:unknown" : location.toString();
     }
     

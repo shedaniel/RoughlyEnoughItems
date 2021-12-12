@@ -64,9 +64,9 @@ public final class ModArgumentType extends ArgumentType<Unit, ModArgumentType.@N
     @Override
     public boolean matches(Mutable<@Nullable ModInfoPair> data, EntryStack<?> stack, String searchText, Unit filterData) {
         if (data.getValue() == null) {
-            ResourceLocation id = stack.getIdentifier();
-            data.setValue(id != null ? new ModInfoPair(
-                    id.getNamespace(),
+            String containingNs = stack.getContainingNamespace();
+            data.setValue(containingNs != null ? new ModInfoPair(
+                    containingNs,
                     null
             ) : ModInfoPair.EMPTY);
         }

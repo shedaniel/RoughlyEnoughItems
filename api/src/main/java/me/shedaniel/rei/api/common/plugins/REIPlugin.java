@@ -27,6 +27,7 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
+import me.shedaniel.rei.api.common.entry.settings.EntrySettingsAdapterRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
@@ -61,6 +62,16 @@ public interface REIPlugin<P extends REIPlugin<?>> extends Comparable<REIPlugin<
      */
     @ApiStatus.OverrideOnly
     default void registerEntryTypes(EntryTypeRegistry registry) {
+    }
+    
+    /**
+     * Registers new entry settings adapters
+     *
+     * @param registry the entry settings adapters registry
+     */
+    @ApiStatus.OverrideOnly
+    @ApiStatus.Experimental
+    default void registerEntrySettingsAdapters(EntrySettingsAdapterRegistry registry) {
     }
     
     /**

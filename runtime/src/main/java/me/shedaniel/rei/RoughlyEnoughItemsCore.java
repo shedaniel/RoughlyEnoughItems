@@ -49,6 +49,7 @@ import me.shedaniel.rei.impl.common.entry.EntryStackProviderImpl;
 import me.shedaniel.rei.impl.common.entry.comparison.FluidComparatorRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.comparison.ItemComparatorRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.comparison.NbtHasherProviderImpl;
+import me.shedaniel.rei.impl.common.entry.settings.EntrySettingsAdapterRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.EntryTypeRegistryImpl;
 import me.shedaniel.rei.impl.common.fluid.FluidSupportProviderImpl;
 import me.shedaniel.rei.impl.common.logging.FileLogger;
@@ -106,6 +107,7 @@ public class RoughlyEnoughItemsCore {
                     );
                 },
                 new EntryTypeRegistryImpl(),
+                new EntrySettingsAdapterRegistryImpl(),
                 new RecipeManagerContextImpl<>(RecipeManagerContextImpl.supplier()),
                 new ItemComparatorRegistryImpl(),
                 new FluidComparatorRegistryImpl(),

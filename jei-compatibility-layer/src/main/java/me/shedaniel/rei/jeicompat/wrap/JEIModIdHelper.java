@@ -30,7 +30,6 @@ import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -61,9 +60,9 @@ public enum JEIModIdHelper implements IModIdHelper {
     @Override
     @NotNull
     public <T> List<Component> addModNameToIngredientTooltip(@NotNull List<Component> tooltip, @NotNull T ingredient, @NotNull IIngredientHelper<T> ingredientHelper) {
-        ResourceLocation location = ingredient.unwrapStack().getIdentifier();
-        if (location != null) {
-            ClientHelper.getInstance().appendModIdToTooltips(tooltip, location.getNamespace());
+        String containingNs = ingredient.unwrapStack().getContainingNamespace();
+        if (containingNs != null) {
+            ClientHelper.getInstance().appendModIdToTooltips(tooltip, containingNs);
         }
         return tooltip;
     }
