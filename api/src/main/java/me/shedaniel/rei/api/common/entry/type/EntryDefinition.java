@@ -72,8 +72,7 @@ public interface EntryDefinition<T> {
     EntryRenderer<T> getRenderer();
     
     /**
-     * Returns the identifier for an entry, used in identifier search argument type,
-     * and appending the mod name to the tooltip.
+     * Returns the identifier for an entry, used in identifier search argument type.
      *
      * @param entry the entry
      * @param value the value of the entry
@@ -81,6 +80,25 @@ public interface EntryDefinition<T> {
      */
     @Nullable
     ResourceLocation getIdentifier(EntryStack<T> entry, T value);
+    
+    /**
+     * Returns the container namespace of the entry, used for determining the
+     * responsible mod for the entry.
+     *
+     * @param entry the entry
+     * @param value the value of the entry
+     * @return the identifier for an entry
+     */
+    @Nullable
+    default String getContainingNamespace(EntryStack<T> entry, T value) {
+        ResourceLocation identifier = getIdentifier(entry, value);
+        
+        if (identifier == null) {
+            return null;
+        } else {
+            return identifier.getNamespace();
+        }
+    }
     
     /**
      * Returns whether the entry is empty, empty entries are not displayed,
