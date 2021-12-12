@@ -35,6 +35,7 @@ import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.settings.EntrySettingsAdapterRegistry;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
@@ -127,6 +128,12 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
     }
     
     @Override
+    @Nullable
+    public String getContainingNamespace() {
+        return get(Settings.CONTAINING_NS).apply(this, getDefinition().getContainingNamespace(this, getValue()));
+    }
+    
+    @Override
     public boolean isEmpty() {
         return getDefinition().isEmpty(this, getValue());
     }
@@ -163,11 +170,12 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
     
     @Override
     public <T> T get(Settings<T> settings) {
-        Object o = this.settings == null ? null : this.settings.get(settings.getId());
+        T o = this.settings == null ? null : (T) this.settings.get(settings.getId());
+        o = EntrySettingsAdapterRegistry.getInstance().adapt(this, settings, o);
         if (o == null) {
-            return settings.getDefaultValue();
+            o = settings.getDefaultValue();
         }
-        return (T) o;
+        return o;
     }
     
     @Override
@@ -191,13 +199,13 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
             tooltip.getValue().addAllTexts(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));
             tooltip.setValue(get(Settings.TOOLTIP_PROCESSOR).apply(this, tooltip.getValue()));
             if (tooltip.getValue() == null) return null;
-            ResourceLocation location = getIdentifier();
+            String containingNs = getContainingNamespace();
             if (appendModName) {
-                if (location != null) {
-                    ClientHelper.getInstance().appendModIdToTooltips(tooltip.getValue(), location.getNamespace());
+                if (containingNs != null) {
+                    ClientHelper.getInstance().appendModIdToTooltips(tooltip.getValue(), containingNs);
                 }
-            } else {
-                final String modName = ClientHelper.getInstance().getModFromModId(location.getNamespace());
+            } else if (containingNs != null) {
+                final String modName = ClientHelper.getInstance().getModFromModId(containingNs);
                 Iterator<Component> iterator = tooltip.getValue().getText().iterator();
                 while (iterator.hasNext()) {
                     Component s = iterator.next();
