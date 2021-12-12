@@ -121,6 +121,9 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     @Nullable
     ResourceLocation getIdentifier();
     
+    @Nullable
+    String getContainingNamespace();
+    
     boolean isEmpty();
     
     /**
@@ -216,6 +219,8 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         @Environment(EnvType.CLIENT)
         public static Settings<BiFunction<EntryStack<?>, Tooltip, Tooltip>> TOOLTIP_PROCESSOR;
         @Environment(EnvType.CLIENT)
+        public static Settings<BiFunction<EntryStack<?>, String, String>> CONTAINING_NS;
+        @Environment(EnvType.CLIENT)
         public static Settings<Function<EntryStack<?>, List<Component>>> TOOLTIP_APPEND_EXTRA;
         @Environment(EnvType.CLIENT)
         public static Settings<Float> FLUID_RENDER_RATIO;
@@ -224,6 +229,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
             EnvExecutor.runInEnv(Env.CLIENT, () -> () -> {
                 RENDERER = new Settings<>(stack -> EntryRendererRegistry.getInstance().get(stack));
                 TOOLTIP_PROCESSOR = new Settings<>((stack, tooltip) -> tooltip);
+                CONTAINING_NS = new Settings<>((stack, ns) -> ns);
                 TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
                 FLUID_RENDER_RATIO = new Settings<>(1.0F);
             });
