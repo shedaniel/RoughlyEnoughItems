@@ -477,9 +477,9 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         private ModifierKeyCode previousPageKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode nextPageKeybind = ModifierKeyCode.unknown();
         private ModifierKeyCode focusSearchFieldKeybind = ModifierKeyCode.unknown();
-        private ModifierKeyCode copyRecipeIdentifierKeybind = ModifierKeyCode.of(InputConstants.Type.MOUSE.getOrCreate(InputConstants.MOUSE_BUTTON_MIDDLE), Modifier.none());
+        private ModifierKeyCode copyRecipeIdentifierKeybind = ModifierKeyCode.of(InputConstants.Type.MOUSE.getOrCreate(2), Modifier.none());
         private ModifierKeyCode favoriteKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(65), Modifier.none());
-        private ModifierKeyCode exportImageKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_F8), Modifier.none());
+        private ModifierKeyCode exportImageKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(297), Modifier.none());
         private ModifierKeyCode previousScreenKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(259), Modifier.none());
     }
     
