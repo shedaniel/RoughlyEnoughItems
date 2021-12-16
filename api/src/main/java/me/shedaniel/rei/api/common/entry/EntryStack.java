@@ -42,6 +42,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -208,6 +209,8 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     default EntryStack<T> tooltip(Function<EntryStack<?>, List<Component>> tooltipProvider) {
         return setting(Settings.TOOLTIP_APPEND_EXTRA, tooltipProvider);
     }
+    
+    EntryStack<ItemStack> cheatsAs();
     
     @Deprecated
     class Settings<R> {
