@@ -27,7 +27,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
-import dev.architectury.fluid.FluidStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
@@ -73,7 +72,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -242,11 +240,9 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
             if (!(ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen))) return false;
             EntryStack<?> entry = stack.copy();
             if (!entry.isEmpty()) {
-                if (entry.getValueType() == FluidStack.class) {
-                    Item bucketItem = ((FluidStack) entry.getValue()).getFluid().getBucket();
-                    if (bucketItem != null) {
-                        entry = EntryStacks.of(bucketItem);
-                    }
+                if (entry.getType() != VanillaEntryTypes.ITEM) {
+                    EntryStack<ItemStack> cheatsAs = entry.cheatsAs();
+                    entry = cheatsAs.isEmpty() ? entry : cheatsAs;
                 }
                 if (entry.getType() == VanillaEntryTypes.ITEM)
                     entry.<ItemStack>castValue().setCount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.<ItemStack>castValue().getMaxStackSize());

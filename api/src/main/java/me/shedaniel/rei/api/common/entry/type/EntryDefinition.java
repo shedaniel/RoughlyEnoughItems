@@ -34,6 +34,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagContainer;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -148,6 +149,11 @@ public interface EntryDefinition<T> {
      */
     default T wildcard(EntryStack<T> entry, T value) {
         return normalize(entry, value);
+    }
+    
+    @Nullable
+    default ItemStack cheatsAs(EntryStack<T> entry, T value) {
+        return null;
     }
     
     long hash(EntryStack<T> entry, T value, ComparisonContext context);
