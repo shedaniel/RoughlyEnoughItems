@@ -24,16 +24,15 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public abstract class EntryListEntryWidget extends EntryWidget {
@@ -79,12 +78,9 @@ public abstract class EntryListEntryWidget extends EntryWidget {
         if (!(ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen))) return false;
         EntryStack<?> entry = getCurrentEntry().copy();
         if (!entry.isEmpty()) {
-            if (entry.getValueType() == FluidStack.class) {
-                FluidStack value = (FluidStack) entry.getValue();
-                Item bucketItem = value.getFluid().getBucket();
-                if (bucketItem != null) {
-                    entry = EntryStacks.of(bucketItem);
-                }
+            if (entry.getType() != VanillaEntryTypes.ITEM) {
+                EntryStack<ItemStack> cheatsAs = entry.cheatsAs();
+                entry = cheatsAs.isEmpty() ? entry : cheatsAs;
             }
             if (entry.getValueType() == ItemStack.class)
                 entry.<ItemStack>castValue().setCount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.<ItemStack>castValue().getMaxStackSize());
@@ -101,12 +97,9 @@ public abstract class EntryListEntryWidget extends EntryWidget {
         if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
             EntryStack<?> entry = getCurrentEntry().copy();
             if (!entry.isEmpty()) {
-                if (entry.getValueType() == FluidStack.class) {
-                    FluidStack value = (FluidStack) entry.getValue();
-                    Item bucketItem = value.getFluid().getBucket();
-                    if (bucketItem != null) {
-                        entry = EntryStacks.of(bucketItem);
-                    }
+                if (entry.getType() != VanillaEntryTypes.ITEM) {
+                    EntryStack<ItemStack> cheatsAs = entry.cheatsAs();
+                    entry = cheatsAs.isEmpty() ? entry : cheatsAs;
                 }
                 return EntryStacks.equalsExact(entry, stack);
             }

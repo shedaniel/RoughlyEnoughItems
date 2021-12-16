@@ -29,7 +29,6 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
-import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.ScrollingContainer;
@@ -323,11 +322,9 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         
         if (containsChecked(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && !minecraft.player.inventory.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
             EntryStack<?> stack = EntryStacks.of(minecraft.player.inventory.getCarried().copy());
-            if (stack.getValueType() == FluidStack.class) {
-                Item bucketItem = ((FluidStack) stack.getValue()).getFluid().getBucket();
-                if (bucketItem != null) {
-                    stack = EntryStacks.of(bucketItem);
-                }
+            if (stack.getType() != VanillaEntryTypes.ITEM) {
+                EntryStack<ItemStack> cheatsAs = stack.cheatsAs();
+                stack = cheatsAs.isEmpty() ? stack : cheatsAs;
             }
             for (Widget child : children()) {
                 if (child.containsMouse(mouseX, mouseY) && child instanceof EntryWidget) {

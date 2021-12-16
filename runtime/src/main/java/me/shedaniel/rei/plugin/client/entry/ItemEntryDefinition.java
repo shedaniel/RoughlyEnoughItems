@@ -132,6 +132,12 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     }
     
     @Override
+    @Nullable
+    public ItemStack cheatsAs(EntryStack<ItemStack> entry, ItemStack value) {
+        return value.copy();
+    }
+    
+    @Override
     public long hash(EntryStack<ItemStack> entry, ItemStack value, ComparisonContext context) {
         int code = 1;
         code = 31 * code + System.identityHashCode(value.getItem());

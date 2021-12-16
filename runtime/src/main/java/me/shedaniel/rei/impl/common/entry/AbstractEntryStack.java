@@ -48,6 +48,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.SerializationTags;
 import net.minecraft.tags.TagContainer;
+import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.ApiStatus;
@@ -156,6 +157,17 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
     @Override
     public EntryStack<A> wildcard() {
         return wrap(getDefinition().wildcard(this, getValue()), false);
+    }
+    
+    @Override
+    public EntryStack<ItemStack> cheatsAs() {
+        ItemStack stack = getDefinition().cheatsAs(this, getValue());
+        
+        if (stack == null) {
+            return null;
+        }
+        
+        return EntryStacks.of(stack);
     }
     
     protected EntryStack<A> wrap(A value, boolean copySettings) {

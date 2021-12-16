@@ -68,6 +68,8 @@ import net.minecraft.tags.TagCollection;
 import net.minecraft.tags.TagContainer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
@@ -139,6 +141,15 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
         Fluid fluid = value.getFluid();
         if (fluid instanceof FlowingFluid) fluid = ((FlowingFluid) fluid).getSource();
         return FluidStack.create(fluid, FluidStack.bucketAmount());
+    }
+    
+    @Override
+    @Nullable
+    public ItemStack cheatsAs(EntryStack<FluidStack> entry, FluidStack value) {
+        if (value.isEmpty()) return ItemStack.EMPTY;
+        Item bucket = value.getFluid().getBucket();
+        if (bucket == null) return ItemStack.EMPTY;
+        return new ItemStack(bucket);
     }
     
     @Override
