@@ -34,6 +34,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -149,6 +150,10 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
     default void addEntries(Collection<? extends EntryStack<?>> stacks) {
         addEntriesAfter(null, stacks);
     }
+    
+    // TODO Re-evaluate the need for this
+    @ApiStatus.Internal
+    Collection<EntryStack<?>> refilterNew(Collection<EntryStack<?>> entries);
     
     /**
      * Checks if a stack is already registered.
