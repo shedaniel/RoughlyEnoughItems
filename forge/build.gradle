@@ -106,6 +106,7 @@ dependencies {
     // modRuntime("curse.maven:bookshelf-228525:3474499")
     // modRuntime("curse.maven:kubejs-238086:3533307")
     // modRuntime("curse.maven:rhino-416294:3525704")
+    modRuntime("curse.maven:enchantment-descriptions-250419:3566741")
 }
 
 shadowJar {

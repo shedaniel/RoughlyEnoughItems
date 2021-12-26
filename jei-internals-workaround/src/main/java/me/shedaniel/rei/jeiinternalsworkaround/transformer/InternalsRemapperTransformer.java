@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeiinternalsworkaround.transformer;
 
+import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.ClassRemapper;
@@ -126,6 +127,23 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
                             isInterface = true;
                         }
                         super.visitMethodInsn(opcodeAndSource, owner, name, descriptor, isInterface);
+                    }
+                    
+                    @Override
+                    public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
+                        if (Objects.equals(bootstrapMethodHandle.getOwner(), "java/lang/invoke/LambdaMetafactory") && Objects.equals(bootstrapMethodHandle.getName(), "metafactory") && bootstrapMethodArguments.length >= 3) {
+                            if (bootstrapMethodArguments[1] instanceof Handle) {
+                                Handle handle = (Handle) bootstrapMethodArguments[1];
+                                if (redirectInvokeVirtual.contains(handle.getOwner())) {
+                                    bootstrapMethodArguments[1] = new Handle(handle.getTag() == Opcodes.H_INVOKEVIRTUAL ? Opcodes.H_INVOKEINTERFACE : handle.getTag(),
+                                            handle.getOwner(),
+                                            handle.getName(),
+                                            handle.getDesc(),
+                                            true);
+                                }
+                            }
+                        }
+                        super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
                     }
                 };
             }
