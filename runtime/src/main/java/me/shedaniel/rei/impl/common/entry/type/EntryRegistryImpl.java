@@ -233,7 +233,9 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     private MutableLong lastRefilterWarning = new MutableLong(-1);
     
-    private Collection<EntryStack<?>> refilterNew(Collection<EntryStack<?>> entries) {
+    @ApiStatus.Internal
+    @Override
+    public Collection<EntryStack<?>> refilterNew(Collection<EntryStack<?>> entries) {
         if (lastRefilterWarning != null) {
             if (lastRefilterWarning.getValue() > 0 && System.currentTimeMillis() - lastRefilterWarning.getValue() > 5000) {
                 RoughlyEnoughItemsCore.LOGGER.warn("Detected runtime EntryRegistry modification, this can be extremely dangerous, or be extremely inefficient!");
