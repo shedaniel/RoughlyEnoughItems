@@ -42,6 +42,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.client.gui.screen.AbstractDisplayViewingScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -110,7 +111,11 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     public <T extends Screen> Rectangle getScreenBounds(T screen) {
         for (OverlayDecider decider : getDeciders(screen)) {
             if (decider instanceof DisplayBoundsProvider) {
-                return ((DisplayBoundsProvider<T>) decider).getScreenBounds(screen);
+                Rectangle bounds = ((DisplayBoundsProvider<T>) decider).getScreenBounds(screen);
+                
+                if (bounds != null) {
+                    return bounds;
+                }
             }
         }
         return new Rectangle();
@@ -239,15 +244,41 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     
     private void registerDefault() {
         registerDecider(this.exclusionZones = new ExclusionZonesImpl());
-        registerDecider(new OverlayDecider() {
+        registerDecider(new DisplayBoundsProvider<AbstractContainerScreen<?>>() {
             @Override
-            public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
-                return true;
+            public Rectangle getScreenBounds(AbstractContainerScreen<?> screen) {
+                return new Rectangle(screen.leftPos, screen.topPos, screen.imageWidth, screen.imageHeight);
             }
             
             @Override
-            public InteractionResult shouldScreenBeOverlaid(Class<?> screen) {
-                return AbstractContainerScreen.class.isAssignableFrom(screen) ? InteractionResult.SUCCESS : InteractionResult.PASS;
+            public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
+                return AbstractContainerScreen.class.isAssignableFrom(screen);
+            }
+            
+            @Override
+            public <R extends Screen> InteractionResult shouldScreenBeOverlaid(R screen) {
+                return screen instanceof AbstractContainerScreen<?> ? InteractionResult.SUCCESS : InteractionResult.PASS;
+            }
+            
+            @Override
+            public double getPriority() {
+                return -10.0;
+            }
+        });
+        registerDecider(new DisplayBoundsProvider<AbstractDisplayViewingScreen>() {
+            @Override
+            public Rectangle getScreenBounds(AbstractDisplayViewingScreen screen) {
+                return screen.getBounds();
+            }
+            
+            @Override
+            public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
+                return AbstractDisplayViewingScreen.class.isAssignableFrom(screen);
+            }
+            
+            @Override
+            public <R extends Screen> InteractionResult shouldScreenBeOverlaid(R screen) {
+                return InteractionResult.SUCCESS;
             }
             
             @Override

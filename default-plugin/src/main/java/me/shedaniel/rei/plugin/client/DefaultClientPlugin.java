@@ -39,7 +39,6 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
-import me.shedaniel.rei.api.client.registry.screen.DisplayBoundsProvider;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
@@ -74,7 +73,6 @@ import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.*;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.core.Registry;
@@ -314,18 +312,6 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerScreens(ScreenRegistry registry) {
-        registry.registerDecider(new DisplayBoundsProvider<AbstractContainerScreen<?>>() {
-            @Override
-            public Rectangle getScreenBounds(AbstractContainerScreen<?> screen) {
-                return new Rectangle(screen.leftPos, screen.topPos, screen.imageWidth, screen.imageHeight);
-            }
-            
-            @Override
-            public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
-                return AbstractContainerScreen.class.isAssignableFrom(screen);
-            }
-        });
-        
         registry.registerContainerClickArea(new Rectangle(88, 32, 28, 23), CraftingScreen.class, CRAFTING);
         registry.registerContainerClickArea(new Rectangle(137, 29, 10, 13), InventoryScreen.class, CRAFTING);
         registry.registerContainerClickArea(new Rectangle(97, 16, 14, 30), BrewingStandScreen.class, BREWING);

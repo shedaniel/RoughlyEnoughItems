@@ -254,11 +254,8 @@ public class RoughlyEnoughItemsCoreClient {
     
     private static boolean _shouldReturn(Screen screen) {
         try {
-            Class<? extends Screen> screenClass = screen.getClass();
-            for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders()) {
-                if (!decider.isHandingScreen(screen.getClass()))
-                    continue;
-                InteractionResult result = decider.shouldScreenBeOverlaid(screenClass);
+            for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(screen)) {
+                InteractionResult result = decider.shouldScreenBeOverlaid(screen);
                 if (result != InteractionResult.PASS) {
                     return result == InteractionResult.FAIL || REIRuntime.getInstance().getPreviousScreen() == null;
                 }
