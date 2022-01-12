@@ -114,7 +114,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
         }
         
         private Entry<K, V> mapEntry(Entry<K, V> entry) {
-            return new ForwardingMapEntry<>() {
+            return new ForwardingMapEntry<K, V>() {
                 @Override
                 @NotNull
                 protected Entry<K, V> delegate() {
