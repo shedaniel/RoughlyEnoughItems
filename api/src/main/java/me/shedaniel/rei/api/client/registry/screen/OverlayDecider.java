@@ -29,6 +29,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.InteractionResult;
+import org.jetbrains.annotations.ApiStatus;
 
 import static net.minecraft.world.InteractionResult.PASS;
 
@@ -39,8 +40,14 @@ import static net.minecraft.world.InteractionResult.PASS;
 public interface OverlayDecider extends Comparable<OverlayDecider> {
     <R extends Screen> boolean isHandingScreen(Class<R> screen);
     
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated
     default InteractionResult shouldScreenBeOverlaid(Class<?> screen) {
         return InteractionResult.PASS;
+    }
+    
+    default <R extends Screen> InteractionResult shouldScreenBeOverlaid(R screen) {
+        return shouldScreenBeOverlaid(screen.getClass());
     }
     
     /**
