@@ -145,6 +145,19 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
                         }
                         super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
                     }
+                    
+                    @Override
+                    public void visitLdcInsn(Object value) {
+                        if (value instanceof String) {
+                            String possibleReplacement = classMap.get(((String) value).replace('.', '/'));
+                            
+                            if (possibleReplacement != null) {
+                                super.visitLdcInsn(possibleReplacement.replace('/', '.'));
+                                return;
+                            }
+                        }
+                        super.visitLdcInsn(value);
+                    }
                 };
             }
         };
