@@ -26,6 +26,7 @@ package me.shedaniel.rei.api.client.registry.screen;
 import me.shedaniel.math.Rectangle;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(EnvType.CLIENT)
 public interface DisplayBoundsProvider<T> extends OverlayDecider {
@@ -33,5 +34,6 @@ public interface DisplayBoundsProvider<T> extends OverlayDecider {
      * @param screen the screen
      * @return the boundary of the base container panel.
      */
+    @Nullable
     Rectangle getScreenBounds(T screen);
 }

@@ -72,7 +72,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
@@ -148,12 +147,25 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         return fit;
     }
     
-    private boolean containsChecked(Point point) {
-        return containsChecked(point.x, point.y);
+    private boolean containsChecked(Point point, boolean inner) {
+        return containsChecked(point.x, point.y, inner);
     }
     
-    private boolean containsChecked(double x, double y) {
-        if (!containsMouse(x, y)) return false;
+    @Override
+    public boolean containsMouse(double mouseX, double mouseY) {
+        return hasSpace() && super.containsMouse(mouseX, mouseY);
+    }
+    
+    public boolean innerContainsMouse(double mouseX, double mouseY) {
+        return hasSpace() && innerBounds.contains(mouseX, mouseY);
+    }
+    
+    private boolean containsChecked(double x, double y, boolean inner) {
+        if (inner) {
+            if (!innerContainsMouse(x, y)) return false;
+        } else {
+            if (!containsMouse(x, y)) return false;
+        }
         Minecraft instance = Minecraft.getInstance();
         for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(instance.screen)) {
             InteractionResult result = decider.isInZone(x, y);
@@ -199,7 +211,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (bounds.contains(mouseX, mouseY)) {
+        if (containsChecked(mouseX, mouseY, false)) {
             if (Screen.hasControlDown()) {
                 ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
                 if (config.setEntrySize(config.getEntrySize() + amount * 0.075)) {
@@ -244,6 +256,8 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        if (!hasSpace()) return;
+
         MutableInt size = new MutableInt();
         MutableLong time = new MutableLong();
         long totalTimeStart = debugTime ? System.nanoTime() : 0;
@@ -320,7 +334,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             matrices.popPose();
         }
         
-        if (containsChecked(mouseX, mouseY) && ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && !minecraft.player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
+        if (containsChecked(mouseX, mouseY, false) && ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && !minecraft.player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
             EntryStack<?> stack = EntryStacks.of(minecraft.player.containerMenu.getCarried().copy());
             if (stack.getType() != VanillaEntryTypes.ITEM) {
                 EntryStack<ItemStack> cheatsAs = stack.cheatsAs();
@@ -345,7 +359,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
-        if (scrolling.mouseDragged(mouseX, mouseY, button, dx, dy, ConfigObject.getInstance().doesSnapToRows(), entrySize()))
+        if (hasSpace() && scrolling.mouseDragged(mouseX, mouseY, button, dx, dy, ConfigObject.getInstance().doesSnapToRows(), entrySize()))
             return true;
         return super.mouseDragged(mouseX, mouseY, button, dx, dy);
     }
@@ -362,10 +376,10 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     }
     
     @Override
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (containsChecked(PointHelper.ofMouse()))
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (containsChecked(PointHelper.ofMouse(), false))
             for (Widget widget : widgets)
-                if (widget.keyPressed(int_1, int_2, int_3))
+                if (widget.keyPressed(keyCode, scanCode, modifiers))
                     return true;
         return false;
     }
@@ -381,6 +395,13 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         } else {
             updateEntriesPosition();
         }
+    }
+    
+    public boolean hasSpace() {
+        int entrySize = entrySize();
+        int width = innerBounds.width / entrySize;
+        int height = innerBounds.height / entrySize;
+        return width * height > 0;
     }
     
     public void updateEntriesPosition() {
@@ -481,20 +502,21 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     }
     
     @Override
-    public boolean mouseClicked(double double_1, double double_2, int int_1) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (!hasSpace()) return false;
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            if (scrolling.updateDraggingState(double_1, double_2, int_1))
+            if (scrolling.updateDraggingState(mouseX, mouseY, button))
                 return true;
         }
         for (Widget widget : children())
-            if (widget.mouseClicked(double_1, double_2, int_1))
+            if (widget.mouseClicked(mouseX, mouseY, button))
                 return true;
         return false;
     }
     
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (containsChecked(mouseX, mouseY)) {
+        if (containsChecked(mouseX, mouseY, false)) {
             LocalPlayer player = minecraft.player;
             if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && player != null && player.containerMenu != null && !player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
                 ClientHelper.getInstance().sendDeletePacket();
@@ -510,7 +532,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     @Override
     public EntryStack<?> getFocusedStack() {
         Point mouse = PointHelper.ofMouse();
-        if (containsMouse(mouse)) {
+        if (containsChecked(mouse, false)) {
             for (EntryListEntry entry : entries) {
                 EntryStack<?> currentEntry = entry.getCurrentEntry();
                 if (!currentEntry.isEmpty() && entry.containsMouse(mouse)) {
@@ -543,7 +565,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         
         @Override
         public boolean containsMouse(double mouseX, double mouseY) {
-            return super.containsMouse(mouseX, mouseY) && containsChecked(mouseX, mouseY);
+            return super.containsMouse(mouseX, mouseY) && containsChecked(mouseX, mouseY, true);
         }
     }
 }

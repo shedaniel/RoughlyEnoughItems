@@ -45,7 +45,6 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
-import me.shedaniel.rei.api.client.registry.screen.DisplayBoundsProvider;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
@@ -59,7 +58,6 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.screen.AbstractDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.widget.FavoritesListWidget;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
@@ -71,7 +69,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -140,22 +137,6 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                 }
             }
             return Collections.emptyList();
-        });
-        registry.registerDecider(new DisplayBoundsProvider<AbstractDisplayViewingScreen>() {
-            @Override
-            public Rectangle getScreenBounds(AbstractDisplayViewingScreen screen) {
-                return screen.getBounds();
-            }
-            
-            @Override
-            public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
-                return AbstractDisplayViewingScreen.class.isAssignableFrom(screen);
-            }
-            
-            @Override
-            public InteractionResult shouldScreenBeOverlaid(Class<?> screen) {
-                return InteractionResult.SUCCESS;
-            }
         });
         registry.registerDraggableStackProvider(DraggableStackProviderWidget.from(context -> {
             if (RoughlyEnoughItemsCoreClient.shouldReturn(context.getScreen()) || !REIRuntime.getInstance().isOverlayVisible()) return Collections.emptyList();
