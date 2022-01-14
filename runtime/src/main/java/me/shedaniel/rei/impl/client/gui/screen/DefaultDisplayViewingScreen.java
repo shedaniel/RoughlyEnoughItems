@@ -30,11 +30,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
+import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -339,23 +341,23 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         return Mth.clamp(Mth.floor(((double) totalHeight - 36) / ((double) height + 4)) - 1, 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, category.getMaximumDisplaysPerPage() - 1));
     }
     
+    private final ValueAnimator<Color> darkStripesColor = ValueAnimator.ofColor()
+            .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFF404040 : 0xFF9E9E9E), ValueAnimator.typicalTransitionTime());
+    
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        darkStripesColor.update(delta);
         this.fillGradient(matrices, 0, 0, this.width, this.height, -1072689136, -804253680);
         for (Widget widget : preWidgets) {
             widget.render(matrices, mouseX, mouseY, delta);
         }
-        PanelWidget.render(matrices, bounds, -1);
-        if (REIRuntime.getInstance().isDarkThemeEnabled()) {
-            fill(matrices, bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF404040);
-            fill(matrices, bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 30, 0xFF404040);
-        } else {
-            fill(matrices, bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, 0xFF9E9E9E);
-            fill(matrices, bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 31, 0xFF9E9E9E);
-        }
+        PanelWidget.render(matrices, bounds, -1, delta);
+        fill(matrices, bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, darkStripesColor.value().getColor());
+        fill(matrices, bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 30, darkStripesColor.value().getColor());
         for (TabWidget tab : tabs) {
-            if (!tab.isSelected())
+            if (!tab.isSelected()) {
                 tab.render(matrices, mouseX, mouseY, delta);
+            }
         }
         super.render(matrices, mouseX, mouseY, delta);
         for (Widget widget : widgets) {
@@ -363,8 +365,9 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         }
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         for (TabWidget tab : tabs) {
-            if (tab.isSelected())
+            if (tab.isSelected()) {
                 tab.render(matrices, mouseX, mouseY, delta);
+            }
         }
         {
             ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();

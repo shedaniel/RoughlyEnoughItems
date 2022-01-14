@@ -34,6 +34,8 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.client.gui.animator.NumberAnimator;
+import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
 import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
@@ -300,10 +302,23 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         return isHighlightEnabled();
     }
     
+    private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
+            .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
+            .asFloat();
+    
     protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (background) {
-            RenderSystem.setShaderTexture(0, REIRuntime.getInstance().isDarkThemeEnabled() ? RECIPE_GUI_DARK : RECIPE_GUI);
+            darkBackgroundAlpha.update(delta);
+            RenderSystem.enableBlend();
+            RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+            RenderSystem.blendFunc(770, 771);
+            RenderSystem.setShaderTexture(0, RECIPE_GUI);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
+            RenderSystem.setShaderTexture(0, RECIPE_GUI_DARK);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value());
+            blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
     
@@ -340,13 +355,19 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         return getCurrentEntry().getTooltip(point);
     }
     
+    private final NumberAnimator<Float> darkHighlightedAlpha = ValueAnimator.ofFloat()
+            .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
+            .asFloat();
+    
     protected void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        darkHighlightedAlpha.update(delta);
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
-        int color = REIRuntime.getInstance().isDarkThemeEnabled() ? -1877929711 : -2130706433;
-        setZ(300);
         Rectangle bounds = getInnerBounds();
-        fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), color, color);
+        setZ(300);
+        fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0x80ffffff, 0x80ffffff);
+        int darkColor = 0x111111 | ((int) (90 * darkHighlightedAlpha.value()) << 24);
+        fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), darkColor, darkColor);
         setZ(0);
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.enableDepthTest();

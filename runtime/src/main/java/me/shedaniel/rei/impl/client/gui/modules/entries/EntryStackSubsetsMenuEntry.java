@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -48,14 +49,12 @@ import java.util.List;
 
 @ApiStatus.Experimental
 @ApiStatus.Internal
-public class EntryStackSubsetsMenuEntry extends MenuEntry {
-    final EntryStack stack;
-    private int x, y, width;
-    private boolean selected, containsMouse, rendering;
+public class EntryStackSubsetsMenuEntry extends AbstractMenuEntry {
+    final EntryStack<?> stack;
     private boolean clickedLast = false;
     private Boolean isFiltered = null;
     
-    public EntryStackSubsetsMenuEntry(EntryStack stack) {
+    public EntryStackSubsetsMenuEntry(EntryStack<?> stack) {
         this.stack = stack;
     }
     
@@ -70,27 +69,13 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
     }
     
     @Override
-    public void updateInformation(int xPos, int yPos, boolean selected, boolean containsMouse, boolean rendering, int width) {
-        this.x = xPos;
-        this.y = yPos;
-        this.selected = selected;
-        this.containsMouse = containsMouse;
-        this.rendering = rendering;
-        this.width = width;
-    }
-    
-    @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (isFiltered()) {
-            if (selected) {
-                fill(matrices, x, y, x + width, y + 18, -26215);
-            } else {
-                fill(matrices, x, y, x + width, y + 18, -65536);
-            }
-        } else if (selected) {
-            fill(matrices, x, y, x + width, y + 18, 1174405119);
+            fill(matrices, getX(), getY(), getX() + getWidth(), getY() + 18, isSelected() ? -26215 : -65536);
+        } else if (isSelected()) {
+            fill(matrices, getX(), getY(), getX() + getWidth(), getY() + 18, 1174405119);
         }
-        if (containsMouse && mouseX >= x + (width / 2) - 8 && mouseX <= x + (width / 2) + 8 && mouseY >= y + 1 && mouseY <= y + 17) {
+        if (containsMouse() && mouseX >= getX() + (getWidth() / 2) - 8 && mouseX <= getX() + (getWidth() / 2) + 8 && mouseY >= getY() + 1 && mouseY <= getY() + 17) {
             REIRuntime.getInstance().queueTooltip(stack.getTooltip(new Point(mouseX, mouseY)));
             if (RoughlyEnoughItemsCoreClient.isLeftMousePressed && !clickedLast) {
                 clickedLast = true;
@@ -113,13 +98,13 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
                 }
             } else if (!RoughlyEnoughItemsCoreClient.isLeftMousePressed) clickedLast = false;
         } else clickedLast = false;
-        stack.render(matrices, new Rectangle(x + (width / 2) - 8, y + 1, 16, 16), mouseX, mouseY, delta);
+        stack.render(matrices, new Rectangle(getX() + (getWidth() / 2) - 8, getY() + 1, 16, 16), mouseX, mouseY, delta);
     }
     
     void recalculateFilter(Menu menu) {
         for (MenuEntry child : menu.children()) {
-            if (child instanceof SubSubsetsMenuEntry && ((SubSubsetsMenuEntry) child).getSubsetsMenu() != null) {
-                recalculateFilter(((SubSubsetsMenuEntry) child).getSubsetsMenu());
+            if (child instanceof SubSubsetsMenuEntry && ((SubSubsetsMenuEntry) child).getChildMenu() != null) {
+                recalculateFilter(((SubSubsetsMenuEntry) child).getChildMenu());
             } else if (child instanceof EntryStackSubsetsMenuEntry && EntryStacks.equalsExact(((EntryStackSubsetsMenuEntry) child).stack, stack)) {
                 ((EntryStackSubsetsMenuEntry) child).isFiltered = null;
             }
@@ -128,7 +113,7 @@ public class EntryStackSubsetsMenuEntry extends MenuEntry {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 18;
+        return isRendering() && mouseX >= getX() && mouseX <= getX() + getWidth() && mouseY >= getY() && mouseY <= getY() + getEntryHeight();
     }
     
     @Override
