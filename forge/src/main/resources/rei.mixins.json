@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "me.shedaniel.rei.mixin.forge",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "MixinEffectRenderingInventoryScreen"
+  ],
+  "mixins": [
+  ],
+  "injectors": {
+    "maxShiftBy": 5,
+    "defaultRequire": 1
+  }
+}

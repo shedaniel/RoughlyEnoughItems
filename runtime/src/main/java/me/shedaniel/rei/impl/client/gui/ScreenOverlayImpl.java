@@ -427,6 +427,17 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                                     }
                                 }
                         ),
+                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.left_side_mob_effects"),
+                                config::isLeftSideMobEffects,
+                                disableRecipeBook -> {
+                                    config.setLeftSideMobEffects(disableRecipeBook);
+                                    Screen screen = Minecraft.getInstance().screen;
+                                    
+                                    if (screen != null) {
+                                        screen.init(minecraft, screen.width, screen.height);
+                                    }
+                                }
+                        ),
                         ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.left_side_panel"),
                                 config::isLeftHandSidePanel,
                                 bool -> config.setDisplayPanelLocation(bool ? DisplayPanelLocation.LEFT : DisplayPanelLocation.RIGHT)

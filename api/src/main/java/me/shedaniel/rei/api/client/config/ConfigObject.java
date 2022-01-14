@@ -94,6 +94,8 @@ public interface ConfigObject {
     
     boolean doesFixTabCloseContainer();
     
+    boolean isLeftSideMobEffects();
+    
     boolean areClickableRecipeArrowsEnabled();
     
     RecipeBorderType getRecipeBorderType();

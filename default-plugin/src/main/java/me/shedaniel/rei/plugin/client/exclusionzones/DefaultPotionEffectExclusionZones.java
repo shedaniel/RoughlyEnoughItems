@@ -25,6 +25,7 @@ package me.shedaniel.rei.plugin.client.exclusionzones;
 
 import com.google.common.collect.Ordering;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZonesProvider;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -43,12 +44,26 @@ public class DefaultPotionEffectExclusionZones implements ExclusionZonesProvider
     public Collection<Rectangle> provide(EffectRenderingInventoryScreen<?> screen) {
         if (!screen.canSeeEffects())
             return Collections.emptyList();
+        boolean leftSideMobEffects = ConfigObject.getInstance().isLeftSideMobEffects();
         Collection<MobEffectInstance> activePotionEffects = Minecraft.getInstance().player.getActiveEffects();
-        int x = screen.leftPos + screen.imageWidth + 2;
-        int availableWidth = screen.width - x;
-        if (activePotionEffects.isEmpty() || availableWidth < 32)
+        int x;
+        boolean fullWidth;
+        
+        if (!leftSideMobEffects) {
+            x = screen.leftPos + screen.imageWidth + 2;
+            int availableWidth = screen.width - x;
+            fullWidth = availableWidth >= 120;
+            
+            if (availableWidth < 32) {
+                return Collections.emptyList();
+            }
+        } else {
+            fullWidth = screen.leftPos >= 120;
+            x = screen.leftPos - (fullWidth ? 124 : 36);
+        }
+        
+        if (activePotionEffects.isEmpty())
             return Collections.emptyList();
-        boolean fullWidth = availableWidth >= 120;
         List<Rectangle> zones = new ArrayList<>();
         int y = screen.topPos;
         int height = 33;
