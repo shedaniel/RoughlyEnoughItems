@@ -82,6 +82,8 @@ public interface REIRuntime extends Reloadable<REIClientPlugin> {
     
     ResourceLocation getDefaultDisplayTexture();
     
+    ResourceLocation getDefaultDisplayTexture(boolean darkTheme);
+    
     SearchFieldLocation getContextualSearchFieldLocation();
     
     @ApiStatus.ScheduledForRemoval

@@ -39,7 +39,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,8 +48,6 @@ import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class LabelWidget extends Label {
     private boolean hovered = false;
@@ -60,7 +57,7 @@ public final class LabelWidget extends Label {
     private boolean hasShadow = true;
     private boolean focusable = true;
     private ValueProvider<Color> color = ValueAnimator.ofColor()
-            .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : -1), ValueAnimator.typicalTransitionTime());
+            .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : -1), 50);
     private ValueProvider<Color> hoveredColor = ValueAnimator.ofColor()
             .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? -1 : 0xFF66FFCC), 50);
     private final ValueProvider<Color> finalColor = ValueAnimator.ofColor()
@@ -170,12 +167,21 @@ public final class LabelWidget extends Label {
     }
     
     @Override
+    public Label color(int lightModeColor, int darkModeColor) {
+        this.color = ValueAnimator.ofColor()
+                .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? darkModeColor : lightModeColor), ValueAnimator.typicalTransitionTime());
+        this.color.completeImmediately();
+        this.finalColor.completeImmediately();
+        return this;
+    }
+    
+    @Override
     public final int getHoveredColor() {
         return hoveredColor.value().getColor();
     }
     
     @Override
-    public final void setHoveredColor(int hoveredColor) {
+    public final void setHoveredColor(int hoveredColor) {                                                                                                                                   
         this.hoveredColor = ValueProvider.constant(Color.ofTransparent(hoveredColor));
         this.finalColor.completeImmediately();
     }

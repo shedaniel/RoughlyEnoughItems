@@ -24,30 +24,46 @@
 package me.shedaniel.rei.impl.client.gui.modules.entries;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.config.ConfigObject;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.config.ConfigManager;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
-import me.shedaniel.rei.impl.common.util.Weather;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
+import java.util.function.BooleanSupplier;
 
-public class WeatherMenuEntry extends AbstractMenuEntry {
-    public final String text;
-    public final Weather weather;
+public class ToggleMenuEntry extends AbstractMenuEntry {
+    public final Component text;
+    public final BooleanSupplier supplier;
+    public final BooleanUnaryOperator consumer;
     private int textWidth = -69;
     
-    public WeatherMenuEntry(Weather weather) {
-        this.text = I18n.get(weather.getTranslateKey());
-        this.weather = weather;
+    public static ToggleMenuEntry of(Component text, BooleanSupplier supplier, BooleanConsumer consumer) {
+        return new ToggleMenuEntry(text, supplier, b -> {
+            consumer.accept(b);
+            return true;
+        });
+    }
+    
+    public static ToggleMenuEntry ofDeciding(Component text, BooleanSupplier supplier, BooleanUnaryOperator consumer) {
+        return new ToggleMenuEntry(text, supplier, consumer);
+    }
+    
+    protected ToggleMenuEntry(Component text, BooleanSupplier supplier, BooleanUnaryOperator consumer) {
+        this.text = text;
+        this.supplier = supplier;
+        this.consumer = consumer;
+    }
+    
+    @FunctionalInterface
+    public interface BooleanUnaryOperator {
+        boolean apply(boolean b);
     }
     
     private int getTextWidth() {
@@ -59,7 +75,7 @@ public class WeatherMenuEntry extends AbstractMenuEntry {
     
     @Override
     public int getEntryWidth() {
-        return getTextWidth() + 4;
+        return getTextWidth() + 4 + 6;
     }
     
     @Override
@@ -77,17 +93,19 @@ public class WeatherMenuEntry extends AbstractMenuEntry {
         if (isSelected()) {
             fill(matrices, getX(), getY(), getX() + getWidth(), getY() + getEntryHeight(), -12237499);
         }
-        if (isSelected() && containsMouse()) {
-            REIRuntime.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.weather_button.tooltip.entry", text)));
-        }
         font.draw(matrices, text, getX() + 2, getY() + 2, isSelected() ? 16777215 : 8947848);
+        if (supplier.getAsBoolean()) {
+            font.draw(matrices, "✔", getX() + getWidth() - 2 - font.width("✔"), getY() + 2, isSelected() ? 16777215 : 8947848);
+        }
     }
     
     @Override
     protected boolean onClick(double mouseX, double mouseY, int button) {
-        Minecraft.getInstance().player.chat(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
+        if (consumer.apply(!supplier.getAsBoolean())) {
+            REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
+        }
+        ConfigManager.getInstance().saveConfig();
         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-        REIRuntime.getInstance().getOverlay().get().closeOverlayMenu();
         return true;
     }
 }

@@ -27,6 +27,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.gui.animator.NumberAnimator;
+import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
 import me.shedaniel.rei.api.client.gui.widgets.Arrow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -39,8 +41,11 @@ import java.util.Objects;
 public final class ArrowWidget extends Arrow {
     private Rectangle bounds;
     private double animationDuration = -1;
+    private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
+            .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
+            .asFloat();
     
-    public ArrowWidget(me.shedaniel.math.Rectangle bounds) {
+    public ArrowWidget(Rectangle bounds) {
         this.bounds = new Rectangle(Objects.requireNonNull(bounds));
     }
     
@@ -63,12 +68,25 @@ public final class ArrowWidget extends Arrow {
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        Minecraft.getInstance().getTextureManager().bind(REIRuntime.getInstance().getDefaultDisplayTexture());
-        blit(matrices, getX(), getY(), 106, 91, 24, 17);
+        this.darkBackgroundAlpha.update(delta);
+        renderBackground(matrices, false, 1.0F);
+        renderBackground(matrices, true, this.darkBackgroundAlpha.value());
+    }
+    
+    public void renderBackground(PoseStack matrices, boolean dark, float alpha) {
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+        Minecraft.getInstance().getTextureManager().bind(REIRuntime.getInstance().getDefaultDisplayTexture(dark));
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+        RenderSystem.blendFunc(770, 771);
         if (getAnimationDuration() > 0) {
             int width = Mth.ceil((System.currentTimeMillis() / (animationDuration / 24) % 24d));
+            blit(matrices, getX() + width, getY(), 106 + width, 91, 24 - width, 17);
             blit(matrices, getX(), getY(), 82, 91, width, 17);
+        } else {
+            blit(matrices, getX(), getY(), 106, 91, 24, 17);
         }
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
     
     @Override

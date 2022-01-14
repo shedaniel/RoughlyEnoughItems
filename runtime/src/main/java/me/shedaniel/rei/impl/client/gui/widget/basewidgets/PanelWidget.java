@@ -30,6 +30,8 @@ import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.animator.NumberAnimator;
+import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.config.RecipeBorderType;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
@@ -44,15 +46,19 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 public final class PanelWidget extends Panel {
-    private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    private static final ResourceLocation CHEST_GUI_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
+    public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    public static final ResourceLocation CHEST_GUI_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     
     private static final PanelWidget TEMP = new PanelWidget(new Rectangle());
     private Rectangle bounds;
     private int color = -1;
     private int xTextureOffset = 0;
     private int yTextureOffset = RecipeBorderType.DEFAULT.getYOffset();
+    private ResourceLocation texture = null;
     private Predicate<Panel> rendering = Predicates.alwaysTrue();
+    private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
+            .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
+            .asFloat();
     
     public static boolean isRendering(Panel panel) {
         return ConfigObject.getInstance().getRecipeScreenType() != DisplayScreenType.COMPOSITE;
@@ -62,10 +68,10 @@ public final class PanelWidget extends Panel {
         this.bounds = Objects.requireNonNull(bounds);
     }
     
-    public static void render(PoseStack matrices, Rectangle bounds, int color) {
+    public static void render(PoseStack matrices, Rectangle bounds, int color, float delta) {
         TEMP.bounds.setBounds(Objects.requireNonNull(bounds));
         TEMP.color = color;
-        TEMP.render(matrices, 0, 0, 0);
+        TEMP.render(matrices, 0, 0, delta);
     }
     
     @Override
@@ -115,15 +121,24 @@ public final class PanelWidget extends Panel {
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        this.darkBackgroundAlpha.update(delta);
         if (!getRendering().test(this))
             return;
+        int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
         float alpha = ((color >> 24) & 0xFF) / 255f;
         float red = ((color >> 16) & 0xFF) / 255f;
         float green = ((color >> 8) & 0xFF) / 255f;
         float blue = (color & 0xFF) / 255f;
+        renderBackground(matrices, x, y, width, height, false, alpha, red, green, blue);
+        renderBackground(matrices, x, y, width, height, true, this.darkBackgroundAlpha.value() * alpha, red, green, blue);
+    }
+    
+    public void renderBackground(PoseStack matrices, int x, int y, int width, int height, boolean dark, float alpha, float red, float green, float blue) {
         RenderSystem.color4f(red, green, blue, alpha);
-        Minecraft.getInstance().getTextureManager().bind(REIRuntime.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
-        int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
+        Minecraft.getInstance().getTextureManager().bind(dark ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+        RenderSystem.blendFunc(770, 771);
         int xTextureOffset = getXTextureOffset();
         int yTextureOffset = getYTextureOffset();
         
@@ -144,6 +159,7 @@ public final class PanelWidget extends Panel {
         
         // Center
         GuiComponent.innerBlit(matrix, x + 8, x + width - 8, y + 8, y + height - 8, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
     
     @Override

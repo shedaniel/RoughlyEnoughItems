@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
+import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
@@ -62,9 +63,15 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
+import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
 import me.shedaniel.rei.impl.client.gui.dragging.CurrentDraggingStack;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
+import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
+import me.shedaniel.rei.impl.client.gui.modules.entries.SeparatorMenuEntry;
+import me.shedaniel.rei.impl.client.gui.modules.entries.SubMenuEntry;
+import me.shedaniel.rei.impl.client.gui.modules.entries.ToggleMenuEntry;
 import me.shedaniel.rei.impl.client.gui.widget.*;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import me.shedaniel.rei.impl.common.util.Weather;
@@ -153,7 +160,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             this.uuid = uuid;
             this.menu = menu;
             this.wrappedMenu = wrappedMenu;
-            this.inBounds = or.or(point -> menu.getBounds().contains(point)).and(and);
+            this.inBounds = or.or(menu::containsMouse).and(and);
         }
     }
     
@@ -237,7 +244,6 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         this.shouldReloadSearch = false;
         //Update Variables
         this.children().clear();
-        this.closeOverlayMenu();
         this.window = Minecraft.getInstance().getWindow();
         this.screenBounds = ScreenRegistry.getInstance().getScreenBounds(Minecraft.getInstance().screen);
         this.bounds = calculateOverlayBounds();
@@ -277,6 +283,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         }
         
         final Rectangle configButtonArea = getConfigButtonArea();
+        UUID configButtonUuid = UUID.fromString("4357bc36-0a4e-47d2-8e07-ddc220df4a0f");
         widgets.add(configButton = InternalWidgets.wrapLateRenderable(
                 Widgets.withTranslate(
                         InternalWidgets.concatWidgets(
@@ -293,6 +300,19 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                                                 button.setTint(ClientHelperImpl.getInstance().hasPermissionToUsePackets() ? 721354752 : 1476440063);
                                             } else {
                                                 button.removeTint();
+                                            }
+                                            
+                                            boolean isOpened = isMenuOpened(configButtonUuid);
+                                            if (isOpened || !isAnyMenuOpened()) {
+                                                boolean inBounds = (isNotInExclusionZones(PointHelper.getMouseFloatingX(), PointHelper.getMouseFloatingY()) && button.containsMouse(PointHelper.ofMouse())) || isMenuInBounds(configButtonUuid);
+                                                if (isOpened != inBounds) {
+                                                    if (inBounds) {
+                                                        Menu menu = new Menu(button.getBounds(), provideConfigButtonMenu(), false);
+                                                        openMenu(configButtonUuid, menu, button::containsMouse, point -> true);
+                                                    } else {
+                                                        closeOverlayMenu();
+                                                    }
+                                                }
                                             }
                                         })
                                         .focusable(false)
@@ -327,7 +347,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             widgets.add(InternalWidgets.wrapLateRenderable(Widgets.withTranslate(Widgets.createButton(subsetsButtonBounds, ClientHelperImpl.getInstance().isAprilFools.get() ? new TranslatableComponent("text.rei.tiny_potato") : new TranslatableComponent("text.rei.subsets"))
                     .onClick(button -> {
                         proceedOpenMenuOrElse(Menu.SUBSETS, () -> {
-                            openMenu(Menu.SUBSETS, Menu.createSubsetsMenuFromRegistry(new Point(subsetsButtonBounds.x, subsetsButtonBounds.getMaxY())), point -> true, point -> true);
+                            openMenu(Menu.SUBSETS, Menu.createSubsetsMenuFromRegistry(subsetsButtonBounds), point -> true, point -> true);
                         }, menu -> {
                             closeOverlayMenu();
                         });
@@ -374,6 +394,58 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         }
         
         widgets.add(draggingStack);
+    }
+    
+    private Collection<MenuEntry> provideConfigButtonMenu() {
+        ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
+        return Arrays.asList(
+                ToggleMenuEntry.of(new TranslatableComponent("text.rei.cheating"),
+                        config::isCheating,
+                        config::setCheating
+                ),
+                new SeparatorMenuEntry(),
+                ToggleMenuEntry.ofDeciding(new TranslatableComponent("text.rei.config.menu.dark_theme"),
+                        config::isUsingDarkTheme,
+                        dark -> {
+                            config.setUsingDarkTheme(dark);
+                            return false;
+                        }
+                ),
+                ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.craftable_filter"),
+                        config::isCraftableFilterEnabled,
+                        config::setCraftableFilterEnabled
+                ),
+                new SubMenuEntry(new TranslatableComponent("text.rei.config.menu.display"), Arrays.asList(
+                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.remove_recipe_book"),
+                                config::doesDisableRecipeBook,
+                                disableRecipeBook -> {
+                                    config.setDisableRecipeBook(disableRecipeBook);
+                                    Screen screen = Minecraft.getInstance().screen;
+                                    
+                                    if (screen != null) {
+                                        screen.init(minecraft, screen.width, screen.height);
+                                    }
+                                }
+                        ),
+                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.left_side_panel"),
+                                config::isLeftHandSidePanel,
+                                bool -> config.setDisplayPanelLocation(bool ? DisplayPanelLocation.LEFT : DisplayPanelLocation.RIGHT)
+                        ),
+                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.scrolling_side_panel"),
+                                config::isEntryListWidgetScrolled,
+                                config::setEntryListWidgetScrolled
+                        ),
+                        new SeparatorMenuEntry(),
+                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.side_search_field"),
+                                () -> config.getSearchFieldLocation() != SearchFieldLocation.CENTER,
+                                bool -> config.setSearchFieldLocation(bool ? SearchFieldLocation.BOTTOM_SIDE : SearchFieldLocation.CENTER)
+                        ),
+                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.syntax_highlighting"),
+                                () -> config.getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL || config.getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL_UNDERSCORED,
+                                bool -> config.setSyntaxHighlightingMode(bool ? SyntaxHighlightingMode.COLORFUL : SyntaxHighlightingMode.PLAIN_UNDERSCORED)
+                        )
+                ))
+        );
     }
     
     private Rectangle getSubsetsButtonBounds() {
