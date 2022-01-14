@@ -27,7 +27,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
+import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
 import me.shedaniel.rei.impl.common.util.Weather;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -40,11 +40,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-public class WeatherMenuEntry extends MenuEntry {
+public class WeatherMenuEntry extends AbstractMenuEntry {
     public final String text;
     public final Weather weather;
-    private int x, y, width;
-    private boolean selected, containsMouse, rendering;
     private int textWidth = -69;
     
     public WeatherMenuEntry(Weather weather) {
@@ -75,34 +73,21 @@ public class WeatherMenuEntry extends MenuEntry {
     }
     
     @Override
-    public void updateInformation(int xPos, int yPos, boolean selected, boolean containsMouse, boolean rendering, int width) {
-        this.x = xPos;
-        this.y = yPos;
-        this.selected = selected;
-        this.containsMouse = containsMouse;
-        this.rendering = rendering;
-        this.width = width;
-    }
-    
-    @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (selected) {
-            fill(matrices, x, y, x + width, y + 12, -12237499);
+        if (isSelected()) {
+            fill(matrices, getX(), getY(), getX() + getWidth(), getY() + getEntryHeight(), -12237499);
         }
-        if (selected && containsMouse) {
+        if (isSelected() && containsMouse()) {
             REIRuntime.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.weather_button.tooltip.entry", text)));
         }
-        font.draw(matrices, text, x + 2, y + 2, selected ? 16777215 : 8947848);
+        font.draw(matrices, text, getX() + 2, getY() + 2, isSelected() ? 16777215 : 8947848);
     }
     
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12) {
-            Minecraft.getInstance().player.chat(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
-            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-            REIRuntime.getInstance().getOverlay().get().closeOverlayMenu();
-            return true;
-        }
-        return super.mouseClicked(mouseX, mouseY, button);
+    protected boolean onClick(double mouseX, double mouseY, int button) {
+        Minecraft.getInstance().player.chat(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)));
+        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+        REIRuntime.getInstance().getOverlay().get().closeOverlayMenu();
+        return true;
     }
 }

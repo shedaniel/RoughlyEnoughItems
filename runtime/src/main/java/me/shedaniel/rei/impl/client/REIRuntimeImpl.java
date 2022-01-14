@@ -181,7 +181,12 @@ public class REIRuntimeImpl implements REIRuntime {
     
     @Override
     public ResourceLocation getDefaultDisplayTexture() {
-        return isDarkThemeEnabled() ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
+        return getDefaultDisplayTexture(isDarkThemeEnabled());
+    }
+    
+    @Override
+    public ResourceLocation getDefaultDisplayTexture(boolean darkTheme) {
+        return darkTheme ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
     }
     
     @Override
