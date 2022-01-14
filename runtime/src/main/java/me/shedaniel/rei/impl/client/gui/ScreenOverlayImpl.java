@@ -444,7 +444,14 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                                 () -> config.getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL || config.getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL_UNDERSCORED,
                                 bool -> config.setSyntaxHighlightingMode(bool ? SyntaxHighlightingMode.COLORFUL : SyntaxHighlightingMode.PLAIN_UNDERSCORED)
                         )
-                ))
+                )),
+                new SeparatorMenuEntry(),
+                ToggleMenuEntry.ofDeciding(new TranslatableComponent("text.rei.config.menu.config"),
+                        () -> false,
+                        $ -> {
+                            ConfigManager.getInstance().openConfigScreen(REIRuntime.getInstance().getPreviousScreen());
+                            return false;
+                        })
         );
     }
     

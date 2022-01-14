@@ -21,6 +21,7 @@
   "text.rei.config.menu.display.scrolling_side_panel": "Scrolling Side Panel",
   "text.rei.config.menu.display.side_search_field": "Side Search Field",
   "text.rei.config.menu.display.syntax_highlighting": "Syntax Highlighting",
+  "text.rei.config.menu.config": "More Options...",
   "category.rei.crafting": "Crafting",
   "category.rei.smelting": "Smelting",
   "category.rei.smelting.fuel": "Fuel",

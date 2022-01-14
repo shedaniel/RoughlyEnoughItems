@@ -86,7 +86,7 @@ public class SubMenuEntry extends AbstractMenuEntry {
     
     @Override
     public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-        renderBackground(poses, getX(), getY(), getX() + getWidth(), getY() + getEntryHeight());
+        renderBackground(poses, getX(), getY(), getWidth(), getEntryHeight());
         if (isSelected()) {
             if (!entries.isEmpty()) {
                 Menu menu = getChildMenu();
