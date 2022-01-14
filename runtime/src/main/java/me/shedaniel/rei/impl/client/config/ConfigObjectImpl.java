@@ -206,6 +206,15 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public boolean isLeftSideMobEffects() {
+        return functionality.leftSideMobEffects;
+    }
+    
+    public void setLeftSideMobEffects(boolean leftSideMobEffects) {
+        functionality.leftSideMobEffects = leftSideMobEffects;
+    }
+    
+    @Override
     public boolean areClickableRecipeArrowsEnabled() {
         return advanced.miscellaneous.clickableRecipeArrows;
     }
@@ -532,6 +541,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public static class Functionality {
         @Comment("Declares whether REI should remove the recipe book.") private boolean disableRecipeBook = false;
+        @Comment("Declares whether mob effects should be on the left side instead of the right side.") private boolean leftSideMobEffects = false;
         @Comment("Declares whether subsets is enabled.") private boolean isSubsetsEnabled = false;
         private boolean allowInventoryHighlighting = true;
     }
