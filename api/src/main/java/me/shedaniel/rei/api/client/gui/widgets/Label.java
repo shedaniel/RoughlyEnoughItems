@@ -330,7 +330,7 @@ public abstract class Label extends WidgetWithBounds {
     
     public abstract void setColor(int color);
     
-    public final Label color(int lightModeColor, int darkModeColor) {
+    public Label color(int lightModeColor, int darkModeColor) {
         return color(REIRuntime.getInstance().isDarkThemeEnabled() ? darkModeColor : lightModeColor);
     }
     

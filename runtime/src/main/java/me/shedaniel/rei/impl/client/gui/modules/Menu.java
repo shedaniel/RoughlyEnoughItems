@@ -41,10 +41,13 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.gui.modules.entries.EntryStackSubsetsMenuEntry;
+import me.shedaniel.rei.impl.client.gui.modules.entries.SubMenuEntry;
 import me.shedaniel.rei.impl.client.gui.modules.entries.SubSubsetsMenuEntry;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -61,6 +64,8 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     public static final UUID GAME_TYPE = UUID.randomUUID();
     
     public final Point menuStartPoint;
+    public final boolean facingRight;
+    public final boolean facingDownwards;
     private final List<MenuEntry> entries = Lists.newArrayList();
     public final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
@@ -83,12 +88,26 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
         }
     };
     
-    public Menu(Point menuStartPoint, Collection<MenuEntry> entries) {
-        this.menuStartPoint = menuStartPoint;
-        buildEntries(entries);
+    public Menu(Rectangle menuStart, Collection<MenuEntry> entries, boolean sort) {
+        buildEntries(entries, sort);
+        int fullWidth = Minecraft.getInstance().screen.width;
+        int fullHeight = Minecraft.getInstance().screen.height;
+        boolean facingRight = true;
+        this.facingDownwards = fullHeight - menuStart.getMaxY() > menuStart.y;
+        int y = facingDownwards ? menuStart.getMaxY() : menuStart.y - (scrolling.getMaxScrollHeight() + 2);
+        boolean hasScrollBar = scrolling.getMaxScrollHeight() > getInnerHeight(y);
+        int menuWidth = getMaxEntryWidth() + 2 + (hasScrollBar ? 6 : 0);
+        if (facingRight && fullWidth - menuStart.getMaxX() < menuWidth + 10) {
+            facingRight = false;
+        } else if (!facingRight && menuStart.x < menuWidth + 10) {
+            facingRight = true;
+        }
+        this.facingRight = facingRight;
+        int x = facingRight ? menuStart.x : menuStart.getMaxX() - (getMaxEntryWidth() + 2 + (hasScrollBar ? 6 : 0));
+        this.menuStartPoint = new Point(x, y);
     }
     
-    public static Menu createSubsetsMenuFromRegistry(Point menuStartPoint) {
+    public static Menu createSubsetsMenuFromRegistry(Rectangle menuStart) {
         EntryRegistry instance = EntryRegistry.getInstance();
         List<? extends EntryStack<?>> stacks = instance.getEntryStacks().collect(Collectors.toList());
         Map<String, Object> entries = Maps.newHashMap();
@@ -132,7 +151,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
                 }
             }
         }
-        return new Menu(menuStartPoint, buildEntries(entries));
+        return new Menu(menuStart, buildEntries(entries), true);
     }
     
     private static Map<String, Object> getOrCreateSubEntryInMap(Map<String, Object> parent, String pathSegment) {
@@ -166,12 +185,12 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
             } else {
                 Map<String, Object> entryMap = (Map<String, Object>) entry.getValue();
                 if (entry.getKey().startsWith("_item_group_")) {
-                    entries.add(new SubSubsetsMenuEntry(I18n.get(entry.getKey().replace("_item_group_", "itemGroup.")), buildEntries(entryMap)));
+                    entries.add(new SubSubsetsMenuEntry(new TranslatableComponent(entry.getKey().replace("_item_group_", "itemGroup.")), buildEntries(entryMap)));
                 } else {
                     String translationKey = "subsets.rei." + entry.getKey().replace(':', '.');
                     if (!I18n.exists(translationKey))
                         RoughlyEnoughItemsCore.LOGGER.warn("Subsets menu " + translationKey + " does not have a translation");
-                    entries.add(new SubSubsetsMenuEntry(I18n.get(translationKey), buildEntries(entryMap)));
+                    entries.add(new SubSubsetsMenuEntry(new TranslatableComponent(translationKey), buildEntries(entryMap)));
                 }
             }
         }
@@ -179,11 +198,13 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     }
     
     @SuppressWarnings("deprecation")
-    private void buildEntries(Collection<MenuEntry> entries) {
+    private void buildEntries(Collection<MenuEntry> entries, boolean sort) {
         this.entries.clear();
         this.entries.addAll(entries);
-        this.entries.sort(Comparator.comparing(entry -> entry instanceof SubSubsetsMenuEntry ? 0 : 1)
-                .thenComparing(entry -> entry instanceof SubSubsetsMenuEntry menuEntry ? menuEntry.text : ""));
+        if (sort) {
+            this.entries.sort(Comparator.comparing(entry -> entry instanceof SubMenuEntry ? 0 : 1)
+                    .thenComparing(entry -> entry instanceof SubMenuEntry menuEntry ? menuEntry.text.getString() : ""));
+        }
         for (MenuEntry entry : this.entries) {
             entry.parent = this;
         }
@@ -191,19 +212,19 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     
     @Override
     public Rectangle getBounds() {
-        return new Rectangle(menuStartPoint.x, menuStartPoint.y, getMaxEntryWidth() + 2 + (hasScrollBar() ? 6 : 0), getInnerHeight() + 2);
+        return new Rectangle(menuStartPoint.x, menuStartPoint.y, getMaxEntryWidth() + 2 + (hasScrollBar() ? 6 : 0), getInnerHeight(menuStartPoint.y) + 2);
     }
     
     public Rectangle getInnerBounds() {
-        return new Rectangle(menuStartPoint.x + 1, menuStartPoint.y + 1, getMaxEntryWidth() + (hasScrollBar() ? 6 : 0), getInnerHeight());
+        return new Rectangle(menuStartPoint.x + 1, menuStartPoint.y + 1, getMaxEntryWidth() + (hasScrollBar() ? 6 : 0), getInnerHeight(menuStartPoint.y));
     }
     
     public boolean hasScrollBar() {
-        return scrolling.getMaxScrollHeight() > getInnerHeight();
+        return scrolling.getMaxScrollHeight() > getInnerHeight(menuStartPoint.y);
     }
     
-    public int getInnerHeight() {
-        return Math.min(scrolling.getMaxScrollHeight(), minecraft.screen.height - 20 - menuStartPoint.y);
+    public int getInnerHeight(int y) {
+        return Math.min(scrolling.getMaxScrollHeight(), minecraft.screen.height - 20 - y);
     }
     
     public int getMaxEntryWidth() {
@@ -268,12 +289,23 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
             return true;
         }
         for (MenuEntry child : children()) {
-            if (child instanceof SubSubsetsMenuEntry) {
+            if (child instanceof SubMenuEntry) {
                 if (child.mouseScrolled(mouseX, mouseY, amount))
                     return true;
             }
         }
         return super.mouseScrolled(mouseX, mouseY, amount);
+    }
+    
+    @Override
+    public boolean containsMouse(double mouseX, double mouseY) {
+        if (super.containsMouse(mouseX, mouseY)) return true;
+        for (MenuEntry child : children()) {
+            if (child.containsMouse(mouseX, mouseY)) {
+                return true;
+            }
+        }
+        return false;
     }
     
     @Override

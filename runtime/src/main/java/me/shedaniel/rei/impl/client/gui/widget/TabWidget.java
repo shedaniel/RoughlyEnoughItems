@@ -30,6 +30,8 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.gui.animator.NumberAnimator;
+import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
 import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
@@ -66,6 +68,9 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     public int u, v;
     @Nullable
     private Predicate<TabWidget> onClick;
+    private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
+            .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
+            .asFloat();
     
     private TabWidget(int id, Rectangle bounds, int u, int v, @Nullable Predicate<TabWidget> onClick) {
         this.id = id;
@@ -112,8 +117,17 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (renderer != null) {
-            RenderSystem.setShaderTexture(0, REIRuntime.getInstance().isDarkThemeEnabled() ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
+            darkBackgroundAlpha.update(delta);
+            RenderSystem.enableBlend();
+            RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+            RenderSystem.blendFunc(770, 771);
+            RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             this.blit(matrices, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
+            RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE_DARK);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value());
+            this.blit(matrices, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             renderer.setZ(100);
             renderer.render(matrices, new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 5, 16, 16), mouseX, mouseY, delta);
             if (containsMouse(mouseX, mouseY)) {

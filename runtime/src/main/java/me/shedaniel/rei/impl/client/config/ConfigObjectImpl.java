@@ -96,6 +96,10 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return appearance.theme == AppearanceTheme.DARK;
     }
     
+    public void setUsingDarkTheme(boolean dark) {
+        appearance.theme = dark ? AppearanceTheme.DARK : AppearanceTheme.LIGHT;
+    }
+    
     @Override
     public boolean isGrabbingItems() {
         return basics.cheatingStyle == ItemCheatingStyle.GRAB;
@@ -114,6 +118,10 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public boolean isEntryListWidgetScrolled() {
         return appearance.scrollingEntryListWidget;
+    }
+    
+    public void setEntryListWidgetScrolled(boolean scrollingEntryListWidget) {
+        appearance.scrollingEntryListWidget = scrollingEntryListWidget;
     }
     
     @Override
@@ -136,14 +144,26 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return appearance.layout.searchFieldLocation;
     }
     
+    public void setSearchFieldLocation(SearchFieldLocation location) {
+        appearance.layout.searchFieldLocation = location;
+    }
+    
     @Override
     public DisplayPanelLocation getDisplayPanelLocation() {
         return advanced.accessibility.displayPanelLocation;
     }
     
+    public void setDisplayPanelLocation(DisplayPanelLocation location) {
+        advanced.accessibility.displayPanelLocation = location;
+    }
+    
     @Override
     public boolean isCraftableFilterEnabled() {
         return appearance.layout.enableCraftableOnlyButton;
+    }
+    
+    public void setCraftableFilterEnabled(boolean enabled) {
+        appearance.layout.enableCraftableOnlyButton = enabled;
     }
     
     @Override
@@ -174,6 +194,10 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public boolean doesDisableRecipeBook() {
         return functionality.disableRecipeBook;
+    }
+    
+    public void setDisableRecipeBook(boolean disableRecipeBook) {
+        functionality.disableRecipeBook = disableRecipeBook;
     }
     
     @Override
@@ -388,6 +412,10 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public SyntaxHighlightingMode getSyntaxHighlightingMode() {
         return appearance.syntaxHighlightingMode;
+    }
+    
+    public void setSyntaxHighlightingMode(SyntaxHighlightingMode mode) {
+        appearance.syntaxHighlightingMode = mode;
     }
     
     @Override

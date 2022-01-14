@@ -28,7 +28,6 @@ import com.mojang.math.Vector4f;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
@@ -82,11 +81,8 @@ public class RegionEntryListEntry<T extends RegionEntry<T>> extends EntryListEnt
                 boolean inBounds = containsMouse(mouseX, mouseY) || overlay.isMenuInBounds(uuid);
                 if (isOpened != inBounds) {
                     if (inBounds) {
-                        Menu menu = new Menu(new Point(getBounds().x, getBounds().getMaxY()),
-                                CollectionUtils.map(menuEntries.get().get(), entry -> convertMenu(overlay, entry)));
-                        if (ConfigObject.getInstance().isLeftHandSidePanel()) {
-                            menu.menuStartPoint.x -= menu.getBounds().width - getBounds().width;
-                        }
+                        Menu menu = new Menu(getBounds(),
+                                CollectionUtils.map(menuEntries.get().get(), entry -> convertMenu(overlay, entry)), false);
                         overlay.openMenu(uuid, menu, this::containsMouse, point -> entry.region.has(entry));
                     } else {
                         overlay.closeOverlayMenu();
