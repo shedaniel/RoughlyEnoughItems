@@ -25,18 +25,28 @@ package me.shedaniel.rei.forge;
 
 import me.shedaniel.rei.RoughlyEnoughItemsInitializer;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.data.loading.DatagenModLoader;
-import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.DatagenModLoader;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-@Mod("roughlyenoughitems")
-@ApiStatus.Internal
-public class RoughlyEnoughItemsForge {
-    public RoughlyEnoughItemsForge() {
+@Mod("roughlyenoughitems_servercomponent")
+public class RoughlyEnoughItemsForgeServerComponent {
+    public RoughlyEnoughItemsForgeServerComponent() {
+        Logger logger = LogManager.getLogger(RoughlyEnoughItemsForgeServerComponent.class);
         if (!DatagenModLoader.isRunningDataGen()) {
-            RoughlyEnoughItemsInitializer.onInitialize();
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> RoughlyEnoughItemsInitializer::onInitializeClient);
+            if (FMLEnvironment.dist == Dist.CLIENT) {
+                logger.error("Roughly Enough Items Server Component is not compatible with the client!");
+                System.exit(1);
+            } else if (ModList.get().isLoaded("roughlyenoughitems")) {
+                logger.error("Roughly Enough Items is already loaded! The server component is only used alongside Just Enough Items, " +
+                             "to allow clients to use REI without switching to JEI completely on the server!");
+                System.exit(1);
+            } else {
+                RoughlyEnoughItemsInitializer.onInitialize();
+            }
         }
     }
 }

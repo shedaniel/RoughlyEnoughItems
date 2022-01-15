@@ -50,8 +50,8 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
         classToInterface("mezz/jei/input/IClickedIngredient", "me/shedaniel/rei/jeicompat/imitator/JEIInternalsClickedIngredient");
         classToInterface("mezz/jei/input/ClickedIngredient", "me/shedaniel/rei/jeicompat/imitator/JEIInternalsClickedIngredientImpl");
         classToInterface("mezz/jei/config/ServerInfo", "me/shedaniel/rei/jeicompat/imitator/JEIServerInfo");
-        classToInterface("mezz/jei/plugins/vanilla/cooking/AbstractCookingCategory", "me/shedaniel/rei/jeicompat/imitator/JEIAbstractCookingCategory");
-        classToInterface("mezz/jei/plugins/vanilla/cooking/FurnaceVariantCategory", "me/shedaniel/rei/jeicompat/imitator/JEIFurnaceVariantCategory");
+        redirect("mezz/jei/plugins/vanilla/cooking/AbstractCookingCategory", "me/shedaniel/rei/jeicompat/imitator/JEIAbstractCookingCategory");
+        redirect("mezz/jei/plugins/vanilla/cooking/FurnaceVariantCategory", "me/shedaniel/rei/jeicompat/imitator/JEIFurnaceVariantCategory");
     }
     
     private void redirect(String oldName, String newName) {
