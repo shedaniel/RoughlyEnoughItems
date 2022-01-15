@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[33,)"
+loaderVersion = "[38,)"
 issueTrackerURL = "https://github.com/shedaniel/RoughlyEnoughItems/issues"
 logoFile = "icon.png"
 authors = "shedaniel"
@@ -16,13 +16,13 @@ To allow players to view items and recipes.
 [[dependencies.roughlyenoughitems_servercomponent]]
 modId = "architectury"
 mandatory = true
-versionRange = "[1.10.139,)"
+versionRange = "[3.1.44,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.roughlyenoughitems_servercomponent]]
 modId = "cloth-config"
 mandatory = true
-versionRange = "[4.12,)"
+versionRange = "[6.0,)"
 ordering = "NONE"
 side = "BOTH"
