@@ -164,7 +164,7 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
         ItemStack stack = getDefinition().cheatsAs(this, getValue());
         
         if (stack == null) {
-            return null;
+            return EntryStacks.of(ItemStack.EMPTY);
         }
         
         return EntryStacks.of(stack);
