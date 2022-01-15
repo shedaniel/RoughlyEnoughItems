@@ -7,6 +7,9 @@
   "text.rei.cheating_limited_creative_enabled": "§aCheating Abilitato (Usando la Creativa)",
   "text.rei.no_permission_cheat": "I permessi dell'operatore sono necessari per cheatare gli oggetti",
   "text.rei.search.field.suggestion": "Cerca...",
+  "text.rei.feedback": "Ci sono feedback che vuoi dare allo sviluppatore REI? %s per inviare il tuo feedback!",
+  "text.rei.feedback.link": "Cliccami per visitare il Modulo di Google",
+  "text.rei.not.fully.initialized": "REI non è ancora completamente inizializzato!",
   "category.rei.crafting": "Fabbricazione",
   "category.rei.smelting": "Fusione",
   "category.rei.smelting.fuel": "Carburante",
@@ -229,5 +232,9 @@
   "language.roughlyenoughitems.upside_down_english": "Inglese Sotto Sopra",
   "language.roughlyenoughitems.bulgarian": "Bulgaro",
   "language.roughlyenoughitems.russian": "Russo",
-  "language.roughlyenoughitems.polish": "Polacco"
+  "language.roughlyenoughitems.polish": "Polacco",
+  "language.roughlyenoughitems.italian": "Italiano",
+  "language.roughlyenoughitems.czech": "Ceco",
+  "language.roughlyenoughitems.danish": "Danese",
+  "language.roughlyenoughitems.hebrew": "Ebraico"
 }

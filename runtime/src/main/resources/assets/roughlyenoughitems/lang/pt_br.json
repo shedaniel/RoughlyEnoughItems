@@ -112,6 +112,7 @@
   "text.rei.subsets": "Subconjuntos",
   "text.rei.tiny_potato": "Batatinhas",
   "text.rei.add_favorite_widget": "Adicionar...",
+  "text.rei.dispose_here": "Deixe aqui",
   "favorite.section.gamemode": "Modo de jogo",
   "favorite.section.weather": "Tempo",
   "tooltip.rei.fluid_amount": "§7%d unidade(s)",
@@ -264,6 +265,7 @@
   "language.roughlyenoughitems.japanese": "Japonês",
   "language.roughlyenoughitems.chinese_simplified": "Chinês simplificado",
   "language.roughlyenoughitems.chinese_traditional": "Chinês tradicional",
+  "language.roughlyenoughitems.chinese_traditional_hong_kong": "Chinês tradicional (Hong Kong)",
   "language.roughlyenoughitems.french": "Francês",
   "language.roughlyenoughitems.german": "Alemão",
   "language.roughlyenoughitems.estonian": "Estoniano",
@@ -273,5 +275,13 @@
   "language.roughlyenoughitems.upside_down_english": "Inglês de ponta cabeça",
   "language.roughlyenoughitems.bulgarian": "Búlgaro",
   "language.roughlyenoughitems.russian": "Russo",
-  "language.roughlyenoughitems.polish": "Polonês"
+  "language.roughlyenoughitems.polish": "Polonês",
+  "language.roughlyenoughitems.norwegian": "Norueguês",
+  "language.roughlyenoughitems.turkish": "Turco",
+  "language.roughlyenoughitems.ukrainian": "Ucraniano",
+  "language.roughlyenoughitems.spanish": "Espanhol",
+  "language.roughlyenoughitems.italian": "Italiano",
+  "language.roughlyenoughitems.czech": "Tcheco",
+  "language.roughlyenoughitems.danish": "Dinamarquês",
+  "language.roughlyenoughitems.hebrew": "Hebraico"
 }
