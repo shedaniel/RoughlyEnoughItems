@@ -280,7 +280,9 @@ public class RoughlyEnoughItemsCoreClient {
         });
         GuiEvent.INIT_POST.register((screen, widgets, children) -> {
             REIRuntime.getInstance().getOverlay(false, true);
-            REIRuntimeImpl.getInstance().setPreviousScreen(screen);
+            if (Minecraft.getInstance().screen == screen) {
+                REIRuntimeImpl.getInstance().setPreviousScreen(screen);
+            }
             if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen) {
                 widgets.removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
                 screen.children().removeIf(widget -> widget instanceof ImageButton && ((ImageButton) widget).resourceLocation.equals(recipeButtonTex));
