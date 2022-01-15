@@ -27,6 +27,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsInitializer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fmllegacy.DatagenModLoader;
 import org.jetbrains.annotations.ApiStatus;
 
 @Mod("roughlyenoughitems")

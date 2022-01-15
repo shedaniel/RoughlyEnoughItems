@@ -212,8 +212,8 @@ curseforge {
             releaseType = "release"
             changelogType = "html"
             changelog = rootProject.releaseChangelog
-            addGameVersion "1.16.4"
-            addGameVersion "1.16.5"
+            addGameVersion "1.17"
+            addGameVersion "1.17.1"
             addGameVersion "Java 8"
             addGameVersion "Forge"
             relations {
