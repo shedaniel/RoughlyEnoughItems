@@ -26,6 +26,7 @@ package me.shedaniel.rei.api.client.registry.screen;
 import me.shedaniel.math.Rectangle;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.screens.Screen;
 
 import java.util.List;
 
@@ -36,7 +37,9 @@ public interface ExclusionZones extends OverlayDecider {
      *
      * @param currentScreenClass the current screen class
      * @return the list of exclusion zones
+     * @deprecated use the screen instance instead
      */
+    @Deprecated
     default List<Rectangle> getExclusionZones(Class<?> currentScreenClass) {
         return getExclusionZones(currentScreenClass, false);
     }
@@ -46,8 +49,28 @@ public interface ExclusionZones extends OverlayDecider {
      *
      * @param currentScreenClass the current screen class
      * @return the list of exclusion zones
+     * @deprecated use the screen instance instead
      */
+    @Deprecated
     List<Rectangle> getExclusionZones(Class<?> currentScreenClass, boolean sort);
+    
+    /**
+     * Returns the exclusion zones by the screen
+     *
+     * @param screen the screen
+     * @return the list of exclusion zones
+     */
+    default List<Rectangle> getExclusionZones(Screen screen) {
+        return getExclusionZones(screen, false);
+    }
+    
+    /**
+     * Returns the exclusion zones by the screen
+     *
+     * @param screen the screen
+     * @return the list of exclusion zones
+     */
+    List<Rectangle> getExclusionZones(Screen screen, boolean sort);
     
     int getZonesCount();
     
