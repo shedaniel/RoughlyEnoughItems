@@ -16,7 +16,7 @@ configurations {
 }
 
 processResources {
-    filesMatching("META-INF/mods.toml") {
+    filesMatching(["META-INF/mods.toml", "META-INF/mods-server-only.toml"]) {
         expand "version": project.version
     }
     inputs.property "version", project.version
@@ -34,6 +34,13 @@ repositories {
     }
 }
 
+sourceSets {
+    serverComponent {
+        compileClasspath += main.compileClasspath
+        runtimeClasspath += main.runtimeClasspath
+    }
+}
+
 loom {
     launches {
         all {
@@ -43,7 +50,7 @@ loom {
 
     forge {
         localMods {
-        it.add(project(":jei-internals-workaround").sourceSets.main)
+            it.add(project(":jei-internals-workaround").sourceSets.main)
         }
     }
 }
@@ -134,6 +141,18 @@ sourcesJar {
     }
 }
 
+task serverOnlyJar(type: Jar, dependsOn: [remapJar]) {
+    classifier "server-only"
+    from(zipTree(remapJar.archiveFile.get().asFile)) {
+        exclude "META-INF/mods.toml", "mezz/**", "me/shedaniel/rei/forge/RoughlyEnoughItemsForge.class", "me/shedaniel/rei/forge/JEIStub.class"
+    }
+    from(sourceSets.serverComponent.output)
+}
+
+tasks.build {
+    dependsOn tasks.serverOnlyJar
+}
+
 components.java {
     withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
         skip()
@@ -179,6 +198,23 @@ curseforge {
                 requiredDependency "architectury-forge"
                 requiredDependency "cloth-config-forge"
                 requiredDependency "roughly-enough-items-hacks"
+            }
+            mainArtifact(tasks.getByName("remapJar")) {
+                displayName = "[Forge $project.supported_version] v$project.version"
+            }
+        } 
+        project {
+            id = "567899"
+            releaseType = "release"
+            changelogType = "html"
+            changelog = rootProject.releaseChangelog
+            addGameVersion "1.16.4"
+            addGameVersion "1.16.5"
+            addGameVersion "Java 8"
+            addGameVersion "Forge"
+            relations {
+                requiredDependency "architectury-forge"
+                requiredDependency "cloth-config-forge"
             }
             mainArtifact(tasks.getByName("remapJar")) {
                 displayName = "[Forge $project.supported_version] v$project.version"
