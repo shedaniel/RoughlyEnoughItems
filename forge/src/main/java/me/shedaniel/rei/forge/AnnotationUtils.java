@@ -25,7 +25,9 @@ package me.shedaniel.rei.forge;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.RoughlyEnoughItemsInitializer;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -35,6 +37,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.objectweb.asm.Type;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -56,7 +59,16 @@ public class AnnotationUtils {
                     .collect(Collectors.toList());
             out:
             for (ModFileScanData.AnnotationData annotation : data.getAnnotations()) {
-                if (annotationType.equals(annotation.annotationType())) {
+                Object value = annotation.annotationData().get("value");
+                boolean enabled;
+                
+                if (value instanceof Dist[]) {
+                    enabled = Arrays.asList((Dist[]) value).contains(FMLEnvironment.dist);
+                } else {
+                    enabled = true;
+                }
+                
+                if (enabled && annotationType.equals(annotation.annotationType())) {
                     try {
                         Class<T> clazz = (Class<T>) Class.forName(annotation.memberName());
                         if (predicate.test(clazz)) {
@@ -72,8 +84,11 @@ public class AnnotationUtils {
                     } catch (Throwable throwable) {
                         Throwable t = throwable;
                         while (t != null) {
-                            if (t.getMessage() != null && t.getMessage().contains("invalid dist DEDICATED_SERVER") && !RoughlyEnoughItemsInitializer.isClient())
+                            if (t.getMessage() != null && t.getMessage().contains("invalid dist DEDICATED_SERVER") && !RoughlyEnoughItemsInitializer.isClient()) {
+                                LOGGER.warn("Plugin " + annotation.memberName() + " is attempting to load on the server, but is not compatible with the server. " +
+                                            "The mod should declare the environments it is compatible with in the @" + annotationType.getClassName() + " annotation.");
                                 continue out;
+                            }
                             t = t.getCause();
                         }
                         LOGGER.error("Failed to load plugin: " + annotation.memberName(), throwable);
