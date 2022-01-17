@@ -16,7 +16,7 @@ configurations {
 }
 
 processResources {
-    filesMatching(["META-INF/mods.toml", "META-INF/mods-server-only.toml"]) {
+    filesMatching("META-INF/mods.toml") {
         expand "version": project.version
     }
     inputs.property "version", project.version
@@ -39,6 +39,13 @@ sourceSets {
         compileClasspath += main.compileClasspath
         runtimeClasspath += main.runtimeClasspath
     }
+}
+
+processServerComponentResources {
+    filesMatching("META-INF/mods.toml") {
+        expand "version": project.version
+    }
+    inputs.property "version", project.version
 }
 
 loom {
@@ -188,7 +195,7 @@ curseforge {
         apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
         project {
             id = "310111"
-            releaseType = "release"
+            releaseType = "beta"
             changelogType = "html"
             changelog = rootProject.releaseChangelog
             addGameVersion "1.16.4"
