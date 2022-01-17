@@ -2,10 +2,6 @@ name: CF CI
 
 on:
   push:
-    paths:
-      - '**.gradle'
-      - '**.properties'
-      - '**/src/**'
     branches:
       - 3.x
       - 4.x-unstable
