@@ -16,7 +16,7 @@ configurations {
 }
 
 processResources {
-    filesMatching(["META-INF/mods.toml", "META-INF/mods-server-only.toml"]) {
+    filesMatching("META-INF/mods.toml") {
         expand "version": project.version
     }
     inputs.property "version", project.version
@@ -39,6 +39,13 @@ sourceSets {
         compileClasspath += main.compileClasspath
         runtimeClasspath += main.runtimeClasspath
     }
+}
+
+processServerComponentResources {
+    filesMatching("META-INF/mods.toml") {
+        expand "version": project.version
+    }
+    inputs.property "version", project.version
 }
 
 loom {
