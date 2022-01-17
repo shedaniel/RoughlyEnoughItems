@@ -21,7 +21,7 @@ ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.roughlyenoughitems_servercomponent]]
-modId = "cloth-config"
+modId = "cloth_config"
 mandatory = true
 versionRange = "[6.0,)"
 ordering = "NONE"
