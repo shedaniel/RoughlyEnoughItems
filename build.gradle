@@ -133,7 +133,8 @@ task releaseOnCf {
     releaseChangelog = changes.toString()
     if (subprojects.any { it.name == "forge" }) {
         dependsOn project("forge").tasks.getByName("curseforge")
-    } else if (subprojects.any { it.name == "fabric" }) {
+    }
+    if (subprojects.any { it.name == "fabric" }) {
         dependsOn project("fabric").tasks.getByName("curseforge")
     }
 }
