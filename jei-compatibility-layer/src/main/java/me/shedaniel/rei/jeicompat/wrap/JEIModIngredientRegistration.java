@@ -60,7 +60,7 @@ public class JEIModIngredientRegistration implements IModIngredientRegistration 
     @Override
     @NotNull
     public IColorHelper getColorHelper() {
-        throw TODO();
+        return JEIColorHelper.INSTANCE;
     }
     
     @Override

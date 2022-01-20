@@ -39,7 +39,6 @@ import mezz.jei.api.gui.drawable.IDrawableStatic;
 import mezz.jei.api.gui.ingredient.ICraftingGridHelper;
 import mezz.jei.api.helpers.IGuiHelper;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 @ExtensionMethod(JEIPluginDetector.class)
@@ -65,8 +64,13 @@ public enum JEIGuiHelper implements IGuiHelper {
             else if (startDirection == IDrawableAnimated.StartDirection.BOTTOM)
                 startDirection = IDrawableAnimated.StartDirection.TOP;
         }
-        boolean vertical = startDirection == IDrawableAnimated.StartDirection.TOP || startDirection == IDrawableAnimated.StartDirection.BOTTOM;
-        IDrawableAnimated.StartDirection dir = startDirection;
+        
+        int maxValue = startDirection == IDrawableAnimated.StartDirection.TOP || startDirection == IDrawableAnimated.StartDirection.BOTTOM ? drawable.getHeight() : drawable.getWidth();
+        return createAnimatedDrawable(drawable, createTickTimer(ticksPerCycle, maxValue, !inverted), startDirection);
+    }
+    
+    @NotNull
+    public IDrawableAnimated createAnimatedDrawable(@NotNull IDrawableStatic drawable, ITickTimer timer, @NotNull IDrawableAnimated.StartDirection startDirection) {
         return new IDrawableAnimated() {
             @Override
             public int getWidth() {
@@ -80,24 +84,22 @@ public enum JEIGuiHelper implements IGuiHelper {
             
             @Override
             public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset) {
-                float maskTop = 0, maskBottom = 0, maskLeft = 0, maskRight = 0;
-                float value = (System.currentTimeMillis() % (ticksPerCycle * 50L)) / (ticksPerCycle * 50F);
-                if (!inverted) value = 1 - value;
-                switch (dir) {
+                int maskTop = 0, maskBottom = 0, maskLeft = 0, maskRight = 0;
+                switch (startDirection) {
                     case TOP:
-                        maskBottom = value * getHeight();
+                        maskBottom = timer.getValue();
                         break;
                     case BOTTOM:
-                        maskTop = value * getHeight();
+                        maskTop = timer.getValue();
                         break;
                     case LEFT:
-                        maskRight = value * getWidth();
+                        maskRight = timer.getValue();
                         break;
                     case RIGHT:
-                        maskLeft = value * getWidth();
+                        maskLeft = timer.getValue();
                         break;
                 }
-                drawable.draw(matrixStack, xOffset, yOffset, Math.round(maskTop), Math.round(maskBottom), Math.round(maskLeft), Math.round(maskRight));
+                drawable.draw(matrixStack, xOffset, yOffset, maskTop, maskBottom, maskLeft, maskRight);
             }
         };
     }
@@ -188,13 +190,11 @@ public enum JEIGuiHelper implements IGuiHelper {
     @NotNull
     public ITickTimer createTickTimer(int ticksPerCycle, int maxValue, boolean countDown) {
         return new ITickTimer() {
-            private double animationDuration = ticksPerCycle * 50.0D;
-            
             @Override
             public int getValue() {
-                int i = Mth.ceil((System.currentTimeMillis() / (animationDuration / maxValue) % ((double) maxValue)));
-                if (countDown) return maxValue - i;
-                return i;
+                float value = (System.currentTimeMillis() % (ticksPerCycle * 50L)) / (ticksPerCycle * 50F);
+                if (countDown) value = 1 - value;
+                return Math.round(value * getMaxValue());
             }
             
             @Override

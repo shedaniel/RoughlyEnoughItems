@@ -156,6 +156,6 @@ public class JEIDrawableBuilder implements IDrawableBuilder {
     @Override
     @NotNull
     public IDrawableAnimated buildAnimated(@NotNull ITickTimer tickTimer, @NotNull IDrawableAnimated.StartDirection startDirection) {
-        throw TODO();
+        return JEIGuiHelper.INSTANCE.createAnimatedDrawable(build(), tickTimer, startDirection);
     }
 }
