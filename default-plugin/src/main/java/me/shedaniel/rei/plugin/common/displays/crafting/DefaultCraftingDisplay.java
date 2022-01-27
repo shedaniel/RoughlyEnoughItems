@@ -24,8 +24,6 @@
 package me.shedaniel.rei.plugin.common.displays.crafting;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import dev.architectury.injectables.annotations.PlatformOnly;
-import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
 import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
@@ -47,7 +45,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -67,6 +64,24 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
         this.recipe = recipe;
     }
     
+    private static final List<CraftingRecipeSizeProvider<?>> SIZE_PROVIDER = new ArrayList<>();
+    
+    static {
+        registerPlatformSizeProvider();
+    }
+    
+    /**
+     * Registers a size provider for crafting recipes.
+     * This is not reloadable, please statically register your provider, and
+     * do not repeatedly register it.
+     *
+     * @param sizeProvider the provider to register
+     * @param <R>          the recipe type
+     */
+    public static <R extends Recipe<?>> void registerSizeProvider(CraftingRecipeSizeProvider<R> sizeProvider) {
+        SIZE_PROVIDER.add(0, sizeProvider);
+    }
+    
     @Nullable
     public static DefaultCraftingDisplay<?> of(Recipe<?> recipe) {
         if (recipe instanceof ShapelessRecipe) {
@@ -75,26 +90,25 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
             return new DefaultShapedDisplay((ShapedRecipe) recipe);
         } else if (!recipe.isSpecial()) {
             NonNullList<Ingredient> ingredients = recipe.getIngredients();
-            Pair<Integer, Integer> size = Platform.isFabric() ? null : getSize(recipe);
-            
-            if (!ingredients.isEmpty()) {
-                if (size == null) {
-                    return new DefaultCustomDisplay(recipe, EntryIngredients.ofIngredients(recipe.getIngredients()),
-                            Collections.singletonList(EntryIngredients.of(recipe.getResultItem())));
-                } else {
+            for (CraftingRecipeSizeProvider<?> pair : SIZE_PROVIDER) {
+                CraftingRecipeSizeProvider.Size size = ((CraftingRecipeSizeProvider<Recipe<?>>) pair).getSize(recipe);
+                
+                if (size != null) {
                     return new DefaultCustomShapedDisplay(recipe, EntryIngredients.ofIngredients(recipe.getIngredients()),
                             Collections.singletonList(EntryIngredients.of(recipe.getResultItem())),
-                            size.getLeft(), size.getRight());
+                            size.getWidth(), size.getHeight());
                 }
             }
+            
+            return new DefaultCustomDisplay(recipe, EntryIngredients.ofIngredients(recipe.getIngredients()),
+                    Collections.singletonList(EntryIngredients.of(recipe.getResultItem())));
         }
         
         return null;
     }
     
     @ExpectPlatform
-    @PlatformOnly(PlatformOnly.FORGE)
-    private static Pair<Integer, Integer> getSize(Recipe<?> recipe) {
+    private static void registerPlatformSizeProvider() {
         throw new AssertionError();
     }
     
@@ -146,14 +160,19 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     
     @Override
     public List<InputIngredient<EntryStack<?>>> getInputIngredients(MenuSerializationContext<?, ?, ?> context, MenuInfo<?, ?> info, boolean fill) {
-        int inputWidth = Math.max(3, getInputWidth());
-        int inputHeight = Math.max(3, getInputHeight());
         int craftingWidth = 3, craftingHeight = 3;
         
         if (info instanceof SimpleGridMenuInfo && fill) {
             craftingWidth = ((SimpleGridMenuInfo<AbstractContainerMenu, ?>) info).getCraftingWidth(context.getMenu());
             craftingHeight = ((SimpleGridMenuInfo<AbstractContainerMenu, ?>) info).getCraftingHeight(context.getMenu());
         }
+        
+        return getInputIngredients(craftingWidth, craftingHeight);
+    }
+    
+    public List<InputIngredient<EntryStack<?>>> getInputIngredients(int craftingWidth, int craftingHeight) {
+        int inputWidth = Math.max(3, getInputWidth());
+        int inputHeight = Math.max(3, getInputHeight());
         
         InputIngredient<EntryStack<?>>[][] grid = new InputIngredient[Math.max(inputWidth, craftingWidth)][Math.max(inputHeight, craftingHeight)];
         

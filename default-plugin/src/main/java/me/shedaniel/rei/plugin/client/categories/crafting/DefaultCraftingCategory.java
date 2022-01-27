@@ -34,10 +34,10 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.DisplayMerger;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.InputIngredient;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
-import me.shedaniel.rei.plugin.common.displays.crafting.DefaultShapedDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
@@ -71,17 +71,13 @@ public class DefaultCraftingCategory implements DisplayCategory<DefaultCraftingD
         widgets.add(Widgets.createRecipeBase(bounds));
         widgets.add(Widgets.createArrow(new Point(startPoint.x + 60, startPoint.y + 18)));
         widgets.add(Widgets.createResultSlotBackground(new Point(startPoint.x + 95, startPoint.y + 19)));
-        List<? extends List<? extends EntryStack<?>>> input = display.getInputEntries();
+        List<InputIngredient<EntryStack<?>>> input = display.getInputIngredients(3, 3);
         List<Slot> slots = Lists.newArrayList();
         for (int y = 0; y < 3; y++)
             for (int x = 0; x < 3; x++)
                 slots.add(Widgets.createSlot(new Point(startPoint.x + 1 + x * 18, startPoint.y + 1 + y * 18)).markInput());
-        for (int i = 0; i < input.size(); i++) {
-            if (display instanceof DefaultShapedDisplay) {
-                if (!input.get(i).isEmpty())
-                    slots.get(DefaultCraftingDisplay.getSlotWithSize(display, i, 3)).entries(input.get(i));
-            } else if (!input.get(i).isEmpty())
-                slots.get(i).entries(input.get(i));
+        for (InputIngredient<EntryStack<?>> ingredient : input) {
+            slots.get(ingredient.getIndex()).entries(ingredient.get());
         }
         widgets.addAll(slots);
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 95, startPoint.y + 19)).entries(display.getOutputEntries().get(0)).disableBackground().markOutput());
