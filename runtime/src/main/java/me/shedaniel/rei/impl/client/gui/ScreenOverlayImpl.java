@@ -50,15 +50,12 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
-import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
@@ -85,12 +82,10 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -618,10 +613,9 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                     return new Point(mouseX, mouseY);
                 }
             };
-            Set<CategoryIdentifier<?>> categories = ScreenRegistry.getInstance().handleClickArea((Class<Screen>) screen.getClass(), context);
-            if (categories != null && !categories.isEmpty()) {
-                Component collect = CollectionUtils.mapAndJoinToComponent(categories, identifier -> CategoryRegistry.getInstance().tryGet(identifier).map(config -> config.getCategory().getTitle()).orElse(new ImmutableTextComponent(identifier.toString())), new ImmutableTextComponent(", "));
-                Tooltip.create(new TranslatableComponent("text.rei.view_recipes_for", collect)).queue();
+            List<Component> clickAreaTooltips = ScreenRegistry.getInstance().getClickAreaTooltips((Class<Screen>) screen.getClass(), context);
+            if (clickAreaTooltips != null && !clickAreaTooltips.isEmpty()) {
+                Tooltip.create(clickAreaTooltips).queue();
             }
         }
     }
@@ -877,10 +871,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                     return new Point(mouseX, mouseY);
                 }
             };
-            Set<CategoryIdentifier<?>> categories = ScreenRegistry.getInstance().handleClickArea((Class<Screen>) screen.getClass(), context);
-            if (categories != null && !categories.isEmpty()) {
-                ViewSearchBuilder.builder().addCategories(categories).open();
-                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            if (ScreenRegistry.getInstance().executeClickArea((Class<Screen>) screen.getClass(), context)) {
                 return true;
             }
         }
