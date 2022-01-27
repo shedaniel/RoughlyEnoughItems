@@ -27,6 +27,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
@@ -83,7 +84,7 @@ public abstract class EntryListEntryWidget extends EntryWidget {
                 entry = cheatsAs.isEmpty() ? entry : cheatsAs;
             }
             if (entry.getValueType() == ItemStack.class)
-                entry.<ItemStack>castValue().setCount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.<ItemStack>castValue().getMaxStackSize());
+                entry.<ItemStack>castValue().setCount(button != 1 && !Screen.hasShiftDown() == (ConfigObject.getInstance().getItemCheatingMode() == ItemCheatingMode.REI_LIKE) ? 1 : entry.<ItemStack>castValue().getMaxStackSize());
             return ClientHelper.getInstance().tryCheatingEntry(entry);
         }
         

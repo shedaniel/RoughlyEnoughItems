@@ -382,6 +382,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return functionality.allowInventoryHighlighting;
     }
     
+    @Override
+    public ItemCheatingMode getItemCheatingMode() {
+        return functionality.itemCheatingMode;
+    }
+    
     @ApiStatus.Experimental
     @Override
     public double getHorizontalEntriesBoundariesPercentage() {
@@ -542,6 +547,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares whether REI should remove the recipe book.") private boolean disableRecipeBook = false;
         @Comment("Declares whether subsets is enabled.") private boolean isSubsetsEnabled = false;
         private boolean allowInventoryHighlighting = true;
+        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON) private ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
     }
     
     public static class Advanced {
