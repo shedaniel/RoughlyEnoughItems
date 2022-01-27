@@ -38,7 +38,11 @@ public class DefaultCustomDisplay extends DefaultCraftingDisplay<Recipe<?>> {
     private int height;
     
     public DefaultCustomDisplay(@Nullable Recipe<?> possibleRecipe, List<EntryIngredient> input, List<EntryIngredient> output) {
-        super(input, output, Optional.ofNullable(possibleRecipe));
+        this(null, possibleRecipe, input, output);
+    }
+    
+    public DefaultCustomDisplay(@Nullable ResourceLocation location, @Nullable Recipe<?> possibleRecipe, List<EntryIngredient> input, List<EntryIngredient> output) {
+        super(input, output, Optional.ofNullable(location == null && possibleRecipe != null ? possibleRecipe.getId() : location), Optional.ofNullable(possibleRecipe));
         BitSet row = new BitSet(3);
         BitSet column = new BitSet(3);
         for (int i = 0; i < 9; i++)
@@ -56,7 +60,7 @@ public class DefaultCustomDisplay extends DefaultCraftingDisplay<Recipe<?>> {
     public static DefaultCustomDisplay simple(List<EntryIngredient> input, List<EntryIngredient> output, Optional<ResourceLocation> location) {
         Recipe<?> optionalRecipe = location.flatMap(resourceLocation -> RecipeManagerContext.getInstance().getRecipeManager().byKey(resourceLocation))
                 .orElse(null);
-        return new DefaultCustomDisplay(optionalRecipe, input, output);
+        return new DefaultCustomDisplay(location.orElse(null), optionalRecipe, input, output);
     }
     
     @Override
