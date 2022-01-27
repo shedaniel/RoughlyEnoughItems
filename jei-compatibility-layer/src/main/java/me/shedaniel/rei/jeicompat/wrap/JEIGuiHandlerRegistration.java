@@ -78,6 +78,7 @@ public enum JEIGuiHandlerRegistration implements IGuiHandlerRegistration {
             @Override
             public Rectangle getScreenBounds(T screen) {
                 IGuiProperties properties = handler.apply(screen);
+                if (properties == null) return null;
                 return new Rectangle(properties.getGuiLeft(), properties.getGuiTop(), properties.getGuiXSize(), properties.getGuiYSize());
             }
         });
