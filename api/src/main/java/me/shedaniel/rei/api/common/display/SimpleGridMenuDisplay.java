@@ -30,7 +30,35 @@ package me.shedaniel.rei.api.common.display;
  * @see me.shedaniel.rei.api.common.transfer.info.simple.SimpleGridMenuInfo
  */
 public interface SimpleGridMenuDisplay extends Display {
+    /**
+     * Returns the functional width of the grid.
+     *
+     * @return the functional width of the grid
+     */
     int getWidth();
     
+    /**
+     * Returns the functional height of the grid.
+     *
+     * @return the functional height of the grid
+     */
     int getHeight();
+    
+    /**
+     * Returns the input width of the input entries.
+     *
+     * @return the input width of the input entries
+     */
+    default int getInputWidth() {
+        return getWidth();
+    }
+    
+    /**
+     * Returns the input height of the input entries.
+     *
+     * @return the input height of the input entries
+     */
+    default int getInputHeight() {
+        return getHeight();
+    }
 }
