@@ -32,10 +32,12 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
@@ -226,7 +228,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                     entry = cheatsAs.isEmpty() ? entry : cheatsAs;
                 }
                 if (entry.getType() == VanillaEntryTypes.ITEM)
-                    entry.<ItemStack>castValue().setCount(button != 1 && !Screen.hasShiftDown() ? 1 : entry.<ItemStack>castValue().getMaxStackSize());
+                    entry.<ItemStack>castValue().setCount(button != 1 && !Screen.hasShiftDown() == (ConfigObject.getInstance().getItemCheatingMode() == ItemCheatingMode.REI_LIKE) ? 1 : entry.<ItemStack>castValue().getMaxStackSize());
                 return ClientHelper.getInstance().tryCheatingEntry(entry);
             }
             
