@@ -167,6 +167,8 @@ public interface ConfigObject {
     
     boolean isInventoryHighlightingAllowed();
     
+    ItemCheatingMode getItemCheatingMode();
+    
     @ApiStatus.Experimental
     double getHorizontalEntriesBoundariesPercentage();
     
