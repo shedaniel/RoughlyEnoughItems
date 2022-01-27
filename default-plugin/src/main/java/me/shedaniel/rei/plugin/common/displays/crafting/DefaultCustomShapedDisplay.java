@@ -24,6 +24,7 @@
 package me.shedaniel.rei.plugin.common.displays.crafting;
 
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,7 +36,11 @@ public class DefaultCustomShapedDisplay extends DefaultCraftingDisplay<Recipe<?>
     private int height;
     
     public DefaultCustomShapedDisplay(@Nullable Recipe<?> possibleRecipe, List<EntryIngredient> input, List<EntryIngredient> output, int width, int height) {
-        super(input, output, Optional.ofNullable(possibleRecipe));
+        this(null, possibleRecipe, input, output, width, height);
+    }
+    
+    public DefaultCustomShapedDisplay(@Nullable ResourceLocation location, @Nullable Recipe<?> possibleRecipe, List<EntryIngredient> input, List<EntryIngredient> output, int width, int height) {
+        super(input, output, Optional.ofNullable(location == null && possibleRecipe != null ? possibleRecipe.getId() : location), Optional.ofNullable(possibleRecipe));
         this.width = width;
         this.height = height;
     }

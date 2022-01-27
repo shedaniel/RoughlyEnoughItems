@@ -59,7 +59,11 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     protected Optional<C> recipe;
     
     public DefaultCraftingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<C> recipe) {
-        super(inputs, outputs, Optional.empty());
+        this(inputs, outputs, recipe.map(Recipe::getId), recipe);
+    }
+    
+    public DefaultCraftingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location, Optional<C> recipe) {
+        super(inputs, outputs, location);
         this.recipe = recipe;
     }
     
