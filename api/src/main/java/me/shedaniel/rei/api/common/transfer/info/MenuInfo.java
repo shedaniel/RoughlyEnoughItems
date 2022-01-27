@@ -25,6 +25,7 @@ package me.shedaniel.rei.api.common.transfer.info;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -32,6 +33,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.InputIngredient;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.transfer.RecipeFinder;
 import me.shedaniel.rei.api.common.transfer.RecipeFinderPopulator;
@@ -133,10 +135,12 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
      *                otherwise it should be aligned for the display category
      * @return the list of lists of items
      */
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     default List<List<ItemStack>> getInputs(MenuInfoContext<T, ?, D> context, boolean fill) {
         if (context.getDisplay() == null) return Collections.emptyList();
-        return CollectionUtils.map(context.getDisplay().getInputEntries(context, this, fill), inputEntry ->
-                CollectionUtils.<EntryStack<?>, ItemStack>filterAndMap(inputEntry,
+        return CollectionUtils.map(context.getDisplay().getInputIngredients(context, this, fill), inputEntry ->
+                CollectionUtils.<EntryStack<?>, ItemStack>filterAndMap(inputEntry.get(),
                         stack -> stack.getType() == VanillaEntryTypes.ITEM, EntryStack::castValue));
     }
     
@@ -150,6 +154,20 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
     @ApiStatus.ScheduledForRemoval
     default List<List<ItemStack>> getInputs(MenuInfoContext<T, ?, D> context) {
         return getInputs(context, false);
+    }
+    
+    /**
+     * Returns the inputs of the {@link Display}. The nested lists are possible stacks for that specific slot.
+     *
+     * @param context the context of the transfer
+     * @param fill    whether this call is for a fill or not, if it is for a fill, the returned list should be aligned for the menu,
+     *                otherwise it should be aligned for the display category
+     * @return the list of lists of items
+     */
+    default List<InputIngredient<ItemStack>> getInputsIndexed(MenuInfoContext<T, ?, D> context, boolean fill) {
+        if (context.getDisplay() == null) return Collections.emptyList();
+        return CollectionUtils.map(context.getDisplay().getInputIngredients(context, this, fill), entry ->
+                InputIngredient.withType(entry, VanillaEntryTypes.ITEM));
     }
     
     /**
@@ -181,6 +199,7 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
      *
      * @param context        the context of the transfer
      * @param inputs         the list of inputs
+     * @param missing        the list of missing stacks
      * @param missingIndices the indices of the missing stacks
      * @param matrices       the rendering transforming matrices
      * @param mouseX         the mouse x position
@@ -190,7 +209,7 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
      * @param bounds         the bounds of the display
      */
     @Environment(EnvType.CLIENT)
-    default void renderMissingInput(MenuInfoContext<T, ?, D> context, List<List<ItemStack>> inputs, IntList missingIndices, PoseStack matrices, int mouseX, int mouseY,
+    default void renderMissingInput(MenuInfoContext<T, ?, D> context, List<InputIngredient<ItemStack>> inputs, List<InputIngredient<ItemStack>> missing, IntSet missingIndices, PoseStack matrices, int mouseX, int mouseY,
             float delta, List<Widget> widgets, Rectangle bounds) {
         int i = 0;
         for (Widget widget : widgets) {
@@ -204,5 +223,26 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
                 }
             }
         }
+    }
+    
+    /**
+     * Renders the missing ingredients of the transfer.
+     * The indices of the missing stacks are provided, this aligns with the list returned by {@link #getInputs(MenuInfoContext, boolean)}.
+     *
+     * @param context        the context of the transfer
+     * @param inputs         the list of inputs
+     * @param missingIndices the indices of the missing stacks
+     * @param matrices       the rendering transforming matrices
+     * @param mouseX         the mouse x position
+     * @param mouseY         the mouse y position
+     * @param delta          the delta frame time
+     * @param widgets        the widgets set-up by the category
+     * @param bounds         the bounds of the display
+     */
+    @Environment(EnvType.CLIENT)
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    default void renderMissingInput(MenuInfoContext<T, ?, D> context, List<List<ItemStack>> inputs, IntList missingIndices, PoseStack matrices, int mouseX, int mouseY,
+            float delta, List<Widget> widgets, Rectangle bounds) {
     }
 }

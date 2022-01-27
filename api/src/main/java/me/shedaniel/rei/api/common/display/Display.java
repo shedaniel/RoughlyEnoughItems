@@ -25,8 +25,11 @@ package me.shedaniel.rei.api.common.display;
 
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.InputIngredient;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuSerializationContext;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
@@ -49,8 +52,13 @@ public interface Display extends DisplaySpec {
      */
     List<EntryIngredient> getInputEntries();
     
+    @Deprecated
     default List<EntryIngredient> getInputEntries(MenuSerializationContext<?, ?, ?> context, MenuInfo<?, ?> info, boolean fill) {
         return getInputEntries();
+    }
+    
+    default List<InputIngredient<EntryStack<?>>> getInputIngredients(MenuSerializationContext<?, ?, ?> context, MenuInfo<?, ?> info, boolean fill) {
+        return CollectionUtils.mapIndexed(getInputEntries(context, info, fill), InputIngredient::of);
     }
     
     /**

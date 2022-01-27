@@ -25,22 +25,25 @@ package me.shedaniel.rei.plugin.autocrafting;
 
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.entry.InputIngredient;
 import me.shedaniel.rei.api.common.transfer.RecipeFinder;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.api.common.transfer.info.MenuTransferException;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.network.FriendlyByteBuf;
@@ -49,6 +52,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
@@ -75,12 +79,19 @@ public class DefaultCategoryHandler implements TransferHandler {
                 return Result.createNotApplicable();
             }
         }
-        List<List<ItemStack>> input = menuInfo.getInputs(menuInfoContext, false);
-        IntList intList = hasItems(menu, menuInfo, display, input);
-        if (!intList.isEmpty()) {
+        List<InputIngredient<ItemStack>> input = menuInfo.getInputsIndexed(menuInfoContext, false);
+        List<InputIngredient<ItemStack>> missing = hasItemsIndexed(menu, menuInfo, display, input);
+        if (!missing.isEmpty()) {
+            IntList missingIndices = new IntArrayList(missing.size());
+            for (InputIngredient<ItemStack> ingredient : missing) {
+                missingIndices.add(ingredient.getIndex());
+            }
+            IntSet missingIndicesSet = new IntLinkedOpenHashSet(missingIndices);
+            List<List<ItemStack>> oldInputs = CollectionUtils.map(input, InputIngredient::get);
             return Result.createFailed(new TranslatableComponent("error.rei.not.enough.materials"))
                     .renderer((matrices, mouseX, mouseY, delta, widgets, bounds, d) -> {
-                        menuInfo.renderMissingInput(menuInfoContext, input, intList, matrices, mouseX, mouseY, delta, widgets, bounds);
+                        menuInfo.renderMissingInput(menuInfoContext, oldInputs, missingIndices, matrices, mouseX, mouseY, delta, widgets, bounds);
+                        menuInfo.renderMissingInput(menuInfoContext, input, missing, missingIndicesSet, matrices, mouseX, mouseY, delta, widgets, bounds);
                     });
         }
         if (!ClientHelper.getInstance().canUseMovePackets()) {
@@ -138,14 +149,23 @@ public class DefaultCategoryHandler implements TransferHandler {
     }
     
     public IntList hasItems(AbstractContainerMenu menu, MenuInfo<AbstractContainerMenu, Display> info, Display display, List<List<ItemStack>> inputs) {
+        List<InputIngredient<ItemStack>> missing = hasItemsIndexed(menu, info, display,
+                CollectionUtils.mapIndexed(inputs, InputIngredient::of));
+        IntList ids = new IntArrayList(missing.size());
+        for (InputIngredient<ItemStack> ingredient : missing) {
+            ids.add(ingredient.getIndex());
+        }
+        return ids;
+    }
+    
+    public List<InputIngredient<ItemStack>> hasItemsIndexed(AbstractContainerMenu menu, MenuInfo<AbstractContainerMenu, Display> info, Display display, List<InputIngredient<ItemStack>> inputs) {
         // Create a clone of player's inventory, and count
         RecipeFinder recipeFinder = new RecipeFinder();
         info.getRecipeFinderPopulator().populate(ofContext(menu, info, display), recipeFinder);
-        IntList intList = new IntArrayList();
-        for (int i = 0; i < inputs.size(); i++) {
-            List<ItemStack> possibleStacks = inputs.get(i);
-            boolean done = possibleStacks.isEmpty();
-            for (ItemStack possibleStack : possibleStacks) {
+        List<InputIngredient<ItemStack>> missing = new ArrayList<>();
+        for (InputIngredient<ItemStack> possibleStacks : inputs) {
+            boolean done = possibleStacks.get().isEmpty();
+            for (ItemStack possibleStack : possibleStacks.get()) {
                 if (!done) {
                     int invRequiredCount = possibleStack.getCount();
                     int key = RecipeFinder.getItemId(possibleStack);
@@ -160,9 +180,9 @@ public class DefaultCategoryHandler implements TransferHandler {
                 }
             }
             if (!done) {
-                intList.add(i);
+                missing.add(possibleStacks);
             }
         }
-        return intList;
+        return missing;
     }
 }

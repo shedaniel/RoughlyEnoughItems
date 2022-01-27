@@ -49,4 +49,16 @@ public class DefaultShapelessDisplay extends DefaultCraftingDisplay<ShapelessRec
     public int getHeight() {
         return recipe.get().getIngredients().size() > 4 ? 3 : 2;
     }
+    
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Override
+    public int getInputWidth() {
+        return Math.min(recipe.get().getIngredients().size(), 3);
+    }
+    
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Override
+    public int getInputHeight() {
+        return (int) Math.ceil(recipe.get().getIngredients().size() / 3.0);
+    }
 }
