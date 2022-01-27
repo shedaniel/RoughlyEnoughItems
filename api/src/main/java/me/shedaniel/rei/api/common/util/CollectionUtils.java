@@ -130,6 +130,20 @@ public class CollectionUtils {
         return l;
     }
     
+    public static <T, R> List<R> mapIndexed(Iterable<T> list, IndexedFunction<T, R> function) {
+        List<R> l = list instanceof Collection ? new ArrayList<>(((Collection<T>) list).size() + 1) : new ArrayList<>();
+        int i = 0;
+        for (T t : list) {
+            l.add(function.apply(i++, t));
+        }
+        return l;
+    }
+    
+    @FunctionalInterface
+    public interface IndexedFunction<T, R> {
+        R apply(int index, T object);
+    }
+    
     public static <T, R> List<R> flatMap(Iterable<T> list, Function<T, Collection<R>> function) {
         List<R> l = new ArrayList<>();
         for (T t : list) {

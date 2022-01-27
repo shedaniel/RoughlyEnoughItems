@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
 import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.InputIngredient;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuSerializationContext;
@@ -140,31 +141,33 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     }
     
     @Override
-    public List<EntryIngredient> getInputEntries(MenuSerializationContext<?, ?, ?> context, MenuInfo<?, ?> info, boolean fill) {
-        int craftingWidth = Math.max(3, getInputWidth());
-        int craftingHeight = Math.max(3, getInputHeight());
+    public List<InputIngredient<EntryStack<?>>> getInputIngredients(MenuSerializationContext<?, ?, ?> context, MenuInfo<?, ?> info, boolean fill) {
+        int inputWidth = Math.max(3, getInputWidth());
+        int inputHeight = Math.max(3, getInputHeight());
+        int craftingWidth = 3, craftingHeight = 3;
         
-        if (info instanceof SimpleGridMenuInfo) {
+        if (info instanceof SimpleGridMenuInfo && fill) {
             craftingWidth = ((SimpleGridMenuInfo<AbstractContainerMenu, ?>) info).getCraftingWidth(context.getMenu());
             craftingHeight = ((SimpleGridMenuInfo<AbstractContainerMenu, ?>) info).getCraftingHeight(context.getMenu());
         }
         
-        EntryIngredient[][] grid = new EntryIngredient[craftingWidth][craftingHeight];
+        InputIngredient<EntryStack<?>>[][] grid = new InputIngredient[Math.max(inputWidth, craftingWidth)][Math.max(inputHeight, craftingHeight)];
         
         List<EntryIngredient> inputEntries = getInputEntries();
         for (int i = 0; i < inputEntries.size(); i++) {
-            grid[i % getInputWidth()][i / getInputWidth()] = inputEntries.get(i);
+            grid[i % getInputWidth()][i / getInputWidth()] = InputIngredient.of(getSlotWithSize(getInputWidth(), i, craftingWidth), inputEntries.get(i));
         }
         
-        List<EntryIngredient> list = new ArrayList<>(craftingWidth * craftingHeight);
+        List<InputIngredient<EntryStack<?>>> list = new ArrayList<>(craftingWidth * craftingHeight);
         for (int i = 0, n = craftingWidth * craftingHeight; i < n; i++) {
-            list.add(EntryIngredient.empty());
+            list.add(InputIngredient.empty(i));
         }
         
         for (int x = 0; x < craftingWidth; x++) {
             for (int y = 0; y < craftingHeight; y++) {
                 if (grid[x][y] != null) {
-                    list.set(craftingWidth * y + x, grid[x][y]);
+                    int index = craftingWidth * y + x;
+                    list.set(index, grid[x][y]);
                 }
             }
         }
