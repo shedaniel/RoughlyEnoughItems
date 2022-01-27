@@ -125,7 +125,7 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     }
     
     public static int getSlotWithSize(DefaultCraftingDisplay<?> display, int index, int craftingGridWidth) {
-        return getSlotWithSize(display.getWidth(), index, craftingGridWidth);
+        return getSlotWithSize(display.getInputWidth(), index, craftingGridWidth);
     }
     
     public static int getSlotWithSize(int recipeWidth, int index, int craftingGridWidth) {
@@ -141,14 +141,34 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     
     @Override
     public List<EntryIngredient> getInputEntries(MenuSerializationContext<?, ?, ?> context, MenuInfo<?, ?> info, boolean fill) {
-        List<EntryIngredient> list = new ArrayList<>(3 * 3);
-        for (int i = 0; i < 3 * 3; i++) {
-            list.add(EntryIngredient.empty());
+        int craftingWidth = Math.max(3, getInputWidth());
+        int craftingHeight = Math.max(3, getInputHeight());
+        
+        if (info instanceof SimpleGridMenuInfo) {
+            craftingWidth = ((SimpleGridMenuInfo<AbstractContainerMenu, ?>) info).getCraftingWidth(context.getMenu());
+            craftingHeight = ((SimpleGridMenuInfo<AbstractContainerMenu, ?>) info).getCraftingHeight(context.getMenu());
         }
+        
+        EntryIngredient[][] grid = new EntryIngredient[craftingWidth][craftingHeight];
+        
         List<EntryIngredient> inputEntries = getInputEntries();
         for (int i = 0; i < inputEntries.size(); i++) {
-            list.set(getSlotWithSize(this, i, 3), inputEntries.get(i));
+            grid[i % getInputWidth()][i / getInputWidth()] = inputEntries.get(i);
         }
+        
+        List<EntryIngredient> list = new ArrayList<>(craftingWidth * craftingHeight);
+        for (int i = 0, n = craftingWidth * craftingHeight; i < n; i++) {
+            list.add(EntryIngredient.empty());
+        }
+        
+        for (int x = 0; x < craftingWidth; x++) {
+            for (int y = 0; y < craftingHeight; y++) {
+                if (grid[x][y] != null) {
+                    list.set(craftingWidth * y + x, grid[x][y]);
+                }
+            }
+        }
+        
         return list;
     }
 }
