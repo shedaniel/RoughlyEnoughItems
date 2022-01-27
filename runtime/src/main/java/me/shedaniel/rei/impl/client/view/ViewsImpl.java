@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.view;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -107,13 +106,13 @@ public class ViewsImpl implements Views {
                 if (!recipesForStacks.isEmpty()) {
                     if (isRecipesFor(recipesForStacks, display)) {
                         set.add(display);
-                        break;
+                        continue;
                     }
                 }
                 if (!usagesForStacks.isEmpty()) {
                     if (isUsagesFor(usagesForStacks, display)) {
                         set.add(display);
-                        break;
+                        continue;
                     }
                 }
             }
@@ -243,7 +242,7 @@ public class ViewsImpl implements Views {
     }
     
     private static boolean checkUsages(List<EntryStack<?>> stacks, Display display, List<EntryIngredient> entries) {
-        for (List<? extends EntryStack<?>> results : entries) {
+        for (EntryIngredient results : entries) {
             for (EntryStack<?> otherEntry : results) {
                 for (EntryStack<?> recipesFor : stacks) {
                     if (EntryStacks.equalsFuzzy(otherEntry, recipesFor)) {
@@ -270,24 +269,8 @@ public class ViewsImpl implements Views {
             }
         }
         
-        return Iterables.concat(successfulDisplays, applicableDisplays, () -> new AbstractIterator<Display>() {
-            Iterator<Display> iterator = displays.iterator();
-            
-            @Override
-            protected Display computeNext() {
-                while (iterator.hasNext()) {
-                    Display next = iterator.next();
-                    
-                    if (successfulDisplays.contains(next) || applicableDisplays.contains(next)) {
-                        continue;
-                    }
-                    
-                    return next;
-                }
-                
-                return endOfData();
-            }
-        });
+        return Iterables.concat(successfulDisplays, applicableDisplays,
+                Iterables.filter(displays, display -> !successfulDisplays.contains(display) && !applicableDisplays.contains(display)));
     }
     
     private static <T extends Display> void generateLiveDisplays(DisplayRegistry displayRegistry, DynamicDisplayGenerator<T> generator, ViewSearchBuilder builder, Consumer<T> displayConsumer) {
