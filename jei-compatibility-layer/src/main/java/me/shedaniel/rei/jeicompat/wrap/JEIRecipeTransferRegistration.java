@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategoryView;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerErrorRenderer;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRenderer;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
@@ -66,7 +67,7 @@ import mezz.jei.api.registration.IRecipeTransferRegistration;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.NotNull;
@@ -196,18 +197,28 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                         if (context.isActuallyCrafting()) {
                             context.getMinecraft().setScreen(context.getContainerScreen());
                         }
-                        IRecipeTransferError error = ((IRecipeTransferHandler<AbstractContainerMenu, Object>) recipeTransferHandler).transferRecipe(context.getMenu(), context.getDisplay().jeiValue(), layout, context.getMinecraft().player, Screen.hasShiftDown(), context.isActuallyCrafting());
+                    IRecipeTransferError error = ((IRecipeTransferHandler<AbstractContainerMenu, Object>) recipeTransferHandler).transferRecipe(context.getMenu(), context.getDisplay().jeiValue(), layout, context.getMinecraft().player, context.isStackedCrafting(), context.isActuallyCrafting());
                         if (error == null) {
                             return TransferHandler.Result.createSuccessful();
                         } else if (error instanceof IRecipeTransferError) {
                             IRecipeTransferError.Type type = error.getType();
-                            if (type == IRecipeTransferError.Type.COSMETIC) {
-                                return TransferHandler.Result.createSuccessful().color(0x6700E1FF);
+                        if (type == IRecipeTransferError.Type.INTERNAL) {
+                            return TransferHandler.Result.createNotApplicable();
                             }
-                            IntArrayList redSlots = error instanceof JEIRecipeTransferError ? ((JEIRecipeTransferError) error).getRedSlots() : null;
+                        TransferHandler.Result result = type == IRecipeTransferError.Type.COSMETIC ? TransferHandler.Result.createSuccessful()
+                                : TransferHandler.Result.createFailed(error instanceof JEIRecipeTransferError ? ((JEIRecipeTransferError) error).getText() : new TextComponent(""));
+                        
+                        if (error instanceof JEIRecipeTransferError) {
+                            JEIRecipeTransferError transferError = (JEIRecipeTransferError) error;
+                            IntArrayList redSlots = transferError.getRedSlots();
                             if (redSlots == null) redSlots = new IntArrayList();
-                            return TransferHandler.Result.createFailed(error instanceof JEIRecipeTransferError ? ((JEIRecipeTransferError) error).getText() : new TranslatableComponent("text.auto_craft.move_items"))
-                                    .errorRenderer(redSlots);
+                            return result.renderer(TransferHandlerRenderer.forRedSlots(redSlots));
+                        } else {
+                            return result
+                                    .overrideTooltipRenderer((point, tooltipSink) -> {})
+                                    .renderer((matrices, mouseX, mouseY, delta, widgets, bounds, d) -> {
+                                        error.showError(matrices, mouseX, mouseY, layout, bounds.x + 4, bounds.y + 4);
+                                    });
                         }
                     }
                 }

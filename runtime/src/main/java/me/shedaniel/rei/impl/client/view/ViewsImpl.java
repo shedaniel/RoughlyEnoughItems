@@ -24,6 +24,8 @@
 package me.shedaniel.rei.impl.client.view;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.AbstractIterator;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
@@ -48,6 +50,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
+import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -102,29 +105,15 @@ public class ViewsImpl implements Views {
             for (Display display : allRecipesFromCategory) {
                 if (!displayRegistry.isDisplayVisible(display)) continue;
                 if (!recipesForStacks.isEmpty()) {
-                    back:
-                    for (List<? extends EntryStack<?>> results : display.getOutputEntries()) {
-                        for (EntryStack<?> otherEntry : results) {
-                            for (EntryStack<?> recipesFor : recipesForStacks) {
-                                if (EntryStacks.equalsFuzzy(otherEntry, recipesFor)) {
-                                    set.add(display);
-                                    break back;
-                                }
-                            }
-                        }
+                    if (isRecipesFor(recipesForStacks, display)) {
+                        set.add(display);
+                        break;
                     }
                 }
                 if (!usagesForStacks.isEmpty()) {
-                    back:
-                    for (List<? extends EntryStack<?>> input : display.getInputEntries()) {
-                        for (EntryStack<?> otherEntry : input) {
-                            for (EntryStack<?> usagesFor : usagesForStacks) {
-                                if (EntryStacks.equalsFuzzy(otherEntry, usagesFor)) {
-                                    set.add(display);
-                                    break back;
-                                }
-                            }
-                        }
+                    if (isUsagesFor(usagesForStacks, display)) {
+                        set.add(display);
+                        break;
                     }
                 }
             }
@@ -220,7 +209,7 @@ public class ViewsImpl implements Views {
                     Map<Wrapped, Wrapped> wrappedSet = new LinkedHashMap<>();
                     List<Wrapped> wrappeds = new ArrayList<>();
                     
-                    for (Display display : entry.getValue()) {
+                    for (Display display : sortAutoCrafting(entry.getValue())) {
                         Wrapped wrapped = new Wrapped(display);
                         if (wrappedSet.containsKey(wrapped)) {
                             wrappedSet.get(wrapped).add(display);
@@ -243,6 +232,62 @@ public class ViewsImpl implements Views {
             RoughlyEnoughItemsCore.LOGGER.trace(message);
         }
         return resultSpeced;
+    }
+    
+    public static boolean isRecipesFor(List<EntryStack<?>> stacks, Display display) {
+        return checkUsages(stacks, display, display.getOutputEntries());
+    }
+    
+    public static boolean isUsagesFor(List<EntryStack<?>> stacks, Display display) {
+        return checkUsages(stacks, display, display.getInputEntries());
+    }
+    
+    private static boolean checkUsages(List<EntryStack<?>> stacks, Display display, List<EntryIngredient> entries) {
+        for (List<? extends EntryStack<?>> results : entries) {
+            for (EntryStack<?> otherEntry : results) {
+                for (EntryStack<?> recipesFor : stacks) {
+                    if (EntryStacks.equalsFuzzy(otherEntry, recipesFor)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    private static Iterable<Display> sortAutoCrafting(List<Display> displays) {
+        Set<Display> successfulDisplays = new LinkedHashSet<>();
+        Set<Display> applicableDisplays = new LinkedHashSet<>();
+        
+        for (Display display : displays) {
+            AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
+            
+            if (result.successful) {
+                successfulDisplays.add(display);
+            } else if (result.hasApplicable) {
+                applicableDisplays.add(display);
+            }
+        }
+        
+        return Iterables.concat(successfulDisplays, applicableDisplays, () -> new AbstractIterator<Display>() {
+            Iterator<Display> iterator = displays.iterator();
+            
+            @Override
+            protected Display computeNext() {
+                while (iterator.hasNext()) {
+                    Display next = iterator.next();
+                    
+                    if (successfulDisplays.contains(next) || applicableDisplays.contains(next)) {
+                        continue;
+                    }
+                    
+                    return next;
+                }
+                
+                return endOfData();
+            }
+        });
     }
     
     private static <T extends Display> void generateLiveDisplays(DisplayRegistry displayRegistry, DynamicDisplayGenerator<T> generator, ViewSearchBuilder builder, Consumer<T> displayConsumer) {
