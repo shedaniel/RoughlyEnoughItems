@@ -30,7 +30,6 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
-import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerErrorRenderer;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.transfer.RecipeFinder;
@@ -49,26 +48,11 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class DefaultCategoryHandler implements TransferHandler {
-    private static class ErrorData {
-        private MenuInfoContext<AbstractContainerMenu, Player, Display> menuInfoContext;
-        private MenuInfo<AbstractContainerMenu, Display> menuInfo;
-        private List<List<ItemStack>> inputs;
-        private IntList intList;
-        
-        public ErrorData(MenuInfoContext<AbstractContainerMenu, Player, Display> menuInfoContext, MenuInfo<AbstractContainerMenu, Display> menuInfo, List<List<ItemStack>> inputs, IntList intList) {
-            this.menuInfoContext = menuInfoContext;
-            this.menuInfo = menuInfo;
-            this.inputs = inputs;
-            this.intList = intList;
-        }
-    }
-    
     @Override
     public Result handle(Context context) {
         Display display = context.getDisplay();
@@ -94,7 +78,10 @@ public class DefaultCategoryHandler implements TransferHandler {
         List<List<ItemStack>> input = menuInfo.getInputs(menuInfoContext, false);
         IntList intList = hasItems(menu, menuInfo, display, input);
         if (!intList.isEmpty()) {
-            return Result.createFailed(new TranslatableComponent("error.rei.not.enough.materials")).errorRenderer(new ErrorData(menuInfoContext, menuInfo, input, intList));
+            return Result.createFailed(new TranslatableComponent("error.rei.not.enough.materials"))
+                    .renderer((matrices, mouseX, mouseY, delta, widgets, bounds, d) -> {
+                        menuInfo.renderMissingInput(menuInfoContext, input, intList, matrices, mouseX, mouseY, delta, widgets, bounds);
+                    });
         }
         if (!ClientHelper.getInstance().canUseMovePackets()) {
             return Result.createFailed(new TranslatableComponent("error.rei.not.on.server"));
@@ -109,28 +96,11 @@ public class DefaultCategoryHandler implements TransferHandler {
         }
         FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
         buf.writeResourceLocation(display.getCategoryIdentifier().getIdentifier());
-        buf.writeBoolean(Screen.hasShiftDown());
+        buf.writeBoolean(context.isStackedCrafting());
         
         buf.writeNbt(menuInfo.save(menuInfoContext, display));
         NetworkManager.sendToServer(RoughlyEnoughItemsNetwork.MOVE_ITEMS_PACKET, buf);
         return Result.createSuccessful();
-    }
-    
-    @Override
-    @Environment(EnvType.CLIENT)
-    @Nullable
-    public TransferHandlerErrorRenderer provideErrorRenderer(Context context, Object data) {
-        if (data instanceof ErrorData) {
-            MenuInfoContext<AbstractContainerMenu, Player, Display> menuInfoContext = ((ErrorData) data).menuInfoContext;
-            MenuInfo<AbstractContainerMenu, Display> menuInfo = ((ErrorData) data).menuInfo;
-            List<List<ItemStack>> inputs = ((ErrorData) data).inputs;
-            IntList intList = ((ErrorData) data).intList;
-            return (matrices, mouseX, mouseY, delta, widgets, bounds, display) -> {
-                menuInfo.renderMissingInput(menuInfoContext, inputs, intList, matrices, mouseX, mouseY, delta, widgets, bounds);
-            };
-        }
-        
-        return null;
     }
     
     @Override
