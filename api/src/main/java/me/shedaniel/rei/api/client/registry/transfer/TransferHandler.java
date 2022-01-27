@@ -23,10 +23,8 @@
 
 package me.shedaniel.rei.api.client.registry.transfer;
 
-import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.registry.display.TransferDisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
