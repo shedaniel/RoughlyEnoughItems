@@ -37,17 +37,21 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 @ExtensionMethod(JEIPluginDetector.class)
 public enum JEISubtypeRegistration implements ISubtypeRegistration {
     INSTANCE;
     
     @Override
     public void registerSubtypeInterpreter(@NotNull Item item, @NotNull IIngredientSubtypeInterpreter<ItemStack> interpreter) {
+        if (interpreter == null) return;
         ItemComparatorRegistry.getInstance().register(wrapItemComparator(interpreter), item);
     }
     
     @Override
     public void registerSubtypeInterpreter(@NotNull Fluid fluid, @NotNull IIngredientSubtypeInterpreter<FluidStack> interpreter) {
+        if (interpreter == null) return;
         FluidComparatorRegistry.getInstance().register(wrapFluidComparator(interpreter), fluid);
     }
     
@@ -72,10 +76,10 @@ public enum JEISubtypeRegistration implements ISubtypeRegistration {
     }
     
     private static EntryComparator<ItemStack> wrapItemComparator(IIngredientSubtypeInterpreter<ItemStack> interpreter) {
-        return (context, stack) -> interpreter.apply(stack, context.wrapContext()).hashCode();
+        return (context, stack) -> Objects.hashCode(interpreter.apply(stack, context.wrapContext()));
     }
     
     private static EntryComparator<dev.architectury.fluid.FluidStack> wrapFluidComparator(IIngredientSubtypeInterpreter<FluidStack> interpreter) {
-        return (context, stack) -> interpreter.apply(FluidStackHooksForge.toForge(stack), context.wrapContext()).hashCode();
+        return (context, stack) -> Objects.hashCode(interpreter.apply(FluidStackHooksForge.toForge(stack), context.wrapContext()));
     }
 }
