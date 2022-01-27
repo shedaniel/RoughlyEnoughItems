@@ -28,33 +28,25 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
-import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerErrorRenderer;
-import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.gui.toast.CopyRecipeIdentifierToast;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
-import org.apache.commons.lang3.mutable.Mutable;
-import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -66,44 +58,10 @@ public final class InternalWidgets {
     private InternalWidgets() {}
     
     public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Component text, Supplier<Display> displaySupplier, Supplier<Collection<ResourceLocation>> idsSupplier, List<Widget> setupDisplay, DisplayCategory<?> category) {
-        AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
-        Mutable<List<Component>> errorTooltip = new MutableObject<>(new ArrayList<>());
         Button autoCraftingButton = Widgets.createButton(rectangle, text)
                 .focusable(false)
                 .onClick(button -> {
-                    TransferHandler.Context context = TransferHandler.Context.create(true, containerScreen, displaySupplier.get());
-                    for (TransferHandler autoTransferHandler : TransferHandlerRegistry.getInstance())
-                        try {
-                            TransferHandler.Result result = autoTransferHandler.handle(context);
-                            if (result.isBlocking()) {
-                                if (result.isReturningToScreen()) {
-                                    break;
-                                }
-                                return;
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    Minecraft.getInstance().setScreen(containerScreen);
-                    REIRuntime.getInstance().getOverlay().get().queueReloadOverlay();
-                })
-                .tooltipSupplier(button -> {
-                    List<Component> str = new ArrayList<>(errorTooltip.getValue());
-                    
-                    if (Minecraft.getInstance().options.advancedItemTooltips) {
-                        Collection<ResourceLocation> locations = idsSupplier.get();
-                        if (!locations.isEmpty()) {
-                            str.add(new TextComponent(" "));
-                            for (ResourceLocation location : locations) {
-                                String t = I18n.get("text.rei.recipe_id", "", location.toString());
-                                if (t.startsWith("\n")) {
-                                    t = t.substring("\n".length());
-                                }
-                                str.add(new TextComponent(t).withStyle(ChatFormatting.GRAY));
-                            }
-                        }
-                    }
-                    return str.toArray(new Component[0]);
+                    AutoCraftingEvaluator.evaluateAutoCrafting(true, Screen.hasShiftDown(), displaySupplier.get(), idsSupplier);
                 });
         return new DelegateWidget(autoCraftingButton) {
             boolean didJustRender = false;
@@ -111,85 +69,32 @@ public final class InternalWidgets {
             @Override
             public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
                 didJustRender = false;
-                autoCraftingButton.setEnabled(false);
-                autoCraftingButton.setTint(0);
                 
-                if (containerScreen == null) {
-                    errorTooltip.setValue(Lists.newArrayList(new TranslatableComponent("error.rei.not.supported.move.items").withStyle(ChatFormatting.RED)));
-                    renderIf(false, poses, mouseX, mouseY, delta);
-                    return;
+                AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, displaySupplier.get(), idsSupplier);
+                
+                autoCraftingButton.setEnabled(result.successful);
+                autoCraftingButton.setTint(result.tint);
+                
+                if (result.hasApplicable && (containsMouse(mouseX, mouseY) || autoCraftingButton.isFocused()) && result.renderer != null) {
+                    result.renderer.render(poses, mouseX, mouseY, delta, setupDisplay, displayBounds, displaySupplier.get());
                 }
                 
-                List<TransferHandler.Result> errors = new ArrayList<>();
-                boolean hasApplicable = false;
-                TransferHandlerErrorRenderer errorRenderer = null;
-                TransferHandler.Context context = TransferHandler.Context.create(false, containerScreen, displaySupplier.get());
-                for (TransferHandler transferHandler : TransferHandlerRegistry.getInstance()) {
-                    try {
-                        TransferHandler.Result result = transferHandler.handle(context);
-                        if (result.isApplicable()) {
-                            hasApplicable = true;
-                            autoCraftingButton.setTint(result.getColor());
-                            
-                            if (result.isSuccessful()) {
-                                errors.clear();
-                                autoCraftingButton.setEnabled(true);
-                                errorRenderer = null;
-                                break;
-                            }
-                            
-                            errors.add(result);
-                            TransferHandlerErrorRenderer transferHandlerErrorRenderer = result.getErrorRenderer(transferHandler, context);
-                            if (transferHandlerErrorRenderer != null) {
-                                errorRenderer = transferHandlerErrorRenderer;
-                            }
-                            
-                            if (result.isBlocking()) {
-                                break;
-                            }
-                        }
-                    } catch (Throwable e) {
-                        e.printStackTrace();
+                renderIf(result.hasApplicable, poses, mouseX, mouseY, delta);
+                
+                if (didJustRender) {
+                    if (!autoCraftingButton.isFocused() && containsMouse(mouseX, mouseY)) {
+                        tryTooltip(result, new Point(mouseX, mouseY));
+                    } else if (autoCraftingButton.isFocused()) {
+                        Rectangle bounds = autoCraftingButton.getBounds();
+                        tryTooltip(result, new Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2));
                     }
                 }
-                
-                if (!hasApplicable) {
-                    errorTooltip.setValue(Lists.newArrayList(new TranslatableComponent("error.rei.not.supported.move.items").withStyle(ChatFormatting.RED)));
-                    renderIf(false, poses, mouseX, mouseY, delta);
-                    return;
+            }
+            
+            private void tryTooltip(AutoCraftingEvaluator.AutoCraftingResult result, Point point) {
+                if (result.tooltipRenderer != null) {
+                    result.tooltipRenderer.accept(point, Tooltip::queue);
                 }
-                
-                if ((containsMouse(mouseX, mouseY) || autoCraftingButton.isFocused()) && errorRenderer != null) {
-                    errorRenderer.render(poses, mouseX, mouseY, delta, setupDisplay, displayBounds, displaySupplier.get());
-                }
-                if (errors.isEmpty()) {
-                    errorTooltip.setValue(Lists.newArrayList(new TranslatableComponent("text.auto_craft.move_items")));
-                } else {
-                    errorTooltip.setValue(Lists.newArrayList());
-                    List<Component> tooltipsFilled = new ArrayList<>();
-                    for (TransferHandler.Result error : errors) {
-                        error.fillTooltip(tooltipsFilled);
-                    }
-                    
-                    if (errors.size() == 1) {
-                        for (Component tooltipFilled : tooltipsFilled) {
-                            MutableComponent colored = tooltipFilled.copy().withStyle(ChatFormatting.RED);
-                            if (!CollectionUtils.anyMatch(errorTooltip.getValue(), ss -> ss.getString().equalsIgnoreCase(tooltipFilled.getString()))) {
-                                errorTooltip.getValue().add(colored);
-                            }
-                        }
-                    } else {
-                        errorTooltip.getValue().add(new TranslatableComponent("error.rei.multi.errors").withStyle(ChatFormatting.RED));
-                        for (Component tooltipFilled : tooltipsFilled) {
-                            MutableComponent colored = new TextComponent("- ").withStyle(ChatFormatting.RED)
-                                    .append(tooltipFilled.copy().withStyle(ChatFormatting.RED));
-                            if (!CollectionUtils.anyMatch(errorTooltip.getValue(), ss -> ss.getString().equalsIgnoreCase(colored.getString()))) {
-                                errorTooltip.getValue().add(colored);
-                            }
-                        }
-                    }
-                }
-                renderIf(true, poses, mouseX, mouseY, delta);
             }
             
             private void renderIf(boolean should, PoseStack poseStack, int mouseX, int mouseY, float delta) {

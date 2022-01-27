@@ -74,7 +74,7 @@ public class DefaultRecipeBookHandler implements TransferHandler {
                 context.getMinecraft().setScreen(context.getContainerScreen());
                 if (context.getContainerScreen() instanceof RecipeUpdateListener)
                     ((RecipeUpdateListener) context.getContainerScreen()).getRecipeBookComponent().ghostRecipe.clear();
-                context.getMinecraft().gameMode.handlePlaceRecipe(container.containerId, recipe, Screen.hasShiftDown());
+                context.getMinecraft().gameMode.handlePlaceRecipe(container.containerId, recipe, context.isStackedCrafting());
                 return Result.createSuccessful();
             }
         } else if (display instanceof DefaultCookingDisplay) {
@@ -88,7 +88,7 @@ public class DefaultRecipeBookHandler implements TransferHandler {
                 context.getMinecraft().setScreen(context.getContainerScreen());
                 if (context.getContainerScreen() instanceof RecipeUpdateListener)
                     ((RecipeUpdateListener) context.getContainerScreen()).getRecipeBookComponent().ghostRecipe.clear();
-                context.getMinecraft().gameMode.handlePlaceRecipe(container.containerId, recipe, Screen.hasShiftDown());
+                context.getMinecraft().gameMode.handlePlaceRecipe(container.containerId, recipe, context.isStackedCrafting());
                 return Result.createSuccessful();
             }
         }

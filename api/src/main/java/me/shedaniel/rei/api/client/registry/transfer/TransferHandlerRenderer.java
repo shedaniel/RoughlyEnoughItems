@@ -38,13 +38,11 @@ import java.util.Objects;
 
 @ApiStatus.Experimental
 @FunctionalInterface
-@Deprecated
-@ApiStatus.ScheduledForRemoval
-public interface TransferHandlerErrorRenderer {
+public interface TransferHandlerRenderer {
     void render(PoseStack matrices, int mouseX, int mouseY, float delta, List<Widget> widgets, Rectangle bounds, Display display);
     
     @ApiStatus.Internal
-    static TransferHandlerErrorRenderer forRedSlots(IntList redSlots) {
+    static TransferHandlerRenderer forRedSlots(IntList redSlots) {
         return (matrices, mouseX, mouseY, delta, widgets, bounds, display) -> {
             DisplayCategory<?> category = Objects.requireNonNull(CategoryRegistry.getInstance().get(display.getCategoryIdentifier()))
                     .getCategory();
@@ -52,9 +50,5 @@ public interface TransferHandlerErrorRenderer {
                 ((TransferDisplayCategory<Display>) category).renderRedSlots(matrices, widgets, bounds, display, redSlots);
             }
         };
-    }
-    
-    default TransferHandlerRenderer asNew() {
-        return this::render;
     }
 }
