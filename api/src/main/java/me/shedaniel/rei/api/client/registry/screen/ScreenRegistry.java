@@ -31,19 +31,29 @@ import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Environment(EnvType.CLIENT)
 public interface ScreenRegistry extends Reloadable<REIClientPlugin> {
@@ -182,5 +192,49 @@ public interface ScreenRegistry extends Reloadable<REIClientPlugin> {
      * @param <T>         the type of screen
      * @return the collection of category identifiers, may be null if there are no click area handlers.
      */
-    @Nullable <T extends Screen> Set<CategoryIdentifier<?>> handleClickArea(Class<T> screenClass, ClickArea.ClickAreaContext<T> context);
+    @Nullable
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    default <T extends Screen> Set<CategoryIdentifier<?>> handleClickArea(Class<T> screenClass, ClickArea.ClickAreaContext<T> context) {
+        List<ClickArea.Result> results = evaluateClickArea(screenClass, context);
+        Set<CategoryIdentifier<?>> identifiers = results.stream().flatMap(ClickArea.Result::getCategories).collect(Collectors.toSet());
+        return identifiers.isEmpty() ? null : identifiers;
+    }
+    
+    /**
+     * Handles the click area, returns the list of successful results.
+     *
+     * @param screenClass the class of the screen
+     * @param context     the click area context
+     * @param <T>         the type of screen
+     * @return the list of successful results, may be empty.
+     */
+    <T extends Screen> List<ClickArea.Result> evaluateClickArea(Class<T> screenClass, ClickArea.ClickAreaContext<T> context);
+    
+    @Nullable
+    default <T extends Screen> List<Component> getClickAreaTooltips(Class<T> screenClass, ClickArea.ClickAreaContext<T> context) {
+        List<Component> tooltips = CollectionUtils.flatMap(evaluateClickArea(screenClass, context), result -> {
+            Component[] components = result.getTooltips();
+            return components == null ? Collections.emptyList() : Arrays.asList(components);
+        });
+        return tooltips.isEmpty() ? null : tooltips;
+    }
+    
+    default <T extends Screen> boolean executeClickArea(Class<T> screenClass, ClickArea.ClickAreaContext<T> context) {
+        List<ClickArea.Result> results = evaluateClickArea(screenClass, context);
+        for (ClickArea.Result result : results) {
+            if (result.execute()) {
+                return true;
+            }
+        }
+        
+        Set<CategoryIdentifier<?>> categories = results.stream().flatMap(ClickArea.Result::getCategories).collect(Collectors.toSet());
+        if (!categories.isEmpty()) {
+            ViewSearchBuilder.builder().addCategories(categories).open();
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            return true;
+        }
+        
+        return false;
+    }
 }

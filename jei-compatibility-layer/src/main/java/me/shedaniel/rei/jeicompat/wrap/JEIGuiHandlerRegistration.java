@@ -25,11 +25,13 @@ package me.shedaniel.rei.jeicompat.wrap;
 
 import dev.architectury.event.CompoundEventResult;
 import lombok.experimental.ExtensionMethod;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
 import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.registry.screen.DisplayBoundsProvider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -41,6 +43,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.data.models.blockstates.PropertyDispatch;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -60,6 +63,28 @@ public enum JEIGuiHandlerRegistration implements IGuiHandlerRegistration {
     @Override
     public <T extends AbstractContainerScreen<?>> void addGuiContainerHandler(@NotNull Class<? extends T> guiClass, @NotNull IGuiContainerHandler<T> guiHandler) {
         this.<T>add(guiClass, guiHandler::getGuiExtraAreas, guiHandler::getIngredientUnderMouse);
+        ScreenRegistry.getInstance().registerClickArea(guiClass, context -> {
+            T screen = context.getScreen();
+            Point mouse = context.getMousePosition();
+            Collection<IGuiClickableArea> areas = guiHandler.getGuiClickableAreas(screen, mouse.getX() - screen.getGuiLeft(), mouse.getY() - screen.getGuiTop());
+            
+            if (areas != null) {
+                for (IGuiClickableArea area : areas) {
+                    if (area.getArea().contains(mouse.getX() - screen.getGuiLeft(), mouse.getY() - screen.getGuiTop())) {
+                        return ClickArea.Result.success()
+                                .executor(() -> {
+                                    area.onClick(JEIFocusFactory.INSTANCE, JEIRecipesGui.INSTANCE);
+                                    return true;
+                                })
+                                .tooltip(() -> {
+                                    return area.getTooltipStrings().toArray(new Component[0]);
+                                });
+                    }
+                }
+            }
+            
+            return ClickArea.Result.fail();
+        });
     }
     
     @Override

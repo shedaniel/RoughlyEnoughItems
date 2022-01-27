@@ -52,7 +52,9 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
@@ -88,6 +90,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.CraftingMenu;
@@ -106,6 +109,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.BiFunction;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -141,6 +145,26 @@ public class RoughlyEnoughItemsCoreClient {
         ClientInternals.attachInstance((Function<Object, Tooltip.Entry>) QueuedTooltip.TooltipEntryImpl::new, "tooltipEntryProvider");
         ClientInternals.attachInstance((Function<@Nullable Boolean, ClickArea.Result>) successful -> new ClickArea.Result() {
             private List<CategoryIdentifier<?>> categories = Lists.newArrayList();
+            private BooleanSupplier execute = () -> {
+                return false;
+            };
+            private Supplier<Component @Nullable []> tooltip = () -> {
+                if (categories != null && !categories.isEmpty()) {
+                    Component collect = CollectionUtils.mapAndJoinToComponent(categories,
+                            identifier -> CategoryRegistry.getInstance().tryGet(identifier)
+                                    .map(config -> config.getCategory().getTitle())
+                                    .orElse(new ImmutableTextComponent(identifier.toString())), new ImmutableTextComponent(", "));
+                    return new Component[]{new TranslatableComponent("text.rei.view_recipes_for", collect)};
+                }
+                
+                return null;
+            };
+            
+            @Override
+            public ClickArea.Result executor(BooleanSupplier task) {
+                this.execute = task;
+                return this;
+            }
             
             @Override
             public ClickArea.Result category(CategoryIdentifier<?> category) {
@@ -149,8 +173,24 @@ public class RoughlyEnoughItemsCoreClient {
             }
             
             @Override
+            public ClickArea.Result tooltip(Supplier<Component @Nullable []> tooltip) {
+                this.tooltip = tooltip;
+                return this;
+            }
+            
+            @Override
             public boolean isSuccessful() {
                 return successful;
+            }
+            
+            @Override
+            public boolean execute() {
+                return this.execute.getAsBoolean();
+            }
+            
+            @Override
+            public Component @Nullable [] getTooltips() {
+                return tooltip.get();
             }
             
             @Override
