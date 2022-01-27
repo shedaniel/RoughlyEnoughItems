@@ -68,6 +68,7 @@
   "ordering.rei.name": "名称循序",
   "ordering.rei.item_groups": "物品分类的循序",
   "text.auto_craft.move_items": "移动物品",
+  "text.auto_craft.move_items.tooltip": "Ctrl+单击 以移动物品",
   "text.auto_craft.move_items.yog": "Generate NullPointerException!!",
   "error.rei.transfer.too_small": "无法将移动物品到 %dx%d 的方格上.",
   "error.rei.not.on.server": "服务器没有安装 REI",
