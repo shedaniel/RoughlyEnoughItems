@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.common.logging;
 
+import org.apache.commons.io.output.NullOutputStream;
 import org.apache.logging.log4j.Level;
 
 import java.io.*;
@@ -37,13 +38,17 @@ public class FileLogger implements Logger {
     private final Writer writer;
     
     public FileLogger(Path file) {
+        Writer w;
         try {
             if (file.getParent() != null) Files.createDirectories(file.getParent());
             file.toFile().createNewFile();
-            this.writer = new OutputStreamWriter(new FileOutputStream(file.toFile()), StandardCharsets.UTF_8);
+            w = new OutputStreamWriter(new FileOutputStream(file.toFile()), StandardCharsets.UTF_8);
         } catch (IOException exception) {
-            throw new UncheckedIOException(exception);
+            exception.printStackTrace();
+            w = new OutputStreamWriter(new NullOutputStream());
         }
+        
+        this.writer = w;
     }
     
     @Override
