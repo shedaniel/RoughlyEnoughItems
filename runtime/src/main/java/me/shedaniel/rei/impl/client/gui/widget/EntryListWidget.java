@@ -52,8 +52,11 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -62,8 +65,11 @@ import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
+import me.shedaniel.rei.impl.client.view.ViewsImpl;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
@@ -76,10 +82,12 @@ import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -257,7 +265,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (!hasSpace()) return;
-
+        
         MutableInt size = new MutableInt();
         MutableLong time = new MutableLong();
         long totalTimeStart = debugTime ? System.nanoTime() : 0;
@@ -559,6 +567,9 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     }
     
     private class EntryListEntry extends EntryListEntryWidget {
+        private Display display;
+        private Optional<TransferHandler> transferHandler;
+        
         private EntryListEntry(int x, int y, int entrySize) {
             super(new Point(x, y), entrySize);
         }
@@ -566,6 +577,60 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         @Override
         public boolean containsMouse(double mouseX, double mouseY) {
             return super.containsMouse(mouseX, mouseY) && containsChecked(mouseX, mouseY, true);
+        }
+        
+        public TransferHandler getTransferHandler() {
+            for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
+                for (Display display : displays) {
+                    if (ViewsImpl.isRecipesFor(getEntries(), display)) {
+                        AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
+                        if (result.successful) {
+                            this.display = display;
+                            return result.successfulHandler;
+                        }
+                    }
+                }
+            }
+            
+            return null;
+        }
+        
+        @Override
+        @Nullable
+        public Tooltip getCurrentTooltip(Point point) {
+            Tooltip tooltip = super.getCurrentTooltip(point);
+            
+            if (tooltip != null && getTransferHandler() != null) {
+                tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
+            }
+            
+            return tooltip;
+        }
+        
+        @Override
+        protected boolean doAction(double mouseX, double mouseY, int button) {
+            if (!ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
+                try {
+                    TransferHandler handler = getTransferHandler();
+                    
+                    if (handler != null) {
+                        AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
+                        TransferHandler.Context context = TransferHandler.Context.create(true, Screen.hasShiftDown() || button == 1, containerScreen, display);
+                        TransferHandler.Result transferResult = handler.handle(context);
+    
+                        if (transferResult.isBlocking()) {
+                            if (transferResult.isReturningToScreen() && Minecraft.getInstance().screen != containerScreen) {
+                                Minecraft.getInstance().setScreen(containerScreen);
+                                REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
+                            }
+                            return true;
+                        }
+                    }
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+            return super.doAction(mouseX, mouseY, button);
         }
     }
 }

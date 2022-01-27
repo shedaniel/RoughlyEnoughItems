@@ -23,10 +23,15 @@
 
 package me.shedaniel.rei.api.client.registry.transfer;
 
+import it.unimi.dsi.fastutil.ints.IntList;
+import me.shedaniel.math.Point;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.registry.display.TransferDisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -34,6 +39,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -61,8 +67,10 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         return Double.compare(getPriority(), o.getPriority());
     }
     
+    @Deprecated
     @Environment(EnvType.CLIENT)
     @Nullable
+    @ApiStatus.ScheduledForRemoval
     default TransferHandlerErrorRenderer provideErrorRenderer(Context context, Object data) {
         return null;
     }
@@ -129,7 +137,13 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         /**
          * Sets the error data, to be passed to {@link TransferHandler#provideErrorRenderer(Context, Object)}.
          */
+        @Deprecated
         Result errorRenderer(Object data);
+        
+        Result renderer(TransferHandlerRenderer renderer);
+        
+        @ApiStatus.Experimental
+        Result overrideTooltipRenderer(BiConsumer<Point, TooltipSink> renderer);
         
         /**
          * @return whether this handler has successfully handled the transfer.
@@ -162,16 +176,31 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         
         @Environment(EnvType.CLIENT)
         @ApiStatus.Internal
-        TransferHandlerErrorRenderer getErrorRenderer(TransferHandler handler, Context context);
+        TransferHandlerRenderer getRenderer(TransferHandler handler, Context context);
+        
+        @Environment(EnvType.CLIENT)
+        @ApiStatus.Internal
+        BiConsumer<Point, TooltipSink> getTooltipRenderer();
         
         @ApiStatus.Internal
         void fillTooltip(List<Component> components);
+        
+        @FunctionalInterface
+        interface TooltipSink {
+            void accept(Tooltip tooltip);
+        }
     }
     
     @ApiStatus.NonExtendable
     interface Context {
+        @Deprecated
+        @ApiStatus.ScheduledForRemoval
         static Context create(boolean actuallyCrafting, @Nullable AbstractContainerScreen<?> containerScreen, Display display) {
-            return new ContextImpl(actuallyCrafting, containerScreen, () -> display);
+            return create(actuallyCrafting, Screen.hasShiftDown(), containerScreen, display);
+        }
+        
+        static Context create(boolean actuallyCrafting, boolean stackedCrafting, @Nullable AbstractContainerScreen<?> containerScreen, Display display) {
+            return new ContextImpl(actuallyCrafting, stackedCrafting, containerScreen, () -> display);
         }
         
         default Minecraft getMinecraft() {
@@ -184,6 +213,8 @@ public interface TransferHandler extends Comparable<TransferHandler> {
          * @return whether we should actually move the items.
          */
         boolean isActuallyCrafting();
+        
+        boolean isStackedCrafting();
         
         Display getDisplay();
         
@@ -201,6 +232,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         private boolean successful, applicable, returningToScreen, blocking;
         private Component error;
         private Object errorRenderer;
+        private BiConsumer<Point, TooltipSink> tooltipRenderer;
         private int color;
         
         private ResultImpl() {
@@ -248,6 +280,18 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         }
         
         @Override
+        public Result renderer(TransferHandlerRenderer renderer) {
+            this.errorRenderer = renderer;
+            return this;
+        }
+        
+        @Override
+        public Result overrideTooltipRenderer(BiConsumer<Point, TooltipSink> renderer) {
+            this.tooltipRenderer = renderer;
+            return this;
+        }
+        
+        @Override
         public boolean isSuccessful() {
             return successful;
         }
@@ -273,10 +317,17 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         }
         
         @Override
-        @Environment(EnvType.CLIENT)
-        public TransferHandlerErrorRenderer getErrorRenderer(TransferHandler handler, Context context) {
+        public TransferHandlerRenderer getRenderer(TransferHandler handler, Context context) {
             if (errorRenderer == null) return null;
-            return handler.provideErrorRenderer(context, errorRenderer);
+            if (errorRenderer instanceof TransferHandlerRenderer) return (TransferHandlerRenderer) errorRenderer;
+            if (isSuccessful()) return null;
+            TransferHandlerErrorRenderer renderer = handler.provideErrorRenderer(context, this.errorRenderer);
+            return renderer == null ? null : renderer.asNew();
+        }
+        
+        @Override
+        public BiConsumer<Point, TooltipSink> getTooltipRenderer() {
+            return tooltipRenderer;
         }
         
         @Override
@@ -290,11 +341,13 @@ public interface TransferHandler extends Comparable<TransferHandler> {
     @ApiStatus.Internal
     final class ContextImpl implements Context {
         private boolean actuallyCrafting;
+        private boolean stackedCrafting;
         private AbstractContainerScreen<?> containerScreen;
         private Supplier<Display> recipeDisplaySupplier;
         
-        private ContextImpl(boolean actuallyCrafting, AbstractContainerScreen<?> containerScreen, Supplier<Display> recipeDisplaySupplier) {
+        private ContextImpl(boolean actuallyCrafting, boolean stackedCrafting, AbstractContainerScreen<?> containerScreen, Supplier<Display> recipeDisplaySupplier) {
             this.actuallyCrafting = actuallyCrafting;
+            this.stackedCrafting = stackedCrafting;
             this.containerScreen = containerScreen;
             this.recipeDisplaySupplier = recipeDisplaySupplier;
         }
@@ -302,6 +355,11 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         @Override
         public boolean isActuallyCrafting() {
             return actuallyCrafting;
+        }
+        
+        @Override
+        public boolean isStackedCrafting() {
+            return stackedCrafting;
         }
         
         @Override
