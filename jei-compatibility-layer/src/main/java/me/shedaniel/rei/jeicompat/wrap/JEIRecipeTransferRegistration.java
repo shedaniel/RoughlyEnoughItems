@@ -37,7 +37,6 @@ import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategoryView;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
-import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerErrorRenderer;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRenderer;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -65,7 +64,6 @@ import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import mezz.jei.api.recipe.transfer.IRecipeTransferInfo;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -197,47 +195,38 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                         if (context.isActuallyCrafting()) {
                             context.getMinecraft().setScreen(context.getContainerScreen());
                         }
-                    IRecipeTransferError error = ((IRecipeTransferHandler<AbstractContainerMenu, Object>) recipeTransferHandler).transferRecipe(context.getMenu(), context.getDisplay().jeiValue(), layout, context.getMinecraft().player, context.isStackedCrafting(), context.isActuallyCrafting());
+                        IRecipeTransferError error = ((IRecipeTransferHandler<AbstractContainerMenu, Object>) recipeTransferHandler).transferRecipe(context.getMenu(), context.getDisplay().jeiValue(), layout, context.getMinecraft().player, context.isStackedCrafting(), context.isActuallyCrafting());
                         if (error == null) {
                             return TransferHandler.Result.createSuccessful();
                         } else if (error instanceof IRecipeTransferError) {
                             IRecipeTransferError.Type type = error.getType();
-                        if (type == IRecipeTransferError.Type.INTERNAL) {
-                            return TransferHandler.Result.createNotApplicable();
+                            if (type == IRecipeTransferError.Type.INTERNAL) {
+                                return TransferHandler.Result.createNotApplicable();
                             }
-                        TransferHandler.Result result = type == IRecipeTransferError.Type.COSMETIC ? TransferHandler.Result.createSuccessful()
-                                : TransferHandler.Result.createFailed(error instanceof JEIRecipeTransferError ? ((JEIRecipeTransferError) error).getText() : new TextComponent(""));
-                        
-                        if (error instanceof JEIRecipeTransferError) {
-                            JEIRecipeTransferError transferError = (JEIRecipeTransferError) error;
-                            IntArrayList redSlots = transferError.getRedSlots();
-                            if (redSlots == null) redSlots = new IntArrayList();
-                            return result.renderer(TransferHandlerRenderer.forRedSlots(redSlots));
-                        } else {
-                            return result
-                                    .overrideTooltipRenderer((point, tooltipSink) -> {})
-                                    .renderer((matrices, mouseX, mouseY, delta, widgets, bounds, d) -> {
-                                        error.showError(matrices, mouseX, mouseY, layout, bounds.x + 4, bounds.y + 4);
-                                    });
+                            TransferHandler.Result result = type == IRecipeTransferError.Type.COSMETIC ? TransferHandler.Result.createSuccessful()
+                                    : TransferHandler.Result.createFailed(error instanceof JEIRecipeTransferError ? ((JEIRecipeTransferError) error).getText() : new TextComponent(""));
+                            
+                            if (error instanceof JEIRecipeTransferError) {
+                                JEIRecipeTransferError transferError = (JEIRecipeTransferError) error;
+                                IntArrayList redSlots = transferError.getRedSlots();
+                                if (redSlots == null) redSlots = new IntArrayList();
+                                return result.renderer(forRedSlots(redSlots));
+                            } else {
+                                return result
+                                        .overrideTooltipRenderer((point, tooltipSink) -> {})
+                                        .renderer((matrices, mouseX, mouseY, delta, widgets, bounds, d) -> {
+                                            error.showError(matrices, mouseX, mouseY, layout, bounds.x + 4, bounds.y + 4);
+                                        });
+                            }
                         }
                     }
                 }
                 return TransferHandler.Result.createNotApplicable();
             }
-            
-            @Override
-            @Nullable
-            public TransferHandlerErrorRenderer provideErrorRenderer(Context context, Object data) {
-                if (data instanceof IntList) {
-                    return forRedSlots((IntList) data);
-                }
-                
-                return null;
-            }
         });
     }
     
-    static TransferHandlerErrorRenderer forRedSlots(IntList redSlots) {
+    static TransferHandlerRenderer forRedSlots(IntList redSlots) {
         return (matrices, mouseX, mouseY, delta, widgets, bounds, display) -> {
             DisplayCategory<?> category = Objects.requireNonNull(CategoryRegistry.getInstance().get(display.getCategoryIdentifier()))
                     .getCategory();
