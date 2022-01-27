@@ -50,13 +50,11 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.apache.commons.lang3.mutable.Mutable;
-import org.apache.commons.lang3.mutable.MutableObject;
+import org.apache.commons.lang3.BooleanUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
@@ -212,20 +210,16 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     }
     
     @Override
-    @Nullable
-    public <T extends Screen> Set<CategoryIdentifier<?>> handleClickArea(Class<T> screenClass, ClickArea.ClickAreaContext<T> context) {
-        Mutable<Set<CategoryIdentifier<?>>> categories = new MutableObject<>(null);
+    public <T extends Screen> List<ClickArea.Result> evaluateClickArea(Class<T> screenClass, ClickArea.ClickAreaContext<T> context) {
+        List<ClickArea.Result> results = new ArrayList<>();
         for (ClickArea<?> area : this.clickAreas.get(screenClass)) {
             ClickArea.Result result = ((ClickArea<T>) area).handle(context);
             
             if (result.isSuccessful()) {
-                if (categories.getValue() == null) {
-                    categories.setValue(new LinkedHashSet<>());
-                }
-                result.getCategories().collect(Collectors.toCollection(categories::getValue));
+                results.add(result);
             }
         }
-        return categories.getValue();
+        return results;
     }
     
     @Override

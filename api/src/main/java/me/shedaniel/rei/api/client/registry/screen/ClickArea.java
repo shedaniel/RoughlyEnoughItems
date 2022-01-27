@@ -29,8 +29,12 @@ import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @FunctionalInterface
@@ -55,6 +59,18 @@ public interface ClickArea<T extends Screen> {
             return ClientInternals.createClickAreaHandlerResult(false);
         }
         
+        /**
+         * Sets a custom execute function.
+         * Returns {@code true} to indicate that the click area was executed.
+         * Returns {@code false} to indicate that the click area was not executed, and
+         * leaves REI to handle the click area.
+         *
+         * @param task the task to execute
+         * @return this
+         */
+        @ApiStatus.Experimental
+        Result executor(BooleanSupplier task);
+        
         Result category(CategoryIdentifier<?> category);
         
         default Result categories(Iterable<? extends CategoryIdentifier<?>> categories) {
@@ -64,7 +80,16 @@ public interface ClickArea<T extends Screen> {
             return this;
         }
         
+        @ApiStatus.Experimental
+        Result tooltip(Supplier<Component @Nullable []> tooltip);
+        
         boolean isSuccessful();
+        
+        @ApiStatus.Experimental
+        boolean execute();
+        
+        @ApiStatus.Experimental
+        Component @Nullable [] getTooltips();
         
         Stream<CategoryIdentifier<?>> getCategories();
     }
