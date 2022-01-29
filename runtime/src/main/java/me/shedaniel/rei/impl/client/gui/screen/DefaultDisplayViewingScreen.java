@@ -347,7 +347,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         darkStripesColor.update(delta);
-        this.fillGradient(matrices, 0, 0, this.width, this.height, -1072689136, -804253680);
+        renderBackground(matrices);
         for (Widget widget : preWidgets) {
             widget.render(matrices, mouseX, mouseY, delta);
         }
