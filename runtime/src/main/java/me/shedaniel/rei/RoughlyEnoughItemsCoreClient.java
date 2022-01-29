@@ -64,6 +64,7 @@ import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.QueuedTooltip;
+import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import me.shedaniel.rei.impl.client.registry.category.CategoryRegistryImpl;
 import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
 import me.shedaniel.rei.impl.client.registry.screen.ScreenRegistryImpl;
@@ -322,6 +323,14 @@ public class RoughlyEnoughItemsCoreClient {
         ClientGuiEvent.INIT_POST.register((screen, access) -> {
             REIRuntime.getInstance().getOverlay(false, true);
             if (Minecraft.getInstance().screen == screen) {
+                if (REIRuntime.getInstance().getPreviousScreen() != screen) {
+                    OverlaySearchField searchField = REIRuntimeImpl.getSearchField();
+                    
+                    if (searchField != null) {
+                        searchField.setFocused(false);
+                    }
+                }
+                
                 REIRuntimeImpl.getInstance().setPreviousScreen(screen);
             }
             if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen) {
