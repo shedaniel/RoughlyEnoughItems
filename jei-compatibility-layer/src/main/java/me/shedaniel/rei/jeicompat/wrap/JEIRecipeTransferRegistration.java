@@ -68,6 +68,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -190,7 +191,7 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                             DisplayCategoryView<Display> categoryView = CategoryRegistry.getInstance().get(display.getCategoryIdentifier().cast()).getView(display);
                             layout = new JEIWrappingRecipeLayout<>(category, background);
                             List<Widget> widgets = categoryView.setupDisplay(display, new Rectangle(0, 0, category.getDisplayWidth(display), category.getDisplayHeight()));
-                            JEIRecipeTransferRegistration.this.addToLayout(layout, widgets);
+                            JEIRecipeTransferRegistration.this.addToLayout(layout, widgets, 4, 4);
                         }
                         if (context.isActuallyCrafting()) {
                             context.getMinecraft().setScreen(context.getContainerScreen());
@@ -244,8 +245,8 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
         };
     }
     
-    private void addToLayout(IRecipeLayout layout, List<Widget> entries) {
-        Map<Boolean, List<Multimap<EntryType<?>, EntryStack<?>>>> groups = new HashMap<>();
+    private void addToLayout(IRecipeLayout layout, List<Widget> entries, int xOffset, int yOffset) {
+        Map<Boolean, List<Pair<Slot, Multimap<EntryType<?>, EntryStack<?>>>>> groups = new HashMap<>();
         for (Widget widget : entries) {
             if (widget instanceof Slot) {
                 Multimap<EntryType<?>, EntryStack<?>> group = HashMultimap.create();
@@ -253,20 +254,22 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                 for (EntryStack<?> stack : ingredient) {
                     group.put(stack.getType(), stack);
                 }
-                groups.computeIfAbsent(((Slot) widget).getNoticeMark() != Slot.OUTPUT, $ -> new ArrayList<>()).add(group);
+                groups.computeIfAbsent(((Slot) widget).getNoticeMark() != Slot.OUTPUT, $ -> new ArrayList<>())
+                        .add(Pair.of((Slot) widget, group));
             }
         }
-        for (Map.Entry<Boolean, List<Multimap<EntryType<?>, EntryStack<?>>>> entry : groups.entrySet()) {
-            entry.getValue().stream().map(Multimap::keys).flatMap(Collection::stream)
+        for (Map.Entry<Boolean, List<Pair<Slot, Multimap<EntryType<?>, EntryStack<?>>>>> entry : groups.entrySet()) {
+            entry.getValue().stream().map(Pair::getRight).map(Multimap::keys).flatMap(Collection::stream)
                     .distinct().forEach(type -> {
                         IGuiIngredientGroup<Object> group = layout.getIngredientsGroup((IIngredientType<Object>) type.getDefinition().jeiType());
                         int[] i = new int[]{getNextId(group.getGuiIngredients().keySet())};
-                        entry.getValue().stream().map(map -> map.get(type))
-                                .forEach(stacks -> {
-                                    group.set(i[0], CollectionUtils.map(stacks, JEIPluginDetector::jeiValue));
-                                    group.init(i[0], entry.getKey(), 0, 0);
-                                    i[0]++;
-                                });
+                        for (Pair<Slot, Multimap<EntryType<?>, EntryStack<?>>> pair : entry.getValue()) {
+                            Slot slot = pair.getLeft();
+                            Collection<EntryStack<?>> stacks = pair.getRight().get(type);
+                            group.set(i[0], CollectionUtils.map(stacks, JEIPluginDetector::jeiValue));
+                            group.init(i[0], entry.getKey(), slot.getBounds().x - xOffset, slot.getBounds().y - yOffset);
+                            i[0]++;
+                        }
                     });
         }
     }

@@ -191,7 +191,8 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
             RenderSystem.disableDepthTest();
             RenderSystem.colorMask(true, true, true, false);
             slot.setZ(300);
-            Rectangle bounds = slot.getInnerBounds();
+            Rectangle bounds = slot.getInnerBounds().clone();
+            bounds.translate(xOffset, yOffset);
             try {
                 m_93179_.invoke(slot, matrixStack, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), color, color);
             } catch (IllegalAccessException | InvocationTargetException e) {
