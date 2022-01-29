@@ -192,7 +192,7 @@ public class UncertainDisplayViewingScreen extends Screen {
     public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
         scroll.update(float_1);
         if (this.minecraft.level != null) {
-            this.fillGradient(matrices, 0, 0, this.width, this.height, -1072689136, -804253680);
+            renderBackground(matrices);
         } else {
             this.fillGradient(matrices, 0, 0, this.width, this.height, -16777216, -16777216);
         }
