@@ -574,17 +574,32 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             ENTRY_LIST_WIDGET.updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
         }
         if (OverlaySearchField.isHighlighting) {
-            matrices.pushPose();
-            matrices.translate(0, 0, 200f);
+            RenderSystem.disableDepthTest();
+            RenderSystem.colorMask(true, true, true, false);
             if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> containerScreen) {
                 int x = containerScreen.leftPos, y = containerScreen.topPos;
                 for (Slot slot : containerScreen.getMenu().slots) {
                     if (!slot.hasItem() || !ENTRY_LIST_WIDGET.matches(EntryStacks.of(slot.getItem()))) {
-                        fillGradient(matrices, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, -601874400, -601874400);
+                        matrices.pushPose();
+                        matrices.translate(0, 0, 500f);
+                        fillGradient(matrices, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0xdc202020, 0xdc202020);
+                        matrices.popPose();
+                    } else {
+                        matrices.pushPose();
+                        matrices.translate(0, 0, 200f);
+                        fillGradient(matrices, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0x345fff3b, 0x345fff3b);
+                        
+                        fillGradient(matrices, x + slot.x - 1, y + slot.y - 1, x + slot.x, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b);
+                        fillGradient(matrices, x + slot.x + 16, y + slot.y - 1, x + slot.x + 16 + 1, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b);
+                        fillGradient(matrices, x + slot.x - 1, y + slot.y - 1, x + slot.x + 16, y + slot.y, 0xff5fff3b, 0xff5fff3b);
+                        fillGradient(matrices, x + slot.x - 1, y + slot.y + 16, x + slot.x + 16, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b);
+                        
+                        matrices.popPose();
                     }
                 }
             }
-            matrices.popPose();
+            RenderSystem.colorMask(true, true, true, true);
+            RenderSystem.enableDepthTest();
         }
         if (!hasSpace()) return;
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
