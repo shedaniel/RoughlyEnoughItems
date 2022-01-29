@@ -30,7 +30,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.locale.Language;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
 import java.util.List;
@@ -42,9 +44,10 @@ public class ScreenOverlayImplImpl {
         List<ClientTooltipComponent> lines = tooltip.entries().stream()
                 .flatMap(component -> {
                     if (component.isText()) {
-                        return Minecraft.getInstance().font.getSplitter().splitLines(component.getAsText(), 100000, Style.EMPTY).stream()
-                                .map(Language.getInstance()::getVisualOrder)
-                                .map(ClientTooltipComponent::create);
+                        List<FormattedText> texts = Minecraft.getInstance().font.getSplitter().splitLines(component.getAsText(), 100000, Style.EMPTY);
+                        Stream<FormattedCharSequence> sequenceStream = texts.isEmpty() ? Stream.of(component.getAsText().getVisualOrderText())
+                                : texts.stream().map(Language.getInstance()::getVisualOrder);
+                        return sequenceStream.map(ClientTooltipComponent::create);
                     } else {
                         return Stream.of(component.getAsComponent());
                     }
