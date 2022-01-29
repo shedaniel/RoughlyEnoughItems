@@ -348,7 +348,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             }
         }
         scrolling.updatePosition(delta);
-        this.fillGradient(matrices, 0, 0, this.width, this.height, -1072689136, -804253680);
+        renderBackground(matrices);
         int yOffset = 0;
         for (Widget widget : widgets) {
             widget.render(matrices, mouseX, mouseY, delta);
