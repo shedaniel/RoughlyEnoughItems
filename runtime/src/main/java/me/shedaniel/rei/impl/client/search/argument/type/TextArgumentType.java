@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.search.argument.type;
 
+import me.shedaniel.rei.api.client.gui.config.SearchMode;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -47,6 +48,11 @@ public final class TextArgumentType extends ArgumentType<Unit, String> {
     @Nullable
     public String getPrefix() {
         return "";
+    }
+    
+    @Override
+    public SearchMode getSearchMode() {
+        return SearchMode.ALWAYS;
     }
     
     @Override
