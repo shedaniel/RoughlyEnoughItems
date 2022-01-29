@@ -59,6 +59,7 @@ import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
@@ -87,7 +88,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -568,7 +568,6 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     
     private class EntryListEntry extends EntryListEntryWidget {
         private Display display;
-        private Optional<TransferHandler> transferHandler;
         
         private EntryListEntry(int x, int y, int entrySize) {
             super(new Point(x, y), entrySize);
@@ -580,6 +579,10 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         }
         
         public TransferHandler getTransferHandler() {
+            if (PluginManager.areAnyReloading()) {
+                return null;
+            }
+            
             for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
                 for (Display display : displays) {
                     if (ViewsImpl.isRecipesFor(getEntries(), display)) {
@@ -617,7 +620,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                         AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
                         TransferHandler.Context context = TransferHandler.Context.create(true, Screen.hasShiftDown() || button == 1, containerScreen, display);
                         TransferHandler.Result transferResult = handler.handle(context);
-    
+                        
                         if (transferResult.isBlocking()) {
                             if (transferResult.isReturningToScreen() && Minecraft.getInstance().screen != containerScreen) {
                                 Minecraft.getInstance().setScreen(containerScreen);
