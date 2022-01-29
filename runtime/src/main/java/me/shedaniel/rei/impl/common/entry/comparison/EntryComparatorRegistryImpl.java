@@ -29,11 +29,14 @@ import me.shedaniel.rei.api.common.entry.comparison.EntryComparatorRegistry;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.ArrayList;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 
 @ApiStatus.Internal
 public abstract class EntryComparatorRegistryImpl<T, S> implements EntryComparatorRegistry<T, S> {
+    private final List<EntryComparator<T>> globalComparators = new ArrayList<>();
     private final Map<S, EntryComparator<T>> comparators = new IdentityHashMap<>();
     
     @Override
@@ -46,12 +49,18 @@ public abstract class EntryComparatorRegistryImpl<T, S> implements EntryComparat
     }
     
     @Override
+    public void registerGlobal(EntryComparator<T> comparator) {
+        this.globalComparators.add(comparator);
+    }
+    
+    @Override
     public ReloadStage getStage() {
         return ReloadStage.START;
     }
     
     @Override
     public void startReload() {
+        globalComparators.clear();
         comparators.clear();
     }
     
@@ -62,19 +71,22 @@ public abstract class EntryComparatorRegistryImpl<T, S> implements EntryComparat
     @Override
     public long hashOf(ComparisonContext context, T stack) {
         EntryComparator<T> comparator = comparators.get(getEntry(stack));
-        if (comparator != null) {
-            return comparator.hash(context, stack);
+        if (comparator == null) comparator = defaultComparator();
+        long hash = 1L;
+        hash = hash * 31 + comparator.hash(context, stack);
+        for (EntryComparator<T> globalComparator : globalComparators) {
+            hash = hash * 31 + globalComparator.hash(context, stack);
         }
-        return defaultComparator().hash(context, stack);
+        return hash;
     }
     
     @Override
     public boolean containsComparator(S item) {
-        return comparators.containsKey(item);
+        return !globalComparators.isEmpty() || comparators.containsKey(item);
     }
     
     @Override
     public int comparatorSize() {
-        return this.comparators.size();
+        return this.globalComparators.size() + this.comparators.size();
     }
 }
