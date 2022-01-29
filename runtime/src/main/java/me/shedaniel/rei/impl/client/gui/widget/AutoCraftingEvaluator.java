@@ -122,7 +122,6 @@ public class AutoCraftingEvaluator {
                         errors.clear();
                         result.successful = true;
                         result.successfulHandler = transferHandler;
-                        result.renderer = null;
                         break;
                     }
                     
