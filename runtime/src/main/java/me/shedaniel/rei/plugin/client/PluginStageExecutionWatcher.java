@@ -25,8 +25,6 @@ package me.shedaniel.rei.plugin.client;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import it.unimi.dsi.fastutil.doubles.DoubleIntMutablePair;
-import it.unimi.dsi.fastutil.doubles.DoubleIntPair;
 import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -39,6 +37,8 @@ import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Nullable;
 
@@ -125,7 +125,7 @@ public class PluginStageExecutionWatcher implements HintProvider {
         List<ReloadStage> stages = Arrays.asList(ReloadStage.values());
         Set<ReloadStage> notVisited = notVisited();
         int allManagers = PluginManager.getActiveInstances().size();
-        DoubleIntPair[] progresses = new DoubleIntPair[allManagers];
+        Pair<Double, Integer>[] progresses = new Pair[allManagers];
         Triple<PluginManager<?>, ReloadStage, Reloadable<?>> current = null;
         int i = 0;
         
@@ -134,18 +134,18 @@ public class PluginStageExecutionWatcher implements HintProvider {
             int index = i++;
             
             if (data == null) {
-                progresses[index] = DoubleIntPair.of(0, 0);
+                progresses[index] = Pair.of(0.0, 0);
                 continue;
             }
             
             boolean allDone = data.finishedStages.size() == stages.size();
             if (allDone) {
-                progresses[index] = DoubleIntPair.of(stages.size(), stages.size());
+                progresses[index] = Pair.of((double) stages.size(), stages.size());
             } else {
-                DoubleIntMutablePair pair = new DoubleIntMutablePair(0, 0);
+                MutablePair<Double, Integer> pair = new MutablePair<>(0.0, 0);
                 for (ReloadStage stage : stages) {
                     List<Reloadable<?>> reloadables = data.beganStages.get(stage);
-                    pair.right(pair.rightInt() + 1);
+                    pair.setRight(pair.getRight() + 1);
                     
                     if (reloadables == null) {
                         continue;
@@ -154,9 +154,9 @@ public class PluginStageExecutionWatcher implements HintProvider {
                     boolean finished = data.finishedStages.contains(stage);
                     
                     if (finished) {
-                        pair.left(pair.leftDouble() + 1);
+                        pair.setLeft(pair.getLeft() + 1);
                     } else {
-                        pair.left(pair.leftDouble() + (reloadables.size() / (double) manager.getReloadables().size()));
+                        pair.setLeft(pair.getLeft() + (reloadables.size() / (double) manager.getReloadables().size()));
                         
                         if (!reloadables.isEmpty()) {
                             Reloadable<?> currentReloadable = Iterables.getLast(reloadables);
@@ -178,8 +178,8 @@ public class PluginStageExecutionWatcher implements HintProvider {
         } else {
             double total = 0;
             int j = 0;
-            for (DoubleIntPair pair : progresses) {
-                total += pair == null || pair.rightInt() == 0 ? 0 : pair.leftDouble() / pair.rightInt();
+            for (Pair<Double, Integer> pair : progresses) {
+                total += pair == null || pair.getRight() == 0 ? 0 : pair.getLeft() / pair.getRight();
             }
             double average = total / progresses.length;
             lastProgress = average;
