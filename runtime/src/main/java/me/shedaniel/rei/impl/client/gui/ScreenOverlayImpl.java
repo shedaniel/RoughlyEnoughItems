@@ -559,8 +559,8 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (shouldReload || !calculateOverlayBounds().equals(bounds)) {
-            ENTRY_LIST_WIDGET.updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
             init();
+            ENTRY_LIST_WIDGET.updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
         } else {
             for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(minecraft.screen)) {
                 if (decider != null && decider.shouldRecalculateArea(ConfigObject.getInstance().getDisplayPanelLocation(), bounds)) {
