@@ -118,10 +118,6 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     public List<EntryStack<?>> getPreFilteredList() {
-        if (PluginManager.areAnyReloading()) {
-            return Collections.emptyList();
-        }
-        
         return Collections.unmodifiableList(preFilteredList);
     }
     
