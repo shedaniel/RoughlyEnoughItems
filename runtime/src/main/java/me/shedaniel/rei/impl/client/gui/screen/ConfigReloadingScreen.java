@@ -46,26 +46,26 @@ public class ConfigReloadingScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         this.renderDirtBackground(0);
         if (!PluginManager.areAnyReloading()) {
             parent.run();
         }
         drawCenteredString(matrices, this.font, I18n.get("text.rei.config.is.reloading"), this.width / 2, this.height / 2 - 50, 16777215);
-        String string_3;
+        String text;
         switch ((int) (Util.getMillis() / 300L % 4L)) {
             case 0:
             default:
-                string_3 = "O o o";
+                text = "O o o";
                 break;
             case 1:
             case 3:
-                string_3 = "o O o";
+                text = "o O o";
                 break;
             case 2:
-                string_3 = "o o O";
+                text = "o o O";
         }
-        drawCenteredString(matrices, this.font, string_3, this.width / 2, this.height / 2 - 41, 8421504);
-        super.render(matrices, int_1, int_2, float_1);
+        drawCenteredString(matrices, this.font, text, this.width / 2, this.height / 2 - 41, 8421504);
+        super.render(matrices, mouseX, mouseY, delta);
     }
 }

@@ -52,6 +52,7 @@ import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
@@ -276,7 +277,9 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         } else {
             trashBounds.setBounds(0, 0, 0, 0);
         }
-        updateSystemRegion();
+        if (!PluginManager.areAnyReloading()) {
+            updateSystemRegion();
+        }
 //        systemRegion.getBounds().setBounds(this.fullBounds.x + 1, this.fullBounds.y - 1 + 14, this.fullBounds.width - 1, Math.max(1, systemRegion.scrolling.getMaxScrollHeight()));
         systemRegion.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + 1, this.fullBounds.width, Math.max(1, systemRegion.scrolling.getMaxScrollHeight()));
         int systemHeight = systemRegion.getBounds().getHeight();
