@@ -40,5 +40,10 @@ public interface HintProvider {
     @Nullable
     Tooltip provideTooltip(Point mouse);
     
+    @Nullable
+    default Double getProgress() {
+        return null;
+    }
+    
     Color getColor();
 }

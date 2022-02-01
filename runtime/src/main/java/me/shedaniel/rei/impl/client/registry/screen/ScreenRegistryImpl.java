@@ -55,6 +55,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
@@ -63,7 +64,7 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     private List<DraggableStackProvider<Screen>> draggableStacksProviders = new ArrayList<>();
     private List<DraggableStackVisitor<Screen>> draggableStacksVisitors = new ArrayList<>();
     private List<FocusedStackProvider> focusedStackProviders = new ArrayList<>();
-    private List<OverlayDecider> deciders = new ArrayList<>();
+    private List<OverlayDecider> deciders = new CopyOnWriteArrayList<>();
     private Map<Class<?>, List<OverlayDecider>> cache = new HashMap<>();
     private ExclusionZones exclusionZones;
     private Class<? extends Screen> tmpScreen;

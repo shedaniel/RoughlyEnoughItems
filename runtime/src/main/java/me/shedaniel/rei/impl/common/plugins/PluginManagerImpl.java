@@ -249,6 +249,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
             reloading = true;
             long startTime = Util.getMillis();
             
+            // Pre Reload
             try (SectionClosable startReloadAll = section(stage, "start-reload/");
                  PerformanceLogger.Plugin perfLogger = RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.stage("Reload Initialization")) {
                 for (Reloadable<P> reloadable : reloadables) {
@@ -262,23 +263,64 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
                 }
             }
             
+            // Sort Plugins
             List<PluginWrapper<P>> plugins = new ArrayList<>(getPluginWrapped().toList());
             plugins.sort(Comparator.comparingDouble(PluginWrapper<P>::getPriority).reversed());
             RoughlyEnoughItemsCore.LOGGER.info("Reloading Plugin Manager [%s] stage [%s], registered %d plugins: %s", name(pluginClass), stage.toString(), plugins.size(), CollectionUtils.mapAndJoinToString(plugins, PluginWrapper::getPluginProviderName, ", "));
             Collections.reverse(plugins);
             
+            // Reload
             for (Reloadable<P> reloadable : getReloadables()) {
                 Class<?> reloadableClass = reloadable.getClass();
                 try (SectionClosable reloadablePlugin = section(stage, "reloadable-plugin/" + name(reloadableClass) + "/");
                      PerformanceLogger.Plugin perfLogger = RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.stage(name(reloadableClass))) {
+                    try (PerformanceLogger.Plugin.Inner inner = perfLogger.stage("reloadable-plugin/" + name(reloadableClass) + "/prompt-others-before")) {
+                        for (Reloadable<P> listener : reloadables) {
+                            try {
+                                listener.beforeReloadable(stage, reloadable);
+                            } catch (Throwable throwable) {
+                                throwable.printStackTrace();
+                            }
+                        }
+                    }
+                    
                     pluginSection(stage, "reloadable-plugin/" + name(reloadableClass) + "/", plugins, reloadable, plugin -> {
                         try (PerformanceLogger.Plugin.Inner inner = perfLogger.plugin(new Pair<>(plugin.provider, plugin.plugin))) {
-                            reloadable.acceptPlugin(plugin.plugin, stage);
+                            for (Reloadable<P> listener : reloadables) {
+                                try {
+                                    listener.beforeReloadablePlugin(stage, reloadable, plugin.plugin);
+                                } catch (Throwable throwable) {
+                                    throwable.printStackTrace();
+                                }
+                            }
+                            
+                            try {
+                                reloadable.acceptPlugin(plugin.plugin, stage);
+                            } finally {
+                                for (Reloadable<P> listener : reloadables) {
+                                    try {
+                                        listener.afterReloadablePlugin(stage, reloadable, plugin.plugin);
+                                    } catch (Throwable throwable) {
+                                        throwable.printStackTrace();
+                                    }
+                                }
+                            }
                         }
                     });
+                    
+                    try (PerformanceLogger.Plugin.Inner inner = perfLogger.stage("reloadable-plugin/" + name(reloadableClass) + "/prompt-others-after")) {
+                        for (Reloadable<P> listener : reloadables) {
+                            try {
+                                listener.afterReloadable(stage, reloadable);
+                            } catch (Throwable throwable) {
+                                throwable.printStackTrace();
+                            }
+                        }
+                    }
                 }
             }
             
+            // Post Reload
             try (SectionClosable endReloadAll = section(stage, "end-reload/");
                  PerformanceLogger.Plugin perfLogger = RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.stage("Reload Finalization")) {
                 for (Reloadable<P> reloadable : reloadables) {
