@@ -35,6 +35,8 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.animator.NumberAnimator;
+import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -61,6 +63,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.opengl.GL11;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.OptionalDouble;
 import java.util.function.Consumer;
 
 @ApiStatus.Internal
@@ -75,6 +79,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     public boolean isMain = true;
     protected Tuple<Long, Point> lastClickedDetails = null;
     private List<String> history = Lists.newArrayListWithCapacity(100);
+    private final NumberAnimator<Double> progress = ValueAnimator.ofDouble();
     
     public OverlaySearchField(int x, int y, int width, int height) {
         super(x, y, width, height);
@@ -138,21 +143,31 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         }
     }
     
-    public void laterRender(PoseStack matrices, int int_1, int int_2, float float_1) {
+    public void laterRender(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        progress.update(delta);
         RenderSystem.disableDepthTest();
-        if (isMain) drawHint(matrices, int_1, int_2);
+        if (isMain) drawHint(matrices, mouseX, mouseY);
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
-        super.render(matrices, int_1, int_2, float_1);
+        super.render(matrices, mouseX, mouseY, delta);
         RenderSystem.enableDepthTest();
     }
     
-    private void drawHint(PoseStack poses, int int_1, int int_2) {
-        List<Pair<HintProvider, Component>> hints = CollectionUtils.flatMap(REIRuntimeImpl.getInstance().getHintProviders(), provider ->
+    private void drawHint(PoseStack poses, int mouseX, int mouseY) {
+        List<HintProvider> hintProviders = REIRuntimeImpl.getInstance().getHintProviders();
+        List<Pair<HintProvider, Component>> hints = CollectionUtils.flatMap(hintProviders, provider ->
                 CollectionUtils.map(provider.provide(), component -> new Pair<>(provider, component)));
         if (hints.isEmpty()) return;
         int width = getBounds().getWidth() - 4;
         List<Pair<HintProvider, FormattedCharSequence>> sequences = CollectionUtils.flatMap(hints, pair ->
                 CollectionUtils.map(font.split(pair.getSecond(), width - 6), sequence -> new Pair<>(pair.getFirst(), sequence)));
+        OptionalDouble progress = hintProviders.stream().map(HintProvider::getProgress).filter(Objects::nonNull).mapToDouble(Double::doubleValue)
+                .average();
+        boolean hasProgress = progress.isPresent();
+        if (!hasProgress) {
+            this.progress.setAs(0);
+        } else {
+            this.progress.setTo(progress.getAsDouble(), 200);
+        }
         Color color = hints.stream()
                 .map(Pair::getFirst)
                 .distinct()
@@ -163,7 +178,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                     int b = color1.getBlue() - (color1.getBlue() - color2.getBlue()) / 2;
                     return Color.ofRGBA(r, g, b, (color1.getAlpha() + color2.getAlpha()) / 2);
                 }).orElse(Color.ofTransparent(0x50000000));
-        int height = 6 + font.lineHeight * sequences.size();
+        int height = 6 + font.lineHeight * sequences.size() + (hasProgress ? 2 : 0);
         int x = getBounds().getX() + 2;
         int y = getBounds().getY() - height;
         Tesselator tesselator = Tesselator.getInstance();
@@ -182,6 +197,12 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         fillGradient(pose, bufferBuilder, x + width - 1, y + 1, x + width, y + height - 1, 400, color1, color2);
         fillGradient(pose, bufferBuilder, x, y, x + width, y + 1, 400, color1, color1);
         fillGradient(pose, bufferBuilder, x, y + height - 1, x + width, y + height, 400, color2, color2);
+        
+        if (hasProgress) {
+            int progressWidth = (int) Math.round(width * this.progress.doubleValue());
+            fillGradient(pose, bufferBuilder, x + 1, y + height - 3, x + progressWidth - 1, y + height - 1, 400, 0xffffffff, 0xffffffff);
+        }
+        
         bufferBuilder.end();
         BufferUploader.end(bufferBuilder);
         poses.pushPose();
@@ -189,8 +210,8 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         for (int i = 0; i < sequences.size(); i++) {
             Pair<HintProvider, FormattedCharSequence> pair = sequences.get(i);
             int lineWidth = font.drawShadow(poses, pair.getSecond(), x + 3, y + 3 + font.lineHeight * i, -1);
-            if (new Rectangle(x + 3, y + 3 + font.lineHeight * i, lineWidth, font.lineHeight).contains(int_1, int_2)) {
-                Tooltip tooltip = pair.getFirst().provideTooltip(new Point(int_1, int_2));
+            if (new Rectangle(x + 3, y + 3 + font.lineHeight * i, lineWidth, font.lineHeight).contains(mouseX, mouseY)) {
+                Tooltip tooltip = pair.getFirst().provideTooltip(new Point(mouseX, mouseY));
                 if (tooltip != null) {
                     tooltip.queue();
                 }

@@ -39,6 +39,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.animator.NumberAnimator;
 import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
@@ -103,6 +104,7 @@ public class UncertainDisplayViewingScreen extends Screen {
         this.parent = parent;
         this.showTips = showTips;
         if (showTips && false && Platform.isForge()) {
+            this.jeiEnabled = ConfigObject.getInstance().isJEICompatibilityLayerEnabled();
             allModsUsingJEI = ClientInternals.getJeiCompatMods().stream()
                     .distinct()
                     .map(ClientHelper.getInstance()::getModFromModId)
@@ -150,7 +152,7 @@ public class UncertainDisplayViewingScreen extends Screen {
                         ConfigManager.getInstance().saveConfig();
                         RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
                         RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
-                        Minecraft.getInstance().setScreen(new ConfigReloadingScreen(() -> callback.accept(original)));
+                        Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
                     } else {
                         callback.accept(original);
                     }

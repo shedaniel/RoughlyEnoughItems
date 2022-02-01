@@ -24,6 +24,9 @@
 package me.shedaniel.rei.plugin.client;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import it.unimi.dsi.fastutil.doubles.DoubleIntMutablePair;
+import it.unimi.dsi.fastutil.doubles.DoubleIntPair;
 import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -31,19 +34,41 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.registry.Reloadable;
+import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class PluginStageExecutionWatcher implements HintProvider {
-    private final Map<PluginManager<?>, Set<ReloadStage>> allStages = new HashMap<>();
+    private final Map<PluginManager<?>, PluginManagerData> allStages = new HashMap<>();
+    
+    private static class PluginManagerData {
+        private final PluginManager<?> manager;
+        private final Map<ReloadStage, List<Reloadable<?>>> beganStages = new HashMap<>();
+        private final Set<ReloadStage> finishedStages = new HashSet<>();
+        
+        public PluginManagerData(PluginManager<?> manager) {
+            this.manager = manager;
+        }
+        
+        private void clear() {
+            beganStages.clear();
+            finishedStages.clear();
+        }
+    }
     
     public <T extends REIPlugin<?>> Reloadable<? extends T> reloadable(PluginManager<?> manager) {
         return new Reloadable<T>() {
+            private PluginManagerData data() {
+                return allStages.computeIfAbsent(manager, PluginManagerData::new);
+            }
+            
             @Override
             public void startReload() {
                 for (ReloadStage stage : ReloadStage.values()) {
@@ -54,9 +79,31 @@ public class PluginStageExecutionWatcher implements HintProvider {
             @Override
             public void startReload(ReloadStage stage) {
                 synchronized (allStages) {
-                    Set<ReloadStage> stages = allStages.computeIfAbsent(manager, $ -> new HashSet<>());
-                    if (stage.ordinal() == 0) stages.clear();
-                    stages.add(stage);
+                    if (manager == PluginManager.getInstance() && stage.ordinal() == 0) {
+                        allStages.clear();
+                    }
+                    data().beganStages.put(stage, new ArrayList<>());
+                }
+            }
+            
+            @Override
+            public void endReload() {
+                for (ReloadStage stage : ReloadStage.values()) {
+                    endReload(stage);
+                }
+            }
+            
+            @Override
+            public void endReload(ReloadStage stage) {
+                synchronized (allStages) {
+                    data().finishedStages.add(stage);
+                }
+            }
+            
+            @Override
+            public void beforeReloadable(ReloadStage stage, Reloadable<T> other) {
+                synchronized (allStages) {
+                    data().beganStages.get(stage).add(other);
                 }
             }
         };
@@ -65,25 +112,112 @@ public class PluginStageExecutionWatcher implements HintProvider {
     public Set<ReloadStage> notVisited() {
         synchronized (allStages) {
             Set<ReloadStage> notVisited = new HashSet<>(Arrays.asList(ReloadStage.values()));
-            notVisited.removeIf(stage -> allStages.values().stream().allMatch(stages -> stages.contains(stage)));
+            notVisited.removeIf(stage -> allStages.values().stream().allMatch(data -> data.finishedStages.contains(stage)));
             return notVisited;
         }
     }
     
+    private int lastStep;
+    private Double lastProgress;
+    
     @Override
     public List<Component> provide() {
+        List<ReloadStage> stages = Arrays.asList(ReloadStage.values());
         Set<ReloadStage> notVisited = notVisited();
+        int allManagers = PluginManager.getActiveInstances().size();
+        DoubleIntPair[] progresses = new DoubleIntPair[allManagers];
+        Triple<PluginManager<?>, ReloadStage, Reloadable<?>> current = null;
+        int i = 0;
+        
+        for (PluginManager<? extends REIPlugin<?>> manager : PluginManager.getActiveInstances()) {
+            PluginManagerData data = allStages.get(manager);
+            int index = i++;
+            
+            if (data == null) {
+                progresses[index] = DoubleIntPair.of(0, 0);
+                continue;
+            }
+            
+            boolean allDone = data.finishedStages.size() == stages.size();
+            if (allDone) {
+                progresses[index] = DoubleIntPair.of(stages.size(), stages.size());
+            } else {
+                DoubleIntMutablePair pair = new DoubleIntMutablePair(0, 0);
+                for (ReloadStage stage : stages) {
+                    List<Reloadable<?>> reloadables = data.beganStages.get(stage);
+                    pair.right(pair.rightInt() + 1);
+                    
+                    if (reloadables == null) {
+                        continue;
+                    }
+                    
+                    boolean finished = data.finishedStages.contains(stage);
+                    
+                    if (finished) {
+                        pair.left(pair.leftDouble() + 1);
+                    } else {
+                        pair.left(pair.leftDouble() + (reloadables.size() / (double) manager.getReloadables().size()));
+                        
+                        if (!reloadables.isEmpty()) {
+                            Reloadable<?> currentReloadable = Iterables.getLast(reloadables);
+                            current = Triple.of(manager, stage, currentReloadable);
+                        }
+                    }
+                }
+                for (Map.Entry<ReloadStage, List<Reloadable<?>>> stageSetEntry : data.beganStages.entrySet()) {
+                    ReloadStage stage = stageSetEntry.getKey();
+                    
+                }
+                progresses[index] = pair;
+            }
+        }
+        
         if (notVisited.isEmpty()) {
+            lastProgress = null;
             return Collections.emptyList();
         } else {
-            return ImmutableList.of(new TranslatableComponent("text.rei.not.fully.initialized"));
+            double total = 0;
+            int j = 0;
+            for (DoubleIntPair pair : progresses) {
+                total += pair == null || pair.rightInt() == 0 ? 0 : pair.leftDouble() / pair.rightInt();
+            }
+            double average = total / progresses.length;
+            lastProgress = average;
+            String progress;
+            String currentTask;
+            if (current != null) {
+                int managerIndex = PluginManager.getActiveInstances().indexOf(current.getLeft());
+                lastStep = managerIndex + 1 + current.getMiddle().ordinal() * allManagers;
+            }
+            progress = String.format("Step %d/%d (%s%%):", lastStep, allManagers * stages.size(), Math.round(average * 100));
+            if (current == null) {
+                currentTask = "Waiting";
+            } else {
+                currentTask = getSimpleName(current.getRight().getClass());
+            }
+            return ImmutableList.of(new TranslatableComponent("text.rei.not.fully.initialized"),
+                    new ImmutableTextComponent(progress), new ImmutableTextComponent(currentTask));
         }
+    }
+    
+    private static <P> String getSimpleName(Class<? extends P> clazz) {
+        String name = clazz.getName();
+        name = name.contains(".") ? StringUtils.substringAfterLast(name, ".") : name;
+        name = name.replace("Impl", "");
+        name = name.replace("$", ".");
+        return name;
     }
     
     @Override
     @Nullable
     public Tooltip provideTooltip(Point mouse) {
         return Tooltip.create(mouse, new TranslatableComponent("text.rei.not.fully.initialized.tooltip", notVisited().stream().map(Enum::name).collect(Collectors.joining(", "))));
+    }
+    
+    @Override
+    @Nullable
+    public Double getProgress() {
+        return lastProgress;
     }
     
     @Override

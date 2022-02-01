@@ -98,7 +98,7 @@ public class PluginDetectorImpl {
             List<String> modIds = new ArrayList<>();
             for (REIPluginProvider<REIClientPlugin> plugin : PluginManager.getClientInstance().getPluginProviders()) {
                 if (plugin instanceof JEIPluginDetector.JEIPluginProvider) {
-                    modIds.addAll(((JEIPluginDetector.JEIPluginProvider) plugin).wrapper.modIds);
+                    modIds.addAll(((JEIPluginDetector.JEIPluginProvider) plugin).modIds);
                 }
             }
             return modIds;

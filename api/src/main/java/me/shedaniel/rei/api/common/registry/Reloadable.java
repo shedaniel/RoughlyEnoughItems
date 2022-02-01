@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.common.registry;
 
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import org.jetbrains.annotations.ApiStatus;
 
 @FunctionalInterface
 public interface Reloadable<P extends REIPlugin<?>> {
@@ -46,6 +47,18 @@ public interface Reloadable<P extends REIPlugin<?>> {
             endReload();
         }
     }
+    
+    @ApiStatus.Experimental
+    default void beforeReloadable(ReloadStage stage, Reloadable<P> other) {}
+    
+    @ApiStatus.Experimental
+    default void afterReloadable(ReloadStage stage, Reloadable<P> other) {}
+    
+    @ApiStatus.Experimental
+    default void beforeReloadablePlugin(ReloadStage stage, Reloadable<P> other, P plugin) {}
+    
+    @ApiStatus.Experimental
+    default void afterReloadablePlugin(ReloadStage stage, Reloadable<P> other, P plugin) {}
     
     /**
      * Accepts a {@link REIPlugin}

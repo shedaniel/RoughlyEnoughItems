@@ -59,4 +59,18 @@ public interface ParentReloadable<P extends REIPlugin<?>> extends Reloadable<P> 
             reloadable.endReload(stage);
         }
     }
+    
+    @Override
+    default void beforeReloadable(ReloadStage stage, Reloadable<P> other) {
+        for (Reloadable<P> reloadable : getReloadables()) {
+            reloadable.beforeReloadable(stage, other);
+        }
+    }
+    
+    @Override
+    default void afterReloadable(ReloadStage stage, Reloadable<P> other) {
+        for (Reloadable<P> reloadable : getReloadables()) {
+            reloadable.afterReloadable(stage, other);
+        }
+    }
 }
