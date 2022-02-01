@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import lombok.experimental.ExtensionMethod;
 import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
@@ -76,10 +76,22 @@ public enum JEISubtypeRegistration implements ISubtypeRegistration {
     }
     
     private static EntryComparator<ItemStack> wrapItemComparator(IIngredientSubtypeInterpreter<ItemStack> interpreter) {
-        return (context, stack) -> Objects.hashCode(interpreter.apply(stack, context.wrapContext()));
+        return (context, stack) -> {
+            try {
+                return Objects.hashCode(interpreter.apply(stack, context.wrapContext()));
+            } catch (NullPointerException e) {
+                return 0;
+            }
+        };
     }
     
     private static EntryComparator<dev.architectury.fluid.FluidStack> wrapFluidComparator(IIngredientSubtypeInterpreter<FluidStack> interpreter) {
-        return (context, stack) -> Objects.hashCode(interpreter.apply(FluidStackHooksForge.toForge(stack), context.wrapContext()));
+        return (context, stack) -> {
+            try {
+                return Objects.hashCode(interpreter.apply(FluidStackHooksForge.toForge(stack), context.wrapContext()));
+            } catch (NullPointerException e) {
+                return 0;
+            }
+        };
     }
 }

@@ -341,7 +341,7 @@ public class JEIPluginDetector {
     }
     
     public static class JEIPluginProvider implements REIPluginProvider<REIClientPlugin> {
-        private final List<String> modIds;
+        public final List<String> modIds;
         public final Supplier<JEIPluginWrapper> supplier;
         private final Class<?> clazz;
         public JEIPluginWrapper wrapper;
@@ -361,13 +361,20 @@ public class JEIPluginDetector {
                     wrapper = supplier.get();
                 }
             }
+            
+            String strSuffix = nameSuffix;
+            
+            if (!ConfigObject.getInstance().isJEICompatibilityLayerEnabled()) {
+                strSuffix = " {DISABLED}";
+            }
+            
             if (wrapper != null) {
-                return wrapper.getPluginProviderName() + nameSuffix;
+                return wrapper.getPluginProviderName() + strSuffix;
             }
             
             String simpleName = clazz.getSimpleName();
             simpleName = simpleName == null ? clazz.getName() : simpleName;
-            return "JEI Plugin [" + simpleName + "]" + nameSuffix;
+            return "JEI Plugin [" + simpleName + "]" + strSuffix;
         }
         
         @Override
@@ -390,7 +397,6 @@ public class JEIPluginDetector {
     }
     
     public static class JEIPluginWrapper implements REIClientPlugin {
-        public final List<String> modIds;
         public final boolean mainThread;
         public final boolean forceRuntime;
         public final IModPlugin backingPlugin;
@@ -400,7 +406,6 @@ public class JEIPluginDetector {
         public final List<Runnable> post = new ArrayList<>();
         
         public JEIPluginWrapper(List<String> modIds, IModPlugin backingPlugin) {
-            this.modIds = modIds;
             this.backingPlugin = backingPlugin;
             // why are you reloading twice
             this.mainThread = CollectionUtils.anyMatch(Arrays.asList("jeresources", "jepb"), modIds::contains);

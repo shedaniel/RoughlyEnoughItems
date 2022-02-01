@@ -96,8 +96,8 @@ dependencies {
     modRuntime("appeng:appliedenergistics2:10.0.1")
     // modRuntime("curse.maven:tcon-74072:3273213")
     // modRuntime("curse.maven:mantle-74924:3273201")
-    // modRuntime("curse.maven:jer-240630:3489131")
-    // modRuntime("curse.maven:jep-417645:3478254")
+    modRuntime("curse.maven:jer-240630:3575590")
+    modRuntime("curse.maven:jep-417645:3550303")
     modRuntime("curse.maven:simple-storage-network-268495:3594529")
     // modRuntime("curse.maven:create-328085:3536025")
     // modRuntime("curse.maven:flywheel-486392:3535459")
@@ -125,6 +125,9 @@ dependencies {
     // modRuntime("curse.maven:rhino-416294:3525704")
     modRuntime("curse.maven:enchantment-descriptions-250419:3566741")
     modRuntime("curse.maven:natures-aura-306626:3587798")
+    modRuntime("curse.maven:integrated-dynamics-236307:3631804")
+    modRuntime("curse.maven:common-capabilities-247007:3614900")
+    modRuntime("curse.maven:cyclops-core-236307:3614854")
 }
 
 shadowJar {
