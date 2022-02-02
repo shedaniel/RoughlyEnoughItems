@@ -1,0 +1,27 @@
+name: Feature Request
+description: Suggest a change to the project
+title: "[Feature] CHANGE ME"
+labels: [ "enhancement" ]
+body:
+  - type: textarea
+    attributes:
+      label: What is your feature request?
+      description: |
+        Please describe the feature you would like to see.
+
+        Tip: You can attach images or additional log files by clicking this area to highlight it and then dragging files in.
+  - type: checkboxes
+    id: types
+    attributes:
+      label: What do you think this change is of?
+      description: Please select all that apply.
+      options:
+        - label: Visual
+        - label: Recipe Lookup
+        - label: Cheat Mode
+        - label: Plugin Integration / JEI Plugin Compatibility
+        - label: Others
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!

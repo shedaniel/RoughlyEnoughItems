@@ -1,0 +1,56 @@
+name: Bug Report
+description: File a bug report
+title: "[Bug] CHANGE ME"
+labels: [ "bug" ]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+  - type: dropdown
+    id: loaders
+    attributes:
+      label: What mod loaders are you seeing the problem on?
+      description: Please select all that apply.
+      multiple: true
+      options:
+        - Fabric
+        - Forge
+        - Rift
+    validations:
+      required: true
+  - type: checkboxes
+    id: types
+    attributes:
+      label: What do you think this bug is of?
+      description: Please select all that apply.
+      options:
+        - label: Visual
+        - label: Recipe Lookup
+        - label: Cheat Mode
+        - label: Plugin Integration / JEI Plugin Compatibility
+        - label: Others
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output, this will be used to help diagnose the issue. Please do not use any paste services, as they may expire and be deleted.
+      placeholder: You can look into `.minecraft/logs` and find the `latest.log` and `rei.log`, you can paste them here.
+      render: shell
+  - type: textarea
+    attributes:
+      label: Anything else?
+      description: |
+        Links? References? Anything that will give us more context about the issue you are encountering!
+
+        Tip: You can attach images or additional log files by clicking this area to highlight it and then dragging files in.
+  - type: markdown
+    attributes:
+      value: |
+        Before submitting a bug report, please make sure that this issue has not already been reported. You can use the search feature to find existing issues.
+
+        Thanks for taking the time to fill out this bug report!
