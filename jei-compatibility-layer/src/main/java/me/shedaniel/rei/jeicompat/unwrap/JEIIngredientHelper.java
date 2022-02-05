@@ -36,6 +36,8 @@ import mezz.jei.api.ingredients.subtypes.UidContext;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 @ExtensionMethod(JEIPluginDetector.class)
 public class JEIIngredientHelper<T> implements IIngredientHelper<T> {
     private final EntryDefinition<T> definition;
@@ -93,7 +95,7 @@ public class JEIIngredientHelper<T> implements IIngredientHelper<T> {
     @Override
     public String getErrorInfo(@Nullable T ingredient) {
         try {
-            return getResourceId(ingredient);
+            return Objects.toString(getResourceLocation(ingredient));
         } catch (Throwable throwable) {
             throwable.printStackTrace();
             return throwable.getClass().getName() + ": " + throwable.getLocalizedMessage();

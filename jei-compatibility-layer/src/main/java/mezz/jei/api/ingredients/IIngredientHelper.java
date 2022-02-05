@@ -27,9 +27,10 @@ public interface IIngredientHelper<V> {
     /**
      * Change one focus into a different focus.
      * This can be used to treat lookups of one focus as if it were something else.
-     * <p>
-     * On example is looking up fluid blocks, which get translated here into looking up the fluid itself.
+     *
+     * @deprecated since JEI 9.2.0. There isn't a good use for this anymore.
      */
+    @Deprecated
     default IFocus<?> translateFocus(IFocus<V> focus, IFocusFactory focusFactory) {
         return focus;
     }
@@ -67,14 +68,17 @@ public interface IIngredientHelper<V> {
     
     /**
      * Return the modId of the mod that created this ingredient.
+     *
+     * @deprecated since JEI 9.2.2. Use {@link #getResourceLocation(Object)} instead.
      */
+    @Deprecated
     String getModId(V ingredient);
     
     /**
      * Return the modId of the mod that should be displayed.
      */
     default String getDisplayModId(V ingredient) {
-        return getModId(ingredient);
+        return getResourceLocation(ingredient).getNamespace();
     }
     
     /**
@@ -89,8 +93,20 @@ public interface IIngredientHelper<V> {
     
     /**
      * Return the resource id of the given ingredient.
+     *
+     * @deprecated since JEI 9.2.2. Use {@link #getResourceLocation(Object)} instead.
      */
+    @Deprecated
     String getResourceId(V ingredient);
+    
+    /**
+     * Return the registry name of the given ingredient.
+     *
+     * @since JEI 9.2.2
+     */
+    default ResourceLocation getResourceLocation(V ingredient) {
+        return new ResourceLocation(getModId(ingredient), getResourceId(ingredient));
+    }
     
     /**
      * Called when a player is in cheat mode and clicks an ingredient in the list.

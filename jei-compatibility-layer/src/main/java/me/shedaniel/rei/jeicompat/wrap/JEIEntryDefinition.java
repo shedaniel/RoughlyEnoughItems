@@ -86,9 +86,13 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
     @Override
     @Nullable
     public ResourceLocation getIdentifier(EntryStack<T> entry, T value) {
-        String resourceId = ingredientHelper.getResourceId(value);
-        if (resourceId == null) return null;
-        return ResourceLocation.tryParse(resourceId);
+        return ingredientHelper.getResourceLocation(value);
+    }
+    
+    @Override
+    @Nullable
+    public String getContainingNamespace(EntryStack<T> entry, T value) {
+        return ingredientHelper.getDisplayModId(value);
     }
     
     @Override
