@@ -38,6 +38,7 @@ import mezz.jei.api.gui.drawable.IDrawableBuilder;
 import mezz.jei.api.gui.drawable.IDrawableStatic;
 import mezz.jei.api.gui.ingredient.ICraftingGridHelper;
 import mezz.jei.api.helpers.IGuiHelper;
+import mezz.jei.api.ingredients.IIngredientType;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -154,6 +155,27 @@ public enum JEIGuiHelper implements IGuiHelper {
             @Override
             public int getHeight() {
                 return height;
+            }
+        };
+    }
+    
+    @Override
+    public <V> IDrawable createDrawableIngredient(IIngredientType<V> type, V ingredient) {
+        EntryStack<?> stack = ingredient.unwrapStack(type);
+        return new IDrawable() {
+            @Override
+            public int getWidth() {
+                return 16;
+            }
+            
+            @Override
+            public int getHeight() {
+                return 16;
+            }
+            
+            @Override
+            public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset) {
+                stack.render(matrixStack, new Rectangle(xOffset, yOffset, getWidth(), getHeight()), PointHelper.getMouseX(), PointHelper.getMouseY(), 0);
             }
         };
     }
