@@ -32,6 +32,10 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraftforge.common.brewing.BrewingRecipe;
+import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
+import net.minecraftforge.common.brewing.IBrewingRecipe;
+import net.minecraftforge.common.brewing.VanillaBrewingRecipe;
 import net.minecraftforge.registries.IRegistryDelegate;
 
 import java.util.Arrays;
@@ -39,6 +43,17 @@ import java.util.Set;
 
 public class DefaultClientPluginImpl {
     public static void registerForgePotions(DisplayRegistry registry, BuiltinClientPlugin clientPlugin) {
+        for (IBrewingRecipe recipe : BrewingRecipeRegistry.getRecipes()) {
+            if (recipe instanceof VanillaBrewingRecipe) {
+                registerVanillaPotions(registry, clientPlugin);
+            } else if (recipe instanceof BrewingRecipe) {
+                BrewingRecipe brewingRecipe = (BrewingRecipe) recipe;
+                clientPlugin.registerBrewingRecipe(brewingRecipe.getInput(), brewingRecipe.getIngredient(), brewingRecipe.getOutput().copy());
+            }
+        }
+    }
+    
+    private static void registerVanillaPotions(DisplayRegistry registry, BuiltinClientPlugin clientPlugin) {
         Set<Potion> potions = Sets.newLinkedHashSet();
         for (Ingredient container : PotionBrewing.ALLOWED_CONTAINERS) {
             for (PotionBrewing.Mix<Potion> mix : PotionBrewing.POTION_MIXES) {
