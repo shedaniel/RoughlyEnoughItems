@@ -47,7 +47,6 @@
   "text.rei.cheat_items": "Hráči {player_name} dán předmět ({item_count}x) [{item_name}§f]",
   "text.rei.failed_cheat_items": "§cNepodařilo se dát předměty.",
   "text.rei.too_long_nbt": "§cNBT předmětu je příliš dlouhé, než aby mohl být použito ve hře pro více hráčů.",
-  "text.rei.tag_match": "Tag: %s",
   "text.rei.performance": "Analýza výkonu",
   "ordering.rei.ascending": "Vzestupně",
   "ordering.rei.descending": "Sestupně",

@@ -40,7 +40,6 @@
   "text.rei.config_tooltip": "פתח מסך קונפיגורציה\n§7תחזיק Shift או Ctrl ותלחץ כדי להפעיל / לכבות מצב רמאות",
   "text.rei.cheat_items": "ניתן [{item_name}§f] x{item_count} ל {player_name}.",
   "text.rei.failed_cheat_items": "§cנכשל לתת פריטים.",
-  "text.rei.tag_match": "טאג: %s",
   "ordering.rei.ascending": "עולה",
   "ordering.rei.descending": "יורד",
   "ordering.rei.name": "שם",
