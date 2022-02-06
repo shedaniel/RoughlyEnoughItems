@@ -83,7 +83,7 @@ public class JEIIngredientHelper<T> implements IIngredientHelper<T> {
     public String getResourceId(T ingredient) {
         EntryStack<T> entry = ingredient.unwrapStack(definition);
         ResourceLocation location = entry.getIdentifier();
-        return location == null ? "minecraft:unknown" : location.toString();
+        return location == null ? "unknown" : location.getPath();
     }
     
     @Override
