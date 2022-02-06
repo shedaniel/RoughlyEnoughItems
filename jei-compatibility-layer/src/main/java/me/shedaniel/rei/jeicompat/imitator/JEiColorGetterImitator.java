@@ -21,20 +21,28 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat.wrap;
+package me.shedaniel.rei.jeicompat.imitator;
 
 import mezz.jei.api.helpers.IColorHelper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.world.item.ItemStack;
 
+import java.util.Collections;
 import java.util.List;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
-
-public enum JEIColorHelper implements IColorHelper {
-    INSTANCE;
+public class JEiColorGetterImitator implements IColorHelper {
+    public static final JEiColorGetterImitator INSTANCE = new JEiColorGetterImitator();
+    
+    public static String[] getColorDefaults() {
+        return new String[0];
+    }
+    
+    public static List<Integer> getColors(ItemStack itemStack, int colorCount) {
+        return Collections.emptyList();
+    }
     
     @Override
     public List<Integer> getColors(TextureAtlasSprite textureAtlasSprite, int renderColor, int colorCount) {
-        throw TODO();
+        return Collections.emptyList();
     }
 }

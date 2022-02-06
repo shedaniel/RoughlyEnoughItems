@@ -28,6 +28,7 @@ import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
+import me.shedaniel.rei.jeicompat.imitator.JEiColorGetterImitator;
 import mezz.jei.api.helpers.IColorHelper;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
@@ -39,8 +40,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Locale;
-
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 
 public class JEIModIngredientRegistration implements IModIngredientRegistration {
     private final JEIPluginDetector.JEIPluginWrapper wrapper;
@@ -60,7 +59,7 @@ public class JEIModIngredientRegistration implements IModIngredientRegistration 
     @Override
     @NotNull
     public IColorHelper getColorHelper() {
-        return JEIColorHelper.INSTANCE;
+        return JEiColorGetterImitator.INSTANCE;
     }
     
     @Override
@@ -70,6 +69,6 @@ public class JEIModIngredientRegistration implements IModIngredientRegistration 
         registry.register(location, new JEIEntryDefinition<>(EntryType.deferred(location), ingredientType, ingredientHelper, ingredientRenderer));
         wrapper.entryRegistry.add(() -> {
             EntryRegistry.getInstance().addEntries(CollectionUtils.map(allIngredients, JEIPluginDetector::unwrapStack));
-        }); 
+        });
     }
 }

@@ -40,7 +40,6 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
     private Boolean isDev;
     
     public InternalsRemapperTransformer() {
-        redirect("mezz/jei/plugins/jei/info/IngredientInfoRecipe", "me/shedaniel/rei/jeicompat/imitator/IngredientInfoRecipe");
         classToInterface("mezz/jei/Internal", "me/shedaniel/rei/jeicompat/imitator/JEIInternalsImitator");
         classToInterface("mezz/jei/runtime/JeiHelpers", "mezz/jei/api/helpers/IJeiHelpers");
         classToInterface("mezz/jei/runtime/JeiRuntime", "mezz/jei/api/runtime/IJeiRuntime");
@@ -50,6 +49,8 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
         classToInterface("mezz/jei/input/IClickedIngredient", "me/shedaniel/rei/jeicompat/imitator/JEIInternalsClickedIngredient");
         classToInterface("mezz/jei/input/ClickedIngredient", "me/shedaniel/rei/jeicompat/imitator/JEIInternalsClickedIngredientImpl");
         classToInterface("mezz/jei/config/ServerInfo", "me/shedaniel/rei/jeicompat/imitator/JEIServerInfo");
+        redirect("mezz/jei/color/ColorGetter", "me/shedaniel/rei/jeicompat/imitator/JEiColorGetterImitator");
+        redirect("mezz/jei/plugins/jei/info/IngredientInfoRecipe", "me/shedaniel/rei/jeicompat/imitator/IngredientInfoRecipe");
         redirect("mezz/jei/plugins/vanilla/cooking/AbstractCookingCategory", "me/shedaniel/rei/jeicompat/imitator/JEIAbstractCookingCategory");
         redirect("mezz/jei/plugins/vanilla/cooking/FurnaceVariantCategory", "me/shedaniel/rei/jeicompat/imitator/JEIFurnaceVariantCategory");
     }

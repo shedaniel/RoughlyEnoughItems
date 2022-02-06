@@ -128,6 +128,8 @@ dependencies {
     modRuntime("curse.maven:integrated-dynamics-236307:3631804")
     modRuntime("curse.maven:common-capabilities-247007:3614900")
     modRuntime("curse.maven:cyclops-core-236307:3614854")
+    modRuntime("curse.maven:elemental-craft-395158:3593428")
+    modRuntime("curse.maven:datapack-anvil-432817:3569515")
 }
 
 shadowJar {
