@@ -47,7 +47,6 @@
   "text.rei.cheat_items": "Видано x{item_count} [{item_name}] гравцеві {player_name}",
   "text.rei.failed_cheat_items": "§cНе вдалося надати предмети.",
   "text.rei.too_long_nbt": "§6NBT предмета занадто довгий для застосування в мультиплеєрі.",
-  "text.rei.tag_match": "Тег: %s",
   "text.rei.performance": "Аналіз продуктивності",
   "ordering.rei.ascending": "За зростанням",
   "ordering.rei.descending": "За спаданням",

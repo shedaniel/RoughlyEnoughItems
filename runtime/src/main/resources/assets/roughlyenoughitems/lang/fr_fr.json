@@ -51,7 +51,6 @@
   "text.rei.cheat_items": "Don de {item_count} [{item_name}§f] à {player_name}",
   "text.rei.failed_cheat_items": "§cImpossible de donner les objets.",
   "text.rei.too_long_nbt": "§cObjet NBT est trop long pour être affiché en multijoueur",
-  "text.rei.tag_match": "Étiquette: %s",
   "text.rei.performance": "Analyse des Performances",
   "ordering.rei.ascending": "Croissant",
   "ordering.rei.descending": "Décroissant",
