@@ -50,7 +50,6 @@
   "text.rei.cheat_items": "{player_name}에게 [{item_name}§f] {item_count}개가 지급되었습니다.",
   "text.rei.failed_cheat_items": "§c아이템을 지급하지 못했습니다.",
   "text.rei.too_long_nbt": "§c아이템 NBT가 너무 길어 멀티플레이에 적용할 수 없습니다.",
-  "text.rei.tag_match": "태그: %s",
   "text.rei.performance": "퍼포먼스 분석",
   "ordering.rei.ascending": "오름차순",
   "ordering.rei.descending": "내림차순",

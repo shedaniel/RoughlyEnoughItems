@@ -47,7 +47,6 @@
   "text.rei.cheat_items": "[{item_name}] x{item_count} {player_name} gegeben.",
   "text.rei.failed_cheat_items": "§cItems geben fehlgeschlagen.",
   "text.rei.too_long_nbt": "§cGegenstand NBT ist zu lang, um im Multiplayer angewendet zu werden.",
-  "text.rei.tag_match": "Schlagwort: %s",
   "text.rei.performance": "Leistungsanalyse",
   "ordering.rei.ascending": "Aufsteigend",
   "ordering.rei.descending": "Absteigend",

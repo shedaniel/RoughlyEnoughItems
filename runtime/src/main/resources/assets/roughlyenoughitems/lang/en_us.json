@@ -61,7 +61,7 @@
   "text.rei.cheat_items": "Gave [{item_name}§f] x{item_count} to {player_name}.",
   "text.rei.failed_cheat_items": "§cFailed to give items.",
   "text.rei.too_long_nbt": "§cItem NBT is too long to be applied in multiplayer.",
-  "text.rei.tag_match": "Tag: %s",
+  "text.rei.tag_match": "Accepts Tag: #%s",
   "text.rei.performance": "Performance Analysis",
   "ordering.rei.ascending": "Ascending",
   "ordering.rei.descending": "Descending",

@@ -56,7 +56,6 @@
   "text.rei.cheat_items": "{player_name} recebeu {item_count} unidade(s) de [{item_name}§f].",
   "text.rei.failed_cheat_items": "§cFalha ao obter itens.",
   "text.rei.too_long_nbt": "§cO NBT do item é longo demais para ser aplicado ao modo multijogador.",
-  "text.rei.tag_match": "Marcação: %s",
   "text.rei.performance": "Análise de desempenho",
   "ordering.rei.ascending": "Crescente",
   "ordering.rei.descending": "Descrescente",
