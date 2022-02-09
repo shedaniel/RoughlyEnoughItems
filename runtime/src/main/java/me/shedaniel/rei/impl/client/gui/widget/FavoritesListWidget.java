@@ -29,7 +29,10 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.api.ScrollingContainer;
+import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
+import me.shedaniel.clothconfig2.api.animator.ProgressValueAnimator;
+import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
+import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -41,9 +44,6 @@ import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.favorites.SystemFavoriteEntryProvider;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
-import me.shedaniel.rei.api.client.gui.animator.NumberAnimator;
-import me.shedaniel.rei.api.client.gui.animator.ProgressValueAnimator;
-import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
 import me.shedaniel.rei.api.client.gui.drag.*;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -330,10 +330,8 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 DraggableStack currentStack = DraggingContext.getInstance().getCurrentStack();
                 if (currentStack instanceof RegionDraggableStack) {
                     RegionDraggableStack<?> stack = (RegionDraggableStack<?>) currentStack;
-                    
-                    if (stack.getEntry().region == region && Objects.equals(stack.getEntry().getEntry(), entry)) {
-                        return false;
-                    }
+    
+                    return stack.getEntry().region != region || !Objects.equals(stack.getEntry().getEntry(), entry);
                 }
             }
             return true;
@@ -559,7 +557,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             if (expendState.progress() > 0.1f) {
                 ScissorsHandler.INSTANCE.scissor(scrollBounds);
                 matrices.pushPose();
-                matrices.translate(0, scroller.scrollAmount, 0);
+                matrices.translate(0, scroller.scrollAmount(), 0);
                 int y = scrollBounds.y;
                 for (Row row : rows.get()) {
                     row.render(matrices, scrollBounds.x, y, scrollBounds.width, row.getRowHeight(), mouseX, mouseY, delta);
@@ -750,7 +748,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                             currentY++;
                         }
                         
-                        if (notSteppingOnExclusionZones(xPos, yPos + lastY + (int) scroller.scrollAmount, entrySize, entrySize, scrollBounds)) {
+                        if (notSteppingOnExclusionZones(xPos, yPos + lastY + scroller.scrollAmountInt(), entrySize, entrySize, scrollBounds)) {
                             widget.moveTo(animated.test(widget), xPos, yPos);
                             break;
                         } else {

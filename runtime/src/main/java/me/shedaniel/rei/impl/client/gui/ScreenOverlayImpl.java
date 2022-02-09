@@ -431,6 +431,11 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                                 config::setEntryListWidgetScrolled
                         ),
                         new SeparatorMenuEntry(),
+                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.caching_entry_rendering"),
+                                config::doesCacheEntryRendering,
+                                config::setDoesCacheEntryRendering
+                        ),
+                        new SeparatorMenuEntry(),
                         ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.side_search_field"),
                                 () -> config.getSearchFieldLocation() != SearchFieldLocation.CENTER,
                                 bool -> config.setSearchFieldLocation(bool ? SearchFieldLocation.BOTTOM_SIDE : SearchFieldLocation.CENTER)

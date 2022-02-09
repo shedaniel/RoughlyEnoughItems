@@ -42,6 +42,7 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
+import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import me.shedaniel.rei.impl.client.search.argument.Argument;
 import net.fabricmc.api.EnvType;
@@ -240,6 +241,7 @@ public class REIRuntimeImpl implements REIRuntime {
         Argument.SEARCH_CACHE.clear();
         getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
         lastDisplayScreen.clear();
+        CachedEntryListRender.refresh();
     }
     
     @Override

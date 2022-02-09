@@ -30,8 +30,7 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.api.ScrollingContainer;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
+import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -80,7 +79,7 @@ public class FilteringScreen extends Screen {
         }
         
         @Override
-        public int getScrollBarX() {
+        public int getScrollBarX(int maxX) {
             return width - 7;
         }
     };
@@ -130,7 +129,7 @@ public class FilteringScreen extends Screen {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack<?> stack = entryStacks.get(i);
                     EntryListEntry entry = entries.get(i);
-                    entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
+                    entry.getBounds().y = entry.backupY - scrolling.scrollAmountInt();
                     if (entry.isSelected() && !entry.isFiltered()) {
                         filteringEntry.configFiltered.add(stack);
                         filteringEntry.edited = true;
@@ -145,7 +144,7 @@ public class FilteringScreen extends Screen {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack<?> stack = entryStacks.get(i);
                     EntryListEntry entry = entries.get(i);
-                    entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
+                    entry.getBounds().y = entry.backupY - scrolling.scrollAmountInt();
                     if (entry.isSelected() && filteringEntry.configFiltered.remove(stack)) {
                         filteringEntry.edited = true;
                         entry.dirty = true;
@@ -218,14 +217,14 @@ public class FilteringScreen extends Screen {
         ScissorsHandler.INSTANCE.scissor(bounds);
         for (EntryListEntry entry : entries)
             entry.clearStacks();
-        int skip = Math.max(0, Mth.floor(scrolling.scrollAmount / (float) entrySize()));
+        int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / (float) entrySize()));
         int nextIndex = skip * innerBounds.width / entrySize();
         int i = nextIndex;
         BatchedEntryRendererManager manager = new BatchedEntryRendererManager();
         for (; i < entryStacks.size(); i++) {
             EntryStack<?> stack = entryStacks.get(i);
             EntryListEntry entry = entries.get(nextIndex);
-            entry.getBounds().y = (int) (entry.backupY - scrolling.scrollAmount);
+            entry.getBounds().y = entry.backupY - scrolling.scrollAmountInt();
             if (entry.getBounds().y > bounds.getMaxY())
                 break;
             entry.entry(stack);
@@ -279,13 +278,13 @@ public class FilteringScreen extends Screen {
             Point p = secondPoint;
             if (p == null) {
                 p = PointHelper.ofMouse();
-                p.translate(0, (int) scrolling.scrollAmount);
+                p.translate(0, scrolling.scrollAmountInt());
             }
             int left = Math.min(p.x, selectionPoint.x);
             int top = Math.min(p.y, selectionPoint.y);
             int right = Math.max(p.x, selectionPoint.x);
             int bottom = Math.max(p.y, selectionPoint.y);
-            selectionCache = new Rectangle(left, (int) (top - scrolling.scrollAmount), right - left, bottom - top);
+            selectionCache = new Rectangle(left, top - scrolling.scrollAmountInt(), right - left, bottom - top);
             return;
         }
         selectionCache = new Rectangle(0, 0, 0, 0);
@@ -299,13 +298,6 @@ public class FilteringScreen extends Screen {
     }
     
     private void updatePosition(float delta) {
-        if (ConfigObject.getInstance().doesSnapToRows() && scrolling.scrollTarget >= 0 && scrolling.scrollTarget <= scrolling.getMaxScroll()) {
-            double nearestRow = Math.round(scrolling.scrollTarget / (double) entrySize()) * (double) entrySize();
-            if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(scrolling.scrollTarget, nearestRow, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
-                scrolling.scrollTarget += (nearestRow - scrolling.scrollTarget) * Math.min(delta / 2.0, 1.0);
-            else
-                scrolling.scrollTarget = nearestRow;
-        }
         scrolling.updatePosition(delta);
     }
     
@@ -375,7 +367,7 @@ public class FilteringScreen extends Screen {
                 return true;
             }
             if (int_1 == 0) {
-                this.selectionPoint = new Point(double_1, double_2 + scrolling.scrollAmount);
+                this.selectionPoint = new Point(double_1, double_2 + scrolling.scrollAmount());
                 this.secondPoint = null;
                 return true;
             }
@@ -386,7 +378,7 @@ public class FilteringScreen extends Screen {
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (selectionPoint != null && button == 0 && secondPoint == null) {
-            this.secondPoint = new Point(mouseX, mouseY + scrolling.scrollAmount);
+            this.secondPoint = new Point(mouseX, mouseY + scrolling.scrollAmount());
             if (secondPoint.equals(selectionPoint)) {
                 secondPoint.translate(1, 1);
             }

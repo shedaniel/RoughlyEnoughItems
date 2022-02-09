@@ -26,13 +26,13 @@ package me.shedaniel.rei.impl.client.gui.widget;
 import com.google.common.base.Predicates;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.api.ScrollingContainer;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
+import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -41,6 +41,7 @@ import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.config.EntryPanelOrdering;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
@@ -273,7 +274,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             ScissorsHandler.INSTANCE.scissor(bounds);
             
-            int skip = Math.max(0, Mth.floor(scrolling.scrollAmount / (float) entrySize()));
+            int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / (float) entrySize()));
             int nextIndex = skip * innerBounds.width / entrySize();
             this.blockedCount = 0;
             BatchedEntryRendererManager helper = new BatchedEntryRendererManager();
@@ -283,7 +284,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                 EntryListEntry entry = entries.get(cont);
                 Rectangle entryBounds = entry.getBounds();
                 
-                entryBounds.y = (int) (entry.backupY - scrolling.scrollAmount);
+                entryBounds.y = entry.backupY - scrolling.scrollAmountInt();
                 if (entryBounds.y > this.bounds.getMaxY()) break;
                 if (allStacks.size() <= i) break;
                 if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height, innerBounds)) {
@@ -309,7 +310,32 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             for (Widget widget : renders) {
                 widget.render(matrices, mouseX, mouseY, delta);
             }
-            new BatchedEntryRendererManager(entries).render(debugTime, size, time, matrices, mouseX, mouseY, delta);
+            if (ConfigObject.getInstance().doesCacheEntryRendering()) {
+                for (EntryListEntry entry : entries) {
+                    if (entry.our == null) {
+                        CachedEntryListRender.Sprite sprite = CachedEntryListRender.get(entry.getCurrentEntry());
+                        if (sprite != null) {
+                            entry.our = entry.getCurrentEntry().copy().setting(EntryStack.Settings.RENDERER, stack -> new EntryRenderer<Object>() {
+                                @Override
+                                public void render(EntryStack<Object> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                                    RenderSystem.setShaderTexture(0, CachedEntryListRender.cachedTextureLocation);
+                                    innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), sprite.u0, sprite.u1, sprite.v0, sprite.v1);
+                                }
+                                
+                                @Override
+                                @Nullable
+                                public Tooltip getTooltip(EntryStack<Object> entry, Point mouse) {
+                                    return stack.getDefinition().getRenderer().getTooltip(entry.cast(), mouse);
+                                }
+                            });
+                        }
+                    }
+                }
+                
+                BatchedEntryRendererManager.renderSlow(debugTime, size, time, matrices, mouseX, mouseY, delta, entries);
+            } else {
+                new BatchedEntryRendererManager(entries).render(debugTime, size, time, matrices, mouseX, mouseY, delta);
+            }
         }
         
         if (debugTime) {
@@ -373,13 +399,14 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     }
     
     private void updatePosition(float delta) {
-        if (ConfigObject.getInstance().doesSnapToRows() && scrolling.scrollTarget >= 0 && scrolling.scrollTarget <= scrolling.getMaxScroll()) {
-            double nearestRow = Math.round(scrolling.scrollTarget / (double) entrySize()) * (double) entrySize();
-            if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(scrolling.scrollTarget, nearestRow, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
-                scrolling.scrollTarget += (nearestRow - scrolling.scrollTarget) * Math.min(delta / 2.0, 1.0);
-            else
-                scrolling.scrollTarget = nearestRow;
-        }
+        // TODO: Snap to rows
+//        if (ConfigObject.getInstance().doesSnapToRows() && scrolling.scrollTarget() >= 0 && scrolling.scrollTarget() <= scrolling.getMaxScroll()) {
+//            double nearestRow = Math.round(scrolling.scrollTarget() / (double) entrySize()) * (double) entrySize();
+//            if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(scrolling.scrollTarget(), nearestRow, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
+//                scrolling.scrollTarget += (nearestRow - scrolling.scrollTarget()) * Math.min(delta / 2.0, 1.0);
+//            else
+//                scrolling.scrollTarget = nearestRow;
+//        }
         scrolling.updatePosition(delta);
     }
     
@@ -554,7 +581,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     @Override
     public Stream<EntryStack<?>> getEntries() {
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            int skip = Math.max(0, Mth.floor(scrolling.scrollAmount / (float) entrySize()));
+            int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / (float) entrySize()));
             int nextIndex = skip * innerBounds.width / entrySize();
             return (Stream<EntryStack<?>>) (Stream<? extends EntryStack<?>>) entries.stream()
                     .skip(nextIndex)
@@ -568,9 +595,21 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     
     private class EntryListEntry extends EntryListEntryWidget {
         private Display display;
+        private EntryStack<?> our;
         
         private EntryListEntry(int x, int y, int entrySize) {
             super(new Point(x, y), entrySize);
+        }
+        
+        @Override
+        public EntryStack<?> getCurrentEntry() {
+            if (our != null) {
+                if (CachedEntryListRender.cachedTextureLocation != null) {
+                    return our;
+                }
+            }
+            
+            return super.getCurrentEntry();
         }
         
         @Override

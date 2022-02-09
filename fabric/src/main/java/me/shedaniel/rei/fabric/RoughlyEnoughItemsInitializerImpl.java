@@ -62,7 +62,7 @@ public class RoughlyEnoughItemsInitializerImpl {
             RoughlyEnoughItemsState.error("Architectury API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/architectury-fabric/files/all");
         } else {
             Version version = FabricLoader.getInstance().getModContainer("architectury").get().getMetadata().getVersion();
-    
+            
             try {
                 if (version instanceof SemanticVersion && SemanticVersion.parse("1.24.0").compareTo((SemanticVersion) version) > 0) {
                     RoughlyEnoughItemsState.error("Architectury API is too old, please update!", "https://www.curseforge.com/minecraft/mc-mods/architectury-fabric/files/all");
@@ -72,14 +72,8 @@ public class RoughlyEnoughItemsInitializerImpl {
             }
         }
         if (isClient()) {
-            try {
-                if (!FabricLoader.getInstance().isModLoaded("cloth-config2")) {
-                    RoughlyEnoughItemsState.error("Cloth Config is not installed!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
-                } else if (SemanticVersion.parse(FabricLoader.getInstance().getModContainer("cloth-config2").get().getMetadata().getVersion().getFriendlyString()).compareTo(SemanticVersion.parse("4.12")) < 0) {
-                    RoughlyEnoughItemsState.error("Your Cloth Config version is too old!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
-                }
-            } catch (VersionParsingException e) {
-                e.printStackTrace();
+            if (!FabricLoader.getInstance().isModLoaded("cloth-config2")) {
+                RoughlyEnoughItemsState.error("Cloth Config is not installed!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
             }
         }
     }

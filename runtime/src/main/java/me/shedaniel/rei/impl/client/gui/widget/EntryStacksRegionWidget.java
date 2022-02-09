@@ -30,8 +30,7 @@ import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.api.ScrollingContainer;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
+import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -84,10 +83,10 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         }
         
         @Override
-        public int getScrollBarX() {
+        public int getScrollBarX(int maxX) {
             if (!ConfigObject.getInstance().isLeftHandSidePanel())
                 return bounds.x + 1;
-            return bounds.getMaxX() - 7;
+            return maxX - 7;
         }
     };
     private final Int2ObjectMap<RealRegionEntry<T>> entries = new Int2ObjectLinkedOpenHashMap<>();
@@ -169,13 +168,6 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     }
     
     private void updatePosition(float delta) {
-        if (ConfigObject.getInstance().doesSnapToRows() && scrolling.scrollTarget >= 0 && scrolling.scrollTarget <= scrolling.getMaxScroll()) {
-            double nearestRow = Math.round(scrolling.scrollTarget / (double) entrySize()) * (double) entrySize();
-            if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(scrolling.scrollTarget, nearestRow, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
-                scrolling.scrollTarget += (nearestRow - scrolling.scrollTarget) * Math.min(delta / 2.0, 1.0);
-            else
-                scrolling.scrollTarget = nearestRow;
-        }
         scrolling.updatePosition(delta);
     }
     
@@ -332,7 +324,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                     currentY++;
                 }
                 
-                if (notSteppingOnExclusionZones(xPos, yPos - (int) scrolling.scrollAmount, entrySize, entrySize, innerBounds)) {
+                if (notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize, innerBounds)) {
                     if (slotIndex++ == releaseIndex) {
                         continue;
                     }
@@ -366,7 +358,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                         currentY++;
                     }
                     
-                    if (notSteppingOnExclusionZones(xPos, yPos - (int) scrolling.scrollAmount, entrySize, entrySize, innerBounds)) {
+                    if (notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize, innerBounds)) {
                         entriesPoints.add(new Tuple<>(entry, new Point(xPos, yPos)));
                         break;
                     } else {
@@ -380,13 +372,13 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                 int xPos = currentX * entrySize + innerBounds.x;
                 int yPos = currentY * entrySize + innerBounds.y;
                 
-                if (notSteppingOnExclusionZones(xPos, yPos - (int) scrolling.scrollAmount, entrySize, entrySize, innerBounds)) {
+                if (notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize, innerBounds)) {
                     entriesPoints.add(new Tuple<>(null, new Point(xPos, yPos)));
                 }
             }
             
             double x = position.x - 8;
-            double y = position.y + scrolling.scrollAmount - 8;
+            double y = position.y + scrolling.scrollAmount() - 8;
             
             return Mth.clamp(entriesPoints.stream()
                             .filter(value -> {
@@ -419,7 +411,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     public boolean drop(RealRegionEntry<T> entry) {
         DraggingContext<?> context = DraggingContext.getInstance();
         double x = context.getCurrentPosition().x;
-        double y = context.getCurrentPosition().y + scrolling.scrollAmount;
+        double y = context.getCurrentPosition().y + scrolling.scrollAmount();
         return drop(entry, x, y);
     }
     
@@ -481,7 +473,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     }
     
     public double getScrollAmount() {
-        return scrolling.scrollAmount;
+        return scrolling.scrollAmount();
     }
     
     public boolean has(RealRegionEntry<T> entry) {
