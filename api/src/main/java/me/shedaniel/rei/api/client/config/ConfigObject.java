@@ -119,6 +119,8 @@ public interface ConfigObject {
     
     boolean doMergeDisplayUnderOne();
     
+    FavoriteAddWidgetMode getFavoriteAddWidgetMode();
+    
     ModifierKeyCode getFavoriteKeyCode();
     
     ModifierKeyCode getRecipeKeybind();
