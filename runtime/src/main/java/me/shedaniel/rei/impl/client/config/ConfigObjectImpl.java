@@ -268,6 +268,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public FavoriteAddWidgetMode getFavoriteAddWidgetMode() {
+        return advanced.layout.favoriteAddWidgetMode;
+    }
+    
+    @Override
     public ModifierKeyCode getFavoriteKeyCode() {
         return basics.keyBindings.favoriteKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.favoriteKeybind;
     }
@@ -592,6 +597,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             private int maxRecipesPageHeight = 300;
             @Comment("Declares whether entry rendering time should be debugged.") private boolean debugRenderTimeRequired = false;
             @Comment("Merges displays with equal contents under 1 display.") private boolean mergeDisplayUnderOne = true;
+            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+            private FavoriteAddWidgetMode favoriteAddWidgetMode = FavoriteAddWidgetMode.ALWAYS_VISIBLE;
         }
         
         public static class Accessibility {

@@ -330,7 +330,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 DraggableStack currentStack = DraggingContext.getInstance().getCurrentStack();
                 if (currentStack instanceof RegionDraggableStack) {
                     RegionDraggableStack<?> stack = (RegionDraggableStack<?>) currentStack;
-    
+                    
                     return stack.getEntry().region != region || !Objects.equals(stack.getEntry().getEntry(), entry);
                 }
             }
@@ -448,7 +448,17 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             this.bounds.setBounds(updateArea(widget.fullBounds));
             boolean hovered = containsMouse(mouseX, mouseY);
-            this.alpha.setTo(hovered ? 1f : isAvailable(mouseX, mouseY) ? 0.3f : 0f, 260);
+            switch (ConfigObject.getInstance().getFavoriteAddWidgetMode()) {
+                case ALWAYS_INVISIBLE:
+                    this.alpha.setAs(0);
+                    break;
+                case AUTO_HIDE:
+                    this.alpha.setTo(hovered ? 1f : isAvailable(mouseX, mouseY) ? 0.5f : 0f, 260);
+                    break;
+                case ALWAYS_VISIBLE:
+                    this.alpha.setAs(hovered ? 1f : 0.5f);
+                    break;
+            }
             this.alpha.update(delta);
             int buttonColor = 0xFFFFFF | (Math.round(0x74 * alpha.floatValue()) << 24);
             fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), buttonColor, buttonColor);
@@ -523,6 +533,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 rows.add(new SectionSeparatorRow());
             }
             if (!rows.isEmpty()) rows.remove(rows.size() - 1);
+            rows.add(new EmptySectionRow(4));
             return rows;
         });
         private final ScrollingContainer scroller = new ScrollingContainer() {
@@ -554,10 +565,10 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), buttonColor, buttonColor);
             scroller.updatePosition(delta);
             
-            if (expendState.progress() > 0.1f) {
+            if (expendState.value()) {
                 ScissorsHandler.INSTANCE.scissor(scrollBounds);
                 matrices.pushPose();
-                matrices.translate(0, scroller.scrollAmount(), 0);
+                matrices.translate(0, -scroller.scrollAmount(), 0);
                 int y = scrollBounds.y;
                 for (Row row : rows.get()) {
                     row.render(matrices, scrollBounds.x, y, scrollBounds.width, row.getRowHeight(), mouseX, mouseY, delta);
@@ -570,14 +581,14 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         
         private Rectangle updatePanelArea(Rectangle fullArea) {
             int currentWidth = 16 + Math.round(Math.min((float) expendState.progress(), 1) * (fullArea.getWidth() - 16 - 8));
-            int currentHeight = 16 + Math.round((float) expendState.progress() * (fullArea.getHeight() * 0.4f - 16 - 8));
+            int currentHeight = 16 + Math.round((float) expendState.progress() * (fullArea.getHeight() * 0.4f - 16 - 8 + 4));
             return new Rectangle(fullArea.x + 4, fullArea.getMaxY() - currentHeight - 4, currentWidth, currentHeight);
         }
         
         @Override
         public boolean mouseScrolled(double d, double e, double f) {
             if (scrollBounds.contains(d, e)) {
-                scroller.offset(ClothConfigInitializer.getScrollStep() * f, true);
+                scroller.offset(ClothConfigInitializer.getScrollStep() * -f, true);
                 return true;
             }
             return super.mouseScrolled(d, e, f);
@@ -636,6 +647,28 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             @Override
             public void render(PoseStack matrices, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
                 fillGradient(matrices, x, y + 2, x + rowWidth, y + 3, -571806998, -571806998);
+            }
+            
+            @Override
+            public List<? extends GuiEventListener> children() {
+                return Collections.emptyList();
+            }
+        }
+        
+        private static class EmptySectionRow extends Row {
+            private final int height;
+            
+            public EmptySectionRow(int height) {
+                this.height = height;
+            }
+            
+            @Override
+            public int getRowHeight() {
+                return height;
+            }
+            
+            @Override
+            public void render(PoseStack matrices, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
             }
             
             @Override
@@ -748,7 +781,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                             currentY++;
                         }
                         
-                        if (notSteppingOnExclusionZones(xPos, yPos + lastY + scroller.scrollAmountInt(), entrySize, entrySize, scrollBounds)) {
+                        if (notSteppingOnExclusionZones(xPos, yPos + lastY - scroller.scrollAmountInt(), entrySize, entrySize, scrollBounds)) {
                             widget.moveTo(animated.test(widget), xPos, yPos);
                             break;
                         } else {
