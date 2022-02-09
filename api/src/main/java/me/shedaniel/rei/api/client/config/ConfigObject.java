@@ -113,6 +113,8 @@ public interface ConfigObject {
     
     boolean doesFastEntryRendering();
     
+    boolean doesCacheEntryRendering();
+    
     boolean doDebugRenderTimeRequired();
     
     boolean doMergeDisplayUnderOne();

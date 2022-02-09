@@ -212,7 +212,7 @@ public class BatchedEntryRendererManager {
         firstRenderer.endBatch(first, extraData[0], matrices, delta);
     }
     
-    private static <T extends EntryWidget> void renderSlow(boolean debugTime, MutableInt size, MutableLong time, PoseStack matrices, int mouseX, int mouseY, float delta, Iterable<T> entries) {
+    public static <T extends EntryWidget> void renderSlow(boolean debugTime, MutableInt size, MutableLong time, PoseStack matrices, int mouseX, int mouseY, float delta, Iterable<T> entries) {
         for (T entry : entries) {
             if (entry.getCurrentEntry().isEmpty())
                 continue;
