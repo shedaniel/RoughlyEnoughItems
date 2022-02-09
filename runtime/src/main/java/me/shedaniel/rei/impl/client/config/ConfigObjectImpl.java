@@ -249,6 +249,15 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public boolean doesCacheEntryRendering() {
+        return advanced.miscellaneous.cachingFastEntryRendering;
+    }
+    
+    public void setDoesCacheEntryRendering(boolean doesCacheEntryRendering) {
+        advanced.miscellaneous.cachingFastEntryRendering = doesCacheEntryRendering;
+    }
+    
+    @Override
     public boolean doDebugRenderTimeRequired() {
         return advanced.layout.debugRenderTimeRequired;
     }
@@ -620,6 +629,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares whether arrows in containers should be clickable.") private boolean clickableRecipeArrows = true;
             private boolean registerRecipesInAnotherThread = true;
             private boolean newFastEntryRendering = true;
+            @ConfigEntry.Gui.PrefixText
+            private boolean cachingFastEntryRendering = false;
         }
         
         public static class Filtering {

@@ -182,11 +182,18 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
     
     @Override
     public <T> T get(Settings<T> settings) {
-        T o = this.settings == null ? null : (T) this.settings.get(settings.getId());
-        o = EntrySettingsAdapterRegistry.getInstance().adapt(this, settings, o);
+        T o = getNullable(settings);
         if (o == null) {
             o = settings.getDefaultValue();
         }
+        return o;
+    }
+    
+    @Override
+    @Nullable
+    public <T> T getNullable(Settings<T> settings) {
+        T o = this.settings == null ? null : (T) this.settings.get(settings.getId());
+        o = EntrySettingsAdapterRegistry.getInstance().adapt(this, settings, o);
         return o;
     }
     

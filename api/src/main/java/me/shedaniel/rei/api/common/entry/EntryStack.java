@@ -197,6 +197,9 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     
     <R> R get(Settings<R> settings);
     
+    @Nullable
+    <R> R getNullable(Settings<R> settings);
+    
     @Environment(EnvType.CLIENT)
     default EntryStack<T> tooltip(Component... tooltips) {
         return tooltip(Arrays.asList(tooltips));
