@@ -81,4 +81,8 @@ public class RoughlyEnoughItemsInitializerImpl {
     public static boolean isDev() {
         return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
+    
+    public static String getMinecraftVersion() {
+        return FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion().getFriendlyString();
+    }
 }
