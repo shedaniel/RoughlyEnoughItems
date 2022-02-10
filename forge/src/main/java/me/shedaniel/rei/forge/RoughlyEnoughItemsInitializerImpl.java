@@ -43,4 +43,8 @@ public class RoughlyEnoughItemsInitializerImpl {
     public static boolean isDev() {
         return !FMLLoader.isProduction();
     }
+    
+    public static String getMinecraftVersion() {
+        return ModList.get().getModContainerById("minecraft").get().getModInfo().getVersion().toString();
+    }
 }
