@@ -298,6 +298,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
                 Minecraft.getInstance().getItemRenderer().render(value, ItemTransforms.TransformType.GUI, false, matrices, immediate,
                         ITEM_LIGHT, OverlayTexture.NO_OVERLAY, model);
                 matrices.popPose();
+                throw new AssertionError();
                 
                 /*ItemStack value = entry.getValue();
                 matrices.pushPose();
