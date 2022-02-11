@@ -30,13 +30,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Unit;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
@@ -69,18 +70,8 @@ public final class TagArgumentType extends ArgumentType<Unit, String[]> {
     @Override
     public boolean matches(Mutable<String[]> data, EntryStack<?> stack, String searchText, Unit filterData) {
         if (data.getValue() == null) {
-            Collection<ResourceLocation> tags = stack.getTagsFor();
-            if (tags.isEmpty()) {
-                data.setValue(EMPTY_ARRAY);
-            } else {
-                data.setValue(new String[tags.size()]);
-                int i = 0;
-                
-                for (ResourceLocation identifier : tags) {
-                    data.getValue()[i] = identifier.toString();
-                    i++;
-                }
-            }
+            Stream<TagKey<?>> tags = stack.getTagsFor();
+            data.setValue(tags.map(TagArgumentType::toString).toArray(String[]::new));
         }
         for (String tag : data.getValue()) {
             if (!tag.isEmpty() && tag.contains(searchText)) {
@@ -93,6 +84,10 @@ public final class TagArgumentType extends ArgumentType<Unit, String[]> {
     @Override
     public Unit prepareSearchFilter(String searchText) {
         return Unit.INSTANCE;
+    }
+    
+    private static String toString(TagKey<?> tagKey) {
+        return Objects.toString(tagKey.location());
     }
     
     private TagArgumentType() {

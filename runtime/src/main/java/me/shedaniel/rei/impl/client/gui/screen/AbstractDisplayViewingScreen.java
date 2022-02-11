@@ -42,15 +42,12 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagCollection;
-import net.minecraft.tags.TagContainer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -58,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public abstract class AbstractDisplayViewingScreen extends Screen implements DisplayScreen {
     protected final Map<DisplayCategory<?>, List<DisplaySpec>> categoryMap;
@@ -171,7 +169,6 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     }
     
     protected void setupTags(List<Widget> widgets) {
-        TagContainer tags = Minecraft.getInstance().getConnection().getTags();
         outer:
         for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
             widget.removeTagMatch = false;
@@ -185,18 +182,20 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                 }
             }
             // TODO: Don't hardcode
-            TagCollection<?> collection;
-            List<Object> objects;
+            Stream<? extends TagKey<?>> collection;
+            List<Holder<?>> objects;
             if (type == VanillaEntryTypes.ITEM) {
-                collection = tags.getOrEmpty(Registry.ITEM_REGISTRY);
-                objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<ItemStack>castValue().getItem());
+                collection = Registry.ITEM.getTagNames();
+                objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<ItemStack>castValue().getItem().builtInRegistryHolder());
             } else if (type == VanillaEntryTypes.FLUID) {
-                collection = tags.getOrEmpty(Registry.FLUID_REGISTRY);
-                objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<FluidStack>castValue().getFluid());
+                collection = Registry.FLUID.getTagNames();
+                objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<FluidStack>castValue().getFluid().builtInRegistryHolder());
             } else continue;
-            Map.Entry<ResourceLocation, ? extends Tag<?>> firstOrNull = CollectionUtils.findFirstOrNull(collection.getAllTags().entrySet(), entry -> entry.getValue().getValues().equals(objects));
+            TagKey<?> firstOrNull = collection.filter(key ->
+                            CollectionUtils.anyMatch(objects, holder -> ((Holder<Object>) holder).is((TagKey<Object>) key)))
+                    .findAny().orElse(null);
             if (firstOrNull != null) {
-                widget.tagMatch = firstOrNull.getKey();
+                widget.tagMatch = firstOrNull.location();
             }
         }
     }

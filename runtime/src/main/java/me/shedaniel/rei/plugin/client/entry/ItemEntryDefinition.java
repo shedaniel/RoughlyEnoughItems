@@ -61,18 +61,16 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagCollection;
-import net.minecraft.tags.TagContainer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySerializer<ItemStack> {
     @Environment(EnvType.CLIENT)
@@ -200,9 +198,8 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     }
     
     @Override
-    public Collection<ResourceLocation> getTagsFor(TagContainer tagContainer, EntryStack<ItemStack> entry, ItemStack value) {
-        TagCollection<Item> collection = tagContainer.getOrEmpty(Registry.ITEM_REGISTRY);
-        return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getItem());
+    public Stream<? extends TagKey<?>> getTagsFor(EntryStack<ItemStack> entry, ItemStack value) {
+        return value.getTags();
     }
     
     @Environment(EnvType.CLIENT)

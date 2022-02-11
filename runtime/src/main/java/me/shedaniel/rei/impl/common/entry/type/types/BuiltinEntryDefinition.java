@@ -37,14 +37,13 @@ import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagContainer;
+import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class BuiltinEntryDefinition<T> implements EntryDefinition<T>, EntrySerializer<T> {
@@ -127,8 +126,8 @@ public class BuiltinEntryDefinition<T> implements EntryDefinition<T>, EntrySeria
     }
     
     @Override
-    public Collection<ResourceLocation> getTagsFor(TagContainer tagContainer, EntryStack<T> entry, T value) {
-        return Collections.emptyList();
+    public Stream<? extends TagKey<?>> getTagsFor(EntryStack<T> entry, T value) {
+        return Stream.empty();
     }
     
     @Override

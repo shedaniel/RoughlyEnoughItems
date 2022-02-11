@@ -11,10 +11,6 @@ architectury {
 }
 
 remapJar {
-    remapAccessWidener = false
-}
-
-remapJar {
     classifier "raw"
 }
 

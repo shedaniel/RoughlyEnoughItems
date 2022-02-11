@@ -23,7 +23,8 @@
 
 package me.shedaniel.rei.impl.client.entry.filtering;
 
-import com.mojang.serialization.Lifecycle;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import me.shedaniel.rei.impl.client.config.entries.FilteringEntry;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.SearchFilteringRule;
@@ -31,11 +32,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -46,14 +44,13 @@ import java.util.function.BiFunction;
 @ApiStatus.Experimental
 @Environment(EnvType.CLIENT)
 public interface FilteringRule<T extends FilteringRule<?>> {
-    ResourceKey<Registry<FilteringRule<?>>> REGISTRY_KEY = ResourceKey.createRegistryKey(new ResourceLocation("roughlyenoughitems", "filtering_rule"));
-    Registry<FilteringRule<?>> REGISTRY = Util.make(new MappedRegistry<>(REGISTRY_KEY, Lifecycle.stable()), registry -> {
-        Registry.register(registry, new ResourceLocation("roughlyenoughitems", "search"), new SearchFilteringRule());
-        Registry.register(registry, new ResourceLocation("roughlyenoughitems", "manual"), new ManualFilteringRule());
+    BiMap<ResourceLocation, FilteringRule<?>> REGISTRY = Util.make(HashBiMap.create(), registry -> {
+        registry.put(new ResourceLocation("roughlyenoughitems", "search"), new SearchFilteringRule());
+        registry.put(new ResourceLocation("roughlyenoughitems", "manual"), new ManualFilteringRule());
     });
     
     static CompoundTag save(FilteringRule<?> rule, CompoundTag tag) {
-        tag.putString("id", REGISTRY.getKey(rule).toString());
+        tag.putString("id", REGISTRY.inverse().get(rule).toString());
         tag.put("rule", rule.save(new CompoundTag()));
         return tag;
     }
@@ -74,7 +71,7 @@ public interface FilteringRule<T extends FilteringRule<?>> {
     }
     
     default Component getTitle() {
-        return Component.nullToEmpty(FilteringRule.REGISTRY.getKey(this).toString());
+        return Component.nullToEmpty(FilteringRule.REGISTRY.inverse().get(this).toString());
     }
     
     default Component getSubtitle() {
