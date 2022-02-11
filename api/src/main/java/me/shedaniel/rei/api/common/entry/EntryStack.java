@@ -41,6 +41,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
@@ -49,6 +50,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * @see me.shedaniel.rei.api.common.util.EntryStacks
@@ -173,7 +175,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      */
     EntryStack<T> wildcard();
     
-    Collection<ResourceLocation> getTagsFor();
+    Stream<TagKey<?>> getTagsFor();
     
     @Deprecated
     int hashCode();

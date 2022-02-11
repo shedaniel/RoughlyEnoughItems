@@ -65,7 +65,7 @@ public class FilteringAddRuleScreen extends Screen {
             }));
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
-        for (FilteringRule<?> rule : FilteringRule.REGISTRY) {
+        for (FilteringRule<?> rule : FilteringRule.REGISTRY.values()) {
             if (!(rule instanceof ManualFilteringRule))
                 rulesList.addItem(new DefaultRuleEntry(parent, entry, rule.createNew(), null));
         }

@@ -72,17 +72,18 @@ import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.*;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagCollection;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionBrewing;
@@ -206,29 +207,32 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 registry.addWorkstations(PATHING, EntryStacks.of(item));
             }
         });
-        TagCollection<Item> itemTagCollection = Minecraft.getInstance().getConnection().getTags().getOrEmpty(Registry.ITEM_REGISTRY);
-        Tag<Item> axesTag = itemTagCollection.getTag(new ResourceLocation("c", "axes"));
-        if (axesTag != null) {
-            for (Item item : axesTag.getValues()) {
-                if (axes.add(item)) {
-                    registry.addWorkstations(STRIPPING, EntryStacks.of(item));
-                    registry.addWorkstations(WAX_SCRAPING, EntryStacks.of(item));
-                    registry.addWorkstations(OXIDATION_SCRAPING, EntryStacks.of(item));
-                }
+        for (Item item : getTag(new ResourceLocation("c", "axes"))) {
+            if (axes.add(item)) {
+                registry.addWorkstations(STRIPPING, EntryStacks.of(item));
+                registry.addWorkstations(WAX_SCRAPING, EntryStacks.of(item));
+                registry.addWorkstations(OXIDATION_SCRAPING, EntryStacks.of(item));
             }
         }
-        Tag<Item> hoesTag = itemTagCollection.getTag(new ResourceLocation("c", "hoes"));
-        if (hoesTag != null) {
-            for (Item item : hoesTag.getValues()) {
-                if (hoes.add(item)) registry.addWorkstations(TILLING, EntryStacks.of(item));
-            }
+        for (Item item : getTag(new ResourceLocation("c", "hoes"))) {
+            if (hoes.add(item)) registry.addWorkstations(TILLING, EntryStacks.of(item));
         }
-        Tag<Item> shovelsTag = itemTagCollection.getTag(new ResourceLocation("c", "shovels"));
-        if (shovelsTag != null) {
-            for (Item item : shovelsTag.getValues()) {
-                if (shovels.add(item)) registry.addWorkstations(PATHING, EntryStacks.of(item));
-            }
+        for (Item item : getTag(new ResourceLocation("c", "shovels"))) {
+            if (shovels.add(item)) registry.addWorkstations(PATHING, EntryStacks.of(item));
         }
+    }
+    
+    private static <T> Iterable<T> resolveTag(TagKey<T> tagKey) {
+        Registry<T> registry = ((Registry<Registry<T>>) Registry.REGISTRY).get((ResourceKey<Registry<T>>) tagKey.registry());
+        HolderSet.Named<T> holders = registry.getTag(tagKey).orElse(null);
+        if (holders == null) return Collections.emptyList();
+        return () -> holders.stream()
+                .map(Holder::value)
+                .iterator();
+    }
+    
+    private static Iterable<Item> getTag(ResourceLocation tagId) {
+        return resolveTag(TagKey.create(Registry.ITEM_REGISTRY, tagId));
     }
     
     @Override
@@ -279,8 +283,8 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         DummyShovelItem.getPathBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultPathingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue().getBlock())));
         });
-        registry.add(new DefaultBeaconBaseDisplay(CollectionUtils.map(Lists.newArrayList(BlockTags.BEACON_BASE_BLOCKS.getValues()), ItemStack::new)));
-        registry.add(new DefaultBeaconPaymentDisplay(CollectionUtils.map(Lists.newArrayList(ItemTags.BEACON_PAYMENT_ITEMS.getValues()), ItemStack::new)));
+        registry.add(new DefaultBeaconBaseDisplay(CollectionUtils.map(resolveTag(BlockTags.BEACON_BASE_BLOCKS), ItemStack::new)));
+        registry.add(new DefaultBeaconPaymentDisplay(CollectionUtils.map(resolveTag(ItemTags.BEACON_PAYMENT_ITEMS), ItemStack::new)));
         HoneycombItem.WAXABLES.get().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultWaxingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
         });

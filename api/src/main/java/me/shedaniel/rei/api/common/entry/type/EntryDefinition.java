@@ -33,12 +33,12 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagContainer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
+import java.util.stream.Stream;
 
 /**
  * A definition of an {@link EntryType}, an interface to provide information from an object type.
@@ -163,7 +163,7 @@ public interface EntryDefinition<T> {
     
     Component asFormattedText(EntryStack<T> entry, T value);
     
-    Collection<ResourceLocation> getTagsFor(TagContainer tagContainer, EntryStack<T> entry, T value);
+    Stream<? extends TagKey<?>> getTagsFor(EntryStack<T> entry, T value);
     
     @ApiStatus.NonExtendable
     default <O> EntryDefinition<O> cast() {

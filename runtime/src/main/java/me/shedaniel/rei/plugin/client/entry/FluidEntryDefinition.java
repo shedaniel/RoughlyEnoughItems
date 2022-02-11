@@ -63,8 +63,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagCollection;
-import net.minecraft.tags.TagContainer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.Item;
@@ -73,8 +72,6 @@ import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -198,9 +195,8 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     }
     
     @Override
-    public Collection<ResourceLocation> getTagsFor(TagContainer tagContainer, EntryStack<FluidStack> entry, FluidStack value) {
-        TagCollection<Fluid> collection = tagContainer.getOrEmpty(Registry.FLUID_REGISTRY);
-        return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getFluid());
+    public Stream<? extends TagKey<?>> getTagsFor(EntryStack<FluidStack> entry, FluidStack value) {
+        return value.getFluid().builtInRegistryHolder().tags();
     }
     
     @Override

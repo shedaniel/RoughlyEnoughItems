@@ -24,8 +24,6 @@
 package me.shedaniel.rei.impl.common.entry;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.platform.Platform;
-import dev.architectury.utils.Env;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
@@ -43,19 +41,17 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.SerializationTags;
-import net.minecraft.tags.TagContainer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
@@ -247,19 +243,8 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
     }
     
     @Override
-    public Collection<ResourceLocation> getTagsFor() {
-        TagContainer container;
-        if (Platform.getEnvironment() == Env.CLIENT) {
-            container = getClientTagContainer();
-        } else {
-            container = SerializationTags.getInstance();
-        }
-        return getDefinition().getTagsFor(container, this, getValue());
-    }
-    
-    @Environment(EnvType.CLIENT)
-    private static TagContainer getClientTagContainer() {
-        return Minecraft.getInstance().getConnection().getTags();
+    public Stream<TagKey<?>> getTagsFor() {
+        return (Stream<TagKey<?>>) getDefinition().getTagsFor(this, getValue());
     }
     
     @Override

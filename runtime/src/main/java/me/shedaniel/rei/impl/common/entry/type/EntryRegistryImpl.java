@@ -142,7 +142,7 @@ public class EntryRegistryImpl implements EntryRegistry {
             FilteringRule<?> rule = rules.get(i);
             cache.setCache(rule, rule.prepareCache(true));
             context.handleResult(rule.processFilteredStacks(context, cache, true));
-            RoughlyEnoughItemsCore.LOGGER.debug("Refiltered rule [%s] in %s.", FilteringRule.REGISTRY.getKey(rule).toString(), innerStopwatch.stop().toString());
+            RoughlyEnoughItemsCore.LOGGER.debug("Refiltered rule [%s] in %s.", FilteringRule.REGISTRY.inverse().get(rule).toString(), innerStopwatch.stop().toString());
         }
         
         Set<HashedEntryStackWrapper> hiddenStacks = context.stacks.get(FilteringContextType.HIDDEN);

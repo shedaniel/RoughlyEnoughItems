@@ -21,10 +21,6 @@ dependencies {
 }
 
 remapJar {
-    remapAccessWidener = false
-}
-
-remapJar {
     classifier "raw"
 }
 
