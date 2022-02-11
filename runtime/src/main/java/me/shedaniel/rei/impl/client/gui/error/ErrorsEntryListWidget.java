@@ -21,15 +21,16 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.credits;
+package me.shedaniel.rei.impl.client.gui.error;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.clothconfig2.gui.widget.DynamicEntryListWidget;
 import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
-import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -39,13 +40,14 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
 
 @ApiStatus.Internal
-public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidget<CreditsEntryListWidget.CreditsItem> {
+public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget<ErrorsEntryListWidget.Entry> {
     private boolean inFocus;
     
-    public CreditsEntryListWidget(Minecraft client, int width, int height, int startY, int endY) {
+    public ErrorsEntryListWidget(Minecraft client, int width, int height, int startY, int endY) {
         super(client, width, height, startY, endY, GuiComponent.BACKGROUND_LOCATION);
     }
     
@@ -65,15 +67,15 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
         }
     }
     
-    public void creditsClearEntries() {
+    public void _clearItems() {
         clearItems();
     }
     
-    private CreditsItem rei_getEntry(int index) {
+    private Entry _getEntry(int index) {
         return this.children().get(index);
     }
     
-    public void creditsAddEntry(CreditsItem entry) {
+    public void _addEntry(Entry entry) {
         addItem(entry);
     }
     
@@ -87,56 +89,40 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
         return width - 40;
     }
     
-    public static abstract class CreditsItem extends DynamicSmoothScrollingEntryListWidget.Entry<CreditsItem> {
+    public static abstract class Entry extends DynamicEntryListWidget.Entry<Entry> {
+        @Override
+        public List<? extends NarratableEntry> narratables() {
+            return Collections.emptyList();
+        }
     }
     
-    public static class TextCreditsItem extends CreditsItem {
+    public static class TextEntry extends Entry {
         private Component text;
+        private int width;
+        private List<FormattedCharSequence> textSplit;
         
-        public TextCreditsItem(Component text) {
+        public TextEntry(Component text, int width) {
             this.text = text;
+            this.width = width;
+            this.textSplit = text.getString().trim().isEmpty() ? Collections.singletonList(text.getVisualOrderText()) : Minecraft.getInstance().font.split(text, width - 6);
         }
         
         @Override
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            Minecraft.getInstance().font.drawShadow(matrices, text.getVisualOrderText(), x + 5, y + 5, -1);
-        }
-        
-        @Override
-        public int getItemHeight() {
-            return 12;
-        }
-        
-        @Override
-        public boolean changeFocus(boolean boolean_1) {
-            return false;
-        }
-    }
-    
-    public static class TranslationCreditsItem extends CreditsItem {
-        private Component language;
-        private List<FormattedCharSequence> translators;
-        private int maxWidth;
-        
-        public TranslationCreditsItem(Component language, Component translators, int width, int maxWidth) {
-            this.language = language;
-            this.translators = Minecraft.getInstance().font.split(translators, width);
-            this.maxWidth = maxWidth;
-        }
-        
-        @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            Minecraft.getInstance().font.drawShadow(matrices, language.getVisualOrderText(), x + 5, y + 5, -1);
-            int yy = y + 5;
-            for (FormattedCharSequence translator : translators) {
-                Minecraft.getInstance().font.drawShadow(matrices, translator, x + 5 + maxWidth, yy, -1);
+            if (this.width != entryWidth) {
+                this.width = entryWidth;
+                this.textSplit = text.getString().trim().isEmpty() ? Collections.singletonList(text.getVisualOrderText()) : Minecraft.getInstance().font.split(text, width - 6);
+            }
+            int yy = y;
+            for (FormattedCharSequence textSp : textSplit) {
+                Minecraft.getInstance().font.drawShadow(matrices, textSp, x + 5, yy, -1);
                 yy += 12;
             }
         }
         
         @Override
         public int getItemHeight() {
-            return 12 * translators.size();
+            return 12 * textSplit.size();
         }
         
         @Override
@@ -145,18 +131,16 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
         }
     }
     
-    public static class LinkItem extends CreditsItem {
+    public static class LinkEntry extends Entry {
         private Component text;
         private List<FormattedCharSequence> textSplit;
         private String link;
         private boolean contains;
-        private boolean rainbow;
         
-        public LinkItem(Component text, String link, int width, boolean rainbow) {
+        public LinkEntry(Component text, String link, int width) {
             this.text = text;
-            this.textSplit = Minecraft.getInstance().font.split(text, width);
+            this.textSplit = Minecraft.getInstance().font.split(text, width - 6);
             this.link = link;
-            this.rainbow = rainbow;
         }
         
         @Override
@@ -169,14 +153,12 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
                     FormattedCharSequence underlined = characterVisitor -> {
                         return textSp.accept((charIndex, style, codePoint) -> characterVisitor.accept(charIndex, style.applyFormat(ChatFormatting.UNDERLINE), codePoint));
                     };
-                    if (rainbow) underlined = TextTransformations.applyRainbow(underlined, x + 5, yy);
                     Minecraft.getInstance().font.drawShadow(matrices, underlined, x + 5, yy, 0xff1fc3ff);
                     yy += 12;
                 }
             } else {
                 int yy = y;
                 for (FormattedCharSequence textSp : textSplit) {
-                    if (rainbow) textSp = TextTransformations.applyRainbow(textSp, x + 5, yy);
                     Minecraft.getInstance().font.drawShadow(matrices, textSp, x + 5, yy, 0xff1fc3ff);
                     yy += 12;
                 }

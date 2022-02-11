@@ -89,7 +89,8 @@ public class BatchedEntryRendererManager {
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Adding entry");
                 CrashReportUtils.renderer(report, currentEntry);
-                throw CrashReportUtils.throwReport(report);
+                CrashReportUtils.catchReport(report);
+                return;
             }
         }
         toRender.add(widget);
@@ -163,7 +164,8 @@ public class BatchedEntryRendererManager {
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry background");
                 CrashReportUtils.renderer(report, entry);
-                throw CrashReportUtils.throwReport(report);
+                CrashReportUtils.catchReport(report);
+                return;
             }
         }
         firstRenderer.startBatch(first, extraData[0], matrices, delta);
@@ -177,7 +179,8 @@ public class BatchedEntryRendererManager {
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry base");
                 CrashReportUtils.renderer(report, entry);
-                throw CrashReportUtils.throwReport(report);
+                CrashReportUtils.catchReport(report);
+                return;
             }
         }
         immediate.endBatch();
@@ -191,7 +194,8 @@ public class BatchedEntryRendererManager {
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry base");
                 CrashReportUtils.renderer(report, entry);
-                throw CrashReportUtils.throwReport(report);
+                CrashReportUtils.catchReport(report);
+                return;
             }
         }
         immediate.endBatch();
@@ -205,7 +209,8 @@ public class BatchedEntryRendererManager {
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry extra");
                 CrashReportUtils.renderer(report, entry);
-                throw CrashReportUtils.throwReport(report);
+                CrashReportUtils.catchReport(report);
+                return;
             }
         }
         if (debugTime) time.add(System.nanoTime() - l);
@@ -226,7 +231,8 @@ public class BatchedEntryRendererManager {
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry");
                 CrashReportUtils.renderer(report, entry);
-                throw CrashReportUtils.throwReport(report);
+                CrashReportUtils.catchReport(report);
+                return;
             }
         }
     }

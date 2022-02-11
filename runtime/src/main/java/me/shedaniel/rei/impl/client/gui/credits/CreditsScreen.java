@@ -35,6 +35,8 @@ import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Tuple;
@@ -46,7 +48,6 @@ import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class CreditsScreen extends Screen {
-    
     private Screen parent;
     private AbstractButton buttonDone;
     private CreditsEntryListWidget entryListWidget;
@@ -57,12 +58,12 @@ public class CreditsScreen extends Screen {
     }
     
     @Override
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (int_1 == 256 && this.shouldCloseOnEsc()) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == 256 && this.shouldCloseOnEsc()) {
             openPrevious();
             return true;
         }
-        return super.keyPressed(int_1, int_2, int_3);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
     
     @Override
@@ -120,18 +121,18 @@ public class CreditsScreen extends Screen {
     }
     
     @Override
-    public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        if (entryListWidget.mouseScrolled(double_1, double_2, double_3))
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (entryListWidget.mouseScrolled(mouseX, mouseY, amount))
             return true;
-        return super.mouseScrolled(double_1, double_2, double_3);
+        return super.mouseScrolled(mouseX, mouseY, amount);
     }
     
     @Override
-    public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         this.renderDirtBackground(0);
-        this.entryListWidget.render(matrices, int_1, int_2, float_1);
+        this.entryListWidget.render(matrices, mouseX, mouseY, delta);
         drawCenteredString(matrices, this.font, I18n.get("text.rei.credits"), this.width / 2, 16, 16777215);
-        super.render(matrices, int_1, int_2, float_1);
+        super.render(matrices, mouseX, mouseY, delta);
     }
     
 }

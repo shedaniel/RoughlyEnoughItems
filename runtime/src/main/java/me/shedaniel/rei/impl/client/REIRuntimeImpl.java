@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.client;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.architectury.event.events.GuiEvent;
 import me.shedaniel.architectury.event.events.client.ClientTickEvent;
 import me.shedaniel.math.Rectangle;
@@ -241,7 +242,11 @@ public class REIRuntimeImpl implements REIRuntime {
         Argument.SEARCH_CACHE.clear();
         getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
         lastDisplayScreen.clear();
-        CachedEntryListRender.refresh();
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(CachedEntryListRender::refresh);
+        } else {
+            CachedEntryListRender.refresh();
+        }
     }
     
     @Override
