@@ -24,12 +24,14 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.Collection;
+import java.util.HashSet;
 
 public enum JEIRecipeTransferHandlerHelper implements IRecipeTransferHandlerHelper {
     INSTANCE;
@@ -45,7 +47,12 @@ public enum JEIRecipeTransferHandlerHelper implements IRecipeTransferHandlerHelp
     }
     
     @Override
+    public IRecipeTransferError createUserErrorForMissingSlots(Component tooltipMessage, Collection<IRecipeSlotView> missingItemSlots) {
+        return new JEIRecipeTransferError.New(IRecipeTransferError.Type.USER_FACING, tooltipMessage, new HashSet<>(missingItemSlots));
+    }
+    
+    @Override
     public IRecipeTransferError createUserErrorForSlots(Component tooltipMessage, Collection<Integer> missingItemSlots) {
-        return new JEIRecipeTransferError(IRecipeTransferError.Type.USER_FACING, tooltipMessage, new IntArrayList(missingItemSlots));
+        return new JEIRecipeTransferError.Legacy(IRecipeTransferError.Type.USER_FACING, tooltipMessage, new IntArrayList(missingItemSlots));
     }
 }

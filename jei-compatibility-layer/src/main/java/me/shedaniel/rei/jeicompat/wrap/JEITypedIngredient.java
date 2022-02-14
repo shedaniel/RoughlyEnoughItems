@@ -23,13 +23,36 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import dev.architectury.utils.value.Value;
-import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.common.display.Display;
-import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.ingredients.ITypedIngredient;
 
-public class JEIWrappingRecipeLayout<T extends Display> extends JEIRecipeLayout<T> {
-    public JEIWrappingRecipeLayout(DisplayCategory<T> category, Value<IDrawable> background) {
-        super(background);
+import java.util.Optional;
+
+public class JEITypedIngredient<T> implements ITypedIngredient<T> {
+    private final IIngredientType<T> type;
+    private final T ingredient;
+    
+    public JEITypedIngredient(IIngredientType<T> type, T ingredient) {
+        this.type = type;
+        this.ingredient = ingredient;
+    }
+    
+    @Override
+    public IIngredientType<T> getType() {
+        return type;
+    }
+    
+    @Override
+    public T getIngredient() {
+        return ingredient;
+    }
+    
+    @Override
+    public <V> Optional<V> getIngredient(IIngredientType<V> ingredientType) {
+        if (ingredient == null) return Optional.empty();
+        if (ingredientType.getIngredientClass().isInstance(ingredient.getClass())) {
+            return Optional.ofNullable((V) ingredient);
+        }
+        return Optional.empty();
     }
 }

@@ -9,16 +9,17 @@ import net.minecraftforge.fluids.FluidStack;
 /**
  * Tell JEI how to interpret NBT tags and capabilities when comparing and looking up items and fluids.
  * <p>
- * If your item has subtypes that depend on NBT or capabilities, use this so JEI can tell those subtypes apart.
+ * If your item or fluid has subtypes that depend on NBT or capabilities, use this so JEI can tell those subtypes apart.
  */
 public interface ISubtypeRegistration {
+    
     /**
      * Add an interpreter to compare item subtypes.
      * This interpreter should account for nbt and anything else that's relevant to differentiating the item's subtypes.
      *
      * @param item        the item that has subtypes.
      * @param interpreter the interpreter for the item.
-     * @since JEI 7.6.2
+     * @since 7.6.2
      */
     void registerSubtypeInterpreter(Item item, IIngredientSubtypeInterpreter<ItemStack> interpreter);
     

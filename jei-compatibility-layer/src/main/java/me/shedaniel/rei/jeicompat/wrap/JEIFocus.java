@@ -23,42 +23,40 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import org.jetbrains.annotations.NotNull;
 
 public class JEIFocus<T> implements IFocus<T> {
-    private final Mode mode;
-    private final T value;
+    private final RecipeIngredientRole role;
+    private final ITypedIngredient<T> value;
     
     public JEIFocus(IFocus<T> focus) {
-        this(focus.getMode(), focus.getValue());
+        this(focus.getRole(), focus.getTypedValue());
     }
     
-    public JEIFocus(Mode mode, T value) {
-        this.mode = mode;
+    public JEIFocus(RecipeIngredientRole role, ITypedIngredient<T> value) {
+        this.role = role;
         this.value = value;
     }
     
-    public static <T> IFocus<T> cast(IFocus<?> focus, IIngredientType<T> type) {
-        if (focus != null) {
-            if (type.getIngredientClass().isInstance(focus.getValue())) {
-                return (IFocus<T>) focus;
-            }
-        }
-        
-        return null;
+    @Override
+    public RecipeIngredientRole getRole() {
+        return role;
     }
     
     @Override
     @NotNull
     public Mode getMode() {
-        return mode;
+        return switch (role) {
+            case INPUT, CATALYST -> IFocus.Mode.INPUT;
+            case OUTPUT, RENDER_ONLY -> IFocus.Mode.OUTPUT;
+        };
     }
     
     @Override
-    @NotNull
-    public T getValue() {
+    public ITypedIngredient<T> getTypedValue() {
         return value;
     }
     

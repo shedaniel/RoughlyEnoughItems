@@ -27,6 +27,8 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
@@ -34,6 +36,11 @@ public interface Views extends Reloadable<REIClientPlugin> {
     static Views getInstance() {
         return PluginManager.getClientInstance().get(Views.class);
     }
+    
+    @Nullable
+    @ApiStatus.Internal
+    @ApiStatus.Experimental
+    ViewSearchBuilder getContext();
     
     /**
      * Returns all craftable items from materials.

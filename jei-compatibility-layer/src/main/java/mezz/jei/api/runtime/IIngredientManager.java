@@ -10,7 +10,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.Collection;
 
 /**
- * The IIngredientManager is provided by JEI and has some useful functions related to recipe ingredients.
+ * The {@link IIngredientManager} has some useful functions related to recipe ingredients.
  * An instance is passed to your plugin in {@link IModPlugin#registerRecipes} and it is accessible from
  * {@link IJeiRuntime#getIngredientManager()}.
  */

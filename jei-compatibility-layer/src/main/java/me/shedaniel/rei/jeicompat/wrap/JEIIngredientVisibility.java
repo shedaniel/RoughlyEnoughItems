@@ -23,15 +23,28 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import dev.architectury.utils.value.Value;
-import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.recipe.category.IRecipeCategory;
+import lombok.experimental.ExtensionMethod;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
+import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.runtime.IIngredientVisibility;
 
-public class JEIBasedRecipeLayout<T> extends JEIRecipeLayout<T> {
-    private final IRecipeCategory<?> category;
+import java.util.Collection;
+import java.util.Collections;
+
+@ExtensionMethod(JEIPluginDetector.class)
+public enum JEIIngredientVisibility implements IIngredientVisibility {
+    INSTANCE;
     
-    public JEIBasedRecipeLayout(IRecipeCategory<?> category, Value<IDrawable> background) {
-        super(background);
-        this.category = category;
+    @Override
+    public <V> boolean isIngredientVisible(IIngredientType<V> ingredientType, V ingredient) {
+        EntryStack<?> stack = ingredient.unwrapStack(ingredientType);
+        EntryRegistry registry = EntryRegistry.getInstance();
+        if (!registry.alreadyContain(stack)) {
+            return false;
+        }
+        Collection<EntryStack<?>> stacks = registry.refilterNew(Collections.singletonList(stack));
+        return !stacks.isEmpty();
     }
 }
