@@ -243,7 +243,14 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         return Optional.empty();
     }
     
-    public void setEntries(List<T> newEntries) {
+    public enum RemovalMode {
+        THROW_EXCEPTION,
+        DISAPPEAR,
+        MIGRATED,
+        ;
+    }
+    
+    public void setEntries(List<T> newEntries, RemovalMode removalMode) {
         newEntries = Lists.newArrayList(newEntries);
         newEntries.removeIf(entry -> entry == null || entry.isEntryInvalid());
         
@@ -252,9 +259,13 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         List<RealRegionEntry<T>> removedEntries = Lists.newArrayList(this.entries.values());
         removedEntries.removeIf(entry -> newFavoritesHash.contains(entry.hashIgnoreAmount()));
         
-        for (RealRegionEntry<T> removedEntry : removedEntries) {
-            removedEntry.remove();
-            this.removedEntries.put(removedEntry.hashIgnoreAmount(), removedEntry);
+        if (!removedEntries.isEmpty() && removalMode == RemovalMode.THROW_EXCEPTION) {
+            throw new IllegalStateException("Cannot remove entries from region " + this + ": " + removedEntries);
+        } else if (removalMode == RemovalMode.DISAPPEAR) {
+            for (RealRegionEntry<T> removedEntry : removedEntries) {
+                removedEntry.remove();
+                this.removedEntries.put(removedEntry.hashIgnoreAmount(), removedEntry);
+            }
         }
         
         List<RealRegionEntry<T>> addedEntries = new ArrayList<>();
@@ -459,7 +470,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         
         setEntries(this.entries.values().stream()
                 .map(RealRegionEntry::getEntry)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()), RemovalMode.THROW_EXCEPTION);
         return true;
     }
     
@@ -467,9 +478,13 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         return entriesList.indexOf(entry.getWidget());
     }
     
-    public void remove(RealRegionEntry<T> entry) {
-        entries.remove(entry.hashIgnoreAmount());
-        setEntries(CollectionUtils.map(entries.values(), RealRegionEntry::getEntry));
+    public void remove(RealRegionEntry<T> entry, RemovalMode mode) {
+        RealRegionEntry<T> currentEntry = entries.get(entry.hashIgnoreAmount());
+        if (currentEntry != null) {
+            List<T> newEntries = CollectionUtils.map(entries.values(), RealRegionEntry::getEntry);
+            newEntries.remove(currentEntry.getEntry());
+            setEntries(newEntries, mode);
+        }
     }
     
     public double getScrollAmount() {
