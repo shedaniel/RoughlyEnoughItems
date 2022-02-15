@@ -257,11 +257,14 @@ public class ClientHelperImpl implements ClientHelper {
         if (ConfigObject.getInstance().getRecipeScreenType() == DisplayScreenType.COMPOSITE) {
             screen = new CompositeDisplayViewingScreen(map, builder.getPreferredOpenedCategory());
         } else if (ConfigObject.getInstance().getRecipeScreenType() == DisplayScreenType.UNSET) {
-            screen = new UncertainDisplayViewingScreen(REIRuntime.getInstance().getPreviousScreen(), DisplayScreenType.UNSET, true, original -> {
-                ConfigObject.getInstance().setRecipeScreenType(original ? DisplayScreenType.ORIGINAL : DisplayScreenType.COMPOSITE);
-                ConfigManager.getInstance().saveConfig();
-                openView(builder);
-            });
+            ConfigObject.getInstance().setRecipeScreenType(DisplayScreenType.ORIGINAL);
+            ConfigManager.getInstance().saveConfig();
+            return openView(builder);
+//            screen = new UncertainDisplayViewingScreen(REIRuntime.getInstance().getPreviousScreen(), DisplayScreenType.UNSET, true, original -> {
+//                ConfigObject.getInstance().setRecipeScreenType(original ? DisplayScreenType.ORIGINAL : DisplayScreenType.COMPOSITE);
+//                ConfigManager.getInstance().saveConfig();
+//                openView(builder);
+//            });
         } else {
             screen = new DefaultDisplayViewingScreen(map, builder.getPreferredOpenedCategory());
         }
