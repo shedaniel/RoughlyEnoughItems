@@ -182,6 +182,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public String getTimeCommand() {
+        return advanced.commands.timeCommand;
+    }
+    
+    @Override
     public int getMaxRecipePerPage() {
         return advanced.layout.maxRecipesPerPage;
     }
@@ -638,6 +643,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares the command used to change gamemode.") private String gamemodeCommand = "/gamemode {gamemode}";
             @Comment("Declares the command used in servers to cheat items.") private String giveCommand = "/give {player_name} {item_identifier}{nbt} {count}";
             @Comment("Declares the command used to change weather.") private String weatherCommand = "/weather {weather}";
+            @Comment("Declares the command used to change time.") private String timeCommand = "/time set {time}";
         }
         
         public static class Miscellaneous {
