@@ -446,6 +446,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public boolean isFocusModeZoomed() {
+        return appearance.isFocusModeZoomed;
+    }
+    
+    @Override
     public SearchMode getTooltipSearchMode() {
         return advanced.search.tooltipSearch;
     }
@@ -555,6 +560,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double favoritesHorizontalEntriesBoundaries = 1.0;
         private int favoritesHorizontalEntriesBoundariesColumns = 50;
         @UseSpecialSearchFilterSyntaxHighlightingScreen private SyntaxHighlightingMode syntaxHighlightingMode = SyntaxHighlightingMode.COLORFUL;
+        private boolean isFocusModeZoomed = false;
     }
     
     public static class Functionality {
