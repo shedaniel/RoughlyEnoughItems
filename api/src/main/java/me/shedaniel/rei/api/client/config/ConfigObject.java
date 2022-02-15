@@ -194,6 +194,9 @@ public interface ConfigObject {
     @ApiStatus.Experimental
     SyntaxHighlightingMode getSyntaxHighlightingMode();
     
+    @ApiStatus.Experimental
+    boolean isFocusModeZoomed();
+    
     SearchMode getTooltipSearchMode();
     
     SearchMode getTagSearchMode();
