@@ -50,6 +50,9 @@ public interface ConfigObject {
     
     void setCheating(boolean cheating);
     
+    @ApiStatus.Experimental
+    CheatingMode getCheatingMode();
+    
     EntryPanelOrdering getItemListOrdering();
     
     boolean isItemListAscending();
