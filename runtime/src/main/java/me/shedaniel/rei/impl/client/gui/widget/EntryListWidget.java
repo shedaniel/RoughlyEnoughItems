@@ -32,6 +32,8 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
+import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
+import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -441,6 +443,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     
     public void updateEntriesPosition() {
         int entrySize = entrySize();
+        boolean focusModeZoomed = ConfigObject.getInstance().isFocusModeZoomed();
         this.innerBounds = updateInnerBounds(bounds);
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             this.renders = Lists.newArrayList();
@@ -453,7 +456,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                     int slotX = currentX * entrySize + innerBounds.x;
                     int slotY = currentY * entrySize + innerBounds.y;
                     if (notSteppingOnExclusionZones(slotX - 1, slotY - 1, entrySize, entrySize, innerBounds)) {
-                        entries.add((EntryListEntry) new EntryListEntry(slotX, slotY, entrySize).noBackground());
+                        entries.add((EntryListEntry) new EntryListEntry(slotX, slotY, entrySize, focusModeZoomed).noBackground());
                     }
                 }
             }
@@ -477,7 +480,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             for (int i = 0; i < slotsToPrepare; i++) {
                 int xPos = currentX * entrySize + innerBounds.x;
                 int yPos = currentY * entrySize + innerBounds.y;
-                entries.add((EntryListEntry) new EntryListEntry(xPos, yPos, entrySize).noBackground());
+                entries.add((EntryListEntry) new EntryListEntry(xPos, yPos, entrySize, focusModeZoomed).noBackground());
                 currentX++;
                 if (currentX >= width) {
                     currentX = 0;
@@ -596,9 +599,34 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     private class EntryListEntry extends EntryListEntryWidget {
         private Display display;
         private EntryStack<?> our;
+        private NumberAnimator<Double> size = null;
         
-        private EntryListEntry(int x, int y, int entrySize) {
+        private EntryListEntry(int x, int y, int entrySize, boolean zoomed) {
             super(new Point(x, y), entrySize);
+            if (zoomed) {
+                noHighlight();
+                size = ValueAnimator.ofDouble(1f)
+                        .withConvention(() -> {
+                            double mouseX = PointHelper.getMouseFloatingX();
+                            double mouseY = PointHelper.getMouseFloatingY();
+                            int x1 = getBounds().getCenterX() - entrySize / 2;
+                            int y1 = getBounds().getCenterY() - entrySize / 2;
+                            boolean hovering = mouseX >= x1 && mouseX < x1 + entrySize && mouseY >= y1 && mouseY < y1 + entrySize;
+                            return hovering ? 1.5 : 1.0;
+                        }, 200);
+            }
+        }
+        
+        @Override
+        protected void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {
+            if (size != null) {
+                size.update(delta);
+                int centerX = getBounds().getCenterX();
+                int centerY = getBounds().getCenterY();
+                int entrySize = (int) Math.round(entrySize() * size.value());
+                getBounds().setBounds(centerX - entrySize / 2, centerY - entrySize / 2, entrySize, entrySize);
+            }
+            super.drawExtra(matrices, mouseX, mouseY, delta);
         }
         
         @Override

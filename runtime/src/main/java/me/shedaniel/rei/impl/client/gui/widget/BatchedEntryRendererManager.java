@@ -203,7 +203,10 @@ public class BatchedEntryRendererManager {
             try {
                 if (entry.containsMouse(mouseX, mouseY)) {
                     entry.queueTooltip(matrices, mouseX, mouseY, delta);
-                    entry.drawHighlighted(matrices, mouseX, mouseY, delta);
+                    
+                    if (entry.hasHighlight()) {
+                        entry.drawHighlighted(matrices, mouseX, mouseY, delta);
+                    }
                 }
                 entry.drawExtra(matrices, mouseX, mouseY, delta);
             } catch (Throwable throwable) {
