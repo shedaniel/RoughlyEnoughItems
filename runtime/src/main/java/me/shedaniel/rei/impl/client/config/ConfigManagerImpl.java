@@ -51,6 +51,7 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.client.gui.config.CheatingMode;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
@@ -134,6 +135,21 @@ public class ConfigManagerImpl implements ConfigManager {
     }
     
     private static Jankson buildJankson(Jankson.Builder builder) {
+        // CheatingMode
+        builder.registerSerializer(CheatingMode.class, (value, marshaller) -> {
+            if (value == CheatingMode.WHEN_CREATIVE) {
+                return new JsonPrimitive("WHEN_CREATIVE");
+            } else {
+                return new JsonPrimitive(value == CheatingMode.ON);
+            }
+        });
+        builder.registerDeserializer(Boolean.class, CheatingMode.class, (value, unmarshaller) -> {
+            return value ? CheatingMode.ON : CheatingMode.OFF;
+        });
+        builder.registerDeserializer(String.class, CheatingMode.class, (value, unmarshaller) -> {
+            return CheatingMode.valueOf(value.toUpperCase(Locale.ROOT));
+        });
+        
         // InputConstants.Key
         builder.registerSerializer(InputConstants.Key.class, (value, marshaller) -> {
             return new JsonPrimitive(value.getName());

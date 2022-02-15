@@ -40,7 +40,9 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.ElementType;
@@ -76,12 +78,18 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public boolean isCheating() {
-        return basics.cheating;
+        return basics.cheating == CheatingMode.ON || (basics.cheating == CheatingMode.WHEN_CREATIVE && Minecraft.getInstance().gameMode != null
+                                                      && Minecraft.getInstance().gameMode.getPlayerMode() == GameType.CREATIVE);
     }
     
     @Override
     public void setCheating(boolean cheating) {
-        basics.cheating = cheating;
+        basics.cheating = cheating ? CheatingMode.ON : CheatingMode.OFF;
+    }
+    
+    @Override
+    public CheatingMode getCheatingMode() {
+        return basics.cheating;
     }
     
     @Override
@@ -512,7 +520,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public static class Basics {
         @ConfigEntry.Gui.Excluded public List<FavoriteEntry> favorites = new ArrayList<>();
-        @Comment("Declares whether cheating mode is on.") private boolean cheating = false;
+        @Comment("Declares whether cheating mode is on.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON) private CheatingMode cheating = CheatingMode.OFF;
         private boolean favoritesEnabled = true;
         @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
         private KeyBindings keyBindings = new KeyBindings();
@@ -572,7 +580,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares whether REI should remove the recipe book.") private boolean disableRecipeBook = false;
         @Comment("Declares whether subsets is enabled.") private boolean isSubsetsEnabled = false;
         private boolean allowInventoryHighlighting = true;
-        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON) private ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
+        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        private ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
     }
     
     public static class Advanced {
