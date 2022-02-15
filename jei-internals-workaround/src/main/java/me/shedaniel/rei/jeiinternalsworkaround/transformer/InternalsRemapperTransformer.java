@@ -53,6 +53,9 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
         redirect("mezz/jei/plugins/jei/info/IngredientInfoRecipe", "me/shedaniel/rei/jeicompat/imitator/IngredientInfoRecipe");
         redirect("mezz/jei/plugins/vanilla/cooking/AbstractCookingCategory", "me/shedaniel/rei/jeicompat/imitator/JEIAbstractCookingCategory");
         redirect("mezz/jei/plugins/vanilla/cooking/FurnaceVariantCategory", "me/shedaniel/rei/jeicompat/imitator/JEIFurnaceVariantCategory");
+        redirect("mezz/jei/plugins/vanilla/ingredients/fluid/FluidStackRenderer", "me/shedaniel/rei/jeicompat/imitator/JEIFluidStackRendererImitator");
+        redirect("mezz/jei/plugins/vanilla/ingredients/item/ItemStackRenderer", "me/shedaniel/rei/jeicompat/imitator/JEIItemStackRendererImitator");
+        // Remember to rebuild this module after changing this
     }
     
     private void redirect(String oldName, String newName) {
@@ -218,7 +221,6 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
         dest.innerClasses = InternalsRemapperTransformer.merge(source.innerClasses, dest.innerClasses);
         dest.fields = InternalsRemapperTransformer.merge(source.fields, dest.fields);
         dest.methods = InternalsRemapperTransformer.merge(source.methods, dest.methods);
-        
     }
     
     public static void replace(ClassNode source, ClassNode dest) {
@@ -255,13 +257,11 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
         
         dest.module = source.module;
         
-        // TODO Java 10
-//        dest.nestHostClassExperimental = source.nestHostClassExperimental;
-//        Bytecode.<String>clear(dest.nestMembersExperimental);
-//        dest.nestMembersExperimental = Bytecode.<String>merge(source.nestMembersExperimental, dest.nestMembersExperimental);
+        dest.nestHostClass = source.nestHostClass;
+        InternalsRemapperTransformer.clear(dest.nestMembers);
+        dest.nestMembers = InternalsRemapperTransformer.merge(source.nestMembers, dest.nestMembers);
         
         InternalsRemapperTransformer.merge(source, dest);
-        
     }
     
     private static <T> void clear(List<T> list) {

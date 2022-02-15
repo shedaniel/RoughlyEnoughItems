@@ -24,6 +24,8 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.architectury.fluid.FluidStack;
+import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
 import dev.architectury.utils.EnvExecutor;
 import lombok.experimental.ExtensionMethod;
 import me.shedaniel.math.Point;
@@ -164,13 +166,17 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
         
         @Override
         public void render(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-            ingredientRenderer.render(matrices, bounds.x, bounds.y, entry.getValue());
+            Object value = entry.getValue();
+            if (value instanceof FluidStack) value = FluidStackHooksForge.toForge((FluidStack) value);
+            ((IIngredientRenderer<Object>) ingredientRenderer).render(matrices, bounds.getCenterX() - ingredientRenderer.getWidth() / 2, bounds.getCenterY() - ingredientRenderer.getHeight() / 2, value);
         }
         
         @Override
         @Nullable
         public Tooltip getTooltip(EntryStack<T> entry, Point mouse) {
-            List<Component> components = ingredientRenderer.getTooltip(entry.getValue(), Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+            Object value = entry.getValue();
+            if (value instanceof FluidStack) value = FluidStackHooksForge.toForge((FluidStack) value);
+            List<Component> components = ((IIngredientRenderer<Object>) ingredientRenderer).getTooltip(value, Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
             if (components != null && !components.isEmpty()) {
                 return Tooltip.create(mouse, components);
             }
