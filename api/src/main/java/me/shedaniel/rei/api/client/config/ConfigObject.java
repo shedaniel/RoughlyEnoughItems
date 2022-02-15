@@ -87,6 +87,8 @@ public interface ConfigObject {
     
     String getWeatherCommand();
     
+    String getTimeCommand();
+    
     int getMaxRecipePerPage();
     
     int getMaxRecipesPageHeight();

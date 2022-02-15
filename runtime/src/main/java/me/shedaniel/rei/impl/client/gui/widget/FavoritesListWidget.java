@@ -179,6 +179,11 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     }
     
     @Override
+    public void onConsumed(RealRegionEntry<FavoriteEntry> entry) {
+        setSystemRegionEntries(entry);
+    }
+    
+    @Override
     @Nullable
     public FavoriteEntry convertDraggableStack(DraggingContext<Screen> context, DraggableStack stack) {
         return FavoriteEntry.fromEntryStack(stack.getStack().copy());
@@ -195,7 +200,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             for (AddFavoritePanel.Row row : favoritePanel.rows.get()) {
                 if (row instanceof AddFavoritePanel.SectionEntriesRow) {
                     for (AddFavoritePanel.SectionEntriesRow.SectionFavoriteWidget widget : ((AddFavoritePanel.SectionEntriesRow) row).widgets) {
-                        if (widget.containsMouse(mouseX, mouseY)) {
+                        if (widget.containsMouse(mouseX, mouseY + favoritePanel.scroller.scrollAmount())) {
                             RealRegionEntry<FavoriteEntry> entry = new RealRegionEntry<>(region, widget.entry.copy(), entrySize());
                             entry.size.setAs(entrySize() * 100);
                             return new RegionDraggableStack<>(entry, widget);
@@ -319,11 +324,11 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         
         if (updated) {
             lastSystemEntries = CollectionUtils.flatMap(providers, Triple::getRight);
-            setSystemRegionEntries();
+            setSystemRegionEntries(null);
         }
     }
     
-    private void setSystemRegionEntries() {
+    private void setSystemRegionEntries(@Nullable RealRegionEntry<FavoriteEntry> removed) {
         systemRegion.setEntries(CollectionUtils.filterToList(lastSystemEntries, entry -> {
             if (region.has(entry)) return false;
             if (DraggingContext.getInstance().isDraggingStack()) {
@@ -331,16 +336,17 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 if (currentStack instanceof RegionDraggableStack) {
                     RegionDraggableStack<?> stack = (RegionDraggableStack<?>) currentStack;
                     
+                    if (removed != null && stack.getEntry() == removed) return true;
                     return stack.getEntry().region != region || !Objects.equals(stack.getEntry().getEntry(), entry);
                 }
             }
             return true;
-        }));
+        }), EntryStacksRegionWidget.RemovalMode.DISAPPEAR);
     }
     
     @Override
     public void onSetNewEntries(List<RegionEntryListEntry<FavoriteEntry>> regionEntryListEntries) {
-        setSystemRegionEntries();
+        setSystemRegionEntries(null);
     }
     
     private void renderAddFavorite(PoseStack matrices, int mouseX, int mouseY, float delta) {
@@ -363,8 +369,8 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     
     public void updateSearch() {
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
-            region.setEntries(CollectionUtils.map(ConfigObject.getInstance().getFavoriteEntries(), FavoriteEntry::copy));
-        } else region.setEntries(Collections.emptyList());
+            region.setEntries(CollectionUtils.map(ConfigObject.getInstance().getFavoriteEntries(), FavoriteEntry::copy), EntryStacksRegionWidget.RemovalMode.DISAPPEAR);
+        } else region.setEntries(Collections.emptyList(), EntryStacksRegionWidget.RemovalMode.DISAPPEAR);
     }
     
     @Override
@@ -571,7 +577,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 matrices.translate(0, -scroller.scrollAmount(), 0);
                 int y = scrollBounds.y;
                 for (Row row : rows.get()) {
-                    row.render(matrices, scrollBounds.x, y, scrollBounds.width, row.getRowHeight(), mouseX, mouseY, delta);
+                    row.render(matrices, scrollBounds.x, y, scrollBounds.width, row.getRowHeight(), mouseX, mouseY + scroller.scrollAmountInt(), delta);
                     y += row.getRowHeight();
                 }
                 matrices.popPose();
@@ -724,6 +730,21 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 return widgets;
             }
             
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int button) {
+                return super.mouseClicked(mouseX, mouseY + scroller.scrollAmount(), button);
+            }
+            
+            @Override
+            public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+                return super.mouseDragged(mouseX, mouseY + scroller.scrollAmount(), button, deltaX, deltaY);
+            }
+            
+            @Override
+            public boolean mouseReleased(double mouseX, double mouseY, int button) {
+                return super.mouseReleased(mouseX, mouseY + scroller.scrollAmount(), button);
+            }
+            
             private class SectionFavoriteWidget extends EntryListEntryWidget {
                 private ValueAnimator<FloatingPoint> pos = ValueAnimator.ofFloatingPoint();
                 private NumberAnimator<Double> size = ValueAnimator.ofDouble();
@@ -752,6 +773,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 @Override
                 @Nullable
                 public Tooltip getCurrentTooltip(Point point) {
+                    point = PointHelper.ofMouse();
                     if (!scrollBounds.contains(point)) return null;
                     Tooltip tooltip = super.getCurrentTooltip(point);
                     if (tooltip != null) {

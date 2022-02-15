@@ -57,6 +57,7 @@ import me.shedaniel.rei.plugin.client.categories.crafting.DefaultCraftingCategor
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultPotionEffectExclusionZones;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultRecipeBookExclusionZones;
 import me.shedaniel.rei.plugin.client.favorites.GameModeFavoriteEntry;
+import me.shedaniel.rei.plugin.client.favorites.TimeFavoriteEntry;
 import me.shedaniel.rei.plugin.client.favorites.WeatherFavoriteEntry;
 import me.shedaniel.rei.plugin.common.displays.*;
 import me.shedaniel.rei.plugin.common.displays.anvil.AnvilRecipe;
@@ -340,6 +341,12 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                         Arrays.stream(WeatherFavoriteEntry.Weather.values()),
                         Stream.of((WeatherFavoriteEntry.Weather) null)
                 ).<FavoriteEntry>map(WeatherFavoriteEntry::new).toArray(FavoriteEntry[]::new));
+        registry.register(TimeFavoriteEntry.ID, TimeFavoriteEntry.Type.INSTANCE);
+        registry.getOrCrateSection(new TranslatableComponent(TimeFavoriteEntry.TRANSLATION_KEY))
+                .add(Stream.concat(
+                        Arrays.stream(TimeFavoriteEntry.Time.values()),
+                        Stream.of((TimeFavoriteEntry.Time) null)
+                ).<FavoriteEntry>map(TimeFavoriteEntry::new).toArray(FavoriteEntry[]::new));
     }
     
     @Override
