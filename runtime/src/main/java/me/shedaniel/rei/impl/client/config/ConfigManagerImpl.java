@@ -79,7 +79,6 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -366,7 +365,6 @@ public class ConfigManagerImpl implements ConfigManager {
                     ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) feedbackEntry);
                     ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) new EmptyEntry(4));
                     ScreenHooks.addButton(screen, new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
-                        MutableLong current = new MutableLong(0);
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
                         Minecraft.getInstance().setScreen(creditsScreen);
                     }));
