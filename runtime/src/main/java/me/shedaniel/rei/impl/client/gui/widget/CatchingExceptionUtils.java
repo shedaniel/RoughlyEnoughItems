@@ -31,6 +31,6 @@ public class CatchingExceptionUtils {
         components.add((Function<Integer, ErrorsEntryListWidget.Entry>) width -> new ErrorsEntryListWidget.LinkEntry(new TranslatableComponent("text.rei.crash.crash_report"), crashReportFile.toURI().toString(), width));
         components.add(ImmutableTextComponent.EMPTY);
         components.add(new TextComponent(report.getFriendlyReport().replace("\t", "    ")));
-        Minecraft.getInstance().setScreen(new ErrorsScreen(new TranslatableComponent("text.rei.crash.title"), components));
+        Minecraft.getInstance().setScreen(new ErrorsScreen(new TranslatableComponent("text.rei.crash.title"), components, null, false));
     }
 }

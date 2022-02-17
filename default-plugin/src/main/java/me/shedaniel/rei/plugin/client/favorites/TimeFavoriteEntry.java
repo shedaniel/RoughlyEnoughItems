@@ -41,6 +41,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
@@ -93,11 +94,11 @@ public class TimeFavoriteEntry extends FavoriteEntry {
     public Renderer getRenderer(boolean showcase) {
         if (time == null) {
             List<Renderer> renderers = IntStream.range(0, 4).mapToObj(TimeFavoriteEntry::getRenderer).collect(Collectors.toList());
-            return new CompoundFavoriteRenderer(showcase, renderers, () -> Minecraft.getInstance().gameMode.getPlayerMode().getId()) {
+            return new CompoundFavoriteRenderer(showcase, renderers, () -> nextTime().ordinal()) {
                 @Override
                 @Nullable
                 public Tooltip getTooltip(Point mouse) {
-                    return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.dropdown"));
+                    return Tooltip.create(mouse, new TranslatableComponent("text.rei.time_button.tooltip.dropdown"));
                 }
                 
                 @Override
@@ -114,6 +115,22 @@ public class TimeFavoriteEntry extends FavoriteEntry {
             };
         }
         return getRenderer(time.ordinal());
+    }
+    
+    private Time nextTime() {
+        ClientLevel level = Minecraft.getInstance().level;
+        long dayTime = level.getDayTime();
+        if (dayTime <= 1000) {
+            return Time.MORN;
+        } else if (dayTime <= 6000) {
+            return Time.NOON;
+        } else if (dayTime <= 12000) {
+            return Time.EVENING;
+        } else if (dayTime <= 18000) {
+            return Time.NIGHT;
+        } else {
+            return Time.MORN;
+        }
     }
     
     private static Renderer getRenderer(int id) {
@@ -161,7 +178,7 @@ public class TimeFavoriteEntry extends FavoriteEntry {
         if (button == 0) {
             Time time = this.time;
             if (time == null) {
-                time = Time.values()[Minecraft.getInstance().gameMode.getPlayerMode().getId() + 1 % 4];
+                time = nextTime();
             }
             Minecraft.getInstance().player.chat(ConfigObject.getInstance().getTimeCommand().replaceAll("\\{time}", time.getPart().toLowerCase(Locale.ROOT)));
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
