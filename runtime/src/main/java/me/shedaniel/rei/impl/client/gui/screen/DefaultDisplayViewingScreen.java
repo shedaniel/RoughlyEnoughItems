@@ -267,6 +267,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 setupDisplay.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() + 1), new TextComponent("Check console for error")));
             }
             setupTags(setupDisplay);
+            transformFiltering(setupDisplay);
             transformIngredientNotice(setupDisplay, ingredientStackToNotice);
             transformResultNotice(setupDisplay, resultStackToNotice);
             for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
