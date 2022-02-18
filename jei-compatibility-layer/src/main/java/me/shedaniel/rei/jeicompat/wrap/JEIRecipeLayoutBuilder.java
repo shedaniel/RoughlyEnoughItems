@@ -31,7 +31,9 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class JEIRecipeLayoutBuilder implements IRecipeLayoutBuilder {
     private boolean dirty = false;
@@ -40,10 +42,27 @@ public class JEIRecipeLayoutBuilder implements IRecipeLayoutBuilder {
     
     @Override
     public IRecipeSlotBuilder addSlot(RecipeIngredientRole role, int x, int y) {
-        JEIRecipeSlot slot = new JEIRecipeSlot(role, new Point(x, y));
+        return addSlot(role, x, y, -1);
+    }
+    
+    public IRecipeSlotBuilder addSlot(RecipeIngredientRole role, int x, int y, int index) {
+        if (index == -1) {
+            index = getNextId(slots.stream().map(JEIRecipeSlot::getIndex).filter(integer -> integer >= 0)
+                    .collect(Collectors.toSet()));
+        }
+        JEIRecipeSlot slot = new JEIRecipeSlot(index, role, new Point(x, y));
         if (rolePredicate != null && !rolePredicate.test(role)) return slot;
         slots.add(slot);
         return slot;
+    }
+    
+    
+    private int getNextId(Set<Integer> keys) {
+        for (int i = 0; ; i++) {
+            if (!keys.contains(i)) {
+                return i;
+            }
+        }
     }
     
     @Override
@@ -52,7 +71,7 @@ public class JEIRecipeLayoutBuilder implements IRecipeLayoutBuilder {
     }
     
     public JEIRecipeSlot _addInvisibleIngredients(RecipeIngredientRole role) {
-        JEIRecipeSlot slot = new JEIRecipeSlot(role, null);
+        JEIRecipeSlot slot = new JEIRecipeSlot(-1, role, null);
         if (rolePredicate != null && !rolePredicate.test(role)) return slot;
         slots.add(slot);
         return slot;

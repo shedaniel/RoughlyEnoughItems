@@ -34,6 +34,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategoryView;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRenderer;
@@ -53,10 +54,8 @@ import me.shedaniel.rei.jeicompat.transfer.JEIRecipeTransferData;
 import me.shedaniel.rei.jeicompat.transfer.JEITransferMenuInfo;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.gui.ingredient.IGuiIngredientGroup;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.helpers.IJeiHelpers;
-import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
@@ -173,7 +172,6 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                 if (recipeTransferHandler.getContainerClass().isInstance(context.getMenu())) {
                     Display display = context.getDisplay();
                     if (recipeCategoryUid == null || display.getCategoryIdentifier().getIdentifier().equals(recipeCategoryUid)) {
-                        IRecipeLayout layout = null;
                         Value<IDrawable> background = new Value<IDrawable>() {
                             @Override
                             public void accept(IDrawable iDrawable) {
@@ -184,24 +182,28 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                                 return JEIGuiHelper.INSTANCE.createBlankDrawable(0, 0);
                             }
                         };
-//                        if (display instanceof JEIWrappedDisplay) {
-//                            layout = ((JEIWrappedDisplay<Object>) display).getBackingCategory().createLayout((JEIWrappedDisplay<Object>) display, background);
-//                        } else {
-//                            DisplayCategory<Display> category = CategoryRegistry.getInstance().get(display.getCategoryIdentifier().cast()).getCategory();
-//                            DisplayCategoryView<Display> categoryView = CategoryRegistry.getInstance().get(display.getCategoryIdentifier().cast()).getView(display);
-//                            layout = new JEIRecipeLayout<>(category, background);
-//                            List<Widget> widgets = categoryView.setupDisplay(display, new Rectangle(0, 0, category.getDisplayWidth(display), category.getDisplayHeight()));
-//                            JEIRecipeTransferRegistration.this.addToLayout(layout, widgets, 4, 4);
-//                        }
+                        JEIDisplaySetup.Result view;
+                        if (display instanceof JEIWrappedDisplay) {
+                            JEIWrappedCategory<Object> category = ((JEIWrappedDisplay<Object>) display).getBackingCategory();
+                            view = JEIDisplaySetup.create(category.getBackingCategory(), (JEIWrappedDisplay<Object>) display, Collections.emptyList());
+                        } else {
+                            DisplayCategory<Display> category = CategoryRegistry.getInstance().get(display.getCategoryIdentifier().cast()).getCategory();
+                            DisplayCategoryView<Display> categoryView = CategoryRegistry.getInstance().get(display.getCategoryIdentifier().cast()).getView(display);
+                            view = new JEIDisplaySetup.Result();
+                            JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder();
+                            List<Widget> widgets = categoryView.setupDisplay(display, new Rectangle(0, 0, category.getDisplayWidth(display), category.getDisplayHeight()));
+                            JEIRecipeTransferRegistration.this.addToLayout(builder, widgets, 4, 4);
+                            view.setSlots(builder.slots);
+                        }
                         if (context.isActuallyCrafting()) {
                             context.getMinecraft().setScreen(context.getContainerScreen());
                         }
                         IRecipeTransferHandler<AbstractContainerMenu, Object> handler = (IRecipeTransferHandler<AbstractContainerMenu, Object>) recipeTransferHandler;
                         IRecipeTransferError error;
                         try {
-                            throw new UnsupportedOperationException();
-//                            error = handler.transferRecipe(context.getMenu(), context.getDisplay().jeiValue(), , context.getMinecraft().player, context.isStackedCrafting(), context.isActuallyCrafting());
+                            error = handler.transferRecipe(context.getMenu(), context.getDisplay().jeiValue(), view, context.getMinecraft().player, context.isStackedCrafting(), context.isActuallyCrafting());
                         } catch (UnsupportedOperationException e) {
+                            IRecipeLayout layout = new JEIRecipeLayoutLegacyAdapter(view);
                             error = handler.transferRecipe(context.getMenu(), context.getDisplay().jeiValue(), layout, context.getMinecraft().player, context.isStackedCrafting(), context.isActuallyCrafting());
                         }
                         if (error == null) {
@@ -223,10 +225,13 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                                 }
                                 return result;
                             } else {
+                                IRecipeTransferError finalError = error;
                                 return result
                                         .overrideTooltipRenderer((point, tooltipSink) -> {})
                                         .renderer((matrices, mouseX, mouseY, delta, widgets, bounds, d) -> {
-                                            error.showError(matrices, mouseX, mouseY, layout, bounds.x + 4, bounds.y + 4);
+                                            finalError.showError(matrices, mouseX, mouseY, view, bounds.x + 4, bounds.y + 4);
+                                            IRecipeLayout layout = new JEIRecipeLayoutLegacyAdapter(view);
+                                            finalError.showError(matrices, mouseX, mouseY, layout, bounds.x + 4, bounds.y + 4);
                                         });
                             }
                         }
@@ -273,7 +278,7 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
         };
     }
     
-    private void addToLayout(IRecipeLayout layout, List<Widget> entries, int xOffset, int yOffset) {
+    private void addToLayout(JEIRecipeLayoutBuilder builder, List<Widget> entries, int xOffset, int yOffset) {
         Map<Boolean, List<Pair<Slot, Multimap<EntryType<?>, EntryStack<?>>>>> groups = new HashMap<>();
         for (Widget widget : entries) {
             if (widget instanceof Slot) {
@@ -289,24 +294,13 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
         for (Map.Entry<Boolean, List<Pair<Slot, Multimap<EntryType<?>, EntryStack<?>>>>> entry : groups.entrySet()) {
             entry.getValue().stream().map(Pair::getRight).map(Multimap::keys).flatMap(Collection::stream)
                     .distinct().forEach(type -> {
-                        IGuiIngredientGroup<Object> group = layout.getIngredientsGroup((IIngredientType<Object>) type.getDefinition().jeiType());
-                        int[] i = new int[]{getNextId(group.getGuiIngredients().keySet())};
                         for (Pair<Slot, Multimap<EntryType<?>, EntryStack<?>>> pair : entry.getValue()) {
                             Slot slot = pair.getLeft();
                             Collection<EntryStack<?>> stacks = pair.getRight().get(type);
-                            group.set(i[0], CollectionUtils.map(stacks, JEIPluginDetector::jeiValue));
-                            group.init(i[0], entry.getKey(), slot.getBounds().x - xOffset, slot.getBounds().y - yOffset);
-                            i[0]++;
+                            builder.addSlot(entry.getKey() ? RecipeIngredientRole.INPUT : RecipeIngredientRole.OUTPUT, slot.getBounds().x - xOffset, slot.getBounds().y - yOffset)
+                                    .addIngredientsUnsafe(CollectionUtils.map(stacks, JEIPluginDetector::jeiValue));
                         }
                     });
-        }
-    }
-    
-    private int getNextId(Set<Integer> keys) {
-        for (int i = 0; ; i++) {
-            if (!keys.contains(i)) {
-                return i;
-            }
         }
     }
     

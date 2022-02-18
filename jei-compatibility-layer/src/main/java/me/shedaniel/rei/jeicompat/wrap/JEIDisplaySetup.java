@@ -87,6 +87,12 @@ public class JEIDisplaySetup {
         JEIRecipeLayout<T> layout = new JEIRecipeLayout<>(builder);
         IIngredients ingredients = display.getLegacyIngredients();
         category.setRecipe(layout, display.getBackingRecipe(), ingredients);
+        applyLegacyTooltip(result, layout);
+        result.setSlots(builder.slots);
+        return result;
+    }
+    
+    public static void applyLegacyTooltip(Result result, JEIRecipeLayout<?> layout) {
         for (JEIGuiIngredientGroup<?> group : layout.getGroups().values()) {
             for (JEIGuiIngredientGroup<?>.SlotWrapper wrapper : group.getSlots().values()) {
                 wrapper.slot.addTooltipCallback((recipeSlotView, tooltip) -> {
@@ -100,8 +106,6 @@ public class JEIDisplaySetup {
                 });
             }
         }
-        result.setSlots(builder.slots);
-        return result;
     }
     
     public static void addTo(List<Widget> widgets, Rectangle bounds, Result result) {

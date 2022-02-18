@@ -64,7 +64,7 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     }
     
     protected SlotWrapper getSlot(int slotIndex) {
-        return slots.computeIfAbsent(slotIndex, i -> new SlotWrapper(i, (JEIRecipeSlot) builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 0, 0)));
+        return slots.computeIfAbsent(slotIndex, i -> new SlotWrapper(i, (JEIRecipeSlot) builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 0, 0, i)));
     }
     
     public Int2ObjectMap<SlotWrapper> getSlots() {

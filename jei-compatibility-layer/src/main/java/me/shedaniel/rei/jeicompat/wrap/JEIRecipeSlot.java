@@ -69,11 +69,17 @@ public class JEIRecipeSlot implements IRecipeSlotBuilder, IRecipeSlotView {
     public Widget background;
     @Nullable
     public Widget overlay;
+    public final int index;
     
-    public JEIRecipeSlot(RecipeIngredientRole role, @Nullable Point pos) {
+    public JEIRecipeSlot(int index, RecipeIngredientRole role, @Nullable Point pos) {
+        this.index = index;
         this.role = role;
         this.slot = Widgets.createSlot(new Point(pos == null ? 0 : pos.x, pos == null ? 0 : pos.y)).disableBackground();
         this.visible = pos != null;
+    }
+    
+    public int getIndex() {
+        return index;
     }
     
     public boolean isVisible() {
