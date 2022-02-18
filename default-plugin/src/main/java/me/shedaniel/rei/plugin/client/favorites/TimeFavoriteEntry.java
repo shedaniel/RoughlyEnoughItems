@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.plugin.client.favorites;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
@@ -149,7 +148,7 @@ public class TimeFavoriteEntry extends FavoriteEntry {
             }
             
             private void renderTimeIcon(PoseStack matrices, Time time, int centerX, int centerY, int color) {
-                RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
+                Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
                 blit(matrices, centerX - 7, centerY - 7, time.ordinal() * 14 + 42, 14, 14, 14, 256, 256);
             }
             
@@ -215,26 +214,26 @@ public class TimeFavoriteEntry extends FavoriteEntry {
     
     @Override
     public boolean isSame(FavoriteEntry other) {
-        if (!(other instanceof TimeFavoriteEntry that)) return false;
-        return Objects.equals(time, that.time);
+        if (!(other instanceof TimeFavoriteEntry)) return false;
+        return Objects.equals(time, ((TimeFavoriteEntry) other).time);
     }
     
     public enum Type implements FavoriteEntryType<TimeFavoriteEntry> {
         INSTANCE;
         
         @Override
-        public DataResult<TimeFavoriteEntry> read(CompoundTag object) {
+        public DataResult<TimeFavoriteEntry> readResult(CompoundTag object) {
             String stringValue = object.getString(KEY);
             Time type = stringValue.equals("NOT_SET") ? null : Time.valueOf(stringValue);
             return DataResult.success(new TimeFavoriteEntry(type), Lifecycle.stable());
         }
         
         @Override
-        public DataResult<TimeFavoriteEntry> fromArgs(Object... args) {
+        public DataResult<TimeFavoriteEntry> fromArgsResult(Object... args) {
             if (args.length == 0) return DataResult.error("Cannot create GameModeFavoriteEntry from empty args!");
-            if (!(args[0] instanceof Time type))
+            if (!(args[0] instanceof Time))
                 return DataResult.error("Creation of GameModeFavoriteEntry from args expected Time as the first argument!");
-            return DataResult.success(new TimeFavoriteEntry(type), Lifecycle.stable());
+            return DataResult.success(new TimeFavoriteEntry((Time) args[0]), Lifecycle.stable());
         }
         
         @Override

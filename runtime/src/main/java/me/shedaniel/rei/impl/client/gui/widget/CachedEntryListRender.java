@@ -23,16 +23,15 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
-import dev.architectury.registry.ReloadListenerRegistry;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
+import me.shedaniel.architectury.registry.ReloadListeners;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
@@ -70,7 +69,7 @@ public class CachedEntryListRender {
     }
     
     static {
-        ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, (barrier, resourceManager, preparationProfiler, reloadProfiler, preparationExecutor, reloadExecutor) -> {
+        ReloadListeners.registerReloadListener(PackType.CLIENT_RESOURCES, (barrier, resourceManager, preparationProfiler, reloadProfiler, preparationExecutor, reloadExecutor) -> {
             return barrier.wait(Unit.INSTANCE).thenRunAsync(CachedEntryListRender::refresh, reloadExecutor);
         });
     }
@@ -130,15 +129,17 @@ public class CachedEntryListRender {
         hash = new Long2LongOpenHashMap(list.size() + 10);
         Minecraft minecraft = Minecraft.getInstance();
         Window window = minecraft.getWindow();
-        TextureTarget target = new TextureTarget(width, height, true, false);
+        RenderTarget target = new RenderTarget(width, height, true, false);
         target.bindWrite(true);
-        Matrix4f projectionMatrix = Matrix4f.orthographic(0.0F, width, 0.0F, height, 1000.0F, 3000.0F);
-        RenderSystem.setProjectionMatrix(projectionMatrix);
-        PoseStack modelViewStack = RenderSystem.getModelViewStack();
-        modelViewStack.pushPose();
-        modelViewStack.setIdentity();
-        modelViewStack.translate(0.0D, 0.0D, -2000.0D);
-        RenderSystem.applyModelViewMatrix();
+        
+        RenderSystem.viewport(0, 0, window.getWidth(), window.getHeight());
+        RenderSystem.clear(256, Minecraft.ON_OSX);
+        RenderSystem.matrixMode(5889);
+        RenderSystem.loadIdentity();
+        RenderSystem.ortho(0.0D, width, height, 0.0D, 1000.0D, 3000.0D);
+        RenderSystem.matrixMode(5888);
+        RenderSystem.loadIdentity();
+        RenderSystem.translatef(0.0F, 0.0F, -2000.0F);
         
         Lighting.setupFor3DItems();
         PoseStack matrices = new PoseStack();
@@ -163,11 +164,7 @@ public class CachedEntryListRender {
         cachedTextureLocation = minecraft.getTextureManager().register("rei_cached_entries", cachedTexture);
         
         target.destroyBuffers();
-        Minecraft.getInstance().levelRenderer.graphicsChanged();
         Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
-        
-        modelViewStack.popPose();
-        RenderSystem.applyModelViewMatrix();
     }
     
     private static long pack(int x, int y) {

@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.gui.widget;
 import com.google.common.base.Predicates;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
@@ -320,7 +319,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                             entry.our = entry.getCurrentEntry().copy().setting(EntryStack.Settings.RENDERER, stack -> new EntryRenderer<Object>() {
                                 @Override
                                 public void render(EntryStack<Object> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                                    RenderSystem.setShaderTexture(0, CachedEntryListRender.cachedTextureLocation);
+                                    Minecraft.getInstance().getTextureManager().bind(CachedEntryListRender.cachedTextureLocation);
                                     innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), sprite.u0, sprite.u1, sprite.v0, sprite.v1);
                                 }
                                 

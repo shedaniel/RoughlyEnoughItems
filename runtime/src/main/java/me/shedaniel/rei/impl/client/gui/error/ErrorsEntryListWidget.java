@@ -24,11 +24,9 @@
 package me.shedaniel.rei.impl.client.gui.error;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector4f;
-import me.shedaniel.clothconfig2.gui.AbstractConfigScreen;
 import me.shedaniel.clothconfig2.gui.widget.DynamicEntryListWidget;
 import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
 import net.minecraft.ChatFormatting;
@@ -37,7 +35,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -101,10 +98,6 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
     }
     
     public static abstract class Entry extends DynamicEntryListWidget.Entry<Entry> {
-        @Override
-        public List<? extends NarratableEntry> narratables() {
-            return Collections.emptyList();
-        }
     }
     
     public static class EmptyEntry extends Entry {
@@ -146,11 +139,6 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         @Override
         public int getItemHeight() {
             return getEntry().getItemHeight();
-        }
-        
-        @Override
-        public List<? extends NarratableEntry> narratables() {
-            return getEntry().narratables();
         }
         
         @Override
@@ -221,11 +209,6 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         @Override
         public int getItemHeight() {
             return getEntry().getItemHeight();
-        }
-        
-        @Override
-        public List<? extends NarratableEntry> narratables() {
-            return getEntry().narratables();
         }
         
         @Override
@@ -338,7 +321,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         public boolean changeFocus(boolean boolean_1) {
             return false;
         }
-    
+        
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (button == 0) {
@@ -358,7 +341,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
             
             return super.mouseClicked(mouseX, mouseY, button);
         }
-    
+        
         @Nullable
         private Style getTextAt(double x, double y) {
             int lineCount = this.textSplit.size();
@@ -420,7 +403,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         
         @Override
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            RenderSystem.setShaderTexture(0, id);
+            Minecraft.getInstance().getTextureManager().bind(id);
             NativeImage image = texture.getPixels();
             width = (entryWidth - 6) / 2;
             this.height = (int) ((double) width * ((double) image.getHeight() / (double) image.getWidth()));

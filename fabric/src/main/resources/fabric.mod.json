@@ -34,7 +34,7 @@
     "rei.mixins.json"
   ],
   "breaks": {
-    "cloth-config2": "<6.2-"
+    "cloth-config2": "<4.14-"
   },
   "custom": {
     "rei:translators": {

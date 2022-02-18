@@ -276,7 +276,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                     .focusable(false));
             widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
                 helper.setBlitOffset(helper.getBlitOffset() + 1);
-                RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
+                Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
                 Rectangle bounds = changelogButton.getBounds();
                 matrices.pushPose();
                 matrices.translate(0.5f, 0, 0);

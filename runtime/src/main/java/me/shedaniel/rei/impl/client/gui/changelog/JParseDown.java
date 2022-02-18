@@ -355,7 +355,7 @@ public class JParseDown {
         }
     }
     
-    public class BlockList extends Block {
+    public static class BlockList extends Block {
         public int indent;
         public String pattern;
         public boolean loose = false;
@@ -364,6 +364,7 @@ public class JParseDown {
         public String marker;
         public String markerType;
         public String markerTypeRegex;
+        public JParseDown parseDown;
         
         public LinkedList<String> lines = new LinkedList<>();
     
@@ -399,7 +400,8 @@ public class JParseDown {
                 }
                 String markerWithoutWhitespace = marker.substring(0, marker.indexOf(' '));
                 
-                BlockList b = parseDown.new BlockList();
+                BlockList b = new BlockList();
+                b.parseDown = parseDown;
                 b.indent = line.indent;
                 b.pattern = pattern;
                 b.ordered = ordered;
@@ -441,11 +443,11 @@ public class JParseDown {
                 indent = line.indent;
                 lines.add(text);
                 return this;
-            } else if (line.indent < requiredIndent && BlockList.startBlock(JParseDown.this, line, null) != null) {
+            } else if (line.indent < requiredIndent && BlockList.startBlock(parseDown, line, null) != null) {
                 return null;
             }
             
-            if (line.text.charAt(0) == '[' && BlockReference.startBlock(JParseDown.this, line, null) != null) {
+            if (line.text.charAt(0) == '[' && BlockReference.startBlock(parseDown, line, null) != null) {
                 return this;
             }
             

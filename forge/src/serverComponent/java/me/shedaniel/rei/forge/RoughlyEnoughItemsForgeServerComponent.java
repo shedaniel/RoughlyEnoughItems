@@ -25,21 +25,21 @@ package me.shedaniel.rei.forge;
 
 import me.shedaniel.rei.RoughlyEnoughItemsInitializer;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.data.loading.DatagenModLoader;
-import net.minecraftforge.fml.IExtensionPoint;
+import net.minecraftforge.fml.DatagenModLoader;
+import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fmllegacy.DatagenModLoader;
-import net.minecraftforge.network.NetworkConstants;
+import net.minecraftforge.fml.network.FMLNetworkConstants;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Mod("roughlyenoughitems_servercomponent")
 public class RoughlyEnoughItemsForgeServerComponent {
     public RoughlyEnoughItemsForgeServerComponent() {
-        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> NetworkConstants.IGNORESERVERONLY, (a, b) -> true));
+        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.DISPLAYTEST, () -> Pair.of(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true));
         Logger logger = LogManager.getLogger(RoughlyEnoughItemsForgeServerComponent.class);
         if (!DatagenModLoader.isRunningDataGen()) {
             if (FMLEnvironment.dist == Dist.CLIENT) {

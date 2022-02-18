@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl.client.gui.changelog;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import dev.architectury.platform.Platform;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.rei.impl.client.gui.error.ErrorsEntryListWidget;
 import me.shedaniel.rei.impl.client.gui.error.ErrorsScreen;
 import net.minecraft.client.Minecraft;
@@ -64,7 +64,7 @@ public class ChangelogLoader {
                     
                     InputStream changesJsonStream = ChangelogLoader.class.getClassLoader().getResourceAsStream("roughlyenoughitems.changes.json");
                     if (changesJsonStream != null) {
-                        JsonObject object = JsonParser.parseReader(new InputStreamReader(changesJsonStream))
+                        JsonObject object = new JsonParser().parse(new InputStreamReader(changesJsonStream))
                                 .getAsJsonObject();
                         String currentVersion = object.getAsJsonPrimitive("version").getAsString();
                         if (currentVersion.equals(version)) {
@@ -88,7 +88,7 @@ public class ChangelogLoader {
                 components.add(function);
             }
         }
-    
+        
         visited = true;
         BuilderImpl builder = new BuilderImpl();
         
@@ -96,7 +96,7 @@ public class ChangelogLoader {
         if (changesJsonStream == null) {
             builder.add(new TranslatableComponent("rei.changelog.error.missingChangelogFile"));
         } else {
-            JsonObject object = JsonParser.parseReader(new InputStreamReader(changesJsonStream))
+            JsonObject object = new JsonParser().parse(new InputStreamReader(changesJsonStream))
                     .getAsJsonObject();
             String version = object.getAsJsonPrimitive("version").getAsString();
             Path file = Platform.getConfigFolder().resolve("roughlyenoughitems/changelog.txt");
@@ -105,7 +105,7 @@ public class ChangelogLoader {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-    
+            
             InputStream changelogStream = ChangelogLoader.class.getClassLoader().getResourceAsStream("roughlyenoughitems/" + version + "/changelog.md");
             
             if (changelogStream == null) {
