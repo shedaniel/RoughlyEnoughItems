@@ -278,7 +278,10 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 helper.setBlitOffset(helper.getBlitOffset() + 1);
                 RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
                 Rectangle bounds = changelogButton.getBounds();
+                matrices.pushPose();
+                matrices.translate(0.5f, 0, 0);
                 helper.blit(matrices, bounds.x + 1, bounds.y + 2, !ChangelogLoader.hasVisited() ? 28 : 14, 0, 14, 14);
+                matrices.popPose();
                 helper.setBlitOffset(helper.getBlitOffset() - 1);
             }));
             widgets.add(rightButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent("text.rei.right_arrow"))
