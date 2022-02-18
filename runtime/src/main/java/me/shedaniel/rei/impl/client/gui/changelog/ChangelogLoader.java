@@ -29,7 +29,7 @@ public class ChangelogLoader {
         void add(Function<Integer, ErrorsEntryListWidget.Entry> function);
     }
     
-    private static Boolean visited = false;
+    private static Boolean visited = null;
     
     public static boolean hasVisited() {
         if (visited == null) {
