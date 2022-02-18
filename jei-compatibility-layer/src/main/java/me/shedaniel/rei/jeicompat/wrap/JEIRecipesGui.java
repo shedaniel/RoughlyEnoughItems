@@ -58,6 +58,20 @@ public enum JEIRecipesGui implements IRecipesGui {
     }
     
     @Override
+    public void show(List<IFocus<?>> focuses) {
+        ViewSearchBuilder builder = ViewSearchBuilder.builder();
+        for (IFocus<?> focus : focuses) {
+            EntryStack<?> stack = focus.getTypedValue().unwrapStack();
+            if (focus.getMode() == IFocus.Mode.INPUT) {
+                builder.addUsagesFor(stack);
+            } else {
+                builder.addRecipesFor(stack);
+            }
+        }
+        builder.open();
+    }
+    
+    @Override
     public void showCategories(@NotNull List<ResourceLocation> recipeCategoryUids) {
         ViewSearchBuilder.builder().addCategories(CollectionUtils.map(recipeCategoryUids, CategoryIdentifier::of)).open();
     }

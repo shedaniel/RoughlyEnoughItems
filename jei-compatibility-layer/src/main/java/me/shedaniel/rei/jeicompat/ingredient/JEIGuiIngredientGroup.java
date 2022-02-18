@@ -23,17 +23,14 @@
 
 package me.shedaniel.rei.jeicompat.ingredient;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.utils.value.Value;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import lombok.experimental.ExtensionMethod;
-import me.shedaniel.math.Point;
-import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
+import me.shedaniel.rei.jeicompat.wrap.JEIRecipeLayoutBuilder;
+import me.shedaniel.rei.jeicompat.wrap.JEIRecipeSlot;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiIngredient;
 import mezz.jei.api.gui.ingredient.IGuiIngredientGroup;
@@ -42,34 +39,36 @@ import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IFocus;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.WILL_NOT_BE_IMPLEMENTED;
 
 @ExtensionMethod(JEIPluginDetector.class)
 public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
-    private static final Method m_93179_ = ObfuscationReflectionHelper.findMethod(GuiComponent.class, "m_93179_",
-            PoseStack.class, Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE, Integer.TYPE);
     private final IIngredientType<T> type;
+    private final JEIRecipeLayoutBuilder builder;
     private final Int2ObjectMap<SlotWrapper> slots = new Int2ObjectOpenHashMap<>();
     public final List<ITooltipCallback<T>> tooltipCallbacks = new ArrayList<>();
-    public final Value<IDrawable> background;
     
-    public JEIGuiIngredientGroup(IIngredientType<T> type, Value<IDrawable> background) {
+    public JEIGuiIngredientGroup(IIngredientType<T> type, JEIRecipeLayoutBuilder builder) {
         this.type = type;
-        this.background = background;
+        this.builder = builder;
+    }
+    
+    public IIngredientType<T> getType() {
+        return type;
     }
     
     protected SlotWrapper getSlot(int slotIndex) {
-        return slots.computeIfAbsent(slotIndex, i -> new SlotWrapper(i, Widgets.createSlot(new Point(0, 0))
-                .disableBackground()));
+        return slots.computeIfAbsent(slotIndex, i -> new SlotWrapper(i, (JEIRecipeSlot) builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 0, 0, i)));
+    }
+    
+    public Int2ObjectMap<SlotWrapper> getSlots() {
+        return slots;
     }
     
     @Override
@@ -81,15 +80,15 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
         Arrays.parallelSort(array);
         for (int slot : array) {
             SlotWrapper slotWrapper = slots.get(slot);
-            if (slotWrapper.slot.getNoticeMark() == Slot.INPUT) {
+            if (slotWrapper.slot.role == RecipeIngredientRole.INPUT) {
                 if (inputIndex < inputs.size()) {
-                    slotWrapper.slot.clearEntries();
-                    slotWrapper.slot.entries(type.unwrapList(inputs.get(inputIndex++)));
+                    slotWrapper.slot.slot.clearEntries();
+                    slotWrapper.slot.slot.entries(type.unwrapList(inputs.get(inputIndex++)));
                 }
-            } else if (slotWrapper.slot.getNoticeMark() == Slot.OUTPUT) {
+            } else if (slotWrapper.slot.role == RecipeIngredientRole.OUTPUT) {
                 if (outputIndex < outputs.size()) {
-                    slotWrapper.slot.clearEntries();
-                    slotWrapper.slot.entries(type.unwrapList(outputs.get(outputIndex++)));
+                    slotWrapper.slot.slot.clearEntries();
+                    slotWrapper.slot.slot.entries(type.unwrapList(outputs.get(outputIndex++)));
                 }
             }
         }
@@ -97,14 +96,14 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     
     @Override
     public void set(int slotIndex, @Nullable List<T> ingredients) {
-        Slot slot = getSlot(slotIndex).slot;
+        Slot slot = getSlot(slotIndex).slot.slot;
         slot.clearEntries();
         slot.entries(type.unwrapList(ingredients));
     }
     
     @Override
     public void set(int slotIndex, @Nullable T ingredient) {
-        Slot slot = getSlot(slotIndex).slot;
+        Slot slot = getSlot(slotIndex).slot.slot;
         slot.clearEntries();
         slot.entry(ingredient.unwrapStack(type));
     }
@@ -112,7 +111,7 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     @Override
     public void setBackground(int slotIndex, @NotNull IDrawable background) {
         SlotWrapper slot = getSlot(slotIndex);
-        slot.background = background;
+        slot.slot.setBackground(background, 0, 0);
     }
     
     @Override
@@ -129,17 +128,17 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     @Override
     public void init(int slotIndex, boolean input, int xPosition, int yPosition) {
         SlotWrapper slot = getSlot(slotIndex);
-        slot.slot.setNoticeMark(input ? Slot.INPUT : Slot.OUTPUT);
-        slot.slot.getBounds().setLocation(xPosition - 1, yPosition - 1);
+        slot.slot.role = input ? RecipeIngredientRole.INPUT : RecipeIngredientRole.OUTPUT;
+        slot.slot.slot.getBounds().setLocation(xPosition - 1, yPosition - 1);
     }
     
     @Override
     public void init(int slotIndex, boolean input, @NotNull IIngredientRenderer<T> ingredientRenderer, int xPosition, int yPosition, int width, int height, int xPadding, int yPadding) {
         SlotWrapper slot = getSlot(slotIndex);
-        slot.slot.setNoticeMark(input ? Slot.INPUT : Slot.OUTPUT);
-        slot.slot.getBounds().setLocation(xPosition - 1, yPosition - 1);
-        slot.slot.getBounds().setSize(width + 2, height + 2);
-        slot.renderer = ingredientRenderer;
+        slot.slot.role = input ? RecipeIngredientRole.INPUT : RecipeIngredientRole.OUTPUT;
+        slot.slot.slot.getBounds().setLocation(xPosition - 1, yPosition - 1);
+        slot.slot.slot.getBounds().setSize(width + 2, height + 2);
+        slot.slot.setCustomRenderer(type, ingredientRenderer);
     }
     
     @Override
@@ -148,17 +147,10 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
     }
     
     public class SlotWrapper extends AbstractList<T> implements IGuiIngredient<T> {
-        public final Slot slot;
-        public float fluidCapacity = Float.NaN;
-        @Nullable
-        public IIngredientRenderer<T> renderer;
-        @Nullable
-        public IDrawable background;
-        @Nullable
-        public IDrawable overlay;
+        public JEIRecipeSlot slot;
         public final int index;
         
-        public SlotWrapper(int index, Slot slot) {
+        public SlotWrapper(int index, JEIRecipeSlot slot) {
             this.index = index;
             this.slot = slot;
         }
@@ -172,7 +164,7 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
         @Override
         @Nullable
         public T getDisplayedIngredient() {
-            return slot.getCurrentEntry().<T>cast().jeiValueOrNull();
+            return slot.getDisplayedIngredient(type).orElse(null);
         }
         
         @Override
@@ -183,44 +175,35 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
         
         @Override
         public boolean isInput() {
-            return slot.getNoticeMark() == Slot.INPUT;
+            return slot.getRole() == RecipeIngredientRole.INPUT;
         }
         
         @Override
         public void drawHighlight(@NotNull PoseStack matrixStack, int color, int xOffset, int yOffset) {
-            RenderSystem.disableDepthTest();
-            RenderSystem.colorMask(true, true, true, false);
-            slot.setZ(300);
-            Rectangle bounds = slot.getInnerBounds().clone();
-            bounds.translate(xOffset, yOffset);
-            try {
-                m_93179_.invoke(slot, matrixStack, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), color, color);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
-            }
-            slot.setZ(0);
-            RenderSystem.colorMask(true, true, true, true);
-            RenderSystem.enableDepthTest();
+            matrixStack.pushPose();
+            matrixStack.translate(xOffset, yOffset, 0);
+            slot.drawHighlight(matrixStack, color);
+            matrixStack.popPose();
         }
         
         @Override
         public T get(int index) {
-            return slot.getEntries().get(index).<T>cast().jeiValueOrNull();
+            return slot.slot.getEntries().get(index).<T>cast().jeiValueOrNull();
         }
         
         @Override
         public int size() {
-            return slot.getEntries().size();
+            return slot.slot.getEntries().size();
         }
         
         @Override
         public void clear() {
-            slot.clearEntries();
+            slot.slot.clearEntries();
         }
         
         @Override
         public void add(int index, T element) {
-            slot.entry(element.unwrapStack(type));
+            slot.slot.entry(element.unwrapStack(type));
         }
     }
 }

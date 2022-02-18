@@ -23,11 +23,12 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.experimental.ExtensionMethod;
-import dev.architectury.utils.value.Value;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -36,7 +37,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -136,37 +137,16 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
         return backingCategory;
     }
     
-    public JEIRecipeLayout<T> createLayout(JEIWrappedDisplay<T> display, Value<IDrawable> background) {
-        return createLayout(getBackingCategory(), display.getBackingRecipe(), display.getIngredients(), background);
-    }
-    
-    public static <T> JEIRecipeLayout<T> createLayout(IRecipeCategory<T> category, T recipe, IIngredients ingredients, Value<IDrawable> background) {
-        JEIRecipeLayout<T> layout = new JEIBasedRecipeLayout<>(category, background);
-        category.setRecipe(layout, recipe, ingredients);
-        return layout;
-    }
-    
     @Override
     public List<Widget> setupDisplay(JEIWrappedDisplay<T> display, Rectangle bounds) {
-        return setupDisplay(getBackingCategory(), display.getBackingRecipe(), display.getIngredients(), bounds, this.background);
+        return setupDisplay(getBackingCategory(), display, JEIWrappedDisplay.getFoci(), bounds, this.background);
     }
     
-    public static <T> List<Widget> setupDisplay(IRecipeCategory<T> category, T recipe, IIngredients ingredients, Rectangle bounds, LazyLoadedValue<IDrawable> backgroundLazy) {
+    public static <T> List<Widget> setupDisplay(IRecipeCategory<T> category, JEIWrappedDisplay<T> display, List<? extends IFocus<?>> focuses, Rectangle bounds, LazyLoadedValue<IDrawable> backgroundLazy) {
         List<Widget> widgets = new ArrayList<>();
-        IDrawable[] background = {backgroundLazy.get()};
-        JEIRecipeLayout<T> layout;
+        JEIDisplaySetup.Result result;
         try {
-            layout = createLayout(category, recipe, ingredients, new Value<IDrawable>() {
-                @Override
-                public void accept(IDrawable iDrawable) {
-                    background[0] = iDrawable;
-                }
-                
-                @Override
-                public IDrawable get() {
-                    return background[0];
-                }
-            });
+            result = JEIDisplaySetup.create(category, display, focuses);
         } catch (Throwable throwable) {
             throwable.printStackTrace();
             widgets.add(Widgets.createRecipeBase(bounds).color(0xFFFF0000));
@@ -175,7 +155,10 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
             return widgets;
         }
         widgets.add(Widgets.createRecipeBase(bounds));
-        widgets.add(Widgets.withTranslate(Widgets.wrapRenderer(bounds, background[0].unwrapRenderer()), 4, 4, 0));
+        IDrawable background = category.getBackground();
+        if (background != null) {
+            widgets.add(Widgets.withTranslate(Widgets.wrapRenderer(bounds, background.unwrapRenderer()), 4, 4, 0));
+        }
         widgets.add(new WidgetWithBounds() {
             @Override
             public Rectangle getBounds() {
@@ -184,10 +167,12 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
             
             @Override
             public void render(PoseStack arg, int mouseX, int mouseY, float f) {
-                arg.pushPose();
-                arg.translate(bounds.x + 4, bounds.y + 4, getZ());
-                category.draw(recipe, arg, mouseX - bounds.x, mouseY - bounds.y);
-                arg.popPose();
+                PoseStack stack = new PoseStack();
+                stack.pushPose();
+                stack.last().pose().load(arg.last().pose());
+                stack.translate(bounds.x + 4, bounds.y + 4, getZ());
+                category.draw(display.getBackingRecipe(), result, stack, mouseX - bounds.x, mouseY - bounds.y);
+                stack.popPose();
                 
                 Point mouse = new Point(mouseX, mouseY);
                 
@@ -211,7 +196,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
             @Override
             @Nullable
             public Tooltip getTooltip(Point mouse) {
-                List<Component> strings = category.getTooltipStrings(recipe, mouse.x - bounds.x - 4, mouse.y - bounds.y - 4);
+                List<Component> strings = category.getTooltipStrings(display.getBackingRecipe(), result, mouse.x - bounds.x - 4, mouse.y - bounds.y - 4);
                 if (strings.isEmpty()) {
                     return null;
                 }
@@ -225,10 +210,17 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
             
             @Override
             public boolean mouseClicked(double d, double e, int i) {
-                return category.handleClick(recipe, d - bounds.x - 4, e - bounds.y - 4, i) || super.mouseClicked(d, e, i);
+                return category.handleInput(display.getBackingRecipe(), d - bounds.x - 4, e - bounds.y - 4, InputConstants.Type.MOUSE.getOrCreate(i)) || super.mouseClicked(d, e, i);
+            }
+            
+            @Override
+            public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+                double d = PointHelper.getMouseFloatingX();
+                double e = PointHelper.getMouseFloatingY();
+                return category.handleInput(display.getBackingRecipe(), d - bounds.x - 4, e - bounds.y - 4, InputConstants.getKey(keyCode, scanCode)) || super.keyPressed(keyCode, scanCode, modifiers);
             }
         });
-        layout.addTo(widgets, bounds);
+        JEIDisplaySetup.addTo(widgets, bounds, result);
         return widgets;
     }
 }

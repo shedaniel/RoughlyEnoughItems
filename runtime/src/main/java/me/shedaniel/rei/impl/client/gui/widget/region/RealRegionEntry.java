@@ -23,11 +23,11 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.region;
 
+import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
+import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
-import me.shedaniel.rei.api.client.gui.animator.NumberAnimator;
-import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
 import me.shedaniel.rei.impl.client.gui.widget.EntryStacksRegionWidget;
 
 import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.entrySize;

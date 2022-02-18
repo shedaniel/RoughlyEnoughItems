@@ -37,7 +37,6 @@ import me.shedaniel.rei.api.common.registry.ReloadStage;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -51,7 +50,8 @@ import java.util.Map;
 public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry {
     private final BiMap<ResourceLocation, FavoriteEntryType<?>> registry = HashBiMap.create();
     private final List<Triple<SystemFavoriteEntryProvider<?>, MutableLong, List<FavoriteEntry>>> systemFavorites = Lists.newArrayList();
-    private final Map<Component, FavoriteEntryType.Section> sections = Maps.newLinkedHashMap();
+    private final Map<Component, FavoriteEntryType.Section> sections = Maps.newConcurrentMap();
+    private final List<FavoriteEntryType.Section> sectionsList = Lists.newCopyOnWriteArrayList();
     
     @Override
     public ReloadStage getStage() {
@@ -81,12 +81,16 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
     
     @Override
     public FavoriteEntryType.Section getOrCrateSection(Component text) {
-        return sections.computeIfAbsent(text, SectionImpl::new);
+        return sections.computeIfAbsent(text, $ -> {
+            SectionImpl section = new SectionImpl($);
+            sectionsList.add(section);
+            return section;
+        });
     }
     
     @Override
     public Iterable<FavoriteEntryType.Section> sections() {
-        return this.sections.values();
+        return sectionsList;
     }
     
     @Override
@@ -103,6 +107,7 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
         this.registry.clear();
         this.systemFavorites.clear();
         this.sections.clear();
+        this.sectionsList.clear();
     }
     
     @Override

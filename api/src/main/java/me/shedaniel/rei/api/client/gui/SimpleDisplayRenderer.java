@@ -127,6 +127,7 @@ public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHold
             outputWidget.setZ(getZ() + 50);
             outputWidget.getBounds().setLocation(xx, yy);
             outputWidget.render(matrices, mouseX, mouseY, delta);
+            yy += 18;
         }
     }
     
@@ -146,7 +147,7 @@ public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHold
     
     @Override
     public int getHeight() {
-        return 4 + getItemsHeight() * 18;
+        return Math.max(4 + getItemsHeight() * 18, 4 + outputWidgets.size() * 18);
     }
     
     public int getItemsHeight() {

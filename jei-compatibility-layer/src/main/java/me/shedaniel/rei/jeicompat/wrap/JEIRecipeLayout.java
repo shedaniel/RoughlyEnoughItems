@@ -23,53 +23,37 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import dev.architectury.utils.value.Value;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 import lombok.experimental.ExtensionMethod;
-import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.api.client.util.ClientEntryStacks;
-import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
-import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupFluid;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupItem;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.IRecipeLayout;
-import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiFluidStackGroup;
 import mezz.jei.api.gui.ingredient.IGuiIngredientGroup;
 import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
-import mezz.jei.api.gui.ingredient.ITooltipCallback;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.IFocus;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.function.Predicate;
-
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @ExtensionMethod(JEIPluginDetector.class)
-public abstract class JEIRecipeLayout<T> implements IRecipeLayout {
-    private final Map<EntryType<?>, IGuiIngredientGroup<?>> groups = new HashMap<>();
-    public final Value<IDrawable> background;
+public class JEIRecipeLayout<T> implements IRecipeLayout {
+    private final Map<EntryType<?>, JEIGuiIngredientGroup<?>> groups = new HashMap<>();
+    public final JEIRecipeLayoutBuilder builder;
     
-    public JEIRecipeLayout(Value<IDrawable> background) {
-        this.background = background;
+    public JEIRecipeLayout(JEIRecipeLayoutBuilder builder) {
+        this.builder = builder;
     }
     
     @Override
@@ -89,99 +73,40 @@ public abstract class JEIRecipeLayout<T> implements IRecipeLayout {
     public <T> IGuiIngredientGroup<T> getIngredientsGroup(@NotNull IIngredientType<T> ingredientType) {
         return (IGuiIngredientGroup<T>) groups.computeIfAbsent(ingredientType.unwrapType(), type -> {
             if (Objects.equals(ingredientType.getIngredientClass(), ItemStack.class))
-                return new JEIGuiIngredientGroupItem(ingredientType.cast(), background);
+                return new JEIGuiIngredientGroupItem(ingredientType.cast(), builder);
             if (Objects.equals(ingredientType.getIngredientClass(), FluidStack.class))
-                return new JEIGuiIngredientGroupFluid(ingredientType.cast(), background);
-            return new JEIGuiIngredientGroup<>(ingredientType, background);
+                return new JEIGuiIngredientGroupFluid(ingredientType.cast(), builder);
+            return new JEIGuiIngredientGroup<>(ingredientType, builder);
         });
+    }
+    
+    public Map<EntryType<?>, JEIGuiIngredientGroup<?>> getGroups() {
+        return groups;
     }
     
     @Nullable
     public IFocus<?> getFocus() {
-        DisplayScreen screen = (DisplayScreen) Minecraft.getInstance().screen;
-        List<EntryStack<?>> notice = screen.getIngredientsToNotice();
-        if (!notice.isEmpty()) {
-            return new JEIFocus<>(IFocus.Mode.INPUT, notice.get(0).cast().jeiValue()).wrap();
-        }
-        notice = screen.getResultsToNotice();
-        if (!notice.isEmpty()) {
-            return new JEIFocus<>(IFocus.Mode.OUTPUT, notice.get(0).cast().jeiValue()).wrap();
-        }
-        return null;
+        List<IFocus<?>> foci = JEIWrappedDisplay.getFoci();
+        if (foci.isEmpty()) return null;
+        return foci.get(0);
     }
     
     @Override
     @Nullable
     public <V> IFocus<V> getFocus(@NotNull IIngredientType<V> ingredientType) {
-        return JEIFocus.cast(getFocus(), ingredientType);
+        IFocus<?> focus = getFocus();
+        if (focus == null) return null;
+        ITypedIngredient<V> typedIngredient = (ITypedIngredient<V>) focus.getTypedValue();
+        return new JEIFocus<>(focus.getRole(), new JEITypedIngredient<>(typedIngredient.getType(), typedIngredient.getIngredient()));
     }
     
     @Override
     public void moveRecipeTransferButton(int posX, int posY) {
+        builder.moveRecipeTransferButton(posX, posY);
     }
     
     @Override
     public void setShapeless() {
-    }
-    
-    public Map<EntryType<?>, IGuiIngredientGroup<?>> getGroups() {
-        return groups;
-    }
-    
-    public void addTo(List<Widget> widgets, Rectangle bounds) {
-        for (Map.Entry<EntryType<?>, IGuiIngredientGroup<?>> groupEntry : getGroups().entrySet()) {
-            JEIGuiIngredientGroup<?> group = (JEIGuiIngredientGroup<?>) groupEntry.getValue();
-            Int2ObjectMap<? extends JEIGuiIngredientGroup<?>.SlotWrapper> guiIngredients = group.getGuiIngredients();
-            IntArrayList integers = new IntArrayList(guiIngredients.keySet());
-            integers.sort(Comparator.naturalOrder());
-            for (int integer : integers) {
-                JEIGuiIngredientGroup<?>.SlotWrapper wrapper = guiIngredients.get(integer);
-                wrapper.slot.getBounds().translate(bounds.x + 4, bounds.y + 4);
-                wrapper.slot.highlightEnabled(!wrapper.isEmpty());
-                
-                if (wrapper.background != null) {
-                    widgets.add(Widgets.withTranslate(Widgets.wrapRenderer(wrapper.slot.getInnerBounds().clone(), wrapper.background.unwrapRenderer()), -1, -1, 0));
-                }
-                
-                widgets.add(Widgets.withTranslate(wrapper.slot, 0, 0, 10));
-                
-                if (wrapper.renderer != null) {
-                    JEIEntryDefinition.Renderer<?> renderer = new JEIEntryDefinition.Renderer<>(wrapper.renderer);
-                    for (EntryStack<?> entry : wrapper.slot.getEntries()) {
-                        ClientEntryStacks.setRenderer(entry, renderer);
-                    }
-                } else if (wrapper.fluidCapacity == wrapper.fluidCapacity) {
-                    for (EntryStack<?> entry : wrapper.slot.getEntries()) {
-                        if (entry.getType() == VanillaEntryTypes.FLUID) {
-                            ClientEntryStacks.setFluidRenderRatio(entry.cast(),
-                                    entry.<dev.architectury.fluid.FluidStack>cast().getValue().getAmount() / wrapper.fluidCapacity);
-                        }
-                    }
-                }
-                
-                if (wrapper.overlay != null) {
-                    widgets.add(Widgets.withTranslate(Widgets.wrapRenderer(wrapper.slot.getInnerBounds().clone(), wrapper.overlay.unwrapRenderer()), 0, 0, 10));
-                }
-                
-                List<ITooltipCallback<Object>> tooltipCallbacks = (List<ITooltipCallback<Object>>) (List) group.tooltipCallbacks;
-                for (EntryStack<?> entry : wrapper.slot.getEntries()) {
-                    ClientEntryStacks.setTooltipProcessor(entry, (stack, tooltip) -> {
-                        Object ingredient = null;
-                        for (ITooltipCallback<Object> callback : tooltipCallbacks) {
-                            if (ingredient == null) {
-                                ingredient = stack.jeiValue();
-                            }
-                            List<Component> components = CollectionUtils.filterAndMap(tooltip.entries(), Tooltip.Entry::isText, Tooltip.Entry::getAsText);
-                            List<ClientTooltipComponent> tooltipComponents = CollectionUtils.filterAndMap(tooltip.entries(), ((Predicate<Tooltip.Entry>) Tooltip.Entry::isText).negate(), Tooltip.Entry::getAsComponent);
-                            callback.onTooltip(integer, wrapper.isInput(), ingredient, components);
-                            tooltip.entries().clear();
-                            tooltip.addAllTexts(components);
-                            tooltip.addAllComponents(tooltipComponents);
-                        }
-                        return tooltip;
-                    });
-                }
-            }
-        }
+        builder.setShapeless();
     }
 }

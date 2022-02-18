@@ -21,48 +21,30 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.gui.animator;
+package me.shedaniel.rei.jeicompat.wrap;
 
-import org.jetbrains.annotations.ApiStatus;
+import lombok.experimental.ExtensionMethod;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
+import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.runtime.IIngredientVisibility;
 
-import java.util.function.Function;
+import java.util.Collection;
+import java.util.Collections;
 
-@ApiStatus.Internal
-final class MappingProgressValueAnimator<R> implements ProgressValueAnimator<R> {
-    private final ValueAnimator<Double> parent;
-    private final Function<Double, R> converter;
-    private final Function<R, Double> backwardsConverter;
-    
-    MappingProgressValueAnimator(ValueAnimator<Double> parent, Function<Double, R> converter, Function<R, Double> backwardsConverter) {
-        this.parent = parent;
-        this.converter = converter;
-        this.backwardsConverter = backwardsConverter;
-    }
+@ExtensionMethod(JEIPluginDetector.class)
+public enum JEIIngredientVisibility implements IIngredientVisibility {
+    INSTANCE;
     
     @Override
-    public ProgressValueAnimator<R> setTo(R value, long duration) {
-        parent.setTo(backwardsConverter.apply(value), duration);
-        return this;
-    }
-    
-    @Override
-    public R target() {
-        return converter.apply(parent.target());
-    }
-    
-    @Override
-    public R value() {
-        return converter.apply(parent.value());
-    }
-    
-    @Override
-    public void update(double delta) {
-        parent.update(delta);
-    }
-    
-    
-    @Override
-    public double progress() {
-        return parent.value() / 100;
+    public <V> boolean isIngredientVisible(IIngredientType<V> ingredientType, V ingredient) {
+        EntryStack<?> stack = ingredient.unwrapStack(ingredientType);
+        EntryRegistry registry = EntryRegistry.getInstance();
+        if (!registry.alreadyContain(stack)) {
+            return false;
+        }
+        Collection<EntryStack<?>> stacks = registry.refilterNew(Collections.singletonList(stack));
+        return !stacks.isEmpty();
     }
 }

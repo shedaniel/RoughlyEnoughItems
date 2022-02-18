@@ -31,7 +31,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.jeicompat.wrap.JEIFocus;
-import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.advanced.IRecipeManagerPlugin;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.resources.ResourceLocation;
@@ -49,8 +49,8 @@ public class JEIDynamicDisplayGenerator implements DynamicDisplayGenerator<Displ
         this.plugin = plugin;
     }
     
-    private Optional<List<Display>> getDisplays(EntryStack<?> entry, IFocus.Mode mode) {
-        JEIFocus<?> focus = new JEIFocus<>(mode, entry.jeiValue());
+    private Optional<List<Display>> getDisplays(EntryStack<?> entry, RecipeIngredientRole role) {
+        JEIFocus<?> focus = new JEIFocus<>(role, entry.typedJeiValue());
         List<ResourceLocation> categoryIds = plugin.getRecipeCategoryUids(focus);
         if (categoryIds.isEmpty()) {
             return Optional.empty();
@@ -77,11 +77,11 @@ public class JEIDynamicDisplayGenerator implements DynamicDisplayGenerator<Displ
     
     @Override
     public Optional<List<Display>> getRecipeFor(EntryStack<?> entry) {
-        return getDisplays(entry, IFocus.Mode.OUTPUT);
+        return getDisplays(entry, RecipeIngredientRole.OUTPUT);
     }
     
     @Override
     public Optional<List<Display>> getUsageFor(EntryStack<?> entry) {
-        return getDisplays(entry, IFocus.Mode.INPUT);
+        return getDisplays(entry, RecipeIngredientRole.INPUT);
     }
 }

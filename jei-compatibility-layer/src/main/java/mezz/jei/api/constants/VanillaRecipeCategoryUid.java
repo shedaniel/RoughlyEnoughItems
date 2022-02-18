@@ -3,12 +3,12 @@ package mezz.jei.api.constants;
 import me.shedaniel.rei.plugin.client.BuiltinClientPlugin;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension;
-import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICustomCraftingCategoryExtension;
 import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.level.block.ComposterBlock;
 
 import java.util.List;
 
@@ -21,9 +21,8 @@ public final class VanillaRecipeCategoryUid {
      * <p>
      * Automatically includes all vanilla and Forge recipes.
      * <p>
-     * To add a shaped recipe extension to this category, it must implement {@link ICraftingCategoryExtension#getSize()}.
-     * <p>
-     * To override the normal behavior of the crafting recipe category, you can implement {@link ICustomCraftingCategoryExtension}
+     * To add a shaped recipe extension to this category, it must implement
+     * {@link ICraftingCategoryExtension#getWidth()} and {@link ICraftingCategoryExtension#getHeight()}.
      */
     public static final ResourceLocation CRAFTING = BuiltinClientPlugin.CRAFTING.getIdentifier();
     
@@ -90,9 +89,18 @@ public final class VanillaRecipeCategoryUid {
      * <p>
      * Automatically includes every {@link UpgradeRecipe}.
      *
-     * @since JEI 7.3.1
+     * @since 7.3.1
      */
     public static final ResourceLocation SMITHING = BuiltinClientPlugin.SMITHING.getIdentifier();
+    
+    /**
+     * The sompostable recipe category.
+     * <p>
+     * Automatically includes every item added to {@link ComposterBlock#COMPOSTABLES}.
+     *
+     * @since 8.1.0
+     */
+    public static final ResourceLocation COMPOSTABLE = BuiltinClientPlugin.COMPOSTING.getIdentifier();
     
     /**
      * The JEI info recipe category shows extra information about ingredients.

@@ -29,12 +29,16 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.jeicompat.wrap.JEIWrappedCategory;
 import mezz.jei.api.gui.IRecipeLayout;
+import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.WILL_NOT_BE_IMPLEMENTED;
@@ -90,6 +94,15 @@ public class JEIUnwrappedCategory<T, D extends Display> implements IRecipeCatego
     public void setIngredients(@NotNull T recipe, @NotNull IIngredients ingredients) {
         if (backingCategory instanceof JEIWrappedCategory) {
             ((JEIWrappedCategory<T>) backingCategory).getBackingCategory().setIngredients(recipe, ingredients);
+            return;
+        }
+        throw WILL_NOT_BE_IMPLEMENTED();
+    }
+    
+    @Override
+    public void setRecipe(IRecipeLayoutBuilder builder, T recipe, List<? extends IFocus<?>> focuses) {
+        if (backingCategory instanceof JEIWrappedCategory) {
+            ((JEIWrappedCategory<T>) backingCategory).getBackingCategory().setRecipe(builder, recipe, focuses);
             return;
         }
         throw WILL_NOT_BE_IMPLEMENTED();

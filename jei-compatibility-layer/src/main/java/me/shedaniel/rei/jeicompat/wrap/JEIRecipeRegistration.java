@@ -39,6 +39,7 @@ import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.runtime.IIngredientManager;
+import mezz.jei.api.runtime.IIngredientVisibility;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -77,6 +78,11 @@ public class JEIRecipeRegistration implements IRecipeRegistration {
     @NotNull
     public IVanillaRecipeFactory getVanillaRecipeFactory() {
         return JEIVanillaRecipeFactory.INSTANCE;
+    }
+    
+    @Override
+    public IIngredientVisibility getIngredientVisibility() {
+        return JEIIngredientVisibility.INSTANCE;
     }
     
     @Override

@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 
 /**
  * An ingredient helper allows JEI to get information about ingredients for searching and other purposes.
@@ -28,9 +29,9 @@ public interface IIngredientHelper<V> {
      * Change one focus into a different focus.
      * This can be used to treat lookups of one focus as if it were something else.
      *
-     * @deprecated since JEI 9.2.0. There isn't a good use for this anymore.
+     * @deprecated There isn't a good use for this anymore.
      */
-    @Deprecated
+    @Deprecated(forRemoval = true, since = "9.2.0")
     default IFocus<?> translateFocus(IFocus<V> focus, IFocusFactory focusFactory) {
         return focus;
     }
@@ -40,7 +41,7 @@ public interface IIngredientHelper<V> {
      * Used for finding a specific focused ingredient in a recipe.
      * Return null if there is no match.
      *
-     * @since JEI 7.3.0
+     * @since 7.3.0
      */
     @Nullable
     V getMatch(Iterable<V> ingredients, V ingredientToMatch, UidContext context);
@@ -53,7 +54,7 @@ public interface IIngredientHelper<V> {
     /**
      * Unique ID for use in comparing, blacklisting, and looking up ingredients.
      *
-     * @since JEI 7.3.0
+     * @since 7.3.0
      */
     String getUniqueId(V ingredient, UidContext context);
     
@@ -69,13 +70,14 @@ public interface IIngredientHelper<V> {
     /**
      * Return the modId of the mod that created this ingredient.
      *
-     * @deprecated since JEI 9.2.2. Use {@link #getResourceLocation(Object)} instead.
+     * @deprecated Use {@link #getResourceLocation(Object)} instead.
      */
-    @Deprecated
+    @Deprecated(forRemoval = true, since = "9.2.2")
     String getModId(V ingredient);
     
     /**
      * Return the modId of the mod that should be displayed.
+     * This mod id can be different from the one in the resource location.
      */
     default String getDisplayModId(V ingredient) {
         return getResourceLocation(ingredient).getNamespace();
@@ -94,18 +96,24 @@ public interface IIngredientHelper<V> {
     /**
      * Return the resource id of the given ingredient.
      *
-     * @deprecated since JEI 9.2.2. Use {@link #getResourceLocation(Object)} instead.
+     * @deprecated Use {@link #getResourceLocation(Object)} instead.
      */
-    @Deprecated
+    @Deprecated(forRemoval = true, since = "9.2.2")
     String getResourceId(V ingredient);
     
     /**
      * Return the registry name of the given ingredient.
      *
-     * @since JEI 9.2.2
+     * @since 9.2.2
      */
     default ResourceLocation getResourceLocation(V ingredient) {
-        return new ResourceLocation(getModId(ingredient), getResourceId(ingredient));
+        String resourceId = getResourceId(ingredient);
+        int colonIndex = resourceId.lastIndexOf(':');
+        if (colonIndex == -1) {
+            return new ResourceLocation(getModId(ingredient), resourceId);
+        } else {
+            return new ResourceLocation(getModId(ingredient), resourceId.substring(colonIndex + 1));
+        }
     }
     
     /**
@@ -182,4 +190,13 @@ public interface IIngredientHelper<V> {
      */
     String getErrorInfo(@Nullable V ingredient);
     
+    /**
+     * If these ingredients represent everything from a single tag,
+     * returns that tag's resource location.
+     *
+     * @since 9.3.0
+     */
+    default Optional<ResourceLocation> getTagEquivalent(Collection<V> ingredients) {
+        return Optional.empty();
+    }
 }
