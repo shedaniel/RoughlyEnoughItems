@@ -30,7 +30,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 
 public class RoughlyEnoughItemsInitializer {
-    public static final String COMPATIBLE_MC_VERSION = "1.18";
+    public static final String COMPATIBLE_MC_VERSION = "1.17";
     
     public static void onInitialize() {
         RoughlyEnoughItemsState.env = isClient() ? EnvType.CLIENT : EnvType.SERVER;
