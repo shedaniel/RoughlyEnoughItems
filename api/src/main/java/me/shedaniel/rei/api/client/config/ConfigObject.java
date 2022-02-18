@@ -50,6 +50,9 @@ public interface ConfigObject {
     
     void setCheating(boolean cheating);
     
+    @ApiStatus.Experimental
+    CheatingMode getCheatingMode();
+    
     EntryPanelOrdering getItemListOrdering();
     
     boolean isItemListAscending();
@@ -86,6 +89,8 @@ public interface ConfigObject {
     
     String getWeatherCommand();
     
+    String getTimeCommand();
+    
     int getMaxRecipePerPage();
     
     int getMaxRecipesPageHeight();
@@ -113,9 +118,13 @@ public interface ConfigObject {
     
     boolean doesFastEntryRendering();
     
+    boolean doesCacheEntryRendering();
+    
     boolean doDebugRenderTimeRequired();
     
     boolean doMergeDisplayUnderOne();
+    
+    FavoriteAddWidgetMode getFavoriteAddWidgetMode();
     
     ModifierKeyCode getFavoriteKeyCode();
     
@@ -187,6 +196,9 @@ public interface ConfigObject {
     
     @ApiStatus.Experimental
     SyntaxHighlightingMode getSyntaxHighlightingMode();
+    
+    @ApiStatus.Experimental
+    boolean isFocusModeZoomed();
     
     SearchMode getTooltipSearchMode();
     

@@ -30,8 +30,7 @@ import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.api.ScrollingContainer;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
+import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -84,10 +83,10 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         }
         
         @Override
-        public int getScrollBarX() {
+        public int getScrollBarX(int maxX) {
             if (!ConfigObject.getInstance().isLeftHandSidePanel())
                 return bounds.x + 1;
-            return bounds.getMaxX() - 7;
+            return maxX - 7;
         }
     };
     private final Int2ObjectMap<RealRegionEntry<T>> entries = new Int2ObjectLinkedOpenHashMap<>();
@@ -169,13 +168,6 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     }
     
     private void updatePosition(float delta) {
-        if (ConfigObject.getInstance().doesSnapToRows() && scrolling.scrollTarget >= 0 && scrolling.scrollTarget <= scrolling.getMaxScroll()) {
-            double nearestRow = Math.round(scrolling.scrollTarget / (double) entrySize()) * (double) entrySize();
-            if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(scrolling.scrollTarget, nearestRow, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
-                scrolling.scrollTarget += (nearestRow - scrolling.scrollTarget) * Math.min(delta / 2.0, 1.0);
-            else
-                scrolling.scrollTarget = nearestRow;
-        }
         scrolling.updatePosition(delta);
     }
     
@@ -251,7 +243,14 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         return Optional.empty();
     }
     
-    public void setEntries(List<T> newEntries) {
+    public enum RemovalMode {
+        THROW_EXCEPTION,
+        DISAPPEAR,
+        MIGRATED,
+        ;
+    }
+    
+    public void setEntries(List<T> newEntries, RemovalMode removalMode) {
         newEntries = Lists.newArrayList(newEntries);
         newEntries.removeIf(entry -> entry == null || entry.isEntryInvalid());
         
@@ -260,9 +259,13 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         List<RealRegionEntry<T>> removedEntries = Lists.newArrayList(this.entries.values());
         removedEntries.removeIf(entry -> newFavoritesHash.contains(entry.hashIgnoreAmount()));
         
-        for (RealRegionEntry<T> removedEntry : removedEntries) {
-            removedEntry.remove();
-            this.removedEntries.put(removedEntry.hashIgnoreAmount(), removedEntry);
+        if (!removedEntries.isEmpty() && removalMode == RemovalMode.THROW_EXCEPTION) {
+            throw new IllegalStateException("Cannot remove entries from region " + this + ": " + removedEntries);
+        } else if (removalMode == RemovalMode.DISAPPEAR) {
+            for (RealRegionEntry<T> removedEntry : removedEntries) {
+                removedEntry.remove();
+                this.removedEntries.put(removedEntry.hashIgnoreAmount(), removedEntry);
+            }
         }
         
         List<RealRegionEntry<T>> addedEntries = new ArrayList<>();
@@ -332,7 +335,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                     currentY++;
                 }
                 
-                if (notSteppingOnExclusionZones(xPos, yPos - (int) scrolling.scrollAmount, entrySize, entrySize, innerBounds)) {
+                if (notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize, innerBounds)) {
                     if (slotIndex++ == releaseIndex) {
                         continue;
                     }
@@ -366,7 +369,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                         currentY++;
                     }
                     
-                    if (notSteppingOnExclusionZones(xPos, yPos - (int) scrolling.scrollAmount, entrySize, entrySize, innerBounds)) {
+                    if (notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize, innerBounds)) {
                         entriesPoints.add(new Tuple<>(entry, new Point(xPos, yPos)));
                         break;
                     } else {
@@ -380,13 +383,13 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                 int xPos = currentX * entrySize + innerBounds.x;
                 int yPos = currentY * entrySize + innerBounds.y;
                 
-                if (notSteppingOnExclusionZones(xPos, yPos - (int) scrolling.scrollAmount, entrySize, entrySize, innerBounds)) {
+                if (notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize, innerBounds)) {
                     entriesPoints.add(new Tuple<>(null, new Point(xPos, yPos)));
                 }
             }
             
             double x = position.x - 8;
-            double y = position.y + scrolling.scrollAmount - 8;
+            double y = position.y + scrolling.scrollAmount() - 8;
             
             return Mth.clamp(entriesPoints.stream()
                             .filter(value -> {
@@ -419,7 +422,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     public boolean drop(RealRegionEntry<T> entry) {
         DraggingContext<?> context = DraggingContext.getInstance();
         double x = context.getCurrentPosition().x;
-        double y = context.getCurrentPosition().y + scrolling.scrollAmount;
+        double y = context.getCurrentPosition().y + scrolling.scrollAmount();
         return drop(entry, x, y);
     }
     
@@ -467,7 +470,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         
         setEntries(this.entries.values().stream()
                 .map(RealRegionEntry::getEntry)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()), RemovalMode.THROW_EXCEPTION);
         return true;
     }
     
@@ -475,13 +478,17 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         return entriesList.indexOf(entry.getWidget());
     }
     
-    public void remove(RealRegionEntry<T> entry) {
-        entries.remove(entry.hashIgnoreAmount());
-        setEntries(CollectionUtils.map(entries.values(), RealRegionEntry::getEntry));
+    public void remove(RealRegionEntry<T> entry, RemovalMode mode) {
+        RealRegionEntry<T> currentEntry = entries.get(entry.hashIgnoreAmount());
+        if (currentEntry != null) {
+            List<T> newEntries = CollectionUtils.map(entries.values(), RealRegionEntry::getEntry);
+            newEntries.remove(currentEntry.getEntry());
+            setEntries(newEntries, mode);
+        }
     }
     
     public double getScrollAmount() {
-        return scrolling.scrollAmount;
+        return scrolling.scrollAmount();
     }
     
     public boolean has(RealRegionEntry<T> entry) {

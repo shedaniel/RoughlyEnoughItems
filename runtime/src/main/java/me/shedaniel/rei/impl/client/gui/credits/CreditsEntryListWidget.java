@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.credits;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWidget;
+import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -44,8 +44,7 @@ import java.util.Collections;
 import java.util.List;
 
 @ApiStatus.Internal
-public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWidget<CreditsEntryListWidget.CreditsItem> {
-    
+public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidget<CreditsEntryListWidget.CreditsItem> {
     private boolean inFocus;
     
     public CreditsEntryListWidget(Minecraft client, int width, int height, int startY, int endY) {
@@ -72,8 +71,8 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
         clearItems();
     }
     
-    private CreditsItem rei_getEntry(int int_1) {
-        return this.children().get(int_1);
+    private CreditsItem rei_getEntry(int index) {
+        return this.children().get(index);
     }
     
     public void creditsAddEntry(CreditsItem entry) {
@@ -90,7 +89,7 @@ public class CreditsEntryListWidget extends DynamicNewSmoothScrollingEntryListWi
         return width - 40;
     }
     
-    public static abstract class CreditsItem extends DynamicNewSmoothScrollingEntryListWidget.Entry<CreditsItem> {
+    public static abstract class CreditsItem extends DynamicSmoothScrollingEntryListWidget.Entry<CreditsItem> {
         @Override
         public List<? extends NarratableEntry> narratables() {
             return Collections.emptyList();

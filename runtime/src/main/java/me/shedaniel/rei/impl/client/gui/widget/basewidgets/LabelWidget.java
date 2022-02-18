@@ -25,12 +25,12 @@ package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.LazyResettable;
+import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
+import me.shedaniel.clothconfig2.api.animator.ValueProvider;
 import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
-import me.shedaniel.rei.api.client.gui.animator.ValueProvider;
 import me.shedaniel.rei.api.client.gui.widgets.Label;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;

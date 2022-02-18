@@ -89,7 +89,8 @@ public class BatchedEntryRendererManager {
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Adding entry");
                 CrashReportUtils.renderer(report, currentEntry);
-                throw CrashReportUtils.throwReport(report);
+                CrashReportUtils.catchReport(report);
+                return;
             }
         }
         toRender.add(widget);
@@ -163,7 +164,8 @@ public class BatchedEntryRendererManager {
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry background");
                 CrashReportUtils.renderer(report, entry);
-                throw CrashReportUtils.throwReport(report);
+                CrashReportUtils.catchReport(report);
+                return;
             }
         }
         firstRenderer.startBatch(first, extraData[0], matrices, delta);
@@ -177,7 +179,8 @@ public class BatchedEntryRendererManager {
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry base");
                 CrashReportUtils.renderer(report, entry);
-                throw CrashReportUtils.throwReport(report);
+                CrashReportUtils.catchReport(report);
+                return;
             }
         }
         immediate.endBatch();
@@ -191,7 +194,8 @@ public class BatchedEntryRendererManager {
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry base");
                 CrashReportUtils.renderer(report, entry);
-                throw CrashReportUtils.throwReport(report);
+                CrashReportUtils.catchReport(report);
+                return;
             }
         }
         immediate.endBatch();
@@ -199,20 +203,24 @@ public class BatchedEntryRendererManager {
             try {
                 if (entry.containsMouse(mouseX, mouseY)) {
                     entry.queueTooltip(matrices, mouseX, mouseY, delta);
-                    entry.drawHighlighted(matrices, mouseX, mouseY, delta);
+                    
+                    if (entry.hasHighlight()) {
+                        entry.drawHighlighted(matrices, mouseX, mouseY, delta);
+                    }
                 }
                 entry.drawExtra(matrices, mouseX, mouseY, delta);
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry extra");
                 CrashReportUtils.renderer(report, entry);
-                throw CrashReportUtils.throwReport(report);
+                CrashReportUtils.catchReport(report);
+                return;
             }
         }
         if (debugTime) time.add(System.nanoTime() - l);
         firstRenderer.endBatch(first, extraData[0], matrices, delta);
     }
     
-    private static <T extends EntryWidget> void renderSlow(boolean debugTime, MutableInt size, MutableLong time, PoseStack matrices, int mouseX, int mouseY, float delta, Iterable<T> entries) {
+    public static <T extends EntryWidget> void renderSlow(boolean debugTime, MutableInt size, MutableLong time, PoseStack matrices, int mouseX, int mouseY, float delta, Iterable<T> entries) {
         for (T entry : entries) {
             if (entry.getCurrentEntry().isEmpty())
                 continue;
@@ -226,7 +234,8 @@ public class BatchedEntryRendererManager {
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry");
                 CrashReportUtils.renderer(report, entry);
-                throw CrashReportUtils.throwReport(report);
+                CrashReportUtils.catchReport(report);
+                return;
             }
         }
     }

@@ -38,7 +38,9 @@ import me.shedaniel.rei.api.client.gui.config.*;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.annotation.ElementType;
@@ -73,12 +75,18 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public boolean isCheating() {
-        return basics.cheating;
+        return basics.cheating == CheatingMode.ON || (basics.cheating == CheatingMode.WHEN_CREATIVE && Minecraft.getInstance().gameMode != null
+                                                      && Minecraft.getInstance().gameMode.getPlayerMode() == GameType.CREATIVE);
     }
     
     @Override
     public void setCheating(boolean cheating) {
-        basics.cheating = cheating;
+        basics.cheating = cheating ? CheatingMode.ON : CheatingMode.OFF;
+    }
+    
+    @Override
+    public CheatingMode getCheatingMode() {
+        return basics.cheating;
     }
     
     @Override
@@ -182,6 +190,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public String getTimeCommand() {
+        return advanced.commands.timeCommand;
+    }
+    
+    @Override
     public int getMaxRecipePerPage() {
         return advanced.layout.maxRecipesPerPage;
     }
@@ -255,6 +268,15 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public boolean doesCacheEntryRendering() {
+        return advanced.miscellaneous.cachingFastEntryRendering;
+    }
+    
+    public void setDoesCacheEntryRendering(boolean doesCacheEntryRendering) {
+        advanced.miscellaneous.cachingFastEntryRendering = doesCacheEntryRendering;
+    }
+    
+    @Override
     public boolean doDebugRenderTimeRequired() {
         return advanced.layout.debugRenderTimeRequired;
     }
@@ -262,6 +284,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public boolean doMergeDisplayUnderOne() {
         return advanced.layout.mergeDisplayUnderOne;
+    }
+    
+    @Override
+    public FavoriteAddWidgetMode getFavoriteAddWidgetMode() {
+        return advanced.layout.favoriteAddWidgetMode;
     }
     
     @Override
@@ -433,6 +460,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public boolean isFocusModeZoomed() {
+        return appearance.isFocusModeZoomed;
+    }
+    
+    @Override
     public SearchMode getTooltipSearchMode() {
         return advanced.search.tooltipSearch;
     }
@@ -489,7 +521,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public static class Basics {
         @ConfigEntry.Gui.Excluded public List<FavoriteEntry> favorites = new ArrayList<>();
-        @Comment("Declares whether cheating mode is on.") private boolean cheating = false;
+        @Comment("Declares whether cheating mode is on.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON) private CheatingMode cheating = CheatingMode.OFF;
         private boolean favoritesEnabled = true;
         @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
         private KeyBindings keyBindings = new KeyBindings();
@@ -542,6 +574,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double favoritesHorizontalEntriesBoundaries = 1.0;
         private int favoritesHorizontalEntriesBoundariesColumns = 50;
         @UseSpecialSearchFilterSyntaxHighlightingScreen private SyntaxHighlightingMode syntaxHighlightingMode = SyntaxHighlightingMode.COLORFUL;
+        private boolean isFocusModeZoomed = false;
     }
     
     public static class Functionality {
@@ -549,7 +582,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares whether mob effects should be on the left side instead of the right side.") private boolean leftSideMobEffects = false;
         @Comment("Declares whether subsets is enabled.") private boolean isSubsetsEnabled = false;
         private boolean allowInventoryHighlighting = true;
-        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON) private ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
+        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        private ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
     }
     
     public static class Advanced {
@@ -585,6 +619,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             private int maxRecipesPageHeight = 300;
             @Comment("Declares whether entry rendering time should be debugged.") private boolean debugRenderTimeRequired = false;
             @Comment("Merges displays with equal contents under 1 display.") private boolean mergeDisplayUnderOne = true;
+            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+            private FavoriteAddWidgetMode favoriteAddWidgetMode = FavoriteAddWidgetMode.ALWAYS_VISIBLE;
         }
         
         public static class Accessibility {
@@ -616,12 +652,15 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares the command used to change gamemode.") private String gamemodeCommand = "/gamemode {gamemode}";
             @Comment("Declares the command used in servers to cheat items.") private String giveCommand = "/give {player_name} {item_identifier}{nbt} {count}";
             @Comment("Declares the command used to change weather.") private String weatherCommand = "/weather {weather}";
+            @Comment("Declares the command used to change time.") private String timeCommand = "/time set {time}";
         }
         
         public static class Miscellaneous {
             @Comment("Declares whether arrows in containers should be clickable.") private boolean clickableRecipeArrows = true;
             private boolean registerRecipesInAnotherThread = true;
             private boolean newFastEntryRendering = true;
+            @ConfigEntry.Gui.PrefixText
+            private boolean cachingFastEntryRendering = false;
         }
         
         public static class Filtering {

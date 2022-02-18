@@ -25,13 +25,13 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
+import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.Renderer;
-import me.shedaniel.rei.api.client.gui.animator.NumberAnimator;
-import me.shedaniel.rei.api.client.gui.animator.ValueAnimator;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
 import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;

@@ -31,6 +31,8 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * An immutable representation of a list of {@link EntryStack}.
@@ -69,6 +71,10 @@ public interface EntryIngredient extends List<EntryStack<?>> {
             stacks[i] = EntryStack.read((CompoundTag) tag.get(i));
         }
         return Internals.getEntryIngredientProvider().of(stacks);
+    }
+    
+    static Collector<EntryStack<?>, ?, EntryIngredient> collector() {
+        return Collectors.collectingAndThen(Collectors.toList(), EntryIngredient::of);
     }
     
     ListTag save();

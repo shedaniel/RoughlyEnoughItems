@@ -62,6 +62,7 @@ import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
+import me.shedaniel.rei.impl.client.gui.changelog.ChangelogLoader;
 import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
 import me.shedaniel.rei.impl.client.gui.dragging.CurrentDraggingStack;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
@@ -265,6 +266,24 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
                     .tooltipLine(new TranslatableComponent("text.rei.previous_page"))
                     .focusable(false));
+            Button changelogButton;
+            widgets.add(changelogButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18 - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent(""))
+                    .onClick(button -> {
+                        ChangelogLoader.show();
+                    })
+                    .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
+                    .tooltipLine(new TranslatableComponent("text.rei.changelog.title"))
+                    .focusable(false));
+            widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+                helper.setBlitOffset(helper.getBlitOffset() + 1);
+                RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
+                Rectangle bounds = changelogButton.getBounds();
+                matrices.pushPose();
+                matrices.translate(0.5f, 0, 0);
+                helper.blit(matrices, bounds.x + 1, bounds.y + 2, !ChangelogLoader.hasVisited() ? 28 : 14, 0, 14, 14);
+                matrices.popPose();
+                helper.setBlitOffset(helper.getBlitOffset() - 1);
+            }));
             widgets.add(rightButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent("text.rei.right_arrow"))
                     .onClick(button -> {
                         ENTRY_LIST_WIDGET.nextPage();
@@ -332,6 +351,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                                     helper.setBlitOffset(helper.getBlitOffset() + 1);
                                     RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
                                     helper.blit(matrices, configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
+                                    helper.setBlitOffset(helper.getBlitOffset() - 1);
                                 })
                         ),
                         0, 0, 600
@@ -349,7 +369,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                     }), 0, 0, 600)));
         }
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            widgets.add(Widgets.createClickableLabel(new Point(bounds.x + (bounds.width / 2), bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), NarratorChatListener.NO_TITLE, label -> {
+            widgets.add(Widgets.createClickableLabel(new Point(bounds.x + ((bounds.width - 18) / 2), bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), NarratorChatListener.NO_TITLE, label -> {
                 if (!Screen.hasShiftDown()) {
                     ENTRY_LIST_WIDGET.setPage(0);
                     ENTRY_LIST_WIDGET.updateEntriesPosition();
@@ -440,6 +460,11 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                         ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.scrolling_side_panel"),
                                 config::isEntryListWidgetScrolled,
                                 config::setEntryListWidgetScrolled
+                        ),
+                        new SeparatorMenuEntry(),
+                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.caching_entry_rendering"),
+                                config::doesCacheEntryRendering,
+                                config::setDoesCacheEntryRendering
                         ),
                         new SeparatorMenuEntry(),
                         ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.side_search_field"),

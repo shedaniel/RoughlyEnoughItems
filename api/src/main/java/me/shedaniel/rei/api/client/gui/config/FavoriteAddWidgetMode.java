@@ -21,50 +21,20 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.gui.animator;
+package me.shedaniel.rei.api.client.gui.config;
 
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.client.resources.language.I18n;
 
-@ApiStatus.Internal
-abstract class ValueAnimatorAsNumberAnimator<T extends Number> extends NumberAnimator<T> {
-    private final ValueAnimator<T> animator;
-    
-    ValueAnimatorAsNumberAnimator(ValueAnimator<T> animator) {
-        this.animator = animator;
-    }
-    
-    @Override
-    public int intValue() {
-        return animator.value().intValue();
-    }
+import java.util.Locale;
+
+public enum FavoriteAddWidgetMode {
+    ALWAYS_INVISIBLE,
+    AUTO_HIDE,
+    ALWAYS_VISIBLE,
+    ;
     
     @Override
-    public long longValue() {
-        return animator.value().longValue();
-    }
-    
-    @Override
-    public float floatValue() {
-        return animator.value().floatValue();
-    }
-    
-    @Override
-    public double doubleValue() {
-        return animator.value().doubleValue();
-    }
-    
-    @Override
-    public T value() {
-        return animator.value();
-    }
-    
-    @Override
-    public T target() {
-        return animator.target();
-    }
-    
-    @Override
-    public void update(double delta) {
-        animator.update(delta);
+    public String toString() {
+        return I18n.get("config.roughlyenoughitems.layout.favoriteAddWidgetMode." + name().toLowerCase(Locale.ROOT));
     }
 }
