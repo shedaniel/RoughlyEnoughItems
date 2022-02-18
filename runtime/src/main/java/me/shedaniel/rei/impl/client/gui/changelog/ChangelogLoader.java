@@ -64,7 +64,7 @@ public class ChangelogLoader {
                     
                     InputStream changesJsonStream = ChangelogLoader.class.getClassLoader().getResourceAsStream("roughlyenoughitems.changes.json");
                     if (changesJsonStream != null) {
-                        JsonObject object = JsonParser.parseReader(new InputStreamReader(changesJsonStream))
+                        JsonObject object = new JsonParser().parse(new InputStreamReader(changesJsonStream))
                                 .getAsJsonObject();
                         String currentVersion = object.getAsJsonPrimitive("version").getAsString();
                         if (currentVersion.equals(version)) {
@@ -96,7 +96,7 @@ public class ChangelogLoader {
         if (changesJsonStream == null) {
             builder.add(new TranslatableComponent("rei.changelog.error.missingChangelogFile"));
         } else {
-            JsonObject object = JsonParser.parseReader(new InputStreamReader(changesJsonStream))
+            JsonObject object = new JsonParser().parse(new InputStreamReader(changesJsonStream))
                     .getAsJsonObject();
             String version = object.getAsJsonPrimitive("version").getAsString();
             Path file = Platform.getConfigFolder().resolve("roughlyenoughitems/changelog.txt");

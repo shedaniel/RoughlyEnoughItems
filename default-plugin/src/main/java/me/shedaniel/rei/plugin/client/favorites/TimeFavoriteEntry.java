@@ -223,14 +223,14 @@ public class TimeFavoriteEntry extends FavoriteEntry {
         INSTANCE;
         
         @Override
-        public DataResult<TimeFavoriteEntry> read(CompoundTag object) {
+        public DataResult<TimeFavoriteEntry> readResult(CompoundTag object) {
             String stringValue = object.getString(KEY);
             Time type = stringValue.equals("NOT_SET") ? null : Time.valueOf(stringValue);
             return DataResult.success(new TimeFavoriteEntry(type), Lifecycle.stable());
         }
         
         @Override
-        public DataResult<TimeFavoriteEntry> fromArgs(Object... args) {
+        public DataResult<TimeFavoriteEntry> fromArgsResult(Object... args) {
             if (args.length == 0) return DataResult.error("Cannot create GameModeFavoriteEntry from empty args!");
             if (!(args[0] instanceof Time type))
                 return DataResult.error("Creation of GameModeFavoriteEntry from args expected Time as the first argument!");
