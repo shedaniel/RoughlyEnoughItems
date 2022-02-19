@@ -97,20 +97,28 @@ public class JEIWrappedDisplay<T> implements Display {
         List<IFocus<?>> foci = new ArrayList<>();
         if (context != null) {
             for (EntryStack<?> stack : context.getUsagesFor()) {
-                foci.add(new JEIFocus<>(RecipeIngredientRole.INPUT, stack.typedJeiValue()));
+                if (stack != null && !stack.isEmpty()) {
+                    foci.add(new JEIFocus<>(RecipeIngredientRole.INPUT, stack.typedJeiValue()));
+                }
             }
             for (EntryStack<?> stack : context.getRecipesFor()) {
-                foci.add(new JEIFocus<>(RecipeIngredientRole.OUTPUT, stack.typedJeiValue()));
+                if (stack != null && !stack.isEmpty()) {
+                    foci.add(new JEIFocus<>(RecipeIngredientRole.OUTPUT, stack.typedJeiValue()));
+                }
             }
         } else if (Minecraft.getInstance().screen instanceof DisplayScreen) {
             DisplayScreen screen = (DisplayScreen) Minecraft.getInstance().screen;
             List<EntryStack<?>> notice = screen.getIngredientsToNotice();
             for (EntryStack<?> stack : notice) {
-                foci.add(new JEIFocus<>(RecipeIngredientRole.INPUT, stack.typedJeiValue()));
+                if (stack != null && !stack.isEmpty()) {
+                    foci.add(new JEIFocus<>(RecipeIngredientRole.INPUT, stack.typedJeiValue()));
+                }
             }
             notice = screen.getResultsToNotice();
             for (EntryStack<?> stack : notice) {
-                foci.add(new JEIFocus<>(RecipeIngredientRole.OUTPUT, stack.typedJeiValue()));
+                if (stack != null && !stack.isEmpty()) {
+                    foci.add(new JEIFocus<>(RecipeIngredientRole.OUTPUT, stack.typedJeiValue()));
+                }
             }
         }
         return foci;

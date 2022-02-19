@@ -212,6 +212,7 @@ public class JEIPluginDetector {
     }
     
     public static <T> ITypedIngredient<T> typedJeiValue(EntryStack<T> stack) {
+        if (stack == null) return null;
         T value = stack.getValue();
         if (value instanceof dev.architectury.fluid.FluidStack) {
             return (ITypedIngredient<T>) new JEITypedIngredient<>(VanillaTypes.FLUID, FluidStackHooksForge.toForge((dev.architectury.fluid.FluidStack) value));
