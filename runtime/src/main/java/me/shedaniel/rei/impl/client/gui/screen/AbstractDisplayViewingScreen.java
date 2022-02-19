@@ -96,11 +96,13 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     
     @Override
     public void addIngredientToNotice(EntryStack<?> stack) {
+        if (stack == null) return;
         this.ingredientStackToNotice.add(stack);
     }
     
     @Override
     public void addResultToNotice(EntryStack<?> stack) {
+        if (stack == null) return;
         this.resultStackToNotice.add(stack);
     }
     
