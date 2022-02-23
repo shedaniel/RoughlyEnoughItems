@@ -56,6 +56,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -64,7 +65,25 @@ import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class ViewsImpl implements Views {
+    private static final ThreadLocal<ViewSearchBuilder> BUILDER = new ThreadLocal<>();
+    
+    @Nullable
+    @Override
+    public ViewSearchBuilder getContext() {
+        return BUILDER.get();
+    }
+    
     public static Map<DisplayCategory<?>, List<DisplaySpec>> buildMapFor(ViewSearchBuilder builder) {
+        BUILDER.set(builder);
+        
+        try {
+            return _buildMapFor(builder);
+        } finally {
+            BUILDER.remove();
+        }
+    }
+    
+    private static Map<DisplayCategory<?>, List<DisplaySpec>> _buildMapFor(ViewSearchBuilder builder) {
         if (PluginManager.areAnyReloading()) {
             RoughlyEnoughItemsCore.LOGGER.info("Cancelled Views buildMap since plugins have not finished reloading.");
             return Maps.newLinkedHashMap();

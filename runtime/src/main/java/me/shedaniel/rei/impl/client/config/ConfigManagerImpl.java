@@ -51,6 +51,7 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.client.gui.config.CheatingMode;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
@@ -79,7 +80,6 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.*;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -135,6 +135,21 @@ public class ConfigManagerImpl implements ConfigManager {
     }
     
     private static Jankson buildJankson(Jankson.Builder builder) {
+        // CheatingMode
+        builder.registerSerializer(CheatingMode.class, (value, marshaller) -> {
+            if (value == CheatingMode.WHEN_CREATIVE) {
+                return new JsonPrimitive("WHEN_CREATIVE");
+            } else {
+                return new JsonPrimitive(value == CheatingMode.ON);
+            }
+        });
+        builder.registerDeserializer(Boolean.class, CheatingMode.class, (value, unmarshaller) -> {
+            return value ? CheatingMode.ON : CheatingMode.OFF;
+        });
+        builder.registerDeserializer(String.class, CheatingMode.class, (value, unmarshaller) -> {
+            return CheatingMode.valueOf(value.toUpperCase(Locale.ROOT));
+        });
+        
         // InputConstants.Key
         builder.registerSerializer(InputConstants.Key.class, (value, marshaller) -> {
             return new JsonPrimitive(value.getName());
@@ -355,7 +370,6 @@ public class ConfigManagerImpl implements ConfigManager {
                     ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) feedbackEntry);
                     ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) new EmptyEntry(4));
                     ScreenHooks.addRenderableWidget(screen, new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
-                        MutableLong current = new MutableLong(0);
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
                         Minecraft.getInstance().setScreen(creditsScreen);
                     }));

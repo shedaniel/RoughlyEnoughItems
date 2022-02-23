@@ -29,7 +29,7 @@ import com.google.common.collect.Sets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.api.ScrollingContainer;
+import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
@@ -244,7 +244,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
         fill(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), -16777216);
         boolean contains = innerBounds.contains(mouseX, mouseY);
         MenuEntry focused = getFocused() instanceof MenuEntry menuEntry ? menuEntry : null;
-        int currentY = (int) (innerBounds.y - scrolling.scrollAmount);
+        int currentY = innerBounds.y - scrolling.scrollAmountInt();
         for (MenuEntry child : children()) {
             boolean containsMouse = contains && mouseY >= currentY && mouseY < currentY + child.getEntryHeight();
             if (containsMouse) {
@@ -252,7 +252,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
             }
             currentY += child.getEntryHeight();
         }
-        currentY = (int) (innerBounds.y - scrolling.scrollAmount);
+        currentY = innerBounds.y - scrolling.scrollAmountInt();
         ScissorsHandler.INSTANCE.scissor(scrolling.getScissorBounds());
         for (MenuEntry child : children()) {
             boolean rendering = currentY + child.getEntryHeight() >= innerBounds.y && currentY <= innerBounds.getMaxY();

@@ -41,6 +41,8 @@ body:
       description: Please copy and paste any relevant log output, this will be used to help diagnose the issue. Please do not use any paste services, as they may expire and be deleted.
       placeholder: You can look into `.minecraft/logs` and find the `latest.log` and `rei.log`, you can paste them here.
       render: shell
+    validations:
+      required: true
   - type: textarea
     attributes:
       label: Anything else?

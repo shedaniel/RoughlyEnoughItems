@@ -21,48 +21,27 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.gui.animator;
+package me.shedaniel.rei.api.client.gui.config;
 
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.client.resources.language.I18n;
 
-import java.util.function.Function;
-
-@ApiStatus.Internal
-final class MappingProgressValueAnimator<R> implements ProgressValueAnimator<R> {
-    private final ValueAnimator<Double> parent;
-    private final Function<Double, R> converter;
-    private final Function<R, Double> backwardsConverter;
-    
-    MappingProgressValueAnimator(ValueAnimator<Double> parent, Function<Double, R> converter, Function<R, Double> backwardsConverter) {
-        this.parent = parent;
-        this.converter = converter;
-        this.backwardsConverter = backwardsConverter;
-    }
+public enum CheatingMode {
+    OFF,
+    ON,
+    WHEN_CREATIVE,
+    ;
     
     @Override
-    public ProgressValueAnimator<R> setTo(R value, long duration) {
-        parent.setTo(backwardsConverter.apply(value), duration);
-        return this;
-    }
-    
-    @Override
-    public R target() {
-        return converter.apply(parent.target());
-    }
-    
-    @Override
-    public R value() {
-        return converter.apply(parent.value());
-    }
-    
-    @Override
-    public void update(double delta) {
-        parent.update(delta);
-    }
-    
-    
-    @Override
-    public double progress() {
-        return parent.value() / 100;
+    public String toString() {
+        switch (this) {
+            case ON:
+                return I18n.get("text.cloth-config.boolean.value.true");
+            case OFF:
+                return I18n.get("text.cloth-config.boolean.value.false");
+            case WHEN_CREATIVE:
+                return I18n.get("config.roughlyenoughitems.cheating.when_creative");
+            default:
+                throw new IllegalStateException("Unknown CheatingMode: " + this);
+        }
     }
 }

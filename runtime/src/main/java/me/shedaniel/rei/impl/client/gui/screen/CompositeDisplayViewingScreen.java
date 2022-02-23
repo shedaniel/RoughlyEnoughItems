@@ -27,7 +27,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.api.ScrollingContainer;
+import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -109,7 +109,6 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         super.init();
         boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
         int tabSize = isCompactTabs ? 24 : 28;
-        scrolling.draggingScrollBar = false;
         this.children().clear();
         this.widgets.clear();
         this.buttonList.clear();
@@ -165,6 +164,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             setupDisplay.add(Widgets.createLabel(new Point(recipeBounds.getCenterX(), recipeBounds.getCenterY() + 1), new TextComponent("Check console for error")));
         }
         setupTags(setupDisplay);
+        transformFiltering(setupDisplay);
         transformIngredientNotice(setupDisplay, ingredientStackToNotice);
         transformResultNotice(setupDisplay, resultStackToNotice);
         for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
@@ -357,7 +357,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         matrices.pushPose();
         ScissorsHandler.INSTANCE.scissor(scrolling.getBounds());
         for (Button button : buttonList) {
-            button.getBounds().y = scrollListBounds.y + 1 + yOffset - (int) scrolling.scrollAmount;
+            button.getBounds().y = scrollListBounds.y + 1 + yOffset - scrolling.scrollAmountInt();
             if (button.getBounds().getMaxY() > scrollListBounds.getMinY() && button.getBounds().getMinY() < scrollListBounds.getMaxY()) {
                 button.render(matrices, mouseX, mouseY, delta);
             }

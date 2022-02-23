@@ -95,7 +95,7 @@ dependencies {
     modRuntime("curse.maven:refined-storage-243076:3623324")
     modRuntime("appeng:appliedenergistics2:10.0.1")
     // modRuntime("curse.maven:tcon-74072:3273213")
-    // modRuntime("curse.maven:mantle-74924:3273201")
+    modRuntime("curse.maven:mantle-74924:3634761")
     modRuntime("curse.maven:jer-240630:3575590")
     modRuntime("curse.maven:jep-417645:3550303")
     modRuntime("curse.maven:simple-storage-network-268495:3594529")
@@ -130,6 +130,7 @@ dependencies {
     modRuntime("curse.maven:cyclops-core-236307:3614854")
     modRuntime("curse.maven:elemental-craft-395158:3593428")
     modRuntime("curse.maven:datapack-anvil-432817:3569515")
+    modRuntime("curse.maven:assemblylinemachines-388282:3623609")
 }
 
 shadowJar {
