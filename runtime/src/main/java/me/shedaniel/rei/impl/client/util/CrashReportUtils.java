@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.client.util;
 
 import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.impl.client.gui.widget.CatchingExceptionUtils;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
@@ -65,5 +66,9 @@ public class CrashReportUtils {
     
     public static ReportedException throwReport(CrashReport report) {
         return new ReportedException(report);
+    }
+    
+    public static void catchReport(CrashReport report) {
+        CatchingExceptionUtils.handleThrowable(new ReportedException(report), report.getTitle());
     }
 }

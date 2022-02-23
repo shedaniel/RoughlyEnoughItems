@@ -21,17 +21,27 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat.wrap;
+package me.shedaniel.rei.api.client.gui.config;
 
-import dev.architectury.utils.value.Value;
-import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.recipe.category.IRecipeCategory;
+import net.minecraft.client.resources.language.I18n;
 
-public class JEIBasedRecipeLayout<T> extends JEIRecipeLayout<T> {
-    private final IRecipeCategory<?> category;
+public enum CheatingMode {
+    OFF,
+    ON,
+    WHEN_CREATIVE,
+    ;
     
-    public JEIBasedRecipeLayout(IRecipeCategory<?> category, Value<IDrawable> background) {
-        super(background);
-        this.category = category;
+    @Override
+    public String toString() {
+        switch (this) {
+            case ON:
+                return I18n.get("text.cloth-config.boolean.value.true");
+            case OFF:
+                return I18n.get("text.cloth-config.boolean.value.false");
+            case WHEN_CREATIVE:
+                return I18n.get("config.roughlyenoughitems.cheating.when_creative");
+            default:
+                throw new IllegalStateException("Unknown CheatingMode: " + this);
+        }
     }
 }

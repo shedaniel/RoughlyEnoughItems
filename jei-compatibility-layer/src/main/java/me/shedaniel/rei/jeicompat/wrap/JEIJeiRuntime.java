@@ -23,12 +23,26 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.ingredients.ITypedIngredient;
+import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IRecipeManager;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.runtime.*;
 import org.jetbrains.annotations.NotNull;
 
 public enum JEIJeiRuntime implements IJeiRuntime {
     INSTANCE;
+    
+    @Override
+    public <T> IFocus<T> createFocus(RecipeIngredientRole role, IIngredientType<T> ingredientType, T ingredient) {
+        return new JEIFocus<>(role, createTypedIngredient(ingredientType, ingredient));
+    }
+    
+    @Override
+    public <T> ITypedIngredient<T> createTypedIngredient(IIngredientType<T> ingredientType, T ingredient) {
+        return new JEITypedIngredient<>(ingredientType, ingredient);
+    }
     
     @Override
     @NotNull
@@ -64,5 +78,10 @@ public enum JEIJeiRuntime implements IJeiRuntime {
     @NotNull
     public IIngredientManager getIngredientManager() {
         return JEIIngredientManager.INSTANCE;
+    }
+    
+    @Override
+    public IIngredientVisibility getIngredientVisibility() {
+        return JEIIngredientVisibility.INSTANCE;
     }
 }

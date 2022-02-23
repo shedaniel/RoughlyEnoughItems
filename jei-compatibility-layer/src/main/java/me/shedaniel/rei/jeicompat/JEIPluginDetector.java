@@ -65,9 +65,11 @@ import me.shedaniel.rei.jeicompat.wrap.*;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.advanced.IRecipeManagerPlugin;
@@ -209,6 +211,24 @@ public class JEIPluginDetector {
         return value;
     }
     
+    public static <T> ITypedIngredient<T> typedJeiValue(EntryStack<T> stack) {
+        if (stack == null) return null;
+        T value = stack.getValue();
+        if (value instanceof dev.architectury.fluid.FluidStack) {
+            return (ITypedIngredient<T>) new JEITypedIngredient<>(VanillaTypes.FLUID, FluidStackHooksForge.toForge((dev.architectury.fluid.FluidStack) value));
+        }
+        return new JEITypedIngredient<>(jeiType(stack.getDefinition()), value);
+    }
+    
+    public static <T> Optional<ITypedIngredient<T>> typedJeiValueOp(EntryStack<T> stack) {
+        if (stack == null || stack.isEmpty()) return Optional.empty();
+        return Optional.ofNullable(typedJeiValue(stack));
+    }
+    
+    public static <T> Optional<ITypedIngredient<?>> typedJeiValueOpWild(EntryStack<T> stack) {
+        return (Optional<ITypedIngredient<?>>) (Optional<?>) typedJeiValueOp(stack);
+    }
+    
     public static <T> T jeiValueOrNull(EntryStack<T> stack) {
         if (stack.isEmpty()) return null;
         return jeiValue(stack);
@@ -297,6 +317,9 @@ public class JEIPluginDetector {
     }
     
     public static EntryStack<?> unwrapStack(Object stack) {
+        if (stack instanceof ITypedIngredient) {
+            return unwrapStack(((ITypedIngredient<?>) stack).getIngredient(), unwrapDefinition(((ITypedIngredient<?>) stack).getType()).cast());
+        }
         if (stack instanceof JEIInternalsClickedIngredient) {
             return unwrapStack(((JEIInternalsClickedIngredient<?>) stack).getValue());
         }

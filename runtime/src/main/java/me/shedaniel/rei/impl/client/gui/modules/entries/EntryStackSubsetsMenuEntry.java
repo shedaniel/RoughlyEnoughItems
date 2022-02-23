@@ -79,7 +79,7 @@ public class EntryStackSubsetsMenuEntry extends AbstractMenuEntry {
             REIRuntime.getInstance().queueTooltip(stack.getTooltip(new Point(mouseX, mouseY)));
             if (RoughlyEnoughItemsCoreClient.isLeftMousePressed && !clickedLast) {
                 clickedLast = true;
-                if (!getParent().scrolling.draggingScrollBar) {
+                if (getParent().scrolling.getScissorBounds().contains(mouseX, mouseY)) {
                     minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     List<EntryStackProvider<?>> filteredStacks = ConfigObject.getInstance().getFilteredStackProviders();
                     if (isFiltered()) {

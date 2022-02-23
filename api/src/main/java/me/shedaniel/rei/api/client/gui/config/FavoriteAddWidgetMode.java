@@ -21,47 +21,20 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.gui.animator;
+package me.shedaniel.rei.api.client.gui.config;
 
-import org.jetbrains.annotations.ApiStatus;
+import net.minecraft.client.resources.language.I18n;
 
-import java.util.Objects;
-import java.util.function.Supplier;
+import java.util.Locale;
 
-@ApiStatus.Internal
-final class ConventionValueAnimator<T> implements ValueAnimator<T> {
-    private final ValueAnimator<T> parent;
-    private final Supplier<T> convention;
-    private final long duration;
-    
-    ConventionValueAnimator(ValueAnimator<T> parent, Supplier<T> convention, long duration) {
-        this.parent = parent;
-        this.convention = convention;
-        this.duration = duration;
-        setAs(convention.get());
-    }
+public enum FavoriteAddWidgetMode {
+    ALWAYS_INVISIBLE,
+    AUTO_HIDE,
+    ALWAYS_VISIBLE,
+    ;
     
     @Override
-    public ValueAnimator<T> setTo(T value, long duration) {
-        return parent.setTo(value, duration);
-    }
-    
-    @Override
-    public T target() {
-        return convention.get();
-    }
-    
-    @Override
-    public T value() {
-        return parent.value();
-    }
-    
-    @Override
-    public void update(double delta) {
-        parent.update(delta);
-        T target = target();
-        if (!Objects.equals(parent.target(), target)) {
-            setTo(target, duration);
-        }
+    public String toString() {
+        return I18n.get("config.roughlyenoughitems.layout.favoriteAddWidgetMode." + name().toLowerCase(Locale.ROOT));
     }
 }

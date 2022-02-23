@@ -30,37 +30,31 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.runtime.IIngredientListOverlay;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @ExtensionMethod(JEIPluginDetector.class)
 public enum JEIIngredientListOverlay implements IIngredientListOverlay {
     INSTANCE;
     
-    @Nullable
-    public Object getIngredientUnderMouse() {
-        if (!REIRuntime.getInstance().isOverlayVisible()) return null;
+    @Override
+    public Optional<ITypedIngredient<?>> getIngredientUnderMouse() {
+        if (!REIRuntime.getInstance().isOverlayVisible()) return Optional.empty();
         ScreenOverlay overlay = REIRuntime.getInstance().getOverlay().get();
         EntryStack<?> stack = overlay.getEntryList().getFocusedStack();
-        if (stack.isEmpty()) return null;
-        return stack.jeiValue();
+        return stack.typedJeiValueOpWild();
     }
     
     @Override
     @Nullable
     public <T> T getIngredientUnderMouse(@NotNull IIngredientType<T> ingredientType) {
-        Object underMouse = getIngredientUnderMouse();
-        if (underMouse == null) {
-            return null;
-        }
-        if (ingredientType.getIngredientClass().isInstance(underMouse.getClass())) {
-            return (T) underMouse;
-        }
-        return null;
+        return getIngredientUnderMouse().flatMap(ingredient -> ingredient.getIngredient(ingredientType)).orElse(null);
     }
     
     @Override

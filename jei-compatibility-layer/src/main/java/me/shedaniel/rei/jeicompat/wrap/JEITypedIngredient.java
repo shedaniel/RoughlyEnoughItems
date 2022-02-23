@@ -21,50 +21,38 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.gui.animator;
+package me.shedaniel.rei.jeicompat.wrap;
 
-import org.jetbrains.annotations.ApiStatus;
+import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.ingredients.ITypedIngredient;
 
-@ApiStatus.Internal
-abstract class ValueAnimatorAsNumberAnimator<T extends Number> extends NumberAnimator<T> {
-    private final ValueAnimator<T> animator;
+import java.util.Optional;
+
+public class JEITypedIngredient<T> implements ITypedIngredient<T> {
+    private final IIngredientType<T> type;
+    private final T ingredient;
     
-    ValueAnimatorAsNumberAnimator(ValueAnimator<T> animator) {
-        this.animator = animator;
+    public JEITypedIngredient(IIngredientType<T> type, T ingredient) {
+        this.type = type;
+        this.ingredient = ingredient;
     }
     
     @Override
-    public int intValue() {
-        return animator.value().intValue();
+    public IIngredientType<T> getType() {
+        return type;
     }
     
     @Override
-    public long longValue() {
-        return animator.value().longValue();
+    public T getIngredient() {
+        return ingredient;
     }
     
     @Override
-    public float floatValue() {
-        return animator.value().floatValue();
-    }
-    
-    @Override
-    public double doubleValue() {
-        return animator.value().doubleValue();
-    }
-    
-    @Override
-    public T value() {
-        return animator.value();
-    }
-    
-    @Override
-    public T target() {
-        return animator.target();
-    }
-    
-    @Override
-    public void update(double delta) {
-        animator.update(delta);
+    public <V> Optional<V> getIngredient(IIngredientType<V> ingredientType) {
+        if (ingredient == null) return Optional.empty();
+        if (ingredientType.getIngredientClass().isInstance(ingredient.getClass())) {
+            return Optional.ofNullable((V) ingredient);
+        }
+        return Optional.empty();
     }
 }

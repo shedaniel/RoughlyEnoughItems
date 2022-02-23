@@ -8,7 +8,7 @@ import java.util.List;
  * Helper class for getting colors for sprites for purposes of implementing {@link mezz.jei.api.ingredients.IIngredientHelper#getColors(Object)}.
  * Get an instance from {@link mezz.jei.api.registration.IModIngredientRegistration#getColorHelper()}
  *
- * @since JEI 7.6.3
+ * @since 7.6.3
  */
 public interface IColorHelper {
     

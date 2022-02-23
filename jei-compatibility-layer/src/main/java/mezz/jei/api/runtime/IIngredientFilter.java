@@ -7,7 +7,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.List;
 
 /**
- * The IIngredientFilter is JEI's filter that can be set by players or controlled by mods.
+ * The {@link IIngredientFilter} is JEI's filter that can be set by players or controlled by mods.
  * Use this interface to get information from and interact with it.
  * Get the instance from {@link IJeiRuntime#getIngredientFilter()}.
  */

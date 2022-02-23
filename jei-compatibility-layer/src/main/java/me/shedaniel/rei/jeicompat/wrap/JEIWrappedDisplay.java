@@ -24,114 +24,53 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import lombok.experimental.ExtensionMethod;
+import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
+import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.api.recipe.category.IRecipeCategory;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @ExtensionMethod(JEIPluginDetector.class)
 public class JEIWrappedDisplay<T> implements Display {
     private final JEIWrappedCategory<T> backingCategory;
     private final T backingRecipe;
-    private final List<EntryIngredient> compiledInput = new ArrayList<>();
-    private final List<EntryIngredient> compiledOutputs = new ArrayList<>();
-    private final IIngredients ingredients;
+    private List<EntryIngredient> compiledInput;
+    private List<EntryIngredient> compiledOutputs;
+    private JEIIngredients ingredients = null;
     
     public JEIWrappedDisplay(JEIWrappedCategory<T> backingCategory, T backingRecipe) {
         this.backingCategory = backingCategory;
         this.backingRecipe = backingRecipe;
-        this.ingredients = createIngredients();
-        backingCategory.getBackingCategory().setIngredients(this.backingRecipe, ingredients);
-        compileIngredients(ingredients, compiledInput, compiledOutputs);
     }
     
-    private static class JEIIngredients implements IIngredients {
-        Map<IIngredientType<?>, List<? extends List<?>>> inputs = new HashMap<>();
-        Map<IIngredientType<?>, List<? extends List<?>>> outputs = new HashMap<>();
-        
-        @Override
-        public void setInputIngredients(@NotNull List<Ingredient> inputs) {
-            this.setInputLists(VanillaTypes.ITEM, CollectionUtils.map(inputs, ingredient -> Arrays.asList(ingredient.getItems())));
-        }
-        
-        @Override
-        public <R> void setInput(@NotNull IIngredientType<R> ingredientType, @NotNull R input) {
-            List<List<R>> ingredient = (List<List<R>>) inputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
-            ingredient.add(Collections.singletonList(input));
-        }
-        
-        @Override
-        public <R> void setInputs(@NotNull IIngredientType<R> ingredientType, @NotNull List<R> input) {
-            List<List<R>> ingredient = (List<List<R>>) inputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
-            ingredient.addAll(CollectionUtils.map(input, Collections::singletonList));
-        }
-        
-        @Override
-        public <R> void setInputLists(@NotNull IIngredientType<R> ingredientType, @NotNull List<List<R>> input) {
-            List<List<R>> ingredient = (List<List<R>>) inputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
-            ingredient.addAll(input);
-        }
-        
-        @Override
-        public <R> void setOutput(@NotNull IIngredientType<R> ingredientType, @NotNull R output) {
-            List<List<R>> ingredient = (List<List<R>>) outputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
-            ingredient.add(Collections.singletonList(output));
-        }
-        
-        @Override
-        public <R> void setOutputs(@NotNull IIngredientType<R> ingredientType, @NotNull List<R> output) {
-            List<List<R>> ingredient = (List<List<R>>) outputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
-            ingredient.addAll(CollectionUtils.map(output, Collections::singletonList));
-        }
-        
-        @Override
-        public <R> void setOutputLists(@NotNull IIngredientType<R> ingredientType, @NotNull List<List<R>> output) {
-            List<List<R>> ingredient = (List<List<R>>) outputs.computeIfAbsent(ingredientType, e -> new ArrayList<>());
-            ingredient.addAll(output);
-        }
-        
-        @Override
-        @NotNull
-        public <R> List<List<R>> getInputs(@NotNull IIngredientType<R> ingredientType) {
-            return (List<List<R>>) inputs.getOrDefault(ingredientType, Collections.emptyList());
-        }
-        
-        @Override
-        @NotNull
-        public <R> List<List<R>> getOutputs(@NotNull IIngredientType<R> ingredientType) {
-            return (List<List<R>>) outputs.getOrDefault(ingredientType, Collections.emptyList());
-        }
-    }
-    
-    public static IIngredients createIngredients() {
+    public static JEIIngredients createIngredients() {
         return new JEIIngredients();
     }
     
-    public static void compileIngredients(IIngredients ingredients, List<EntryIngredient> compiledInput, List<EntryIngredient> compiledOutputs) {
-        for (Map.Entry<IIngredientType<?>, List<? extends List<?>>> entry : ((JEIIngredients) ingredients).inputs.entrySet()) {
-            for (List<?> slot : entry.getValue()) {
-                compiledInput.add(((IIngredientType<Object>) entry.getKey()).unwrapList((List<Object>) slot));
-            }
+    public IIngredients getLegacyIngredients() {
+        if (ingredients == null) {
+            this.ingredients = createIngredients();
+            backingCategory.getBackingCategory().setIngredients(this.backingRecipe, ingredients);
+            this.compiledInput = new ArrayList<>();
+            this.compiledOutputs = new ArrayList<>();
+            ingredients.compileIngredients(compiledInput, compiledOutputs);
         }
         
-        for (Map.Entry<IIngredientType<?>, List<? extends List<?>>> entry : ((JEIIngredients) ingredients).outputs.entrySet()) {
-            for (List<?> slot : entry.getValue()) {
-                compiledOutputs.add(((IIngredientType<Object>) entry.getKey()).unwrapList((List<Object>) slot));
-            }
-        }
-    }
-    
-    public IIngredients getIngredients() {
         return ingredients;
     }
     
@@ -150,12 +89,60 @@ public class JEIWrappedDisplay<T> implements Display {
     
     @Override
     public List<EntryIngredient> getInputEntries() {
-        return compiledInput;
+        return compiledInput != null ? compiledInput : computeInput();
+    }
+    
+    public static List<IFocus<?>> getFoci() {
+        ViewSearchBuilder context = Views.getInstance().getContext();
+        List<IFocus<?>> foci = new ArrayList<>();
+        if (context != null) {
+            for (EntryStack<?> stack : context.getUsagesFor()) {
+                if (stack != null && !stack.isEmpty()) {
+                    foci.add(new JEIFocus<>(RecipeIngredientRole.INPUT, stack.typedJeiValue()));
+                }
+            }
+            for (EntryStack<?> stack : context.getRecipesFor()) {
+                if (stack != null && !stack.isEmpty()) {
+                    foci.add(new JEIFocus<>(RecipeIngredientRole.OUTPUT, stack.typedJeiValue()));
+                }
+            }
+        } else if (Minecraft.getInstance().screen instanceof DisplayScreen) {
+            DisplayScreen screen = (DisplayScreen) Minecraft.getInstance().screen;
+            List<EntryStack<?>> notice = screen.getIngredientsToNotice();
+            for (EntryStack<?> stack : notice) {
+                if (stack != null && !stack.isEmpty()) {
+                    foci.add(new JEIFocus<>(RecipeIngredientRole.INPUT, stack.typedJeiValue()));
+                }
+            }
+            notice = screen.getResultsToNotice();
+            for (EntryStack<?> stack : notice) {
+                if (stack != null && !stack.isEmpty()) {
+                    foci.add(new JEIFocus<>(RecipeIngredientRole.OUTPUT, stack.typedJeiValue()));
+                }
+            }
+        }
+        return foci;
+    }
+    
+    private List<EntryIngredient> compute(RecipeIngredientRole role) {
+        JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder();
+        builder.rolePredicate = role::equals;
+        IRecipeCategory<T> category = getBackingCategory().getBackingCategory();
+        category.setRecipe(builder, getBackingRecipe(), getFoci());
+        return CollectionUtils.map(builder.slots, slot -> EntryIngredient.of(slot.slot.getEntries()));
+    }
+    
+    private List<EntryIngredient> computeInput() {
+        return compute(RecipeIngredientRole.INPUT);
+    }
+    
+    private List<EntryIngredient> computeOutput() {
+        return compute(RecipeIngredientRole.OUTPUT);
     }
     
     @Override
     public List<EntryIngredient> getOutputEntries() {
-        return compiledOutputs;
+        return compiledOutputs != null ? compiledOutputs : computeOutput();
     }
     
     @Override

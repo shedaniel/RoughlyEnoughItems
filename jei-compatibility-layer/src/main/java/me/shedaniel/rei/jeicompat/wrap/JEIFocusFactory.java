@@ -23,14 +23,24 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import lombok.experimental.ExtensionMethod;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
+import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IFocusFactory;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 
+@ExtensionMethod(JEIPluginDetector.class)
 public enum JEIFocusFactory implements IFocusFactory {
     INSTANCE;
     
     @Override
+    public <V> IFocus<V> createFocus(RecipeIngredientRole role, IIngredientType<V> ingredientType, V ingredient) {
+        return new JEIFocus<>(role, new JEITypedIngredient<>(ingredientType, ingredient));
+    }
+    
+    @Override
     public <V> IFocus<V> createFocus(IFocus.Mode mode, V ingredient) {
-        return new JEIFocus<>(mode, ingredient);
+        return new JEIFocus<>(mode.toRole(), new JEITypedIngredient<>(ingredient.unwrapType().<V>cast().getDefinition().jeiType(), ingredient));
     }
 }

@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategoryView;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -51,10 +52,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 public abstract class AbstractDisplayViewingScreen extends Screen implements DisplayScreen {
@@ -97,11 +95,13 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     
     @Override
     public void addIngredientToNotice(EntryStack<?> stack) {
+        if (stack == null) return;
         this.ingredientStackToNotice.add(stack);
     }
     
     @Override
     public void addResultToNotice(EntryStack<?> stack) {
+        if (stack == null) return;
         this.resultStackToNotice.add(stack);
     }
     
@@ -163,6 +163,18 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                         widget.entry(stack);
                         break;
                     }
+                }
+            }
+        }
+    }
+    
+    protected void transformFiltering(List<? extends GuiEventListener> setupDisplay) {
+        for (EntryWidget widget : Widgets.<EntryWidget>walk(setupDisplay, EntryWidget.class::isInstance)) {
+            if (widget.getEntries().size() > 1) {
+                Collection<EntryStack<?>> refiltered = EntryRegistry.getInstance().refilterNew(widget.getEntries());
+                if (!refiltered.isEmpty()) {
+                    widget.clearStacks();
+                    widget.entries(refiltered);
                 }
             }
         }

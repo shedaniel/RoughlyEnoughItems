@@ -37,6 +37,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
 import mezz.jei.api.gui.IRecipeLayoutDrawable;
+import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IRecipeManager;
 import mezz.jei.api.recipe.category.IRecipeCategory;
@@ -70,13 +71,35 @@ public enum JEIRecipeManager implements IRecipeManager {
     }
     
     @Override
+    public <T> List<T> getRecipes(IRecipeCategory<T> recipeCategory, List<? extends IFocus<?>> focuses, boolean includeHidden) {
+        if (focuses != null && !focuses.isEmpty()) throw TODO();
+        return JEIPluginDetector.wrapRecipes(recipeCategory.getUid().categoryId(), !includeHidden);
+    }
+    
+    @Override
+    public List<ITypedIngredient<?>> getRecipeCatalystsTyped(IRecipeCategory<?> recipeCategory, boolean includeHidden) {
+        List<ITypedIngredient<?>> objects = new ArrayList<>();
+        for (EntryIngredient stacks : CategoryRegistry.getInstance().get(recipeCategory.getUid().categoryId()).getWorkstations()) {
+            objects.addAll(CollectionUtils.map(stacks, JEIPluginDetector::typedJeiValue));
+        }
+        return objects;
+    }
+    
+    @Override
     public <V> IFocus<V> createFocus(IFocus.Mode mode, V ingredient) {
-        return new JEIFocus<>(mode, ingredient);
+        return JEIFocusFactory.INSTANCE.createFocus(mode, ingredient);
     }
     
     @Override
     public <V> List<IRecipeCategory<?>> getRecipeCategories(@Nullable IFocus<V> focus, boolean includeHidden) {
         if (focus != null) throw TODO();
+        return CollectionUtils.filterAndMap(CategoryRegistry.getInstance(), config -> includeHidden || CategoryRegistry.getInstance().isCategoryVisible(config.getCategory()),
+                config -> new JEIUnwrappedCategory<>(config.getCategory()));
+    }
+    
+    @Override
+    public List<IRecipeCategory<?>> getRecipeCategories(Collection<? extends IFocus<?>> focuses, boolean includeHidden) {
+        if (focuses != null && !focuses.isEmpty()) throw TODO();
         return CollectionUtils.filterAndMap(CategoryRegistry.getInstance(), config -> includeHidden || CategoryRegistry.getInstance().isCategoryVisible(config.getCategory()),
                 config -> new JEIUnwrappedCategory<>(config.getCategory()));
     }

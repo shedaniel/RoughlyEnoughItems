@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.impl.client.gui.widget.EntryStacksRegionWidget;
 
 public class RegionDraggableStack<T extends RegionEntry<T>> implements DraggableStack {
     private RealRegionEntry<T> entry;
@@ -52,7 +53,7 @@ public class RegionDraggableStack<T extends RegionEntry<T>> implements Draggable
     public void drag() {
         if (showcaseWidget == null && entry.region.listener.removeOnDrag()) {
             previousIndex = entry.region.indexOf(entry);
-            entry.region.remove(entry);
+            entry.region.remove(entry, EntryStacksRegionWidget.RemovalMode.MIGRATED);
         }
     }
     
@@ -77,6 +78,8 @@ public class RegionDraggableStack<T extends RegionEntry<T>> implements Draggable
             } else {
                 entry.region.drop(entry);
             }
+        } else {
+            entry.region.listener.onConsumed(entry);
         }
     }
     

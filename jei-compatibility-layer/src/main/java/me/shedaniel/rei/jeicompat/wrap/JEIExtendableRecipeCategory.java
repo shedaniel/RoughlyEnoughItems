@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -38,7 +39,6 @@ import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
-import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.category.extensions.IExtendableRecipeCategory;
 import mezz.jei.api.recipe.category.extensions.IRecipeCategoryExtension;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -103,10 +103,7 @@ public class JEIExtendableRecipeCategory<T, D extends Display, W extends IRecipe
             List<Widget> widgets = new ArrayList<>();
             
             if (category instanceof JEIWrappedCategory) {
-                IIngredients ingredients = JEIWrappedDisplay.createIngredients();
-                this.extension.setIngredients(ingredients);
-                
-                widgets.addAll(JEIWrappedCategory.setupDisplay(((JEIWrappedCategory<R>) category).getBackingCategory(), origin, ingredients, bounds, ((JEIWrappedCategory<?>) category).background));
+                widgets.addAll(JEIWrappedCategory.setupDisplay(((JEIWrappedCategory<R>) category).getBackingCategory(), (JEIWrappedDisplay<R>) display, JEIWrappedDisplay.getFoci(), bounds, ((JEIWrappedCategory<?>) category).background));
             } else {
                 widgets.addAll(this.lastView.setupDisplay(display, bounds));
             }
@@ -151,7 +148,14 @@ public class JEIExtendableRecipeCategory<T, D extends Display, W extends IRecipe
                 
                 @Override
                 public boolean mouseClicked(double d, double e, int i) {
-                    return extension.handleClick(d - bounds.x, e - bounds.y, i) || super.mouseClicked(d, e, i);
+                    return extension.handleInput(d - bounds.x, e - bounds.y, InputConstants.Type.MOUSE.getOrCreate(i)) || super.mouseClicked(d, e, i);
+                }
+                
+                @Override
+                public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+                    double d = PointHelper.getMouseFloatingX();
+                    double e = PointHelper.getMouseFloatingY();
+                    return extension.handleInput(d - bounds.x - 4, e - bounds.y - 4, InputConstants.getKey(keyCode, scanCode)) || super.keyPressed(keyCode, scanCode, modifiers);
                 }
             });
             

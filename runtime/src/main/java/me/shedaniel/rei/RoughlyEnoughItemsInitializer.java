@@ -27,13 +27,19 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.fabricmc.api.EnvType;
 
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class RoughlyEnoughItemsInitializer {
+    public static final String COMPATIBLE_MC_VERSION = "1.18";
+    
     public static void onInitialize() {
         RoughlyEnoughItemsState.env = isClient() ? EnvType.CLIENT : EnvType.SERVER;
         RoughlyEnoughItemsState.isDev = isDev();
+        
+        if (getMinecraftVersion().startsWith("1.") && !getMinecraftVersion().startsWith(COMPATIBLE_MC_VERSION)) {
+            RoughlyEnoughItemsState.error("Your current REI version (for " + COMPATIBLE_MC_VERSION + ") is not compatible with your current Minecraft version (" + getMinecraftVersion() + ").");
+        }
+        
         checkMods();
         
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
@@ -93,6 +99,11 @@ public class RoughlyEnoughItemsInitializer {
     
     @ExpectPlatform
     public static void checkMods() {
+        throw new AssertionError();
+    }
+    
+    @ExpectPlatform
+    public static String getMinecraftVersion() {
         throw new AssertionError();
     }
 }

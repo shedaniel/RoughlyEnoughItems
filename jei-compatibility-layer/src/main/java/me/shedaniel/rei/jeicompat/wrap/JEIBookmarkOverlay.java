@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.runtime.IBookmarkOverlay;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,15 +41,18 @@ public enum JEIBookmarkOverlay implements IBookmarkOverlay {
     INSTANCE;
     
     @Override
-    @Nullable
-    public <T> T getIngredientUnderMouse(IIngredientType<T> ingredientType) {
-        if (!REIRuntime.getInstance().isOverlayVisible()) return null;
+    public Optional<ITypedIngredient<?>> getIngredientUnderMouse() {
+        if (!REIRuntime.getInstance().isOverlayVisible()) return Optional.empty();
         ScreenOverlay overlay = REIRuntime.getInstance().getOverlay().get();
         Optional<OverlayListWidget> favoritesList = overlay.getFavoritesList();
-        if (!favoritesList.isPresent()) return null;
+        if (!favoritesList.isPresent()) return Optional.empty();
         EntryStack<?> stack = favoritesList.get().getFocusedStack();
-        if (stack.isEmpty()) return null;
-        if (stack.getType() != ingredientType.unwrapType()) return null;
-        return stack.<T>cast().jeiValue();
+        return stack.typedJeiValueOpWild();
+    }
+    
+    @Override
+    @Nullable
+    public <T> T getIngredientUnderMouse(IIngredientType<T> ingredientType) {
+        return getIngredientUnderMouse().flatMap(ingredient -> ingredient.getIngredient(ingredientType)).orElse(null);
     }
 }

@@ -185,8 +185,12 @@ public final class Widgets {
     }
     
     public static WidgetWithBounds wrapRenderer(Rectangle bounds, Renderer renderer) {
+        return wrapRenderer(() -> bounds, renderer);
+    }
+    
+    public static WidgetWithBounds wrapRenderer(Supplier<Rectangle> bounds, Renderer renderer) {
         if (renderer instanceof Widget widget)
-            return wrapWidgetWithBounds(widget, bounds);
+            return wrapWidgetWithBoundsSupplier(widget, bounds);
         return new RendererWrappedWidget(renderer, bounds);
     }
     
@@ -195,6 +199,10 @@ public final class Widgets {
     }
     
     public static WidgetWithBounds wrapWidgetWithBounds(Widget widget, Rectangle bounds) {
+        return wrapWidgetWithBoundsSupplier(widget, bounds == null ? null : () -> bounds);
+    }
+    
+    public static WidgetWithBounds wrapWidgetWithBoundsSupplier(Widget widget, Supplier<Rectangle> bounds) {
         if (widget instanceof WidgetWithBounds withBounds)
             return withBounds;
         if (bounds == null)
@@ -204,9 +212,9 @@ public final class Widgets {
     
     private static class RendererWrappedWidget extends WidgetWithBounds {
         private final Renderer renderer;
-        private final Rectangle bounds;
+        private final Supplier<Rectangle> bounds;
         
-        public RendererWrappedWidget(Renderer renderer, Rectangle bounds) {
+        public RendererWrappedWidget(Renderer renderer, Supplier<Rectangle> bounds) {
             this.renderer = Objects.requireNonNull(renderer);
             this.bounds = Objects.requireNonNull(bounds);
         }
@@ -235,21 +243,21 @@ public final class Widgets {
         
         @Override
         public Rectangle getBounds() {
-            return bounds;
+            return bounds.get();
         }
     }
     
     private static class DelegateWidgetWithBounds extends DelegateWidget {
-        private final Rectangle bounds;
+        private final Supplier<Rectangle> bounds;
         
-        public DelegateWidgetWithBounds(Widget widget, Rectangle bounds) {
+        public DelegateWidgetWithBounds(Widget widget, Supplier<Rectangle> bounds) {
             super(widget);
             this.bounds = bounds;
         }
         
         @Override
         public Rectangle getBounds() {
-            return bounds;
+            return bounds.get();
         }
     }
     

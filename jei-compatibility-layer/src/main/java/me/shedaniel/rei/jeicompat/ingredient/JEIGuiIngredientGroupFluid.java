@@ -23,26 +23,26 @@
 
 package me.shedaniel.rei.jeicompat.ingredient;
 
-import dev.architectury.utils.value.Value;
-import me.shedaniel.rei.api.client.gui.widgets.Slot;
+import me.shedaniel.rei.jeicompat.wrap.JEIRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiFluidStackGroup;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 public class JEIGuiIngredientGroupFluid extends JEIGuiIngredientGroup<FluidStack> implements IGuiFluidStackGroup {
-    public JEIGuiIngredientGroupFluid(IIngredientType<FluidStack> type, Value<IDrawable> background) {
-        super(type, background);
+    public JEIGuiIngredientGroupFluid(IIngredientType<FluidStack> type, JEIRecipeLayoutBuilder builder) {
+        super(type, builder);
     }
     
     @Override
     public void init(int slotIndex, boolean input, int xPosition, int yPosition, int width, int height, int capacityMb, boolean showCapacity, @Nullable IDrawable overlay) {
         SlotWrapper slot = getSlot(slotIndex);
-        slot.slot.setNoticeMark(input ? Slot.INPUT : Slot.OUTPUT);
-        slot.slot.getBounds().setLocation(xPosition - 1, yPosition - 1);
-        slot.slot.getBounds().setSize(width + 2, height + 2);
-        slot.fluidCapacity = capacityMb;
-        slot.overlay = overlay;
+        slot.slot.role = input ? RecipeIngredientRole.INPUT : RecipeIngredientRole.OUTPUT;
+        slot.slot.slot.getBounds().setLocation(xPosition - 1, yPosition - 1);
+        slot.slot.slot.getBounds().setSize(width + 2, height + 2);
+        slot.slot.capacityMb = capacityMb;
+        slot.slot.setOverlay(overlay, 0, 0);
     }
 }

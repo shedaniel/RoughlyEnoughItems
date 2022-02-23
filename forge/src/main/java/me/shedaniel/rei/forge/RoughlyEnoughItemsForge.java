@@ -27,6 +27,8 @@ import me.shedaniel.rei.RoughlyEnoughItemsInitializer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.data.loading.DatagenModLoader;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.IExtensionPoint;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -34,6 +36,7 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Internal
 public class RoughlyEnoughItemsForge {
     public RoughlyEnoughItemsForge() {
+        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "", (a, b) -> true));
         if (!DatagenModLoader.isRunningDataGen()) {
             RoughlyEnoughItemsInitializer.onInitialize();
             DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> RoughlyEnoughItemsInitializer::onInitializeClient);
