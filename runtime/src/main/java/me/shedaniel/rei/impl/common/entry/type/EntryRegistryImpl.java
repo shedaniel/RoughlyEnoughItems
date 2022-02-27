@@ -197,7 +197,7 @@ public class EntryRegistryImpl implements EntryRegistry {
                 int index = entries.lastIndexOf(afterEntry);
                 entries.add(index, stack);
             } else entries.add(stack);
-            preFilteredList.addAll(refilterNew(Collections.singletonList(stack)));
+            preFilteredList.addAll(refilterNew(true, Collections.singletonList(stack)));
             queueSearchUpdate();
         }
     }
@@ -216,7 +216,7 @@ public class EntryRegistryImpl implements EntryRegistry {
                 int index = entries.lastIndexOf(afterEntry);
                 entries.addAll(index, filtered);
             } else entries.addAll(filtered);
-            preFilteredList.addAll(refilterNew(filtered));
+            preFilteredList.addAll(refilterNew(true, filtered));
             queueSearchUpdate();
         }
     }
@@ -231,8 +231,8 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @ApiStatus.Internal
     @Override
-    public Collection<EntryStack<?>> refilterNew(Collection<EntryStack<?>> entries) {
-        if (lastRefilterWarning != null) {
+    public Collection<EntryStack<?>> refilterNew(boolean warn, Collection<EntryStack<?>> entries) {
+        if (lastRefilterWarning != null && warn) {
             if (lastRefilterWarning.getValue() > 0 && System.currentTimeMillis() - lastRefilterWarning.getValue() > 5000) {
                 RoughlyEnoughItemsCore.LOGGER.warn("Detected runtime EntryRegistry modification, this can be extremely dangerous, or be extremely inefficient!");
             }

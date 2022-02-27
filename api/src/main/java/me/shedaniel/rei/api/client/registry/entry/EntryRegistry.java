@@ -153,7 +153,7 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
     
     // TODO Re-evaluate the need for this
     @ApiStatus.Internal
-    Collection<EntryStack<?>> refilterNew(Collection<EntryStack<?>> entries);
+    Collection<EntryStack<?>> refilterNew(boolean warn, Collection<EntryStack<?>> entries);
     
     /**
      * Checks if a stack is already registered.
