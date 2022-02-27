@@ -86,8 +86,10 @@ public class JEIDisplaySetup {
         // Legacy code
         JEIRecipeLayout<T> layout = new JEIRecipeLayout<>(builder);
         IIngredients ingredients = display.getLegacyIngredients();
-        category.setRecipe(layout, display.getBackingRecipe(), ingredients);
-        applyLegacyTooltip(result, layout);
+        if (ingredients != null) {
+            category.setRecipe(layout, display.getBackingRecipe(), ingredients);
+            applyLegacyTooltip(result, layout);
+        }
         result.setSlots(builder.slots);
         return result;
     }
@@ -100,7 +102,7 @@ public class JEIDisplaySetup {
                     
                     if (ingredient.isPresent()) {
                         for (ITooltipCallback callback : group.tooltipCallbacks) {
-                            callback.onTooltip(wrapper.index, wrapper.slot.role == RecipeIngredientRole.INPUT, ingredient.get(), tooltip);
+                            callback.onTooltip(wrapper.index, wrapper.slot.role == RecipeIngredientRole.INPUT || wrapper.slot.role == RecipeIngredientRole.CATALYST, ingredient.get(), tooltip);
                         }
                     }
                 });
@@ -120,7 +122,7 @@ public class JEIDisplaySetup {
                 
                 RecipeIngredientRole role = slot.role;
                 
-                if (role == RecipeIngredientRole.INPUT) {
+                if (role == RecipeIngredientRole.INPUT || role == RecipeIngredientRole.CATALYST) {
                     slot.slot.markInput();
                 } else if (role == RecipeIngredientRole.OUTPUT) {
                     slot.slot.markOutput();

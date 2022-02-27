@@ -42,6 +42,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,21 +57,30 @@ public class JEIWrappedDisplay<T> implements Display {
     public JEIWrappedDisplay(JEIWrappedCategory<T> backingCategory, T backingRecipe) {
         this.backingCategory = backingCategory;
         this.backingRecipe = backingRecipe;
+        this.cache();
     }
     
-    public static JEIIngredients createIngredients() {
-        return new JEIIngredients();
+    public void cache() {
+        JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder();
+        IRecipeCategory<T> category = getBackingCategory().getBackingCategory();
+        category.setRecipe(builder, getBackingRecipe(), getFoci());
+        
+        if (builder.isDirty()) {
+            this.compiledInput = CollectionUtils.filterAndMap(builder.slots, role -> role.role == RecipeIngredientRole.INPUT || role.role == RecipeIngredientRole.CATALYST,
+                    slot -> EntryIngredient.of(slot.slot.getEntries()));
+            this.compiledOutputs = CollectionUtils.filterAndMap(builder.slots, role -> role.role == RecipeIngredientRole.OUTPUT,
+                    slot -> EntryIngredient.of(slot.slot.getEntries()));
+            return;
+        }
+        
+        this.ingredients = new JEIIngredients();
+        backingCategory.getBackingCategory().setIngredients(this.backingRecipe, ingredients);
+        this.compiledInput = new ArrayList<>();
+        this.compiledOutputs = new ArrayList<>();
+        ingredients.compileIngredients(compiledInput, compiledOutputs);
     }
     
     public IIngredients getLegacyIngredients() {
-        if (ingredients == null) {
-            this.ingredients = createIngredients();
-            backingCategory.getBackingCategory().setIngredients(this.backingRecipe, ingredients);
-            this.compiledInput = new ArrayList<>();
-            this.compiledOutputs = new ArrayList<>();
-            ingredients.compileIngredients(compiledInput, compiledOutputs);
-        }
-        
         return ingredients;
     }
     
@@ -85,11 +95,6 @@ public class JEIWrappedDisplay<T> implements Display {
     @Override
     public CategoryIdentifier<?> getCategoryIdentifier() {
         return this.backingCategory.getCategoryIdentifier();
-    }
-    
-    @Override
-    public List<EntryIngredient> getInputEntries() {
-        return compiledInput != null ? compiledInput : computeInput();
     }
     
     public static List<IFocus<?>> getFoci() {
@@ -124,25 +129,14 @@ public class JEIWrappedDisplay<T> implements Display {
         return foci;
     }
     
-    private List<EntryIngredient> compute(RecipeIngredientRole role) {
-        JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder();
-        builder.rolePredicate = role::equals;
-        IRecipeCategory<T> category = getBackingCategory().getBackingCategory();
-        category.setRecipe(builder, getBackingRecipe(), getFoci());
-        return CollectionUtils.map(builder.slots, slot -> EntryIngredient.of(slot.slot.getEntries()));
-    }
-    
-    private List<EntryIngredient> computeInput() {
-        return compute(RecipeIngredientRole.INPUT);
-    }
-    
-    private List<EntryIngredient> computeOutput() {
-        return compute(RecipeIngredientRole.OUTPUT);
+    @Override
+    public List<EntryIngredient> getInputEntries() {
+        return compiledInput != null ? compiledInput : Collections.emptyList();
     }
     
     @Override
     public List<EntryIngredient> getOutputEntries() {
-        return compiledOutputs != null ? compiledOutputs : computeOutput();
+        return compiledOutputs != null ? compiledOutputs : Collections.emptyList();
     }
     
     @Override
