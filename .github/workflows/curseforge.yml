@@ -27,7 +27,7 @@ jobs:
         with:
           java-version: 17
       - name: Upload to CurseForge
-        run: ./gradlew build publish forge:curseforge fabric:curseforge jei-internals-workaround:curseforge --stacktrace
+        run: ./gradlew build publish fabric:curseforge --stacktrace
         env:
           danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
           BRANCH_NAME: ${{ github.ref }}
