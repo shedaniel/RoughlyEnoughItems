@@ -87,6 +87,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -507,26 +508,29 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         if (ignoreLastSearch) searchManager.markDirty();
         searchManager.updateFilter(searchTerm);
         if (searchManager.isDirty()) {
-            List<EntryStack<?>> list = searchManager.get();
-            EntryPanelOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
-            if (ordering == EntryPanelOrdering.NAME)
-                list.sort(ENTRY_NAME_COMPARER);
-            if (ordering == EntryPanelOrdering.GROUPS)
-                list.sort(ENTRY_GROUP_COMPARER);
-            if (!ConfigObject.getInstance().isItemListAscending()) {
-                Collections.reverse(list);
-            }
-            allStacks = list;
+            searchManager.getAsync(list -> {
+                list = new ArrayList<>(list);
+                EntryPanelOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
+                if (ordering == EntryPanelOrdering.NAME)
+                    list.sort(ENTRY_NAME_COMPARER);
+                if (ordering == EntryPanelOrdering.GROUPS)
+                    list.sort(ENTRY_GROUP_COMPARER);
+                if (!ConfigObject.getInstance().isItemListAscending()) {
+                    Collections.reverse(list);
+                }
+                allStacks = list;
+                
+                if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
+                    RoughlyEnoughItemsCore.LOGGER.info("Search Used: %s", stopwatch.stop().toString());
+                }
+                updateEntriesPosition();
+            });
         }
         debugTime = ConfigObject.getInstance().doDebugRenderTimeRequired();
         FavoritesListWidget favorites = ScreenOverlayImpl.getFavoritesListWidget();
         if (favorites != null) {
             favorites.updateSearch();
         }
-        if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
-            RoughlyEnoughItemsCore.LOGGER.info("Search Used: %s", stopwatch.stop().toString());
-        }
-        updateEntriesPosition();
     }
     
     public boolean matches(EntryStack<?> stack) {

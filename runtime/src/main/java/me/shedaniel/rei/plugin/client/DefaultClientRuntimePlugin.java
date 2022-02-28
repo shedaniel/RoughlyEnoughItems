@@ -90,6 +90,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         }
         REIRuntimeImpl.getInstance().addHintProvider(watcher);
         REIRuntimeImpl.getInstance().addHintProvider(new SearchBarHighlightWatcher());
+        REIRuntimeImpl.getInstance().addHintProvider(new SearchFilterPrepareWatcher());
     }
     
     @Override

@@ -25,27 +25,32 @@ package me.shedaniel.rei.impl.client.search.argument;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchMode;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.search.IntRange;
 import me.shedaniel.rei.impl.client.search.argument.type.AlwaysMatchingArgumentType;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentTypesRegistry;
 import me.shedaniel.rei.impl.client.search.result.ArgumentApplicableResult;
+import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Unit;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.mutable.Mutable;
-import org.apache.commons.lang3.mutable.MutableObject;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,6 +58,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -178,12 +187,11 @@ public class Argument<T, R> {
         if (!Objects.equals(lastLanguage.getAndSet(newLanguage), newLanguage)) {
             SEARCH_CACHE.clear();
         }
-        Mutable<?> mutable = new MutableObject<>();
         
         a:
         for (CompoundArgument arguments : compoundArguments) {
             for (AlternativeArgument argument : arguments) {
-                if (!matches(stack, argument, mutable)) {
+                if (!matches(stack, argument)) {
                     continue a;
                 }
             }
@@ -194,12 +202,12 @@ public class Argument<T, R> {
         return false;
     }
     
-    private static <T, R, Z, B> boolean matches(EntryStack<?> stack, AlternativeArgument alternativeArgument, Mutable<?> mutable) {
+    private static <T, R, Z, B> boolean matches(EntryStack<?> stack, AlternativeArgument alternativeArgument) {
         if (alternativeArgument.isEmpty()) return true;
         long hashExact = EntryStacks.hashExact(stack);
         
         for (Argument<?, ?> argument : alternativeArgument) {
-            if (matches((short) argument.getArgument().getIndex(), argument.getArgument(), mutable, stack, hashExact, argument.getText(), argument.filterData) == argument.isRegular()) {
+            if (matches(argument.getArgument(), stack, hashExact, argument.getText(), argument.filterData) == argument.isRegular()) {
                 return true;
             }
         }
@@ -207,18 +215,98 @@ public class Argument<T, R> {
         return false;
     }
     
-    private static <T, R, Z, B> boolean matches(short argumentIndex, ArgumentType<T, B> argumentType, Mutable<Z> data, EntryStack<?> stack, long hashExact, String filter, R filterData) {
+    private static Long2ObjectMap<Object> getSearchCache(ArgumentType<?, ?> argumentType) {
+        short argumentIndex = (short) argumentType.getIndex();
         Long2ObjectMap<Object> map = SEARCH_CACHE.get(argumentIndex);
         if (map == null) {
             SEARCH_CACHE.put(argumentIndex, map = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>()));
         }
-        Z value = (Z) map.get(hashExact);
-        data.setValue(value);
-        boolean matches = argumentType.matches((Mutable<B>) data, stack, filter, (T) filterData);
+        return map;
+    }
+    
+    private static <T, R, B> boolean matches(ArgumentType<T, B> argumentType, EntryStack<?> stack, long hashExact, String filter, R filterData) {
+        Long2ObjectMap<Object> map = getSearchCache(argumentType);
+        B value = (B) map.get(hashExact);
         if (value == null) {
-            map.put(hashExact, data.getValue());
+            value = argumentType.cacheData(stack);
+            map.put(hashExact, value);
         }
-        return matches;
+        return argumentType.matches(value, stack, filter, (T) filterData);
+    }
+    
+    public static Long prepareStart = null;
+    public static Collection<EntryStack<?>> prepareStacks = null;
+    public static MutablePair<Integer, Integer> prepareStage = null;
+    public static MutablePair<Integer, Integer>[] currentStages = null;
+    
+    public static void prepareFilter(Collection<EntryStack<?>> stacks, Collection<ArgumentType<?, ?>> argumentTypes) {
+        if (prepareStage != null || currentStages != null) return;
+        prepareStart = Util.getEpochMillis();
+        prepareStacks = stacks;
+        prepareStage = new MutablePair<>(0, argumentTypes.size());
+        currentStages = new MutablePair[argumentTypes.size()];
+        List<HashedEntryStackWrapper> hashedStacks = CollectionUtils.map(stacks, HashedEntryStackWrapper::new);
+        int searchPartitionSize = ConfigObject.getInstance().getAsyncSearchPartitionSize();
+        boolean async = ConfigObject.getInstance().shouldAsyncSearch() && stacks.size() > searchPartitionSize * 4;
+        List<CompletableFuture<Long2ObjectMap<Object>>> futures = Lists.newArrayList();
+        List<Pair<ArgumentType<?, ?>, CompletableFuture<Long2ObjectMap<Object>>>> pairs = Lists.newArrayList();
+        
+        for (ArgumentType<?, ?> argumentType : argumentTypes) {
+            prepareStage.setLeft(prepareStage.getLeft() + 1);
+            Long2ObjectMap<Object> map = getSearchCache(argumentType);
+            MutablePair<Integer, Integer> currentStage = currentStages[prepareStage.getLeft() - 1] = new MutablePair<>(0, hashedStacks.size());
+            
+            if (async) {
+                for (Collection<HashedEntryStackWrapper> partitionStacks : CollectionUtils.partition(hashedStacks, searchPartitionSize)) {
+                    CompletableFuture<Long2ObjectMap<Object>> future = CompletableFuture.supplyAsync(() -> {
+                        Long2ObjectMap<Object> out = new Long2ObjectArrayMap<>(searchPartitionSize + 1);
+                        for (HashedEntryStackWrapper stack : partitionStacks) {
+                            if (map.get(stack.hashExact()) == null) {
+                                Object data = argumentType.cacheData(stack.unwrap());
+                                
+                                if (data != null) {
+                                    out.put(stack.hashExact(), data);
+                                }
+                            }
+                        }
+                        return out;
+                    }).whenComplete((objectLong2ObjectMap, throwable) -> {
+                        currentStage.setLeft(currentStage.getLeft() + partitionStacks.size());
+                    });
+                    futures.add(future);
+                    pairs.add(Pair.of(argumentType, future));
+                }
+            } else {
+                for (HashedEntryStackWrapper stack : hashedStacks) {
+                    currentStage.setLeft(currentStage.getLeft() + 1);
+                    
+                    if (map.get(stack.hashExact()) == null) {
+                        Object data = argumentType.cacheData(stack.unwrap());
+                        
+                        if (data != null) {
+                            map.put(stack.hashExact(), data);
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (async) {
+            try {
+                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(10, TimeUnit.SECONDS);
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                e.printStackTrace();
+            }
+            for (Pair<ArgumentType<?, ?>, CompletableFuture<Long2ObjectMap<Object>>> pair : pairs) {
+                Long2ObjectMap<Object> now = pair.getRight().getNow(null);
+                if (now != null) getSearchCache(pair.getLeft()).putAll(now);
+            }
+        }
+    
+        prepareStart = null;
+        prepareStacks = null;
+        prepareStage = null;
+        currentStages = null;
     }
     
     public ArgumentType<?, ?> getArgument() {

@@ -32,7 +32,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
-import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -65,21 +64,19 @@ public final class IdentifierArgumentType extends ArgumentType<Unit, String> {
     }
     
     @Override
-    public boolean matches(Mutable<String> data, EntryStack<?> stack, String searchText, Unit filterData) {
-        if (data.getValue() == null) {
-            ResourceLocation identifier = stack.getIdentifier();
-            if (identifier == null) {
-                data.setValue(EMPTY);
-            } else {
-                String s = identifier.getPath();
-                if (s.isEmpty()) {
-                    data.setValue(EMPTY);
-                } else {
-                    data.setValue(s);
-                }
+    public String cacheData(EntryStack<?> stack) {
+        ResourceLocation identifier = stack.getIdentifier();
+        if (identifier != null) {
+            String s = identifier.getPath();
+            if (!s.isEmpty()) {
+                return s;
             }
         }
-        String identifier = data.getValue();
+        return EMPTY;
+    }
+    
+    @Override
+    public boolean matches(String identifier, EntryStack<?> stack, String searchText, Unit filterData) {
         return !identifier.isEmpty() && identifier.contains(searchText);
     }
     

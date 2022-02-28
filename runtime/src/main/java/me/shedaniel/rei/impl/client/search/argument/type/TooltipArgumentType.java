@@ -35,7 +35,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.Unit;
-import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,6 +45,7 @@ import java.util.Locale;
 @Environment(EnvType.CLIENT)
 public final class TooltipArgumentType extends ArgumentType<Unit, String> {
     public static final TooltipArgumentType INSTANCE = new TooltipArgumentType();
+    public static final String INVALID = "INVALID_PIECE_OF_TOOLTIP_I_DONT_THINK_PEOPLE_WILL_EXACTLY_HAVE_THIS_REI_REI_REI";
     private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xffe0ad));
     
     @Override
@@ -70,13 +70,16 @@ public final class TooltipArgumentType extends ArgumentType<Unit, String> {
     }
     
     @Override
-    public boolean matches(Mutable<String> data, EntryStack<?> stack, String searchText, Unit filterData) {
-        if (data.getValue() == null) {
-            String tooltip = tryGetEntryStackTooltip(stack, 0);
-            if (tooltip == null) return false;
-            data.setValue(tooltip.toLowerCase(Locale.ROOT));
-        }
-        String tooltip = data.getValue();
+    public String cacheData(EntryStack<?> stack) {
+        String tooltip = tryGetEntryStackTooltip(stack, 0);
+        if (tooltip == null) return INVALID;
+        return tooltip.toLowerCase(Locale.ROOT);
+    }
+    
+    @Override
+    public boolean matches(String tooltip, EntryStack<?> stack, String searchText, Unit filterData) {
+        //noinspection StringEquality
+        if (tooltip == INVALID) return false;
         return tooltip.isEmpty() || tooltip.contains(searchText);
     }
     
