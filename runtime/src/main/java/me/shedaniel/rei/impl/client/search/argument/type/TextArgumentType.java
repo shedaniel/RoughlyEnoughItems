@@ -28,7 +28,6 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Unit;
-import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,11 +55,12 @@ public final class TextArgumentType extends ArgumentType<Unit, String> {
     }
     
     @Override
-    public boolean matches(Mutable<String> data, EntryStack<?> stack, String searchText, Unit filterData) {
-        if (data.getValue() == null) {
-            data.setValue(stack.asFormatStrippedText().getString().toLowerCase(Locale.ROOT));
-        }
-        String value = data.getValue();
+    public String cacheData(EntryStack<?> stack) {
+        return stack.asFormatStrippedText().getString().toLowerCase(Locale.ROOT);
+    }
+    
+    @Override
+    public boolean matches(String value, EntryStack<?> stack, String searchText, Unit filterData) {
         return !value.isEmpty() && value.contains(searchText);
     }
     

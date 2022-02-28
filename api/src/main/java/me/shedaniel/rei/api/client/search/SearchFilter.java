@@ -27,6 +27,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
+import java.util.Collection;
 import java.util.function.Predicate;
 
 /**
@@ -70,4 +71,13 @@ public interface SearchFilter extends Predicate<EntryStack<?>> {
      * @return the original filter
      */
     String getFilter();
+    
+    /**
+     * Prepares the following stacks for matching, this could help to speed up the matching process.<br>
+     * However, this is not required.
+     *
+     * @param stacks the stacks to prepare
+     */
+    default void prepareFilter(Collection<EntryStack<?>> stacks) {
+    }
 }

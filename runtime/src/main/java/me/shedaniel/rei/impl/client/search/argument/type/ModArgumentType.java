@@ -31,9 +31,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
-import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -62,15 +60,17 @@ public final class ModArgumentType extends ArgumentType<Unit, ModArgumentType.@N
     }
     
     @Override
-    public boolean matches(Mutable<@Nullable ModInfoPair> data, EntryStack<?> stack, String searchText, Unit filterData) {
-        if (data.getValue() == null) {
-            String containingNs = stack.getContainingNamespace();
-            data.setValue(containingNs != null ? new ModInfoPair(
-                    containingNs,
-                    null
-            ) : ModInfoPair.EMPTY);
-        }
-        ModInfoPair pair = data.getValue();
+    @Nullable
+    public ModInfoPair cacheData(EntryStack<?> stack) {
+        String containingNs = stack.getContainingNamespace();
+        return containingNs != null ? new ModInfoPair(
+                containingNs,
+                null
+        ) : ModInfoPair.EMPTY;
+    }
+    
+    @Override
+    public boolean matches(@Nullable ModInfoPair pair, EntryStack<?> stack, String searchText, Unit filterData) {
         if (pair.modId == null || pair.modId.contains(searchText)) return true;
         if (pair.modName == null) {
             pair.modName = ClientHelper.getInstance().getModFromModId(pair.modId).toLowerCase(Locale.ROOT);

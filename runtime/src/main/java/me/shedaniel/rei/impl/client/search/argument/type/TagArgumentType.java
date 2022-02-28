@@ -32,7 +32,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
-import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,22 +66,26 @@ public final class TagArgumentType extends ArgumentType<Unit, String[]> {
     }
     
     @Override
-    public boolean matches(Mutable<String[]> data, EntryStack<?> stack, String searchText, Unit filterData) {
-        if (data.getValue() == null) {
-            Collection<ResourceLocation> tags = stack.getTagsFor();
-            if (tags.isEmpty()) {
-                data.setValue(EMPTY_ARRAY);
-            } else {
-                data.setValue(new String[tags.size()]);
-                int i = 0;
-                
-                for (ResourceLocation identifier : tags) {
-                    data.getValue()[i] = identifier.toString();
-                    i++;
-                }
+    public String[] cacheData(EntryStack<?> stack) {
+        Collection<ResourceLocation> tags = stack.getTagsFor();
+        if (tags.isEmpty()) {
+            return EMPTY_ARRAY;
+        } else {
+            String[] arr = new String[tags.size()];
+            int i = 0;
+            
+            for (ResourceLocation identifier : tags) {
+                arr[i] = identifier.toString();
+                i++;
             }
+            
+            return arr;
         }
-        for (String tag : data.getValue()) {
+    }
+    
+    @Override
+    public boolean matches(String[] data, EntryStack<?> stack, String searchText, Unit filterData) {
+        for (String tag : data) {
             if (!tag.isEmpty() && tag.contains(searchText)) {
                 return true;
             }
