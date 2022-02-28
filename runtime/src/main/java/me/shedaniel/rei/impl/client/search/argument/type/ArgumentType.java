@@ -29,7 +29,6 @@ import me.shedaniel.rei.impl.client.search.result.ArgumentApplicableResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Style;
-import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -83,7 +82,9 @@ public abstract class ArgumentType<T, R> {
         return ArgumentApplicableResult.notApplicable();
     }
     
-    public abstract boolean matches(Mutable<R> data, EntryStack<?> stack, String searchText, T filterData);
+    public abstract R cacheData(EntryStack<?> stack);
+    
+    public abstract boolean matches(R data, EntryStack<?> stack, String searchText, T filterData);
     
     public abstract T prepareSearchFilter(String searchText);
     

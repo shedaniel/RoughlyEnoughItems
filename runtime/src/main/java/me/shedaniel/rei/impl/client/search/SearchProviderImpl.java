@@ -26,14 +26,18 @@ package me.shedaniel.rei.impl.client.search;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.impl.client.search.argument.AlternativeArgument;
 import me.shedaniel.rei.impl.client.search.argument.Argument;
 import me.shedaniel.rei.impl.client.search.argument.CompoundArgument;
+import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class SearchProviderImpl implements SearchProvider {
     @Override
@@ -49,10 +53,17 @@ public class SearchProviderImpl implements SearchProvider {
     public static class SearchFilterImpl implements SearchFilter {
         private final List<CompoundArgument> arguments;
         private final String filter;
+        private final List<ArgumentType<?, ?>> argumentTypes;
         
         public SearchFilterImpl(List<CompoundArgument> arguments, String searchTerm) {
             this.arguments = arguments;
             this.filter = searchTerm;
+            this.argumentTypes = arguments.stream()
+                    .flatMap(CompoundArgument::stream)
+                    .flatMap(AlternativeArgument::stream)
+                    .map(Argument::getArgument)
+                    .distinct()
+                    .collect(Collectors.toList());
         }
         
         @Override
@@ -69,6 +80,11 @@ public class SearchProviderImpl implements SearchProvider {
                 }
                 throw CrashReportUtils.throwReport(report);
             }
+        }
+        
+        @Override
+        public void prepareFilter(Collection<EntryStack<?>> stacks) {
+            Argument.prepareFilter(stacks, argumentTypes);
         }
         
         @Override

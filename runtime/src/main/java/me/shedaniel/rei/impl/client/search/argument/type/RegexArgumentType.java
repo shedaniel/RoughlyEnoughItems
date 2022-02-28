@@ -29,7 +29,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -80,12 +79,14 @@ public final class RegexArgumentType extends ArgumentType<@Nullable Pattern, Str
     }
     
     @Override
-    public boolean matches(Mutable<String> data, EntryStack<?> stack, String searchText, @Nullable Pattern filterData) {
+    public String cacheData(EntryStack<?> stack) {
+        return stack.asFormatStrippedText().getString();
+    }
+    
+    @Override
+    public boolean matches(String data, EntryStack<?> stack, String searchText, @Nullable Pattern filterData) {
         if (filterData == null) return false;
-        if (data.getValue() == null) {
-            data.setValue(stack.asFormatStrippedText().getString());
-        }
-        Matcher matcher = filterData.matcher(data.getValue());
+        Matcher matcher = filterData.matcher(data);
         return matcher != null && matcher.matches();
     }
     
