@@ -177,7 +177,7 @@ public class JEIRecipeLayoutLegacyAdapter implements IRecipeLayout {
             
             @Override
             public boolean isInput() {
-                return slot.role == RecipeIngredientRole.INPUT;
+                return slot.role == RecipeIngredientRole.INPUT || slot.role == RecipeIngredientRole.CATALYST;
             }
             
             @Override

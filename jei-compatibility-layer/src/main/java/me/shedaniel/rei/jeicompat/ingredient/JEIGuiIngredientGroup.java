@@ -175,7 +175,7 @@ public class JEIGuiIngredientGroup<T> implements IGuiIngredientGroup<T> {
         
         @Override
         public boolean isInput() {
-            return slot.getRole() == RecipeIngredientRole.INPUT;
+            return slot.getRole() == RecipeIngredientRole.INPUT || slot.getRole() == RecipeIngredientRole.CATALYST;
         }
         
         @Override

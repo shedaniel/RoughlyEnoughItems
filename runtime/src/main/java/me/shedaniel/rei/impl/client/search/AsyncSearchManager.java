@@ -38,10 +38,8 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -53,6 +51,8 @@ public class AsyncSearchManager {
     private Predicate<EntryStack<?>> additionalPredicate;
     private SearchFilter filter;
     private boolean dirty = false;
+    private boolean filterDirty = false;
+    private CompletableFuture<List<EntryStack<?>>> future;
     private List<EntryStack<?>> last;
     
     public AsyncSearchManager(Supplier<List<EntryStack<?>>> stacksProvider, Supplier<Predicate<EntryStack<?>>> additionalPredicateSupplier, UnaryOperator<EntryStack<?>> transformer) {
@@ -78,15 +78,36 @@ public class AsyncSearchManager {
         this.dirty = true;
     }
     
+    public void markFilterDirty() {
+        this.filterDirty = true;
+    }
+    
     public void updateFilter(String filter) {
         if (this.filter == null || !this.filter.getFilter().equals(filter)) {
             this.filter = SearchProvider.getInstance().createFilter(filter);
             markDirty();
+            markFilterDirty();
         }
     }
     
     public boolean isDirty() {
         return last == null || dirty;
+    }
+    
+    public boolean isFilterDirty() {
+        return filterDirty;
+    }
+    
+    public Future<Void> getAsync(Consumer<List<EntryStack<?>>> consumer) {
+        if (future == null || future.isCancelled() || future.isDone() || future.isCompletedExceptionally()) {
+            if (future != null) future.cancel(true);
+            future = CompletableFuture.supplyAsync(this::get)
+                    .exceptionally(throwable -> {
+                        throwable.printStackTrace();
+                        return null;
+                    });
+        }
+        return future.thenAccept(consumer);
     }
     
     public List<EntryStack<?>> get() {
@@ -97,6 +118,11 @@ public class AsyncSearchManager {
             last = new ArrayList<>();
             
             if (!stacks.isEmpty()) {
+                if (filterDirty) {
+                    filter.prepareFilter(stacks);
+                    filterDirty = false;
+                }
+                
                 if (ConfigObject.getInstance().shouldAsyncSearch() && stacks.size() > searchPartitionSize * 4) {
                     List<CompletableFuture<List<EntryStack<?>>>> futures = Lists.newArrayList();
                     for (Iterable<EntryStack<?>> partitionStacks : CollectionUtils.partition(stacks, searchPartitionSize)) {
