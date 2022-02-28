@@ -28,7 +28,6 @@ import me.shedaniel.rei.impl.client.search.result.ArgumentApplicableResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Unit;
-import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
@@ -42,7 +41,12 @@ public final class AlwaysMatchingArgumentType extends ArgumentType<Unit, Unit> {
     }
     
     @Override
-    public boolean matches(Mutable<Unit> data, EntryStack<?> stack, String searchText, Unit filterData) {
+    public Unit cacheData(EntryStack<?> stack) {
+        return null;
+    }
+    
+    @Override
+    public boolean matches(Unit data, EntryStack<?> stack, String searchText, Unit filterData) {
         return true;
     }
     

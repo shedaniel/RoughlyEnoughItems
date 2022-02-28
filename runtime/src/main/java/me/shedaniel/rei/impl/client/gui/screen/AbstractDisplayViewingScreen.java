@@ -171,7 +171,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     protected void transformFiltering(List<? extends GuiEventListener> setupDisplay) {
         for (EntryWidget widget : Widgets.<EntryWidget>walk(setupDisplay, EntryWidget.class::isInstance)) {
             if (widget.getEntries().size() > 1) {
-                Collection<EntryStack<?>> refiltered = EntryRegistry.getInstance().refilterNew(widget.getEntries());
+                Collection<EntryStack<?>> refiltered = EntryRegistry.getInstance().refilterNew(false, widget.getEntries());
                 if (!refiltered.isEmpty()) {
                     widget.clearStacks();
                     widget.entries(refiltered);

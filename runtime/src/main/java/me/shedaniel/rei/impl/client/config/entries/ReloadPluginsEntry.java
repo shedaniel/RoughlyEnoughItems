@@ -31,6 +31,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.impl.client.gui.screen.ConfigReloadingScreen;
+import me.shedaniel.rei.impl.client.search.argument.Argument;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -48,7 +49,7 @@ import java.util.Optional;
 @ApiStatus.Internal
 public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     private int width;
-    private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
+    private AbstractWidget reloadPluginsButton = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
         RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
         RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
     }) {
@@ -62,12 +63,16 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
             }
         }
     };
-    private List<AbstractWidget> children = ImmutableList.of(buttonWidget);
+    private AbstractWidget reloadSearchButton = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
+        Argument.SEARCH_CACHE.clear();
+    });
+    private List<AbstractWidget> children = ImmutableList.of(reloadPluginsButton, reloadSearchButton);
     
     public ReloadPluginsEntry(int width) {
         super(NarratorChatListener.NO_TITLE, false);
         this.width = width;
-        buttonWidget.setMessage(new TranslatableComponent("text.rei.reload_config"));
+        reloadPluginsButton.setMessage(new TranslatableComponent("text.rei.reload_config"));
+        reloadSearchButton.setMessage(new TranslatableComponent("text.rei.reload_search"));
     }
     
     @Override
@@ -89,11 +94,16 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
-        this.buttonWidget.active = this.isEditable();
-        this.buttonWidget.y = y;
-        this.buttonWidget.x = x + entryWidth / 2 - width / 2;
-        this.buttonWidget.setWidth(width);
-        this.buttonWidget.render(matrices, mouseX, mouseY, delta);
+        this.reloadPluginsButton.active = this.isEditable();
+        this.reloadPluginsButton.y = y;
+        this.reloadPluginsButton.setWidth(width / 2 - 6);
+        this.reloadPluginsButton.x = x + entryWidth / 2 - width / 2;
+        this.reloadPluginsButton.render(matrices, mouseX, mouseY, delta);
+        this.reloadSearchButton.active = this.isEditable() && !Argument.SEARCH_CACHE.isEmpty();
+        this.reloadSearchButton.y = y;
+        this.reloadSearchButton.setWidth(width / 2 - 6);
+        this.reloadSearchButton.x = x + entryWidth / 2 + 3;
+        this.reloadSearchButton.render(matrices, mouseX, mouseY, delta);
     }
     
     @Override

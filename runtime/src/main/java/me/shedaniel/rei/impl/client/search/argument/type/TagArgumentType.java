@@ -32,7 +32,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Unit;
-import org.apache.commons.lang3.mutable.Mutable;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -68,12 +67,14 @@ public final class TagArgumentType extends ArgumentType<Unit, String[]> {
     }
     
     @Override
-    public boolean matches(Mutable<String[]> data, EntryStack<?> stack, String searchText, Unit filterData) {
-        if (data.getValue() == null) {
-            Stream<TagKey<?>> tags = stack.getTagsFor();
-            data.setValue(tags.map(TagArgumentType::toString).toArray(String[]::new));
-        }
-        for (String tag : data.getValue()) {
+    public String[] cacheData(EntryStack<?> stack) {
+        Stream<TagKey<?>> tags = stack.getTagsFor();
+        return tags.map(TagArgumentType::toString).toArray(String[]::new);
+    }
+    
+    @Override
+    public boolean matches(String[] data, EntryStack<?> stack, String searchText, Unit filterData) {
+        for (String tag : data) {
             if (!tag.isEmpty() && tag.contains(searchText)) {
                 return true;
             }
