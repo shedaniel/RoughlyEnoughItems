@@ -26,7 +26,6 @@ package me.shedaniel.rei.jeicompat.wrap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.fluid.FluidStack;
 import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
-import dev.architectury.utils.EnvExecutor;
 import lombok.experimental.ExtensionMethod;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -45,16 +44,15 @@ import mezz.jei.api.ingredients.IIngredientType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagContainer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @ExtensionMethod(JEIPluginDetector.class)
 public class JEIEntryDefinition<T> implements EntryDefinition<T> {
@@ -147,13 +145,8 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
     }
     
     @Override
-    public Collection<ResourceLocation> getTagsFor(TagContainer tagContainer, EntryStack<T> entry, T value) {
-        return EnvExecutor.getEnvSpecific(() -> () -> _getTagsFor(value), () -> Collections::emptyList);
-    }
-    
-    @OnlyIn(Dist.CLIENT)
-    public Collection<ResourceLocation> _getTagsFor(T value) {
-        return ingredientHelper.getTags(value);
+    public Stream<? extends TagKey<?>> getTagsFor(EntryStack<T> entry, T value) {
+        return Stream.empty();
     }
     
     @OnlyIn(Dist.CLIENT)
