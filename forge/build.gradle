@@ -89,24 +89,24 @@ dependencies {
     // modRuntime("curse.maven:mekanism-tools-268567:3206396")
     // modRuntime("curse.maven:autoreglib-250363:3326041")
     // modRuntime("curse.maven:ars-nouveau-401955:3619899")
-    modRuntime("curse.maven:patchouli-306770:3594394")
-    modRuntime("curse.maven:curios-309927:3613028")
-    modRuntime("curse.maven:geckolib-388172:3627502")
-    modRuntime("curse.maven:refined-storage-243076:3623324")
-    modRuntime("appeng:appliedenergistics2:10.0.1")
+    // modRuntime("curse.maven:patchouli-306770:3594394")
+    // modRuntime("curse.maven:curios-309927:3613028")
+    // modRuntime("curse.maven:geckolib-388172:3627502")
+    // modRuntime("curse.maven:refined-storage-243076:3623324")
+    // modRuntime("appeng:appliedenergistics2:10.0.1")
     // modRuntime("curse.maven:tcon-74072:3273213")
-    modRuntime("curse.maven:mantle-74924:3634761")
-    modRuntime("curse.maven:jer-240630:3575590")
-    modRuntime("curse.maven:jep-417645:3550303")
-    modRuntime("curse.maven:simple-storage-network-268495:3594529")
+    // modRuntime("curse.maven:mantle-74924:3634761")
+    // modRuntime("curse.maven:jer-240630:3575590")
+    // modRuntime("curse.maven:jep-417645:3550303")
+    // modRuntime("curse.maven:simple-storage-network-268495:3594529")
     // modRuntime("curse.maven:create-328085:3536025")
     // modRuntime("curse.maven:flywheel-486392:3535459")
     // modRuntime("curse.maven:industrial-foregoing-266515:3446262")
     // modRuntime("curse.maven:titanium-287342:3346366")
-    modRuntime("curse.maven:extended-crafting-268387:3606681")
-    modRuntime("curse.maven:cucumber-272335:3623830")
-    modRuntime("curse.maven:crafttweaker-239197:3602440")
-    modRuntime("curse.maven:jeitweaker-368718:3602846")
+    // modRuntime("curse.maven:extended-crafting-268387:3606681")
+    // modRuntime("curse.maven:cucumber-272335:3623830")
+    // modRuntime("curse.maven:crafttweaker-239197:3602440")
+    // modRuntime("curse.maven:jeitweaker-368718:3602846")
     // modRuntime("curse.maven:eidolon-429625:3157832")
     // modRuntime("curse.maven:token-enchanter-444421:3449483")
     // modRuntime("curse.maven:silent-lib-242998:3400030")
@@ -123,15 +123,19 @@ dependencies {
     // modRuntime("curse.maven:bookshelf-228525:3474499")
     // modRuntime("curse.maven:kubejs-238086:3533307")
     // modRuntime("curse.maven:rhino-416294:3525704")
-    modRuntime("curse.maven:enchantment-descriptions-250419:3566741")
-    modRuntime("curse.maven:natures-aura-306626:3587798")
-    modRuntime("curse.maven:integrated-dynamics-236307:3631804")
-    modRuntime("curse.maven:common-capabilities-247007:3614900")
-    modRuntime("curse.maven:cyclops-core-236307:3614854")
-    modRuntime("curse.maven:elemental-craft-395158:3593428")
-    modRuntime("curse.maven:datapack-anvil-432817:3569515")
-    modRuntime("curse.maven:assemblylinemachines-388282:3623609")
-    modRuntime("curse.maven:mystical-agriculture-246640:3645812")
+    // modRuntime("curse.maven:enchantment-descriptions-250419:3566741")
+    // modRuntime("curse.maven:natures-aura-306626:3587798")
+    // modRuntime("curse.maven:integrated-dynamics-236307:3631804")
+    // modRuntime("curse.maven:common-capabilities-247007:3614900")
+    // modRuntime("curse.maven:cyclops-core-236307:3614854")
+    // modRuntime("curse.maven:elemental-craft-395158:3593428")
+    // modRuntime("curse.maven:datapack-anvil-432817:3569515")
+    // modRuntime("curse.maven:assemblylinemachines-388282:3623609")
+    // modRuntime("curse.maven:mystical-agriculture-246640:3645812")
+}
+
+def modRuntime(str) {
+    dependencies.modLocalRuntime(str)
 }
 
 shadowJar {
@@ -194,7 +198,7 @@ publishing {
                     def project = project(":" + projectName)
                     publication.artifact(project.fakeForgeJar) { classifier null }
                     def remapSourcesJarTask = project.remapSourcesJar
-                    publication.artifact(remapSourcesJarTask.output) {
+                    publication.artifact(remapSourcesJarTask) {
                         builtBy remapSourcesJarTask
                         classifier "sources"
                     }
