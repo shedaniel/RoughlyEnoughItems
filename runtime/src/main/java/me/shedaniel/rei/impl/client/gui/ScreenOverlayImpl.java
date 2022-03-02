@@ -67,9 +67,7 @@ import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
 import me.shedaniel.rei.impl.client.gui.dragging.CurrentDraggingStack;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
-import me.shedaniel.rei.impl.client.gui.modules.entries.SeparatorMenuEntry;
-import me.shedaniel.rei.impl.client.gui.modules.entries.SubMenuEntry;
-import me.shedaniel.rei.impl.client.gui.modules.entries.ToggleMenuEntry;
+import me.shedaniel.rei.impl.client.gui.modules.entries.*;
 import me.shedaniel.rei.impl.client.gui.widget.*;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import me.shedaniel.rei.impl.common.util.Weather;
@@ -330,23 +328,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                                             }
                                         })
                                         .focusable(false)
-                                        .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
-                                        .tooltipSupplier(button -> {
-                                            List<Component> tooltips = new ArrayList<>();
-                                            tooltips.add(new TranslatableComponent("text.rei.config_tooltip"));
-                                            tooltips.add(new ImmutableTextComponent("  "));
-                                            if (!ClientHelper.getInstance().isCheating())
-                                                tooltips.add(new TranslatableComponent("text.rei.cheating_disabled"));
-                                            else if (!ClientHelperImpl.getInstance().hasOperatorPermission()) {
-                                                if (minecraft.gameMode.hasInfiniteItems())
-                                                    tooltips.add(new TranslatableComponent("text.rei.cheating_limited_creative_enabled"));
-                                                else tooltips.add(new TranslatableComponent("text.rei.cheating_enabled_no_perms"));
-                                            } else if (ClientHelperImpl.getInstance().hasPermissionToUsePackets())
-                                                tooltips.add(new TranslatableComponent("text.rei.cheating_enabled"));
-                                            else
-                                                tooltips.add(new TranslatableComponent("text.rei.cheating_limited_enabled"));
-                                            return tooltips.toArray(new Component[0]);
-                                        }),
+                                        .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)),
                                 Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
                                     helper.setBlitOffset(helper.getBlitOffset() + 1);
                                     RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
@@ -418,6 +400,19 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                         config::isCheating,
                         config::setCheating
                 ),
+                new EmptyMenuEntry(4),
+                new TextMenuEntry(() -> {
+                    if (!ClientHelper.getInstance().isCheating())
+                        return new TranslatableComponent("text.rei.cheating_disabled");
+                    else if (!ClientHelperImpl.getInstance().hasOperatorPermission()) {
+                        if (minecraft.gameMode.hasInfiniteItems())
+                            return new TranslatableComponent("text.rei.cheating_limited_creative_enabled");
+                        else return new TranslatableComponent("text.rei.cheating_enabled_no_perms");
+                    } else if (ClientHelperImpl.getInstance().hasPermissionToUsePackets())
+                        return new TranslatableComponent("text.rei.cheating_enabled");
+                    else
+                    return new TranslatableComponent("text.rei.cheating_limited_enabled");
+                }),
                 new SeparatorMenuEntry(),
                 ToggleMenuEntry.ofDeciding(new TranslatableComponent("text.rei.config.menu.dark_theme"),
                         config::isUsingDarkTheme,
