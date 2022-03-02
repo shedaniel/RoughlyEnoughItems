@@ -75,7 +75,7 @@ public class ToggleMenuEntry extends AbstractMenuEntry {
     
     @Override
     public int getEntryWidth() {
-        return getTextWidth() + 4 + 6;
+        return getTextWidth() + 4 + 8;
     }
     
     @Override
