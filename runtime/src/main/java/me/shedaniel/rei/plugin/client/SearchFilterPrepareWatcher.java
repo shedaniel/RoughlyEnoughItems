@@ -46,18 +46,22 @@ public class SearchFilterPrepareWatcher implements HintProvider {
     @Override
     public List<Component> provide() {
         lastProcess = null;
-        if (Argument.prepareStage != null && Argument.currentStages != null && Argument.prepareStacks != null && Argument.prepareStacks.size() > 100) {
-            if (Util.getEpochMillis() - Argument.prepareStart < 500) return Collections.emptyList();
+        try {
+            if (Argument.prepareStage != null && Argument.currentStages != null && Argument.prepareStacks != null && Argument.prepareStacks.size() > 100
+                && Argument.prepareStart != null) {
+                if (Util.getEpochMillis() - Argument.prepareStart < 500) return Collections.emptyList();
             int prepareStageCurrent = Argument.prepareStage.getLeft();
             int prepareStageTotal = Argument.prepareStage.getRight();
             MutablePair<Integer, Integer> currentStage = Iterables.get(Arrays.asList(Argument.currentStages), prepareStageCurrent - 1, null);
             int currentStageCurrent = currentStage == null ? 0 : currentStage.getLeft();
             int currentStageTotal = currentStage == null ? 0 : currentStage.getRight();
-            double prepareStageProgress = prepareStageTotal == 0 ? 0 : prepareStageCurrent / (double) prepareStageTotal;
-            double currentStageProgress = currentStageTotal == 0 ? 0 : currentStageCurrent / (double) currentStageTotal;
-            lastProcess = prepareStageTotal == 0 ? 0 : Math.max(0, prepareStageProgress - (1 - currentStageProgress) / prepareStageTotal);
-            return ImmutableList.of(new TranslatableComponent("text.rei.caching.search"),
-                    new TranslatableComponent("text.rei.caching.search.step", prepareStageCurrent, prepareStageTotal, Math.round(lastProcess * 100)));
+                double prepareStageProgress = prepareStageTotal == 0 ? 0 : prepareStageCurrent / (double) prepareStageTotal;
+                double currentStageProgress = currentStageTotal == 0 ? 0 : currentStageCurrent / (double) currentStageTotal;
+                lastProcess = prepareStageTotal == 0 ? 0 : Math.max(0, prepareStageProgress - (1 - currentStageProgress) / prepareStageTotal);
+                return ImmutableList.of(new TranslatableComponent("text.rei.caching.search"),
+                        new TranslatableComponent("text.rei.caching.search.step", prepareStageCurrent, prepareStageTotal, Math.round(lastProcess * 100)));
+            }
+        } catch (NullPointerException ignored) {
         }
         return Collections.emptyList();
     }
