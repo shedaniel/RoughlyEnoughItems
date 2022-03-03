@@ -42,12 +42,17 @@ import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.RegistryManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -146,7 +151,16 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
     
     @Override
     public Stream<? extends TagKey<?>> getTagsFor(EntryStack<T> entry, T value) {
-        return Stream.empty();
+        ResourceKey<Registry<T>> key;
+        if (value instanceof IForgeRegistryEntry<?>) {
+            Class<IForgeRegistryEntry<?>> type = ((IForgeRegistryEntry<IForgeRegistryEntry<?>>) value).getRegistryType();
+            IForgeRegistry<? extends IForgeRegistryEntry<?>> registry = RegistryManager.ACTIVE.getRegistry(type);
+            key = ResourceKey.createRegistryKey(registry.getRegistryName());
+        } else {
+            key = null;
+        }
+        return ingredientHelper.getTags(value).stream()
+                .map(loc -> TagKey.create(key, loc));
     }
     
     @OnlyIn(Dist.CLIENT)
