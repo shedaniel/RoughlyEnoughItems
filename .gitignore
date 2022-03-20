@@ -31,3 +31,4 @@ private.properties
 # Files from bad operating systems :^)
 Thumbs.db
 .DS_Store
+/.architectury-transformer/debug.log
