@@ -78,6 +78,10 @@ allprojects {
     }
 }
 
+["api", "default-plugin", "runtime"].forEach {
+    project(":fabric").evaluationDependsOn(":$it")
+}
+
 subprojects {
     group = rootProject.group
     version = rootProject.version
