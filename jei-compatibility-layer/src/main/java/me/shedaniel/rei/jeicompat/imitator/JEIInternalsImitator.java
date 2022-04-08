@@ -23,12 +23,10 @@
 
 package me.shedaniel.rei.jeicompat.imitator;
 
-import me.shedaniel.rei.jeicompat.wrap.JEIIngredientFilter;
 import me.shedaniel.rei.jeicompat.wrap.JEIIngredientManager;
 import me.shedaniel.rei.jeicompat.wrap.JEIJeiHelpers;
 import me.shedaniel.rei.jeicompat.wrap.JEIJeiRuntime;
 import mezz.jei.api.helpers.IJeiHelpers;
-import mezz.jei.api.runtime.IIngredientFilter;
 import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IJeiRuntime;
 
@@ -43,9 +41,5 @@ public class JEIInternalsImitator {
     
     public static IIngredientManager getIngredientManager() {
         return JEIIngredientManager.INSTANCE;
-    }
-    
-    public static IIngredientFilter getIngredientFilter() {
-        return JEIIngredientFilter.INSTANCE;
     }
 }

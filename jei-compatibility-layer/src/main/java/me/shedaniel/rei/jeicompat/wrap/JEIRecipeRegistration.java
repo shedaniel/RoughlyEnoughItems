@@ -32,10 +32,12 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.plugin.client.BuiltinClientPlugin;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.runtime.IIngredientManager;
@@ -53,6 +55,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @ExtensionMethod(JEIPluginDetector.class)
 public class JEIRecipeRegistration implements IRecipeRegistration {
@@ -88,25 +91,47 @@ public class JEIRecipeRegistration implements IRecipeRegistration {
     @Override
     public void addRecipes(@NotNull Collection<?> recipes, @NotNull ResourceLocation categoryId) {
         post.add(() -> {
-            CategoryIdentifier<Display> categoryIdentifier = CategoryIdentifier.of(categoryId);
-            DisplayRegistry registry = DisplayRegistry.getInstance();
-            if (recipes instanceof List<?> && recipes.size() >= 100) {
-                addRecipesOptimized((List<Object>) recipes, categoryIdentifier, registry);
-                return;
-            }
-            
-            for (Object recipe : recipes) {
-                Collection<Display> displays = registry.tryFillDisplay(recipe);
-                for (Display display : displays) {
-                    if (Objects.equals(display.getCategoryIdentifier(), categoryIdentifier)) {
-                        registry.add(display, recipe);
-                    }
-                }
-            }
+            addRecipes0(recipes, categoryId);
         });
     }
     
-    private void addRecipesOptimized(List<Object> recipes, @NotNull CategoryIdentifier<?> categoryId, DisplayRegistry registry) {
+    public static void addRecipes0(@NotNull Collection<?> recipes, @NotNull ResourceLocation categoryId) {
+        CategoryIdentifier<Display> categoryIdentifier = CategoryIdentifier.of(categoryId);
+        DisplayRegistry registry = DisplayRegistry.getInstance();
+        if (recipes instanceof List<?> && recipes.size() >= 100) {
+            addRecipesOptimized((List<Object>) recipes, categoryIdentifier, registry);
+            return;
+        }
+        
+        for (Object recipe : recipes) {
+            Collection<Display> displays = registry.tryFillDisplay(recipe);
+            
+            if (displays.isEmpty()) {
+                InternalLogger.getInstance().warn("No displays found for recipe: %s for category %s", recipe, categoryId);
+                return;
+            }
+            
+            boolean registered = false;
+            
+            for (Display display : displays) {
+                if (Objects.equals(display.getCategoryIdentifier(), categoryIdentifier)) {
+                    registry.add(display, recipe);
+                    registered = true;
+                }
+            }
+            
+            if (!registered) {
+                InternalLogger.getInstance().warn("No displays matched category for recipe: %s for category %s", recipe, categoryId);
+            }
+        }
+    }
+    
+    @Override
+    public <T> void addRecipes(RecipeType<T> recipeType, List<T> recipes) {
+        addRecipes(recipes, recipeType.getUid());
+    }
+    
+    private static void addRecipesOptimized(List<Object> recipes, @NotNull CategoryIdentifier<?> categoryId, DisplayRegistry registry) {
         List<CompletableFuture<List<Collection<Display>>>> completableFutures = Lists.newArrayList();
         Function<Object, Collection<Display>> tryFillDisplay = registry::tryFillDisplay;
         CollectionUtils.partition(recipes, 50).forEach(list -> {
@@ -120,7 +145,10 @@ public class JEIRecipeRegistration implements IRecipeRegistration {
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             e.printStackTrace();
         }
+        
         int i = 0;
+        boolean contains = false;
+        boolean registered = false;
         
         for (CompletableFuture<List<Collection<Display>>> future : completableFutures) {
             List<Collection<Display>> displayCollection = future.getNow(null);
@@ -134,12 +162,25 @@ public class JEIRecipeRegistration implements IRecipeRegistration {
                     for (Display display : displays) {
                         if (Objects.equals(display.getCategoryIdentifier(), categoryId)) {
                             registry.add(display, origin);
+                            registered = true;
                         }
                     }
+                }
+                
+                if (displayCollection.size() > 0) {
+                    contains = true;
                 }
             }
             
             i++;
+        }
+        
+        if (!contains) {
+            InternalLogger.getInstance().warn("No displays found for recipes: %s for category %s", recipes.stream().map(Objects::toString)
+                    .collect(Collectors.joining(", ")), categoryId);
+        } else if (!registered) {
+            InternalLogger.getInstance().warn("No displays matched category for recipes: %s for category %s", recipes.stream().map(Objects::toString)
+                    .collect(Collectors.joining(", ")), categoryId);
         }
     }
     

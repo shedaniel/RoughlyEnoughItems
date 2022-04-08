@@ -57,6 +57,7 @@ import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
@@ -98,36 +99,46 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
     
     @Override
     public <C extends AbstractContainerMenu> void addRecipeTransferHandler(Class<C> containerClass, ResourceLocation recipeCategoryUid, int recipeSlotStart, int recipeSlotCount, int inventorySlotStart, int inventorySlotCount) {
-        addRecipeTransferHandler(new IRecipeTransferInfo<C, Object>() {
+        addRecipeTransferHandler(containerClass, new RecipeType<>(recipeCategoryUid, Object.class), recipeSlotStart, recipeSlotCount, inventorySlotStart, inventorySlotCount);
+    }
+    
+    @Override
+    public <C extends AbstractContainerMenu, R> void addRecipeTransferHandler(Class<C> containerClass, RecipeType<R> recipeType, int recipeSlotStart, int recipeSlotCount, int inventorySlotStart, int inventorySlotCount) {
+        addRecipeTransferHandler(new IRecipeTransferInfo<C, R>() {
             @Override
             public Class<C> getContainerClass() {
                 return containerClass;
             }
             
             @Override
-            public Class<Object> getRecipeClass() {
-                return Object.class;
+            public RecipeType<R> getRecipeType() {
+                return recipeType;
+            }
+            
+            @Override
+            public Class<R> getRecipeClass() {
+                return (Class<R>) recipeType.getRecipeClass();
             }
             
             @Override
             public ResourceLocation getRecipeCategoryUid() {
-                return recipeCategoryUid;
+                return recipeType.getUid();
             }
             
             @Override
-            public boolean canHandle(C container, Object recipe) {
+            public boolean canHandle(C container, R recipe) {
                 return getContainerClass().isInstance(container);
             }
             
             @Override
-            public List<net.minecraft.world.inventory.Slot> getRecipeSlots(C container, Object recipe) {
+            public List<net.minecraft.world.inventory.Slot> getRecipeSlots(C container, R recipe) {
                 return IntStream.range(recipeSlotStart, recipeSlotStart + recipeSlotCount)
                         .mapToObj(container::getSlot)
                         .collect(Collectors.toList());
             }
             
             @Override
-            public List<net.minecraft.world.inventory.Slot> getInventorySlots(C container, Object recipe) {
+            public List<net.minecraft.world.inventory.Slot> getInventorySlots(C container, R recipe) {
                 return IntStream.range(inventorySlotStart, inventorySlotStart + inventorySlotCount)
                         .mapToObj(container::getSlot)
                         .collect(Collectors.toList());
@@ -165,6 +176,11 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
     }
     
     @Override
+    public <C extends AbstractContainerMenu, R> void addRecipeTransferHandler(IRecipeTransferHandler<C, R> recipeTransferHandler, RecipeType<R> recipeCategoryUid) {
+        addRecipeTransferHandler(recipeTransferHandler, recipeCategoryUid.getUid());
+    }
+    
+    @Override
     public <C extends AbstractContainerMenu, R> void addRecipeTransferHandler(IRecipeTransferHandler<C, R> recipeTransferHandler, ResourceLocation recipeCategoryUid) {
         TransferHandlerRegistry.getInstance().register(new TransferHandler() {
             @Override
@@ -185,7 +201,7 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                         JEIDisplaySetup.Result view;
                         if (display instanceof JEIWrappedDisplay) {
                             JEIWrappedCategory<Object> category = ((JEIWrappedDisplay<Object>) display).getBackingCategory();
-                            view = JEIDisplaySetup.create(category.getBackingCategory(), (JEIWrappedDisplay<Object>) display, Collections.emptyList());
+                            view = JEIDisplaySetup.create(category.getBackingCategory(), (JEIWrappedDisplay<Object>) display, JEIFocusGroup.EMPTY);
                         } else {
                             DisplayCategory<Display> category = CategoryRegistry.getInstance().get(display.getCategoryIdentifier().cast()).getCategory();
                             DisplayCategoryView<Display> categoryView = CategoryRegistry.getInstance().get(display.getCategoryIdentifier().cast()).getView(display);
@@ -306,6 +322,6 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
     
     @Override
     public <C extends AbstractContainerMenu, R> void addUniversalRecipeTransferHandler(IRecipeTransferHandler<C, R> recipeTransferHandler) {
-        addRecipeTransferHandler(recipeTransferHandler, null);
+        addRecipeTransferHandler(recipeTransferHandler, (ResourceLocation) null);
     }
 }

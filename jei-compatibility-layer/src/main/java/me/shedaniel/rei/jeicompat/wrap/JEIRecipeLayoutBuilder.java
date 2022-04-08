@@ -24,6 +24,7 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import me.shedaniel.math.Point;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import mezz.jei.api.gui.builder.IIngredientAcceptor;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
@@ -90,6 +91,11 @@ public class JEIRecipeLayoutBuilder implements IRecipeLayoutBuilder {
     @Override
     public void setShapeless(int posX, int posY) {
         markDirty();
+    }
+    
+    @Override
+    public void createFocusLink(IRecipeSlotBuilder... slots) {
+        InternalLogger.getInstance().error("createFocusLink is not supported in REI yet!");
     }
     
     private void markDirty() {

@@ -31,7 +31,7 @@ public enum UidContext {
      * This is a secondary context and should be less specific than {@link #Ingredient}, to allow for broader matches in recipes.
      * <p>
      * Used for:
-     * recipe lookups (see {@link IRecipeCategory#setIngredients(Object, IIngredients)})
+     * recipe lookups (see {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, IFocusGroup)})
      * recipe catalysts (see {@link IRecipeCatalystRegistration})
      * recipe transfer (since JEI 7.4.0) (see {@link IRecipeTransferRegistration}
      */

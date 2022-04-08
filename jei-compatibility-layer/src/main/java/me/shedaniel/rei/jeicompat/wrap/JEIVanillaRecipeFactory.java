@@ -31,6 +31,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collections;
 import java.util.List;
@@ -61,6 +62,11 @@ public enum JEIVanillaRecipeFactory implements IVanillaRecipeFactory {
     private static class JEIAnvilRecipe extends AnvilRecipe implements IJeiAnvilRecipe {
         public JEIAnvilRecipe(@Nullable ResourceLocation id, List<ItemStack> leftInput, List<ItemStack> rightInputs, List<ItemStack> outputs) {
             super(id, leftInput, rightInputs, outputs);
+        }
+        
+        @Override
+        public @Unmodifiable List<ItemStack> getLeftInputs() {
+            return getLeftInput();
         }
     }
 }

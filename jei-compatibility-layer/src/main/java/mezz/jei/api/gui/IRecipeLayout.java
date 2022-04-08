@@ -18,7 +18,7 @@ import java.util.List;
  * It is passed to plugins in {@link IRecipeCategory#setRecipe(IRecipeLayout, Object, IIngredients)}.
  *
  * @see IRecipeLayoutDrawable
- * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, List)}
+ * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, IFocusGroup)}
  * and other methods that do not use {@link IRecipeLayout}.
  */
 @Deprecated(forRemoval = true, since = "9.3.0")
@@ -27,7 +27,7 @@ public interface IRecipeLayout {
      * Contains all the itemStacks displayed on this recipe layout.
      * Init and set them in your recipe category.
      *
-     * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, List)}
+     * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, IFocusGroup)}
      * and other methods that do not use {@link IRecipeLayout}.
      */
     @Deprecated(forRemoval = true, since = "9.3.0")
@@ -37,7 +37,7 @@ public interface IRecipeLayout {
      * Contains all the fluidStacks displayed on this recipe layout.
      * Init and set them in your recipe category.
      *
-     * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, List)}
+     * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, IFocusGroup)}
      * and other methods that do not use {@link IRecipeLayout}.
      */
     @Deprecated(forRemoval = true, since = "9.3.0")
@@ -51,7 +51,7 @@ public interface IRecipeLayout {
      *
      * @see #getItemStacks()
      * @see #getFluidStacks()
-     * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, List)}
+     * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, IFocusGroup)}
      * and other methods that do not use {@link IRecipeLayout}.
      */
     @Deprecated(forRemoval = true, since = "9.3.0")
@@ -63,7 +63,7 @@ public interface IRecipeLayout {
      * Returns null if there is no focus, or if the focus is a different type
      *
      * @since 7.0.1
-     * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, List)}
+     * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, IFocusGroup)}
      * and other methods that do not use {@link IRecipeLayout}.
      */
     @Deprecated(forRemoval = true, since = "9.3.0")
@@ -74,7 +74,7 @@ public interface IRecipeLayout {
      * By default the recipe transfer button is at the bottom, to the right of the recipe.
      * If it doesn't fit there, you can use this to move it when you init the recipe layout.
      *
-     * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, List)}
+     * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, IFocusGroup)}
      * and other methods that do not use {@link IRecipeLayout}.
      */
     @Deprecated(forRemoval = true, since = "9.3.0")
@@ -83,7 +83,7 @@ public interface IRecipeLayout {
     /**
      * Adds a shapeless icon to the top right of the recipe, that shows a tooltip saying "shapeless" when hovered over.
      *
-     * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, List)}
+     * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, IFocusGroup)}
      * and other methods that do not use {@link IRecipeLayout}.
      */
     @Deprecated(forRemoval = true, since = "9.3.0")

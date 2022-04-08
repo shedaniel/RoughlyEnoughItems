@@ -26,25 +26,29 @@ package me.shedaniel.rei.impl.common.logging;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import org.apache.logging.log4j.Level;
 
-public class Log4JLogger implements InternalLogger {
-    private final org.apache.logging.log4j.Logger logger;
+import java.util.function.UnaryOperator;
+
+public class TransformingLogger implements InternalLogger {
+    private final InternalLogger logger;
+    private final UnaryOperator<String> transformer;
     
-    public Log4JLogger(org.apache.logging.log4j.Logger logger) {
+    public TransformingLogger(InternalLogger logger, UnaryOperator<String> transformer) {
         this.logger = logger;
+        this.transformer = transformer;
     }
     
     @Override
     public void throwException(Throwable throwable) {
-        logger.throwing(throwable);
+        logger.throwException(throwable);
     }
     
     @Override
     public void log(Level level, String message) {
-        logger.log(level, message);
+        logger.log(level, transformer.apply(message));
     }
     
     @Override
     public void log(Level level, String message, Throwable throwable) {
-        logger.log(level, message, throwable);
+        logger.log(level, transformer.apply(message), throwable);
     }
 }

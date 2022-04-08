@@ -21,30 +21,34 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.common.logging;
+package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.rei.impl.common.InternalLogger;
-import org.apache.logging.log4j.Level;
+import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.IRecipeCategoriesLookup;
+import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.category.IRecipeCategory;
 
-public class Log4JLogger implements InternalLogger {
-    private final org.apache.logging.log4j.Logger logger;
-    
-    public Log4JLogger(org.apache.logging.log4j.Logger logger) {
-        this.logger = logger;
+import java.util.Collection;
+import java.util.stream.Stream;
+
+public class JEIRecipeCategoriesLookup implements IRecipeCategoriesLookup {
+    @Override
+    public IRecipeCategoriesLookup limitTypes(Collection<RecipeType<?>> recipeTypes) {
+        return null;
     }
     
     @Override
-    public void throwException(Throwable throwable) {
-        logger.throwing(throwable);
+    public IRecipeCategoriesLookup limitFocus(Collection<? extends IFocus<?>> focuses) {
+        return null;
     }
     
     @Override
-    public void log(Level level, String message) {
-        logger.log(level, message);
+    public IRecipeCategoriesLookup includeHidden() {
+        return null;
     }
     
     @Override
-    public void log(Level level, String message, Throwable throwable) {
-        logger.log(level, message, throwable);
+    public Stream<IRecipeCategory<?>> get() {
+        return null;
     }
 }

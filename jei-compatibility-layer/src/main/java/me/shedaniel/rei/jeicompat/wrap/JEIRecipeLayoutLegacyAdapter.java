@@ -36,6 +36,7 @@ import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
@@ -83,9 +84,9 @@ public class JEIRecipeLayoutLegacyAdapter implements IRecipeLayout {
     
     @Nullable
     public IFocus<?> getFocus() {
-        List<IFocus<?>> foci = JEIWrappedDisplay.getFoci();
+        IFocusGroup foci = JEIWrappedDisplay.getFoci();
         if (foci.isEmpty()) return null;
-        return foci.get(0);
+        return foci.getAllFocuses().get(0);
     }
     
     @Override

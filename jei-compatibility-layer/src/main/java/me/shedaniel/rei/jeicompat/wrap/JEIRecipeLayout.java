@@ -37,13 +37,13 @@ import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.IFocusGroup;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -86,9 +86,9 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
     
     @Nullable
     public IFocus<?> getFocus() {
-        List<IFocus<?>> foci = JEIWrappedDisplay.getFoci();
+        IFocusGroup foci = JEIWrappedDisplay.getFoci();
         if (foci.isEmpty()) return null;
-        return foci.get(0);
+        return foci.getAllFocuses().get(0);
     }
     
     @Override

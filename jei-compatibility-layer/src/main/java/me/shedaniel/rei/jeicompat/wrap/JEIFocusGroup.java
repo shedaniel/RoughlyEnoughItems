@@ -24,97 +24,56 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import mezz.jei.api.ingredients.IIngredientType;
-import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
-public class JEIFocus<T> implements IFocus<T>, IFocusGroup {
-    private final RecipeIngredientRole role;
-    private final ITypedIngredient<T> value;
+public class JEIFocusGroup implements IFocusGroup {
+    public static final IFocusGroup EMPTY = new JEIFocusGroup(Collections.emptyList());
+    private List<IFocus<?>> foci;
     
-    public JEIFocus(IFocus<T> focus) {
-        this(focus.getRole(), focus.getTypedValue());
-    }
-    
-    public JEIFocus(RecipeIngredientRole role, ITypedIngredient<T> value) {
-        this.role = role;
-        this.value = value;
-    }
-    
-    @Override
-    public RecipeIngredientRole getRole() {
-        return role;
-    }
-    
-    @Override
-    @NotNull
-    public Mode getMode() {
-        return switch (role) {
-            case INPUT, CATALYST -> IFocus.Mode.INPUT;
-            case OUTPUT, RENDER_ONLY -> IFocus.Mode.OUTPUT;
-        };
-    }
-    
-    @Override
-    public ITypedIngredient<T> getTypedValue() {
-        return value;
-    }
-    
-    @Override
-    public <T1> Optional<IFocus<T1>> checkedCast(IIngredientType<T1> ingredientType) {
-        if (Objects.equals(value.getType(), ingredientType)) {
-            return Optional.of((IFocus<T1>) this);
-        } else {
-            return Optional.empty();
-        }
-    }
-    
-    public <R> JEIFocus<R> wrap() {
-        return (JEIFocus<R>) this;
+    public JEIFocusGroup(List<IFocus<?>> foci) {
+        this.foci = foci;
     }
     
     @Override
     public boolean isEmpty() {
-        return false;
+        return foci.isEmpty();
     }
     
     @Override
     public List<IFocus<?>> getAllFocuses() {
-        return Collections.singletonList(this);
+        return Collections.unmodifiableList(foci);
     }
     
     @Override
     public Stream<IFocus<?>> getFocuses(RecipeIngredientRole role) {
-        if (getRole() == role) {
-            return Stream.of(this);
-        } else {
-            return Stream.empty();
-        }
+        return foci.stream()
+                .filter(focus -> focus.getRole() == role);
     }
     
     @Override
     public <T> Stream<IFocus<T>> getFocuses(IIngredientType<T> ingredientType) {
-        if (Objects.equals(value.getType(), ingredientType)) {
-            return Stream.of((IFocus<T>) this);
-        } else {
-            return Stream.empty();
-        }
+        return foci.stream()
+                .flatMap(focus -> {
+                    if (focus instanceof IFocusGroup group) {
+                        return group.getFocuses(ingredientType);
+                    } else if (Objects.equals(focus.getTypedValue().getType(), ingredientType)) {
+                        return Stream.of((IFocus<T>) focus);
+                    } else {
+                        return Stream.empty();
+                    }
+                });
     }
     
     @Override
     public <T> Stream<IFocus<T>> getFocuses(IIngredientType<T> ingredientType, RecipeIngredientRole role) {
-        if (Objects.equals(value.getType(), ingredientType) && getRole() == role) {
-            return Stream.of((IFocus<T>) this);
-        } else {
-            return Stream.empty();
-        }
+        return getFocuses(ingredientType)
+                .filter(focus -> focus.getRole() == role);
     }
 }

@@ -1,6 +1,7 @@
 package mezz.jei.api.recipe.vanilla;
 
 import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.world.item.ItemStack;
 
@@ -11,7 +12,7 @@ import java.util.List;
  * The {@link IVanillaRecipeFactory} allows creation of vanilla recipes.
  * Get the instance from {@link IJeiHelpers#getStackHelper()}.
  * <p>
- * Use {@link IRecipeRegistration#addRecipes(Collection, net.minecraft.resources.ResourceLocation)} to add the recipe.
+ * Use {@link IRecipeRegistration#addRecipes(RecipeType, List)} to add the recipe.
  */
 public interface IVanillaRecipeFactory {
     /**

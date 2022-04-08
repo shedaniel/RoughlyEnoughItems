@@ -35,6 +35,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.Minecraft;
@@ -97,10 +98,10 @@ public class JEIWrappedDisplay<T> implements Display {
         return this.backingCategory.getCategoryIdentifier();
     }
     
-    public static List<IFocus<?>> getFoci() {
+    public static IFocusGroup getFoci() {
         ViewSearchBuilder context = Views.getInstance().getContext();
-        List<IFocus<?>> foci = new ArrayList<>();
         if (context != null) {
+            List<IFocus<?>> foci = new ArrayList<>();
             for (EntryStack<?> stack : context.getUsagesFor()) {
                 if (stack != null && !stack.isEmpty()) {
                     foci.add(new JEIFocus<>(RecipeIngredientRole.INPUT, stack.typedJeiValue()));
@@ -111,7 +112,9 @@ public class JEIWrappedDisplay<T> implements Display {
                     foci.add(new JEIFocus<>(RecipeIngredientRole.OUTPUT, stack.typedJeiValue()));
                 }
             }
+            return new JEIFocusGroup(foci);
         } else if (Minecraft.getInstance().screen instanceof DisplayScreen) {
+            List<IFocus<?>> foci = new ArrayList<>();
             DisplayScreen screen = (DisplayScreen) Minecraft.getInstance().screen;
             List<EntryStack<?>> notice = screen.getIngredientsToNotice();
             for (EntryStack<?> stack : notice) {
@@ -125,8 +128,10 @@ public class JEIWrappedDisplay<T> implements Display {
                     foci.add(new JEIFocus<>(RecipeIngredientRole.OUTPUT, stack.typedJeiValue()));
                 }
             }
+            return new JEIFocusGroup(foci);
+        } else {
+            return JEIFocusGroup.EMPTY;
         }
-        return foci;
     }
     
     @Override

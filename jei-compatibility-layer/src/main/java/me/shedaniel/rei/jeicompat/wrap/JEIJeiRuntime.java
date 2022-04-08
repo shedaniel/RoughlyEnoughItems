@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.IFocus;
@@ -36,7 +37,7 @@ public enum JEIJeiRuntime implements IJeiRuntime {
     
     @Override
     public <T> IFocus<T> createFocus(RecipeIngredientRole role, IIngredientType<T> ingredientType, T ingredient) {
-        return new JEIFocus<>(role, createTypedIngredient(ingredientType, ingredient));
+        return JEIFocusFactory.INSTANCE.createFocus(role, ingredientType, ingredient);
     }
     
     @Override
@@ -72,6 +73,11 @@ public enum JEIJeiRuntime implements IJeiRuntime {
     @NotNull
     public IBookmarkOverlay getBookmarkOverlay() {
         return JEIBookmarkOverlay.INSTANCE;
+    }
+    
+    @Override
+    public IJeiHelpers getJeiHelpers() {
+        return JEIJeiHelpers.INSTANCE;
     }
     
     @Override

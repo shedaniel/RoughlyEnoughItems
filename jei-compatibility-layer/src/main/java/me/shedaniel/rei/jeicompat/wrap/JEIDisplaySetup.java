@@ -38,7 +38,7 @@ import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.gui.ingredient.ITooltipCallback;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredients;
-import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -75,7 +75,7 @@ public class JEIDisplaySetup {
         }
     }
     
-    public static <T> Result create(IRecipeCategory<T> category, JEIWrappedDisplay<T> display, List<? extends IFocus<?>> focuses) {
+    public static <T> Result create(IRecipeCategory<T> category, JEIWrappedDisplay<T> display, IFocusGroup focuses) {
         Result result = new Result();
         JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder();
         category.setRecipe(builder, display.getBackingRecipe(), focuses);

@@ -27,6 +27,7 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.helpers.IStackHelper;
+import mezz.jei.api.recipe.IFocusFactory;
 import org.jetbrains.annotations.NotNull;
 
 public enum JEIJeiHelpers implements IJeiHelpers {
@@ -48,5 +49,10 @@ public enum JEIJeiHelpers implements IJeiHelpers {
     @NotNull
     public IModIdHelper getModIdHelper() {
         return JEIModIdHelper.INSTANCE;
+    }
+    
+    @Override
+    public IFocusFactory getFocusFactory() {
+        return JEIFocusFactory.INSTANCE;
     }
 }

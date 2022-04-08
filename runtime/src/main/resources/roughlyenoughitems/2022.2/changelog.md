@@ -27,9 +27,9 @@ Instead of highlighting the items on hover, you can now configure REI to zoom in
 With the [REI Feedback Form](https://forms.gle/5tdnK5WN1wng78pV8), we have received a lot of feedback on the
 scrolling experience. An overwhelming majority of users (79.1%) is happy with smooth scrolling, so we have decided to
 implement this back in REI.
-- **Support for JEI API 9.3** [#781](https://github.com/shedaniel/RoughlyEnoughItems/issues/781)
+- **Support for JEI API 9.5** [#821](https://github.com/shedaniel/RoughlyEnoughItems/issues/821)
 
-The JEI compatibility layer has been updated to support APIs from JEI 9.3, this is a completely new way for
+The JEI compatibility layer has been updated to support APIs from JEI 9.5, this is a completely new way for
 JEI plugins to layout their categories, please report any issues you find with this new update.
 - **Filtering of Entries in Recipes** [#783](https://github.com/shedaniel/RoughlyEnoughItems/issues/783)
 

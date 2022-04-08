@@ -2,6 +2,7 @@ package mezz.jei.api.registration;
 
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IIngredientVisibility;
@@ -37,8 +38,18 @@ public interface IRecipeRegistration {
     
     /**
      * Add the recipes provided by your plugin.
+     *
+     * @deprecated use {@link #addRecipes(RecipeType, List)}
      */
+    @Deprecated(forRemoval = true, since = "9.5.0")
     void addRecipes(Collection<?> recipes, ResourceLocation recipeCategoryUid);
+    
+    /**
+     * Add the recipes provided by your plugin.
+     *
+     * @since 9.5.0
+     */
+    <T> void addRecipes(RecipeType<T> recipeType, List<T> recipes);
     
     /**
      * Add an info page for an ingredient.

@@ -38,6 +38,7 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -142,7 +143,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
         return setupDisplay(getBackingCategory(), display, JEIWrappedDisplay.getFoci(), bounds, this.background);
     }
     
-    public static <T> List<Widget> setupDisplay(IRecipeCategory<T> category, JEIWrappedDisplay<T> display, List<? extends IFocus<?>> focuses, Rectangle bounds, LazyLoadedValue<IDrawable> backgroundLazy) {
+    public static <T> List<Widget> setupDisplay(IRecipeCategory<T> category, JEIWrappedDisplay<T> display, IFocusGroup focuses, Rectangle bounds, LazyLoadedValue<IDrawable> backgroundLazy) {
         List<Widget> widgets = new ArrayList<>();
         JEIDisplaySetup.Result result;
         try {

@@ -27,12 +27,20 @@ import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import net.minecraft.resources.ResourceLocation;
 
 @ExtensionMethod(JEIPluginDetector.class)
 public enum JEIRecipeCatalystRegistration implements IRecipeCatalystRegistration {
     INSTANCE;
+    
+    @Override
+    public <T> void addRecipeCatalyst(IIngredientType<T> ingredientType, T ingredient, RecipeType<?>... recipeTypes) {
+        for (RecipeType<?> type : recipeTypes) {
+            CategoryRegistry.getInstance().addWorkstations(type.categoryId(), ingredient.unwrapStack(ingredientType));
+        }
+    }
     
     @Override
     public <T> void addRecipeCatalyst(IIngredientType<T> ingredientType, T ingredient, ResourceLocation... categoryIds) {
