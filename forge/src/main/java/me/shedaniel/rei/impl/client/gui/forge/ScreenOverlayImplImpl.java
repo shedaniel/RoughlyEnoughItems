@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.forge;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -37,8 +38,11 @@ import java.util.List;
 
 public class ScreenOverlayImplImpl {
     public static void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
+        PoseStack modelViewStack = RenderSystem.getModelViewStack();
+        modelViewStack.pushPose();
+        modelViewStack.translate(0, 0, 500);
+        RenderSystem.applyModelViewMatrix();
         matrices.pushPose();
-        matrices.translate(0, 0, 500);
         EntryStack<?> stack = tooltip.getContextStack();
         ItemStack itemStack = stack.getValue() instanceof ItemStack ? stack.castValue() : ItemStack.EMPTY;
         List<Component> texts = CollectionUtils.filterAndMap(tooltip.entries(), Tooltip.Entry::isText, Tooltip.Entry::getAsText);
@@ -52,5 +56,7 @@ public class ScreenOverlayImplImpl {
         screen.renderTooltipInternal(matrices, components, mouseX, mouseY);
         screen.tooltipStack = ItemStack.EMPTY;
         matrices.popPose();
+        modelViewStack.popPose();
+        RenderSystem.applyModelViewMatrix();
     }
 }
