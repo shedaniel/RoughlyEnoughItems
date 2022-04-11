@@ -27,6 +27,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicates;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
 import io.netty.buffer.Unpooled;
@@ -296,7 +297,7 @@ public class JEIPluginDetector {
         CategoryIdentifier<?> existingId = CATEGORY_ID_MAP.get(id);
         if (existingId != null) return existingId.cast();
         CategoryIdentifier<T> identifier = CategoryIdentifier.of(id);
-        CATEGORY_ID_MAP.putIfAbsent(id, identifier);
+        CATEGORY_ID_MAP.forcePut(id, identifier);
         return identifier;
     }
     
