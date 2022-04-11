@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 public class ScreenOverlayImplImpl {
     public static void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
         matrices.pushPose();
-        matrices.translate(0, 0, 500);
         screen.renderTooltip(matrices, tooltip.getText().stream()
                 .flatMap(component -> {
                     return Minecraft.getInstance().font.getSplitter().splitLines(component, 100000, Style.EMPTY).stream()
