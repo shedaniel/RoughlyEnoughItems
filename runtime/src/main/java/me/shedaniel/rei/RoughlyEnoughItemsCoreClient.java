@@ -376,6 +376,9 @@ public class RoughlyEnoughItemsCoreClient {
         ClientScreenInputEvent.CHAR_TYPED_PRE.register((minecraftClient, screen, character, keyCode) -> {
             if (shouldReturn(screen))
                 return EventResult.pass();
+            if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
+                if (!REIRuntimeImpl.getSearchField().isFocused())
+                    return EventResult.pass();
             resetFocused(screen);
             if (getOverlay().charTyped(character, keyCode)
                 && resetFocused(screen))
@@ -409,7 +412,8 @@ public class RoughlyEnoughItemsCoreClient {
                 }
             }
             if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
-                return EventResult.pass();
+                if (!REIRuntimeImpl.getSearchField().isFocused())
+                    return EventResult.pass();
             resetFocused(screen);
             if (getOverlay().keyPressed(i, i1, i2)
                 && resetFocused(screen))
