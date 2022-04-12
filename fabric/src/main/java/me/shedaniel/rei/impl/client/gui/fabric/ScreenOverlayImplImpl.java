@@ -50,15 +50,19 @@ public class ScreenOverlayImplImpl {
                                 : texts.stream().map(Language.getInstance()::getVisualOrder);
                         return sequenceStream.map(ClientTooltipComponent::create);
                     } else {
-                        return Stream.of(component.getAsComponent());
+                        return Stream.empty();
                     }
                 })
                 .collect(Collectors.toList());
-        for (TooltipComponent component : tooltip.components()) {
-            try {
-                ClientInternals.getClientTooltipComponent(lines, component);
-            } catch (Throwable exception) {
-                throw new IllegalArgumentException("Failed to add tooltip component! " + component + ", Class: " + (component == null ? null : component.getClass().getCanonicalName()), exception);
+        for (Tooltip.Entry entry : tooltip.entries()) {
+            if (entry.isTooltipComponent()) {
+                TooltipComponent component = entry.getAsTooltipComponent();
+                
+                try {
+                    ClientInternals.getClientTooltipComponent(lines, component);
+                } catch (Throwable exception) {
+                    throw new IllegalArgumentException("Failed to add tooltip component! " + component + ", Class: " + (component == null ? null : component.getClass().getCanonicalName()), exception);
+                }
             }
         }
         renderTooltipInner(matrices, lines, tooltip.getX(), tooltip.getY());
