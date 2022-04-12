@@ -242,72 +242,74 @@ public class Argument<T, R> {
     
     public static void prepareFilter(Collection<EntryStack<?>> stacks, Collection<ArgumentType<?, ?>> argumentTypes) {
         if (prepareStage != null || currentStages != null) return;
-        prepareStart = Util.getEpochMillis();
-        prepareStacks = stacks;
-        prepareStage = new IntIntMutablePair(0, argumentTypes.size());
-        currentStages = new IntIntPair[argumentTypes.size()];
-        List<HashedEntryStackWrapper> hashedStacks = CollectionUtils.map(stacks, HashedEntryStackWrapper::new);
-        int searchPartitionSize = ConfigObject.getInstance().getAsyncSearchPartitionSize();
-        boolean async = ConfigObject.getInstance().shouldAsyncSearch() && stacks.size() > searchPartitionSize * 4;
-        List<CompletableFuture<Long2ObjectMap<Object>>> futures = Lists.newArrayList();
-        List<Pair<ArgumentType<?, ?>, CompletableFuture<Long2ObjectMap<Object>>>> pairs = Lists.newArrayList();
-        
-        for (ArgumentType<?, ?> argumentType : argumentTypes) {
-            prepareStage.first(prepareStage.firstInt() + 1);
-            Long2ObjectMap<Object> map = getSearchCache(argumentType);
-            IntIntPair currentStage = currentStages[prepareStage.firstInt() - 1] = new IntIntMutablePair(0, hashedStacks.size());
+        try {
+            prepareStart = Util.getEpochMillis();
+            prepareStacks = stacks;
+            prepareStage = new IntIntMutablePair(0, argumentTypes.size());
+            currentStages = new IntIntPair[argumentTypes.size()];
+            List<HashedEntryStackWrapper> hashedStacks = CollectionUtils.map(stacks, HashedEntryStackWrapper::new);
+            int searchPartitionSize = ConfigObject.getInstance().getAsyncSearchPartitionSize();
+            boolean async = ConfigObject.getInstance().shouldAsyncSearch() && stacks.size() > searchPartitionSize * 4;
+            List<CompletableFuture<Long2ObjectMap<Object>>> futures = Lists.newArrayList();
+            List<Pair<ArgumentType<?, ?>, CompletableFuture<Long2ObjectMap<Object>>>> pairs = Lists.newArrayList();
             
-            if (async) {
-                for (Collection<HashedEntryStackWrapper> partitionStacks : CollectionUtils.partition(hashedStacks, searchPartitionSize)) {
-                    CompletableFuture<Long2ObjectMap<Object>> future = CompletableFuture.supplyAsync(() -> {
-                        Long2ObjectMap<Object> out = new Long2ObjectArrayMap<>(searchPartitionSize + 1);
-                        for (HashedEntryStackWrapper stack : partitionStacks) {
-                            if (map.get(stack.hashExact()) == null) {
-                                Object data = argumentType.cacheData(stack.unwrap());
-                                
-                                if (data != null) {
-                                    out.put(stack.hashExact(), data);
+            for (ArgumentType<?, ?> argumentType : argumentTypes) {
+                prepareStage.first(prepareStage.firstInt() + 1);
+                Long2ObjectMap<Object> map = getSearchCache(argumentType);
+                IntIntPair currentStage = currentStages[prepareStage.firstInt() - 1] = new IntIntMutablePair(0, hashedStacks.size());
+                
+                if (async) {
+                    for (Collection<HashedEntryStackWrapper> partitionStacks : CollectionUtils.partition(hashedStacks, searchPartitionSize)) {
+                        CompletableFuture<Long2ObjectMap<Object>> future = CompletableFuture.supplyAsync(() -> {
+                            Long2ObjectMap<Object> out = new Long2ObjectArrayMap<>(searchPartitionSize + 1);
+                            for (HashedEntryStackWrapper stack : partitionStacks) {
+                                if (map.get(stack.hashExact()) == null) {
+                                    Object data = argumentType.cacheData(stack.unwrap());
+                                    
+                                    if (data != null) {
+                                        out.put(stack.hashExact(), data);
+                                    }
                                 }
                             }
-                        }
-                        return out;
-                    }).whenComplete((objectLong2ObjectMap, throwable) -> {
-                        currentStage.first(currentStage.firstInt() + partitionStacks.size());
-                    });
-                    futures.add(future);
-                    pairs.add(Pair.of(argumentType, future));
-                }
-            } else {
-                for (HashedEntryStackWrapper stack : hashedStacks) {
-                    currentStage.first(currentStage.firstInt() + 1);
-                    
-                    if (map.get(stack.hashExact()) == null) {
-                        Object data = argumentType.cacheData(stack.unwrap());
+                            return out;
+                        }).whenComplete((objectLong2ObjectMap, throwable) -> {
+                            currentStage.first(currentStage.firstInt() + partitionStacks.size());
+                        });
+                        futures.add(future);
+                        pairs.add(Pair.of(argumentType, future));
+                    }
+                } else {
+                    for (HashedEntryStackWrapper stack : hashedStacks) {
+                        currentStage.first(currentStage.firstInt() + 1);
                         
-                        if (data != null) {
-                            map.put(stack.hashExact(), data);
+                        if (map.get(stack.hashExact()) == null) {
+                            Object data = argumentType.cacheData(stack.unwrap());
+                            
+                            if (data != null) {
+                                map.put(stack.hashExact(), data);
+                            }
                         }
                     }
                 }
             }
-        }
-        
-        if (async) {
-            try {
-                CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(10, TimeUnit.SECONDS);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                e.printStackTrace();
+            
+            if (async) {
+                try {
+                    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(10, TimeUnit.SECONDS);
+                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                    e.printStackTrace();
+                }
+                for (Pair<ArgumentType<?, ?>, CompletableFuture<Long2ObjectMap<Object>>> pair : pairs) {
+                    Long2ObjectMap<Object> now = pair.second().getNow(null);
+                    if (now != null) getSearchCache(pair.left()).putAll(now);
+                }
             }
-            for (Pair<ArgumentType<?, ?>, CompletableFuture<Long2ObjectMap<Object>>> pair : pairs) {
-                Long2ObjectMap<Object> now = pair.second().getNow(null);
-                if (now != null) getSearchCache(pair.left()).putAll(now);
-            }
+        } finally {
+            prepareStart = null;
+            prepareStacks = null;
+            prepareStage = null;
+            currentStages = null;
         }
-    
-        prepareStart = null;
-        prepareStacks = null;
-        prepareStage = null;
-        currentStages = null;
     }
     
     public ArgumentType<?, ?> getArgument() {

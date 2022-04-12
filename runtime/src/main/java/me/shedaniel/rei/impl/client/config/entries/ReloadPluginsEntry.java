@@ -96,13 +96,13 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
         Window window = Minecraft.getInstance().getWindow();
         this.reloadPluginsButton.active = this.isEditable();
         this.reloadPluginsButton.y = y;
-        this.reloadPluginsButton.setWidth(width / 2 - 6);
+        this.reloadPluginsButton.setWidth(width / 2 - 2);
         this.reloadPluginsButton.x = x + entryWidth / 2 - width / 2;
         this.reloadPluginsButton.render(matrices, mouseX, mouseY, delta);
         this.reloadSearchButton.active = this.isEditable() && !Argument.SEARCH_CACHE.isEmpty();
         this.reloadSearchButton.y = y;
-        this.reloadSearchButton.setWidth(width / 2 - 6);
-        this.reloadSearchButton.x = x + entryWidth / 2 + 3;
+        this.reloadSearchButton.setWidth(width / 2 - 2);
+        this.reloadSearchButton.x = x + entryWidth / 2 + 2;
         this.reloadSearchButton.render(matrices, mouseX, mouseY, delta);
     }
     

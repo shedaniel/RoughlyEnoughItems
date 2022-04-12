@@ -90,7 +90,9 @@ public class ViewsImpl implements Views {
         }
         
         Stopwatch stopwatch = Stopwatch.createStarted();
+        boolean processingVisibilityHandlers = builder.isProcessingVisibilityHandlers();
         Set<CategoryIdentifier<?>> categories = builder.getCategories();
+        Set<CategoryIdentifier<?>> filteringCategories = builder.getFilteringCategories();
         List<EntryStack<?>> recipesForStacks = builder.getRecipesFor();
         List<EntryStack<?>> usagesForStacks = builder.getUsagesFor();
         recipesForStacks = Stream.concat(recipesForStacks.stream(), recipesForStacks.stream().map(EntryStack::wildcard))
@@ -104,14 +106,15 @@ public class ViewsImpl implements Views {
         Map<DisplayCategory<?>, List<Display>> result = Maps.newLinkedHashMap();
         for (CategoryRegistry.CategoryConfiguration<?> categoryConfiguration : CategoryRegistry.getInstance()) {
             DisplayCategory<?> category = categoryConfiguration.getCategory();
-            if (CategoryRegistry.getInstance().isCategoryInvisible(category)) continue;
+            if (processingVisibilityHandlers && CategoryRegistry.getInstance().isCategoryInvisible(category)) continue;
             CategoryIdentifier<?> categoryId = categoryConfiguration.getCategoryIdentifier();
+            if (!filteringCategories.isEmpty() && !filteringCategories.contains(categoryId)) continue;
             List<Display> allRecipesFromCategory = displayRegistry.get((CategoryIdentifier<Display>) categoryId);
             
             Set<Display> set = Sets.newLinkedHashSet();
             if (categories.contains(categoryId)) {
                 for (Display display : allRecipesFromCategory) {
-                    if (displayRegistry.isDisplayVisible(display)) {
+                    if (!processingVisibilityHandlers || displayRegistry.isDisplayVisible(display)) {
                         set.add(display);
                     }
                 }
@@ -121,7 +124,7 @@ public class ViewsImpl implements Views {
                 continue;
             }
             for (Display display : allRecipesFromCategory) {
-                if (!displayRegistry.isDisplayVisible(display)) continue;
+                if (processingVisibilityHandlers && !displayRegistry.isDisplayVisible(display)) continue;
                 if (!recipesForStacks.isEmpty()) {
                     if (isRecipesFor(recipesForStacks, display)) {
                         set.add(display);
@@ -137,7 +140,11 @@ public class ViewsImpl implements Views {
             }
             for (EntryStack<?> usagesFor : usagesForStacks) {
                 if (isStackWorkStationOfCategory(categoryConfiguration, usagesFor)) {
-                    set.addAll(CollectionUtils.filterToSet(allRecipesFromCategory, displayRegistry::isDisplayVisible));
+                    if (processingVisibilityHandlers) {
+                        set.addAll(CollectionUtils.filterToSet(allRecipesFromCategory, displayRegistry::isDisplayVisible));
+                    } else {
+                        set.addAll(allRecipesFromCategory);
+                    }
                     break;
                 }
             }
@@ -151,7 +158,8 @@ public class ViewsImpl implements Views {
         for (Map.Entry<CategoryIdentifier<?>, List<DynamicDisplayGenerator<?>>> entry : displayRegistry.getCategoryDisplayGenerators().entrySet()) {
             CategoryIdentifier<?> categoryId = entry.getKey();
             DisplayCategory<?> category = CategoryRegistry.getInstance().get(categoryId).getCategory();
-            if (CategoryRegistry.getInstance().isCategoryInvisible(category)) continue;
+            if (processingVisibilityHandlers && CategoryRegistry.getInstance().isCategoryInvisible(category)) continue;
+            if (!filteringCategories.isEmpty() && !filteringCategories.contains(categoryId)) continue;
             Set<Display> set = new LinkedHashSet<>();
             generatorsCount += entry.getValue().size();
             
@@ -165,7 +173,9 @@ public class ViewsImpl implements Views {
         }
         
         Consumer<Display> displayConsumer = display -> {
-            CollectionUtils.getOrPutEmptyList(result, CategoryRegistry.getInstance().get(display.getCategoryIdentifier()).getCategory()).add(display);
+            CategoryIdentifier<?> categoryIdentifier = display.getCategoryIdentifier();
+            if (!filteringCategories.isEmpty() && !filteringCategories.contains(categoryIdentifier)) return;
+            CollectionUtils.getOrPutEmptyList(result, CategoryRegistry.getInstance().get(categoryIdentifier).getCategory()).add(display);
         };
         for (DynamicDisplayGenerator<Display> generator : (List<DynamicDisplayGenerator<Display>>) (List<? extends DynamicDisplayGenerator<?>>) displayRegistry.getGlobalDisplayGenerators()) {
             generatorsCount++;
@@ -174,7 +184,7 @@ public class ViewsImpl implements Views {
         
         Map<DisplayCategory<?>, List<DisplaySpec>> resultSpeced = (Map<DisplayCategory<?>, List<DisplaySpec>>) (Map) new LinkedHashMap<>(result);
         // optimize displays
-        if (ConfigObject.getInstance().doMergeDisplayUnderOne()) {
+        if (builder.isMergingDisplays() && ConfigObject.getInstance().doMergeDisplayUnderOne()) {
             for (Map.Entry<DisplayCategory<?>, List<Display>> entry : result.entrySet()) {
                 DisplayMerger<Display> merger = (DisplayMerger<Display>) entry.getKey().getDisplayMerger();
                 
@@ -293,11 +303,13 @@ public class ViewsImpl implements Views {
     }
     
     private static <T extends Display> void generateLiveDisplays(DisplayRegistry displayRegistry, DynamicDisplayGenerator<T> generator, ViewSearchBuilder builder, Consumer<T> displayConsumer) {
+        boolean processingVisibilityHandlers = builder.isProcessingVisibilityHandlers();
+        
         for (EntryStack<?> stack : builder.getRecipesFor()) {
             Optional<List<T>> recipeForDisplays = generator.getRecipeFor(stack);
             if (recipeForDisplays.isPresent()) {
                 for (T display : recipeForDisplays.get()) {
-                    if (displayRegistry.isDisplayVisible(display)) {
+                    if (!processingVisibilityHandlers || displayRegistry.isDisplayVisible(display)) {
                         displayConsumer.accept(display);
                     }
                 }
@@ -308,7 +320,7 @@ public class ViewsImpl implements Views {
             Optional<List<T>> usageForDisplays = generator.getUsageFor(stack);
             if (usageForDisplays.isPresent()) {
                 for (T display : usageForDisplays.get()) {
-                    if (displayRegistry.isDisplayVisible(display)) {
+                    if (!processingVisibilityHandlers || displayRegistry.isDisplayVisible(display)) {
                         displayConsumer.accept(display);
                     }
                 }
@@ -318,7 +330,7 @@ public class ViewsImpl implements Views {
         Optional<List<T>> displaysGenerated = generator.generate(builder);
         if (displaysGenerated.isPresent()) {
             for (T display : displaysGenerated.get()) {
-                if (displayRegistry.isDisplayVisible(display)) {
+                if (!processingVisibilityHandlers || displayRegistry.isDisplayVisible(display)) {
                     displayConsumer.accept(display);
                 }
             }
