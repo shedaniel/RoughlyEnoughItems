@@ -347,10 +347,6 @@ public class ConfigManagerImpl implements ConfigManager {
                 builder.setGlobalized(true);
                 builder.setGlobalizedExpanded(false);
                 if (Minecraft.getInstance().getConnection() != null && Minecraft.getInstance().getConnection().getRecipeManager() != null) {
-                    builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new ReloadPluginsEntry(220));
-                    builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new PerformanceEntry(220));
-                }
-                return builder.setAfterInitConsumer(screen -> {
                     TextListEntry feedbackEntry = ConfigEntryBuilder.create().startTextDescription(
                             new TranslatableComponent("text.rei.feedback", new TranslatableComponent("text.rei.feedback.link")
                                     .withStyle(style -> style
@@ -361,8 +357,32 @@ public class ConfigManagerImpl implements ConfigManager {
                                     ))
                                     .withStyle(ChatFormatting.GRAY)
                     ).build();
-                    feedbackEntry.setScreen((AbstractConfigScreen) screen);
-                    ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) feedbackEntry);
+                    builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, feedbackEntry);
+                    builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new ReloadPluginsEntry(220));
+                    builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new PerformanceEntry(220));
+                }
+                return builder.setAfterInitConsumer(screen -> {
+                    ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) new EmptyEntry(4));
+                    TextListEntry supportText = ConfigEntryBuilder.create().startTextDescription(
+                            new TranslatableComponent("text.rei.support.me.desc",
+                                    new TranslatableComponent("text.rei.support.me.patreon")
+                                            .withStyle(style -> style
+                                                    .withColor(TextColor.fromRgb(0xff1fc3ff))
+                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://patreon.com/shedaniel"))
+                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ImmutableTextComponent("https://patreon.com/shedaniel")))
+                                            ),
+                                    new TranslatableComponent("text.rei.support.me.bisect")
+                                            .withStyle(style -> style
+                                                    .withColor(TextColor.fromRgb(0xff1fc3ff))
+                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.bisecthosting.com/shedaniel"))
+                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ImmutableTextComponent("https://www.bisecthosting.com/shedaniel")))
+                                            )
+                            )
+                                    .withStyle(ChatFormatting.GRAY)
+                    ).build();
+                    supportText.setScreen((AbstractConfigScreen) screen);
+                    ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) supportText);
+                    ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) new TitleTextEntry(new TranslatableComponent("text.rei.support.me")));
                     ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) new EmptyEntry(4));
                     ScreenHooks.addButton(screen, new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
