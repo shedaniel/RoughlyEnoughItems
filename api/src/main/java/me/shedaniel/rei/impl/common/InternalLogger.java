@@ -21,11 +21,18 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.common.logging;
+package me.shedaniel.rei.impl.common;
 
+import me.shedaniel.rei.impl.Internals;
 import org.apache.logging.log4j.Level;
+import org.jetbrains.annotations.ApiStatus;
 
-public interface Logger {
+@ApiStatus.Internal
+public interface InternalLogger {
+    static InternalLogger getInstance() {
+        return Internals.getInternalLogger();
+    }
+    
     void throwException(Throwable throwable);
     
     void log(Level level, String message);

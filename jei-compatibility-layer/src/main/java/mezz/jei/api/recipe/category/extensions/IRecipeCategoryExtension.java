@@ -10,6 +10,7 @@ import mezz.jei.api.gui.ingredient.IRecipeSlotTooltipCallback;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension;
 import net.minecraft.network.chat.Component;
@@ -87,7 +88,7 @@ public interface IRecipeCategoryExtension {
     /**
      * Gets all the recipe's ingredients by filling out an instance of {@link IIngredients}.
      *
-     * @see ICraftingCategoryExtension#setRecipe(IRecipeLayoutBuilder, ICraftingGridHelper, List)
+     * @see ICraftingCategoryExtension#setRecipe(IRecipeLayoutBuilder, ICraftingGridHelper, IFocusGroup)
      * @deprecated Subclasses of this interface should define their own methods of setting ingredients.
      */
     @Deprecated(forRemoval = true, since = "9.3.0")

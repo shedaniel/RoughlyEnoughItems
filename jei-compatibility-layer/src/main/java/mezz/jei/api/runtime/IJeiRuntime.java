@@ -1,6 +1,7 @@
 package mezz.jei.api.runtime;
 
 import mezz.jei.api.IModPlugin;
+import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.IFocus;
@@ -16,7 +17,9 @@ public interface IJeiRuntime {
      * Returns a new focus.
      *
      * @since 9.3.0
+     * @deprecated Use {@link IJeiHelpers#getFocusFactory()} instead, it's available to use much earlier.
      */
+    @Deprecated(forRemoval = true, since = "9.4.0")
     <T> IFocus<T> createFocus(RecipeIngredientRole role, IIngredientType<T> ingredientType, T ingredient);
     
     /**
@@ -54,6 +57,13 @@ public interface IJeiRuntime {
      * Use this interface to get information from it.
      */
     IBookmarkOverlay getBookmarkOverlay();
+    
+    /**
+     * {@link IJeiHelpers} provides helpers and tools for addon mods.
+     *
+     * @since 9.4.2
+     */
+    IJeiHelpers getJeiHelpers();
     
     /**
      * The {@link IIngredientManager} has some useful functions related to recipe ingredients.

@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.common.logging;
 
+import me.shedaniel.rei.impl.common.InternalLogger;
 import org.apache.commons.io.output.NullOutputStream;
 import org.apache.logging.log4j.Level;
 
@@ -33,7 +34,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class FileLogger implements Logger {
+public class FileLogger implements InternalLogger {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss");
     private final Writer writer;
     

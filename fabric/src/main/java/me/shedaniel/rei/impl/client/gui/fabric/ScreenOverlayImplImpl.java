@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.fabric;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.ClientInternals;
@@ -49,15 +50,19 @@ public class ScreenOverlayImplImpl {
                                 : texts.stream().map(Language.getInstance()::getVisualOrder);
                         return sequenceStream.map(ClientTooltipComponent::create);
                     } else {
-                        return Stream.of(component.getAsComponent());
+                        return Stream.empty();
                     }
                 })
                 .collect(Collectors.toList());
-        for (TooltipComponent component : tooltip.components()) {
-            try {
-                ClientInternals.getClientTooltipComponent(lines, component);
-            } catch (Throwable exception) {
-                throw new IllegalArgumentException("Failed to add tooltip component! " + component + ", Class: " + (component == null ? null : component.getClass().getCanonicalName()), exception);
+        for (Tooltip.Entry entry : tooltip.entries()) {
+            if (entry.isTooltipComponent()) {
+                TooltipComponent component = entry.getAsTooltipComponent();
+                
+                try {
+                    ClientInternals.getClientTooltipComponent(lines, component);
+                } catch (Throwable exception) {
+                    throw new IllegalArgumentException("Failed to add tooltip component! " + component + ", Class: " + (component == null ? null : component.getClass().getCanonicalName()), exception);
+                }
             }
         }
         renderTooltipInner(matrices, lines, tooltip.getX(), tooltip.getY());
@@ -67,9 +72,14 @@ public class ScreenOverlayImplImpl {
         if (lines.isEmpty()) {
             return;
         }
+        PoseStack modelViewStack = RenderSystem.getModelViewStack();
+        modelViewStack.pushPose();
+        modelViewStack.translate(0, 0, 500);
+        RenderSystem.applyModelViewMatrix();
         matrices.pushPose();
-        matrices.translate(0, 0, 500);
         Minecraft.getInstance().screen.renderTooltipInternal(matrices, lines, mouseX, mouseY);
         matrices.popPose();
+        modelViewStack.popPose();
+        RenderSystem.applyModelViewMatrix();
     }
 }

@@ -25,6 +25,9 @@ package me.shedaniel.rei.jeicompat;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicates;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
 import io.netty.buffer.Unpooled;
@@ -59,6 +62,7 @@ import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.jeicompat.imitator.JEIInternalsClickedIngredient;
 import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
 import me.shedaniel.rei.jeicompat.wrap.*;
@@ -72,6 +76,7 @@ import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.advanced.IRecipeManagerPlugin;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.category.extensions.IRecipeCategoryExtension;
@@ -243,7 +248,8 @@ public class JEIPluginDetector {
     }
     
     public static final Map<Class<?>, IIngredientType<?>> INGREDIENT_TYPE_MAP = new HashMap<>();
-    public static final Map<ResourceLocation, CategoryIdentifier<?>> CATEGORY_ID_MAP = new HashMap<>();
+    public static final BiMap<ResourceLocation, CategoryIdentifier<?>> CATEGORY_ID_MAP = HashBiMap.create();
+    public static final Map<ResourceLocation, RecipeType<?>> RECIPE_TYPE_MAP = new HashMap<>();
     
     static {
         CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "crafting"), BuiltinPlugin.CRAFTING);
@@ -271,11 +277,27 @@ public class JEIPluginDetector {
         return type;
     }
     
+    public static <T extends Display, R> CategoryIdentifier<T> categoryId(RecipeType<R> id) {
+        return categoryId(id.getUid());
+    }
+    
+    public static <T extends Display, R> RecipeType<R> asRecipeType(CategoryIdentifier<T> id, Class<? extends R> recipeType) {
+        return asRecipeType(id.getIdentifier(), recipeType);
+    }
+    
+    public static <R> RecipeType<R> asRecipeType(ResourceLocation id, Class<? extends R> recipeType) {
+        RecipeType<R> existingType = (RecipeType<R>) RECIPE_TYPE_MAP.get(id);
+        if (existingType != null) return existingType;
+        RecipeType<R> type = new RecipeType<>(id, recipeType);
+        RECIPE_TYPE_MAP.putIfAbsent(id, type);
+        return type;
+    }
+    
     public static <T extends Display> CategoryIdentifier<T> categoryId(ResourceLocation id) {
         CategoryIdentifier<?> existingId = CATEGORY_ID_MAP.get(id);
         if (existingId != null) return existingId.cast();
         CategoryIdentifier<T> identifier = CategoryIdentifier.of(id);
-        CATEGORY_ID_MAP.put(id, identifier);
+        CATEGORY_ID_MAP.forcePut(id, identifier);
         return identifier;
     }
     
@@ -537,6 +559,7 @@ public class JEIPluginDetector {
         @Override
         public void postStage(PluginManager<REIClientPlugin> manager, ReloadStage stage) {
             if (stage == ReloadStage.END && Objects.equals(manager, PluginManager.getClientInstance())) {
+                InternalLogger.getInstance().debug("Running post-register for %s with %d post tasks", getPluginProviderName(), post.size());
                 for (Map.Entry<DisplayCategory<?>, List<Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>>>> entry : categories.entrySet()) {
                     DisplayCategory<?> category = entry.getKey();
                     for (Triple<Class<?>, Predicate<Object>, Function<Object, IRecipeCategoryExtension>> pair : entry.getValue()) {

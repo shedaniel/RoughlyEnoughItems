@@ -48,7 +48,15 @@ public interface Tooltip {
         return ClientInternals.createTooltipEntry(text);
     }
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     static Tooltip.Entry entry(ClientTooltipComponent text) {
+        return ClientInternals.createTooltipEntry(text);
+    }
+    
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
+    static Tooltip.Entry entry(TooltipComponent text) {
         return ClientInternals.createTooltipEntry(text);
     }
     
@@ -90,14 +98,27 @@ public interface Tooltip {
     
     List<Entry> entries();
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     List<TooltipComponent> components();
     
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     Tooltip add(ClientTooltipComponent component);
     
     Tooltip add(Component text);
     
     Tooltip add(TooltipComponent component);
     
+    default Tooltip addAll(TooltipComponent... components) {
+        for (TooltipComponent component : components) {
+            add(component);
+        }
+        return this;
+    }
+    
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     default Tooltip addAll(ClientTooltipComponent... components) {
         for (ClientTooltipComponent component : components) {
             add(component);
@@ -112,6 +133,15 @@ public interface Tooltip {
         return this;
     }
     
+    default Tooltip addAllTooltipComponents(Iterable<TooltipComponent> text) {
+        for (TooltipComponent component : text) {
+            add(component);
+        }
+        return this;
+    }
+    
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     default Tooltip addAllComponents(Iterable<ClientTooltipComponent> text) {
         for (ClientTooltipComponent component : text) {
             add(component);
@@ -134,12 +164,20 @@ public interface Tooltip {
         EnvExecutor.runInEnv(Env.CLIENT, () -> () -> REIRuntime.getInstance().queueTooltip(this));
     }
     
+    Tooltip copy();
+    
     @ApiStatus.NonExtendable
     interface Entry {
         boolean isText();
         
+        boolean isTooltipComponent();
+        
         Component getAsText();
         
+        TooltipComponent getAsTooltipComponent();
+        
+        @Deprecated
+        @ApiStatus.ScheduledForRemoval
         ClientTooltipComponent getAsComponent();
     }
 }

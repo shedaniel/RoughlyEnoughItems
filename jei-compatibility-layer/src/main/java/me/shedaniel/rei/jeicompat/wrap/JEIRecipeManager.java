@@ -23,12 +23,11 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import lombok.experimental.ExtensionMethod;
 import dev.architectury.event.EventResult;
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.category.visibility.CategoryVisibilityPredicate;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibilityPredicate;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
@@ -38,8 +37,7 @@ import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
 import mezz.jei.api.gui.IRecipeLayoutDrawable;
 import mezz.jei.api.ingredients.ITypedIngredient;
-import mezz.jei.api.recipe.IFocus;
-import mezz.jei.api.recipe.IRecipeManager;
+import mezz.jei.api.recipe.*;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
@@ -126,8 +124,52 @@ public enum JEIRecipeManager implements IRecipeManager {
     }
     
     @Override
+    public <R> IRecipeLookup<R> createRecipeLookup(RecipeType<R> recipeType) {
+        return new JEIRecipeLookup<>(recipeType.categoryId());
+    }
+    
+    @Override
+    public IRecipeCategoriesLookup createRecipeCategoryLookup() {
+        return null;
+    }
+    
+    @Override
+    public IRecipeCatalystLookup createRecipeCatalystLookup(RecipeType<?> recipeType) {
+        return null;
+    }
+    
+    @Override
+    public <T> void hideRecipes(RecipeType<T> recipeType, Collection<T> recipes) {
+        hiddenRecipes.computeIfAbsent(recipeType.categoryId(), $ -> new HashSet<>()).addAll(recipes);
+    }
+    
+    @Override
+    public <T> void unhideRecipes(RecipeType<T> recipeType, Collection<T> recipes) {
+        CategoryIdentifier<Display> categoryIdentifier = recipeType.categoryId();
+        hiddenRecipes.computeIfAbsent(categoryIdentifier, $ -> new HashSet<>()).removeAll(recipes);
+        if (hiddenRecipes.get(categoryIdentifier).isEmpty()) {
+            hiddenRecipes.remove(categoryIdentifier);
+        }
+    }
+    
+    @Override
+    public <T> void addRecipes(RecipeType<T> recipeType, List<T> recipes) {
+        JEIRecipeRegistration.addRecipes0(recipes, recipeType.getUid());
+    }
+    
+    @Override
+    public void hideRecipeCategory(RecipeType<?> recipeType) {
+        this.hiddenCategories.add(recipeType.categoryId());
+    }
+    
+    @Override
+    public void unhideRecipeCategory(RecipeType<?> recipeType) {
+        this.hiddenCategories.remove(recipeType.categoryId());
+    }
+    
+    @Override
     @Nullable
-    public <T> IRecipeLayoutDrawable createRecipeLayoutDrawable(IRecipeCategory<T> recipeCategory, T recipe, IFocus<?> focus) {
+    public <T> IRecipeLayoutDrawable createRecipeLayoutDrawable(IRecipeCategory<T> recipeCategory, T recipe, @Nullable IFocus<?> focus) {
         throw TODO();
     }
     
@@ -159,12 +201,7 @@ public enum JEIRecipeManager implements IRecipeManager {
     
     @Override
     public <T> void addRecipe(T recipe, ResourceLocation recipeCategoryUid) {
-        Collection<Display> displays = recipe.createDisplayFrom();
-        for (Display display : displays) {
-            if (Objects.equals(display.getCategoryIdentifier().getIdentifier(), recipeCategoryUid)) {
-                DisplayRegistry.getInstance().add(display, recipe);
-            }
-        }
+        JEIRecipeRegistration.addRecipes0(Collections.singletonList(recipe), recipeCategoryUid);
     }
     
     public class DisplayPredicate implements DisplayVisibilityPredicate {

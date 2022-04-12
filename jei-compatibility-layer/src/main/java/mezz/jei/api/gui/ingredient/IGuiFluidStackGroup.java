@@ -17,7 +17,7 @@ import java.util.List;
  * <p>
  * Get an instance from {@link IRecipeLayout#getFluidStacks()}.
  *
- * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, List)}
+ * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, IFocusGroup)}
  */
 @Deprecated(forRemoval = true, since = "9.3.0")
 public interface IGuiFluidStackGroup extends IGuiIngredientGroup<FluidStack> {

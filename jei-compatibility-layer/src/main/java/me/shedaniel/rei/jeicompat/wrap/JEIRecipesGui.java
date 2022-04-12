@@ -33,10 +33,10 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.runtime.IRecipesGui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -50,7 +50,7 @@ public enum JEIRecipesGui implements IRecipesGui {
         ViewSearchBuilder builder = ViewSearchBuilder.builder();
         if (focus != null) {
             EntryStack<?> stack = focus.getValue().unwrapStack();
-
+            
             if (stack != null && !stack.isEmpty()) {
                 if (focus.getMode() == IFocus.Mode.INPUT) {
                     builder.addUsagesFor(stack);
@@ -77,7 +77,12 @@ public enum JEIRecipesGui implements IRecipesGui {
     }
     
     @Override
-    public void showCategories(@NotNull List<ResourceLocation> recipeCategoryUids) {
+    public void showTypes(List<RecipeType<?>> recipeTypes) {
+        ViewSearchBuilder.builder().addCategories(CollectionUtils.map(recipeTypes, JEIPluginDetector::categoryId)).open();
+    }
+    
+    @Override
+    public void showCategories(List<ResourceLocation> recipeCategoryUids) {
         ViewSearchBuilder.builder().addCategories(CollectionUtils.map(recipeCategoryUids, CategoryIdentifier::of)).open();
     }
     

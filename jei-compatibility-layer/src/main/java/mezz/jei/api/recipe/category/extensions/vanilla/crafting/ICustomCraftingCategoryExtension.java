@@ -6,6 +6,7 @@ import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.ingredient.ICraftingGridHelper;
 import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
 import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.category.extensions.IRecipeCategoryExtension;
 
@@ -15,7 +16,7 @@ import java.util.List;
  * This interface allows recipes to override the default behavior in the
  * {@link VanillaRecipeCategoryUid#CRAFTING} recipe category.
  *
- * @deprecated Use {@link ICraftingCategoryExtension#setRecipe(IRecipeLayoutBuilder, ICraftingGridHelper, List)} instead.
+ * @deprecated Use {@link ICraftingCategoryExtension#setRecipe(IRecipeLayoutBuilder, ICraftingGridHelper, IFocusGroup)} instead.
  */
 @Deprecated(forRemoval = true, since = "9.3.0")
 public interface ICustomCraftingCategoryExtension extends ICraftingCategoryExtension {
@@ -29,7 +30,7 @@ public interface ICustomCraftingCategoryExtension extends ICraftingCategoryExten
      *
      * @param recipeLayout the layout that needs its properties set.
      * @param ingredients  the ingredients, already set by the recipeWrapper
-     * @deprecated Use {@link ICraftingCategoryExtension#setRecipe(IRecipeLayoutBuilder, ICraftingGridHelper, List)} instead.
+     * @deprecated Use {@link ICraftingCategoryExtension#setRecipe(IRecipeLayoutBuilder, ICraftingGridHelper, IFocusGroup)} instead.
      */
     @Deprecated(forRemoval = true, since = "9.3.0")
     void setRecipe(IRecipeLayout recipeLayout, IIngredients ingredients);

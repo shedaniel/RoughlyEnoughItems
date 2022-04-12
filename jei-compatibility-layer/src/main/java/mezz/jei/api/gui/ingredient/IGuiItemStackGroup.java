@@ -16,7 +16,7 @@ import java.util.List;
  * <p>
  * Get an instance from {@link IRecipeLayout#getItemStacks()}.
  *
- * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, List)}
+ * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, IFocusGroup)}
  */
 @Deprecated(forRemoval = true, since = "9.3.0")
 public interface IGuiItemStackGroup extends IGuiIngredientGroup<ItemStack> {
@@ -26,7 +26,7 @@ public interface IGuiItemStackGroup extends IGuiIngredientGroup<ItemStack> {
      *
      * @apiNote for legacy reasons, this method adds a padding and offset of 1 pixel on all sides, so that an 18x18 slot texture will center a 16x16 item.
      * The new methods do not have this legacy 1 pixel offset.
-     * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, List)}
+     * @deprecated Update to using {@link IRecipeCategory#setRecipe(IRecipeLayoutBuilder, Object, IFocusGroup)}
      * and {@link IRecipeLayoutBuilder#addSlot(RecipeIngredientRole, int, int)}
      */
     @Override

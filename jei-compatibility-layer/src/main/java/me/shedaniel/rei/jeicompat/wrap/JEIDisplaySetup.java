@@ -38,14 +38,12 @@ import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.gui.ingredient.ITooltipCallback;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredients;
-import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class JEIDisplaySetup {
@@ -75,7 +73,7 @@ public class JEIDisplaySetup {
         }
     }
     
-    public static <T> Result create(IRecipeCategory<T> category, JEIWrappedDisplay<T> display, List<? extends IFocus<?>> focuses) {
+    public static <T> Result create(IRecipeCategory<T> category, JEIWrappedDisplay<T> display, IFocusGroup focuses) {
         Result result = new Result();
         JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder();
         category.setRecipe(builder, display.getBackingRecipe(), focuses);
@@ -157,11 +155,9 @@ public class JEIDisplaySetup {
                     ClientEntryStacks.setTooltipProcessor(entry, (stack, tooltip) -> {
                         Object ingredient = null;
                         List<Component> components = CollectionUtils.filterAndMap(tooltip.entries(), Tooltip.Entry::isText, Tooltip.Entry::getAsText);
-                        List<ClientTooltipComponent> tooltipComponents = CollectionUtils.filterAndMap(tooltip.entries(), ((Predicate<Tooltip.Entry>) Tooltip.Entry::isText).negate(), Tooltip.Entry::getAsComponent);
                         slot.tooltipCallback.onTooltip(slot, components);
-                        tooltip.entries().clear();
+                        tooltip.entries().removeIf(Tooltip.Entry::isText);
                         tooltip.addAllTexts(components);
-                        tooltip.addAllComponents(tooltipComponents);
                         return tooltip;
                     });
                 }

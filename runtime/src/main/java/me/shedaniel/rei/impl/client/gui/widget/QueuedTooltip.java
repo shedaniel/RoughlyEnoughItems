@@ -29,6 +29,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -46,17 +47,15 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public class QueuedTooltip implements Tooltip {
     private Point location;
-    private List<Tooltip.Entry> entries;
-    private List<TooltipComponent> components;
+    private List<TooltipEntryImpl> entries;
     private EntryStack<?> stack = EntryStack.empty();
     
-    private QueuedTooltip(Point location, Collection<Tooltip.Entry> entries) {
+    private QueuedTooltip(Point location, Collection<? extends Tooltip.Entry> entries) {
         this.location = location;
         if (this.location == null) {
             this.location = PointHelper.ofMouse();
         }
-        this.entries = Lists.newArrayList(entries);
-        this.components = Lists.newArrayList();
+        this.entries = (List<TooltipEntryImpl>) Lists.newArrayList(entries);
     }
     
     public static QueuedTooltip impl(Point location, Collection<Tooltip.Entry> text) {
@@ -75,12 +74,12 @@ public class QueuedTooltip implements Tooltip {
     
     @Override
     public List<Entry> entries() {
-        return entries;
+        return (List<Entry>) (List<? extends Entry>) entries;
     }
     
     @Override
     public List<TooltipComponent> components() {
-        return components;
+        return CollectionUtils.filterAndMap(entries, TooltipEntryImpl::isTooltipComponent, TooltipEntryImpl::getAsTooltipComponent);
     }
     
     @Override
@@ -97,13 +96,20 @@ public class QueuedTooltip implements Tooltip {
     
     @Override
     public Tooltip add(TooltipComponent component) {
-        components.add(component);
+        entries.add(new TooltipEntryImpl(component));
         return this;
     }
     
     @Override
     public void queue() {
         Tooltip.super.queue();
+    }
+    
+    @Override
+    public Tooltip copy() {
+        QueuedTooltip tooltip = new QueuedTooltip(location.clone(), entries);
+        tooltip.withContextStack(getContextStack());
+        return tooltip;
     }
     
     @Override
@@ -128,8 +134,25 @@ public class QueuedTooltip implements Tooltip {
             return obj instanceof Component;
         }
         
+        public boolean isTooltipComponent() {
+            return obj instanceof TooltipComponent;
+        }
+        
+        public boolean isClientComponent() {
+            return obj instanceof ClientTooltipComponent;
+        }
+        
+        @Override
+        public TooltipComponent getAsTooltipComponent() {
+            return (TooltipComponent) obj;
+        }
+        
         @Override
         public ClientTooltipComponent getAsComponent() {
+            if (isTooltipComponent()) {
+                return ClientTooltipComponent.create((TooltipComponent) obj);
+            }
+            
             return (ClientTooltipComponent) obj;
         }
     }

@@ -35,6 +35,7 @@ import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -76,7 +77,9 @@ public class CachedEntryListRender {
     }
     
     public static void refresh() {
-        RoughlyEnoughItemsCore.LOGGER.info("Refreshing cached entry list texture...");
+        if (ConfigObject.getInstance().doesCacheEntryRendering()) {
+            RoughlyEnoughItemsCore.LOGGER.info("Refreshing cached entry list texture...");
+        }
         if (cachedTextureLocation != null) {
             Minecraft.getInstance().getTextureManager().release(cachedTextureLocation);
             cachedTextureLocation = null;

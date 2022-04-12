@@ -27,10 +27,29 @@ import me.shedaniel.rei.plugin.common.displays.brewing.BrewingRecipe;
 import mezz.jei.api.recipe.vanilla.IJeiBrewingRecipe;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import org.jetbrains.annotations.Unmodifiable;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class JEIBrewingRecipe extends BrewingRecipe implements IJeiBrewingRecipe {
     public JEIBrewingRecipe(Ingredient input, Ingredient ingredient, ItemStack output) {
         super(input, ingredient, output);
+    }
+    
+    @Override
+    public @Unmodifiable List<ItemStack> getPotionInputs() {
+        return Arrays.asList(input.getItems());
+    }
+    
+    @Override
+    public @Unmodifiable List<ItemStack> getIngredients() {
+        return Arrays.asList(ingredient.getItems());
+    }
+    
+    @Override
+    public ItemStack getPotionOutput() {
+        return output;
     }
     
     @Override

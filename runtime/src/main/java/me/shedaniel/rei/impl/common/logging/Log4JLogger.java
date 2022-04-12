@@ -23,9 +23,10 @@
 
 package me.shedaniel.rei.impl.common.logging;
 
+import me.shedaniel.rei.impl.common.InternalLogger;
 import org.apache.logging.log4j.Level;
 
-public class Log4JLogger implements Logger {
+public class Log4JLogger implements InternalLogger {
     private final org.apache.logging.log4j.Logger logger;
     
     public Log4JLogger(org.apache.logging.log4j.Logger logger) {

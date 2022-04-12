@@ -362,11 +362,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
         Rectangle bounds = getInnerBounds();
-        setZ(300);
         fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0x80ffffff, 0x80ffffff);
         int darkColor = 0x111111 | ((int) (90 * darkHighlightedAlpha.value()) << 24);
         fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), darkColor, darkColor);
-        setZ(0);
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.enableDepthTest();
     }

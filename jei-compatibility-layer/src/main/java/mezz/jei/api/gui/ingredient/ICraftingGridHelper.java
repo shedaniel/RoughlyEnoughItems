@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
  * This places smaller recipes in the grid in a consistent way.
  *
  * This is passed to plugins that implement
- * {@link ICraftingCategoryExtension#setRecipe(IRecipeLayoutBuilder, ICraftingGridHelper, List)}
+ * {@link ICraftingCategoryExtension#setRecipe(IRecipeLayoutBuilder, ICraftingGridHelper, IFocusGroup)}
  * to help them override the default behavior.
  */
 public interface ICraftingGridHelper {
