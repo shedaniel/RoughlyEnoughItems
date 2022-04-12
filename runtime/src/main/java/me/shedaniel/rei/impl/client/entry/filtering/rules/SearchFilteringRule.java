@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.entry.filtering.rules;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
@@ -41,6 +42,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.StringUtil;
 
 import java.util.Collection;
 import java.util.List;
@@ -51,23 +53,30 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
 public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRule> {
-    private SearchFilter filter;
+    private String filterStr;
+    private Supplier<SearchFilter> filter;
     private boolean show;
     
     public SearchFilteringRule() {
     }
     
-    public SearchFilteringRule(SearchFilter filter, boolean show) {
-        this.filter = filter;
+    public SearchFilteringRule(String filter, boolean show) {
+        setFilter(filter);
         this.show = show;
+    }
+    
+    public void setFilter(String filter) {
+        this.filterStr = filter;
+        this.filter = Suppliers.memoize(() -> StringUtil.isNullOrEmpty(filter) ? SearchFilter.matchAll() : SearchProvider.getInstance().createFilter(filter));
     }
     
     @Override
     public CompoundTag save(CompoundTag tag) {
-        tag.putString("filter", filter.getFilter());
+        tag.putString("filter", filterStr);
         tag.putBoolean("show", show);
         return tag;
     }
@@ -76,7 +85,7 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
     public SearchFilteringRule createFromTag(CompoundTag tag) {
         String filter = tag.getString("filter");
         boolean show = tag.getBoolean("show");
-        return new SearchFilteringRule(SearchProvider.getInstance().createFilter(filter), show);
+        return new SearchFilteringRule(filter, show);
     }
     
     @Override
@@ -106,7 +115,7 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
     
     @Override
     public SearchFilteringRule createNew() {
-        return new SearchFilteringRule(SearchFilter.matchAll(), true);
+        return new SearchFilteringRule("", true);
     }
     
     private void processList(Collection<EntryStack<?>> stacks, List<CompletableFuture<List<EntryStack<?>>>> completableFutures) {
@@ -114,7 +123,7 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
             completableFutures.add(CompletableFuture.supplyAsync(() -> {
                 List<EntryStack<?>> output = Lists.newArrayList();
                 for (EntryStack<?> stack : partitionStacks) {
-                    if (stack != null && filter.test(stack)) {
+                    if (stack != null && filter.get().test(stack)) {
                         output.add(stack);
                     }
                 }
@@ -146,7 +155,7 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
                 entryConsumer.accept(entry = new TextFieldRuleEntry(width - 36, rule, widget -> {
                     widget.setMaxLength(9999);
                     if (entry != null) widget.setValue(entry.getWidget().getValue());
-                    else widget.setValue(rule.filter.getFilter());
+                    else widget.setValue(rule.filterStr);
                 }));
                 addEmpty(entryConsumer, 10);
                 addText(entryConsumer, new TranslatableComponent("rule.roughlyenoughitems.filtering.search.show").withStyle(ChatFormatting.GRAY));
@@ -157,7 +166,7 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
             
             @Override
             public void save() {
-                rule.filter = SearchProvider.getInstance().createFilter(entry.getWidget().getValue());
+                rule.setFilter(entry.getWidget().getValue());
                 rule.show = show.getBoolean();
             }
         });
