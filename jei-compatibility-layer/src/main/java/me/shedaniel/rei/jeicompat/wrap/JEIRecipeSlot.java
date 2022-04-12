@@ -195,14 +195,12 @@ public class JEIRecipeSlot implements IRecipeSlotBuilder, IRecipeSlotView {
     public void drawHighlight(PoseStack stack, int color) {
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
-        slot.setZ(300);
         Rectangle bounds = slot.getInnerBounds().clone();
         try {
             m_93179_.invoke(slot, stack, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), color, color);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
-        slot.setZ(0);
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.enableDepthTest();
     }

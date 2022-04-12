@@ -27,6 +27,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -40,11 +41,11 @@ public class ScreenOverlayImplImpl {
     public static void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
         PoseStack modelViewStack = RenderSystem.getModelViewStack();
         modelViewStack.pushPose();
-        modelViewStack.translate(0, 0, 500);
+//        modelViewStack.translate(0, 0, 500);
         RenderSystem.applyModelViewMatrix();
         matrices.pushPose();
         EntryStack<?> stack = tooltip.getContextStack();
-        ItemStack itemStack = stack.getValue() instanceof ItemStack ? stack.castValue() : ItemStack.EMPTY;
+        ItemStack itemStack = stack.getType() == VanillaEntryTypes.ITEM ? stack.castValue() : ItemStack.EMPTY;
         List<Component> texts = CollectionUtils.filterAndMap(tooltip.entries(), Tooltip.Entry::isText, Tooltip.Entry::getAsText);
         List<ClientTooltipComponent> components = ForgeHooksClient.gatherTooltipComponents(itemStack, texts, mouseX, screen.width, screen.height, null, screen.getMinecraft().font);
         for (Tooltip.Entry entry : tooltip.entries()) {

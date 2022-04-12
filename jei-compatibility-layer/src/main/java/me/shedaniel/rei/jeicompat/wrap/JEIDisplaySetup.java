@@ -41,11 +41,9 @@ import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
 
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class JEIDisplaySetup {
@@ -157,11 +155,9 @@ public class JEIDisplaySetup {
                     ClientEntryStacks.setTooltipProcessor(entry, (stack, tooltip) -> {
                         Object ingredient = null;
                         List<Component> components = CollectionUtils.filterAndMap(tooltip.entries(), Tooltip.Entry::isText, Tooltip.Entry::getAsText);
-                        List<ClientTooltipComponent> tooltipComponents = CollectionUtils.filterAndMap(tooltip.entries(), ((Predicate<Tooltip.Entry>) Tooltip.Entry::isText).negate(), Tooltip.Entry::getAsComponent);
                         slot.tooltipCallback.onTooltip(slot, components);
-                        tooltip.entries().clear();
+                        tooltip.entries().removeIf(Tooltip.Entry::isText);
                         tooltip.addAllTexts(components);
-                        tooltip.addAllComponents(tooltipComponents);
                         return tooltip;
                     });
                 }

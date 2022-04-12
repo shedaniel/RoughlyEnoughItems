@@ -295,17 +295,6 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
                 Minecraft.getInstance().getItemRenderer().render(value, ItemTransforms.TransformType.GUI, false, matrices, immediate,
                         ITEM_LIGHT, OverlayTexture.NO_OVERLAY, model);
                 matrices.popPose();
-                
-                /*ItemStack value = entry.getValue();
-                matrices.pushPose();
-                matrices.last().pose().load(RenderSystem.getModelViewStack().last().pose());
-                matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, 1.0F);
-                RenderSystem.modelViewMatrix = matrices.last().pose();
-                PoseStack stack = new PoseStack();
-                stack.translate(bounds.getCenterX() / (double) bounds.getWidth(),bounds.getCenterY() * -2.0 / (bounds.getWidth() + bounds.getHeight()),100.0F + entry.getZ());
-                Minecraft.getInstance().getItemRenderer().render(value, ItemTransforms.TransformType.GUI, false, stack, immediate,
-                        0xf000f0, OverlayTexture.NO_OVERLAY, getModelFromStack(value));
-                matrices.popPose();*/
             }
         }
         
