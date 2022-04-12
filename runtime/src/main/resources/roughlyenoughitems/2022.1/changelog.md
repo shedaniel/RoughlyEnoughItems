@@ -3,7 +3,7 @@
 
 You can now easily set the time of day for your worlds. You can click the "+" button on the bottom left of
 the screen to add this new favorite. We also took some time to re-make the weather icons!
-![Example](roughlyenoughitems/2022.1/2022-02-18_01-30.png)
+![Example](roughlyenoughitems/2022.2/2022-02-18_01-30.png)
 
 - **Creative Mode Cheats** [#768](https://github.com/shedaniel/RoughlyEnoughItems/issues/768)
 
@@ -19,14 +19,9 @@ with an average of **2.5x performance gain**. However, this will break enchantme
 - **Item Zoom** [#430](https://github.com/shedaniel/RoughlyEnoughItems/issues/430)
 
 Instead of highlighting the items on hover, you can now configure REI to zoom in on the item you are hovering.
-![Example](roughlyenoughitems/2022.1/2022-02-18_09-05.png)
+![Example](roughlyenoughitems/2022.2/2022-02-18_09-05.png)
 ---
 #**Changes**
-- **Smoother Scrolling**
-
-With the [REI Feedback Form](https://forms.gle/5tdnK5WN1wng78pV8), we have received a lot of feedback on the
-scrolling experience. An overwhelming majority of users (79.1%) is happy with smooth scrolling, so we have decided to
-implement this back in REI.
 - **Support for JEI API 9.5** [#821](https://github.com/shedaniel/RoughlyEnoughItems/issues/821)
 
 The JEI compatibility layer has been updated to support APIs from JEI 9.5, this is a completely new way for
