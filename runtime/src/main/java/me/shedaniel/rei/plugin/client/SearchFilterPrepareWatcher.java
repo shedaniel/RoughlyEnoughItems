@@ -57,7 +57,9 @@ public class SearchFilterPrepareWatcher implements HintProvider {
             int currentStageTotal = currentStage == null ? 0 : currentStage.getRight();
                 double prepareStageProgress = prepareStageTotal == 0 ? 0 : prepareStageCurrent / (double) prepareStageTotal;
                 double currentStageProgress = currentStageTotal == 0 ? 0 : currentStageCurrent / (double) currentStageTotal;
-                lastProcess = prepareStageTotal == 0 ? 0 : Math.max(0, prepareStageProgress - (1 - currentStageProgress) / prepareStageTotal);
+                double lastProcess = prepareStageTotal == 0 ? 0 : Math.max(0, prepareStageProgress - (1 - currentStageProgress) / prepareStageTotal);
+                if (lastProcess < 0.05 || lastProcess > 0.95) return Collections.emptyList();
+                this.lastProcess = lastProcess;
                 return ImmutableList.of(new TranslatableComponent("text.rei.caching.search"),
                         new TranslatableComponent("text.rei.caching.search.step", prepareStageCurrent, prepareStageTotal, Math.round(lastProcess * 100)));
             }
