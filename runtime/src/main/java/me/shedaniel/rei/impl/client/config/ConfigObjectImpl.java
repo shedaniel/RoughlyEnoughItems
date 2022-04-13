@@ -569,7 +569,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             private SearchFieldLocation searchFieldLocation = SearchFieldLocation.CENTER;
             @Comment("Declares the position of the config button.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
             private ConfigButtonPosition configButtonLocation = ConfigButtonPosition.LOWER;
-            @Comment("Declares whether the craftable filter button is enabled.") private boolean enableCraftableOnlyButton = false;
+            @Comment("Declares whether the craftable filter button is enabled.") private boolean enableCraftableOnlyButton = true;
         }
         
         @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double horizontalEntriesBoundaries = 1.0;
