@@ -669,9 +669,16 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                 lastCheckTime = -1;
             }
             
-            if (lastCheckTime != -1 && Util.getMillis() - lastCheckTime < 100) {
+            if (lastCheckTime != -1 && Util.getMillis() - lastCheckTime < 2000) {
                 return null;
             }
+            
+            return _getTransferHandler();
+        }
+        
+        @Nullable
+        private TransferHandler _getTransferHandler() {
+            lastCheckTime = Util.getMillis();
             
             for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
                 for (Display display : displays) {
