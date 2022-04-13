@@ -42,6 +42,8 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplayMerger;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
@@ -58,6 +60,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -377,7 +380,23 @@ public class ViewsImpl implements Views {
                 Iterable<SlotAccessor> inputSlots = info != null ? info.getInputSlots(context.withDisplay(display)) : Collections.emptySet();
                 int slotsCraftable = 0;
                 List<EntryIngredient> requiredInput = display.getRequiredEntries();
-                Long2LongMap usedCount = new Long2LongOpenHashMap();
+                Long2LongMap invCount = new Long2LongOpenHashMap(CraftableFilter.INSTANCE.getInvStacks());
+                for (SlotAccessor inputSlot : inputSlots) {
+                    ItemStack stack = inputSlot.getItemStack();
+                    
+                    EntryDefinition<ItemStack> definition;
+                    try {
+                        definition = VanillaEntryTypes.ITEM.getDefinition();
+                    } catch (NullPointerException e) {
+                        break;
+                    }
+                    
+                    if (!stack.isEmpty()) {
+                        long hash = definition.hash(null, stack, ComparisonContext.FUZZY);
+                        long newCount = invCount.get(hash) + Math.max(0, stack.getCount());
+                        invCount.put(hash, newCount);
+                    }
+                }
                 for (EntryIngredient slot : requiredInput) {
                     if (slot.isEmpty()) {
                         slotsCraftable++;
@@ -385,14 +404,11 @@ public class ViewsImpl implements Views {
                     }
                     for (EntryStack<?> slotPossible : slot) {
                         if (slotPossible.getType() != VanillaEntryTypes.ITEM) continue;
+                        ItemStack stack = slotPossible.castValue();
                         long hashFuzzy = EntryStacks.hashFuzzy(slotPossible);
-                        long currentUsed = usedCount.get(hashFuzzy);
-                        int matches = CraftableFilter.INSTANCE.matches(slotPossible, inputSlots, currentUsed);
-                        if (matches != 0) {
-                            if (matches == 1) {
-                                usedCount.put(hashFuzzy, currentUsed + 1);
-                            }
-                            
+                        long availableAmount = invCount.get(hashFuzzy);
+                        if (availableAmount >= stack.getCount()) {
+                            invCount.put(hashFuzzy, availableAmount - stack.getCount());
                             slotsCraftable++;
                             break;
                         }
