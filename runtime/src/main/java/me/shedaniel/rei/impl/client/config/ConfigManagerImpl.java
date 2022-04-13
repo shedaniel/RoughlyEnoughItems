@@ -292,7 +292,7 @@ public class ConfigManagerImpl implements ConfigManager {
     
     @Override
     public boolean isCraftableOnlyEnabled() {
-        return craftableOnly;
+        return craftableOnly && getConfig().isCraftableFilterEnabled();
     }
     
     @Override

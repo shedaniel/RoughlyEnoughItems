@@ -76,7 +76,7 @@
   "ordering.rei.name": "名稱",
   "ordering.rei.item_groups": "物品分類",
   "text.auto_craft.move_items": "移動物品",
-  "text.auto_craft.move_items.tooltip": "按住《Shift》鍵再點擊此處以移動物品",
+  "text.auto_craft.move_items.tooltip": "按住《Ctrl》鍵再點擊此處以移動物品",
   "text.auto_craft.move_items.yog": "發生異常無效指標 ！！",
   "error.rei.transfer.too_small": "無法將物品移動至 %dx%d 的合成格！",
   "error.rei.not.on.server": "伺服器未安裝 REI ！",
