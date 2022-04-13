@@ -138,7 +138,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     public void tick() {
         if (REIRuntimeImpl.getSearchField() != null) {
             REIRuntimeImpl.getSearchField().tick();
-            if (Minecraft.getInstance().player != null && !PluginManager.areAnyReloading()) {
+            if (Minecraft.getInstance().player != null && !PluginManager.areAnyReloading() && Minecraft.getInstance().player.tickCount % 20 == 0) {
                 CraftableFilter.INSTANCE.tick();
             }
         }
