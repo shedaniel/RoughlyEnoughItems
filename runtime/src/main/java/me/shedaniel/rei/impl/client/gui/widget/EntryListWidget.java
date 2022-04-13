@@ -71,6 +71,7 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -601,6 +602,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     }
     
     private class EntryListEntry extends EntryListEntryWidget {
+        private long lastCheckTime = -1;
         private Display display;
         private EntryStack<?> our;
         private NumberAnimator<Double> size = null;
@@ -654,6 +656,22 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                 return null;
             }
             
+            if (display != null) {
+                if (ViewsImpl.isRecipesFor(getEntries(), display)) {
+                    AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
+                    if (result.successful) {
+                        return result.successfulHandler;
+                    }
+                }
+                
+                display = null;
+                lastCheckTime = -1;
+            }
+            
+            if (lastCheckTime != -1 && Util.getMillis() - lastCheckTime < 100) {
+                return null;
+            }
+            
             for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
                 for (Display display : displays) {
                     if (ViewsImpl.isRecipesFor(getEntries(), display)) {
@@ -674,7 +692,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         public Tooltip getCurrentTooltip(Point point) {
             Tooltip tooltip = super.getCurrentTooltip(point);
             
-            if (tooltip != null && getTransferHandler() != null) {
+            if (tooltip != null && !ClientHelper.getInstance().isCheating() && getTransferHandler() != null) {
                 tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
             }
             
