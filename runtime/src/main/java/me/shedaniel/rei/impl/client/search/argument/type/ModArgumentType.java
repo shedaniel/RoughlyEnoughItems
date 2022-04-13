@@ -75,7 +75,7 @@ public final class ModArgumentType extends ArgumentType<Unit, ModArgumentType.@N
         if (pair.modName == null) {
             pair.modName = ClientHelper.getInstance().getModFromModId(pair.modId).toLowerCase(Locale.ROOT);
         }
-        return pair.modName.isEmpty() || pair.modName.contains(searchText);
+        return pair.modName.contains(searchText);
     }
     
     @Override
