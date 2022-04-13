@@ -25,8 +25,9 @@ package me.shedaniel.rei.impl.client;
 
 import com.google.common.base.Suppliers;
 import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.longs.Long2LongMap;
+import it.unimi.dsi.fastutil.longs.Long2LongMaps;
+import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
@@ -40,6 +41,8 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.FormattingUtils;
@@ -54,6 +57,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -222,17 +226,22 @@ public class ClientHelperImpl implements ClientHelper {
     }
     
     @ApiStatus.Internal
-    public LongSet _getInventoryItemsTypes() {
+    public Long2LongMap _getInventoryItemsTypes() {
+        EntryDefinition<ItemStack> definition;
         try {
-            VanillaEntryTypes.ITEM.getDefinition();
+            definition = VanillaEntryTypes.ITEM.getDefinition();
         } catch (NullPointerException e) {
-            return new LongOpenHashSet();
+            return Long2LongMaps.EMPTY_MAP;
         }
-        return Minecraft.getInstance().player.inventory.compartments.stream()
-                .flatMap(Collection::stream)
-                .map(EntryStacks::of)
-                .mapToLong(EntryStacks::hashFuzzy)
-                .collect(LongOpenHashSet::new, LongOpenHashSet::add, LongOpenHashSet::addAll);
+        Long2LongOpenHashMap map = new Long2LongOpenHashMap();
+        for (NonNullList<ItemStack> compartment : Minecraft.getInstance().player.getInventory().compartments) {
+            for (ItemStack stack : compartment) {
+                long hash = definition.hash(null, stack, ComparisonContext.FUZZY);
+                long newCount = map.getOrDefault(hash, 0) + Math.max(0, stack.getCount());
+                map.put(hash, newCount);
+            }
+        }
+        return map;
     }
     
     @ApiStatus.Internal

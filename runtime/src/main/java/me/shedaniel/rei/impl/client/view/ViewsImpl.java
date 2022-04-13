@@ -27,6 +27,8 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import it.unimi.dsi.fastutil.longs.Long2LongMap;
+import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -40,6 +42,7 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplayMerger;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
@@ -370,13 +373,22 @@ public class ViewsImpl implements Views {
                 Iterable<SlotAccessor> inputSlots = info != null ? info.getInputSlots(context) : Collections.emptySet();
                 int slotsCraftable = 0;
                 List<EntryIngredient> requiredInput = display.getRequiredEntries();
+                Long2LongMap usedCount = new Long2LongOpenHashMap();
                 for (EntryIngredient slot : requiredInput) {
                     if (slot.isEmpty()) {
                         slotsCraftable++;
                         continue;
                     }
                     for (EntryStack<?> slotPossible : slot) {
-                        if (CraftableFilter.INSTANCE.matches(slotPossible, inputSlots)) {
+                        if (slotPossible.getType() != VanillaEntryTypes.ITEM) continue;
+                        long hashFuzzy = EntryStacks.hashFuzzy(slotPossible);
+                        long currentUsed = usedCount.get(hashFuzzy);
+                        int matches = CraftableFilter.INSTANCE.matches(slotPossible, inputSlots, currentUsed);
+                        if (matches != 0) {
+                            if (matches == 1) {
+                                usedCount.put(hashFuzzy, currentUsed + 1);
+                            }
+                            
                             slotsCraftable++;
                             break;
                         }
