@@ -10,7 +10,7 @@
   "text.rei.feedback": "您想向 REI 開發人員提供任何回饋嗎？ %s 以提交您的建議！",
   "text.rei.feedback.link": "點擊此處前往 Google Form",
   "text.rei.support.me": "支持我繼續讓 REI 變得更好！",
-  "text.rei.support.me.desc": "作為 REI 的 Patreon 訂閱會員，你可以下載適用於最新 Minecraft 快照的 REI 版本。\n你也可以通過租用 BisectHosting 服務器來支持我。",
+  "text.rei.support.me.desc": "作為 REI 的 Patreon 訂閱會員，你可以下載適用於最新 Minecraft 快照的 REI 版本。\n你也可以通過租用 BisectHosting 服務器來支持我。\n\n%s\n%s",
   "text.rei.support.me.patreon": "在 Patreon 上支持我",
   "text.rei.support.me.bisect": "在 BisectHosting 上使用代碼 SHEDANIEL",
   "text.rei.not.fully.initialized": "REI 尚未完成初始化！",
