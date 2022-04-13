@@ -91,7 +91,7 @@ publishing {
                     def project = project(":" + projectName)
                     publication.artifact(project.fakeJar) { classifier null }
                     def remapSourcesJarTask = project.remapSourcesJar
-                    publication.artifact(remapSourcesJarTask.output) {
+                    publication.artifact(remapSourcesJarTask) {
                         builtBy remapSourcesJarTask
                         classifier "sources"
                     }

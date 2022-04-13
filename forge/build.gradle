@@ -120,6 +120,10 @@ dependencies {
     modRuntime("curse.maven:enchantment-descriptions-250419:3566132")
 }
 
+def modRuntime(str) {
+    dependencies.modLocalRuntime(str)
+}
+
 shadowJar {
     configurations = [project.configurations.shadowCommon]
     classifier "dev-shadow"
@@ -180,7 +184,7 @@ publishing {
                     def project = project(":" + projectName)
                     publication.artifact(project.fakeForgeJar) { classifier null }
                     def remapSourcesJarTask = project.remapSourcesJar
-                    publication.artifact(remapSourcesJarTask.output) {
+                    publication.artifact(remapSourcesJarTask) {
                         builtBy remapSourcesJarTask
                         classifier "sources"
                     }

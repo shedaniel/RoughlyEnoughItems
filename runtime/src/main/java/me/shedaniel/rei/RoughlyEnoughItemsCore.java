@@ -41,6 +41,7 @@ import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.category.CategoryIdentifierImpl;
 import me.shedaniel.rei.impl.common.display.DisplaySerializerRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.DeferringEntryTypeProviderImpl;
@@ -54,8 +55,8 @@ import me.shedaniel.rei.impl.common.entry.type.EntryTypeRegistryImpl;
 import me.shedaniel.rei.impl.common.fluid.FluidSupportProviderImpl;
 import me.shedaniel.rei.impl.common.logging.FileLogger;
 import me.shedaniel.rei.impl.common.logging.Log4JLogger;
-import me.shedaniel.rei.impl.common.logging.Logger;
 import me.shedaniel.rei.impl.common.logging.MultiLogger;
+import me.shedaniel.rei.impl.common.logging.TransformingLogger;
 import me.shedaniel.rei.impl.common.logging.performance.PerformanceLogger;
 import me.shedaniel.rei.impl.common.logging.performance.PerformanceLoggerImpl;
 import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
@@ -74,10 +75,10 @@ import java.util.function.UnaryOperator;
 @ApiStatus.Internal
 public class RoughlyEnoughItemsCore {
     @ApiStatus.Internal
-    public static final Logger LOGGER = new MultiLogger(ImmutableList.of(
+    public static final InternalLogger LOGGER = new TransformingLogger(new MultiLogger(ImmutableList.of(
             new FileLogger(Platform.getGameFolder().resolve("logs/rei.log")),
             new Log4JLogger(LogManager.getFormatterLogger("REI"))
-    ));
+    )), message -> "[REI] " + message);
     public static final PerformanceLogger PERFORMANCE_LOGGER = new PerformanceLoggerImpl();
     
     static {
@@ -124,6 +125,7 @@ public class RoughlyEnoughItemsCore {
                     );
                 },
                 new MenuInfoRegistryImpl()), "serverPluginManager");
+        Internals.attachInstanceSupplier(LOGGER, "logger");
     }
     
     public static void _reloadPlugins(@Nullable ReloadStage stage) {

@@ -31,7 +31,6 @@ import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.client.ClientHelper;
-import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
@@ -40,7 +39,6 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -48,7 +46,6 @@ import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.gui.screen.CompositeDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
-import me.shedaniel.rei.impl.client.gui.screen.UncertainDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.fabricmc.api.EnvType;
@@ -71,6 +68,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
@@ -304,14 +302,22 @@ public class ClientHelperImpl implements ClientHelper {
             }
             return this;
         }
+        
+        @Override
+        public Stream<DisplaySpec> streamDisplays() {
+            return buildMapInternal().values().stream().flatMap(Collection::stream);
+        }
     }
     
     public static final class ViewSearchBuilderImpl extends AbstractViewSearchBuilder {
+        private final Set<CategoryIdentifier<?>> filteringCategories = new HashSet<>();
         private final Set<CategoryIdentifier<?>> categories = new HashSet<>();
         private final List<EntryStack<?>> recipesFor = new ArrayList<>();
         private final List<EntryStack<?>> usagesFor = new ArrayList<>();
         @Nullable
         private CategoryIdentifier<?> preferredOpenedCategory = null;
+        private boolean mergeDisplays = true;
+        private boolean processVisibilityHandlers = true;
         private final Supplier<Map<DisplayCategory<?>, List<DisplaySpec>>> map = Suppliers.memoize(() -> ViewsImpl.buildMapFor(this));
         
         @Override
@@ -366,9 +372,48 @@ public class ClientHelperImpl implements ClientHelper {
         }
         
         @Override
+        public ViewSearchBuilder filterCategory(CategoryIdentifier<?> category) {
+            this.filteringCategories.add(category);
+            return this;
+        }
+        
+        @Override
+        public ViewSearchBuilder filterCategories(Collection<CategoryIdentifier<?>> categories) {
+            this.filteringCategories.addAll(categories);
+            return this;
+        }
+        
+        @Override
+        public Set<CategoryIdentifier<?>> getFilteringCategories() {
+            return filteringCategories;
+        }
+        
+        @Override
         public Map<DisplayCategory<?>, List<DisplaySpec>> buildMapInternal() {
             fillPreferredOpenedCategory();
             return this.map.get();
+        }
+        
+        @Override
+        public boolean isMergingDisplays() {
+            return mergeDisplays;
+        }
+        
+        @Override
+        public ViewSearchBuilder mergingDisplays(boolean mergingDisplays) {
+            this.mergeDisplays = mergingDisplays;
+            return this;
+        }
+        
+        @Override
+        public boolean isProcessingVisibilityHandlers() {
+            return processVisibilityHandlers;
+        }
+        
+        @Override
+        public ViewSearchBuilder processingVisibilityHandlers(boolean processingVisibilityHandlers) {
+            this.processVisibilityHandlers = processingVisibilityHandlers;
+            return this;
         }
     }
     
@@ -397,6 +442,21 @@ public class ClientHelperImpl implements ClientHelper {
         
         @Override
         public Set<CategoryIdentifier<?>> getCategories() {
+            return Collections.emptySet();
+        }
+        
+        @Override
+        public ViewSearchBuilder filterCategory(CategoryIdentifier<?> category) {
+            return this;
+        }
+        
+        @Override
+        public ViewSearchBuilder filterCategories(Collection<CategoryIdentifier<?>> categories) {
+            return this;
+        }
+        
+        @Override
+        public Set<CategoryIdentifier<?>> getFilteringCategories() {
             return Collections.emptySet();
         }
         
@@ -446,6 +506,26 @@ public class ClientHelperImpl implements ClientHelper {
         public Map<DisplayCategory<?>, List<DisplaySpec>> buildMapInternal() {
             fillPreferredOpenedCategory();
             return this.map;
+        }
+        
+        @Override
+        public boolean isMergingDisplays() {
+            return true;
+        }
+        
+        @Override
+        public ViewSearchBuilder mergingDisplays(boolean mergingDisplays) {
+            return this;
+        }
+        
+        @Override
+        public boolean isProcessingVisibilityHandlers() {
+            return false;
+        }
+        
+        @Override
+        public ViewSearchBuilder processingVisibilityHandlers(boolean processingVisibilityHandlers) {
+            return this;
         }
     }
 }

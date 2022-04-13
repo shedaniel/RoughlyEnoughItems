@@ -36,26 +36,89 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public interface ViewSearchBuilder {
+    /**
+     * Creates a new {@link ViewSearchBuilder} for looking up displays.
+     */
     static ViewSearchBuilder builder() {
         return ClientInternals.createViewSearchBuilder();
     }
     
+    /**
+     * Adds all displays from the given {@link DisplayCategory} to the search.
+     *
+     * @param category the category to add
+     * @return the {@link ViewSearchBuilder} for chaining
+     */
     ViewSearchBuilder addCategory(CategoryIdentifier<?> category);
     
+    /**
+     * Adds all displays from the given {@link DisplayCategory}s to the search.
+     *
+     * @param categories the categories to add
+     * @return the {@link ViewSearchBuilder} for chaining
+     */
     ViewSearchBuilder addCategories(Collection<CategoryIdentifier<?>> categories);
     
+    /**
+     * Adds all displays from all the {@link CategoryRegistry}s to the search.
+     *
+     * @return the {@link ViewSearchBuilder} for chaining
+     */
     default ViewSearchBuilder addAllCategories() {
         return addCategories(CollectionUtils.map(CategoryRegistry.getInstance(), CategoryRegistry.CategoryConfiguration::getCategoryIdentifier));
     }
     
+    /**
+     * Returns the set of {@link CategoryIdentifier}s that will be used to add all the {@link Display}s to the search.
+     *
+     * @return the set of {@link CategoryIdentifier}s
+     */
     Set<CategoryIdentifier<?>> getCategories();
     
+    /**
+     * Filters the search to only include {@link Display}s that are in the given {@link CategoryIdentifier}.
+     *
+     * @param category the category to filter by
+     * @return the {@link ViewSearchBuilder} for chaining
+     */
+    ViewSearchBuilder filterCategory(CategoryIdentifier<?> category);
+    
+    /**
+     * Filters the search to only include {@link Display}s that are in the given {@link CategoryIdentifier}s.
+     *
+     * @param categories the categories to filter by
+     * @return the {@link ViewSearchBuilder} for chaining
+     */
+    ViewSearchBuilder filterCategories(Collection<CategoryIdentifier<?>> categories);
+    
+    /**
+     * Returns the set of {@link CategoryIdentifier}s that will be used to filter the search.
+     *
+     * @return the set of {@link CategoryIdentifier}s
+     */
+    Set<CategoryIdentifier<?>> getFilteringCategories();
+    
+    /**
+     * Filters the search to only include {@link Display}s that are recipes for the given {@link EntryStack}.
+     *
+     * @param stack the stack to filter by
+     * @param <T>   the type of the stack
+     * @return the {@link ViewSearchBuilder} for chaining
+     */
     <T> ViewSearchBuilder addRecipesFor(EntryStack<T> stack);
     
     List<EntryStack<?>> getRecipesFor();
     
+    /**
+     * Filters the search to only include {@link Display}s that are usages for the given {@link EntryStack}.
+     *
+     * @param stack the stack to filter by
+     * @param <T>   the type of the stack
+     * @return the {@link ViewSearchBuilder} for chaining
+     */
     <T> ViewSearchBuilder addUsagesFor(EntryStack<T> stack);
     
     List<EntryStack<?>> getUsagesFor();
@@ -77,6 +140,17 @@ public interface ViewSearchBuilder {
     
     @ApiStatus.Internal
     Map<DisplayCategory<?>, List<DisplaySpec>> buildMapInternal();
+    
+    @ApiStatus.Experimental
+    Stream<DisplaySpec> streamDisplays();
+    
+    boolean isMergingDisplays();
+    
+    ViewSearchBuilder mergingDisplays(boolean mergingDisplays);
+    
+    boolean isProcessingVisibilityHandlers();
+    
+    ViewSearchBuilder processingVisibilityHandlers(boolean processingVisibilityHandlers);
     
     default boolean open() {
         return ClientHelper.getInstance().openView(this);
