@@ -80,7 +80,7 @@ public final class TooltipArgumentType extends ArgumentType<Unit, String> {
     public boolean matches(String tooltip, EntryStack<?> stack, String searchText, Unit filterData) {
         //noinspection StringEquality
         if (tooltip == INVALID) return false;
-        return tooltip.isEmpty() || tooltip.contains(searchText);
+        return tooltip.contains(searchText);
     }
     
     @Nullable
