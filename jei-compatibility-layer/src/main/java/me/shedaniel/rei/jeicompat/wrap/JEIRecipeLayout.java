@@ -30,6 +30,7 @@ import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupFluid;
 import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroupItem;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.forge.ForgeTypes;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.ingredient.IGuiFluidStackGroup;
 import mezz.jei.api.gui.ingredient.IGuiIngredientGroup;
@@ -65,7 +66,7 @@ public class JEIRecipeLayout<T> implements IRecipeLayout {
     @Override
     @NotNull
     public IGuiFluidStackGroup getFluidStacks() {
-        return (IGuiFluidStackGroup) getIngredientsGroup(VanillaTypes.FLUID);
+        return (IGuiFluidStackGroup) getIngredientsGroup(ForgeTypes.FLUID);
     }
     
     @Override

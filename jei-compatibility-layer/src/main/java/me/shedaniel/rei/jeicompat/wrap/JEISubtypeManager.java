@@ -23,11 +23,14 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import lombok.experimental.ExtensionMethod;
 import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
+import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
+import mezz.jei.api.ingredients.IIngredientTypeWithSubtypes;
 import mezz.jei.api.ingredients.subtypes.ISubtypeManager;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import net.minecraft.world.item.ItemStack;
@@ -37,6 +40,19 @@ import org.jetbrains.annotations.Nullable;
 @ExtensionMethod(JEIPluginDetector.class)
 public enum JEISubtypeManager implements ISubtypeManager {
     INSTANCE;
+    
+    @Override
+    @Nullable
+    public <T> String getSubtypeInfo(IIngredientTypeWithSubtypes<?, T> ingredientType, T ingredient, UidContext context) {
+        EntryType<T> type = ingredientType.unwrapType();
+        if (type == VanillaEntryTypes.ITEM) {
+            return getSubtypeInfo((ItemStack) ingredient, context);
+        } else if (type == VanillaEntryTypes.FLUID) {
+            return getSubtypeInfo((FluidStack) ingredient, context);
+        }
+        
+        return null;
+    }
     
     @Override
     @Nullable

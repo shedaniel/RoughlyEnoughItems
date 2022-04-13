@@ -153,6 +153,9 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                     new MenuInfoProvider<C, Display>() {
                         @Override
                         public Optional<MenuInfo<C, Display>> provideClient(Display display, MenuSerializationContext<C, ?, Display> context, C menu) {
+                            if (!info.canHandle(menu, (R) display.jeiValue())) {
+                                return Optional.empty();
+                            }
                             return Optional.of(new JEITransferMenuInfo<>(display, new JEIRecipeTransferData<>(info, menu, (R) display.jeiValue())));
                         }
                         
@@ -313,7 +316,7 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                         for (Pair<Slot, Multimap<EntryType<?>, EntryStack<?>>> pair : entry.getValue()) {
                             Slot slot = pair.getLeft();
                             Collection<EntryStack<?>> stacks = pair.getRight().get(type);
-                            builder.addSlot(entry.getKey() ? RecipeIngredientRole.INPUT : RecipeIngredientRole.OUTPUT, slot.getBounds().x - xOffset, slot.getBounds().y - yOffset)
+                            builder.addSlot(entry.getKey() ? RecipeIngredientRole.INPUT : RecipeIngredientRole.OUTPUT, slot.getInnerBounds().x - xOffset, slot.getInnerBounds().y - yOffset)
                                     .addIngredientsUnsafe(CollectionUtils.map(stacks, JEIPluginDetector::jeiValue));
                         }
                     });

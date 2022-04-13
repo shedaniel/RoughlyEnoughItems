@@ -28,7 +28,10 @@ import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
+import mezz.jei.api.ingredients.IIngredientTypeWithSubtypes;
 import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.world.item.Item;
@@ -42,6 +45,16 @@ import java.util.Objects;
 @ExtensionMethod(JEIPluginDetector.class)
 public enum JEISubtypeRegistration implements ISubtypeRegistration {
     INSTANCE;
+    
+    @Override
+    public <B, I> void registerSubtypeInterpreter(IIngredientTypeWithSubtypes<B, I> type, B base, IIngredientSubtypeInterpreter<I> interpreter) {
+        EntryType<I> reiType = type.unwrapType();
+        if (reiType == VanillaEntryTypes.ITEM) {
+            registerSubtypeInterpreter((Item) base, (IIngredientSubtypeInterpreter<ItemStack>) interpreter);
+        } else if (reiType == VanillaEntryTypes.FLUID) {
+            registerSubtypeInterpreter((Fluid) base, (IIngredientSubtypeInterpreter<FluidStack>) interpreter);
+        }
+    }
     
     @Override
     public void registerSubtypeInterpreter(@NotNull Item item, @NotNull IIngredientSubtypeInterpreter<ItemStack> interpreter) {

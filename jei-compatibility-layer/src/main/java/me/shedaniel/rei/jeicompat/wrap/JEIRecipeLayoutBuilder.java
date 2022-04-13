@@ -54,6 +54,7 @@ public class JEIRecipeLayoutBuilder implements IRecipeLayoutBuilder {
         JEIRecipeSlot slot = new JEIRecipeSlot(index, role, new Point(x, y));
         if (rolePredicate != null && !rolePredicate.test(role)) return slot;
         slots.add(slot);
+        markDirty();
         return slot;
     }
     
@@ -75,6 +76,7 @@ public class JEIRecipeLayoutBuilder implements IRecipeLayoutBuilder {
         JEIRecipeSlot slot = new JEIRecipeSlot(-1, role, null);
         if (rolePredicate != null && !rolePredicate.test(role)) return slot;
         slots.add(slot);
+        markDirty();
         return slot;
     }
     

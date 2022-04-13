@@ -28,6 +28,7 @@ import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.forge.ForgeTypes;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.*;
@@ -67,7 +68,7 @@ public class JEIRecipeLayoutLegacyAdapter implements IRecipeLayout {
     @Override
     @NotNull
     public IGuiFluidStackGroup getFluidStacks() {
-        return (IGuiFluidStackGroup) getIngredientsGroup(VanillaTypes.FLUID);
+        return (IGuiFluidStackGroup) getIngredientsGroup(ForgeTypes.FLUID);
     }
     
     @Override

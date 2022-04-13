@@ -73,6 +73,7 @@ public final class VanillaRecipeCategoryUid {
      * <p>
      * Automatically tries to generate all potion variations from the basic ingredients.
      * <p>
+     * Also automatically adds modded potions from the Forge BrewingRecipeRegistry.
      * JEI can only understand modded potion recipes that are built into vanilla or Forge.
      */
     public static final ResourceLocation BREWING = BuiltinClientPlugin.BREWING.getIdentifier();
