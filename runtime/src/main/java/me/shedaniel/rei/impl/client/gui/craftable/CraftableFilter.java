@@ -26,16 +26,13 @@ package me.shedaniel.rei.impl.client.gui.craftable;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongMaps;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
-import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
-import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 
 public class CraftableFilter {
     public static final CraftableFilter INSTANCE = new CraftableFilter();
     private boolean dirty = false;
     private Long2LongMap invStacks = new Long2LongOpenHashMap();
+    private Long2LongMap containerStacks = new Long2LongOpenHashMap();
     
     public void markDirty() {
         dirty = true;
@@ -63,17 +60,21 @@ public class CraftableFilter {
             invStacks = currentStacks;
             markDirty();
         }
+        if (dirty) return;
+    
+        try {
+            currentStacks = ClientHelperImpl.getInstance()._getContainerItemsTypes();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            currentStacks = Long2LongMaps.EMPTY_MAP;
+        }
+        if (!currentStacks.equals(this.containerStacks)) {
+            containerStacks = currentStacks;
+            markDirty();
+        }
     }
     
-    public int matches(EntryStack<?> stack, Iterable<SlotAccessor> inputSlots, long currentUsed) {
-        long availableAmount = invStacks.get(EntryStacks.hashFuzzy(stack));
-        if (availableAmount > currentUsed) return 1;
-        for (SlotAccessor slot : inputSlots) {
-            EntryStack<?> itemStack = EntryStacks.of(slot.getItemStack());
-            if (!itemStack.isEmpty() && EntryStacks.equalsFuzzy(itemStack, stack)) {
-                return 2;
-            }
-        }
-        return 0;
+    public Long2LongMap getInvStacks() {
+        return invStacks;
     }
 }

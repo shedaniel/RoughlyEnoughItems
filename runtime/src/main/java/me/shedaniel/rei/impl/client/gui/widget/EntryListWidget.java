@@ -76,9 +76,11 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.CreativeModeTab;
@@ -710,6 +712,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                         TransferHandler.Result transferResult = handler.handle(context);
                         
                         if (transferResult.isBlocking()) {
+                            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                             if (transferResult.isReturningToScreen() && Minecraft.getInstance().screen != containerScreen) {
                                 Minecraft.getInstance().setScreen(containerScreen);
                                 REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);

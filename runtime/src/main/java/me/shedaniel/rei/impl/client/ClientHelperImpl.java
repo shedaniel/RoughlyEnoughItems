@@ -65,6 +65,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -239,6 +240,30 @@ public class ClientHelperImpl implements ClientHelper {
                 long hash = definition.hash(null, stack, ComparisonContext.FUZZY);
                 long newCount = map.getOrDefault(hash, 0) + Math.max(0, stack.getCount());
                 map.put(hash, newCount);
+            }
+        }
+        return map;
+    }
+    
+    @ApiStatus.Internal
+    public Long2LongMap _getContainerItemsTypes() {
+        EntryDefinition<ItemStack> definition;
+        try {
+            definition = VanillaEntryTypes.ITEM.getDefinition();
+        } catch (NullPointerException e) {
+            return Long2LongMaps.EMPTY_MAP;
+        }
+        Long2LongOpenHashMap map = new Long2LongOpenHashMap();
+        AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
+        if (menu != null) {
+            for (Slot slot : menu.slots) {
+                ItemStack stack = slot.getItem();
+                
+                if (!stack.isEmpty()) {
+                    long hash = definition.hash(null, stack, ComparisonContext.FUZZY);
+                    long newCount = map.getOrDefault(hash, 0) + Math.max(0, stack.getCount());
+                    map.put(hash, newCount);
+                }
             }
         }
         return map;
