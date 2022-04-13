@@ -22,9 +22,9 @@ Instead of highlighting the items on hover, you can now configure REI to zoom in
 ![Example](roughlyenoughitems/2022.2/2022-02-18_09-05.png)
 ---
 #**Changes**
-- **Support for JEI API 9.5** [#821](https://github.com/shedaniel/RoughlyEnoughItems/issues/821)
+- **Support for JEI API 9.7** [#821](https://github.com/shedaniel/RoughlyEnoughItems/issues/821)
 
-The JEI compatibility layer has been updated to support APIs from JEI 9.5, this is a completely new way for
+The JEI compatibility layer has been updated to support APIs from JEI 9.7, this is a completely new way for
 JEI plugins to layout their categories, please report any issues you find with this new update.
 - **Filtering of Entries in Recipes** [#783](https://github.com/shedaniel/RoughlyEnoughItems/issues/783)
 
