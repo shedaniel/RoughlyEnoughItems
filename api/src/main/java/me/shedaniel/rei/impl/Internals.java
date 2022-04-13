@@ -34,6 +34,7 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
@@ -53,6 +54,7 @@ public final class Internals {
     private static Supplier<NbtHasherProvider> nbtHasherProvider = Internals::throwNotSetup;
     private static Function<String, CategoryIdentifier<?>> categoryIdentifier = (object) -> throwNotSetup();
     private static Supplier<MenuInfoRegistry> stubMenuInfoRegistry = Internals::throwNotSetup;
+    private static Supplier<InternalLogger> logger = Internals::throwNotSetup;
     
     private static <T> T throwNotSetup() {
         throw new AssertionError("REI Internals have not been initialized!");
@@ -109,6 +111,10 @@ public final class Internals {
     
     public static <T extends Display> CategoryIdentifier<T> getCategoryIdentifier(String location) {
         return (CategoryIdentifier<T>) categoryIdentifier.apply(location);
+    }
+    
+    public static InternalLogger getInternalLogger() {
+        return logger.get();
     }
     
     public interface EntryStackProvider {

@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -42,7 +43,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
-import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.TestOnly;
 
 import java.util.Random;
@@ -56,7 +56,7 @@ public class REITestPlugin implements REIClientPlugin {
     
     @Override
     public void preStage(PluginManager<REIClientPlugin> manager, ReloadStage stage) {
-        LogManager.getLogger().error("REI Test Plugin is enabled! If you see this unintentionally, please report this!");
+        InternalLogger.getInstance().error("REI Test Plugin is enabled! If you see this unintentionally, please report this!");
     }
     
     @Override

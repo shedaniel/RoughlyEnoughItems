@@ -23,32 +23,33 @@
 
 package me.shedaniel.rei.impl.common.logging;
 
+import me.shedaniel.rei.impl.common.InternalLogger;
 import org.apache.logging.log4j.Level;
 
-public class MultiLogger implements Logger {
-    private final Iterable<Logger> loggers;
+public class MultiLogger implements InternalLogger {
+    private final Iterable<InternalLogger> loggers;
     
-    public MultiLogger(Iterable<Logger> loggers) {
+    public MultiLogger(Iterable<InternalLogger> loggers) {
         this.loggers = loggers;
     }
     
     @Override
     public void throwException(Throwable throwable) {
-        for (Logger logger : loggers) {
+        for (InternalLogger logger : loggers) {
             logger.throwException(throwable);
         }
     }
     
     @Override
     public void log(Level level, String message) {
-        for (Logger logger : loggers) {
+        for (InternalLogger logger : loggers) {
             logger.log(level, message);
         }
     }
     
     @Override
     public void log(Level level, String message, Throwable throwable) {
-        for (Logger logger : loggers) {
+        for (InternalLogger logger : loggers) {
             logger.log(level, message, throwable);
         }
     }
