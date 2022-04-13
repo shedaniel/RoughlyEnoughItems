@@ -375,6 +375,7 @@ public class ViewsImpl implements Views {
                 InfoContext context = new InfoContext(display);
                 Iterable<SlotAccessor> inputSlots = info != null ? info.getInputSlots(context) : Collections.emptySet();
                 int slotsCraftable = 0;
+                boolean containsNonEmpty = false;
                 List<EntryIngredient> requiredInput = display.getRequiredEntries();
                 Long2LongMap invCount = new Long2LongOpenHashMap(CraftableFilter.INSTANCE.getInvStacks());
                 for (SlotAccessor inputSlot : inputSlots) {
@@ -405,12 +406,13 @@ public class ViewsImpl implements Views {
                         long availableAmount = invCount.get(hashFuzzy);
                         if (availableAmount >= stack.getCount()) {
                             invCount.put(hashFuzzy, availableAmount - stack.getCount());
+                            containsNonEmpty = true;
                             slotsCraftable++;
                             break;
                         }
                     }
                 }
-                if (slotsCraftable == display.getRequiredEntries().size()) {
+                if (slotsCraftable == display.getRequiredEntries().size() && containsNonEmpty) {
                     display.getOutputEntries().stream().flatMap(Collection::stream).collect(Collectors.toCollection(() -> craftables));
                 }
             }
