@@ -221,6 +221,7 @@
   "config.roughlyenoughitems.search.asyncSearch": "Async Search:",
   "config.roughlyenoughitems.search.asyncSearchPartitionSize": "Async Search Partition Size:",
   "config.roughlyenoughitems.accessibility.useCompactTabs": "Compact Tabs:",
+  "config.roughlyenoughitems.accessibility.useCompactTabButtons": "Compact Tab Arrow Buttons:",
   "config.roughlyenoughitems.theme": "Appearance Theme:",
   "config.roughlyenoughitems.theme.dark": "Dark Theme",
   "config.roughlyenoughitems.theme.light": "Light Theme",

@@ -357,6 +357,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public boolean isUsingCompactTabButtons() {
+        return advanced.accessibility.useCompactTabButtons;
+    }
+    
+    @Override
     public boolean isLowerConfigButton() {
         return appearance.layout.configButtonLocation == ConfigButtonPosition.LOWER;
     }
@@ -521,7 +526,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public static class Basics {
         @ConfigEntry.Gui.Excluded public List<FavoriteEntry> favorites = new ArrayList<>();
-        @Comment("Declares whether cheating mode is on.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON) private CheatingMode cheating = CheatingMode.OFF;
+        @Comment("Declares whether cheating mode is on.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        private CheatingMode cheating = CheatingMode.OFF;
         private boolean favoritesEnabled = true;
         @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
         private KeyBindings keyBindings = new KeyBindings();
@@ -631,6 +637,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares how the scrollbar in composite screen should act.") private boolean compositeScrollBarPermanent = false;
             private boolean toastDisplayedOnCopyIdentifier = true;
             @Comment("Declares whether REI should use compact tabs for categories.") private boolean useCompactTabs = true;
+            @Comment("Declares whether REI should use compact tab buttons for categories.") private boolean useCompactTabButtons = true;
         }
         
         public static class Search {
