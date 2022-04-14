@@ -108,6 +108,8 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
     public void init() {
         super.init();
         boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
+        boolean isCompactTabButtons = ConfigObject.getInstance().isUsingCompactTabButtons();
+        int tabButtonsSize = isCompactTabButtons ? 10 : 16;
         int tabSize = isCompactTabs ? 24 : 28;
         this.children().clear();
         this.widgets.clear();
@@ -120,7 +122,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         DisplaySpec display = categoryMap.get(category).get(selectedRecipeIndex);
         int guiWidth = Mth.clamp(category.getDisplayWidth(display.provideInternalDisplay()) + 30, 0, largestWidth) + 100;
         int guiHeight = Mth.clamp(category.getDisplayHeight() + 40, 166, largestHeight);
-        this.tabsPerPage = Math.max(5, Mth.floor((guiWidth - 20d) / tabSize));
+        this.tabsPerPage = Math.max(5, Mth.floor((guiWidth - tabButtonsSize * 2d) / tabSize));
         if (this.tabsPage == -1) {
             this.tabsPage = selectedCategoryIndex / tabsPerPage;
         }
@@ -207,21 +209,23 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 tab.setRenderer(tabCategory, tabCategory.getIcon(), tabCategory.getTitle(), j == selectedCategoryIndex);
             }
         }
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + 2, bounds.y - 16, 10, 10), new TranslatableComponent("text.rei.left_arrow"))
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + 2, bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), new TranslatableComponent("text.rei.left_arrow"))
                 .onClick(button -> {
                     tabsPage--;
                     if (tabsPage < 0)
                         tabsPage = Mth.ceil(categories.size() / (float) tabsPerPage) - 1;
                     CompositeDisplayViewingScreen.this.init();
                 })
+                .tooltipLine(new TranslatableComponent("text.rei.previous_page"))
                 .enabled(categories.size() > tabsPerPage));
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - 12, bounds.y - 16, 10, 10), new TranslatableComponent("text.rei.right_arrow"))
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - (isCompactTabButtons ? tabButtonsSize + 2 : tabButtonsSize + 3), bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), new TranslatableComponent("text.rei.right_arrow"))
                 .onClick(button -> {
                     tabsPage++;
                     if (tabsPage > Mth.ceil(categories.size() / (float) tabsPerPage) - 1)
                         tabsPage = 0;
                     CompositeDisplayViewingScreen.this.init();
                 })
+                .tooltipLine(new TranslatableComponent("text.rei.next_page"))
                 .enabled(categories.size() > tabsPerPage));
         
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), categories.get(selectedCategoryIndex).getTitle(), label -> {

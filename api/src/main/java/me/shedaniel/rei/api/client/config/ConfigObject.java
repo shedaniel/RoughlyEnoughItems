@@ -150,6 +150,9 @@ public interface ConfigObject {
     
     boolean isUsingCompactTabs();
     
+    @ApiStatus.Experimental
+    boolean isUsingCompactTabButtons();
+    
     boolean isLowerConfigButton();
     
     @ApiStatus.Experimental

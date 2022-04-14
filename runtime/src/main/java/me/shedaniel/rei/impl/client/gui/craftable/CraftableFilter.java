@@ -23,20 +23,16 @@
 
 package me.shedaniel.rei.impl.client.gui.craftable;
 
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
-import it.unimi.dsi.fastutil.longs.LongSets;
-import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
-import me.shedaniel.rei.api.common.util.EntryStacks;
+import it.unimi.dsi.fastutil.longs.Long2LongMap;
+import it.unimi.dsi.fastutil.longs.Long2LongMaps;
+import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import net.minecraft.client.Minecraft;
 
 public class CraftableFilter {
     public static final CraftableFilter INSTANCE = new CraftableFilter();
     private boolean dirty = false;
-    private LongSet invStacks = new LongOpenHashSet();
+    private Long2LongMap invStacks = new Long2LongOpenHashMap();
+    private Long2LongMap containerStacks = new Long2LongOpenHashMap();
     
     public void markDirty() {
         dirty = true;
@@ -53,28 +49,32 @@ public class CraftableFilter {
     
     public void tick() {
         if (dirty) return;
-        LongSet currentStacks;
+        Long2LongMap currentStacks;
         try {
             currentStacks = ClientHelperImpl.getInstance()._getInventoryItemsTypes();
         } catch (Throwable throwable) {
             throwable.printStackTrace();
-            currentStacks = LongSets.EMPTY_SET;
+            currentStacks = Long2LongMaps.EMPTY_MAP;
         }
         if (!currentStacks.equals(this.invStacks)) {
-            invStacks = new LongOpenHashSet(currentStacks);
+            invStacks = currentStacks;
+            markDirty();
+        }
+        if (dirty) return;
+    
+        try {
+            currentStacks = ClientHelperImpl.getInstance()._getContainerItemsTypes();
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            currentStacks = Long2LongMaps.EMPTY_MAP;
+        }
+        if (!currentStacks.equals(this.containerStacks)) {
+            containerStacks = currentStacks;
             markDirty();
         }
     }
     
-    public boolean matches(EntryStack<?> stack, Iterable<SlotAccessor> inputSlots) {
-        if (invStacks.contains(EntryStacks.hashFuzzy(stack))) return true;
-        if (stack.getType() != VanillaEntryTypes.ITEM) return false;
-        for (SlotAccessor slot : inputSlots) {
-            EntryStack<?> itemStack = EntryStacks.of(slot.getItemStack());
-            if (!itemStack.isEmpty() && EntryStacks.equalsFuzzy(itemStack, stack)) {
-                return true;
-            }
-        }
-        return false;
+    public Long2LongMap getInvStacks() {
+        return invStacks;
     }
 }
