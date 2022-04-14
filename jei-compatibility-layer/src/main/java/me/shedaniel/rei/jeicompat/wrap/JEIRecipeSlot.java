@@ -126,7 +126,7 @@ public class JEIRecipeSlot implements IRecipeSlotBuilder, IRecipeSlotView {
     
     @Override
     public IRecipeSlotBuilder setBackground(IDrawable background, int xOffset, int yOffset) {
-        this.background = Widgets.withTranslate(Widgets.wrapRenderer(() -> slot.getInnerBounds().clone(), background.unwrapRenderer()), -1 + xOffset, -1 + yOffset, 0);
+        this.background = Widgets.withTranslate(Widgets.wrapRenderer(() -> slot.getInnerBounds().clone(), background.unwrapRenderer()), xOffset, yOffset, 0);
         return this;
     }
     

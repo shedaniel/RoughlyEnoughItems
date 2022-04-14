@@ -86,7 +86,8 @@ public final class EntryStacks {
         if (leftType == rightType) {
             return left.getDefinition().equals(left.getValue(), right.castValue(), context);
         }
-        for (EntryTypeBridge<A, B> bridge : EntryTypeRegistry.getInstance().getBridgesFor(leftType, rightType)) {
+        EntryTypeRegistry instance = EntryTypeRegistry.getInstance();
+        for (EntryTypeBridge<A, B> bridge : instance.getBridgesFor(leftType, rightType)) {
             CompoundEventResult<Stream<EntryStack<B>>> holder = bridge.bridge(left);
             if (holder.isTrue()) {
                 Iterator<EntryStack<B>> iterator = holder.object().iterator();
@@ -98,7 +99,7 @@ public final class EntryStacks {
                 }
             }
         }
-        for (EntryTypeBridge<B, A> bridge : EntryTypeRegistry.getInstance().getBridgesFor(rightType, leftType)) {
+        for (EntryTypeBridge<B, A> bridge : instance.getBridgesFor(rightType, leftType)) {
             CompoundEventResult<Stream<EntryStack<A>>> holder = bridge.bridge(right);
             if (holder.isTrue()) {
                 Iterator<EntryStack<A>> iterator = holder.object().iterator();

@@ -48,7 +48,7 @@ public class JEIIngredientHelper<T> implements IIngredientHelper<T> {
     
     @Override
     public IIngredientType<T> getIngredientType() {
-        return definition::getValueType;
+        return definition.jeiType();
     }
     
     @Nullable

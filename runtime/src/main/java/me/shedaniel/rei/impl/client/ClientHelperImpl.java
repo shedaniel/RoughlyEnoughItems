@@ -27,8 +27,9 @@ import com.google.common.base.Suppliers;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
 import io.netty.buffer.Unpooled;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.longs.Long2LongMap;
+import it.unimi.dsi.fastutil.longs.Long2LongMaps;
+import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.config.ConfigManager;
@@ -40,6 +41,8 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.FormattingUtils;
@@ -54,12 +57,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -221,17 +226,46 @@ public class ClientHelperImpl implements ClientHelper {
     }
     
     @ApiStatus.Internal
-    public LongSet _getInventoryItemsTypes() {
+    public Long2LongMap _getInventoryItemsTypes() {
+        EntryDefinition<ItemStack> definition;
         try {
-            VanillaEntryTypes.ITEM.getDefinition();
+            definition = VanillaEntryTypes.ITEM.getDefinition();
         } catch (NullPointerException e) {
-            return new LongOpenHashSet();
+            return Long2LongMaps.EMPTY_MAP;
         }
-        return Minecraft.getInstance().player.getInventory().compartments.stream()
-                .flatMap(Collection::stream)
-                .map(EntryStacks::of)
-                .mapToLong(EntryStacks::hashFuzzy)
-                .collect(LongOpenHashSet::new, LongOpenHashSet::add, LongOpenHashSet::addAll);
+        Long2LongOpenHashMap map = new Long2LongOpenHashMap();
+        for (NonNullList<ItemStack> compartment : Minecraft.getInstance().player.getInventory().compartments) {
+            for (ItemStack stack : compartment) {
+                long hash = definition.hash(null, stack, ComparisonContext.FUZZY);
+                long newCount = map.getOrDefault(hash, 0) + Math.max(0, stack.getCount());
+                map.put(hash, newCount);
+            }
+        }
+        return map;
+    }
+    
+    @ApiStatus.Internal
+    public Long2LongMap _getContainerItemsTypes() {
+        EntryDefinition<ItemStack> definition;
+        try {
+            definition = VanillaEntryTypes.ITEM.getDefinition();
+        } catch (NullPointerException e) {
+            return Long2LongMaps.EMPTY_MAP;
+        }
+        Long2LongOpenHashMap map = new Long2LongOpenHashMap();
+        AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
+        if (menu != null) {
+            for (Slot slot : menu.slots) {
+                ItemStack stack = slot.getItem();
+                
+                if (!stack.isEmpty()) {
+                    long hash = definition.hash(null, stack, ComparisonContext.FUZZY);
+                    long newCount = map.getOrDefault(hash, 0) + Math.max(0, stack.getCount());
+                    map.put(hash, newCount);
+                }
+            }
+        }
+        return map;
     }
     
     @ApiStatus.Internal

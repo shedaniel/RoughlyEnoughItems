@@ -27,7 +27,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicates;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
 import io.netty.buffer.Unpooled;
@@ -69,10 +68,11 @@ import me.shedaniel.rei.jeicompat.wrap.*;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.forge.ForgeTypes;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.ingredients.IIngredientTypeWithSubtypes;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.recipe.IFocus;
@@ -85,9 +85,11 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.tuple.Triple;
@@ -220,7 +222,7 @@ public class JEIPluginDetector {
         if (stack == null) return null;
         T value = stack.getValue();
         if (value instanceof dev.architectury.fluid.FluidStack) {
-            return (ITypedIngredient<T>) new JEITypedIngredient<>(VanillaTypes.FLUID, FluidStackHooksForge.toForge((dev.architectury.fluid.FluidStack) value));
+            return (ITypedIngredient<T>) new JEITypedIngredient<>(ForgeTypes.FLUID, FluidStackHooksForge.toForge((dev.architectury.fluid.FluidStack) value));
         }
         return new JEITypedIngredient<>(jeiType(stack.getDefinition()), value);
     }
@@ -252,6 +254,8 @@ public class JEIPluginDetector {
     public static final Map<ResourceLocation, RecipeType<?>> RECIPE_TYPE_MAP = new HashMap<>();
     
     static {
+        INGREDIENT_TYPE_MAP.put(ItemStack.class, makeJeiTypeWithSubtype(ItemStack.class, Item.class, ItemStack::getItem));
+        INGREDIENT_TYPE_MAP.put(FluidStack.class, makeJeiTypeWithSubtype(FluidStack.class, Fluid.class, FluidStack::getFluid));
         CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "crafting"), BuiltinPlugin.CRAFTING);
         CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "stonecutting"), BuiltinPlugin.STONE_CUTTING);
         CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "furnace"), BuiltinPlugin.SMELTING);
@@ -263,6 +267,25 @@ public class JEIPluginDetector {
         CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "smithing"), BuiltinPlugin.SMITHING);
         CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "compostable"), BuiltinPlugin.COMPOSTING);
         CATEGORY_ID_MAP.put(new ResourceLocation("minecraft", "information"), BuiltinPlugin.INFO);
+    }
+    
+    public static <B, T> IIngredientTypeWithSubtypes<B, T> makeJeiTypeWithSubtype(Class<? extends T> c, Class<? extends B> bc, Function<T, B> mapper) {
+        return new IIngredientTypeWithSubtypes<B, T>() {
+            @Override
+            public Class<? extends T> getIngredientClass() {
+                return c;
+            }
+    
+            @Override
+            public Class<? extends B> getIngredientBaseClass() {
+                return bc;
+            }
+    
+            @Override
+            public B getBase(T ingredient) {
+                return mapper.apply(ingredient);
+            }
+        };
     }
     
     public static <T> IIngredientType<T> jeiType(EntryDefinition<T> definition) {
@@ -530,7 +553,6 @@ public class JEIPluginDetector {
                     }
                 });
             }));
-            backingPlugin.registerRecipeCatalysts(JEIRecipeCatalystRegistration.INSTANCE);
             backingPlugin.registerVanillaCategoryExtensions(new JEIVanillaCategoryExtensionRegistration(this));
             if (!registry.getVisibilityPredicates().contains(JEIRecipeManager.INSTANCE.categoryPredicate)) {
                 registry.registerVisibilityPredicate(JEIRecipeManager.INSTANCE.categoryPredicate);
@@ -544,6 +566,7 @@ public class JEIPluginDetector {
             if (!registry.getVisibilityPredicates().contains(JEIRecipeManager.INSTANCE.displayPredicate)) {
                 registry.registerVisibilityPredicate(JEIRecipeManager.INSTANCE.displayPredicate);
             }
+            backingPlugin.registerRecipeCatalysts(JEIRecipeCatalystRegistration.INSTANCE);
         }
         
         @Override

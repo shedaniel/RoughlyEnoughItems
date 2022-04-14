@@ -93,7 +93,7 @@ public final class RecipeTypes {
      * The brewing recipe type.
      * <p>
      * JEI automatically tries to generate all potion variations from the basic ingredients,
-     * and also automatically adds modded potions from {@link BrewingRecipeRegistry#getRecipes()}.
+     * and also automatically adds modded potions from the Forge BrewingRecipeRegistry
      *
      * @see IVanillaRecipeFactory#createBrewingRecipe to create new brewing recipes in JEI.
      * @since 9.5.0

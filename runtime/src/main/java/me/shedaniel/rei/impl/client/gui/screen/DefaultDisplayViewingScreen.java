@@ -162,28 +162,32 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         }
         
         boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
+        boolean isCompactTabButtons = ConfigObject.getInstance().isUsingCompactTabButtons();
+        int tabButtonsSize = isCompactTabButtons ? 10 : 16;
         int tabSize = isCompactTabs ? 24 : 28;
-        this.tabsPerPage = Math.max(5, Mth.floor((guiWidth - 20d) / tabSize));
+        this.tabsPerPage = Math.max(5, Mth.floor((guiWidth - tabButtonsSize * 2d) / tabSize));
         if (this.categoryPages == -1) {
             this.categoryPages = Math.max(0, selectedCategoryIndex / tabsPerPage);
         }
         
         this.page = Mth.clamp(page, 0, getCurrentTotalPages() - 1);
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x, bounds.y - 16, 10, 10), new TranslatableComponent("text.rei.left_arrow"))
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x, bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), new TranslatableComponent("text.rei.left_arrow"))
                 .onClick(button -> {
                     categoryPages--;
                     if (categoryPages < 0)
                         categoryPages = Mth.ceil(categories.size() / (float) tabsPerPage) - 1;
                     DefaultDisplayViewingScreen.this.init();
                 })
+                .tooltipLine(new TranslatableComponent("text.rei.previous_page"))
                 .enabled(categories.size() > tabsPerPage));
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - 10, bounds.y - 16, 10, 10), new TranslatableComponent("text.rei.right_arrow"))
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - tabButtonsSize - (isCompactTabButtons ? 0 : 1), bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), new TranslatableComponent("text.rei.right_arrow"))
                 .onClick(button -> {
                     categoryPages++;
                     if (categoryPages > Mth.ceil(categories.size() / (float) tabsPerPage) - 1)
                         categoryPages = 0;
                     DefaultDisplayViewingScreen.this.init();
                 })
+                .tooltipLine(new TranslatableComponent("text.rei.next_page"))
                 .enabled(categories.size() > tabsPerPage));
         this.widgets.add(categoryBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.left_arrow"))
                 .onClick(button -> previousCategory()).tooltipLine(new TranslatableComponent("text.rei.previous_category")));
@@ -354,7 +358,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         }
         PanelWidget.render(matrices, bounds, -1, delta);
         fill(matrices, bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, darkStripesColor.value().getColor());
-        fill(matrices, bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 30, darkStripesColor.value().getColor());
+        fill(matrices, bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 31, darkStripesColor.value().getColor());
         for (TabWidget tab : tabs) {
             if (!tab.isSelected()) {
                 tab.render(matrices, mouseX, mouseY, delta);

@@ -171,7 +171,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
                 PoseStack stack = new PoseStack();
                 stack.pushPose();
                 stack.last().pose().load(arg.last().pose());
-                stack.translate(bounds.x + 4, bounds.y + 4, getZ());
+                stack.translate(bounds.x + 4, bounds.y + 4, 10);
                 category.draw(display.getBackingRecipe(), result, stack, mouseX - bounds.x, mouseY - bounds.y);
                 stack.popPose();
                 

@@ -138,6 +138,12 @@ public class JEIDisplaySetup {
                         }
                     }
                 }
+                
+                if (slot.renderers.size() == 1) {
+                    IIngredientRenderer<?> renderer = slot.renderers.values().iterator().next();
+                    slot.slot.getBounds().setSize(renderer.getWidth() + 2, renderer.getHeight() + 2);
+                }
+                
                 if (slot.capacityMb != null) {
                     for (EntryStack<?> entry : slot.slot.getEntries()) {
                         if (entry.getType() == VanillaEntryTypes.FLUID) {

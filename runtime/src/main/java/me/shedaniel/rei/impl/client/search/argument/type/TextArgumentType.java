@@ -61,7 +61,7 @@ public final class TextArgumentType extends ArgumentType<Unit, String> {
     
     @Override
     public boolean matches(String value, EntryStack<?> stack, String searchText, Unit filterData) {
-        return !value.isEmpty() && value.contains(searchText);
+        return value.contains(searchText);
     }
     
     @Override

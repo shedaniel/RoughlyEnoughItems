@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.fabric;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.ClientInternals;
@@ -49,6 +48,8 @@ public class ScreenOverlayImplImpl {
                         Stream<FormattedCharSequence> sequenceStream = texts.isEmpty() ? Stream.of(component.getAsText().getVisualOrderText())
                                 : texts.stream().map(Language.getInstance()::getVisualOrder);
                         return sequenceStream.map(ClientTooltipComponent::create);
+                    } else if (!component.isTooltipComponent()) {
+                        return Stream.of(component.getAsComponent());
                     } else {
                         return Stream.empty();
                     }
@@ -72,14 +73,8 @@ public class ScreenOverlayImplImpl {
         if (lines.isEmpty()) {
             return;
         }
-        PoseStack modelViewStack = RenderSystem.getModelViewStack();
-        modelViewStack.pushPose();
-        modelViewStack.translate(0, 0, 500);
-        RenderSystem.applyModelViewMatrix();
         matrices.pushPose();
         Minecraft.getInstance().screen.renderTooltipInternal(matrices, lines, mouseX, mouseY);
         matrices.popPose();
-        modelViewStack.popPose();
-        RenderSystem.applyModelViewMatrix();
     }
 }

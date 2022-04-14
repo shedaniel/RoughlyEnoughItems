@@ -27,6 +27,8 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import it.unimi.dsi.fastutil.longs.Long2LongMap;
+import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -40,6 +42,9 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplayMerger;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
@@ -55,6 +60,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -373,20 +379,44 @@ public class ViewsImpl implements Views {
                 
                 Iterable<SlotAccessor> inputSlots = info != null ? info.getInputSlots(context.withDisplay(display)) : Collections.emptySet();
                 int slotsCraftable = 0;
+                boolean containsNonEmpty = false;
                 List<EntryIngredient> requiredInput = display.getRequiredEntries();
+                Long2LongMap invCount = new Long2LongOpenHashMap(CraftableFilter.INSTANCE.getInvStacks());
+                for (SlotAccessor inputSlot : inputSlots) {
+                    ItemStack stack = inputSlot.getItemStack();
+                    
+                    EntryDefinition<ItemStack> definition;
+                    try {
+                        definition = VanillaEntryTypes.ITEM.getDefinition();
+                    } catch (NullPointerException e) {
+                        break;
+                    }
+                    
+                    if (!stack.isEmpty()) {
+                        long hash = definition.hash(null, stack, ComparisonContext.FUZZY);
+                        long newCount = invCount.get(hash) + Math.max(0, stack.getCount());
+                        invCount.put(hash, newCount);
+                    }
+                }
                 for (EntryIngredient slot : requiredInput) {
                     if (slot.isEmpty()) {
                         slotsCraftable++;
                         continue;
                     }
                     for (EntryStack<?> slotPossible : slot) {
-                        if (CraftableFilter.INSTANCE.matches(slotPossible, inputSlots)) {
+                        if (slotPossible.getType() != VanillaEntryTypes.ITEM) continue;
+                        ItemStack stack = slotPossible.castValue();
+                        long hashFuzzy = EntryStacks.hashFuzzy(slotPossible);
+                        long availableAmount = invCount.get(hashFuzzy);
+                        if (availableAmount >= stack.getCount()) {
+                            invCount.put(hashFuzzy, availableAmount - stack.getCount());
+                            containsNonEmpty = true;
                             slotsCraftable++;
                             break;
                         }
                     }
                 }
-                if (slotsCraftable == display.getRequiredEntries().size()) {
+                if (slotsCraftable == display.getRequiredEntries().size() && containsNonEmpty) {
                     display.getOutputEntries().stream().flatMap(Collection::stream).collect(Collectors.toCollection(() -> craftables));
                 }
             }
