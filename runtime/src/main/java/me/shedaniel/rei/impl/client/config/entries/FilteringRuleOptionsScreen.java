@@ -23,24 +23,33 @@
 
 package me.shedaniel.rei.impl.client.config.entries;
 
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> extends Screen {
     private final FilteringEntry entry;
@@ -235,6 +244,119 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         @Override
         public List<? extends GuiEventListener> children() {
             return Collections.singletonList(widget);
+        }
+    }
+    
+    public static class SubRulesEntry extends RuleEntry {
+        private static final ResourceLocation CONFIG_TEX = new ResourceLocation("cloth-config2", "textures/gui/cloth_config.png");
+        private final CategoryLabelWidget widget;
+        private final List<RuleEntry> rules;
+        private final List<GuiEventListener> children;
+        private boolean expanded;
+        private Supplier<Component> name;
+        
+        public SubRulesEntry(FilteringRule<?> rule, Supplier<Component> name, List<RuleEntry> rules) {
+            super(rule);
+            this.rules = rules;
+            this.widget = new CategoryLabelWidget();
+            this.name = name;
+            this.expanded = true;
+            this.children = new ArrayList<>(rules);
+            this.children.add(widget);
+        }
+        
+        public List<RuleEntry> getRules() {
+            return rules;
+        }
+        
+        @Override
+        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+            RenderSystem.setShaderTexture(0, CONFIG_TEX);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            this.widget.rectangle.x = x + 3;
+            this.widget.rectangle.y = y;
+            this.widget.rectangle.width = entryWidth - 6;
+            this.widget.rectangle.height = 24;
+            this.blit(matrices, x + 3, y + 5, 24, (this.widget.rectangle.contains(mouseX, mouseY) ? 18 : 0) + (this.expanded ? 9 : 0), 9, 9);
+            Minecraft.getInstance().font.drawShadow(matrices, this.name.get().getVisualOrderText(), (float) x + 3 + 15, (float) (y + 6), this.widget.rectangle.contains(mouseX, mouseY) ? -1638890 : -1);
+            
+            for (RuleEntry performanceEntry : this.rules) {
+                performanceEntry.setParent(this.getParent());
+            }
+            
+            if (this.expanded) {
+                int yy = y + 24;
+                
+                RuleEntry entry;
+                for (Iterator<RuleEntry> iterator = this.rules.iterator(); iterator.hasNext(); yy += entry.getItemHeight()) {
+                    entry = iterator.next();
+                    entry.render(matrices, -1, yy, x + 3 + 15, entryWidth - 15 - 3, entry.getItemHeight(), mouseX, mouseY, isHovered && this.getFocused() == entry, delta);
+                }
+            }
+        }
+        
+        @Override
+        public int getMorePossibleHeight() {
+            if (!this.expanded) {
+                return -1;
+            } else {
+                List<Integer> list = new ArrayList<>();
+                int i = 24;
+                
+                for (RuleEntry entry : this.rules) {
+                    i += entry.getItemHeight();
+                    if (entry.getMorePossibleHeight() >= 0) {
+                        list.add(i + entry.getMorePossibleHeight());
+                    }
+                }
+                
+                list.add(i);
+                return list.stream().max(Integer::compare).orElse(0) - this.getItemHeight();
+            }
+        }
+        
+        @Override
+        public int getItemHeight() {
+            if (!this.expanded) {
+                return 24;
+            } else {
+                int i = 24;
+                
+                RuleEntry entry;
+                for (Iterator<RuleEntry> iterator = this.rules.iterator(); iterator.hasNext(); i += entry.getItemHeight()) {
+                    entry = iterator.next();
+                }
+                
+                return i;
+            }
+        }
+        
+        @Override
+        public List<? extends GuiEventListener> children() {
+            return children;
+        }
+        
+        @Override
+        public List<? extends NarratableEntry> narratables() {
+            return Collections.emptyList();
+        }
+        
+        public class CategoryLabelWidget implements GuiEventListener {
+            private final Rectangle rectangle = new Rectangle();
+            
+            public CategoryLabelWidget() {
+            }
+            
+            @Override
+            public boolean mouseClicked(double mouseX, double mouseY, int button) {
+                if (this.rectangle.contains(mouseX, mouseY)) {
+                    SubRulesEntry.this.expanded = !SubRulesEntry.this.expanded;
+                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                    return true;
+                } else {
+                    return false;
+                }
+            }
         }
     }
 }
