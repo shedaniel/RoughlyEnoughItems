@@ -23,13 +23,14 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
+import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
@@ -44,12 +45,12 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
@@ -141,34 +142,8 @@ public final class InternalWidgets {
         return new MergedWidget(widget2, widget1);
     }
     
-    private static class MergedWidget extends Widget {
-        private final List<Widget> widgets;
-        
-        public MergedWidget(Widget widget1, Widget widget2) {
-            this.widgets = Lists.newArrayList(Objects.requireNonNull(widget1), Objects.requireNonNull(widget2));
-        }
-        
-        @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            for (Widget widget : widgets) {
-                widget.setZ(getZ());
-                widget.render(matrices, mouseX, mouseY, delta);
-            }
-        }
-        
-        @Override
-        public List<? extends GuiEventListener> children() {
-            return widgets;
-        }
-        
-        @Override
-        public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-            for (Widget widget : this.widgets) {
-                if (widget.mouseScrolled(mouseX, mouseY, amount))
-                    return true;
-            }
-            return false;
-        }
+    public static Widget concatWidgets(List<Widget> widgets) {
+        return new MergedWidget(widgets);
     }
     
     private static class LateRenderableWidget extends DelegateWidget implements LateRenderable {
@@ -188,17 +163,33 @@ public final class InternalWidgets {
         }
         
         @Override
+        public Widget wrapVanillaWidget(GuiEventListener element) {
+            if (element instanceof Widget) return (Widget) element;
+            return new VanillaWrappedWidget(element);
+        }
+        
+        @Override
+        public WidgetWithBounds wrapRenderer(Supplier<Rectangle> bounds, Renderer renderer) {
+            return new RendererWrappedWidget(renderer, bounds);
+        }
+        
+        @Override
+        public WidgetWithBounds withTranslate(WidgetWithBounds widget, Supplier<Matrix4f> translate) {
+            return new DelegateWidgetWithTranslate(widget, translate);
+        }
+        
+        @Override
         public Widget createDrawableWidget(DrawableConsumer drawable) {
             return new DrawableWidget(drawable);
         }
         
         @Override
-        public me.shedaniel.rei.api.client.gui.widgets.Slot createSlot(Point point) {
+        public Slot createSlot(Point point) {
             return new EntryWidget(point);
         }
         
         @Override
-        public me.shedaniel.rei.api.client.gui.widgets.Slot createSlot(Rectangle bounds) {
+        public Slot createSlot(Rectangle bounds) {
             return new EntryWidget(bounds);
         }
         
@@ -235,6 +226,34 @@ public final class InternalWidgets {
         @Override
         public DrawableConsumer createFillRectangleConsumer(Rectangle rectangle, int color) {
             return new FillRectangleDrawableConsumer(rectangle, color);
+        }
+        
+        @Override
+        public Widget createShapelessIcon(Point point) {
+            int magnification;
+            double scale = Minecraft.getInstance().getWindow().getGuiScale();
+            if (scale >= 1 && scale <= 4 && scale == Math.floor(scale)) {
+                magnification = (int) scale;
+            } else if (scale > 4 && scale == Math.floor(scale)) {
+                magnification = 1;
+                for (int i = 4; i >= 1; i--) {
+                    if (scale % i == 0) {
+                        magnification = i;
+                        break;
+                    }
+                }
+            } else {
+                magnification = 4;
+            }
+            Rectangle bounds = new Rectangle(point.getX() - 9, point.getY() + 1, 8, 8);
+            Widget widget = Widgets.createTexturedWidget(new ResourceLocation("roughlyenoughitems:textures/gui/shapeless_icon_" + magnification + "x.png"), bounds.getX(), bounds.getY(), 0, 0, bounds.getWidth(), bounds.getHeight(), 1, 1, 1, 1);
+            return Widgets.withTooltip(Widgets.withBounds(widget, bounds),
+                    new TranslatableComponent("text.rei.shapeless"));
+        }
+        
+        @Override
+        public Widget concatWidgets(List<Widget> widgets) {
+            return InternalWidgets.concatWidgets(widgets);
         }
     }
 }
