@@ -28,7 +28,9 @@ import me.shedaniel.architectury.event.CompoundEventResult;
 import me.shedaniel.architectury.hooks.forge.FluidStackHooksForge;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
@@ -54,5 +56,9 @@ public class DefaultPluginImpl {
             
             return CompoundEventResult.pass();
         });
+    }
+    
+    public static Fluid getFluidFromBucket(BucketItem item) {
+        return item.getFluid();
     }
 }

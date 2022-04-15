@@ -21,7 +21,6 @@ accessible    field  net/minecraft/world/item/alchemy/PotionBrewing             
 accessible    field  net/minecraft/world/item/alchemy/PotionBrewing$Mix                        from                    Ljava/lang/Object;
 accessible    field  net/minecraft/world/item/alchemy/PotionBrewing$Mix                        ingredient              Lnet/minecraft/world/item/crafting/Ingredient;
 accessible    field  net/minecraft/world/item/alchemy/PotionBrewing$Mix                        to                      Ljava/lang/Object;
-accessible    field  net/minecraft/world/item/BucketItem                                       content                 Lnet/minecraft/world/level/material/Fluid;
 accessible    field  net/minecraft/world/item/crafting/UpgradeRecipe                           addition                Lnet/minecraft/world/item/crafting/Ingredient;
 accessible    field  net/minecraft/world/item/crafting/UpgradeRecipe                           base                    Lnet/minecraft/world/item/crafting/Ingredient;
 accessible    field  net/minecraft/world/item/CreativeModeTab                                  langId                  Ljava/lang/String;
