@@ -30,7 +30,6 @@ import me.shedaniel.rei.impl.client.gui.error.ErrorsEntryListWidget;
 import me.shedaniel.rei.impl.client.gui.error.ErrorsScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
@@ -94,7 +93,7 @@ public class ChangelogLoader {
         
         InputStream changesJsonStream = ChangelogLoader.class.getClassLoader().getResourceAsStream("roughlyenoughitems.changes.json");
         if (changesJsonStream == null) {
-            builder.add(new TranslatableComponent("rei.changelog.error.missingChangelogFile"));
+            builder.add(Component.translatable("rei.changelog.error.missingChangelogFile"));
         } else {
             JsonObject object = JsonParser.parseReader(new InputStreamReader(changesJsonStream))
                     .getAsJsonObject();
@@ -109,7 +108,7 @@ public class ChangelogLoader {
             InputStream changelogStream = ChangelogLoader.class.getClassLoader().getResourceAsStream("roughlyenoughitems/" + version + "/changelog.md");
             
             if (changelogStream == null) {
-                builder.add(new TranslatableComponent("rei.changelog.error.missingChangelogFile"));
+                builder.add(Component.translatable("rei.changelog.error.missingChangelogFile"));
             } else {
                 try {
                     JParseDown parseDown = new JParseDown();
@@ -130,11 +129,11 @@ public class ChangelogLoader {
                         }
                     }
                 } catch (IOException e) {
-                    builder.add(new TranslatableComponent("rei.changelog.error.failedToReadChangelogFile"));
+                    builder.add(Component.translatable("rei.changelog.error.failedToReadChangelogFile"));
                 }
             }
         }
         
-        Minecraft.getInstance().setScreen(new ErrorsScreen(new TranslatableComponent("text.rei.changelog.title"), builder.components, Minecraft.getInstance().screen, true));
+        Minecraft.getInstance().setScreen(new ErrorsScreen(Component.translatable("text.rei.changelog.title"), builder.components, Minecraft.getInstance().screen, true));
     }
 }

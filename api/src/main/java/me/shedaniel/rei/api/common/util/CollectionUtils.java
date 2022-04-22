@@ -30,7 +30,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -240,7 +240,7 @@ public class CollectionUtils {
     }
     
     public static <T> Component mapAndJoinToComponent(Iterable<T> list, Function<T, Component> function, Component separator) {
-        TextComponent joiner = new TextComponent("");
+        MutableComponent joiner = Component.literal("");
         boolean first = true;
         for (T t : list) {
             if (first) {
@@ -254,7 +254,7 @@ public class CollectionUtils {
     }
     
     public static <T> Component mapAndJoinToComponent(T[] list, Function<T, Component> function, Component separator) {
-        TextComponent joiner = new TextComponent("");
+        MutableComponent joiner = Component.literal("");
         boolean first = true;
         for (T t : list) {
             if (first) {

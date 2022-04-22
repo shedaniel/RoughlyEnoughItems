@@ -28,7 +28,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector4f;
-import me.shedaniel.clothconfig2.gui.AbstractConfigScreen;
 import me.shedaniel.clothconfig2.gui.widget.DynamicEntryListWidget;
 import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
 import net.minecraft.ChatFormatting;
@@ -41,7 +40,10 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
@@ -455,7 +457,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
-                Minecraft.getInstance().screen.renderTooltip(matrices, new TextComponent("Click to open link."), mouseX, mouseY);
+                Minecraft.getInstance().screen.renderTooltip(matrices, Component.literal("Click to open link."), mouseX, mouseY);
                 int yy = y;
                 for (FormattedCharSequence textSp : textSplit) {
                     FormattedCharSequence underlined = characterVisitor -> {

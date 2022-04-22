@@ -55,8 +55,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
@@ -162,8 +161,8 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             throwable.printStackTrace();
             setupDisplay = new ArrayList<>();
             setupDisplay.add(Widgets.createRecipeBase(recipeBounds).color(0xFFBB0000));
-            setupDisplay.add(Widgets.createLabel(new Point(recipeBounds.getCenterX(), recipeBounds.getCenterY() - 8), new TextComponent("Failed to initiate setupDisplay")));
-            setupDisplay.add(Widgets.createLabel(new Point(recipeBounds.getCenterX(), recipeBounds.getCenterY() + 1), new TextComponent("Check console for error")));
+            setupDisplay.add(Widgets.createLabel(new Point(recipeBounds.getCenterX(), recipeBounds.getCenterY() - 8), Component.literal("Failed to initiate setupDisplay")));
+            setupDisplay.add(Widgets.createLabel(new Point(recipeBounds.getCenterX(), recipeBounds.getCenterY() + 1), Component.literal("Check console for error")));
         }
         setupTags(setupDisplay);
         transformFiltering(setupDisplay);
@@ -175,7 +174,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         this.widgets.addAll(setupDisplay);
         Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getPlusButtonArea();
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
-            this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), new TextComponent(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category));
+            this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), Component.literal(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category));
         
         int index = 0;
         for (DisplaySpec recipeDisplay : categoryMap.get(category)) {
@@ -209,28 +208,28 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 tab.setRenderer(tabCategory, tabCategory.getIcon(), tabCategory.getTitle(), j == selectedCategoryIndex);
             }
         }
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + 2, bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), new TranslatableComponent("text.rei.left_arrow"))
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + 2, bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), Component.translatable("text.rei.left_arrow"))
                 .onClick(button -> {
                     tabsPage--;
                     if (tabsPage < 0)
                         tabsPage = Mth.ceil(categories.size() / (float) tabsPerPage) - 1;
                     CompositeDisplayViewingScreen.this.init();
                 })
-                .tooltipLine(new TranslatableComponent("text.rei.previous_page"))
+                .tooltipLine(Component.translatable("text.rei.previous_page"))
                 .enabled(categories.size() > tabsPerPage));
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - (isCompactTabButtons ? tabButtonsSize + 2 : tabButtonsSize + 3), bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), new TranslatableComponent("text.rei.right_arrow"))
+        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - (isCompactTabButtons ? tabButtonsSize + 2 : tabButtonsSize + 3), bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), Component.translatable("text.rei.right_arrow"))
                 .onClick(button -> {
                     tabsPage++;
                     if (tabsPage > Mth.ceil(categories.size() / (float) tabsPerPage) - 1)
                         tabsPage = 0;
                     CompositeDisplayViewingScreen.this.init();
                 })
-                .tooltipLine(new TranslatableComponent("text.rei.next_page"))
+                .tooltipLine(Component.translatable("text.rei.next_page"))
                 .enabled(categories.size() > tabsPerPage));
         
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), categories.get(selectedCategoryIndex).getTitle(), label -> {
             ViewSearchBuilder.builder().addAllCategories().open();
-        }).tooltip(new TranslatableComponent("text.rei.view_all_categories")).noShadow().color(0xFF404040, 0xFFBBBBBB).hoveredColor(0xFF0041FF, 0xFFFFBD4D));
+        }).tooltip(Component.translatable("text.rei.view_all_categories")).noShadow().color(0xFF404040, 0xFFBBBBBB).hoveredColor(0xFF0041FF, 0xFFFFBD4D));
         
         this._children().addAll(buttonList);
         this.widgets.addAll(tabs);

@@ -42,7 +42,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,7 +59,7 @@ public class DefaultFuelCategory implements DisplayCategory<DefaultFuelDisplay> 
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("category.rei.fuel");
+        return Component.translatable("category.rei.fuel");
     }
     
     @Override
@@ -79,7 +78,7 @@ public class DefaultFuelCategory implements DisplayCategory<DefaultFuelDisplay> 
         String burnItems = DECIMAL_FORMAT.format(display.getFuelTime() / 200d);
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));
-        widgets.add(Widgets.createLabel(new Point(bounds.x + 26, bounds.getMaxY() - 15), new TranslatableComponent("category.rei.fuel.time.items", burnItems))
+        widgets.add(Widgets.createLabel(new Point(bounds.x + 26, bounds.getMaxY() - 15), Component.translatable("category.rei.fuel.time.items", burnItems))
                 .color(0xFF404040, 0xFFBBBBBB).noShadow().leftAligned());
         widgets.add(Widgets.createBurningFire(new Point(bounds.x + 6, startPoint.y + 1)).animationDurationTicks(display.getFuelTime()));
         widgets.add(Widgets.createSlot(new Point(bounds.x + 6, startPoint.y + 18)).entries(display.getInputEntries().get(0)).markInput());
@@ -91,7 +90,7 @@ public class DefaultFuelCategory implements DisplayCategory<DefaultFuelDisplay> 
         Slot slot = Widgets.createSlot(new Point(0, 0)).entries(display.getInputEntries().get(0)).disableBackground().disableHighlight();
         String burnItems = DECIMAL_FORMAT.format(display.getFuelTime() / 200d);
         return new DisplayRenderer() {
-            private TranslatableComponent text = new TranslatableComponent("category.rei.fuel.time_short.items", burnItems);
+            private Component text = Component.translatable("category.rei.fuel.time_short.items", burnItems);
             
             @Override
             public int getHeight() {

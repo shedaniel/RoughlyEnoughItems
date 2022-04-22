@@ -39,8 +39,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 
 import java.util.*;
@@ -54,7 +52,7 @@ public class PerformanceScreen extends Screen {
     private Screen parent;
     
     public PerformanceScreen(Screen parent) {
-        super(new TranslatableComponent("text.rei.performance"));
+        super(Component.translatable("text.rei.performance"));
         this.parent = parent;
     }
     
@@ -76,7 +74,7 @@ public class PerformanceScreen extends Screen {
     public static FormattedCharSequence formatTime(long time, boolean total) {
         TimeUnit unit = chooseUnit(time);
         double value = (double) time / NANOSECONDS.convert(1, unit);
-        return new TextComponent(String.format(Locale.ROOT, "%.4g", value) + " " + abbreviate(unit))
+        return Component.literal(String.format(Locale.ROOT, "%.4g", value) + " " + abbreviate(unit))
                 .withStyle(style -> style.withColor(TextColor.fromRgb(chooseColor(MILLISECONDS.convert(time, NANOSECONDS), total))))
                 .getVisualOrderText();
     }
@@ -138,7 +136,7 @@ public class PerformanceScreen extends Screen {
     @Override
     public void init() {
         {
-            Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));
+            Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
@@ -148,7 +146,7 @@ public class PerformanceScreen extends Screen {
         RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.getStages().forEach((stage, inner) -> {
             List<EntryListEntry> entries = new ArrayList<>();
             inner.times().forEach((obj, time) -> {
-                entries.add(new EntryListEntry(new TextComponent(obj instanceof Pair ? ((Pair<REIPluginProvider<?>, REIPlugin<?>>) obj).getFirst().getPluginProviderName() : Objects.toString(obj)), time));
+                entries.add(new EntryListEntry(Component.literal(obj instanceof Pair ? ((Pair<REIPluginProvider<?>, REIPlugin<?>>) obj).getFirst().getPluginProviderName() : Objects.toString(obj)), time));
             });
             Collection<Long> values = inner.times().values();
             long separateTime;
@@ -156,10 +154,10 @@ public class PerformanceScreen extends Screen {
                 separateTime = values.stream().collect(Collectors.summarizingLong(value -> value)).getSum();
             }
             if ((inner.totalNano() - separateTime) > 1000000) {
-                entries.add(new EntryListEntry(new TextComponent("Miscellaneous Operations"), inner.totalNano() - separateTime));
+                entries.add(new EntryListEntry(Component.literal("Miscellaneous Operations"), inner.totalNano() - separateTime));
             }
             entries.sort(Comparator.<EntryListEntry>comparingLong(value -> value.time).reversed());
-            list.addItem(new SubCategoryListEntry(new TextComponent(stage), (List<PerformanceScreen.PerformanceEntry>) (List<? extends PerformanceScreen.PerformanceEntry>) entries, inner.totalNano(), false));
+            list.addItem(new SubCategoryListEntry(Component.literal(stage), (List<PerformanceScreen.PerformanceEntry>) (List<? extends PerformanceScreen.PerformanceEntry>) entries, inner.totalNano(), false));
         });
         addWidget(list);
     }

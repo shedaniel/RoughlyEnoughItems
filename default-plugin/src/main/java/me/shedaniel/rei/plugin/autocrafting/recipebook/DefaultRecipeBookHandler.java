@@ -31,9 +31,8 @@ import me.shedaniel.rei.plugin.common.displays.cooking.DefaultCookingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
@@ -64,7 +63,7 @@ public class DefaultRecipeBookHandler implements TransferHandler {
                     return Result.createNotApplicable();
                 Recipe<?> recipe = craftingDisplay.getOptionalRecipe().get();
                 if (craftingDisplay.getHeight() > h || craftingDisplay.getWidth() > w)
-                    return Result.createFailed(new TranslatableComponent("error.rei.transfer.too_small", h, w));
+                    return Result.createFailed(Component.translatable("error.rei.transfer.too_small", h, w));
                 if (!context.getMinecraft().player.getRecipeBook().contains(recipe))
                     return Result.createNotApplicable();
                 if (!context.isActuallyCrafting())

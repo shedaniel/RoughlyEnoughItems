@@ -150,8 +150,8 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
         } catch (Throwable throwable) {
             throwable.printStackTrace();
             widgets.add(Widgets.createRecipeBase(bounds).color(0xFFFF0000));
-            widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() - 8), new TextComponent("Failed to initiate JEI integration setRecipe")));
-            widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() + 1), new TextComponent("Check console for error")));
+            widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() - 8), Component.literal("Failed to initiate JEI integration setRecipe")));
+            widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() + 1), Component.literal("Check console for error")));
             return widgets;
         }
         widgets.add(Widgets.createRecipeBase(bounds));

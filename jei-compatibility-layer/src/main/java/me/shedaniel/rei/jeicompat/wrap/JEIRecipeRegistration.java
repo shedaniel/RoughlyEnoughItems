@@ -196,7 +196,7 @@ public class JEIRecipeRegistration implements IRecipeRegistration {
     @Override
     public <T> void addIngredientInfo(@NotNull List<T> ingredients, @NotNull IIngredientType<T> ingredientType, @NotNull Component @NotNull ... descriptionComponents) {
         EntryIngredient ingredient = ingredientType.unwrapList(ingredients);
-        BuiltinClientPlugin.getInstance().registerInformation(ingredient, ImmutableTextComponent.EMPTY, components -> {
+        BuiltinClientPlugin.getInstance().registerInformation(ingredient, Component.empty(), components -> {
             Collections.addAll(components, descriptionComponents);
             return components;
         });

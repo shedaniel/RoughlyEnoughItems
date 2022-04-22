@@ -39,7 +39,6 @@ import me.shedaniel.rei.plugin.common.displays.brewing.DefaultBrewingDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -60,7 +59,7 @@ public class DefaultBrewingCategory implements DisplayCategory<DefaultBrewingDis
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("category.rei.brewing");
+        return Component.translatable("category.rei.brewing");
     }
     
     @Override

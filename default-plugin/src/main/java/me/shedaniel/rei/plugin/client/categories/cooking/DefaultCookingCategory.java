@@ -38,7 +38,6 @@ import me.shedaniel.rei.plugin.common.displays.cooking.DefaultCookingDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 import java.text.DecimalFormat;
 import java.util.Collections;
@@ -67,7 +66,7 @@ public class DefaultCookingCategory implements DisplayCategory<DefaultCookingDis
         widgets.add(Widgets.createBurningFire(new Point(startPoint.x + 1, startPoint.y + 20))
                 .animationDurationMS(10000));
         widgets.add(Widgets.createLabel(new Point(bounds.x + bounds.width - 5, bounds.y + 5),
-                new TranslatableComponent("category.rei.cooking.time&xp", df.format(display.getXp()), df.format(cookingTime / 20d))).noShadow().rightAligned().color(0xFF404040, 0xFFBBBBBB));
+                Component.translatable("category.rei.cooking.time&xp", df.format(display.getXp()), df.format(cookingTime / 20d))).noShadow().rightAligned().color(0xFF404040, 0xFFBBBBBB));
         widgets.add(Widgets.createArrow(new Point(startPoint.x + 24, startPoint.y + 8))
                 .animationDurationTicks(cookingTime));
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 61, startPoint.y + 9))
@@ -102,6 +101,6 @@ public class DefaultCookingCategory implements DisplayCategory<DefaultCookingDis
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent(categoryName);
+        return Component.translatable(categoryName);
     }
 }

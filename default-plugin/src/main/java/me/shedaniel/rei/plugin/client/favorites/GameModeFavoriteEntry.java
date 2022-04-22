@@ -45,7 +45,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.level.GameType;
@@ -80,7 +79,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
                 @Override
                 @Nullable
                 public Tooltip getTooltip(Point mouse) {
-                    return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.dropdown"));
+                    return Tooltip.create(mouse, Component.translatable("text.rei.gamemode_button.tooltip.dropdown"));
                 }
                 
                 @Override
@@ -115,7 +114,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             }
             
             private void renderGameModeText(PoseStack matrices, GameType type, int centerX, int centerY, int color) {
-                Component s = new TranslatableComponent("text.rei.short_gamemode." + type.getName());
+                Component s = Component.translatable("text.rei.short_gamemode." + type.getName());
                 Font font = Minecraft.getInstance().font;
                 font.draw(matrices, s, centerX - font.width(s) / 2f + 0.5f, centerY - 3.5f, color);
             }
@@ -123,7 +122,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             @Override
             @Nullable
             public Tooltip getTooltip(Point mouse) {
-                return Tooltip.create(mouse, new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", type.getLongDisplayName().getString()));
+                return Tooltip.create(mouse, Component.translatable("text.rei.gamemode_button.tooltip.entry", type.getLongDisplayName().getString()));
             }
             
             @Override
@@ -262,7 +261,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
                 fill(matrices, x, y, x + width, y + 12, -12237499);
             }
             if (!disabled && selected && containsMouse) {
-                REIRuntime.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.gamemode_button.tooltip.entry", text)));
+                REIRuntime.getInstance().queueTooltip(Tooltip.create(Component.translatable("text.rei.gamemode_button.tooltip.entry", text)));
             }
             String s = text;
             if (disabled) {

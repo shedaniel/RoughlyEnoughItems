@@ -69,7 +69,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
@@ -109,7 +109,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                 @Override
                 @Nullable
                 public Tooltip getTooltip(Point point) {
-                    return Tooltip.create(new TextComponent("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
+                    return Tooltip.create(Component.literal("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
                 }
             }));
         }

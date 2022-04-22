@@ -23,8 +23,6 @@
 
 package me.shedaniel.rei.impl.client.config.entries;
 
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
@@ -39,7 +37,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
@@ -59,7 +56,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
     public T rule;
     
     public FilteringRuleOptionsScreen(FilteringEntry entry, T rule, Screen screen) {
-        super(new TranslatableComponent("config.roughlyenoughitems.filteringRulesScreen"));
+        super(Component.translatable("config.roughlyenoughitems.filteringRulesScreen"));
         this.entry = entry;
         this.rule = rule;
         this.parent = screen;
@@ -70,7 +67,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         super.init();
         if (rulesList != null) save();
         {
-            Component doneText = new TranslatableComponent("gui.done");
+            Component doneText = Component.translatable("gui.done");
             int width = Minecraft.getInstance().font.width(doneText);
             addRenderableWidget(new Button(this.width - 4 - width - 10, 4, width + 10, 20, doneText, button -> {
                 save();

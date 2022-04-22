@@ -233,7 +233,7 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                                 return TransferHandler.Result.createNotApplicable();
                             }
                             TransferHandler.Result result = type == IRecipeTransferError.Type.COSMETIC ? TransferHandler.Result.createSuccessful()
-                                    : TransferHandler.Result.createFailed(error instanceof JEIRecipeTransferError ? ((JEIRecipeTransferError) error).getText() : new TextComponent(""));
+                                    : TransferHandler.Result.createFailed(error instanceof JEIRecipeTransferError ? ((JEIRecipeTransferError) error).getText() : Component.literal(""));
                             
                             if (error instanceof JEIRecipeTransferError) {
                                 JEIRecipeTransferError transferError = (JEIRecipeTransferError) error;

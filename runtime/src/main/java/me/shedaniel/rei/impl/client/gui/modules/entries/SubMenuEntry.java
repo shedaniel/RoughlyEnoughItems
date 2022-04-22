@@ -29,7 +29,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
@@ -57,7 +56,7 @@ public class SubMenuEntry extends AbstractMenuEntry {
     }
     
     public SubMenuEntry(Component text, List<MenuEntry> entries) {
-        this.text = MoreObjects.firstNonNull(text, ImmutableTextComponent.EMPTY);
+        this.text = MoreObjects.firstNonNull(text, Component.empty());
         this.entries = entries;
     }
     

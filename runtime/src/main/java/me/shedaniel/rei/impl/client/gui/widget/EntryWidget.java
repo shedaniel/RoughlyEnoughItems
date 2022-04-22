@@ -52,8 +52,7 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
@@ -333,13 +332,13 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 String name = ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString();
                 if (reverseFavoritesAction())
                     tooltip.addAllTexts(Stream.of(I18n.get("text.rei.remove_favorites_tooltip", name).split("\n"))
-                            .map(TextComponent::new).collect(Collectors.toList()));
+                            .map(Component::literal).collect(Collectors.toList()));
                 else
                     tooltip.addAllTexts(Stream.of(I18n.get("text.rei.favorites_tooltip", name).split("\n"))
-                            .map(TextComponent::new).collect(Collectors.toList()));
+                            .map(Component::literal).collect(Collectors.toList()));
             }
             if (tagMatch != null) {
-                tooltip.add(new TranslatableComponent("text.rei.tag_match", tagMatch.toString()).withStyle(ChatFormatting.GRAY));
+                tooltip.add(Component.translatable("text.rei.tag_match", tagMatch.toString()).withStyle(ChatFormatting.GRAY));
             }
             tooltip.queue();
         }

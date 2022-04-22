@@ -28,7 +28,6 @@ import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -182,7 +181,7 @@ public abstract class Label extends WidgetWithBounds {
     public void setTooltip(@Nullable Function<Label, @Nullable String> tooltip) {
         if(tooltip != null) setTooltipFunction((label) -> {
             String text = tooltip.apply(label);
-            if(text != null) return Stream.of(text.split("\n")).map(TextComponent::new).toArray(Component[]::new);
+            if(text != null) return Stream.of(text.split("\n")).map(Component::literal).toArray(Component[]::new);
             return null;
         });
     }
@@ -209,7 +208,7 @@ public abstract class Label extends WidgetWithBounds {
      * @param tooltip the tooltip.
      */
     public void setTooltip(String... tooltip) {
-        setTooltipFunction((label) -> Stream.of(tooltip).map(TextComponent::new).toArray(Component[]::new));
+        setTooltipFunction((label) -> Stream.of(tooltip).map(Component::literal).toArray(Component[]::new));
     }
     
     /**
@@ -245,7 +244,7 @@ public abstract class Label extends WidgetWithBounds {
      * @return the label itself.
      */
     public final Label tooltip(String... tooltip) {
-        return tooltipFunction(label -> Stream.of(tooltip).map(TextComponent::new).toArray(Component[]::new));
+        return tooltipFunction(label -> Stream.of(tooltip).map(Component::literal).toArray(Component[]::new));
     }
 
     /**

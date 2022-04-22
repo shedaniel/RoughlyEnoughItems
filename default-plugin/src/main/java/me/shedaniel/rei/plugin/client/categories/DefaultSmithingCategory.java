@@ -35,7 +35,6 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.DefaultSmithingDisplay;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
@@ -48,7 +47,7 @@ public class DefaultSmithingCategory implements DisplayCategory<DefaultSmithingD
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("category.rei.smithing");
+        return Component.translatable("category.rei.smithing");
     }
     
     @Override

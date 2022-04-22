@@ -24,7 +24,6 @@
 package me.shedaniel.rei.api.common.transfer.info;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 public class MenuTransferException extends Exception {
     private final Component component;
@@ -40,7 +39,7 @@ public class MenuTransferException extends Exception {
     }
     
     public MenuTransferException(String message) {
-        this(new TranslatableComponent(message));
+        this(Component.translatable(message));
     }
     
     public static MenuTransferException createNotApplicable() {

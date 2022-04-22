@@ -34,10 +34,8 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.registry.Reloadable;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Nullable;
@@ -195,8 +193,8 @@ public class PluginStageExecutionWatcher implements HintProvider {
             } else {
                 currentTask = getSimpleName(current.getRight().getClass());
             }
-            return ImmutableList.of(new TranslatableComponent("text.rei.not.fully.initialized"),
-                    new ImmutableTextComponent(progress), new ImmutableTextComponent(currentTask));
+            return ImmutableList.of(Component.translatable("text.rei.not.fully.initialized"),
+                    Component.literal(progress), Component.literal(currentTask));
         }
     }
     
@@ -211,7 +209,7 @@ public class PluginStageExecutionWatcher implements HintProvider {
     @Override
     @Nullable
     public Tooltip provideTooltip(Point mouse) {
-        return Tooltip.create(mouse, new TranslatableComponent("text.rei.not.fully.initialized.tooltip", notVisited().stream().map(Enum::name).collect(Collectors.joining(", "))));
+        return Tooltip.create(mouse, Component.translatable("text.rei.not.fully.initialized.tooltip", notVisited().stream().map(Enum::name).collect(Collectors.joining(", "))));
     }
     
     @Override

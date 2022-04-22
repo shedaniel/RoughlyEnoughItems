@@ -70,6 +70,6 @@ public final class TexturedDrawableConsumer implements DrawableConsumer {
         bufferBuilder.vertex(matrix, xEnd, yStart, z).uv(uEnd, vStart).endVertex();
         bufferBuilder.vertex(matrix, xStart, yStart, z).uv(uStart, vStart).endVertex();
         bufferBuilder.end();
-        BufferUploader.end(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder);
     }
 }

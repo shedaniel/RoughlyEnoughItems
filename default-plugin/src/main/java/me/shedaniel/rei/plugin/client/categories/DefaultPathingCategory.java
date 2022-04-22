@@ -35,7 +35,6 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.DefaultPathingDisplay;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Items;
 
 import java.util.List;
@@ -53,7 +52,7 @@ public class DefaultPathingCategory implements DisplayCategory<DefaultPathingDis
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("category.rei.pathing");
+        return Component.translatable("category.rei.pathing");
     }
     
     @Override

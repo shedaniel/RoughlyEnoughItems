@@ -62,7 +62,7 @@ public abstract class JEIAbstractCookingCategory<T extends AbstractCookingRecipe
         this.background = guiHelper.createDrawable(new ResourceLocation("jei:textures/gui/gui_vanilla.png"), 0, 114, 82, 54);
         this.regularCookTime = regularCookTime;
         this.icon = guiHelper.createDrawableIngredient(new ItemStack(icon));
-        this.localizedName = new TranslatableComponent(translationKey);
+        this.localizedName = Component.translatable(translationKey);
         this.cachedArrows = CacheBuilder.newBuilder()
                 .maximumSize(25)
                 .build(new CacheLoader<Integer, IDrawableAnimated>() {
@@ -112,7 +112,7 @@ public abstract class JEIAbstractCookingCategory<T extends AbstractCookingRecipe
     protected void drawExperience(T recipe, PoseStack matrixStack, int y) {
         float experience = recipe.getExperience();
         if (experience > 0) {
-            TranslatableComponent experienceString = new TranslatableComponent("gui.jei.category.smelting.experience", experience);
+            TranslatableComponent experienceString = Component.translatable("gui.jei.category.smelting.experience", experience);
             Minecraft minecraft = Minecraft.getInstance();
             Font fontRenderer = minecraft.font;
             int stringWidth = fontRenderer.width(experienceString);
@@ -124,7 +124,7 @@ public abstract class JEIAbstractCookingCategory<T extends AbstractCookingRecipe
         int cookTime = recipe.getCookingTime();
         if (cookTime > 0) {
             int cookTimeSeconds = cookTime / 20;
-            TranslatableComponent timeString = new TranslatableComponent("gui.jei.category.smelting.time.seconds", cookTimeSeconds);
+            TranslatableComponent timeString = Component.translatable("gui.jei.category.smelting.time.seconds", cookTimeSeconds);
             Minecraft minecraft = Minecraft.getInstance();
             Font fontRenderer = minecraft.font;
             int stringWidth = fontRenderer.width(timeString);

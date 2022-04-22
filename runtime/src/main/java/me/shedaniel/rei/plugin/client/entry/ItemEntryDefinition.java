@@ -45,7 +45,6 @@ import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -190,11 +189,11 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
                 SEARCH_BLACKLISTED.add(value.getItem());
             }
         try {
-            return new ImmutableTextComponent(I18n.get("item." + Registry.ITEM.getKey(value.getItem()).toString().replace(":", ".")));
+            return Component.literal(I18n.get("item." + Registry.ITEM.getKey(value.getItem()).toString().replace(":", ".")));
         } catch (Throwable e) {
             e.printStackTrace();
         }
-        return new ImmutableTextComponent("ERROR");
+        return Component.literal("ERROR");
     }
     
     @Override

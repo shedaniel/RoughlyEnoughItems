@@ -43,7 +43,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ComposterBlock;
@@ -67,13 +66,13 @@ public class DefaultCompostingCategory implements DisplayCategory<DefaultCompost
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("category.rei.composting");
+        return Component.translatable("category.rei.composting");
     }
     
     @Override
     public DisplayRenderer getDisplayRenderer(DefaultCompostingDisplay display) {
         return new DisplayRenderer() {
-            private Component text = new TranslatableComponent("text.rei.composting.page", display.getPage() + 1);
+            private Component text = Component.translatable("text.rei.composting.page", display.getPage() + 1);
             
             @Override
             public int getHeight() {
@@ -99,7 +98,7 @@ public class DefaultCompostingCategory implements DisplayCategory<DefaultCompost
                 if (!entryStack.isEmpty()) {
                     ComposterBlock.COMPOSTABLES.object2FloatEntrySet().stream().filter(entry -> entry.getKey() != null && Objects.equals(entry.getKey().asItem(), entryStack.get(0).getValue())).findAny().map(Map.Entry::getValue).ifPresent(chance -> {
                         for (EntryStack<?> stack : entryStack) {
-                            stack.tooltip(new TranslatableComponent("text.rei.composting.chance", Mth.fastFloor(chance * 100)).withStyle(ChatFormatting.YELLOW));
+                            stack.tooltip(Component.translatable("text.rei.composting.chance", Mth.fastFloor(chance * 100)).withStyle(ChatFormatting.YELLOW));
                         }
                     });
                 }

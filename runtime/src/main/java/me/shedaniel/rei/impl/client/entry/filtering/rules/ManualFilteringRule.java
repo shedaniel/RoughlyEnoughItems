@@ -37,7 +37,6 @@ import me.shedaniel.rei.impl.client.entry.filtering.FilteringContext;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringResult;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.Collection;
 import java.util.List;
@@ -106,12 +105,12 @@ public class ManualFilteringRule extends AbstractFilteringRule<ManualFilteringRu
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("rule.roughlyenoughitems.filtering.manual");
+        return Component.translatable("rule.roughlyenoughitems.filtering.manual");
     }
     
     @Override
     public Component getSubtitle() {
-        return new TranslatableComponent("rule.roughlyenoughitems.filtering.manual.subtitle");
+        return Component.translatable("rule.roughlyenoughitems.filtering.manual.subtitle");
     }
     
     @Override

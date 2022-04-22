@@ -45,7 +45,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.Nullable;
@@ -98,7 +98,7 @@ public class TimeFavoriteEntry extends FavoriteEntry {
                 @Override
                 @Nullable
                 public Tooltip getTooltip(Point mouse) {
-                    return Tooltip.create(mouse, new TranslatableComponent("text.rei.time_button.tooltip.dropdown"));
+                    return Tooltip.create(mouse, Component.translatable("text.rei.time_button.tooltip.dropdown"));
                 }
                 
                 @Override
@@ -156,7 +156,7 @@ public class TimeFavoriteEntry extends FavoriteEntry {
             @Override
             @Nullable
             public Tooltip getTooltip(Point mouse) {
-                return Tooltip.create(mouse, new TranslatableComponent("text.rei.time_button.tooltip.entry", new TranslatableComponent("text.rei.time_button.name." + time.name().toLowerCase(Locale.ROOT))));
+                return Tooltip.create(mouse, Component.translatable("text.rei.time_button.tooltip.entry", Component.translatable("text.rei.time_button.name." + time.name().toLowerCase(Locale.ROOT))));
             }
             
             @Override
@@ -294,7 +294,7 @@ public class TimeFavoriteEntry extends FavoriteEntry {
                 fill(matrices, x, y, x + width, y + 12, -12237499);
             }
             if (selected && containsMouse) {
-                REIRuntime.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.time_button.tooltip.entry", text)));
+                REIRuntime.getInstance().queueTooltip(Tooltip.create(Component.translatable("text.rei.time_button.tooltip.entry", text)));
             }
             font.draw(matrices, text, x + 2, y + 2, selected ? 16777215 : 8947848);
         }

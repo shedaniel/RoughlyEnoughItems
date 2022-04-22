@@ -34,7 +34,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -47,7 +47,7 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>
     private Consumer<List<EntryStack<?>>> saveConsumer;
     private List<EntryStack<?>> defaultValue;
     private List<EntryStack<?>> configFiltered;
-    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, new TranslatableComponent("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {});
+    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.translatable("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {});
     private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public NoFilteringEntry(int width, List<EntryStack<?>> configFiltered, List<EntryStack<?>> defaultValue, Consumer<List<EntryStack<?>>> saveConsumer) {

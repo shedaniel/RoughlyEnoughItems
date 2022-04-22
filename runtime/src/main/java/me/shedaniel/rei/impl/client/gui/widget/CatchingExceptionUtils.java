@@ -23,15 +23,13 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.gui.error.ErrorsEntryListWidget;
 import me.shedaniel.rei.impl.client.gui.error.ErrorsScreen;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
 import net.minecraft.CrashReport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.Bootstrap;
 
 import java.io.File;
@@ -50,10 +48,10 @@ public class CatchingExceptionUtils {
         report.saveToFile(crashReportFile);
         Bootstrap.realStdoutPrintln(report.getFriendlyReport());
         List<Object> components = new ArrayList<>();
-        components.add(new TextComponent(I18n.get("text.rei.crash.description", report.getTitle())));
-        components.add((Function<Integer, ErrorsEntryListWidget.Entry>) width -> new ErrorsEntryListWidget.LinkEntry(new TranslatableComponent("text.rei.crash.crash_report"), crashReportFile.toURI().toString(), width));
-        components.add(ImmutableTextComponent.EMPTY);
-        components.add(new TextComponent(report.getFriendlyReport().replace("\t", "    ")));
-        Minecraft.getInstance().setScreen(new ErrorsScreen(new TranslatableComponent("text.rei.crash.title"), components, null, false));
+        components.add(Component.literal(I18n.get("text.rei.crash.description", report.getTitle())));
+        components.add((Function<Integer, ErrorsEntryListWidget.Entry>) width -> new ErrorsEntryListWidget.LinkEntry(Component.translatable("text.rei.crash.crash_report"), crashReportFile.toURI().toString(), width));
+        components.add(Component.empty());
+        components.add(Component.literal(report.getFriendlyReport().replace("\t", "    ")));
+        Minecraft.getInstance().setScreen(new ErrorsScreen(Component.translatable("text.rei.crash.title"), components, null, false));
     }
 }

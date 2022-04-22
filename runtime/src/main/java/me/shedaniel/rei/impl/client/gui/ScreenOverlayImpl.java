@@ -57,7 +57,6 @@ import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
@@ -82,8 +81,6 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.Slot;
@@ -254,7 +251,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         this.widgets.add(REIRuntimeImpl.getSearchField());
         REIRuntimeImpl.getSearchField().setResponder(s -> ENTRY_LIST_WIDGET.updateSearch(s, false));
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            widgets.add(leftButton = Widgets.createButton(new Rectangle(bounds.x, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent("text.rei.left_arrow"))
+            widgets.add(leftButton = Widgets.createButton(new Rectangle(bounds.x, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), Component.translatable("text.rei.left_arrow"))
                     .onClick(button -> {
                         ENTRY_LIST_WIDGET.previousPage();
                         if (ENTRY_LIST_WIDGET.getPage() < 0)
@@ -262,15 +259,15 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                         ENTRY_LIST_WIDGET.updateEntriesPosition();
                     })
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
-                    .tooltipLine(new TranslatableComponent("text.rei.previous_page"))
+                    .tooltipLine(Component.translatable("text.rei.previous_page"))
                     .focusable(false));
             Button changelogButton;
-            widgets.add(changelogButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18 - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent(""))
+            widgets.add(changelogButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18 - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), Component.translatable(""))
                     .onClick(button -> {
                         ChangelogLoader.show();
                     })
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
-                    .tooltipLine(new TranslatableComponent("text.rei.changelog.title"))
+                    .tooltipLine(Component.translatable("text.rei.changelog.title"))
                     .focusable(false));
             widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
                 helper.setBlitOffset(helper.getBlitOffset() + 1);
@@ -282,7 +279,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 matrices.popPose();
                 helper.setBlitOffset(helper.getBlitOffset() - 1);
             }));
-            widgets.add(rightButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent("text.rei.right_arrow"))
+            widgets.add(rightButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), Component.translatable("text.rei.right_arrow"))
                     .onClick(button -> {
                         ENTRY_LIST_WIDGET.nextPage();
                         if (ENTRY_LIST_WIDGET.getPage() >= ENTRY_LIST_WIDGET.getTotalPages())
@@ -290,7 +287,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                         ENTRY_LIST_WIDGET.updateEntriesPosition();
                     })
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
-                    .tooltipLine(new TranslatableComponent("text.rei.next_page"))
+                    .tooltipLine(Component.translatable("text.rei.next_page"))
                     .focusable(false));
         }
         
@@ -341,7 +338,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         ));
         Rectangle subsetsButtonBounds = getSubsetsButtonBounds();
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
-            widgets.add(InternalWidgets.wrapLateRenderable(Widgets.withTranslate(Widgets.createButton(subsetsButtonBounds, ClientHelperImpl.getInstance().isAprilFools.get() ? new TranslatableComponent("text.rei.tiny_potato") : new TranslatableComponent("text.rei.subsets"))
+            widgets.add(InternalWidgets.wrapLateRenderable(Widgets.withTranslate(Widgets.createButton(subsetsButtonBounds, ClientHelperImpl.getInstance().isAprilFools.get() ? Component.translatable("text.rei.tiny_potato") : Component.translatable("text.rei.subsets"))
                     .onClick(button -> {
                         proceedOpenMenuOrElse(Menu.SUBSETS, () -> {
                             openMenu(Menu.SUBSETS, Menu.createSubsetsMenuFromRegistry(subsetsButtonBounds), point -> true, point -> true);
@@ -361,9 +358,9 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                         ENTRY_LIST_WIDGET.updateEntriesPosition();
                     }, ENTRY_LIST_WIDGET.getPage(), ENTRY_LIST_WIDGET.getTotalPages());
                 }
-            }).tooltip(new TranslatableComponent("text.rei.go_back_first_page"), new TextComponent(" "), new TranslatableComponent("text.rei.shift_click_to", new TranslatableComponent("text.rei.choose_page")).withStyle(ChatFormatting.GRAY)).focusable(false).onRender((matrices, label) -> {
+            }).tooltip(Component.translatable("text.rei.go_back_first_page"), Component.literal(" "), Component.translatable("text.rei.shift_click_to", Component.translatable("text.rei.choose_page")).withStyle(ChatFormatting.GRAY)).focusable(false).onRender((matrices, label) -> {
                 label.setClickable(ENTRY_LIST_WIDGET.getTotalPages() > 1);
-                label.setMessage(new TextComponent(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, Math.max(ENTRY_LIST_WIDGET.getTotalPages(), 1))));
+                label.setMessage(Component.literal(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, Math.max(ENTRY_LIST_WIDGET.getTotalPages(), 1))));
             }).rainbow(new Random().nextFloat() < 1.0E-4D || ClientHelperImpl.getInstance().isAprilFools.get()));
         }
         if (ConfigObject.getInstance().isCraftableFilterEnabled()) {
@@ -379,7 +376,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                             })
                             .onRender((matrices, button) -> button.setTint(ConfigManager.getInstance().isCraftableOnlyEnabled() ? 939579655 : 956235776))
                             .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
-                            .tooltipLineSupplier(button -> new TranslatableComponent(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all")),
+                            .tooltipLineSupplier(button -> Component.translatable(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all")),
                     Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
                         Vector4f vector = new Vector4f(area.x + 2, area.y + 2, helper.getBlitOffset() - 10, 1.0F);
                         vector.transform(matrices.last().pose());
@@ -396,37 +393,37 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     private Collection<MenuEntry> provideConfigButtonMenu() {
         ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
         return Arrays.asList(
-                ToggleMenuEntry.of(new TranslatableComponent("text.rei.cheating"),
+                ToggleMenuEntry.of(Component.translatable("text.rei.cheating"),
                         config::isCheating,
                         config::setCheating
                 ),
                 new EmptyMenuEntry(4),
                 new TextMenuEntry(() -> {
                     if (!ClientHelper.getInstance().isCheating())
-                        return new TranslatableComponent("text.rei.cheating_disabled");
+                        return Component.translatable("text.rei.cheating_disabled");
                     else if (!ClientHelperImpl.getInstance().hasOperatorPermission()) {
                         if (minecraft.gameMode.hasInfiniteItems())
-                            return new TranslatableComponent("text.rei.cheating_limited_creative_enabled");
-                        else return new TranslatableComponent("text.rei.cheating_enabled_no_perms");
+                            return Component.translatable("text.rei.cheating_limited_creative_enabled");
+                        else return Component.translatable("text.rei.cheating_enabled_no_perms");
                     } else if (ClientHelperImpl.getInstance().hasPermissionToUsePackets())
-                        return new TranslatableComponent("text.rei.cheating_enabled");
+                        return Component.translatable("text.rei.cheating_enabled");
                     else
-                    return new TranslatableComponent("text.rei.cheating_limited_enabled");
+                    return Component.translatable("text.rei.cheating_limited_enabled");
                 }),
                 new SeparatorMenuEntry(),
-                ToggleMenuEntry.ofDeciding(new TranslatableComponent("text.rei.config.menu.dark_theme"),
+                ToggleMenuEntry.ofDeciding(Component.translatable("text.rei.config.menu.dark_theme"),
                         config::isUsingDarkTheme,
                         dark -> {
                             config.setUsingDarkTheme(dark);
                             return false;
                         }
                 ),
-                ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.craftable_filter"),
+                ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.craftable_filter"),
                         config::isCraftableFilterEnabled,
                         config::setCraftableFilterEnabled
                 ),
-                new SubMenuEntry(new TranslatableComponent("text.rei.config.menu.display"), Arrays.asList(
-                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.remove_recipe_book"),
+                new SubMenuEntry(Component.translatable("text.rei.config.menu.display"), Arrays.asList(
+                        ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.remove_recipe_book"),
                                 config::doesDisableRecipeBook,
                                 disableRecipeBook -> {
                                     config.setDisableRecipeBook(disableRecipeBook);
@@ -437,7 +434,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                                     }
                                 }
                         ),
-                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.left_side_mob_effects"),
+                        ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.left_side_mob_effects"),
                                 config::isLeftSideMobEffects,
                                 disableRecipeBook -> {
                                     config.setLeftSideMobEffects(disableRecipeBook);
@@ -448,31 +445,31 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                                     }
                                 }
                         ),
-                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.left_side_panel"),
+                        ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.left_side_panel"),
                                 config::isLeftHandSidePanel,
                                 bool -> config.setDisplayPanelLocation(bool ? DisplayPanelLocation.LEFT : DisplayPanelLocation.RIGHT)
                         ),
-                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.scrolling_side_panel"),
+                        ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.scrolling_side_panel"),
                                 config::isEntryListWidgetScrolled,
                                 config::setEntryListWidgetScrolled
                         ),
                         new SeparatorMenuEntry(),
-                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.caching_entry_rendering"),
+                        ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.caching_entry_rendering"),
                                 config::doesCacheEntryRendering,
                                 config::setDoesCacheEntryRendering
                         ),
                         new SeparatorMenuEntry(),
-                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.side_search_field"),
+                        ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.side_search_field"),
                                 () -> config.getSearchFieldLocation() != SearchFieldLocation.CENTER,
                                 bool -> config.setSearchFieldLocation(bool ? SearchFieldLocation.BOTTOM_SIDE : SearchFieldLocation.CENTER)
                         ),
-                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.syntax_highlighting"),
+                        ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.syntax_highlighting"),
                                 () -> config.getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL || config.getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL_UNDERSCORED,
                                 bool -> config.setSyntaxHighlightingMode(bool ? SyntaxHighlightingMode.COLORFUL : SyntaxHighlightingMode.PLAIN_UNDERSCORED)
                         )
                 )),
                 new SeparatorMenuEntry(),
-                ToggleMenuEntry.ofDeciding(new TranslatableComponent("text.rei.config.menu.config"),
+                ToggleMenuEntry.ofDeciding(Component.translatable("text.rei.config.menu.config"),
                         () -> false,
                         $ -> {
                             ConfigManager.getInstance().openConfigScreen(REIRuntime.getInstance().getPreviousScreen());

@@ -46,7 +46,6 @@ import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconPaymentDispla
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
 
@@ -61,7 +60,7 @@ public class DefaultBeaconPaymentCategory implements DisplayCategory<DefaultBeac
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("category.rei.beacon_payment");
+        return Component.translatable("category.rei.beacon_payment");
     }
     
     @Override

@@ -30,10 +30,10 @@ import net.minecraft.network.chat.Component;
  */
 public interface TextRepresentable {
     default Component asFormattedText() {
-        return ImmutableTextComponent.EMPTY;
+        return Component.empty();
     }
     
     default Component asFormatStrippedText() {
-        return new ImmutableTextComponent(FormattingUtils.stripFormatting(asFormattedText().getString()));
+        return Component.literal(FormattingUtils.stripFormatting(asFormattedText().getString()));
     }
 }

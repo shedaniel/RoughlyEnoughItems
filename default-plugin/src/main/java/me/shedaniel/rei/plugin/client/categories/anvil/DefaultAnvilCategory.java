@@ -35,7 +35,6 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.anvil.DefaultAnvilDisplay;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
@@ -48,7 +47,7 @@ public class DefaultAnvilCategory implements DisplayCategory<DefaultAnvilDisplay
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("block.minecraft.anvil");
+        return Component.translatable("block.minecraft.anvil");
     }
     
     @Override

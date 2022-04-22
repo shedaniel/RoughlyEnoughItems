@@ -35,7 +35,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -101,7 +100,7 @@ public interface ClientHelper {
         String mod = getModFromItem(item);
         if (mod.isEmpty())
             return NarratorChatListener.NO_TITLE;
-        return new TextComponent(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
+        return Component.literal(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
     }
     
     /**
@@ -114,7 +113,7 @@ public interface ClientHelper {
         String mod = getModFromIdentifier(identifier);
         if (mod.isEmpty())
             return NarratorChatListener.NO_TITLE;
-        return new TextComponent(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
+        return Component.literal(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
     }
     
     /**
@@ -127,7 +126,7 @@ public interface ClientHelper {
         String mod = getModFromModId(modid);
         if (mod.isEmpty())
             return NarratorChatListener.NO_TITLE;
-        return new TextComponent(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
+        return Component.literal(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
     }
     
     default List<Component> appendModIdToTooltips(List<Component> components, String modId) {

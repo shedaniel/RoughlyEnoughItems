@@ -35,7 +35,7 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.ApiStatus;
@@ -63,9 +63,9 @@ public class DefaultBrewingDisplay implements Display {
     }
     
     public DefaultBrewingDisplay(EntryIngredient input, EntryIngredient reactant, EntryStack<?> output) {
-        this.input = input.map(stack -> stack.copy().tooltip(new TranslatableComponent("category.rei.brewing.input").withStyle(ChatFormatting.YELLOW)));
-        this.reactant = reactant.map(stack -> stack.copy().tooltip(new TranslatableComponent("category.rei.brewing.reactant").withStyle(ChatFormatting.YELLOW)));
-        this.output = output.copy().tooltip(new TranslatableComponent("category.rei.brewing.result").withStyle(ChatFormatting.YELLOW));
+        this.input = input.map(stack -> stack.copy().tooltip(Component.translatable("category.rei.brewing.input").withStyle(ChatFormatting.YELLOW)));
+        this.reactant = reactant.map(stack -> stack.copy().tooltip(Component.translatable("category.rei.brewing.reactant").withStyle(ChatFormatting.YELLOW)));
+        this.output = output.copy().tooltip(Component.translatable("category.rei.brewing.result").withStyle(ChatFormatting.YELLOW));
     }
     
     @Override

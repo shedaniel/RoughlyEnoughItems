@@ -40,7 +40,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Tuple;
@@ -98,11 +97,11 @@ public class WarningAndErrorScreen extends Screen {
         listWidget.creditsClearEntries();
         listWidget.creditsAddEntry(new EmptyItem());
         if (!warnings.isEmpty())
-            listWidget.creditsAddEntry(new TextItem(new TextComponent("Warnings:").withStyle(ChatFormatting.GOLD).getVisualOrderText()));
+            listWidget.creditsAddEntry(new TextItem(Component.literal("Warnings:").withStyle(ChatFormatting.GOLD).getVisualOrderText()));
         for (Tuple<String, String> pair : warnings) {
-            addText(new TextComponent(pair.getA()));
+            addText(Component.literal(pair.getA()));
             if (pair.getB() != null)
-                addLink(new TextComponent(pair.getB()), pair.getB());
+                addLink(Component.literal(pair.getB()), pair.getB());
             for (int i = 0; i < 2; i++) {
                 listWidget.creditsAddEntry(new EmptyItem());
             }
@@ -111,11 +110,11 @@ public class WarningAndErrorScreen extends Screen {
             listWidget.creditsAddEntry(new EmptyItem());
         }
         if (!errors.isEmpty())
-            listWidget.creditsAddEntry(new TextItem(new TextComponent("Errors:").withStyle(ChatFormatting.RED).getVisualOrderText()));
+            listWidget.creditsAddEntry(new TextItem(Component.literal("Errors:").withStyle(ChatFormatting.RED).getVisualOrderText()));
         for (Tuple<String, String> pair : errors) {
-            addText(new TextComponent(pair.getA()));
+            addText(Component.literal(pair.getA()));
             if (pair.getB() != null)
-                addLink(new TextComponent(pair.getB()), pair.getB());
+                addLink(Component.literal(pair.getB()), pair.getB());
             for (int i = 0; i < 2; i++) {
                 listWidget.creditsAddEntry(new EmptyItem());
             }
@@ -124,7 +123,7 @@ public class WarningAndErrorScreen extends Screen {
             listWidget.max = Math.max(listWidget.max, child.getWidth());
         }
         addRenderableWidget(buttonExit = new Button(width / 2 - 100, height - 26, 200, 20,
-                new TextComponent(errors.isEmpty() ? "Continue" : "Exit"),
+                Component.literal(errors.isEmpty() ? "Continue" : "Exit"),
                 button -> onContinue.accept(parent)));
     }
     
@@ -279,7 +278,7 @@ public class WarningAndErrorScreen extends Screen {
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
-                WarningAndErrorScreen.this.renderTooltip(matrices, new TextComponent("Click to open link."), mouseX, mouseY);
+                WarningAndErrorScreen.this.renderTooltip(matrices, Component.literal("Click to open link."), mouseX, mouseY);
                 Minecraft.getInstance().font.drawShadow(matrices, characterVisitor -> {
                     return text.accept((charIndex, style, codePoint) -> characterVisitor.accept(charIndex, style.applyFormat(ChatFormatting.UNDERLINE), codePoint));
                 }, x + 5, y, 0xff1fc3ff);

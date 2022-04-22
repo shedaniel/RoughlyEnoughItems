@@ -36,7 +36,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.TextFieldWidget;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -111,7 +111,7 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
         this.widgets.add(base2 = Widgets.createCategoryBase(bounds));
         this.widgets.add(new Widget() {
             
-            private TranslatableComponent text = new TranslatableComponent("text.rei.choose_page");
+            private Component text = Component.translatable("text.rei.choose_page");
             
             @Override
             public List<Widget> children() {
@@ -143,7 +143,7 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
             return stringBuilder_1.toString();
         };
         textFieldWidget.setText(String.valueOf(currentPage + 1));
-        widgets.add(btnDone = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20), new TranslatableComponent("gui.done"))
+        widgets.add(btnDone = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20), Component.translatable("gui.done"))
                 .onClick(button -> {
                     callback.accept(Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, maxPage - 1));
                     ScreenOverlayImpl.getInstance().choosePageWidget = null;

@@ -37,7 +37,6 @@ import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
@@ -75,7 +74,7 @@ public class SubSubsetsMenuEntry extends SubMenuEntry {
             }
             if (clickedBefore) {
                 if (isRendering() && mouseX >= getX() && mouseX <= getX() + getWidth() && mouseY >= getY() && mouseY <= getY() + 12 && !entries.isEmpty()) {
-                    REIRuntime.getInstance().queueTooltip(Tooltip.create(new TextComponent("Click again to filter everything in this group.")));
+                    REIRuntime.getInstance().queueTooltip(Tooltip.create(Component.literal("Click again to filter everything in this group.")));
                 } else clickedBefore = false;
             }
         } else clickedBefore = false;

@@ -35,7 +35,6 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.DefaultWaxingDisplay;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -55,7 +54,7 @@ public class DefaultWaxingCategory implements DisplayCategory<DefaultWaxingDispl
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("category.rei.waxing");
+        return Component.translatable("category.rei.waxing");
     }
     
     @Override

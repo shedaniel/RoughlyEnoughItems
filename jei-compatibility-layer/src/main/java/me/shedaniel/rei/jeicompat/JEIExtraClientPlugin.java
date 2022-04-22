@@ -35,7 +35,7 @@ public class JEIExtraClientPlugin implements REIClientPlugin {
     @Override
     public void registerDisplays(DisplayRegistry registry) {
         registry.registerFiller((Class<IngredientInfoRecipe<Object>>) (Class<?>) IngredientInfoRecipe.class, (recipe) -> {
-            return DefaultInformationDisplay.createFromEntries(recipe.getIngredientType().unwrapList(recipe.getIngredients()), ImmutableTextComponent.EMPTY.copy())
+            return DefaultInformationDisplay.createFromEntries(recipe.getIngredientType().unwrapList(recipe.getIngredients()), Component.empty().copy())
                     .lines(recipe.getDescriptionREI());
         });
     }

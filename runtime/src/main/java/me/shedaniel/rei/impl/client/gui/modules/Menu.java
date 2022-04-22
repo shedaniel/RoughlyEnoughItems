@@ -47,7 +47,7 @@ import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Registry;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -185,12 +185,12 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
             } else {
                 Map<String, Object> entryMap = (Map<String, Object>) entry.getValue();
                 if (entry.getKey().startsWith("_item_group_")) {
-                    entries.add(new SubSubsetsMenuEntry(new TranslatableComponent(entry.getKey().replace("_item_group_", "itemGroup.")), buildEntries(entryMap)));
+                    entries.add(new SubSubsetsMenuEntry(Component.translatable(entry.getKey().replace("_item_group_", "itemGroup.")), buildEntries(entryMap)));
                 } else {
                     String translationKey = "subsets.rei." + entry.getKey().replace(':', '.');
                     if (!I18n.exists(translationKey))
                         RoughlyEnoughItemsCore.LOGGER.warn("Subsets menu " + translationKey + " does not have a translation");
-                    entries.add(new SubSubsetsMenuEntry(new TranslatableComponent(translationKey), buildEntries(entryMap)));
+                    entries.add(new SubSubsetsMenuEntry(Component.translatable(translationKey), buildEntries(entryMap)));
                 }
             }
         }

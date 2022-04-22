@@ -79,8 +79,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
@@ -361,7 +359,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             }
             int z = getZ();
             setZ(500);
-            Component debugText = new TextComponent(String.format("%d entries, avg. %.0fns, ttl. %.2fms, %s fps", size.getValue(), lastAverageDebugTime, lastTotalDebugTime, minecraft.fpsString.split(" ")[0]));
+            Component debugText = Component.literal(String.format("%d entries, avg. %.0fns, ttl. %.2fms, %s fps", size.getValue(), lastAverageDebugTime, lastTotalDebugTime, minecraft.fpsString.split(" ")[0]));
             int stringWidth = font.width(debugText);
             fillGradient(matrices, Math.min(bounds.x, minecraft.screen.width - stringWidth - 2), bounds.y, bounds.x + stringWidth + 2, bounds.y + font.lineHeight + 2, -16777216, -16777216);
             MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
@@ -387,7 +385,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                     }
                 }
             }
-            Tooltip.create(new TranslatableComponent("text.rei.delete_items")).queue();
+            Tooltip.create(Component.translatable("text.rei.delete_items")).queue();
         }
     }
     
@@ -702,7 +700,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             Tooltip tooltip = super.getCurrentTooltip(point);
             
             if (tooltip != null && !ClientHelper.getInstance().isCheating() && getTransferHandler() != null) {
-                tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
+                tooltip.add(Component.translatable("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
             }
             
             return tooltip;

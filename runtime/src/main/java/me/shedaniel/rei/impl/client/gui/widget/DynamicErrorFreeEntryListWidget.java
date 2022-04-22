@@ -39,7 +39,7 @@ import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
@@ -115,7 +115,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
             }
         }
         
-        narrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.component_list.usage"));
+        narrationElementOutput.add(NarratedElementType.USAGE, Component.translatable("narration.component_list.usage"));
     }
     
     protected void narrateListElementPosition(NarrationElementOutput narrationElementOutput, E entry) {
@@ -123,7 +123,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         if (list.size() > 1) {
             int i = list.indexOf(entry);
             if (i != -1) {
-                narrationElementOutput.add(NarratedElementType.POSITION, new TranslatableComponent("narrator.position.list", i + 1, list.size()));
+                narrationElementOutput.add(NarratedElementType.POSITION, Component.translatable("narrator.position.list", i + 1, list.size()));
             }
         }
         
@@ -583,9 +583,9 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
                 }
                 
                 if (list.size() > 1) {
-                    narrationElementOutput.add(NarratedElementType.POSITION, new TranslatableComponent("narrator.position.object_list", narratableSearchResult.index + 1, list.size()));
+                    narrationElementOutput.add(NarratedElementType.POSITION, Component.translatable("narrator.position.object_list", narratableSearchResult.index + 1, list.size()));
                     if (narratableSearchResult.priority == NarrationPriority.FOCUSED) {
-                        narrationElementOutput.add(NarratedElementType.USAGE, new TranslatableComponent("narration.component_list.usage"));
+                        narrationElementOutput.add(NarratedElementType.USAGE, Component.translatable("narration.component_list.usage"));
                     }
                 }
                 

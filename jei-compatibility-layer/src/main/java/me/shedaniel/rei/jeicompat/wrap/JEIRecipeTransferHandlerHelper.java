@@ -38,7 +38,7 @@ public enum JEIRecipeTransferHandlerHelper implements IRecipeTransferHandlerHelp
     
     @Override
     public IRecipeTransferError createInternalError() {
-        return new JEIRecipeTransferError(IRecipeTransferError.Type.INTERNAL, new TranslatableComponent("error.rei.internal.error", ""));
+        return new JEIRecipeTransferError(IRecipeTransferError.Type.INTERNAL, Component.translatable("error.rei.internal.error", ""));
     }
     
     @Override

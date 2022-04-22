@@ -41,7 +41,6 @@ import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,7 +60,7 @@ public class DefaultCraftingCategory implements DisplayCategory<DefaultCraftingD
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("category.rei.crafting");
+        return Component.translatable("category.rei.crafting");
     }
     
     @Override

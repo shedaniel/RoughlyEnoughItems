@@ -38,8 +38,6 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
@@ -69,13 +67,13 @@ public class AutoCraftingEvaluator {
             if (Minecraft.getInstance().options.advancedItemTooltips && idsSupplier != null) {
                 Collection<ResourceLocation> locations = idsSupplier.get();
                 if (!locations.isEmpty()) {
-                    str.add(new TextComponent(" "));
+                    str.add(Component.literal(" "));
                     for (ResourceLocation location : locations) {
                         String t = I18n.get("text.rei.recipe_id", "", location.toString());
                         if (t.startsWith("\n")) {
                             t = t.substring("\n".length());
                         }
-                        str.add(new TextComponent(t).withStyle(ChatFormatting.GRAY));
+                        str.add(Component.literal(t).withStyle(ChatFormatting.GRAY));
                     }
                 }
             }
@@ -84,7 +82,7 @@ public class AutoCraftingEvaluator {
         };
         
         if (containerScreen == null) {
-            errorTooltip.add(new TranslatableComponent("error.rei.not.supported.move.items").withStyle(ChatFormatting.RED));
+            errorTooltip.add(Component.translatable("error.rei.not.supported.move.items").withStyle(ChatFormatting.RED));
             return result;
         }
         
@@ -138,13 +136,13 @@ public class AutoCraftingEvaluator {
         
         if (!result.hasApplicable) {
             errorTooltip.clear();
-            errorTooltip.add(new TranslatableComponent("error.rei.not.supported.move.items").withStyle(ChatFormatting.RED));
+            errorTooltip.add(Component.translatable("error.rei.not.supported.move.items").withStyle(ChatFormatting.RED));
             return result;
         }
         
         if (errors.isEmpty()) {
             errorTooltip.clear();
-            errorTooltip.add(new TranslatableComponent("text.auto_craft.move_items"));
+            errorTooltip.add(Component.translatable("text.auto_craft.move_items"));
         } else {
             errorTooltip.clear();
             List<Component> tooltipsFilled = new ArrayList<>();
@@ -160,9 +158,9 @@ public class AutoCraftingEvaluator {
                     }
                 }
             } else {
-                errorTooltip.add(new TranslatableComponent("error.rei.multi.errors").withStyle(ChatFormatting.RED));
+                errorTooltip.add(Component.translatable("error.rei.multi.errors").withStyle(ChatFormatting.RED));
                 for (Component tooltipFilled : tooltipsFilled) {
-                    MutableComponent colored = new TextComponent("- ").withStyle(ChatFormatting.RED)
+                    MutableComponent colored = Component.literal("- ").withStyle(ChatFormatting.RED)
                             .append(tooltipFilled.copy().withStyle(ChatFormatting.RED));
                     if (!CollectionUtils.anyMatch(errorTooltip, ss -> ss.getString().equalsIgnoreCase(colored.getString()))) {
                         errorTooltip.add(colored);

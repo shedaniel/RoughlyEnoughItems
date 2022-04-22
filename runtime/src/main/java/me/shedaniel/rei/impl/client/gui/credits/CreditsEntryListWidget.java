@@ -33,7 +33,6 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.ApiStatus;
@@ -169,7 +168,7 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
-                Minecraft.getInstance().screen.renderTooltip(matrices, new TextComponent("Click to open link."), mouseX, mouseY);
+                Minecraft.getInstance().screen.renderTooltip(matrices, Component.literal("Click to open link."), mouseX, mouseY);
                 int yy = y;
                 for (FormattedCharSequence textSp : textSplit) {
                     FormattedCharSequence underlined = characterVisitor -> {

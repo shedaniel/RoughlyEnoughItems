@@ -45,7 +45,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.ApiStatus;
@@ -81,7 +81,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
                 @Override
                 @Nullable
                 public Tooltip getTooltip(Point mouse) {
-                    return Tooltip.create(mouse, new TranslatableComponent("text.rei.weather_button.tooltip.dropdown"));
+                    return Tooltip.create(mouse, Component.translatable("text.rei.weather_button.tooltip.dropdown"));
                 }
                 
                 @Override
@@ -132,7 +132,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
             @Override
             @Nullable
             public Tooltip getTooltip(Point mouse) {
-                return Tooltip.create(mouse, new TranslatableComponent("text.rei.weather_button.tooltip.entry", new TranslatableComponent(weather.getTranslateKey())));
+                return Tooltip.create(mouse, Component.translatable("text.rei.weather_button.tooltip.entry", Component.translatable(weather.getTranslateKey())));
             }
             
             @Override
@@ -303,7 +303,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
                 fill(matrices, x, y, x + width, y + 12, -12237499);
             }
             if (selected && containsMouse) {
-                REIRuntime.getInstance().queueTooltip(Tooltip.create(new TranslatableComponent("text.rei.weather_button.tooltip.entry", text)));
+                REIRuntime.getInstance().queueTooltip(Tooltip.create(Component.translatable("text.rei.weather_button.tooltip.entry", text)));
             }
             font.draw(matrices, text, x + 2, y + 2, selected ? 16777215 : 8947848);
         }

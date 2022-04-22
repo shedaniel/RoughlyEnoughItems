@@ -37,7 +37,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -54,7 +54,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>>>
     boolean edited = false;
     final FilteringScreen filteringScreen = new FilteringScreen(this);
     final FilteringRulesScreen filteringRulesScreen = new FilteringRulesScreen(this);
-    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, new TranslatableComponent("config.roughlyenoughitems.filteringScreen"), button -> {
+    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.translatable("config.roughlyenoughitems.filteringScreen"), button -> {
         filteringRulesScreen.parent = Minecraft.getInstance().screen;
         Minecraft.getInstance().setScreen(filteringRulesScreen);
     });
