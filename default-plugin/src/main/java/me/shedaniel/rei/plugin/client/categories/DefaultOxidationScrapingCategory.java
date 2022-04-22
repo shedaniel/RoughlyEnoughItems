@@ -35,7 +35,6 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.DefaultOxidationScrapingDisplay;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -55,7 +54,7 @@ public class DefaultOxidationScrapingCategory implements DisplayCategory<Default
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("category.rei.oxidation_scraping");
+        return Component.translatable("category.rei.oxidation_scraping");
     }
     
     @Override

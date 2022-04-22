@@ -35,8 +35,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collections;
@@ -50,7 +48,7 @@ public class FilteringAddRuleScreen extends Screen {
     Screen parent;
     
     public FilteringAddRuleScreen(FilteringEntry entry) {
-        super(new TranslatableComponent("config.roughlyenoughitems.filteringRulesScreen.new"));
+        super(Component.translatable("config.roughlyenoughitems.filteringRulesScreen.new"));
         this.entry = entry;
     }
     
@@ -58,7 +56,7 @@ public class FilteringAddRuleScreen extends Screen {
     public void init() {
         super.init();
         {
-            Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));
+            Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;

@@ -29,7 +29,6 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -38,14 +37,14 @@ import java.util.List;
 public class SearchBarHighlightWatcher implements HintProvider {
     @Override
     public List<Component> provide() {
-        return OverlaySearchField.isHighlighting ? Collections.singletonList(new TranslatableComponent("text.rei.inventory.highlighting.enabled")) :
+        return OverlaySearchField.isHighlighting ? Collections.singletonList(Component.translatable("text.rei.inventory.highlighting.enabled")) :
                 Collections.emptyList();
     }
     
     @Override
     @Nullable
     public Tooltip provideTooltip(Point mouse) {
-        return Tooltip.create(mouse, new TranslatableComponent("text.rei.inventory.highlighting.enabled.tooltip"));
+        return Tooltip.create(mouse, Component.translatable("text.rei.inventory.highlighting.enabled.tooltip"));
     }
     
     @Override

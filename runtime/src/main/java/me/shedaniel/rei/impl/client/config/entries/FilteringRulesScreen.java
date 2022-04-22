@@ -37,8 +37,6 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 
@@ -55,7 +53,7 @@ public class FilteringRulesScreen extends Screen {
     Screen parent;
     
     public FilteringRulesScreen(FilteringEntry entry) {
-        super(new TranslatableComponent("config.roughlyenoughitems.filteringRulesScreen"));
+        super(Component.translatable("config.roughlyenoughitems.filteringRulesScreen"));
         this.entry = entry;
     }
     
@@ -63,14 +61,14 @@ public class FilteringRulesScreen extends Screen {
     public void init() {
         super.init();
         {
-            Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));
+            Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
             }));
         }
         {
-            Component addText = new TextComponent(" + ");
+            Component addText = Component.literal(" + ");
             addRenderableWidget(new Button(width - 4 - 20, 4, 20, 20, addText, button -> {
                 FilteringAddRuleScreen screen = new FilteringAddRuleScreen(entry);
                 screen.parent = this;
@@ -198,7 +196,7 @@ public class FilteringRulesScreen extends Screen {
                 }
             };
             {
-                Component deleteText = new TranslatableComponent("config.roughlyenoughitems.filteringRulesScreen.delete");
+                Component deleteText = Component.translatable("config.roughlyenoughitems.filteringRulesScreen.delete");
                 deleteButton = new Button(0, 0, Minecraft.getInstance().font.width(deleteText) + 10, 20, deleteText, button -> {
                     final Screen screen = Minecraft.getInstance().screen;
                     entry.edited = true;

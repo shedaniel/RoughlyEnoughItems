@@ -54,7 +54,6 @@ import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
@@ -67,7 +66,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.Triple;
@@ -275,7 +273,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             fillGradient(matrices, this.trashBounds.x, this.trashBounds.y + 1, this.trashBounds.x + 1, this.trashBounds.getMaxY() - 1, lineColor, lineColor);
             fillGradient(matrices, this.trashBounds.getMaxX() - 1, this.trashBounds.y + 1, this.trashBounds.getMaxX(), this.trashBounds.getMaxY() - 1, lineColor, lineColor);
             
-            Component text = new TranslatableComponent("text.rei.dispose_here");
+            Component text = Component.translatable("text.rei.dispose_here");
             if (0xAA * progress > 0x4) {
                 font.draw(matrices, text, this.trashBounds.getCenterX() - font.width(text) / 2, this.trashBounds.getCenterY() - 4F, (int) (0xAA * progress) << 24 | 0xFFFFFF);
             }
@@ -290,7 +288,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         int systemHeight = systemRegion.getBounds().getHeight();
         if (systemHeight > 1 && !region.isEmpty()) {
             Rectangle innerBounds = systemRegion.getInnerBounds();
-//            font.draw(matrices, new TranslatableComponent("System Favorites").withStyle(ChatFormatting.UNDERLINE), innerBounds.x - 1 + 4, fullBounds.y - 1 + 4, 0xFFFFFFFF);
+//            font.draw(matrices, Component.translatable("System Favorites").withStyle(ChatFormatting.UNDERLINE), innerBounds.x - 1 + 4, fullBounds.y - 1 + 4, 0xFFFFFFFF);
             fillGradient(matrices, innerBounds.x + 1, this.fullBounds.y + systemHeight + 2, innerBounds.getMaxX() - 1, this.fullBounds.y + systemHeight + 3, 0xFF777777, 0xFF777777);
 //            fillGradient(matrices, innerBounds.x - 2, this.fullBounds.y - 1, innerBounds.getMaxX() + 2, this.fullBounds.y + systemHeight + 1 + 14, 0x34FFFFFF, 0x34FFFFFF);
 //            systemHeight += 4 + 14;
@@ -414,7 +412,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         
         @Override
         protected void queueTooltip() {
-            Tooltip.create(new TranslatableComponent("text.rei.add_favorite_widget")).queue();
+            Tooltip.create(Component.translatable("text.rei.add_favorite_widget")).queue();
         }
         
         @Override
@@ -780,8 +778,8 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                     if (!scrollBounds.contains(point)) return null;
                     Tooltip tooltip = super.getCurrentTooltip(point);
                     if (tooltip != null) {
-                        tooltip.add(ImmutableTextComponent.EMPTY);
-                        tooltip.add(new TranslatableComponent("tooltip.rei.drag_to_add_favorites"));
+                        tooltip.add(Component.empty());
+                        tooltip.add(Component.translatable("tooltip.rei.drag_to_add_favorites"));
                     }
                     return tooltip;
                 }

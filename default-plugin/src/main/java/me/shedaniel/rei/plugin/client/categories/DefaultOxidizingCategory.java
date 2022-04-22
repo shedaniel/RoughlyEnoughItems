@@ -35,7 +35,6 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.DefaultOxidizingDisplay;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -55,7 +54,7 @@ public class DefaultOxidizingCategory implements DisplayCategory<DefaultOxidizin
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("category.rei.oxidizing");
+        return Component.translatable("category.rei.oxidizing");
     }
     
     @Override

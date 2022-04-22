@@ -52,8 +52,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -106,25 +104,25 @@ public class FilteringScreen extends Screen {
     private SearchFilter lastFilter = SearchFilter.matchAll();
     
     public FilteringScreen(FilteringEntry filteringEntry) {
-        super(new TranslatableComponent("config.roughlyenoughitems.filteringScreen"));
+        super(Component.translatable("config.roughlyenoughitems.filteringScreen"));
         this.filteringEntry = filteringEntry;
         this.searchField = new OverlaySearchField(0, 0, 0, 0);
         {
-            Component selectAllText = new TranslatableComponent("config.roughlyenoughitems.filteredEntries.selectAll");
+            Component selectAllText = Component.translatable("config.roughlyenoughitems.filteredEntries.selectAll");
             this.selectAllButton = new Button(0, 0, Minecraft.getInstance().font.width(selectAllText) + 10, 20, selectAllText, button -> {
                 this.selectionPoint = new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2);
                 this.secondPoint = new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2);
             });
         }
         {
-            Component selectNoneText = new TranslatableComponent("config.roughlyenoughitems.filteredEntries.selectNone");
+            Component selectNoneText = Component.translatable("config.roughlyenoughitems.filteredEntries.selectNone");
             this.selectNoneButton = new Button(0, 0, Minecraft.getInstance().font.width(selectNoneText) + 10, 20, selectNoneText, button -> {
                 this.selectionPoint = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
                 this.secondPoint = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
             });
         }
         {
-            Component hideText = new TranslatableComponent("config.roughlyenoughitems.filteredEntries.hide");
+            Component hideText = Component.translatable("config.roughlyenoughitems.filteredEntries.hide");
             this.hideButton = new Button(0, 0, Minecraft.getInstance().font.width(hideText) + 10, 20, hideText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack<?> stack = entryStacks.get(i);
@@ -139,7 +137,7 @@ public class FilteringScreen extends Screen {
             });
         }
         {
-            Component showText = new TranslatableComponent("config.roughlyenoughitems.filteredEntries.show");
+            Component showText = Component.translatable("config.roughlyenoughitems.filteredEntries.show");
             this.showButton = new Button(0, 0, Minecraft.getInstance().font.width(showText) + 10, 20, showText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack<?> stack = entryStacks.get(i);
@@ -153,7 +151,7 @@ public class FilteringScreen extends Screen {
             });
         }
         {
-            Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));
+            Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             this.backButton = new Button(0, 0, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;

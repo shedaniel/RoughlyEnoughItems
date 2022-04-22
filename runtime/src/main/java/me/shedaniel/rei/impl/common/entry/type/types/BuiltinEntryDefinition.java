@@ -31,7 +31,6 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
@@ -122,7 +121,7 @@ public class BuiltinEntryDefinition<T> implements EntryDefinition<T>, EntrySeria
     
     @Override
     public Component asFormattedText(EntryStack<T> entry, T value) {
-        return ImmutableTextComponent.EMPTY;
+        return Component.empty();
     }
     
     @Override

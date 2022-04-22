@@ -79,7 +79,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -362,20 +361,20 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     @Override
     public void registerFavorites(FavoriteEntryType.Registry registry) {
         registry.register(GameModeFavoriteEntry.ID, GameModeFavoriteEntry.Type.INSTANCE);
-        registry.getOrCrateSection(new TranslatableComponent(GameModeFavoriteEntry.TRANSLATION_KEY))
+        registry.getOrCrateSection(Component.translatable(GameModeFavoriteEntry.TRANSLATION_KEY))
                 .add(Stream.concat(
                         Arrays.stream(GameType.values())
                                 .filter(type -> type.getId() >= 0),
                         Stream.of((GameType) null)
                 ).<FavoriteEntry>map(GameModeFavoriteEntry::new).toArray(FavoriteEntry[]::new));
         registry.register(WeatherFavoriteEntry.ID, WeatherFavoriteEntry.Type.INSTANCE);
-        registry.getOrCrateSection(new TranslatableComponent(WeatherFavoriteEntry.TRANSLATION_KEY))
+        registry.getOrCrateSection(Component.translatable(WeatherFavoriteEntry.TRANSLATION_KEY))
                 .add(Stream.concat(
                         Arrays.stream(WeatherFavoriteEntry.Weather.values()),
                         Stream.of((WeatherFavoriteEntry.Weather) null)
                 ).<FavoriteEntry>map(WeatherFavoriteEntry::new).toArray(FavoriteEntry[]::new));
         registry.register(TimeFavoriteEntry.ID, TimeFavoriteEntry.Type.INSTANCE);
-        registry.getOrCrateSection(new TranslatableComponent(TimeFavoriteEntry.TRANSLATION_KEY))
+        registry.getOrCrateSection(Component.translatable(TimeFavoriteEntry.TRANSLATION_KEY))
                 .add(Stream.concat(
                         Arrays.stream(TimeFavoriteEntry.Time.values()),
                         Stream.of((TimeFavoriteEntry.Time) null)

@@ -29,7 +29,7 @@ import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.PacketEncoder;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
 import net.minecraft.server.MinecraftServer;
@@ -49,7 +49,7 @@ public class MixinPacketEncoder {
                            "Please check the server console log for errors, this breaks REI and vanilla recipe books!";
             server.execute(() -> {
                 for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                    player.sendMessage(new TextComponent(issue).withStyle(ChatFormatting.RED), Util.NIL_UUID);
+                    player.sendMessage(Component.literal(issue).withStyle(ChatFormatting.RED), Util.NIL_UUID);
                 }
             });
             System.out.println(issue);

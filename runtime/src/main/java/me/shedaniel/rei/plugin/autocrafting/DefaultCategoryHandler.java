@@ -47,7 +47,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
@@ -88,14 +88,14 @@ public class DefaultCategoryHandler implements TransferHandler {
             }
             IntSet missingIndicesSet = new IntLinkedOpenHashSet(missingIndices);
             List<List<ItemStack>> oldInputs = CollectionUtils.map(input, InputIngredient::get);
-            return Result.createFailed(new TranslatableComponent("error.rei.not.enough.materials"))
+            return Result.createFailed(Component.translatable("error.rei.not.enough.materials"))
                     .renderer((matrices, mouseX, mouseY, delta, widgets, bounds, d) -> {
                         menuInfo.renderMissingInput(menuInfoContext, oldInputs, missingIndices, matrices, mouseX, mouseY, delta, widgets, bounds);
                         menuInfo.renderMissingInput(menuInfoContext, input, missing, missingIndicesSet, matrices, mouseX, mouseY, delta, widgets, bounds);
                     });
         }
         if (!ClientHelper.getInstance().canUseMovePackets()) {
-            return Result.createFailed(new TranslatableComponent("error.rei.not.on.server"));
+            return Result.createFailed(Component.translatable("error.rei.not.on.server"));
         }
         if (!context.isActuallyCrafting()) {
             return Result.createSuccessful();

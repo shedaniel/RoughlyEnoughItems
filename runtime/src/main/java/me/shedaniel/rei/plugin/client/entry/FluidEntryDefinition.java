@@ -61,7 +61,6 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -292,12 +291,12 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
             if (amount >= 0) {
                 String amountTooltip = I18n.get(FLUID_AMOUNT, entry.getValue().getAmount());
                 if (amountTooltip != null) {
-                    toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList()));
+                    toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(Component::literal).collect(Collectors.toList()));
                 }
             }
             if (Minecraft.getInstance().options.advancedItemTooltips) {
                 ResourceLocation fluidId = Registry.FLUID.getKey(entry.getValue().getFluid());
-                toolTip.add((new TextComponent(fluidId.toString())).withStyle(ChatFormatting.DARK_GRAY));
+                toolTip.add((Component.literal(fluidId.toString())).withStyle(ChatFormatting.DARK_GRAY));
             }
             return Tooltip.create(toolTip);
         }

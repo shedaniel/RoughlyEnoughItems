@@ -32,7 +32,6 @@ import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.search.argument.Argument;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,8 +58,8 @@ public class SearchFilterPrepareWatcher implements HintProvider {
                 double lastProcess = prepareStageTotal == 0 ? 0 : Math.max(0, prepareStageProgress - (1 - currentStageProgress) / prepareStageTotal);
                 if (lastProcess < 0.05 || lastProcess > 0.95) return Collections.emptyList();
                 this.lastProcess = lastProcess;
-                return ImmutableList.of(new TranslatableComponent("text.rei.caching.search"),
-                        new TranslatableComponent("text.rei.caching.search.step", prepareStageCurrent, prepareStageTotal, Math.round(lastProcess * 100)));
+                return ImmutableList.of(Component.translatable("text.rei.caching.search"),
+                        Component.translatable("text.rei.caching.search.step", prepareStageCurrent, prepareStageTotal, Math.round(lastProcess * 100)));
             }
         } catch (NullPointerException ignored) {
         }

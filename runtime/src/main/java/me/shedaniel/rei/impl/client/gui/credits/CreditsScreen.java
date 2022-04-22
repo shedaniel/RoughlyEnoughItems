@@ -27,7 +27,6 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.platform.Platform;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TextCreditsItem;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
 import net.minecraft.ChatFormatting;
@@ -39,8 +38,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -55,7 +52,7 @@ public class CreditsScreen extends Screen {
     private CreditsEntryListWidget entryListWidget;
     
     public CreditsScreen(Screen parent) {
-        super(new TextComponent(""));
+        super(Component.literal(""));
         this.parent = parent;
     }
     
@@ -103,34 +100,34 @@ public class CreditsScreen extends Screen {
         for (String line : String.format("§lRoughly Enough Items (v%s)\n§7Originally a fork for Almost Enough Items.\n\n§lLanguage Translation\n%s\n\n§lLicense\n§7Roughly Enough Items is licensed under MIT.", Platform.getMod("roughlyenoughitems").getVersion(), "%translators%").split("\n"))
             if (line.equalsIgnoreCase("%translators%")) {
                 if (exception[0] != null) {
-                    entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableTextComponent("Failed to get translators: " + exception[0].toString())));
+                    entryListWidget.creditsAddEntry(new TextCreditsItem(Component.literal("Failed to get translators: " + exception[0].toString())));
                     for (StackTraceElement traceElement : exception[0].getStackTrace())
-                        entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableTextComponent("  at " + traceElement)));
+                        entryListWidget.creditsAddEntry(new TextCreditsItem(Component.literal("  at " + traceElement)));
                 } else {
                     int maxWidth = translatorsMapped.stream().mapToInt(pair -> font.width(pair.getA())).max().orElse(0) + 5;
                     for (Tuple<String, List<TranslatorEntry>> pair : translatorsMapped) {
-                        MutableComponent text = new TextComponent("");
+                        MutableComponent text = Component.literal("");
                         boolean isFirst = true;
                         for (TranslatorEntry entry : pair.getB()) {
                             if (!isFirst) {
-                                text = text.append(new TextComponent(", "));
+                                text = text.append(Component.literal(", "));
                             }
                             isFirst = false;
-                            MutableComponent component = new TextComponent(entry.getName());
+                            MutableComponent component = Component.literal(entry.getName());
                             if (entry.proofreader)
                                 component = component.withStyle(ChatFormatting.GOLD);
                             text = text.append(component);
                         }
-                        entryListWidget.creditsAddEntry(new TranslationCreditsItem(new TranslatableComponent(pair.getA()), text, i - maxWidth - 10, maxWidth));
+                        entryListWidget.creditsAddEntry(new TranslationCreditsItem(Component.translatable(pair.getA()), text, i - maxWidth - 10, maxWidth));
                     }
                 }
-            } else entryListWidget.creditsAddEntry(new TextCreditsItem(new ImmutableTextComponent(line)));
+            } else entryListWidget.creditsAddEntry(new TextCreditsItem(Component.literal(line)));
         entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorChatListener.NO_TITLE));
-        entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableTextComponent("Visit the project at GitHub."), "https://www.github.com/shedaniel/RoughlyEnoughItems", entryListWidget.getItemWidth(), false));
-        entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableTextComponent("Visit the project page at CurseForge."), "https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items", entryListWidget.getItemWidth(), false));
-        entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(new ImmutableTextComponent("Support the project via Patreon!"), "https://patreon.com/shedaniel", entryListWidget.getItemWidth(), true));
+        entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(Component.literal("Visit the project at GitHub."), "https://www.github.com/shedaniel/RoughlyEnoughItems", entryListWidget.getItemWidth(), false));
+        entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(Component.literal("Visit the project page at CurseForge."), "https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items", entryListWidget.getItemWidth(), false));
+        entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(Component.literal("Support the project via Patreon!"), "https://patreon.com/shedaniel", entryListWidget.getItemWidth(), true));
         entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorChatListener.NO_TITLE));
-        addRenderableWidget(buttonDone = new Button(width / 2 - 100, height - 26, 200, 20, new TranslatableComponent("gui.done"), button -> openPrevious()));
+        addRenderableWidget(buttonDone = new Button(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> openPrevious()));
     }
     
     @ExpectPlatform

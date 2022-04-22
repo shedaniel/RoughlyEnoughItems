@@ -26,9 +26,7 @@ package me.shedaniel.rei.impl.client.entry.filtering.rules;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
@@ -36,7 +34,6 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.entries.FilteringEntry;
 import me.shedaniel.rei.impl.client.config.entries.FilteringRuleOptionsScreen;
-import me.shedaniel.rei.impl.client.config.entries.FilteringScreen;
 import me.shedaniel.rei.impl.client.entry.filtering.AbstractFilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringCache;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringContext;
@@ -52,8 +49,6 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
 
 import java.util.*;
@@ -148,12 +143,12 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("rule.roughlyenoughitems.filtering.search");
+        return Component.translatable("rule.roughlyenoughitems.filtering.search");
     }
     
     @Override
     public Component getSubtitle() {
-        return new TranslatableComponent("rule.roughlyenoughitems.filtering.search.subtitle");
+        return Component.translatable("rule.roughlyenoughitems.filtering.search.subtitle");
     }
     
     @Override
@@ -166,7 +161,7 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
             @Override
             public void addEntries(Consumer<RuleEntry> entryConsumer) {
                 addEmpty(entryConsumer, 10);
-                addText(entryConsumer, new TranslatableComponent("rule.roughlyenoughitems.filtering.search.filter").withStyle(ChatFormatting.GRAY));
+                addText(entryConsumer, Component.translatable("rule.roughlyenoughitems.filtering.search.filter").withStyle(ChatFormatting.GRAY));
                 entryConsumer.accept(entry = new TextFieldRuleEntry(width - 36, rule, widget -> {
                     widget.setMaxLength(9999);
                     widget.setResponder(searchTerm -> {
@@ -181,9 +176,9 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
                     else widget.setValue(rule.filterStr);
                 }));
                 addEmpty(entryConsumer, 10);
-                addText(entryConsumer, new TranslatableComponent("rule.roughlyenoughitems.filtering.search.show").withStyle(ChatFormatting.GRAY));
+                addText(entryConsumer, Component.translatable("rule.roughlyenoughitems.filtering.search.show").withStyle(ChatFormatting.GRAY));
                 Function<Boolean, Component> function = bool -> {
-                    return new TranslatableComponent("rule.roughlyenoughitems.filtering.search.show." + bool);
+                    return Component.translatable("rule.roughlyenoughitems.filtering.search.show." + bool);
                 };
                 entryConsumer.accept(show = new BooleanRuleEntry(width - 36, show == null ? rule.show : show.getBoolean(), rule, function));
                 addEmpty(entryConsumer, 10);

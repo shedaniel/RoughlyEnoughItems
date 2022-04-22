@@ -46,7 +46,6 @@ import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconBaseDisplay;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
 
@@ -61,7 +60,7 @@ public class DefaultBeaconBaseCategory implements DisplayCategory<DefaultBeaconB
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("category.rei.beacon_base");
+        return Component.translatable("category.rei.beacon_base");
     }
     
     @Override

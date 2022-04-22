@@ -28,7 +28,7 @@ import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
 import me.shedaniel.rei.api.common.transfer.info.MenuTransferException;
 import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
 import java.util.stream.Collectors;
@@ -68,7 +68,7 @@ public interface SimpleGridMenuInfo<T extends AbstractContainerMenu, D extends S
         int height = getCraftingHeight(context.getMenu());
         SimpleGridMenuDisplay display = context.getDisplay();
         if (display != null && (display.getWidth() > width || display.getHeight() > height)) {
-            throw new MenuTransferException(new TranslatableComponent("error.rei.transfer.too_small", width, height));
+            throw new MenuTransferException(Component.translatable("error.rei.transfer.too_small", width, height));
         }
     }
 }

@@ -44,7 +44,6 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -138,7 +137,7 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     
     private void drawTooltip() {
         if (this.minecraft.options.advancedItemTooltips)
-            Tooltip.create(categoryName, new TextComponent(category.getIdentifier().toString()).withStyle(ChatFormatting.DARK_GRAY), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
+            Tooltip.create(categoryName, Component.literal(category.getIdentifier().toString()).withStyle(ChatFormatting.DARK_GRAY), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
         else
             Tooltip.create(categoryName, ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
     }

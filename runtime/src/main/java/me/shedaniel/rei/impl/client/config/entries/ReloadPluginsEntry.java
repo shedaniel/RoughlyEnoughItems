@@ -39,7 +39,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -71,8 +71,8 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     public ReloadPluginsEntry(int width) {
         super(NarratorChatListener.NO_TITLE, false);
         this.width = width;
-        reloadPluginsButton.setMessage(new TranslatableComponent("text.rei.reload_config"));
-        reloadSearchButton.setMessage(new TranslatableComponent("text.rei.reload_search"));
+        reloadPluginsButton.setMessage(Component.translatable("text.rei.reload_config"));
+        reloadSearchButton.setMessage(Component.translatable("text.rei.reload_search"));
     }
     
     @Override

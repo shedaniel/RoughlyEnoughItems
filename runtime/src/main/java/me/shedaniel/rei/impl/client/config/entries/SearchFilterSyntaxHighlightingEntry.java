@@ -35,7 +35,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +48,7 @@ public class SearchFilterSyntaxHighlightingEntry extends TooltipListEntry<Syntax
     private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, $ -> {}) {
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            setMessage(new TextComponent(type.toString()));
+            setMessage(Component.literal(type.toString()));
             super.render(matrices, mouseX, mouseY, delta);
         }
     };

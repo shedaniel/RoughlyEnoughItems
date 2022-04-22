@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.changelog;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.gui.error.ErrorsEntryListWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -38,28 +37,28 @@ import java.io.InputStream;
 public class JParseDownToMinecraft {
     public static Component toComponent(JParseDown.Inline inline) {
         if (inline instanceof JParseDown.InlineText) {
-            return new TextComponent(((JParseDown.InlineText) inline).text.replace("\n", " "));
+            return Component.literal(((JParseDown.InlineText) inline).text.replace("\n", " "));
         } else if (inline instanceof JParseDown.InlineBold) {
-            return new TextComponent(((JParseDown.InlineBold) inline).text.replace("\n", " "))
+            return Component.literal(((JParseDown.InlineBold) inline).text.replace("\n", " "))
                     .withStyle(ChatFormatting.BOLD);
         } else if (inline instanceof JParseDown.InlineItalic) {
-            return new TextComponent(((JParseDown.InlineItalic) inline).text.replace("\n", " "))
+            return Component.literal(((JParseDown.InlineItalic) inline).text.replace("\n", " "))
                     .withStyle(ChatFormatting.ITALIC);
         } else if (inline instanceof JParseDown.InlineLink) {
-            return new TextComponent(((JParseDown.InlineLink) inline).text.replace("\n", " "))
+            return Component.literal(((JParseDown.InlineLink) inline).text.replace("\n", " "))
                     .withStyle(style -> style.withColor(TextColor.fromRgb(0x1fc3ff)).withUnderlined(true)
-                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(((JParseDown.InlineLink) inline).url)
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(((JParseDown.InlineLink) inline).url)
                                     .withStyle(ChatFormatting.GRAY)))
                             .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, ((JParseDown.InlineLink) inline).url)));
         } else if (inline instanceof JParseDown.InlineStrikeThrough) {
-            return new TextComponent(((JParseDown.InlineStrikeThrough) inline).text.replace("\n", " "))
+            return Component.literal(((JParseDown.InlineStrikeThrough) inline).text.replace("\n", " "))
                     .withStyle(ChatFormatting.STRIKETHROUGH);
         }
         return null;
     }
     
     public static void build(ChangelogLoader.Builder builder, JParseDown.Block block) {
-        MutableComponent lastComponent = ImmutableTextComponent.EMPTY;
+        MutableComponent lastComponent = Component.empty();
         ChangelogLoader.Builder finalBuilder = builder;
         for (JParseDown.Inline inline : block.inlines) {
             Component component = toComponent(inline);
@@ -67,7 +66,7 @@ public class JParseDownToMinecraft {
                 lastComponent = lastComponent.append(component);
             } else {
                 builder.add(lastComponent);
-                lastComponent = ImmutableTextComponent.EMPTY;
+                lastComponent = Component.empty();
                 if (inline instanceof JParseDown.InlineLineBreak) {
                     continue;
                 } else if (inline instanceof JParseDown.InlineHorizontalRule) {
@@ -86,7 +85,7 @@ public class JParseDownToMinecraft {
                 }
             }
         }
-        if (lastComponent != ImmutableTextComponent.EMPTY) {
+        if (lastComponent != Component.empty()) {
             builder.add(lastComponent);
         }
     }

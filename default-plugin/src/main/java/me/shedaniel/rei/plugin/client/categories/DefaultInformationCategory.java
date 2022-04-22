@@ -50,7 +50,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 
 import java.util.Collections;
@@ -68,7 +67,7 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
         bufferBuilder.vertex(matrix4f, xEnd, yStart, z).uv(uEnd, vStart).endVertex();
         bufferBuilder.vertex(matrix4f, xStart, yStart, z).uv(uStart, vStart).endVertex();
         bufferBuilder.end();
-        BufferUploader.end(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder);
     }
     
     @Override
@@ -78,7 +77,7 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("category.rei.information");
+        return Component.translatable("category.rei.information");
     }
     
     @Override

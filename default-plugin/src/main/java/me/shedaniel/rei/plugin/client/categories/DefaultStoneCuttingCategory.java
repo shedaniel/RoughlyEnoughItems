@@ -35,7 +35,6 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.DefaultStoneCuttingDisplay;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
@@ -53,7 +52,7 @@ public class DefaultStoneCuttingCategory implements DisplayCategory<DefaultStone
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("category.rei.stone_cutting");
+        return Component.translatable("category.rei.stone_cutting");
     }
     
     @Override

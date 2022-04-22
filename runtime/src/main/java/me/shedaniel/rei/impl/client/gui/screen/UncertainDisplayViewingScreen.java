@@ -47,7 +47,6 @@ import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import net.minecraft.ChatFormatting;
@@ -57,8 +56,7 @@ import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -89,7 +87,7 @@ public class UncertainDisplayViewingScreen extends Screen {
     private boolean jeiEnabled = false;
     
     public UncertainDisplayViewingScreen(Screen parent, DisplayScreenType type, boolean showTips, BooleanConsumer callback) {
-        super(ImmutableTextComponent.EMPTY);
+        super(Component.empty());
         this.widgets = Lists.newArrayList();
         if (type == DisplayScreenType.UNSET) {
             this.isSet = false;
@@ -139,9 +137,9 @@ public class UncertainDisplayViewingScreen extends Screen {
                 .onRender((matrices, button) -> {
                     button.setEnabled(isSet);
                     if (scroll.target() != 0 && allModsUsingJEI != null) {
-                        button.setText(new TranslatableComponent("gui.done"));
+                        button.setText(Component.translatable("gui.done"));
                     } else {
-                        button.setText(isSet ? new TranslatableComponent("text.rei.select") : new TranslatableComponent("config.roughlyenoughitems.recipeScreenType.unset"));
+                        button.setText(isSet ? Component.translatable("text.rei.select") : Component.translatable("config.roughlyenoughitems.recipeScreenType.unset"));
                     }
                 })
                 .onClick(button -> {
@@ -158,13 +156,13 @@ public class UncertainDisplayViewingScreen extends Screen {
                     }
                 }));
         this.widgets.add(transformScroll(new ScreenTypeSelection(width / 2 - 200 - 5, height / 2 - 112 / 2 - 10, DisplayScreenType.ORIGINAL)));
-        this.widgets.add(transformScroll(Widgets.createLabel(new Point(width / 2 - 200 - 5 + 104, height / 2 - 112 / 2 + 115), new TranslatableComponent("config.roughlyenoughitems.recipeScreenType.original")).noShadow().color(-1124073473)));
+        this.widgets.add(transformScroll(Widgets.createLabel(new Point(width / 2 - 200 - 5 + 104, height / 2 - 112 / 2 + 115), Component.translatable("config.roughlyenoughitems.recipeScreenType.original")).noShadow().color(-1124073473)));
         this.widgets.add(transformScroll(new ScreenTypeSelection(width / 2 + 5, height / 2 - 112 / 2 - 10, DisplayScreenType.COMPOSITE)));
-        this.widgets.add(transformScroll(Widgets.createLabel(new Point(width / 2 + 5 + 104, height / 2 - 112 / 2 + 115), new TranslatableComponent("config.roughlyenoughitems.recipeScreenType.composite")).noShadow().color(-1124073473)));
-        this.widgets.add(slider = transformScroll(Widgets.wrapVanillaWidget(new AbstractSliderButton(width / 2 - 100, height * 2 - 64, 200, 20, new TranslatableComponent("text.rei.jei_compat.false"), 0) {
+        this.widgets.add(transformScroll(Widgets.createLabel(new Point(width / 2 + 5 + 104, height / 2 - 112 / 2 + 115), Component.translatable("config.roughlyenoughitems.recipeScreenType.composite")).noShadow().color(-1124073473)));
+        this.widgets.add(slider = transformScroll(Widgets.wrapVanillaWidget(new AbstractSliderButton(width / 2 - 100, height * 2 - 64, 200, 20, Component.translatable("text.rei.jei_compat.false"), 0) {
             @Override
             protected void updateMessage() {
-                setMessage(new TranslatableComponent("text.rei.jei_compat." + (jeiEnabled = value == 1f)));
+                setMessage(Component.translatable("text.rei.jei_compat." + (jeiEnabled = value == 1f)));
             }
             
             @Override
@@ -199,21 +197,21 @@ public class UncertainDisplayViewingScreen extends Screen {
             this.fillGradient(matrices, 0, 0, this.width, this.height, -16777216, -16777216);
         }
         if (scroll.target() == 0) {
-            drawCenteredString(matrices, this.font, new TranslatableComponent("text.rei.recipe_screen_type.selection"), this.width / 2, 20, 16777215);
+            drawCenteredString(matrices, this.font, Component.translatable("text.rei.recipe_screen_type.selection"), this.width / 2, 20, 16777215);
         } else {
-            drawCenteredString(matrices, this.font, new TranslatableComponent("text.rei.jei_compat"), this.width / 2, 20, 16777215);
+            drawCenteredString(matrices, this.font, Component.translatable("text.rei.jei_compat"), this.width / 2, 20, 16777215);
         }
         ScissorsHandler.INSTANCE.scissor(new Rectangle(0, 20 + font.lineHeight + 2, width, height - 42));
         if (showTips) {
             float i = 32 - (scroll.floatValue() / 200f * height);
-            for (FormattedCharSequence s : this.font.split(new TranslatableComponent("text.rei.recipe_screen_type.selection.sub").withStyle(ChatFormatting.GRAY), width - 30)) {
+            for (FormattedCharSequence s : this.font.split(Component.translatable("text.rei.recipe_screen_type.selection.sub").withStyle(ChatFormatting.GRAY), width - 30)) {
                 font.drawShadow(matrices, s, width / 2 - font.width(s) / 2, i, -1);
                 i += 10;
             }
             if (allModsUsingJEI != null) {
                 i = 32 + height - (scroll.floatValue() / 200f * height);
-                for (FormattedCharSequence s : this.font.split(new TranslatableComponent("text.rei.jei_compat.sub", new TranslatableComponent("text.rei.jei_compat.sub.stability"),
-                        new TextComponent(String.join(", ", allModsUsingJEI))).withStyle(ChatFormatting.GRAY), width - 30)) {
+                for (FormattedCharSequence s : this.font.split(Component.translatable("text.rei.jei_compat.sub", Component.translatable("text.rei.jei_compat.sub.stability"),
+                        Component.literal(String.join(", ", allModsUsingJEI))).withStyle(ChatFormatting.GRAY), width - 30)) {
                     font.drawShadow(matrices, s, width / 2 - font.width(s) / 2, i, -1);
                     i += 10;
                 }

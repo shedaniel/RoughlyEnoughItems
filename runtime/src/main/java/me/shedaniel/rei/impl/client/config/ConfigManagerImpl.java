@@ -58,7 +58,6 @@ import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.entries.*;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
@@ -77,7 +76,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.ApiStatus;
@@ -102,21 +104,21 @@ public class ConfigManagerImpl implements ConfigManager {
         guiRegistry.registerPredicateProvider((i13n, field, config, defaults, guiProvider) -> {
             if (field.isAnnotationPresent(ConfigEntry.Gui.Excluded.class))
                 return Collections.emptyList();
-            KeyCodeEntry entry = ConfigEntryBuilder.create().startModifierKeyCodeField(new TranslatableComponent(i13n), getUnsafely(field, config, ModifierKeyCode.unknown())).setModifierDefaultValue(() -> getUnsafely(field, defaults)).setModifierSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
+            KeyCodeEntry entry = ConfigEntryBuilder.create().startModifierKeyCodeField(Component.translatable(i13n), getUnsafely(field, config, ModifierKeyCode.unknown())).setModifierDefaultValue(() -> getUnsafely(field, defaults)).setModifierSaveConsumer(newValue -> setUnsafely(field, config, newValue)).build();
             return Collections.singletonList(entry);
         }, field -> field.getType() == ModifierKeyCode.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
             ConfigObjectImpl.UsePercentage bounds = field.getAnnotation(ConfigObjectImpl.UsePercentage.class);
-            return Collections.singletonList(ConfigEntryBuilder.create().startIntSlider(new TranslatableComponent(i13n), Mth.ceil(Utils.getUnsafely(field, config, 0.0) * 100), Mth.ceil(bounds.min() * 100), Mth.ceil(bounds.max() * 100)).setDefaultValue(() -> Mth.ceil((double) Utils.getUnsafely(field, defaults) * 100)).setSaveConsumer((newValue) -> {
+            return Collections.singletonList(ConfigEntryBuilder.create().startIntSlider(Component.translatable(i13n), Mth.ceil(Utils.getUnsafely(field, config, 0.0) * 100), Mth.ceil(bounds.min() * 100), Mth.ceil(bounds.max() * 100)).setDefaultValue(() -> Mth.ceil((double) Utils.getUnsafely(field, defaults) * 100)).setSaveConsumer((newValue) -> {
                 setUnsafely(field, config, newValue / 100d);
-            }).setTextGetter(integer -> new TextComponent(bounds.prefix() + String.format("%d%%", integer))).build());
+            }).setTextGetter(integer -> Component.literal(bounds.prefix() + String.format("%d%%", integer))).build());
         }, (field) -> field.getType() == Double.TYPE || field.getType() == Double.class, ConfigObjectImpl.UsePercentage.class);
         
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
-                        Collections.singletonList(new RecipeScreenTypeEntry(220, new TranslatableComponent(i13n), getUnsafely(field, config, DisplayScreenType.UNSET), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
+                        Collections.singletonList(new RecipeScreenTypeEntry(220, Component.translatable(i13n), getUnsafely(field, config, DisplayScreenType.UNSET), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
                 , (field) -> field.getType() == DisplayScreenType.class, ConfigObjectImpl.UseSpecialRecipeTypeScreen.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
-                        Collections.singletonList(new SearchFilterSyntaxHighlightingEntry(new TranslatableComponent(i13n), getUnsafely(field, config, SyntaxHighlightingMode.COLORFUL), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
+                        Collections.singletonList(new SearchFilterSyntaxHighlightingEntry(Component.translatable(i13n), getUnsafely(field, config, SyntaxHighlightingMode.COLORFUL), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
                 , (field) -> field.getType() == SyntaxHighlightingMode.class, ConfigObjectImpl.UseSpecialSearchFilterSyntaxHighlightingScreen.class);
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
                     List<EntryStack<?>> value = CollectionUtils.map(Utils.<List<EntryStackProvider<?>>>getUnsafely(field, config, new ArrayList<>()), EntryStackProvider::provide);
@@ -308,7 +310,7 @@ public class ConfigManagerImpl implements ConfigManager {
             private final int height;
             
             public EmptyEntry(int height) {
-                super(new TextComponent(UUID.randomUUID().toString()), false);
+                super(Component.literal(UUID.randomUUID().toString()), false);
                 this.height = height;
             }
             
@@ -353,43 +355,43 @@ public class ConfigManagerImpl implements ConfigManager {
                 builder.setGlobalizedExpanded(false);
                 if (Minecraft.getInstance().getConnection() != null && Minecraft.getInstance().getConnection().getRecipeManager() != null) {
                     TextListEntry feedbackEntry = ConfigEntryBuilder.create().startTextDescription(
-                            new TranslatableComponent("text.rei.feedback", new TranslatableComponent("text.rei.feedback.link")
+                            Component.translatable("text.rei.feedback", Component.translatable("text.rei.feedback.link")
                                     .withStyle(style -> style
                                             .withColor(TextColor.fromRgb(0xff1fc3ff))
                                             .withUnderlined(true)
                                             .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://forms.gle/5tdnK5WN1wng78pV8"))
-                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ImmutableTextComponent("https://forms.gle/5tdnK5WN1wng78pV8")))
+                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("https://forms.gle/5tdnK5WN1wng78pV8")))
                                     ))
                                     .withStyle(ChatFormatting.GRAY)
                     ).build();
-                    builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, feedbackEntry);
-                    builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new ReloadPluginsEntry(220));
-                    builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new PerformanceEntry(220));
+                    builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.advanced")).getEntries().add(0, feedbackEntry);
+                    builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.advanced")).getEntries().add(0, new ReloadPluginsEntry(220));
+                    builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.advanced")).getEntries().add(0, new PerformanceEntry(220));
                 }
                 return builder.setAfterInitConsumer(screen -> {
                     ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) new EmptyEntry(4));
                     TextListEntry supportText = ConfigEntryBuilder.create().startTextDescription(
-                            new TranslatableComponent("text.rei.support.me.desc",
-                                    new TranslatableComponent("text.rei.support.me.patreon")
+                            Component.translatable("text.rei.support.me.desc",
+                                    Component.translatable("text.rei.support.me.patreon")
                                             .withStyle(style -> style
                                                     .withColor(TextColor.fromRgb(0xff1fc3ff))
                                                     .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://patreon.com/shedaniel"))
-                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ImmutableTextComponent("https://patreon.com/shedaniel")))
+                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("https://patreon.com/shedaniel")))
                                             ),
-                                    new TranslatableComponent("text.rei.support.me.bisect")
+                                    Component.translatable("text.rei.support.me.bisect")
                                             .withStyle(style -> style
                                                     .withColor(TextColor.fromRgb(0xff1fc3ff))
                                                     .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.bisecthosting.com/shedaniel"))
-                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ImmutableTextComponent("https://www.bisecthosting.com/shedaniel")))
+                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("https://www.bisecthosting.com/shedaniel")))
                                             )
                             )
                                     .withStyle(ChatFormatting.GRAY)
                     ).build();
                     supportText.setScreen((AbstractConfigScreen) screen);
                     ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) supportText);
-                    ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) new TitleTextEntry(new TranslatableComponent("text.rei.support.me")));
+                    ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) new TitleTextEntry(Component.translatable("text.rei.support.me")));
                     ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) new EmptyEntry(4));
-                    ScreenHooks.addRenderableWidget(screen, new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
+                    ScreenHooks.addRenderableWidget(screen, new Button(screen.width - 104, 4, 100, 20, Component.translatable("text.rei.credits"), button -> {
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
                         Minecraft.getInstance().setScreen(creditsScreen);
                     }));

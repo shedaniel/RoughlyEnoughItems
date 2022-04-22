@@ -45,7 +45,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -248,7 +247,7 @@ public final class InternalWidgets {
             Rectangle bounds = new Rectangle(point.getX() - 9, point.getY() + 1, 8, 8);
             Widget widget = Widgets.createTexturedWidget(new ResourceLocation("roughlyenoughitems:textures/gui/shapeless_icon_" + magnification + "x.png"), bounds.getX(), bounds.getY(), 0, 0, bounds.getWidth(), bounds.getHeight(), 1, 1, 1, 1);
             return Widgets.withTooltip(Widgets.withBounds(widget, bounds),
-                    new TranslatableComponent("text.rei.shapeless"));
+                    Component.translatable("text.rei.shapeless"));
         }
         
         @Override

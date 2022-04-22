@@ -54,7 +54,6 @@ import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
@@ -90,8 +89,6 @@ import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.CraftingMenu;
@@ -154,8 +151,8 @@ public class RoughlyEnoughItemsCoreClient {
                     Component collect = CollectionUtils.mapAndJoinToComponent(categories,
                             identifier -> CategoryRegistry.getInstance().tryGet(identifier)
                                     .map(config -> config.getCategory().getTitle())
-                                    .orElse(new ImmutableTextComponent(identifier.toString())), new ImmutableTextComponent(", "));
-                    return new Component[]{new TranslatableComponent("text.rei.view_recipes_for", collect)};
+                                    .orElse(Component.literal(identifier.toString())), Component.literal(", "));
+                    return new Component[]{Component.translatable("text.rei.view_recipes_for", collect)};
                 }
                 
                 return null;
@@ -243,7 +240,7 @@ public class RoughlyEnoughItemsCoreClient {
             ItemStack stack = buf.readItem();
             String player = buf.readUtf(32767);
             if (client.player != null) {
-                client.player.displayClientMessage(new TextComponent(I18n.get("text.rei.cheat_items").replaceAll("\\{item_name}", EntryStacks.of(stack.copy()).asFormattedText().getString()).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
+                client.player.displayClientMessage(Component.literal(I18n.get("text.rei.cheat_items").replaceAll("\\{item_name}", EntryStacks.of(stack.copy()).asFormattedText().getString()).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
             }
         });
         NetworkManager.registerReceiver(NetworkManager.s2c(), RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (buf, context) -> {

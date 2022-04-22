@@ -35,7 +35,6 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.DefaultTillingDisplay;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Items;
 
 import java.util.List;
@@ -53,7 +52,7 @@ public class DefaultTillingCategory implements DisplayCategory<DefaultTillingDis
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("category.rei.tilling");
+        return Component.translatable("category.rei.tilling");
     }
     
     @Override

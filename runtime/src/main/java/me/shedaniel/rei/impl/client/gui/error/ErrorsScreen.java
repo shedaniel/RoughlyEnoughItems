@@ -32,7 +32,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -81,9 +80,9 @@ public class ErrorsScreen extends Screen {
         }
         listWidget._addEntry(new TextEntry(NarratorChatListener.NO_TITLE, listWidget.getItemWidth()));
         if (quitable) {
-            addRenderableWidget(doneButton = new Button(width / 2 - 100, height - 26, 200, 20, new TranslatableComponent("gui.done"), button -> Minecraft.getInstance().setScreen(parent)));
+            addRenderableWidget(doneButton = new Button(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> Minecraft.getInstance().setScreen(parent)));
         } else {
-            addRenderableWidget(doneButton = new Button(width / 2 - 100, height - 26, 200, 20, new TranslatableComponent("menu.quit"), button -> exit()));
+            addRenderableWidget(doneButton = new Button(width / 2 - 100, height - 26, 200, 20, Component.translatable("menu.quit"), button -> exit()));
         }
     }
     
@@ -93,7 +92,7 @@ public class ErrorsScreen extends Screen {
         this.minecraft.level.disconnect();
         
         if (localServer) {
-            this.minecraft.clearLevel(new GenericDirtMessageScreen(new TranslatableComponent("menu.savingLevel")));
+            this.minecraft.clearLevel(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
         } else {
             this.minecraft.clearLevel();
         }
