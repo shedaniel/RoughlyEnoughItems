@@ -37,7 +37,6 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.Minecraft;
@@ -222,6 +221,15 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
             }
         });
         JEIDisplaySetup.addTo(widgets, bounds, result);
+        if (result.shapelessData.shapeless) {
+            Point shapelessPoint = result.shapelessData.pos;
+            
+            if (shapelessPoint != null) {
+                widgets.add(Widgets.createShapelessIcon(new Point(shapelessPoint.x + 9, shapelessPoint.y - 1)));
+            } else {
+                widgets.add(Widgets.createShapelessIcon(bounds));
+            }
+        }
         return widgets;
     }
 }

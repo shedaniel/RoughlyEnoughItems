@@ -37,9 +37,14 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class JEIRecipeLayoutBuilder implements IRecipeLayoutBuilder {
+    private final JEIDisplaySetup.ShapelessData shapelessData;
     private boolean dirty = false;
     public Predicate<RecipeIngredientRole> rolePredicate;
     public List<JEIRecipeSlot> slots = new ArrayList<>();
+    
+    public JEIRecipeLayoutBuilder(JEIDisplaySetup.ShapelessData shapelessData) {
+        this.shapelessData = shapelessData;
+    }
     
     @Override
     public IRecipeSlotBuilder addSlot(RecipeIngredientRole role, int x, int y) {
@@ -87,11 +92,14 @@ public class JEIRecipeLayoutBuilder implements IRecipeLayoutBuilder {
     
     @Override
     public void setShapeless() {
+        this.shapelessData.shapeless = true;
         markDirty();
     }
     
     @Override
     public void setShapeless(int posX, int posY) {
+        this.shapelessData.shapeless = true;
+        this.shapelessData.pos = new Point(posX, posY);
         markDirty();
     }
     

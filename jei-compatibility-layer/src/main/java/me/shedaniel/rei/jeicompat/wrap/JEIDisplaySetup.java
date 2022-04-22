@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -47,7 +48,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class JEIDisplaySetup {
+    public static class ShapelessData {
+        public boolean shapeless;
+        public Point pos;
+    }
+    
     public static class Result implements IRecipeSlotsView {
+        public ShapelessData shapelessData = new ShapelessData();
         public List<JEIRecipeSlot> slots;
         public Map<RecipeIngredientRole, List<JEIRecipeSlot>> slotsRoled;
         
@@ -75,7 +82,7 @@ public class JEIDisplaySetup {
     
     public static <T> Result create(IRecipeCategory<T> category, JEIWrappedDisplay<T> display, IFocusGroup focuses) {
         Result result = new Result();
-        JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder();
+        JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder(result.shapelessData);
         category.setRecipe(builder, display.getBackingRecipe(), focuses);
         if (builder.isDirty()) {
             result.setSlots(builder.slots);

@@ -143,6 +143,10 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
         return list;
     }
     
+    public boolean isShapeless() {
+        return false;
+    }
+    
     public static int getSlotWithSize(DefaultCraftingDisplay<?> display, int index, int craftingGridWidth) {
         return getSlotWithSize(display.getInputWidth(), index, craftingGridWidth);
     }

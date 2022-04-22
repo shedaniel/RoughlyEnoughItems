@@ -21,49 +21,46 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.common.displays.crafting;
+package me.shedaniel.rei.impl.client.gui.widget;
 
-import me.shedaniel.rei.api.common.util.EntryIngredients;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
+import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 
-import java.util.Collections;
-import java.util.Optional;
+import java.util.List;
+import java.util.Objects;
 
-public class DefaultShapelessDisplay extends DefaultCraftingDisplay<ShapelessRecipe> {
-    public DefaultShapelessDisplay(ShapelessRecipe recipe) {
-        super(
-                EntryIngredients.ofIngredients(recipe.getIngredients()),
-                Collections.singletonList(EntryIngredients.of(recipe.getResultItem())),
-                Optional.of(recipe)
-        );
+public class MergedWidget extends Widget {
+    private final List<Widget> widgets;
+    
+    public MergedWidget(Widget widget1, Widget widget2) {
+        this.widgets = Lists.newArrayList(Objects.requireNonNull(widget1), Objects.requireNonNull(widget2));
     }
     
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    @Override
-    public int getWidth() {
-        return recipe.get().getIngredients().size() > 4 ? 3 : 2;
-    }
-    
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    @Override
-    public int getHeight() {
-        return recipe.get().getIngredients().size() > 4 ? 3 : 2;
-    }
-    
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    @Override
-    public int getInputWidth() {
-        return Math.min(recipe.get().getIngredients().size(), 3);
-    }
-    
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    @Override
-    public int getInputHeight() {
-        return (int) Math.ceil(recipe.get().getIngredients().size() / 3.0);
+    public MergedWidget(List<Widget> widgets) {
+        this.widgets = widgets;
     }
     
     @Override
-    public boolean isShapeless() {
-        return true;
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        for (Widget widget : widgets) {
+            widget.setZ(getZ());
+            widget.render(matrices, mouseX, mouseY, delta);
+        }
+    }
+    
+    @Override
+    public List<? extends GuiEventListener> children() {
+        return widgets;
+    }
+    
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        for (Widget widget : this.widgets) {
+            if (widget.mouseScrolled(mouseX, mouseY, amount))
+                return true;
+        }
+        return false;
     }
 }

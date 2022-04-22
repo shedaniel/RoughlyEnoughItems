@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl;
 
+import com.mojang.math.Matrix4f;
 import com.mojang.serialization.DataResult;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -30,6 +31,7 @@ import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
+import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
@@ -37,6 +39,7 @@ import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -155,6 +158,12 @@ public final class ClientInternals {
     public interface WidgetsProvider {
         boolean isRenderingPanel(Panel panel);
         
+        Widget wrapVanillaWidget(GuiEventListener element);
+        
+        WidgetWithBounds wrapRenderer(Supplier<Rectangle> bounds, Renderer renderer);
+        
+        WidgetWithBounds withTranslate(WidgetWithBounds widget, Supplier<Matrix4f> translate);
+        
         Widget createDrawableWidget(DrawableConsumer drawable);
         
         Slot createSlot(Point point);
@@ -174,5 +183,9 @@ public final class ClientInternals {
         DrawableConsumer createTexturedConsumer(ResourceLocation texture, int x, int y, int width, int height, float u, float v, int uWidth, int vHeight, int textureWidth, int textureHeight);
         
         DrawableConsumer createFillRectangleConsumer(Rectangle rectangle, int color);
+        
+        Widget createShapelessIcon(Point point);
+        
+        Widget concatWidgets(List<Widget> widgets);
     }
 }
