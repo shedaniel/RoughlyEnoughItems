@@ -21,49 +21,52 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.common.displays.crafting;
+package me.shedaniel.rei.impl.client.gui.widget;
 
-import me.shedaniel.rei.api.common.util.EntryIngredients;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
+import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 
 import java.util.Collections;
-import java.util.Optional;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Supplier;
 
-public class DefaultShapelessDisplay extends DefaultCraftingDisplay<ShapelessRecipe> {
-    public DefaultShapelessDisplay(ShapelessRecipe recipe) {
-        super(
-                EntryIngredients.ofIngredients(recipe.getIngredients()),
-                Collections.singletonList(EntryIngredients.of(recipe.getResultItem())),
-                Optional.of(recipe)
-        );
-    }
+public class RendererWrappedWidget extends WidgetWithBounds {
+    private final Renderer renderer;
+    private final Supplier<Rectangle> bounds;
     
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    @Override
-    public int getWidth() {
-        return recipe.get().getIngredients().size() > 4 ? 3 : 2;
-    }
-    
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    @Override
-    public int getHeight() {
-        return recipe.get().getIngredients().size() > 4 ? 3 : 2;
-    }
-    
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    @Override
-    public int getInputWidth() {
-        return Math.min(recipe.get().getIngredients().size(), 3);
-    }
-    
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    @Override
-    public int getInputHeight() {
-        return (int) Math.ceil(recipe.get().getIngredients().size() / 3.0);
+    public RendererWrappedWidget(Renderer renderer, Supplier<Rectangle> bounds) {
+        this.renderer = Objects.requireNonNull(renderer);
+        this.bounds = Objects.requireNonNull(bounds);
     }
     
     @Override
-    public boolean isShapeless() {
-        return true;
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        renderer.render(matrices, getBounds(), mouseX, mouseY, delta);
+    }
+    
+    @Override
+    public List<? extends GuiEventListener> children() {
+        if (renderer instanceof GuiEventListener listener)
+            return Collections.singletonList(listener);
+        return Collections.emptyList();
+    }
+    
+    @Override
+    public void setZ(int z) {
+        renderer.setZ(z);
+    }
+    
+    @Override
+    public int getZ() {
+        return renderer.getZ();
+    }
+    
+    @Override
+    public Rectangle getBounds() {
+        return bounds.get();
     }
 }
