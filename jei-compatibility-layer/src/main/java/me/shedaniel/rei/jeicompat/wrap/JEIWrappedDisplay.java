@@ -62,7 +62,7 @@ public class JEIWrappedDisplay<T> implements Display {
     }
     
     public void cache() {
-        JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder();
+        JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder(null);
         IRecipeCategory<T> category = getBackingCategory().getBackingCategory();
         category.setRecipe(builder, getBackingRecipe(), getFoci());
         
