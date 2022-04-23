@@ -145,6 +145,7 @@ public class PerformanceScreen extends Screen {
             }));
         }
         list = new PerformanceEntryListWidget();
+        long[] totalTime = {0};
         RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.getStages().forEach((stage, inner) -> {
             List<EntryListEntry> entries = new ArrayList<>();
             inner.times().forEach((obj, time) -> {
@@ -158,9 +159,11 @@ public class PerformanceScreen extends Screen {
             if ((inner.totalNano() - separateTime) > 1000000) {
                 entries.add(new EntryListEntry(new TextComponent("Miscellaneous Operations"), inner.totalNano() - separateTime));
             }
+            totalTime[0] += inner.totalNano();
             entries.sort(Comparator.<EntryListEntry>comparingLong(value -> value.time).reversed());
             list.addItem(new SubCategoryListEntry(new TextComponent(stage), (List<PerformanceScreen.PerformanceEntry>) (List<? extends PerformanceScreen.PerformanceEntry>) entries, inner.totalNano(), false));
         });
+        list.children().add(0, new EntryListEntry(new TextComponent("Total Load Time"), totalTime[0]));
         addWidget(list);
     }
     
