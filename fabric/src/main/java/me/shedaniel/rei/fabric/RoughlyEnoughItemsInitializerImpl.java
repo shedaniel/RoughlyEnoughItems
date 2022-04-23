@@ -85,4 +85,24 @@ public class RoughlyEnoughItemsInitializerImpl {
     public static String getMinecraftVersion() {
         return FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion().getFriendlyString();
     }
+    
+    public static int compareVersions(String version1, String version2) {
+        Version v1, v2;
+        
+        try {
+            v1 = SemanticVersion.parse(version1);
+        } catch (VersionParsingException e) {
+            new IllegalStateException("Failed to parse version: " + version1, e).printStackTrace();
+            return 0;
+        }
+        
+        try {
+            v2 = SemanticVersion.parse(version2);
+        } catch (VersionParsingException e) {
+            new IllegalStateException("Failed to parse version: " + version2, e).printStackTrace();
+            return 0;
+        }
+        
+        return v1.compareTo(v2);
+    }
 }
