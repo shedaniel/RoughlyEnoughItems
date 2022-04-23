@@ -159,9 +159,9 @@ public class PerformanceScreen extends Screen {
             if ((inner.totalNano() - separateTime) > 1000000) {
                 entries.add(new EntryListEntry(new TextComponent("Miscellaneous Operations"), inner.totalNano() - separateTime));
             }
-            totalTime[0] += inner.totalNano();
+            totalTime[0] += Math.max(inner.totalNano(), separateTime);
             entries.sort(Comparator.<EntryListEntry>comparingLong(value -> value.time).reversed());
-            list.addItem(new SubCategoryListEntry(new TextComponent(stage), (List<PerformanceScreen.PerformanceEntry>) (List<? extends PerformanceScreen.PerformanceEntry>) entries, inner.totalNano(), false));
+            list.addItem(new SubCategoryListEntry(new TextComponent(stage), (List<PerformanceScreen.PerformanceEntry>) (List<? extends PerformanceScreen.PerformanceEntry>) entries, Math.max(inner.totalNano(), separateTime), false));
         });
         list.children().add(0, new EntryListEntry(new TextComponent("Total Load Time"), totalTime[0]));
         addWidget(list);
