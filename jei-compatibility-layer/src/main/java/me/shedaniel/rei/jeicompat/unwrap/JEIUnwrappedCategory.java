@@ -62,7 +62,7 @@ public class JEIUnwrappedCategory<T, D extends Display> implements IRecipeCatego
     @NotNull
     public Class<? extends T> getRecipeClass() {
         if (backingCategory instanceof JEIWrappedCategory) {
-            return ((JEIWrappedCategory<T>) backingCategory).getBackingCategory().getRecipeClass();
+            return ((JEIWrappedCategory<T>) backingCategory).getBackingCategory().getRecipeType().getRecipeClass();
         }
         return (Class<? extends T>) Display.class;
     }

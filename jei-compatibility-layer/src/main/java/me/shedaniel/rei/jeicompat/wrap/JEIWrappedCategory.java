@@ -61,11 +61,11 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
     public JEIWrappedCategory(IRecipeCategory<T> backingCategory) {
         this.backingCategory = backingCategory;
         this.background = new LazyLoadedValue<>(backingCategory::getBackground);
-        this.identifier = backingCategory.getUid().categoryId().cast();
+        this.identifier = backingCategory.getRecipeType().categoryId().cast();
     }
     
     public Class<? extends T> getRecipeClass() {
-        return backingCategory.getRecipeClass();
+        return backingCategory.getRecipeType().getRecipeClass();
     }
     
     public boolean handlesRecipe(T recipe) {

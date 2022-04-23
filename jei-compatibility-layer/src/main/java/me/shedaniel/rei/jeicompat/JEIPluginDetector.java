@@ -166,7 +166,7 @@ public class JEIPluginDetector {
             @Override
             @NotNull
             public <T> List<T> getRecipes(@NotNull IRecipeCategory<T> recipeCategory) {
-                CategoryIdentifier<Display> categoryId = categoryId(recipeCategory.getUid());
+                CategoryIdentifier<Display> categoryId = categoryId(recipeCategory.getRecipeType());
                 return wrapRecipes(categoryId, false);
             }
         };
