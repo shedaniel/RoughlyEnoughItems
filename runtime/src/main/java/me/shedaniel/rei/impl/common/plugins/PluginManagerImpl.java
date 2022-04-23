@@ -40,7 +40,6 @@ import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.common.logging.performance.PerformanceLogger;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -50,7 +49,8 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Closeable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.LongConsumer;
 import java.util.function.UnaryOperator;
 
@@ -63,6 +63,9 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     private boolean reloading = false;
     private final List<REIPluginProvider<P>> plugins = new ArrayList<>();
     private final LongConsumer reloadDoneListener;
+    private final Stopwatch reloadStopwatch = Stopwatch.createUnstarted();
+    private boolean forcedMainThread;
+    private final Stopwatch forceMainThreadStopwatch = Stopwatch.createUnstarted();
     
     @SafeVarargs
     public PluginManagerImpl(Class<P> pluginClass, UnaryOperator<PluginView<P>> view, LongConsumer reloadDoneListener, Reloadable<? extends P>... reloadables) {
@@ -173,19 +176,32 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         return new SectionClosable(stage, section);
     }
     
-    private void pluginSection(ReloadStage stage, String sectionName, List<PluginWrapper<P>> list, @Nullable Reloadable<?> reloadable, Consumer<PluginWrapper<P>> consumer) {
+    @FunctionalInterface
+    private interface SectionPluginSink {
+        void accept(boolean respectMainThread, Runnable task);
+    }
+    
+    private void pluginSection(ReloadStage stage, String sectionName, List<PluginWrapper<P>> list, @Nullable Reloadable<?> reloadable, BiConsumer<PluginWrapper<P>, SectionPluginSink> consumer) {
         for (PluginWrapper<P> wrapper : list) {
             try (SectionClosable section = section(stage, sectionName + wrapper.getPluginProviderName() + "/")) {
-                if (reloadable == null || !wrapper.plugin.shouldBeForcefullyDoneOnMainThread(reloadable)) {
-                    consumer.accept(wrapper);
-                } else {
-                    RoughlyEnoughItemsCore.LOGGER.warn("Forcing plugin " + wrapper.getPluginProviderName() + " to run on the main thread for " + sectionName + "! This is extremely dangerous, and have large performance implications.");
-                    if (Platform.getEnvironment() == Env.CLIENT) {
-                        EnvExecutor.runInEnv(Env.CLIENT, () -> () -> queueExecutionClient(() -> consumer.accept(wrapper)));
+                consumer.accept(wrapper, (respectMainThread, runnable) -> {
+                    if (!respectMainThread || reloadable == null || !wrapper.plugin.shouldBeForcefullyDoneOnMainThread(reloadable)) {
+                        runnable.run();
                     } else {
-                        queueExecution(() -> consumer.accept(wrapper));
+                        try {
+                            forcedMainThread = true;
+                            forceMainThreadStopwatch.start();
+                            RoughlyEnoughItemsCore.LOGGER.warn("Forcing plugin " + wrapper.getPluginProviderName() + " to run on the main thread for " + sectionName + "! This is extremely dangerous, and have large performance implications.");
+                            if (Platform.getEnvironment() == Env.CLIENT) {
+                                EnvExecutor.runInEnv(Env.CLIENT, () -> () -> queueExecutionClient(runnable));
+                            } else {
+                                queueExecution(runnable);
+                            }
+                        } finally {
+                            forceMainThreadStopwatch.stop();
+                        }
                     }
-                }
+                });
             } catch (Throwable throwable) {
                 RoughlyEnoughItemsCore.LOGGER.error(wrapper.getPluginProviderName() + " plugin failed to " + sectionName + "!", throwable);
             }
@@ -205,37 +221,51 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     
     @Override
     public void pre(ReloadStage stage) {
+        this.forcedMainThread = false;
+        this.forceMainThreadStopwatch.reset();
+        this.reloadStopwatch.reset().start();
         List<PluginWrapper<P>> plugins = new ArrayList<>(getPluginWrapped().toList());
         plugins.sort(Comparator.comparingDouble(PluginWrapper<P>::getPriority).reversed());
         Collections.reverse(plugins);
         try (SectionClosable preRegister = section(stage, "pre-register/");
              PerformanceLogger.Plugin perfLogger = RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.stage("Pre Registration")) {
-            pluginSection(stage, "pre-register/", plugins, null, plugin -> {
+            pluginSection(stage, "pre-register/", plugins, null, (plugin, sink) -> {
                 try (PerformanceLogger.Plugin.Inner inner = perfLogger.plugin(new Pair<>(plugin.provider, plugin.plugin))) {
-                    plugin.plugin.preRegister();
-                    ((REIPlugin<P>) plugin.plugin).preStage(this, stage);
+                    sink.accept(false, () -> {
+                        plugin.plugin.preRegister();
+                        ((REIPlugin<P>) plugin.plugin).preStage(this, stage);
+                    });
                 }
             });
         } catch (Throwable throwable) {
             new RuntimeException("Failed to run pre registration").printStackTrace();
         }
+        this.reloadStopwatch.stop();
     }
     
     @Override
     public void post(ReloadStage stage) {
+        this.reloadStopwatch.start();
         List<PluginWrapper<P>> plugins = new ArrayList<>(getPluginWrapped().toList());
         plugins.sort(Comparator.comparingDouble(PluginWrapper<P>::getPriority).reversed());
         Collections.reverse(plugins);
         try (SectionClosable postRegister = section(stage, "post-register/");
              PerformanceLogger.Plugin perfLogger = RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.stage("Post Registration")) {
-            pluginSection(stage, "post-register/", plugins, null, plugin -> {
+            pluginSection(stage, "post-register/", plugins, null, (plugin, sink) -> {
                 try (PerformanceLogger.Plugin.Inner inner = perfLogger.plugin(new Pair<>(plugin.provider, plugin.plugin))) {
-                    plugin.plugin.postRegister();
-                    ((REIPlugin<P>) plugin.plugin).postStage(this, stage);
+                    sink.accept(false, () -> {
+                        plugin.plugin.postRegister();
+                        ((REIPlugin<P>) plugin.plugin).postStage(this, stage);
+                    });
                 }
             });
         } catch (Throwable throwable) {
             new RuntimeException("Failed to run post registration").printStackTrace();
+        }
+        this.reloadStopwatch.stop();
+        reloadDoneListener.accept(this.reloadStopwatch.elapsed(TimeUnit.MILLISECONDS));
+        if (forcedMainThread) {
+            RoughlyEnoughItemsCore.LOGGER.warn("Forcing plugins to run on main thread took " + forceMainThreadStopwatch);
         }
     }
     
@@ -248,8 +278,8 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     @Override
     public void startReload(ReloadStage stage) {
         try {
+            this.reloadStopwatch.start();
             reloading = true;
-            long startTime = Util.getMillis();
             
             // Pre Reload
             try (SectionClosable startReloadAll = section(stage, "start-reload/");
@@ -286,27 +316,29 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
                         }
                     }
                     
-                    pluginSection(stage, "reloadable-plugin/" + name(reloadableClass) + "/", plugins, reloadable, plugin -> {
+                    pluginSection(stage, "reloadable-plugin/" + name(reloadableClass) + "/", plugins, reloadable, (plugin, sink) -> {
                         try (PerformanceLogger.Plugin.Inner inner = perfLogger.plugin(new Pair<>(plugin.provider, plugin.plugin))) {
-                            for (Reloadable<P> listener : reloadables) {
-                                try {
-                                    listener.beforeReloadablePlugin(stage, reloadable, plugin.plugin);
-                                } catch (Throwable throwable) {
-                                    throwable.printStackTrace();
-                                }
-                            }
-                            
-                            try {
-                                reloadable.acceptPlugin(plugin.plugin, stage);
-                            } finally {
+                            sink.accept(true, () -> {
                                 for (Reloadable<P> listener : reloadables) {
                                     try {
-                                        listener.afterReloadablePlugin(stage, reloadable, plugin.plugin);
+                                        listener.beforeReloadablePlugin(stage, reloadable, plugin.plugin);
                                     } catch (Throwable throwable) {
                                         throwable.printStackTrace();
                                     }
                                 }
-                            }
+                                
+                                try {
+                                    reloadable.acceptPlugin(plugin.plugin, stage);
+                                } finally {
+                                    for (Reloadable<P> listener : reloadables) {
+                                        try {
+                                            listener.afterReloadablePlugin(stage, reloadable, plugin.plugin);
+                                        } catch (Throwable throwable) {
+                                            throwable.printStackTrace();
+                                        }
+                                    }
+                                }
+                            });
                         }
                     });
                     
@@ -336,8 +368,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
                 }
             }
             
-            long usedTime = Util.getMillis() - startTime;
-            reloadDoneListener.accept(usedTime);
+            this.reloadStopwatch.stop();
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         } finally {
