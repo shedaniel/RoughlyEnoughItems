@@ -275,12 +275,12 @@ public class JEIPluginDetector {
             public Class<? extends T> getIngredientClass() {
                 return c;
             }
-    
+            
             @Override
             public Class<? extends B> getIngredientBaseClass() {
                 return bc;
             }
-    
+            
             @Override
             public B getBase(T ingredient) {
                 return mapper.apply(ingredient);
@@ -622,7 +622,11 @@ public class JEIPluginDetector {
         
         @Override
         public boolean shouldBeForcefullyDoneOnMainThread(Reloadable<?> reloadable) {
-            return mainThread;
+            if (!mainThread) {
+                return false;
+            } else return reloadable instanceof CategoryRegistry ||
+                          reloadable instanceof DisplayRegistry ||
+                          reloadable instanceof ScreenRegistry;
         }
     }
 }
