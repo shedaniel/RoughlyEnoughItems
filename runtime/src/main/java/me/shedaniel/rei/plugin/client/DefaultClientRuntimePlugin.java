@@ -60,7 +60,7 @@ import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
-import me.shedaniel.rei.impl.client.gui.widget.FavoritesListWidget;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.fabricmc.api.EnvType;
@@ -134,8 +134,8 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         zones.register(Screen.class, screen -> {
             FavoritesListWidget widget = ScreenOverlayImpl.getFavoritesListWidget();
             if (widget != null) {
-                if (widget.favoritePanelButton.isVisible()) {
-                    return Collections.singletonList(widget.favoritePanelButton.bounds);
+                if (widget.togglePanelButton.isVisible()) {
+                    return Collections.singletonList(widget.togglePanelButton.bounds);
                 }
             }
             return Collections.emptyList();

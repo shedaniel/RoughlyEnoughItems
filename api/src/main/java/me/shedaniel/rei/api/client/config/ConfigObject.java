@@ -109,6 +109,8 @@ public interface ConfigObject {
     
     boolean doesRegisterRecipesInAnotherThread();
     
+    @Deprecated(forRemoval = true)
+    @ApiStatus.ScheduledForRemoval
     boolean doesSnapToRows();
     
     boolean isFavoritesEnabled();

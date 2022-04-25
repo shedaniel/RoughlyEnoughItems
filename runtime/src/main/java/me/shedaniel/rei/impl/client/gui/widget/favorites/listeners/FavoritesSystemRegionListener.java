@@ -21,50 +21,36 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.widget.region;
+package me.shedaniel.rei.impl.client.gui.widget.favorites.listeners;
 
-import me.shedaniel.rei.api.client.entry.region.RegionEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
+import me.shedaniel.rei.impl.client.gui.widget.region.RegionListener;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-import java.util.stream.Stream;
-
-public interface RegionListener<T extends RegionEntry<T>> {
-    default void onDrop(Stream<T> entries) {}
-    
+public class FavoritesSystemRegionListener implements RegionListener<FavoriteEntry> {
+    @Override
     @Nullable
-    default T convertDraggableStack(DraggingContext<Screen> context, DraggableStack stack) {
+    public FavoriteEntry convertDraggableStack(DraggingContext<Screen> context, DraggableStack stack) {
+        return FavoriteEntry.fromEntryStack(stack.getStack().copy());
+    }
+    
+    @Override
+    public boolean canAcceptDrop(RealRegionEntry<FavoriteEntry> entry) {
+        return false;
+    }
+    
+    @Override
+    @Nullable
+    public FavoriteEntry asFavorite(RealRegionEntry<FavoriteEntry> entry) {
         return null;
     }
     
-    default boolean canAcceptDrop(RealRegionEntry<T> entry) {
-        return true;
+    @Override
+    public boolean removeOnDrag() {
+        return false;
     }
-    
-    @Nullable
-    default FavoriteEntry asFavorite(RealRegionEntry<T> entry) {
-        return entry.getEntry().asFavorite();
-    }
-    
-    default boolean canBeDragged(RealRegionEntry<T> entry) {
-        return true;
-    }
-    
-    default boolean removeOnDrag() {
-        return true;
-    }
-    
-    default void onRemove(RealRegionEntry<T> entry) {}
-    
-    default void onAdd(RealRegionEntry<T> entry) {}
-    
-    default void onSetNewEntries(List<RegionEntryWidget<T>> entries) {}
-    
-    default void onSetNewEntries(Stream<T> entries) {}
-    
-    default void onConsumed(RealRegionEntry<T> entry) {}
 }

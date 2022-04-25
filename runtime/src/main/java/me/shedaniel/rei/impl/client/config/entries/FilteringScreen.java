@@ -35,7 +35,6 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
@@ -62,7 +61,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.entrySize;
+import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
 @ApiStatus.Internal
 public class FilteringScreen extends Screen {
@@ -89,7 +88,7 @@ public class FilteringScreen extends Screen {
     private Tooltip tooltip = null;
     private List<EntryStack<?>> entryStacks = null;
     private Rectangle innerBounds;
-    private List<EntryListEntry> entries = Collections.emptyList();
+    private List<FilteringListEntry> entries = Collections.emptyList();
     private List<GuiEventListener> elements = Collections.emptyList();
     
     private Point selectionPoint = null;
@@ -128,7 +127,7 @@ public class FilteringScreen extends Screen {
             this.hideButton = new Button(0, 0, Minecraft.getInstance().font.width(hideText) + 10, 20, hideText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack<?> stack = entryStacks.get(i);
-                    EntryListEntry entry = entries.get(i);
+                    FilteringListEntry entry = entries.get(i);
                     entry.getBounds().y = entry.backupY - scrolling.scrollAmountInt();
                     if (entry.isSelected() && !entry.isFiltered()) {
                         filteringEntry.configFiltered.add(stack);
@@ -143,7 +142,7 @@ public class FilteringScreen extends Screen {
             this.showButton = new Button(0, 0, Minecraft.getInstance().font.width(showText) + 10, 20, showText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack<?> stack = entryStacks.get(i);
-                    EntryListEntry entry = entries.get(i);
+                    FilteringListEntry entry = entries.get(i);
                     entry.getBounds().y = entry.backupY - scrolling.scrollAmountInt();
                     if (entry.isSelected() && filteringEntry.configFiltered.remove(stack)) {
                         filteringEntry.edited = true;
@@ -215,7 +214,7 @@ public class FilteringScreen extends Screen {
         if (bounds.isEmpty())
             return;
         ScissorsHandler.INSTANCE.scissor(bounds);
-        for (EntryListEntry entry : entries)
+        for (FilteringListEntry entry : entries)
             entry.clearStacks();
         int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / (float) entrySize()));
         int nextIndex = skip * innerBounds.width / entrySize();
@@ -223,7 +222,7 @@ public class FilteringScreen extends Screen {
         BatchedEntryRendererManager manager = new BatchedEntryRendererManager();
         for (; i < entryStacks.size(); i++) {
             EntryStack<?> stack = entryStacks.get(i);
-            EntryListEntry entry = entries.get(nextIndex);
+            FilteringListEntry entry = entries.get(nextIndex);
             entry.getBounds().y = entry.backupY - scrolling.scrollAmountInt();
             if (entry.getBounds().y > bounds.getMaxY())
                 break;
@@ -292,7 +291,7 @@ public class FilteringScreen extends Screen {
     
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
-        if (scrolling.mouseDragged(mouseX, mouseY, button, dx, dy, ConfigObject.getInstance().doesSnapToRows(), entrySize()))
+        if (scrolling.mouseDragged(mouseX, mouseY, button, dx, dy))
             return true;
         return super.mouseDragged(mouseX, mouseY, button, dx, dy);
     }
@@ -326,11 +325,11 @@ public class FilteringScreen extends Screen {
         int slotsToPrepare = Math.max(entryStacks.size() * 3, width * pageHeight * 3);
         int currentX = 0;
         int currentY = 0;
-        List<EntryListEntry> entries = Lists.newArrayList();
+        List<FilteringListEntry> entries = Lists.newArrayList();
         for (int i = 0; i < slotsToPrepare; i++) {
             int xPos = currentX * entrySize + innerBounds.x;
             int yPos = currentY * entrySize + innerBounds.y;
-            entries.add(new EntryListEntry(xPos, yPos, entrySize));
+            entries.add(new FilteringListEntry(xPos, yPos, entrySize));
             currentX++;
             if (currentX >= width) {
                 currentX = 0;
@@ -438,12 +437,12 @@ public class FilteringScreen extends Screen {
         return true;
     }
     
-    private class EntryListEntry extends EntryWidget {
+    private class FilteringListEntry extends EntryWidget {
         private int backupY;
         private boolean filtered = false;
         private boolean dirty = true;
         
-        private EntryListEntry(int x, int y, int entrySize) {
+        private FilteringListEntry(int x, int y, int entrySize) {
             super(new Point(x, y));
             this.backupY = y;
             getBounds().width = getBounds().height = entrySize;

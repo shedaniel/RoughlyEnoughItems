@@ -29,7 +29,7 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
-import me.shedaniel.rei.impl.client.gui.performance.entry.EntryListEntry;
+import me.shedaniel.rei.impl.client.gui.performance.entry.PerformanceEntryImpl;
 import me.shedaniel.rei.impl.client.gui.performance.entry.SubCategoryListEntry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -147,9 +147,9 @@ public class PerformanceScreen extends Screen {
         list = new PerformanceEntryListWidget();
         long[] totalTime = {0};
         RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.getStages().forEach((stage, inner) -> {
-            List<EntryListEntry> entries = new ArrayList<>();
+            List<PerformanceEntryImpl> entries = new ArrayList<>();
             inner.times().forEach((obj, time) -> {
-                entries.add(new EntryListEntry(new TextComponent(obj instanceof Pair ? ((Pair<REIPluginProvider<?>, REIPlugin<?>>) obj).getFirst().getPluginProviderName() : Objects.toString(obj)), time));
+                entries.add(new PerformanceEntryImpl(new TextComponent(obj instanceof Pair ? ((Pair<REIPluginProvider<?>, REIPlugin<?>>) obj).getFirst().getPluginProviderName() : Objects.toString(obj)), time));
             });
             Collection<Long> values = inner.times().values();
             long separateTime;
@@ -157,13 +157,13 @@ public class PerformanceScreen extends Screen {
                 separateTime = values.stream().collect(Collectors.summarizingLong(value -> value)).getSum();
             }
             if ((inner.totalNano() - separateTime) > 1000000) {
-                entries.add(new EntryListEntry(new TextComponent("Miscellaneous Operations"), inner.totalNano() - separateTime));
+                entries.add(new PerformanceEntryImpl(new TextComponent("Miscellaneous Operations"), inner.totalNano() - separateTime));
             }
             totalTime[0] += Math.max(inner.totalNano(), separateTime);
-            entries.sort(Comparator.<EntryListEntry>comparingLong(value -> value.time).reversed());
+            entries.sort(Comparator.<PerformanceEntryImpl>comparingLong(value -> value.time).reversed());
             list.addItem(new SubCategoryListEntry(new TextComponent(stage), (List<PerformanceScreen.PerformanceEntry>) (List<? extends PerformanceScreen.PerformanceEntry>) entries, Math.max(inner.totalNano(), separateTime), false));
         });
-        list.children().add(0, new EntryListEntry(new TextComponent("Total Load Time"), totalTime[0]));
+        list.children().add(0, new PerformanceEntryImpl(new TextComponent("Total Load Time"), totalTime[0]));
         addWidget(list);
     }
     
@@ -176,7 +176,6 @@ public class PerformanceScreen extends Screen {
     }
     
     public static abstract class PerformanceEntry extends DynamicElementListWidget.ElementEntry<PerformanceEntry> {
-        
     }
     
     private class PerformanceEntryListWidget extends DynamicElementListWidget<PerformanceEntry> {

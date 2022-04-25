@@ -243,7 +243,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public boolean doesSnapToRows() {
-        return advanced.accessibility.snapToRows;
+        return false;
     }
     
     @Override
@@ -631,7 +631,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @UsePercentage(min = 0.25, max = 4.0) private double entrySize = 1.0;
             @Comment("Declares the position of the entry panel.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
             private DisplayPanelLocation displayPanelLocation = DisplayPanelLocation.RIGHT;
-            @Comment("Declares whether scrolled entry panel should snap to rows.") private boolean snapToRows = false;
             @Comment("Declares how the scrollbar in composite screen should act.") private boolean compositeScrollBarPermanent = false;
             private boolean toastDisplayedOnCopyIdentifier = true;
             @Comment("Declares whether REI should use compact tabs for categories.") private boolean useCompactTabs = true;

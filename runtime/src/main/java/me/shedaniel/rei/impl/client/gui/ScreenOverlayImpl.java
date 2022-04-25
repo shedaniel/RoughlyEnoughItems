@@ -57,7 +57,6 @@ import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
@@ -69,6 +68,9 @@ import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.client.gui.modules.entries.*;
 import me.shedaniel.rei.impl.client.gui.widget.*;
+import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListSearchManager;
+import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import me.shedaniel.rei.impl.common.util.Weather;
 import net.minecraft.ChatFormatting;
@@ -97,7 +99,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.entrySize;
+import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
 @ApiStatus.Internal
 public class ScreenOverlayImpl extends ScreenOverlay {
@@ -600,7 +602,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) Minecraft.getInstance().screen;
                 int x = containerScreen.leftPos, y = containerScreen.topPos;
                 for (Slot slot : containerScreen.getMenu().slots) {
-                    if (!slot.hasItem() || !ENTRY_LIST_WIDGET.matches(EntryStacks.of(slot.getItem()))) {
+                    if (!slot.hasItem() || !EntryListSearchManager.INSTANCE.matches(EntryStacks.of(slot.getItem()))) {
                         matrices.pushPose();
                         matrices.translate(0, 0, 500f);
                         fillGradient(matrices, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0xdc202020, 0xdc202020);

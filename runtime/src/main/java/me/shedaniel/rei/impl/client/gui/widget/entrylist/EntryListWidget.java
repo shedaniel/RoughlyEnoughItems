@@ -21,29 +21,22 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.widget;
+package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
 import com.google.common.base.Predicates;
-import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
-import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
-import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
-import me.shedaniel.rei.api.client.gui.config.EntryPanelOrdering;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
 import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
@@ -54,63 +47,40 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
-import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
-import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
-import me.shedaniel.rei.impl.client.view.ViewsImpl;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
+import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
+import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
+import me.shedaniel.rei.impl.client.gui.widget.region.RegionRenderingDebugger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
-import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class EntryListWidget extends WidgetWithBounds implements OverlayListWidget, DraggableStackVisitorWidget {
-    static final Comparator<? super EntryStack<?>> ENTRY_NAME_COMPARER = Comparator.comparing(stack -> stack.asFormatStrippedText().getString());
-    static final Comparator<? super EntryStack<?>> ENTRY_GROUP_COMPARER = Comparator.comparingInt(stack -> {
-        if (stack.getType() == VanillaEntryTypes.ITEM) {
-            CreativeModeTab group = ((ItemStack) stack.getValue()).getItem().getItemCategory();
-            if (group != null)
-                return group.getId();
-        }
-        return Integer.MAX_VALUE;
-    });
     private static final int SIZE = 18;
-    private static final boolean LAZY = true;
-    private static int page;
+    private int page;
     protected final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
         public Rectangle getBounds() {
@@ -123,14 +93,12 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         }
     };
     protected int blockedCount;
-    private boolean debugTime;
-    private double lastAverageDebugTime, averageDebugTime, lastTotalDebugTime, totalDebugTime, totalDebugTimeDelta;
+    private final RegionRenderingDebugger debugger = new RegionRenderingDebugger();
     private Rectangle bounds, innerBounds;
     private List<EntryStack<?>> allStacks = null;
-    private List<EntryListEntry> entries = Collections.emptyList();
+    private List<EntryListStackEntry> entries = Collections.emptyList();
     private List<Widget> renders = Collections.emptyList();
-    private List<Widget> widgets = Collections.emptyList();
-    private AsyncSearchManager searchManager = AsyncSearchManager.createDefault();
+    private List<Widget> children = Collections.emptyList();
     
     public static int entrySize() {
         return Mth.ceil(SIZE * ConfigObject.getInstance().getEntrySize());
@@ -174,7 +142,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         return hasSpace() && innerBounds.contains(mouseX, mouseY);
     }
     
-    private boolean containsChecked(double x, double y, boolean inner) {
+    public boolean containsChecked(double x, double y, boolean inner) {
         if (inner) {
             if (!innerContainsMouse(x, y)) return false;
         } else {
@@ -251,7 +219,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     }
     
     public void setPage(int page) {
-        EntryListWidget.page = page;
+        this.page = page;
     }
     
     public void previousPage() {
@@ -272,9 +240,6 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (!hasSpace()) return;
         
-        MutableInt size = new MutableInt();
-        MutableLong time = new MutableLong();
-        long totalTimeStart = debugTime ? System.nanoTime() : 0;
         boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
         if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             ScissorsHandler.INSTANCE.scissor(bounds);
@@ -286,7 +251,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             
             int i = nextIndex;
             for (int cont = nextIndex; cont < entries.size(); cont++) {
-                EntryListEntry entry = entries.get(cont);
+                EntryListStackEntry entry = entries.get(cont);
                 Rectangle entryBounds = entry.getBounds();
                 
                 entryBounds.y = entry.backupY - scrolling.scrollAmountInt();
@@ -304,9 +269,9 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                 }
             }
             
-            helper.render(debugTime, size, time, matrices, mouseX, mouseY, delta);
+            helper.render(debugger.debugTime, debugger.size, debugger.time, matrices, mouseX, mouseY, delta);
             
-            updatePosition(delta);
+            scrolling.updatePosition(delta);
             ScissorsHandler.INSTANCE.removeLastScissor();
             if (scrolling.getMaxScroll() > 0) {
                 scrolling.renderScrollBar(0, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
@@ -316,11 +281,11 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                 widget.render(matrices, mouseX, mouseY, delta);
             }
             if (ConfigObject.getInstance().doesCacheEntryRendering()) {
-                for (EntryListEntry entry : entries) {
+                for (EntryListStackEntry entry : entries) {
                     if (entry.our == null) {
                         CachedEntryListRender.Sprite sprite = CachedEntryListRender.get(entry.getCurrentEntry());
                         if (sprite != null) {
-                            entry.our = entry.getCurrentEntry().copy().setting(EntryStack.Settings.RENDERER, stack -> new EntryRenderer<Object>() {
+                            entry.our = ClientEntryStacks.setRenderer(entry.getCurrentEntry().copy().cast(), stack -> new EntryRenderer<Object>() {
                                 @Override
                                 public void render(EntryStack<Object> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
                                     Minecraft.getInstance().getTextureManager().bind(CachedEntryListRender.cachedTextureLocation);
@@ -337,41 +302,13 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                     }
                 }
                 
-                BatchedEntryRendererManager.renderSlow(debugTime, size, time, matrices, mouseX, mouseY, delta, entries);
+                BatchedEntryRendererManager.renderSlow(debugger.debugTime, debugger.size, debugger.time, matrices, mouseX, mouseY, delta, entries);
             } else {
-                new BatchedEntryRendererManager(entries).render(debugTime, size, time, matrices, mouseX, mouseY, delta);
+                new BatchedEntryRendererManager(entries).render(debugger.debugTime, debugger.size, debugger.time, matrices, mouseX, mouseY, delta);
             }
         }
         
-        if (debugTime) {
-            long totalTime = System.nanoTime() - totalTimeStart;
-            averageDebugTime += (time.getValue() / size.doubleValue()) * delta;
-            totalDebugTime += totalTime / 1000000d * delta;
-            totalDebugTimeDelta += delta;
-            if (totalDebugTimeDelta >= 20) {
-                lastAverageDebugTime = averageDebugTime / totalDebugTimeDelta;
-                lastTotalDebugTime = totalDebugTime / totalDebugTimeDelta;
-                averageDebugTime = 0;
-                totalDebugTime = 0;
-                totalDebugTimeDelta = 0;
-            } else if (lastAverageDebugTime == 0) {
-                lastAverageDebugTime = time.getValue() / size.doubleValue();
-                totalDebugTime = totalTime / 1000000d;
-            }
-            int z = getZ();
-            setZ(500);
-            Component debugText = new TextComponent(String.format("%d entries, avg. %.0fns, ttl. %.2fms, %s fps", size.getValue(), lastAverageDebugTime, lastTotalDebugTime, minecraft.fpsString.split(" ")[0]));
-            int stringWidth = font.width(debugText);
-            fillGradient(matrices, Math.min(bounds.x, minecraft.screen.width - stringWidth - 2), bounds.y, bounds.x + stringWidth + 2, bounds.y + font.lineHeight + 2, -16777216, -16777216);
-            MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-            matrices.pushPose();
-            matrices.translate(0.0D, 0.0D, getZ());
-            Matrix4f matrix = matrices.last().pose();
-            font.drawInBatch(debugText.getVisualOrderText(), Math.min(bounds.x + 2, minecraft.screen.width - stringWidth), bounds.y + 2, -1, false, matrix, immediate, false, 0, 15728880);
-            immediate.endBatch();
-            setZ(z);
-            matrices.popPose();
-        }
+        debugger.render(matrices, bounds.x, bounds.y, delta);
         
         if (containsChecked(mouseX, mouseY, false) && ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && !minecraft.player.inventory.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
             EntryStack<?> stack = EntryStacks.of(minecraft.player.inventory.getCarried().copy());
@@ -390,35 +327,17 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         }
     }
     
-    private int getScrollbarMinX() {
-        if (ConfigObject.getInstance().isLeftHandSidePanel())
-            return bounds.x + 1;
-        return bounds.getMaxX() - 7;
-    }
-    
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
-        if (hasSpace() && scrolling.mouseDragged(mouseX, mouseY, button, dx, dy, ConfigObject.getInstance().doesSnapToRows(), entrySize()))
+        if (hasSpace() && scrolling.mouseDragged(mouseX, mouseY, button, dx, dy))
             return true;
         return super.mouseDragged(mouseX, mouseY, button, dx, dy);
-    }
-    
-    private void updatePosition(float delta) {
-        // TODO: Snap to rows
-//        if (ConfigObject.getInstance().doesSnapToRows() && scrolling.scrollTarget() >= 0 && scrolling.scrollTarget() <= scrolling.getMaxScroll()) {
-//            double nearestRow = Math.round(scrolling.scrollTarget() / (double) entrySize()) * (double) entrySize();
-//            if (!DynamicNewSmoothScrollingEntryListWidget.Precision.almostEquals(scrolling.scrollTarget(), nearestRow, DynamicNewSmoothScrollingEntryListWidget.Precision.FLOAT_EPSILON))
-//                scrolling.scrollTarget += (nearestRow - scrolling.scrollTarget()) * Math.min(delta / 2.0, 1.0);
-//            else
-//                scrolling.scrollTarget = nearestRow;
-//        }
-        scrolling.updatePosition(delta);
     }
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (containsChecked(PointHelper.ofMouse(), false))
-            for (Widget widget : widgets)
+            for (Widget widget : children)
                 if (widget.keyPressed(keyCode, scanCode, modifiers))
                     return true;
         return false;
@@ -446,53 +365,12 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     
     public void updateEntriesPosition() {
         int entrySize = entrySize();
-        boolean focusModeZoomed = ConfigObject.getInstance().isFocusModeZoomed();
+        boolean zoomed = ConfigObject.getInstance().isFocusModeZoomed();
         this.innerBounds = updateInnerBounds(bounds);
-        if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            this.renders = Lists.newArrayList();
-            page = Math.max(page, 0);
-            List<EntryListEntry> entries = Lists.newArrayList();
-            int width = innerBounds.width / entrySize;
-            int height = innerBounds.height / entrySize;
-            for (int currentY = 0; currentY < height; currentY++) {
-                for (int currentX = 0; currentX < width; currentX++) {
-                    int slotX = currentX * entrySize + innerBounds.x;
-                    int slotY = currentY * entrySize + innerBounds.y;
-                    if (notSteppingOnExclusionZones(slotX - 1, slotY - 1, entrySize, entrySize, innerBounds)) {
-                        entries.add((EntryListEntry) new EntryListEntry(slotX, slotY, entrySize, focusModeZoomed).noBackground());
-                    }
-                }
-            }
-            page = Math.max(Math.min(page, getTotalPages() - 1), 0);
-            List<EntryStack<?>> subList = allStacks.stream().skip(Math.max(0, page * entries.size())).limit(Math.max(0, entries.size() - Math.max(0, -page * entries.size()))).collect(Collectors.toList());
-            for (int i = 0; i < subList.size(); i++) {
-                EntryStack<?> stack = subList.get(i);
-                entries.get(i + Math.max(0, -page * entries.size())).clearStacks().entry(stack);
-            }
-            this.entries = entries;
-            this.widgets = Lists.newArrayList(renders);
-            this.widgets.addAll(entries);
+        if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
+            updateScrolledEntries(entrySize, zoomed);
         } else {
-            page = 0;
-            int width = innerBounds.width / entrySize;
-            int pageHeight = innerBounds.height / entrySize;
-            int slotsToPrepare = Math.max(allStacks.size() * 3, width * pageHeight * 3);
-            int currentX = 0;
-            int currentY = 0;
-            List<EntryListEntry> entries = Lists.newArrayList();
-            for (int i = 0; i < slotsToPrepare; i++) {
-                int xPos = currentX * entrySize + innerBounds.x;
-                int yPos = currentY * entrySize + innerBounds.y;
-                entries.add((EntryListEntry) new EntryListEntry(xPos, yPos, entrySize, focusModeZoomed).noBackground());
-                currentX++;
-                if (currentX >= width) {
-                    currentX = 0;
-                    currentY++;
-                }
-            }
-            this.entries = entries;
-            this.widgets = Lists.newArrayList(renders);
-            this.widgets.addAll(entries);
+            updatePaginatedEntries(entrySize, zoomed);
         }
         FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
         if (favoritesListWidget != null) {
@@ -501,48 +379,75 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         }
     }
     
+    private void updateScrolledEntries(int entrySize, boolean zoomed) {
+        page = 0;
+        int width = innerBounds.width / entrySize;
+        int pageHeight = innerBounds.height / entrySize;
+        int slotsToPrepare = Math.max(allStacks.size() * 3, width * pageHeight * 3);
+        int currentX = 0;
+        int currentY = 0;
+        List<EntryListStackEntry> entries = Lists.newArrayList();
+        for (int i = 0; i < slotsToPrepare; i++) {
+            int xPos = currentX * entrySize + innerBounds.x;
+            int yPos = currentY * entrySize + innerBounds.y;
+            entries.add((EntryListStackEntry) new EntryListStackEntry(this, xPos, yPos, entrySize, zoomed).noBackground());
+            currentX++;
+            if (currentX >= width) {
+                currentX = 0;
+                currentY++;
+            }
+        }
+        this.entries = entries;
+        this.children = Lists.newArrayList(renders);
+        this.children.addAll(entries);
+    }
+    
+    private void updatePaginatedEntries(int entrySize, boolean zoomed) {
+        this.renders = Lists.newArrayList();
+        page = Math.max(page, 0);
+        List<EntryListStackEntry> entries = Lists.newArrayList();
+        int width = innerBounds.width / entrySize;
+        int height = innerBounds.height / entrySize;
+        for (int currentY = 0; currentY < height; currentY++) {
+            for (int currentX = 0; currentX < width; currentX++) {
+                int slotX = currentX * entrySize + innerBounds.x;
+                int slotY = currentY * entrySize + innerBounds.y;
+                if (notSteppingOnExclusionZones(slotX - 1, slotY - 1, entrySize, entrySize, innerBounds)) {
+                    entries.add((EntryListStackEntry) new EntryListStackEntry(this, slotX, slotY, entrySize, zoomed).noBackground());
+                }
+            }
+        }
+        page = Math.max(Math.min(page, getTotalPages() - 1), 0);
+        List<EntryStack<?>> subList = allStacks.stream().skip(Math.max(0, page * entries.size())).limit(Math.max(0, entries.size() - Math.max(0, -page * entries.size()))).collect(Collectors.toList());
+        for (int i = 0; i < subList.size(); i++) {
+            EntryStack<?> stack = subList.get(i);
+            entries.get(i + Math.max(0, -page * entries.size())).clearStacks().entry(stack);
+        }
+        this.entries = entries;
+        this.children = Lists.newArrayList(renders);
+        this.children.addAll(entries);
+    }
+    
     @ApiStatus.Internal
     public List<EntryStack<?>> getAllStacks() {
         return allStacks;
     }
     
     public void updateSearch(String searchTerm, boolean ignoreLastSearch) {
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        if (ignoreLastSearch) searchManager.markDirty();
-        searchManager.updateFilter(searchTerm);
-        if (searchManager.isDirty()) {
-            searchManager.getAsync(list -> {
-                list = new ArrayList<>(list);
-                EntryPanelOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
-                if (ordering == EntryPanelOrdering.NAME)
-                    list.sort(ENTRY_NAME_COMPARER);
-                if (ordering == EntryPanelOrdering.GROUPS)
-                    list.sort(ENTRY_GROUP_COMPARER);
-                if (!ConfigObject.getInstance().isItemListAscending()) {
-                    Collections.reverse(list);
-                }
-                allStacks = list;
-                
-                if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
-                    RoughlyEnoughItemsCore.LOGGER.info("Search Used: %s", stopwatch.stop().toString());
-                }
-                updateEntriesPosition();
-            });
-        }
-        debugTime = ConfigObject.getInstance().doDebugRenderTimeRequired();
+        EntryListSearchManager.INSTANCE.update(searchTerm, ignoreLastSearch, stacks -> {
+            allStacks = stacks;
+            updateEntriesPosition();
+        });
+        debugger.debugTime = ConfigObject.getInstance().doDebugRenderTimeRequired();
         FavoritesListWidget favorites = ScreenOverlayImpl.getFavoritesListWidget();
         if (favorites != null) {
             favorites.updateSearch();
         }
     }
     
-    public boolean matches(EntryStack<?> stack) {
-        return searchManager.matches(stack);
-    }
-    
     @Override
     public List<? extends Widget> children() {
-        return widgets;
+        return children;
     }
     
     @Override
@@ -577,7 +482,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     public EntryStack<?> getFocusedStack() {
         Point mouse = PointHelper.ofMouse();
         if (containsChecked(mouse, false)) {
-            for (EntryListEntry entry : entries) {
+            for (EntryListStackEntry entry : entries) {
                 EntryStack<?> currentEntry = entry.getCurrentEntry();
                 if (!currentEntry.isEmpty() && entry.containsMouse(mouse)) {
                     return currentEntry.copy();
@@ -599,139 +504,6 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                     .filter(Predicates.not(EntryStack::isEmpty));
         } else {
             return entries.stream().map(EntryWidget::getCurrentEntry);
-        }
-    }
-    
-    private class EntryListEntry extends EntryListEntryWidget {
-        private long lastCheckTime = -1;
-        private Display display;
-        private EntryStack<?> our;
-        private NumberAnimator<Double> size = null;
-        
-        private EntryListEntry(int x, int y, int entrySize, boolean zoomed) {
-            super(new Point(x, y), entrySize);
-            if (zoomed) {
-                noHighlight();
-                size = ValueAnimator.ofDouble(1f)
-                        .withConvention(() -> {
-                            double mouseX = PointHelper.getMouseFloatingX();
-                            double mouseY = PointHelper.getMouseFloatingY();
-                            int x1 = getBounds().getCenterX() - entrySize / 2;
-                            int y1 = getBounds().getCenterY() - entrySize / 2;
-                            boolean hovering = mouseX >= x1 && mouseX < x1 + entrySize && mouseY >= y1 && mouseY < y1 + entrySize;
-                            return hovering ? 1.5 : 1.0;
-                        }, 200);
-            }
-        }
-        
-        @Override
-        protected void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            if (size != null) {
-                size.update(delta);
-                int centerX = getBounds().getCenterX();
-                int centerY = getBounds().getCenterY();
-                int entrySize = (int) Math.round(entrySize() * size.value());
-                getBounds().setBounds(centerX - entrySize / 2, centerY - entrySize / 2, entrySize, entrySize);
-            }
-            super.drawExtra(matrices, mouseX, mouseY, delta);
-        }
-        
-        @Override
-        public EntryStack<?> getCurrentEntry() {
-            if (our != null) {
-                if (CachedEntryListRender.cachedTextureLocation != null) {
-                    return our;
-                }
-            }
-            
-            return super.getCurrentEntry();
-        }
-        
-        @Override
-        public boolean containsMouse(double mouseX, double mouseY) {
-            return super.containsMouse(mouseX, mouseY) && containsChecked(mouseX, mouseY, true);
-        }
-        
-        public TransferHandler getTransferHandler() {
-            if (PluginManager.areAnyReloading()) {
-                return null;
-            }
-            
-            if (display != null) {
-                if (ViewsImpl.isRecipesFor(getEntries(), display)) {
-                    AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
-                    if (result.successful) {
-                        return result.successfulHandler;
-                    }
-                }
-                
-                display = null;
-                lastCheckTime = -1;
-            }
-            
-            if (lastCheckTime != -1 && Util.getMillis() - lastCheckTime < 2000) {
-                return null;
-            }
-            
-            return _getTransferHandler();
-        }
-        
-        @Nullable
-        private TransferHandler _getTransferHandler() {
-            lastCheckTime = Util.getMillis();
-            
-            for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
-                for (Display display : displays) {
-                    if (ViewsImpl.isRecipesFor(getEntries(), display)) {
-                        AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
-                        if (result.successful) {
-                            this.display = display;
-                            return result.successfulHandler;
-                        }
-                    }
-                }
-            }
-            
-            return null;
-        }
-        
-        @Override
-        @Nullable
-        public Tooltip getCurrentTooltip(Point point) {
-            Tooltip tooltip = super.getCurrentTooltip(point);
-            
-            if (tooltip != null && !ClientHelper.getInstance().isCheating() && getTransferHandler() != null) {
-                tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
-            }
-            
-            return tooltip;
-        }
-        
-        @Override
-        protected boolean doAction(double mouseX, double mouseY, int button) {
-            if (!ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
-                try {
-                    TransferHandler handler = getTransferHandler();
-                    
-                    if (handler != null) {
-                        AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
-                        TransferHandler.Context context = TransferHandler.Context.create(true, Screen.hasShiftDown() || button == 1, containerScreen, display);
-                        TransferHandler.Result transferResult = handler.handle(context);
-                        
-                        if (transferResult.isBlocking()) {
-                            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                            if (transferResult.isReturningToScreen() && Minecraft.getInstance().screen != containerScreen) {
-                                Minecraft.getInstance().setScreen(containerScreen);
-                                REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
-                            }
-                            return true;
-                        }
-                    }
-                } catch (Throwable e) {
-                    e.printStackTrace();
-                }
-            }
-            return super.doAction(mouseX, mouseY, button);
         }
     }
 }
