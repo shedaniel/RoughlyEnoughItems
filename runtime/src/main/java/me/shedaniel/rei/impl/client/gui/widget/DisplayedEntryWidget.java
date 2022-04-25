@@ -36,10 +36,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.item.ItemStack;
 
-public abstract class EntryListEntryWidget extends EntryWidget {
+public abstract class DisplayedEntryWidget extends EntryWidget {
     public int backupY;
     
-    protected EntryListEntryWidget(Point point, int entrySize) {
+    protected DisplayedEntryWidget(Point point, int entrySize) {
         super(point);
         this.backupY = point.y;
         getBounds().width = getBounds().height = entrySize;
@@ -92,7 +92,7 @@ public abstract class EntryListEntryWidget extends EntryWidget {
     }
     
     @Override
-    protected boolean cancelDeleteItems(EntryStack<?> stack) {
+    public boolean cancelDeleteItems(EntryStack<?> stack) {
         if (!interactable || !ConfigObject.getInstance().isGrabbingItems())
             return super.cancelDeleteItems(stack);
         if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {

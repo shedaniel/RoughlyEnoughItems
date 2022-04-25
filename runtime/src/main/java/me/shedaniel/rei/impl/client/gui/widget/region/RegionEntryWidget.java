@@ -36,16 +36,16 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
-import me.shedaniel.rei.impl.client.gui.widget.EntryListEntryWidget;
+import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 
 import java.util.*;
 import java.util.function.Supplier;
 
-public class RegionEntryListEntry<T extends RegionEntry<T>> extends EntryListEntryWidget {
+public class RegionEntryWidget<T extends RegionEntry<T>> extends DisplayedEntryWidget {
     private final RealRegionEntry<T> entry;
     
-    RegionEntryListEntry(RealRegionEntry<T> entry, int x, int y, int entrySize) {
+    RegionEntryWidget(RealRegionEntry<T> entry, int x, int y, int entrySize) {
         super(new Point(x, y), entrySize);
         this.entry = entry;
         this.clearEntries().entry(entry.getEntry().toStack());

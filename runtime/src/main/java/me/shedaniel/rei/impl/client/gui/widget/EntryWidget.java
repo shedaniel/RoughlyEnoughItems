@@ -46,6 +46,7 @@ import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -441,7 +442,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     @ApiStatus.Internal
-    protected boolean cancelDeleteItems(EntryStack<?> stack) {
+    public boolean cancelDeleteItems(EntryStack<?> stack) {
         return false;
     }
     

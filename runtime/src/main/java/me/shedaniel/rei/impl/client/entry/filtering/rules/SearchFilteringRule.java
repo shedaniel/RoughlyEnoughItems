@@ -26,9 +26,7 @@ package me.shedaniel.rei.impl.client.entry.filtering.rules;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
@@ -36,7 +34,6 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.entries.FilteringEntry;
 import me.shedaniel.rei.impl.client.config.entries.FilteringRuleOptionsScreen;
-import me.shedaniel.rei.impl.client.config.entries.FilteringScreen;
 import me.shedaniel.rei.impl.client.entry.filtering.AbstractFilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringCache;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringContext;
@@ -53,7 +50,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.util.Mth;
 import net.minecraft.util.StringUtil;
 
 import java.util.*;
@@ -67,7 +63,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.entrySize;
+import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
 @Environment(EnvType.CLIENT)
 public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRule> {
