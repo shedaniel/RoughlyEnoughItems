@@ -223,7 +223,7 @@ curseforge {
             addGameVersion "Forge"
             relations {
                 requiredDependency "architectury-forge"
-                requiredDependency "cloth-config-forge"
+                requiredDependency "cloth-config"
                 requiredDependency "roughly-enough-items-hacks"
             }
             mainArtifact(tasks.getByName("remapJar")) {
@@ -241,7 +241,7 @@ curseforge {
             addGameVersion "Forge"
             relations {
                 requiredDependency "architectury-forge"
-                requiredDependency "cloth-config-forge"
+                requiredDependency "cloth-config"
             }
             mainArtifact(tasks.getByName("serverOnlyJar")) {
                 displayName = "[Forge $project.supported_version] v$project.version"
