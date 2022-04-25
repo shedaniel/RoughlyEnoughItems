@@ -467,8 +467,8 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                                 throwable.printStackTrace();
                                 setupDisplay = new ArrayList<>();
                                 setupDisplay.add(Widgets.createRecipeBase(displayBounds).color(0xFFBB0000));
-                                setupDisplay.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() - 8), new TextComponent("Failed to initiate setupDisplay")));
-                                setupDisplay.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() + 1), new TextComponent("Check console for error")));
+                                setupDisplay.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() - 8), Component.literal("Failed to initiate setupDisplay")));
+                                setupDisplay.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() + 1), Component.literal("Check console for error")));
                             }
                             setupTags(setupDisplay);
                             transformFiltering(setupDisplay);
@@ -483,8 +483,8 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                         ExportRecipeIdentifierToast.addToast(I18n.get("msg.rei.exported_recipe"), I18n.get("msg.rei.exported_recipe.desc"));
                     }
                     minecraft.setScreen(DefaultDisplayViewingScreen.this);
-                }, new TranslatableComponent("text.rei.ask_to_export", tab.categoryName),
-                        new TranslatableComponent("text.rei.ask_to_export.subtitle", categoryMap.getOrDefault(tab.category, Collections.emptyList()).size())));
+                }, Component.translatable("text.rei.ask_to_export", tab.categoryName),
+                        Component.translatable("text.rei.ask_to_export.subtitle", categoryMap.getOrDefault(tab.category, Collections.emptyList()).size())));
             }
         }
         return false;

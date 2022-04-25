@@ -30,7 +30,7 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 @SuppressWarnings("UnstableApiUsage")
 public class FavoritesTogglePanelButton extends FadingFavoritesPanelButton {
@@ -46,7 +46,7 @@ public class FavoritesTogglePanelButton extends FadingFavoritesPanelButton {
     
     @Override
     protected void queueTooltip() {
-        Tooltip.create(new TranslatableComponent("text.rei.add_favorite_widget")).queue();
+        Tooltip.create(Component.translatable("text.rei.add_favorite_widget")).queue();
     }
     
     @Override

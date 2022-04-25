@@ -269,7 +269,7 @@ public class FilteringScreen extends Screen {
         }
         
         this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
-        Component hint = new TranslatableComponent("config.roughlyenoughitems.filteringRulesScreen.hint").withStyle(ChatFormatting.YELLOW);
+        Component hint = Component.translatable("config.roughlyenoughitems.filteringRulesScreen.hint").withStyle(ChatFormatting.YELLOW);
         this.font.drawShadow(matrices, hint, this.width - this.font.width(hint) - 15, 12.0F, -1);
     }
     

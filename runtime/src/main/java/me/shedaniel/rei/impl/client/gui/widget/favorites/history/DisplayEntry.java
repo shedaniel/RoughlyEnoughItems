@@ -42,7 +42,7 @@ import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 
 import java.util.Collections;
 import java.util.List;
@@ -62,7 +62,7 @@ public class DisplayEntry extends WidgetWithBounds {
         this.display = display;
         this.parent = parent;
         this.bounds.setAs(initialBounds.getFloatingBounds());
-        this.plusButton = Widgets.createButton(new Rectangle(initialBounds.getMaxX() - 16, initialBounds.getMaxY() - 16, 10, 10), new TextComponent("+"));
+        this.plusButton = Widgets.createButton(new Rectangle(initialBounds.getMaxX() - 16, initialBounds.getMaxY() - 16, 10, 10), Component.literal("+"));
     }
     
     public void markBoundsDirty() {
@@ -158,7 +158,7 @@ public class DisplayEntry extends WidgetWithBounds {
             plusButton.getBounds().setBounds(new Rectangle(bounds.getMaxX() - 14, bounds.getMaxY() - 14, 10, 10));
             
             if (result.hasApplicable) {
-                plusButton.setText(new TextComponent("+"));
+                plusButton.setText(Component.literal("+"));
                 plusButton.render(poses, Math.round(mouse.x()), Math.round(mouse.y()), delta);
                 
                 if (plusButton.containsMouse(Math.round(mouse.x()), Math.round(mouse.y()))) {
