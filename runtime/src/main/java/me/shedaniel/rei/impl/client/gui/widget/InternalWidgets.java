@@ -47,8 +47,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -78,7 +76,7 @@ public final class InternalWidgets {
                 if (result.hasApplicable) {
                     autoCraftingButton.setText(text);
                 } else {
-                    autoCraftingButton.setText(new TextComponent("?"));
+                    autoCraftingButton.setText(Component.literal("?"));
                 }
                 
                 if (result.hasApplicable && (containsMouse(mouseX, mouseY) || autoCraftingButton.isFocused()) && result.renderer != null) {

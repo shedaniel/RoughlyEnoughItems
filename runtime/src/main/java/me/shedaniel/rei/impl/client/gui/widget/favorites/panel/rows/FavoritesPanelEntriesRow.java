@@ -36,13 +36,12 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.FavoritesPanel;
 import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionDraggableStack;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -173,8 +172,8 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
             if (!panel.getInnerBounds().contains(point)) return null;
             Tooltip tooltip = super.getCurrentTooltip(point);
             if (tooltip != null) {
-                tooltip.add(ImmutableTextComponent.EMPTY);
-                tooltip.add(new TranslatableComponent("tooltip.rei.drag_to_add_favorites"));
+                tooltip.add(Component.empty());
+                tooltip.add(Component.translatable("tooltip.rei.drag_to_add_favorites"));
             }
             return tooltip;
         }

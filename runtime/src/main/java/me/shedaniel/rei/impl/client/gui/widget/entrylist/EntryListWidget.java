@@ -68,12 +68,7 @@ import me.shedaniel.rei.impl.client.gui.widget.region.RegionRenderingDebugger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
@@ -339,7 +334,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         
         scaleIndicator.update(delta);
         if (scaleIndicator.value() > 0.04) {
-            TextComponent component = new TextComponent(Math.round(ConfigObject.getInstance().getEntrySize() * 100) + "%");
+            Component component = Component.literal(Math.round(ConfigObject.getInstance().getEntrySize() * 100) + "%");
             int width = font.width(component);
             int backgroundColor = ((int) Math.round(0xa0 * Mth.clamp(scaleIndicator.value(), 0.0, 1.0))) << 24;
             int textColor = ((int) Math.round(0xdd * Mth.clamp(scaleIndicator.value(), 0.0, 1.0))) << 24;

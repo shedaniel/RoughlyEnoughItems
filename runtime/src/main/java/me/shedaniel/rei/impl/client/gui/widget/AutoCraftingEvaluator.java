@@ -67,8 +67,8 @@ public class AutoCraftingEvaluator {
             List<Component> str = new ArrayList<>(errorTooltip);
             
             if (ConfigObject.getInstance().isFavoritesEnabled()) {
-                str.add(new TextComponent(" "));
-                str.add(new TranslatableComponent("text.rei.save.recipes", new TextComponent(ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString().toUpperCase(Locale.ROOT)).withStyle(ChatFormatting.BOLD)).withStyle(ChatFormatting.GRAY));
+                str.add(Component.literal(" "));
+                str.add(Component.translatable("text.rei.save.recipes", Component.literal(ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString().toUpperCase(Locale.ROOT)).withStyle(ChatFormatting.BOLD)).withStyle(ChatFormatting.GRAY));
             }
             
             if (Minecraft.getInstance().options.advancedItemTooltips && idsSupplier != null) {

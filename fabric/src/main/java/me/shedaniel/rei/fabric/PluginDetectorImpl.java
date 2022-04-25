@@ -78,7 +78,7 @@ public class PluginDetectorImpl {
             String name = pair.getRight();
             try {
                 if (deprecatedEntrypoints.contains(name)) {
-                    RoughlyEnoughItemsState.LOGGER.warn("The entrypoint used by %s, \"%s\" is deprecated and will be removed in a future version of Roughly Enough Items. Please use \"rei_server\", \"rei_client\" or \"rei_common\" instead.".formatted(container.getProvider().getMetadata().getName(), name));
+                    RoughlyEnoughItemsState.warn("The entrypoint used by %s, \"%s\" is deprecated and will be removed in a future version of Roughly Enough Items. Please use \"rei_server\", \"rei_client\" or \"rei_common\" instead.".formatted(container.getProvider().getMetadata().getName(), name));
                 }
                 
                 REIPluginProvider<P> plugin = container.getEntrypoint();
@@ -104,7 +104,7 @@ public class PluginDetectorImpl {
                 Throwable throwable = t;
                 while (throwable != null) {
                     if (throwable.getMessage() != null && throwable.getMessage().contains("environment type SERVER") && !RoughlyEnoughItemsInitializer.isClient()) {
-                        RoughlyEnoughItemsState.LOGGER.warn("Rerached side issue when loading REI plugin by %s. Please use \"rei_server\", \"rei_client\" or \"rei_common\" instead.".formatted(container.getProvider().getMetadata().getName()));
+                        RoughlyEnoughItemsState.error("Rerached side issue when loading REI plugin by %s. Please use \"rei_server\", \"rei_client\" or \"rei_common\" instead.".formatted(container.getProvider().getMetadata().getName()));
                         continue out;
                     }
                     throwable = throwable.getCause();

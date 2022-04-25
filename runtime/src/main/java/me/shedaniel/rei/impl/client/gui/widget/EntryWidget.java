@@ -415,7 +415,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         
         if (tooltip != null && !ClientHelper.getInstance().isCheating() && getTransferHandler() != null
             && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
-            tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
+            tooltip.add(Component.translatable("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
         }
         
         return tooltip;

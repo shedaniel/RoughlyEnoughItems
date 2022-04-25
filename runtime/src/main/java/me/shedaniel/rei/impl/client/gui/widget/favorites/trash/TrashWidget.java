@@ -33,7 +33,6 @@ import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.FavoritesPanel;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 
 import java.util.Collections;
@@ -74,7 +73,7 @@ public class TrashWidget extends WidgetWithBounds {
             fillGradient(poses, this.bounds.x, this.bounds.y + 1, this.bounds.x + 1, this.bounds.getMaxY() - 1, lineColor, lineColor);
             fillGradient(poses, this.bounds.getMaxX() - 1, this.bounds.y + 1, this.bounds.getMaxX(), this.bounds.getMaxY() - 1, lineColor, lineColor);
             
-            Component text = new TranslatableComponent("text.rei.dispose_here");
+            Component text = Component.translatable("text.rei.dispose_here");
             if (0xAA * lastProgress > 0x4) {
                 font.draw(poses, text, this.bounds.getCenterX() - font.width(text) / 2, this.bounds.getCenterY() - 4F, (int) (0xAA * lastProgress) << 24 | 0xFFFFFF);
             }
