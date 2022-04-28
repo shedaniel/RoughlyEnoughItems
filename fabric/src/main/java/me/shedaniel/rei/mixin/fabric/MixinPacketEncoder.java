@@ -27,7 +27,6 @@ import dev.architectury.utils.GameInstance;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.network.PacketEncoder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -49,7 +48,7 @@ public class MixinPacketEncoder {
                            "Please check the server console log for errors, this breaks REI and vanilla recipe books!";
             server.execute(() -> {
                 for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                    player.sendMessage(Component.literal(issue).withStyle(ChatFormatting.RED), Util.NIL_UUID);
+                    player.sendSystemMessage(Component.literal(issue).withStyle(ChatFormatting.RED));
                 }
             });
             System.out.println(issue);

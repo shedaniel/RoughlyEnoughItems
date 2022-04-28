@@ -116,6 +116,6 @@
     }
   },
   "depends": {
-    "minecraft": "~1.19-"
+    "minecraft": "1.19-alpha.22.17.a"
   }
 }

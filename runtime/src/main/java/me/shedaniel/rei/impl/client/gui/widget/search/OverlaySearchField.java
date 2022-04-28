@@ -203,8 +203,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
             fillGradient(pose, bufferBuilder, x + 1, y + height - 3, x + progressWidth - 1, y + height - 1, 400, 0xffffffff, 0xffffffff);
         }
         
-        bufferBuilder.end();
-        BufferUploader.drawWithShader(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder.end());
         poses.pushPose();
         poses.translate(0.0D, 0.0D, 400.0D);
         for (int i = 0; i < sequences.size(); i++) {
