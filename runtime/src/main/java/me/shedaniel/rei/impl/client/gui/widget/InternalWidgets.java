@@ -35,8 +35,10 @@ import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.toast.CopyRecipeIdentifierToast;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.*;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -45,6 +47,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
@@ -65,30 +68,30 @@ public final class InternalWidgets {
                     AutoCraftingEvaluator.evaluateAutoCrafting(true, Screen.hasShiftDown(), displaySupplier.get(), idsSupplier);
                 });
         return new DelegateWidget(autoCraftingButton) {
-            boolean didJustRender = false;
-            
             @Override
             public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-                didJustRender = false;
-                
                 AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, displaySupplier.get(), idsSupplier);
                 
                 autoCraftingButton.setEnabled(result.successful);
                 autoCraftingButton.setTint(result.tint);
                 
+                if (result.hasApplicable) {
+                    autoCraftingButton.setText(text);
+                } else {
+                    autoCraftingButton.setText(new TextComponent("?"));
+                }
+                
                 if (result.hasApplicable && (containsMouse(mouseX, mouseY) || autoCraftingButton.isFocused()) && result.renderer != null) {
                     result.renderer.render(poses, mouseX, mouseY, delta, setupDisplay, displayBounds, displaySupplier.get());
                 }
                 
-                renderIf(result.hasApplicable, poses, mouseX, mouseY, delta);
+                this.widget.render(poses, mouseX, mouseY, delta);
                 
-                if (didJustRender) {
-                    if (!autoCraftingButton.isFocused() && containsMouse(mouseX, mouseY)) {
-                        tryTooltip(result, new Point(mouseX, mouseY));
-                    } else if (autoCraftingButton.isFocused()) {
-                        Rectangle bounds = autoCraftingButton.getBounds();
-                        tryTooltip(result, new Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2));
-                    }
+                if (!autoCraftingButton.isFocused() && containsMouse(mouseX, mouseY)) {
+                    tryTooltip(result, new Point(mouseX, mouseY));
+                } else if (autoCraftingButton.isFocused()) {
+                    Rectangle bounds = autoCraftingButton.getBounds();
+                    tryTooltip(result, new Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2));
                 }
             }
             
@@ -98,37 +101,47 @@ public final class InternalWidgets {
                 }
             }
             
-            private void renderIf(boolean should, PoseStack poseStack, int mouseX, int mouseY, float delta) {
-                if (should) {
-                    didJustRender = true;
-                    this.widget.render(poseStack, mouseX, mouseY, delta);
-                } else if (Minecraft.getInstance().options.advancedItemTooltips) {
-                    didJustRender = true;
-                    this.widget.render(poseStack, mouseX, mouseY, delta);
-                }
-            }
-            
             @Override
             public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-                if (didJustRender && displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(keyCode, scanCode) && containsMouse(PointHelper.ofMouse())) {
+                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesKey(keyCode, scanCode) && containsMouse(PointHelper.ofMouse())) {
                     minecraft.keyboardHandler.setClipboard(displaySupplier.get().getDisplayLocation().get().toString());
                     if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
                         CopyRecipeIdentifierToast.addToast(I18n.get("msg.rei.copied_recipe_id"), I18n.get("msg.rei.recipe_id_details", displaySupplier.get().getDisplayLocation().get().toString()));
                     }
                     return true;
+                } else if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse())) {
+                    if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
+                        FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
+                        
+                        if (favoritesListWidget != null) {
+                            favoritesListWidget.displayHistory.addDisplay(displayBounds.clone(), displaySupplier.get());
+                            return true;
+                        }
+                    }
                 }
+                
                 return super.keyPressed(keyCode, scanCode, modifiers);
             }
             
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                if (didJustRender && displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesMouse(button) && containsMouse(PointHelper.ofMouse())) {
+                if (displaySupplier.get().getDisplayLocation().isPresent() && ConfigObject.getInstance().getCopyRecipeIdentifierKeybind().matchesMouse(button) && containsMouse(PointHelper.ofMouse())) {
                     minecraft.keyboardHandler.setClipboard(displaySupplier.get().getDisplayLocation().get().toString());
                     if (ConfigObject.getInstance().isToastDisplayedOnCopyIdentifier()) {
                         CopyRecipeIdentifierToast.addToast(I18n.get("msg.rei.copied_recipe_id"), I18n.get("msg.rei.recipe_id_details", displaySupplier.get().getDisplayLocation().get().toString()));
                     }
                     return true;
+                } else if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse())) {
+                    if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
+                        FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
+                        
+                        if (favoritesListWidget != null) {
+                            favoritesListWidget.displayHistory.addDisplay(displayBounds.clone(), displaySupplier.get());
+                            return true;
+                        }
+                    }
                 }
+                
                 return super.mouseClicked(mouseX, mouseY, button);
             }
         };

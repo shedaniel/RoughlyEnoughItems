@@ -27,6 +27,7 @@ import me.shedaniel.rei.api.client.entry.region.RegionEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
@@ -67,4 +68,8 @@ public interface RegionListener<T extends RegionEntry<T>> {
     default void onSetNewEntries(Stream<T> entries) {}
     
     default void onConsumed(RealRegionEntry<T> entry) {}
+    
+    default boolean notSteppingOnExclusionZones(int left, int top, int width, int height) {
+        return EntryListWidget.notSteppingOnExclusionZones(left, top, width, height);
+    }
 }

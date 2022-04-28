@@ -200,7 +200,7 @@
   "config.roughlyenoughitems.disableRecipeBook.boolean.false": "§aSim",
   "config.roughlyenoughitems.fixTabCloseContainer": "Correção da Aba do Vanilla (Quando o Livro de Receitas está Desativado):",
   "config.roughlyenoughitems.lighterButtonHover": "Botão Mais Claro ao Pairar o Cursor:",
-  "config.roughlyenoughitems.layout.enableCraftableOnlyButton": "Filtro de Apenas Criáveis:",
+  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "Filtro de Apenas Criáveis:",
   "config.roughlyenoughitems.layout.showUtilsButtons": "Butões de Utilidades:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "Comando de Modo de Jogo:",
   "config.roughlyenoughitems.commands.giveCommand": "Comando de Dar Item:",

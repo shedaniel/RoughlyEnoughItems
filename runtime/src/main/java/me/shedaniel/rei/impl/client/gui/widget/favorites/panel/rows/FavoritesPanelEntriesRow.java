@@ -199,7 +199,7 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
                     currentY++;
                 }
                 
-                if (notSteppingOnExclusionZones(xPos, yPos + lastY - panel.getScrolledAmountInt(), entrySize, entrySize, panel.getInnerBounds())) {
+                if (notSteppingOnExclusionZones(xPos, yPos + lastY - panel.getScrolledAmountInt(), entrySize, entrySize)) {
                     widget.moveTo(animated.test(widget), xPos, yPos);
                     break;
                 } else {

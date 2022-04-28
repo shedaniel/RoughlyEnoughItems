@@ -23,6 +23,9 @@
 
 package me.shedaniel.rei.api.client.gui.drag;
 
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitorWidget;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.client.gui.screens.Screen;
 
 import java.util.function.Function;
@@ -33,7 +36,7 @@ import java.util.stream.StreamSupport;
  * An interface to be implemented on {@link me.shedaniel.rei.api.client.gui.widgets.Widget} to accept
  * incoming {@link DraggableStack}.
  */
-public interface DraggableStackVisitorWidget {
+public interface DraggableStackVisitorWidget extends DraggableComponentVisitorWidget {
     static DraggableStackVisitorWidget from(Function<DraggingContext<Screen>, Iterable<DraggableStackVisitorWidget>> providers) {
         return new DraggableStackVisitorWidget() {
             @Override
@@ -65,6 +68,13 @@ public interface DraggableStackVisitorWidget {
         return DraggedAcceptorResult.PASS;
     }
     
+    @Override
+    default DraggedAcceptorResult acceptDragged(DraggingContext<Screen> context, DraggableComponent<?> component) {
+        return component.<EntryStack<?>>getIf()
+                .map(comp -> acceptDraggedStack(context, DraggableStack.from(comp)))
+                .orElse(DraggedAcceptorResult.PASS);
+    }
+    
     /**
      * Returns the accepting bounds for the dragging stack, this should only be called once on drag.
      * The bounds are used to overlay to indicate to the users that the widget is accepting entries.
@@ -75,6 +85,14 @@ public interface DraggableStackVisitorWidget {
      */
     default Stream<DraggableStackVisitor.BoundsProvider> getDraggableAcceptingBounds(DraggingContext<Screen> context, DraggableStack stack) {
         return Stream.empty();
+    }
+    
+    @Override
+    default Stream<DraggableBoundsProvider> getDraggableAcceptingBounds(DraggingContext<Screen> context, DraggableComponent<?> component) {
+        return component.<EntryStack<?>>getIf()
+                .map(comp -> getDraggableAcceptingBounds(context, DraggableStack.from(comp)))
+                .orElse(Stream.empty())
+                .map(Function.identity());
     }
     
     static DraggableStackVisitor<Screen> toVisitor(DraggableStackVisitorWidget widget) {

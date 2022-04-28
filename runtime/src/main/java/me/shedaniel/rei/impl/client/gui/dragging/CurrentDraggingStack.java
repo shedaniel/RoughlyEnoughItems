@@ -29,11 +29,17 @@ import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingRectangle;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
-import me.shedaniel.rei.api.client.gui.drag.*;
+import me.shedaniel.rei.api.client.gui.drag.DraggableBoundsProvider;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
+import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProvider;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitor;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -43,15 +49,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Supplier;
 
+@SuppressWarnings("UnstableApiUsage")
 public class CurrentDraggingStack extends Widget implements LateRenderable, DraggingContext<Screen> {
-    private DraggableStackProvider<Screen> provider;
-    private DraggableStackVisitor<Screen> visitor;
+    private DraggableComponentProvider<Screen, ?> provider;
+    private DraggableComponentVisitor<Screen> visitor;
     @Nullable
     private DraggableEntry entry;
     private final List<RenderBackEntry> backToOriginals = new ArrayList<>();
     private final Set<ShapeBounds> bounds = new HashSet<>();
     
-    public void set(DraggableStackProvider<Screen> provider, DraggableStackVisitor<Screen> visitor) {
+    public void set(DraggableComponentProvider<Screen, ?> provider, DraggableComponentVisitor<Screen> visitor) {
         this.provider = provider;
         this.visitor = visitor;
     }
@@ -69,16 +76,19 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
                 
                 if (xDistance * xDistance + yDistance * yDistance > requiredDistance * requiredDistance) {
                     entry.dragging = true;
-                    entry.stack.drag();
+                    entry.startDragging = Util.getMillis();
+                    entry.component.drag();
                 }
             }
             
-            if (!RoughlyEnoughItemsCoreClient.isLeftMousePressed) {
-                drop();
-            } else if (entry.dragging) {
+            if (entry.dragging) {
                 matrices.pushPose();
                 matrices.translate(0, 0, 600);
-                entry.stack.render(matrices, new Rectangle(mouseX - 8, mouseY - 8, 16, 16), mouseX, mouseY, delta);
+                entry.bounds.update(delta);
+                int width = entry.component.getWidth();
+                int height = entry.component.getHeight();
+                entry.bounds.setTo(new FloatingRectangle(mouseX - width / 2, mouseY - height / 2, width, height), Util.getMillis() - entry.startDragging < 100 && width * height > 1000 ? 80 : 10);
+                entry.component.render(matrices, entry.bounds.value().getBounds(), mouseX, mouseY, delta);
                 matrices.popPose();
                 
                 VoxelShape shape = entry.getBoundsProvider().bounds();
@@ -86,6 +96,10 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
                 shapeBounds.alpha.setTo(60, 300);
                 bounds.add(shapeBounds);
                 hash = shapeBounds.hash;
+            }
+            
+            if (!RoughlyEnoughItemsCoreClient.isLeftMousePressed) {
+                drop();
             }
         }
         
@@ -119,12 +133,12 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
             renderBackEntry.update(delta);
             FloatingRectangle value = renderBackEntry.bounds.value();
             FloatingRectangle target = renderBackEntry.bounds.target();
-            if (value.width < 2 || value.height < 2 || (Math.abs(value.x - target.x) <= 2 && Math.abs(value.y - target.y) <= 2 && Math.abs(value.width - target.width) <= 1 && Math.abs(value.height - target.height) <= 1)) {
+            if (value.width < 2 || value.height < 2 || (Math.abs(value.x - target.x) <= 1.3 && Math.abs(value.y - target.y) <= 1.3 && Math.abs(value.width - target.width) <= 1 && Math.abs(value.height - target.height) <= 1)) {
                 iterator.remove();
             } else {
                 matrices.pushPose();
                 matrices.translate(0, 0, 600);
-                renderBackEntry.stack.render(matrices, value.getBounds(), mouseX, mouseY, delta);
+                renderBackEntry.component.render(matrices, value.getBounds(), mouseX, mouseY, delta);
                 matrices.popPose();
             }
         }
@@ -138,7 +152,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         drop();
-        DraggableStack hoveredStack = provider.getHoveredStack(this, mouseX, mouseY);
+        DraggableComponent<?> hoveredStack = provider.getHovered(this, mouseX, mouseY);
         if (hoveredStack != null) {
             entry = new DraggableEntry(hoveredStack, new Point(mouseX, mouseY));
         }
@@ -157,8 +171,8 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     private boolean drop() {
         if (entry != null && entry.dragging) {
-            DraggedAcceptorResult result = visitor.acceptDraggedStack(this, entry.stack);
-            entry.stack.release(result);
+            DraggedAcceptorResult result = visitor.acceptDragged(this, entry.component);
+            entry.component.release(result);
             entry = null;
             return true;
         }
@@ -175,42 +189,65 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     @Override
     @Nullable
     public DraggableStack getCurrentStack() {
-        return entry != null && entry.dragging ? entry.stack : null;
+        DraggableComponent<?> dragged = getDragged();
+        return dragged instanceof DraggableStack ? (DraggableStack) dragged : null;
+    }
+    
+    @Override
+    @Nullable
+    public DraggableComponent<?> getDragged() {
+        return entry != null && entry.dragging ? entry.component : null;
     }
     
     @Override
     @Nullable
     public Point getCurrentPosition() {
-        return isDraggingStack() ? PointHelper.ofMouse() : null;
+        if (!isDraggingComponent()) return null;
+        FloatingRectangle rectangle = entry.bounds.value();
+        return new Point(rectangle.getCenterX(), rectangle.getCenterY());
     }
     
     @Override
-    public void renderBackToPosition(DraggableStack stack, Point initialPosition, Supplier<Point> position) {
-        backToOriginals.add(new RenderBackEntry(stack, new Rectangle(initialPosition.x - 8, initialPosition.y - 8, 16, 16), () -> {
+    @Nullable
+    public Rectangle getCurrentBounds() {
+        if (!isDraggingComponent()) return null;
+        FloatingRectangle rectangle = entry.bounds.value();
+        return rectangle.getBounds();
+    }
+    
+    @Override
+    public void renderBack(DraggableComponent<?> component, Point initialPosition, Supplier<Point> position) {
+        int width = component.getWidth();
+        int height = component.getHeight();
+        backToOriginals.add(new RenderBackEntry(component, new Rectangle(initialPosition.x - width / 2, initialPosition.y - height / 2, width, height), () -> {
             Point point = position.get();
-            return new Rectangle(point.x, point.y, 16, 16);
+            return new Rectangle(point.x, point.y, width, height);
         }));
     }
     
     @Override
-    public void renderBackToPosition(DraggableStack stack, Rectangle initialPosition, Supplier<Rectangle> bounds) {
-        backToOriginals.add(new RenderBackEntry(stack, initialPosition, bounds));
+    public void renderBack(DraggableComponent<?> component, Rectangle initialPosition, Supplier<Rectangle> bounds) {
+        backToOriginals.add(new RenderBackEntry(component, initialPosition, bounds));
     }
     
     private class DraggableEntry {
-        private final DraggableStack stack;
+        private final DraggableComponent<?> component;
         private final Point start;
+        private long startDragging = -1;
+        private final ValueAnimator<FloatingRectangle> bounds;
         private boolean dragging = false;
-        private DraggableStackVisitor.BoundsProvider boundsProvider;
+        private DraggableBoundsProvider boundsProvider;
         
-        private DraggableEntry(DraggableStack stack, Point start) {
-            this.stack = stack;
+        private DraggableEntry(DraggableComponent<?> component, Point start) {
+            this.component = component;
             this.start = start;
+            this.bounds = ValueAnimator.ofFloatingRectangle()
+                    .setAs(component.getOriginBounds(start).getFloatingBounds());
         }
         
-        public DraggableStackVisitor.BoundsProvider getBoundsProvider() {
+        public DraggableBoundsProvider getBoundsProvider() {
             if (boundsProvider == null) {
-                boundsProvider = DraggableStackVisitor.BoundsProvider.concat(visitor.getDraggableAcceptingBounds(CurrentDraggingStack.this, stack).toList());
+                boundsProvider = DraggableBoundsProvider.concat(visitor.getDraggableAcceptingBounds(CurrentDraggingStack.this, component).toList());
             }
             
             return boundsProvider;
@@ -246,13 +283,13 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     }
     
     private static class RenderBackEntry {
-        private final DraggableStack stack;
+        private final DraggableComponent<?> component;
         private final Supplier<Rectangle> position;
         private ValueAnimator<FloatingRectangle> bounds = ValueAnimator.ofFloatingRectangle();
         private int lastDestination = -1;
         
-        public RenderBackEntry(DraggableStack stack, Rectangle initialPosition, Supplier<Rectangle> position) {
-            this.stack = stack;
+        public RenderBackEntry(DraggableComponent<?> component, Rectangle initialPosition, Supplier<Rectangle> position) {
+            this.component = component;
             this.bounds.setAs(new FloatingRectangle(initialPosition));
             this.position = position;
         }

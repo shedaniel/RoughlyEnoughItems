@@ -248,7 +248,7 @@
   "config.roughlyenoughitems.leftSideMobEffects.boolean.true": "左側",
   "config.roughlyenoughitems.leftSideMobEffects.boolean.false": "右側（デフォルト）",
   "config.roughlyenoughitems.fixTabCloseContainer": "バニラタブコンテナを修正(レシピ本が無効になった場合):",
-  "config.roughlyenoughitems.layout.enableCraftableOnlyButton": "クラフタブルフィルター（クラフト可能なアイテム表示）：",
+  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "クラフタブルフィルター（クラフト可能なアイテム表示）：",
   "config.roughlyenoughitems.layout.showUtilsButtons": "ユーティリティボタン:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "ゲームモードを変更するコマンド：",
   "config.roughlyenoughitems.commands.giveCommand": "アイテムを付与するコマンド：",
