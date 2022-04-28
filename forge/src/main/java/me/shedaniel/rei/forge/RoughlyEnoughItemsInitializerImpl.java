@@ -28,6 +28,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
+import org.apache.maven.artifact.versioning.ComparableVersion;
 
 public class RoughlyEnoughItemsInitializerImpl {
     public static boolean isClient() {
@@ -46,5 +47,17 @@ public class RoughlyEnoughItemsInitializerImpl {
     
     public static String getMinecraftVersion() {
         return ModList.get().getModContainerById("minecraft").get().getModInfo().getVersion().toString();
+    }
+    
+    public static int compareVersions(String version1, String version2) {
+        ComparableVersion v1 = new ComparableVersion(version1);
+        ComparableVersion v2 = new ComparableVersion(version2);
+        
+        try {
+            return v1.compareTo(v2);
+        } catch (IllegalStateException e) {
+            new IllegalStateException("Failed to compare versions: " + version1 + " and " + version2, e).printStackTrace();
+            return 0;
+        }
     }
 }
