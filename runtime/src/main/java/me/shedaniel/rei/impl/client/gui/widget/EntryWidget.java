@@ -315,10 +315,12 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             Minecraft.getInstance().getTextureManager().bind(RECIPE_GUI);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
-            Minecraft.getInstance().getTextureManager().bind(RECIPE_GUI_DARK);
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value());
-            blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            if (darkBackgroundAlpha.value() > 0.0F) {
+                Minecraft.getInstance().getTextureManager().bind(RECIPE_GUI_DARK);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value());
+                blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            }
         }
     }
     

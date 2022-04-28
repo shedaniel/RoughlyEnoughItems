@@ -260,7 +260,7 @@
   "config.roughlyenoughitems.leftSideMobEffects.boolean.false": "右側 (原版)",
   "config.roughlyenoughitems.fixTabCloseContainer": "修正原版頁籤容器 (關閉配方手冊時)：",
   "config.roughlyenoughitems.lighterButtonHover": "較輕的按鈕停留：",
-  "config.roughlyenoughitems.layout.enableCraftableOnlyButton": "可合成物品篩選器：",
+  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "可合成物品篩選器：",
   "config.roughlyenoughitems.layout.showUtilsButtons": "功能按鈕：",
   "config.roughlyenoughitems.commands.gamemodeCommand": "改變遊戲模式的指令：",
   "config.roughlyenoughitems.commands.giveCommand": "給予物品的指令：",

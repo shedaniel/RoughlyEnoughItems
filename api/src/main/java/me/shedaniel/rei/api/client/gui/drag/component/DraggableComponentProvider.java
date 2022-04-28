@@ -21,25 +21,23 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.gui.drag;
+package me.shedaniel.rei.api.client.gui.drag.component;
 
-import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
-import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProvider;
-import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
 /**
- * A provider for supplying {@link DraggableStack} to the screen.
+ * A provider for supplying {@link DraggableComponent} to the screen.
  */
-public interface DraggableStackProvider<T extends Screen> extends DraggableComponentProvider<T, EntryStack<?>> {
-    static <T extends Screen> DraggableStackProvider<T> from(Supplier<Iterable<DraggableStackProvider<T>>> providers) {
-        return new DraggableStackProvider<T>() {
+public interface DraggableComponentProvider<T extends Screen, A> extends Comparable<DraggableComponentProvider<T, A>> {
+    static <T extends Screen, A> DraggableComponentProvider<T, A> from(Supplier<? extends Iterable<? extends DraggableComponentProvider<T, A>>> providers) {
+        return new DraggableComponentProvider<T, A>() {
             @Override
             public <R extends Screen> boolean isHandingScreen(R screen) {
-                for (DraggableStackProvider<T> provider : providers.get()) {
+                for (DraggableComponentProvider<T, A> provider : providers.get()) {
                     if (provider.isHandingScreen(screen)) {
                         return true;
                     }
@@ -49,11 +47,11 @@ public interface DraggableStackProvider<T extends Screen> extends DraggableCompo
             
             @Override
             @Nullable
-            public DraggableStack getHoveredStack(DraggingContext<T> context, double mouseX, double mouseY) {
-                for (DraggableStackProvider<T> provider : providers.get()) {
+            public DraggableComponent<A> getHovered(DraggingContext<T> context, double mouseX, double mouseY) {
+                for (DraggableComponentProvider<T, A> provider : providers.get()) {
                     if (provider.isHandingScreen(context.getScreen())) {
-                        DraggableStack stack = provider.getHoveredStack(context, mouseX, mouseY);
-                        if (stack != null) return stack;
+                        DraggableComponent<A> component = provider.getHovered(context, mouseX, mouseY);
+                        if (component != null) return component;
                     }
                 }
                 return null;
@@ -62,18 +60,10 @@ public interface DraggableStackProvider<T extends Screen> extends DraggableCompo
     }
     
     @Nullable
-    DraggableStack getHoveredStack(DraggingContext<T> context, double mouseX, double mouseY);
+    DraggableComponent<A> getHovered(DraggingContext<T> context, double mouseX, double mouseY);
     
-    @Override
-    @Nullable
-    default DraggableComponent<EntryStack<?>> getHovered(DraggingContext<T> context, double mouseX, double mouseY) {
-        return getHoveredStack(context, mouseX, mouseY);
-    }
-    
-    @Override
     <R extends Screen> boolean isHandingScreen(R screen);
     
-    @Override
     default DraggingContext<T> getContext() {
         return DraggingContext.getInstance().cast();
     }
@@ -83,12 +73,12 @@ public interface DraggableStackProvider<T extends Screen> extends DraggableCompo
      *
      * @return the priority
      */
-    @Override
     default double getPriority() {
         return 0f;
     }
     
-    default int compareTo(DraggableStackProvider<T> o) {
+    @Override
+    default int compareTo(DraggableComponentProvider<T, A> o) {
         return Double.compare(getPriority(), o.getPriority());
     }
 }

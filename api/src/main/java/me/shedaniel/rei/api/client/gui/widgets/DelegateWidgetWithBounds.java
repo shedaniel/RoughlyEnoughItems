@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.client.gui.widgets;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 
 import java.util.function.Supplier;
@@ -38,5 +39,19 @@ public class DelegateWidgetWithBounds extends DelegateWidget {
     @Override
     public Rectangle getBounds() {
         return bounds.get();
+    }
+    
+    @Override
+    public boolean containsMouse(double mouseX, double mouseY) {
+        return getBounds().contains(mouseX, mouseY);
+    }
+    
+    @Deprecated
+    @Override
+    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        Rectangle clone = getBounds().clone();
+        getBounds().setBounds(bounds);
+        render(matrices, mouseX, mouseY, delta);
+        getBounds().setBounds(clone);
     }
 }

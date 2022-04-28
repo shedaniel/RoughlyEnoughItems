@@ -63,4 +63,49 @@ public class MergedWidget extends Widget {
         }
         return false;
     }
+    
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        for (Widget widget : this.widgets) {
+            if (widget.keyPressed(keyCode, scanCode, modifiers))
+                return true;
+        }
+        return false;
+    }
+    
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        for (Widget widget : this.widgets) {
+            if (widget.keyReleased(keyCode, scanCode, modifiers))
+                return true;
+        }
+        return false;
+    }
+    
+    @Override
+    public boolean charTyped(char character, int modifiers) {
+        for (Widget widget : this.widgets) {
+            if (widget.charTyped(character, modifiers))
+                return true;
+        }
+        return false;
+    }
+    
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        for (Widget widget : this.widgets) {
+            if (widget.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+                return true;
+        }
+        return false;
+    }
+    
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        for (Widget widget : this.widgets) {
+            if (widget.mouseReleased(mouseX, mouseY, button))
+                return true;
+        }
+        return false;
+    }
 }

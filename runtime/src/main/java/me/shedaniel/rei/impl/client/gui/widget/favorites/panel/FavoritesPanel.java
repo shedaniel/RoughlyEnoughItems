@@ -85,7 +85,7 @@ public class FavoritesPanel extends WidgetWithBounds {
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        this.bounds.setBounds(updatePanelArea(parent.fullBounds));
+        this.bounds.setBounds(updatePanelArea(parent.favoritesBounds));
         this.innerBounds.setBounds(bounds.x + 4, bounds.y + 4, bounds.width - 8, bounds.height - 20);
         this.expendState.update(delta);
         int buttonColor = 0xFFFFFF | (Math.round(0x34 * Math.min((float) expendState.progress() * 2, 1)) << 24);

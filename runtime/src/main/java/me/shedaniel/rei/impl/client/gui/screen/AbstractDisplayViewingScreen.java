@@ -122,7 +122,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     }
     
     protected DisplayCategoryView<Display> getCurrentCategoryView(Display display) {
-        return CategoryRegistry.getInstance().get(categories.get(selectedCategoryIndex).getCategoryIdentifier().cast())
+        return CategoryRegistry.getInstance().get(display.getCategoryIdentifier().cast())
                 .getView(display);
     }
     
@@ -205,7 +205,8 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                 collection = tags.getFluids();
                 objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<FluidStack>castValue().getFluid());
             } else continue;
-            Map.Entry<ResourceLocation, ? extends Tag<?>> firstOrNull = CollectionUtils.findFirstOrNull(collection.getAllTags().entrySet(), entry -> entry.getValue().getValues().equals(objects));
+            TagKey<?> firstOrNull = CollectionUtils.findFirstOrNull(collection::iterator,
+                    key -> CollectionUtils.allMatch(objects, holder -> ((Holder<Object>) holder).is((TagKey<Object>) key)));
             if (firstOrNull != null) {
                 widget.tagMatch = firstOrNull.getKey();
             }

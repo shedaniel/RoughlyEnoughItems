@@ -34,17 +34,26 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.favorites.SystemFavoriteEntryProvider;
-import me.shedaniel.rei.api.client.gui.drag.*;
+import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
+import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProviderWidget;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitorWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
+import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.history.DisplayHistoryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.listeners.FavoritesRegionListener;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.listeners.FavoritesSystemRegionListener;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.FavoritesPanel;
@@ -53,6 +62,7 @@ import me.shedaniel.rei.impl.client.gui.widget.favorites.trash.TrashWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.EntryStacksRegionWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionDraggableStack;
+import me.shedaniel.rei.impl.common.util.RectangleUtils;
 import net.minecraft.client.gui.screens.Screen;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.Triple;
@@ -66,14 +76,17 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 @ApiStatus.Internal
-public class FavoritesListWidget extends WidgetWithBounds implements DraggableStackProviderWidget, DraggableStackVisitorWidget, OverlayListWidget {
+public class FavoritesListWidget extends WidgetWithBounds implements DraggableComponentProviderWidget<Object>, DraggableComponentVisitorWidget, OverlayListWidget {
     public Rectangle fullBounds;
+    public Rectangle excludedBounds;
+    public Rectangle favoritesBounds;
     private EntryStacksRegionWidget<FavoriteEntry> systemRegion = new EntryStacksRegionWidget<>(new FavoritesSystemRegionListener());
     private EntryStacksRegionWidget<FavoriteEntry> region = new EntryStacksRegionWidget<>(new FavoritesRegionListener(this));
     private List<FavoriteEntry> lastSystemEntries = new ArrayList<>();
     
     public final FavoritesPanel favoritePanel = new FavoritesPanel(this);
     public final TrashWidget trash = new TrashWidget(this);
+    public final DisplayHistoryWidget displayHistory = new DisplayHistoryWidget(this);
     public final FavoritesTogglePanelButton togglePanelButton = new FavoritesTogglePanelButton(this);
     private List<Widget> children = ImmutableList.of(favoritePanel, togglePanelButton, systemRegion, region);
     
@@ -82,12 +95,15 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         if (fullBounds.contains(mouseX, mouseY)) {
             if (Screen.hasControlDown()) {
                 ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
+                ScreenOverlayImpl.getEntryListWidget().scaleIndicator.setAs(10.0D);
                 if (config.setEntrySize(config.getEntrySize() + amount * 0.075)) {
                     ConfigManager.getInstance().saveConfig();
                     REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
                     return true;
                 }
             } else if (favoritePanel.mouseScrolled(mouseX, mouseY, amount)) {
+                return true;
+            } else if (displayHistory.mouseScrolled(mouseX, mouseY, amount)) {
                 return true;
             }
         }
@@ -109,26 +125,29 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
     
     @Override
     @Nullable
-    public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
-        DraggableStack stack = region.getHoveredStack(context, mouseX, mouseY);
-        if (stack != null) return stack;
+    public DraggableComponent<Object> getHovered(DraggingContext<Screen> context, double mouseX, double mouseY) {
+        DraggableComponent<?> stack = region.getHoveredStack(context, mouseX, mouseY);
+        if (stack != null) return (DraggableComponent<Object>) stack;
         stack = systemRegion.getHoveredStack(context, mouseX, mouseY);
-        if (stack != null) return stack;
+        if (stack != null) return (DraggableComponent<Object>) stack;
         if (favoritePanel.containsMouse(mouseX, mouseY)) {
-            return favoritePanel.getHoveredStack(mouseX, mouseY);
+            stack = favoritePanel.getHoveredStack(mouseX, mouseY);
+            if (stack != null) return (DraggableComponent<Object>) stack;
         }
+        stack = displayHistory.getHovered(context, mouseX, mouseY);
+        if (stack != null) return (DraggableComponent<Object>) stack;
         
         return null;
     }
     
     @Override
-    public DraggedAcceptorResult acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
+    public DraggedAcceptorResult acceptDragged(DraggingContext<Screen> context, DraggableComponent<?> stack) {
         if (favoritePanel.containsMouse(context.getCurrentPosition()) || trash.containsMouse(context.getCurrentPosition())) {
             context.renderToVoid(stack);
             return DraggedAcceptorResult.CONSUMED;
         }
-        return Stream.of(region, systemRegion)
-                .map(visitor -> visitor.acceptDraggedStack(context, stack))
+        return Stream.of(region, systemRegion, displayHistory)
+                .map(visitor -> visitor.acceptDragged(context, stack))
                 .filter(result -> result != DraggedAcceptorResult.PASS)
                 .findFirst()
                 .orElse(DraggedAcceptorResult.PASS);
@@ -168,18 +187,27 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             updateSystemRegion();
         }
         
-        systemRegion.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + 1, this.fullBounds.width, Math.max(1, systemRegion.scrolling.getMaxScrollHeight()));
+        boolean draggingDisplay = DraggingContext.getInstance().isDraggingComponent()
+                                  && DraggingContext.getInstance().getDragged().get() instanceof Display;
+        int topOffsetHeight = 0;
+        this.favoritesBounds = displayHistory.getEntries().isEmpty() && !draggingDisplay
+                ? fullBounds : RectangleUtils.excludeZones(this.fullBounds, Stream.of(displayHistory.createBounds(this.excludedBounds)));
+        
+        systemRegion.getBounds().setBounds(this.favoritesBounds.x, this.favoritesBounds.y + 1, this.favoritesBounds.width, Math.max(1, systemRegion.scrolling.getMaxScrollHeight()));
         int systemHeight = systemRegion.getBounds().getHeight();
         if (systemHeight > 1 && !region.isEmpty()) {
             Rectangle innerBounds = systemRegion.getInnerBounds();
-            fillGradient(matrices, innerBounds.x + 1, this.fullBounds.y + systemHeight + 2, innerBounds.getMaxX() - 1, this.fullBounds.y + systemHeight + 3, 0xFF777777, 0xFF777777);
-            systemHeight += 4;
+            fillGradient(matrices, innerBounds.x + 1, this.favoritesBounds.y + systemHeight + 2, innerBounds.getMaxX() - 1, this.favoritesBounds.y + systemHeight + 3, 0xFF777777, 0xFF777777);
+            topOffsetHeight += systemHeight + 4;
         }
         
+        displayHistory.render(matrices, mouseX, mouseY, delta);
+        
         if (favoritePanel.getBounds().height > 20) {
-            region.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + systemHeight, this.fullBounds.width, this.fullBounds.height - systemHeight - (this.fullBounds.getMaxY() - this.favoritePanel.getBounds().y) - 4 - (Math.round(trashHeight) <= 0 ? 0 : trashHeight));
+            // Opened favorites panel
+            region.getBounds().setBounds(this.favoritesBounds.x, this.favoritesBounds.y + topOffsetHeight, this.favoritesBounds.width, this.favoritesBounds.height - topOffsetHeight - (this.favoritesBounds.getMaxY() - this.favoritePanel.getBounds().y) - 4 - (Math.round(trashHeight) <= 0 ? 0 : trashHeight));
         } else {
-            region.getBounds().setBounds(this.fullBounds.x, this.fullBounds.y + systemHeight, this.fullBounds.width, this.fullBounds.height - systemHeight - (Math.round(trashHeight) <= 0 ? 0 : trashHeight + 24));
+            region.getBounds().setBounds(this.favoritesBounds.x, this.favoritesBounds.y + topOffsetHeight, this.favoritesBounds.width, this.favoritesBounds.height - topOffsetHeight - (Math.round(trashHeight) <= 0 ? 0 : trashHeight + 24));
         }
         
         systemRegion.render(matrices, mouseX, mouseY, delta);
@@ -240,11 +268,15 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
             for (Widget widget : children())
                 if (widget.keyPressed(keyCode, scanCode, modifiers))
                     return true;
+        if (displayHistory.keyPressed(keyCode, scanCode, modifiers))
+            return true;
         return false;
     }
     
     public void updateFavoritesBounds(@Nullable String searchTerm) {
         this.fullBounds = REIRuntime.getInstance().calculateFavoritesListArea();
+        this.excludedBounds = RectangleUtils.excludeZones(this.fullBounds, ScreenRegistry.getInstance().exclusionZones().getExclusionZones(minecraft.screen).stream());
+        this.favoritesBounds = RectangleUtils.excludeZones(this.fullBounds, Stream.of(displayHistory.createBounds(this.fullBounds, null)));
     }
     
     public void updateSearch() {
@@ -265,6 +297,8 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
         for (Widget widget : children())
             if (widget.mouseClicked(mouseX, mouseY, button))
                 return true;
+        if (displayHistory.mouseClicked(mouseX, mouseY, button))
+            return true;
         return false;
     }
     
@@ -275,6 +309,8 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableSt
                 if (widget.mouseReleased(mouseX, mouseY, button))
                     return true;
         }
+        if (displayHistory.mouseReleased(mouseX, mouseY, button))
+            return true;
         return false;
     }
 }

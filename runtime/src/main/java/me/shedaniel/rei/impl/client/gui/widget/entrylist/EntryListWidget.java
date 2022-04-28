@@ -28,6 +28,8 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
+import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
+import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -65,6 +67,7 @@ import me.shedaniel.rei.impl.client.gui.widget.region.RegionRenderingDebugger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
@@ -99,12 +102,14 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     private List<EntryListStackEntry> entries = Collections.emptyList();
     private List<Widget> renders = Collections.emptyList();
     private List<Widget> children = Collections.emptyList();
+    public final NumberAnimator<Double> scaleIndicator = ValueAnimator.ofDouble(0.0D)
+            .withConvention(() -> 0.0D, 8000);
     
     public static int entrySize() {
         return Mth.ceil(SIZE * ConfigObject.getInstance().getEntrySize());
     }
     
-    public static boolean notSteppingOnExclusionZones(int left, int top, int width, int height, Rectangle listArea) {
+    public static boolean notSteppingOnExclusionZones(int left, int top, int width, int height) {
         Minecraft instance = Minecraft.getInstance();
         for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(instance.screen)) {
             InteractionResult fit = canItemSlotWidgetFit(left, top, width, height, decider);
@@ -196,6 +201,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         if (containsChecked(mouseX, mouseY, false)) {
             if (Screen.hasControlDown()) {
                 ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
+                scaleIndicator.setAs(10.0D);
                 if (config.setEntrySize(config.getEntrySize() + amount * 0.075)) {
                     ConfigManager.getInstance().saveConfig();
                     REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
@@ -257,7 +263,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                 entryBounds.y = entry.backupY - scrolling.scrollAmountInt();
                 if (entryBounds.y > this.bounds.getMaxY()) break;
                 if (allStacks.size() <= i) break;
-                if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height, innerBounds)) {
+                if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height)) {
                     EntryStack<?> stack = allStacks.get(i++);
                     entry.clearStacks();
                     if (!stack.isEmpty()) {
@@ -324,6 +330,16 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                 }
             }
             Tooltip.create(new TranslatableComponent("text.rei.delete_items")).queue();
+        }
+        
+        scaleIndicator.update(delta);
+        if (scaleIndicator.value() > 0.04) {
+            TextComponent component = new TextComponent(Math.round(ConfigObject.getInstance().getEntrySize() * 100) + "%");
+            int width = font.width(component);
+            int backgroundColor = ((int) Math.round(0xa0 * Mth.clamp(scaleIndicator.value(), 0.0, 1.0))) << 24;
+            int textColor = ((int) Math.round(0xdd * Mth.clamp(scaleIndicator.value(), 0.0, 1.0))) << 24;
+            fillGradient(matrices, bounds.getCenterX() - width / 2 - 2, bounds.getCenterY() - 6, bounds.getCenterX() + width / 2 + 2, bounds.getCenterY() + 6, backgroundColor, backgroundColor);
+            font.draw(matrices, component, bounds.getCenterX() - width / 2, bounds.getCenterY() - 4, 0xFFFFFF | textColor);
         }
     }
     
@@ -412,7 +428,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             for (int currentX = 0; currentX < width; currentX++) {
                 int slotX = currentX * entrySize + innerBounds.x;
                 int slotY = currentY * entrySize + innerBounds.y;
-                if (notSteppingOnExclusionZones(slotX - 1, slotY - 1, entrySize, entrySize, innerBounds)) {
+                if (notSteppingOnExclusionZones(slotX - 1, slotY - 1, entrySize, entrySize)) {
                     entries.add((EntryListStackEntry) new EntryListStackEntry(this, slotX, slotY, entrySize, zoomed).noBackground());
                 }
             }

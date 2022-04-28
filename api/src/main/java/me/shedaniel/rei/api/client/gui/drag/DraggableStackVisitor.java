@@ -24,13 +24,18 @@
 package me.shedaniel.rei.api.client.gui.drag;
 
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitor;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -38,7 +43,7 @@ import java.util.stream.StreamSupport;
 /**
  * A visitor for accepting {@link DraggableStack} to the screen.
  */
-public interface DraggableStackVisitor<T extends Screen> extends Comparable<DraggableStackVisitor<T>> {
+public interface DraggableStackVisitor<T extends Screen> extends DraggableComponentVisitor<T> {
     static <T extends Screen> DraggableStackVisitor<T> from(Supplier<Iterable<DraggableStackVisitor<T>>> visitors) {
         return new DraggableStackVisitor<T>() {
             @Override
@@ -109,6 +114,13 @@ public interface DraggableStackVisitor<T extends Screen> extends Comparable<Drag
         return acceptDraggedStack(context, stack) ? DraggedAcceptorResult.CONSUMED : DraggedAcceptorResult.PASS;
     }
     
+    @Override
+    default DraggedAcceptorResult acceptDragged(DraggingContext<T> context, DraggableComponent<?> component) {
+        return component.<EntryStack<?>>getIf()
+                .map(comp -> acceptDraggedStack(context, DraggableStack.from(comp)))
+                .orElse(DraggedAcceptorResult.PASS);
+    }
+    
     /**
      * Returns the accepting bounds for the dragging stack, this should only be called once on drag.
      * The bounds are used to overlay to indicate to the users that the area is accepting entries.
@@ -121,8 +133,18 @@ public interface DraggableStackVisitor<T extends Screen> extends Comparable<Drag
         return Stream.empty();
     }
     
+    @Override
+    default Stream<DraggableBoundsProvider> getDraggableAcceptingBounds(DraggingContext<T> context, DraggableComponent<?> component) {
+        return component.<EntryStack<?>>getIf()
+                .map(comp -> getDraggableAcceptingBounds(context, DraggableStack.from(comp)))
+                .orElse(Stream.empty())
+                .map(Function.identity());
+    }
+    
+    @Override
     <R extends Screen> boolean isHandingScreen(R screen);
     
+    @Override
     default DraggingContext<T> getContext() {
         return DraggingContext.getInstance().cast();
     }
@@ -132,11 +154,11 @@ public interface DraggableStackVisitor<T extends Screen> extends Comparable<Drag
      *
      * @return the priority
      */
+    @Override
     default double getPriority() {
         return 0.0;
     }
     
-    @Override
     default int compareTo(DraggableStackVisitor<T> o) {
         return Double.compare(getPriority(), o.getPriority());
     }
@@ -147,30 +169,25 @@ public interface DraggableStackVisitor<T extends Screen> extends Comparable<Drag
     }
     
     @FunctionalInterface
-    interface BoundsProvider {
+    interface BoundsProvider extends DraggableBoundsProvider {
         static VoxelShape fromRectangle(Rectangle bounds) {
-            return Shapes.box(bounds.x, bounds.y, 0, bounds.getMaxX(), bounds.getMaxY(), 0.1);
+            return DraggableBoundsProvider.fromRectangle(bounds);
         }
         
         static BoundsProvider ofRectangle(Rectangle bounds) {
-            return ofShape(fromRectangle(bounds));
+            return DraggableBoundsProvider.ofRectangle(bounds)::bounds;
         }
         
         static BoundsProvider ofRectangles(Iterable<Rectangle> bounds) {
-            VoxelShape shape = StreamSupport.stream(bounds.spliterator(), false)
-                    .map(BoundsProvider::fromRectangle)
-                    .reduce(Shapes.empty(), Shapes::or);
-            return ofShape(shape);
+            return DraggableBoundsProvider.ofRectangles(bounds)::bounds;
         }
         
         static BoundsProvider ofShape(VoxelShape shape) {
-            return () -> shape;
+            return DraggableBoundsProvider.ofShape(shape)::bounds;
         }
         
         static BoundsProvider ofShapes(Iterable<VoxelShape> shapes) {
-            VoxelShape shape = StreamSupport.stream(shapes.spliterator(), false)
-                    .reduce(Shapes.empty(), Shapes::or);
-            return ofShape(shape);
+            return DraggableBoundsProvider.ofShapes(shapes)::bounds;
         }
         
         static BoundsProvider empty() {
@@ -178,11 +195,11 @@ public interface DraggableStackVisitor<T extends Screen> extends Comparable<Drag
         }
         
         static BoundsProvider concat(Iterable<BoundsProvider> providers) {
-            return () -> StreamSupport.stream(providers.spliterator(), false)
-                    .map(BoundsProvider::bounds)
-                    .reduce(Shapes.empty(), Shapes::or);
+            return DraggableBoundsProvider.concat((List<DraggableBoundsProvider>)
+                    (List<? extends DraggableBoundsProvider>) providers)::bounds;
         }
         
+        @Override
         VoxelShape bounds();
     }
 }

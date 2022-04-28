@@ -73,5 +73,8 @@ public class RegionRenderingDebugger extends GuiComponent {
             immediate.endBatch();
             matrices.popPose();
         }
+        
+        this.size.setValue(0);
+        this.time.setValue(0);
     }
 }

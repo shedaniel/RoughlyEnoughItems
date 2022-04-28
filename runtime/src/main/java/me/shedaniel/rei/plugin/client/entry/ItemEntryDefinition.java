@@ -275,7 +275,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         public void renderOverlay(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
             if (!entry.isEmpty()) {
                 Minecraft.getInstance().getItemRenderer().blitOffset = entry.getZ();
-                Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, entry.getValue(), bounds.x, bounds.y, null);
+                Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, entry.getValue(), 0, 0, null);
                 Minecraft.getInstance().getItemRenderer().blitOffset = 0.0F;
             }
         }
