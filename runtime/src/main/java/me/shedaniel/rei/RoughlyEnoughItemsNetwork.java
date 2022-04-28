@@ -121,9 +121,9 @@ public class RoughlyEnoughItemsNetwork {
                     }
                     NetworkManager.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);*/
                 } catch (IllegalStateException e) {
-                    player.sendMessage(Component.translatable(e.getMessage()).withStyle(ChatFormatting.RED), Util.NIL_UUID);
+                    player.sendSystemMessage(Component.translatable(e.getMessage()).withStyle(ChatFormatting.RED));
                 } catch (Exception e) {
-                    player.sendMessage(Component.translatable("error.rei.internal.error", e.getMessage()).withStyle(ChatFormatting.RED), Util.NIL_UUID);
+                    player.sendSystemMessage(Component.translatable("error.rei.internal.error", e.getMessage()).withStyle(ChatFormatting.RED));
                     e.printStackTrace();
                 }
             } catch (Exception e) {

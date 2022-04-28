@@ -33,7 +33,6 @@ import net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -47,13 +46,10 @@ public class FabricFluidAPISupportPlugin implements REIServerPlugin {
             ItemStack stack = entry.getValue().copy();
             Storage<FluidVariant> storage = FluidStorage.ITEM.find(stack, ContainerItemContext.withInitial(stack));
             if (storage != null) {
-                List<EntryStack<FluidStack>> result;
-                try (Transaction transaction = Transaction.openOuter()) {
-                    result = StreamSupport.stream(storage.iterable(transaction).spliterator(), false)
-                            .filter(view -> !view.isResourceBlank())
-                            .map(view -> EntryStacks.of(FluidStack.create(view.getResource().getFluid(), view.getAmount(), view.getResource().getNbt())))
-                            .collect(Collectors.toList());
-                }
+                List<EntryStack<FluidStack>> result = StreamSupport.stream(storage.spliterator(), false)
+                        .filter(view -> !view.isResourceBlank())
+                        .map(view -> EntryStacks.of(FluidStack.create(view.getResource().getFluid(), view.getAmount(), view.getResource().getNbt())))
+                        .collect(Collectors.toList());
                 if (!result.isEmpty()) {
                     return CompoundEventResult.interruptTrue(result.stream());
                 }

@@ -87,6 +87,10 @@ public class RoughlyEnoughItemsInitializerImpl {
     }
     
     public static int compareVersions(String version1, String version2) {
+        version1 = version1.contains("-") ? version1.substring(0, version1.indexOf("-")) : version1;
+        version2 = version2.contains("-") ? version2.substring(0, version2.indexOf("-")) : version2;
+        version1 = version1.contains("+") ? version1.substring(0, version1.indexOf("+")) : version1;
+        version2 = version2.contains("+") ? version2.substring(0, version2.indexOf("+")) : version2;
         Version v1, v2;
         
         try {

@@ -161,7 +161,7 @@ public class PerformanceScreen extends Screen {
             entries.sort(Comparator.<EntryListEntry>comparingLong(value -> value.time).reversed());
             list.addItem(new SubCategoryListEntry(Component.literal(stage), (List<PerformanceScreen.PerformanceEntry>) (List<? extends PerformanceScreen.PerformanceEntry>) entries, Math.max(inner.totalNano(), separateTime), false));
         });
-        list.children().add(0, new EntryListEntry(new TextComponent("Total Load Time"), totalTime[0]));
+        list.children().add(0, new EntryListEntry(Component.literal("Total Load Time"), totalTime[0]));
         addWidget(list);
     }
     
