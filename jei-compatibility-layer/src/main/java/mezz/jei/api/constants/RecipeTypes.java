@@ -117,7 +117,7 @@ public final class RecipeTypes {
      * @since 9.5.0
      */
     public static final RecipeType<UpgradeRecipe> SMITHING =
-            BuiltinClientPlugin.SMELTING.asRecipeType(UpgradeRecipe.class);
+            BuiltinClientPlugin.SMITHING.asRecipeType(UpgradeRecipe.class);
     
     /**
      * The composting recipe type.

@@ -92,14 +92,18 @@ public class JEIRecipeLayoutBuilder implements IRecipeLayoutBuilder {
     
     @Override
     public void setShapeless() {
-        this.shapelessData.shapeless = true;
+        if (this.shapelessData != null) {
+            this.shapelessData.shapeless = true;
+        }
         markDirty();
     }
     
     @Override
     public void setShapeless(int posX, int posY) {
-        this.shapelessData.shapeless = true;
-        this.shapelessData.pos = new Point(posX, posY);
+        if (this.shapelessData != null) {
+            this.shapelessData.shapeless = true;
+            this.shapelessData.pos = new Point(posX, posY);
+        }
         markDirty();
     }
     

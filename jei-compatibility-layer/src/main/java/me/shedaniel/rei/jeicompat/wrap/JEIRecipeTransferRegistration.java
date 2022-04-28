@@ -209,7 +209,7 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                             DisplayCategory<Display> category = CategoryRegistry.getInstance().get(display.getCategoryIdentifier().cast()).getCategory();
                             DisplayCategoryView<Display> categoryView = CategoryRegistry.getInstance().get(display.getCategoryIdentifier().cast()).getView(display);
                             view = new JEIDisplaySetup.Result();
-                            JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder();
+                            JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder(null);
                             List<Widget> widgets = categoryView.setupDisplay(display, new Rectangle(0, 0, category.getDisplayWidth(display), category.getDisplayHeight()));
                             JEIRecipeTransferRegistration.this.addToLayout(builder, widgets, 4, 4);
                             view.setSlots(builder.slots);

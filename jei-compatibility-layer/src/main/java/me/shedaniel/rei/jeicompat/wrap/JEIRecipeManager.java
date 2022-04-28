@@ -71,13 +71,13 @@ public enum JEIRecipeManager implements IRecipeManager {
     @Override
     public <T> List<T> getRecipes(IRecipeCategory<T> recipeCategory, List<? extends IFocus<?>> focuses, boolean includeHidden) {
         if (focuses != null && !focuses.isEmpty()) throw TODO();
-        return JEIPluginDetector.wrapRecipes(recipeCategory.getUid().categoryId(), !includeHidden);
+        return JEIPluginDetector.wrapRecipes(recipeCategory.getRecipeType().categoryId(), !includeHidden);
     }
     
     @Override
     public List<ITypedIngredient<?>> getRecipeCatalystsTyped(IRecipeCategory<?> recipeCategory, boolean includeHidden) {
         List<ITypedIngredient<?>> objects = new ArrayList<>();
-        for (EntryIngredient stacks : CategoryRegistry.getInstance().get(recipeCategory.getUid().categoryId()).getWorkstations()) {
+        for (EntryIngredient stacks : CategoryRegistry.getInstance().get(recipeCategory.getRecipeType().categoryId()).getWorkstations()) {
             objects.addAll(CollectionUtils.map(stacks, JEIPluginDetector::typedJeiValue));
         }
         return objects;
@@ -111,13 +111,13 @@ public enum JEIRecipeManager implements IRecipeManager {
     @Override
     public <T, V> List<T> getRecipes(IRecipeCategory<T> recipeCategory, @Nullable IFocus<V> focus, boolean includeHidden) {
         if (focus != null) throw TODO();
-        return JEIPluginDetector.wrapRecipes(recipeCategory.getUid().categoryId(), !includeHidden);
+        return JEIPluginDetector.wrapRecipes(recipeCategory.getRecipeType().categoryId(), !includeHidden);
     }
     
     @Override
     public List<Object> getRecipeCatalysts(IRecipeCategory<?> recipeCategory, boolean includeHidden) {
         List<Object> objects = new ArrayList<>();
-        for (EntryIngredient stacks : CategoryRegistry.getInstance().get(recipeCategory.getUid().categoryId()).getWorkstations()) {
+        for (EntryIngredient stacks : CategoryRegistry.getInstance().get(recipeCategory.getRecipeType().categoryId()).getWorkstations()) {
             objects.addAll(CollectionUtils.map(stacks, JEIPluginDetector::jeiValue));
         }
         return objects;
