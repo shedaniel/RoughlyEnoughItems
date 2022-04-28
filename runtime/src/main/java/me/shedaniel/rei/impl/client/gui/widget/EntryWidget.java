@@ -314,10 +314,12 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             RenderSystem.setShaderTexture(0, RECIPE_GUI);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
-            RenderSystem.setShaderTexture(0, RECIPE_GUI_DARK);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value());
-            blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            if (darkBackgroundAlpha.value() > 0.0F) {
+                RenderSystem.setShaderTexture(0, RECIPE_GUI_DARK);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value());
+                blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            }
         }
     }
     

@@ -254,7 +254,7 @@
   "config.roughlyenoughitems.leftSideMobEffects.boolean.false": "Vpravo (Vanilla)",
   "config.roughlyenoughitems.fixTabCloseContainer": "Opravit místo po knize receptů (když je zakázána kniha receptů):",
   "config.roughlyenoughitems.lighterButtonHover": "Zesvětlit tlačítko při najetí:",
-  "config.roughlyenoughitems.layout.enableCraftableOnlyButton": "Filtr vyrobitelných:",
+  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "Filtr vyrobitelných:",
   "config.roughlyenoughitems.layout.showUtilsButtons": "Užitečná tlačítka:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "Příkaz gamemode:",
   "config.roughlyenoughitems.commands.giveCommand": "Příkaz give:",

@@ -256,7 +256,7 @@
   "config.roughlyenoughitems.leftSideMobEffects.boolean.false": "Direita (padrão)",
   "config.roughlyenoughitems.fixTabCloseContainer": "Corrigir contêiner de guias padrão (livro de receitas desativado):",
   "config.roughlyenoughitems.lighterButtonHover": "Cursor mínimo do botão:",
-  "config.roughlyenoughitems.layout.enableCraftableOnlyButton": "Filtro de fabricáveis:",
+  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "Filtro de fabricáveis:",
   "config.roughlyenoughitems.layout.showUtilsButtons": "Botões utilitários:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "Comando do modo de jogo:",
   "config.roughlyenoughitems.commands.giveCommand": "Comando \"give\":",

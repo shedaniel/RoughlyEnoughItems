@@ -92,9 +92,10 @@ public class DefaultCompostingCategory implements DisplayCategory<DefaultCompost
         List<Widget> widgets = Lists.newArrayList();
         Point startingPoint = new Point(bounds.x + bounds.width - 55, bounds.y + 110);
         List<EntryIngredient> stacks = new ArrayList<>(display.getInputEntries());
+        widgets.add(Widgets.createRecipeBase(bounds));
         int i = 0;
-        for (int y = 0; y < 6; y++)
-            for (int x = 0; x < 8; x++) {
+        for (int y = 0; y < 5; y++)
+            for (int x = 0; x < 7; x++) {
                 EntryIngredient entryStack = stacks.size() > i ? stacks.get(i) : EntryIngredient.empty();
                 if (!entryStack.isEmpty()) {
                     ComposterBlock.COMPOSTABLES.object2FloatEntrySet().stream().filter(entry -> entry.getKey() != null && Objects.equals(entry.getKey().asItem(), entryStack.get(0).getValue())).findAny().map(Map.Entry::getValue).ifPresent(chance -> {
@@ -103,12 +104,12 @@ public class DefaultCompostingCategory implements DisplayCategory<DefaultCompost
                         }
                     });
                 }
-                widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 72 + x * 18, bounds.y + 3 + y * 18)).entries(entryStack).markInput());
+                widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 72 + 9 + x * 18, bounds.y + 12 + y * 18)).entries(entryStack).markInput());
                 i++;
             }
-        widgets.add(Widgets.createArrow(new Point(startingPoint.x - 1, startingPoint.y + 7)));
-        widgets.add(Widgets.createResultSlotBackground(new Point(startingPoint.x + 33, startingPoint.y + 8)));
-        widgets.add(Widgets.createSlot(new Point(startingPoint.x + 33, startingPoint.y + 8)).entries(display.getOutputEntries().get(0)).disableBackground().markOutput());
+        widgets.add(Widgets.createArrow(new Point(startingPoint.x - 1 - 5, startingPoint.y + 7 - 5)));
+        widgets.add(Widgets.createResultSlotBackground(new Point(startingPoint.x + 33 - 5, startingPoint.y + 8 - 5)));
+        widgets.add(Widgets.createSlot(new Point(startingPoint.x + 33 - 5, startingPoint.y + 8 - 5)).entries(display.getOutputEntries().get(0)).disableBackground().markOutput());
         return widgets;
     }
     

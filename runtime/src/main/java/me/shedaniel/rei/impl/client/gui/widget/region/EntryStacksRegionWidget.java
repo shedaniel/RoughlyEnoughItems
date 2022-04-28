@@ -62,7 +62,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
-import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.notSteppingOnExclusionZones;
 
 public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWithBounds implements DraggableStackProviderWidget, DraggableStackVisitorWidget {
     public final RegionListener<T> listener;
@@ -333,7 +332,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                     currentY++;
                 }
                 
-                if (notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize, innerBounds)) {
+                if (listener.notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize)) {
                     if (slotIndex++ == releaseIndex) {
                         continue;
                     }
@@ -367,7 +366,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                         currentY++;
                     }
                     
-                    if (notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize, innerBounds)) {
+                    if (listener.notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize)) {
                         entriesPoints.add(new Tuple<>(entry, new Point(xPos, yPos)));
                         break;
                     } else {
@@ -381,7 +380,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                 int xPos = currentX * entrySize + innerBounds.x;
                 int yPos = currentY * entrySize + innerBounds.y;
                 
-                if (notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize, innerBounds)) {
+                if (listener.notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize)) {
                     entriesPoints.add(new Tuple<>(null, new Point(xPos, yPos)));
                 }
             }

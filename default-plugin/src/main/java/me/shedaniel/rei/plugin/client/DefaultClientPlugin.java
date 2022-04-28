@@ -166,19 +166,6 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 new DefaultInformationCategory()
         );
         
-        registry.removePlusButton(FUEL);
-        registry.removePlusButton(COMPOSTING);
-        registry.removePlusButton(BEACON_BASE);
-        registry.removePlusButton(BEACON_PAYMENT);
-        registry.removePlusButton(INFO);
-        registry.removePlusButton(STRIPPING);
-        registry.removePlusButton(TILLING);
-        registry.removePlusButton(PATHING);
-        registry.removePlusButton(WAXING);
-        registry.removePlusButton(WAX_SCRAPING);
-        registry.removePlusButton(OXIDIZING);
-        registry.removePlusButton(OXIDATION_SCRAPING);
-        
         registry.addWorkstations(CRAFTING, EntryStacks.of(Items.CRAFTING_TABLE));
         registry.addWorkstations(SMELTING, EntryStacks.of(Items.FURNACE));
         registry.addWorkstations(SMOKING, EntryStacks.of(Items.SMOKER));
@@ -273,7 +260,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             ComposterBlock.bootStrap();
         }
         int page = 0;
-        Iterator<List<Object2FloatMap.Entry<ItemLike>>> iterator = Iterators.partition(ComposterBlock.COMPOSTABLES.object2FloatEntrySet().stream().sorted(Map.Entry.comparingByValue()).iterator(), 48);
+        Iterator<List<Object2FloatMap.Entry<ItemLike>>> iterator = Iterators.partition(ComposterBlock.COMPOSTABLES.object2FloatEntrySet().stream().sorted(Map.Entry.comparingByValue()).iterator(), 35);
         while (iterator.hasNext()) {
             List<Object2FloatMap.Entry<ItemLike>> entries = iterator.next();
             registry.add(DefaultCompostingDisplay.of(entries, Collections.singletonList(EntryIngredients.of(new ItemStack(Items.BONE_MEAL))), page++));

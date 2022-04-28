@@ -158,6 +158,7 @@ public interface CategoryRegistry extends Reloadable<REIClientPlugin>, Iterable<
         configure(category, config -> config.addWorkstations(stations));
     }
     
+    @Deprecated(forRemoval = true)
     default <D extends Display> void removePlusButton(CategoryIdentifier<D> category) {
         configure(category, CategoryConfiguration::removePlusButton);
     }
@@ -186,6 +187,7 @@ public interface CategoryRegistry extends Reloadable<REIClientPlugin>, Iterable<
         /**
          * Removes the plus button.
          */
+        @Deprecated(forRemoval = true)
         default void removePlusButton() {
             setPlusButtonArea(bounds -> null);
         }

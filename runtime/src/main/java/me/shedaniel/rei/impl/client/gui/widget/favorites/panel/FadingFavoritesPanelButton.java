@@ -51,7 +51,7 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        this.bounds.setBounds(updateArea(parent.fullBounds));
+        this.bounds.setBounds(updateArea(parent.favoritesBounds));
         boolean hovered = containsMouse(mouseX, mouseY);
         switch (ConfigObject.getInstance().getFavoriteAddWidgetMode()) {
             case ALWAYS_INVISIBLE:

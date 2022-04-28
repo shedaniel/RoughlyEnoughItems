@@ -82,6 +82,15 @@ public class CollectionUtils {
         return null;
     }
     
+    public static <T> boolean allMatch(Iterable<T> list, Predicate<T> predicate) {
+        for (T t : list) {
+            if (!predicate.test(t)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     public static <T> boolean anyMatch(Iterable<T> list, Predicate<T> predicate) {
         return findFirstOrNull(list, predicate) != null;
     }

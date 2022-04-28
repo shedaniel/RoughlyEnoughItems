@@ -36,7 +36,6 @@ import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -178,7 +177,9 @@ public class EntryRegistryImpl implements EntryRegistry {
         if (list.isEmpty()) {
             return Collections.singletonList(item.getDefaultInstance());
         }
-        list.sort(STACK_COMPARATOR);
+        if (list.size() > 1) {
+            list.sort(STACK_COMPARATOR);
+        }
         return list;
     }
     

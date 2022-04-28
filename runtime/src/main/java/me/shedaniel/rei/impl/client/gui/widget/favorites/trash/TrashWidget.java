@@ -44,13 +44,14 @@ public class TrashWidget extends WidgetWithBounds {
     private final Rectangle bounds = new Rectangle();
     private final FavoritesListWidget parent;
     private final NumberAnimator<Double> height;
+    private double lastProgress;
     
     public TrashWidget(FavoritesListWidget parent) {
         this.parent = parent;
         this.height = ValueAnimator.ofDouble().withConvention(() -> {
-            Rectangle fullBounds = this.parent.fullBounds;
-            if (DraggingContext.getInstance().isDraggingStack() && fullBounds.contains(DraggingContext.getInstance().getCurrentPosition())) {
-                return Math.min(60D, fullBounds.height * 0.15D);
+            Rectangle fullBounds = this.parent.favoritesBounds;
+            if (DraggingContext.getInstance().isDraggingComponent() && fullBounds.contains(DraggingContext.getInstance().getCurrentPosition())) {
+                return Math.min(60D, fullBounds.height * 0.23D);
             }
             return 0D;
         }, ValueAnimator.typicalTransitionTime());
@@ -63,18 +64,10 @@ public class TrashWidget extends WidgetWithBounds {
     
     @Override
     public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-        this.height.update(delta);
-        double trashBoundsHeight = this.height.value();
-        if (Math.round(trashBoundsHeight) > 0) {
-            Rectangle fullBounds = parent.fullBounds;
-            FavoritesPanel favoritePanel = parent.favoritePanel;
-            double heightTarget = Math.min(150D, fullBounds.height * 0.15D);
-            double progress = Math.pow(Mth.clamp(trashBoundsHeight / heightTarget, 0, 1), 7);
-            int y = fullBounds.getMaxY() - 4 - favoritePanel.getBounds().height;
-            bounds.setBounds(fullBounds.x + 4, (int) Math.round(y - trashBoundsHeight), fullBounds.width - 8, (int) Math.round(trashBoundsHeight - 4));
-            int alpha = 0x12 + (int) (0x22 * progress * (Mth.cos((float) (System.currentTimeMillis() % 2000 / 1000F * Math.PI)) + 1) / 2);
+        if (updateBounds(delta)) {
+            int alpha = 0x12 + (int) (0x22 * lastProgress * (Mth.cos((float) (System.currentTimeMillis() % 2000 / 1000F * Math.PI)) + 1) / 2);
             fillGradient(poses, this.bounds.x, this.bounds.y, this.bounds.getMaxX(), this.bounds.getMaxY(), 0xFFFFFF | (alpha << 24), 0xFFFFFF | (alpha << 24));
-            int lineColor = (int) (0x60 * progress) << 24 | 0xFFFFFF;
+            int lineColor = (int) (0x60 * lastProgress) << 24 | 0xFFFFFF;
             fillGradient(poses, this.bounds.x, this.bounds.y, this.bounds.getMaxX(), this.bounds.y + 1, lineColor, lineColor);
             fillGradient(poses, this.bounds.x, this.bounds.getMaxY() - 1, this.bounds.getMaxX(), this.bounds.getMaxY(), lineColor, lineColor);
             
@@ -82,11 +75,27 @@ public class TrashWidget extends WidgetWithBounds {
             fillGradient(poses, this.bounds.getMaxX() - 1, this.bounds.y + 1, this.bounds.getMaxX(), this.bounds.getMaxY() - 1, lineColor, lineColor);
             
             Component text = new TranslatableComponent("text.rei.dispose_here");
-            if (0xAA * progress > 0x4) {
-                font.draw(poses, text, this.bounds.getCenterX() - font.width(text) / 2, this.bounds.getCenterY() - 4F, (int) (0xAA * progress) << 24 | 0xFFFFFF);
+            if (0xAA * lastProgress > 0x4) {
+                font.draw(poses, text, this.bounds.getCenterX() - font.width(text) / 2, this.bounds.getCenterY() - 4F, (int) (0xAA * lastProgress) << 24 | 0xFFFFFF);
             }
+        }
+    }
+    
+    public boolean updateBounds(float delta) {
+        this.height.update(delta);
+        double trashBoundsHeight = this.height.value();
+        if (Math.round(trashBoundsHeight) > 0) {
+            Rectangle fullBounds = parent.favoritesBounds;
+            FavoritesPanel favoritePanel = parent.favoritePanel;
+            double heightTarget = Math.min(150D, fullBounds.height * 0.23D);
+            this.lastProgress = Math.pow(Mth.clamp(trashBoundsHeight / heightTarget, 0, 1), 7);
+            int y = fullBounds.getMaxY() - 4 - favoritePanel.getBounds().height;
+            bounds.setBounds(fullBounds.x + 4, (int) Math.round(y - trashBoundsHeight), fullBounds.width - 8, (int) Math.round(trashBoundsHeight - 4));
+            return true;
         } else {
             bounds.setBounds(0, 0, 0, 0);
+            this.lastProgress = 0.0D;
+            return false;
         }
     }
     

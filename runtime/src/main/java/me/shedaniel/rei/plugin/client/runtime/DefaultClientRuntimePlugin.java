@@ -38,8 +38,8 @@ import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.config.ItemCheatingMode;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProviderWidget;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitorWidget;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -141,13 +141,13 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
             }
             return Collections.emptyList();
         });
-        registry.registerDraggableStackProvider(DraggableStackProviderWidget.from(context -> {
+        registry.registerDraggableComponentProvider(DraggableComponentProviderWidget.from(context -> {
             if (RoughlyEnoughItemsCoreClient.shouldReturn(context.getScreen()) || !REIRuntime.getInstance().isOverlayVisible()) return Collections.emptyList();
-            return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableStackProviderWidget.class::isInstance);
+            return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableComponentProviderWidget.class::isInstance);
         }));
-        registry.registerDraggableStackVisitor(DraggableStackVisitorWidget.from(context -> {
+        registry.registerDraggableComponentVisitor(DraggableComponentVisitorWidget.from(context -> {
             if (RoughlyEnoughItemsCoreClient.shouldReturn(context.getScreen()) || !REIRuntime.getInstance().isOverlayVisible()) return Collections.emptyList();
-            return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableStackVisitorWidget.class::isInstance);
+            return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableComponentVisitorWidget.class::isInstance);
         }));
     }
     

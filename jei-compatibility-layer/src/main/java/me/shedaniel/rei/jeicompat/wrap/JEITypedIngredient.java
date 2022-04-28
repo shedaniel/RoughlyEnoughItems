@@ -50,7 +50,7 @@ public class JEITypedIngredient<T> implements ITypedIngredient<T> {
     @Override
     public <V> Optional<V> getIngredient(IIngredientType<V> ingredientType) {
         if (ingredient == null) return Optional.empty();
-        if (ingredientType.getIngredientClass().isInstance(ingredient.getClass())) {
+        if (ingredientType.getIngredientClass().isInstance(ingredient)) {
             return Optional.ofNullable((V) ingredient);
         }
         return Optional.empty();

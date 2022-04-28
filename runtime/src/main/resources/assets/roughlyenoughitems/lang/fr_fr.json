@@ -232,7 +232,7 @@
   "config.roughlyenoughitems.leftSideMobEffects.boolean.true": "Gauche",
   "config.roughlyenoughitems.fixTabCloseContainer": "Corriger l'onglet Vanilla dans les contenants (livre de recettes désactivé) :",
   "config.roughlyenoughitems.lighterButtonHover": "Bouton survolé plus clair :",
-  "config.roughlyenoughitems.layout.enableCraftableOnlyButton": "Filtre des recettes réalisables :",
+  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "Filtre des recettes réalisables :",
   "config.roughlyenoughitems.layout.showUtilsButtons": "Boutons utilitaires :",
   "config.roughlyenoughitems.commands.gamemodeCommand": "Commande pour le mode de jeu :",
   "config.roughlyenoughitems.commands.giveCommand": "Commande pour donner :",

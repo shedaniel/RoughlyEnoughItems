@@ -207,7 +207,7 @@
   "config.roughlyenoughitems.disableRecipeBook.boolean.false": "§aSí",
   "config.roughlyenoughitems.fixTabCloseContainer": "Arreglar el contenedor de la pestaña de vainilla (cuando el libro de recetas está deshabilitado):",
   "config.roughlyenoughitems.lighterButtonHover": "Transición de botón más clara:",
-  "config.roughlyenoughitems.layout.enableCraftableOnlyButton": "Filtro de crafteos:",
+  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "Filtro de crafteos:",
   "config.roughlyenoughitems.layout.showUtilsButtons": "Botones útiles:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "Comando del modo de juego:",
   "config.roughlyenoughitems.commands.giveCommand": "Dar comando:",

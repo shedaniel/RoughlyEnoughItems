@@ -21,11 +21,9 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.gui.drag;
+package me.shedaniel.rei.api.client.gui.drag.component;
 
-import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
-import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProviderWidget;
-import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,39 +31,33 @@ import java.util.function.Function;
 
 /**
  * An interface to be implemented on {@link me.shedaniel.rei.api.client.gui.widgets.Widget} to provide
- * {@link DraggableStack}.
+ * {@link DraggableComponent}.
  */
 @FunctionalInterface
-public interface DraggableStackProviderWidget extends DraggableComponentProviderWidget<EntryStack<?>> {
-    static DraggableStackProviderWidget from(Function<DraggingContext<Screen>, Iterable<DraggableStackProviderWidget>> providers) {
+public interface DraggableComponentProviderWidget<A> {
+    static <A> DraggableComponentProviderWidget<A> from(Function<DraggingContext<Screen>, Iterable<DraggableComponentProviderWidget<A>>> providers) {
         return (context, mouseX, mouseY) -> {
-            for (DraggableStackProviderWidget provider : providers.apply(context)) {
-                DraggableStack stack = provider.getHoveredStack(context, mouseX, mouseY);
-                if (stack != null) return stack;
+            for (DraggableComponentProviderWidget<A> provider : providers.apply(context)) {
+                DraggableComponent<A> component = provider.getHovered(context, mouseX, mouseY);
+                if (component != null) return component;
             }
             return null;
         };
     }
     
     @Nullable
-    DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY);
+    DraggableComponent<A> getHovered(DraggingContext<Screen> context, double mouseX, double mouseY);
     
-    @Override
-    @Nullable
-    default DraggableComponent<EntryStack<?>> getHovered(DraggingContext<Screen> context, double mouseX, double mouseY) {
-        return getHoveredStack(context, mouseX, mouseY);
-    }
-    
-    static DraggableStackProvider<Screen> toProvider(DraggableStackProviderWidget widget) {
+    static <A> DraggableComponentProvider<Screen, A> toProvider(DraggableComponentProviderWidget<A> widget) {
         return toProvider(widget, 0D);
     }
     
-    static DraggableStackProvider<Screen> toProvider(DraggableStackProviderWidget widget, double priority) {
-        return new DraggableStackProvider<Screen>() {
+    static <A> DraggableComponentProvider<Screen, A> toProvider(DraggableComponentProviderWidget<A> widget, double priority) {
+        return new DraggableComponentProvider<Screen, A>() {
             @Override
             @Nullable
-            public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
-                return widget.getHoveredStack(context, mouseX, mouseY);
+            public DraggableComponent<A> getHovered(DraggingContext<Screen> context, double mouseX, double mouseY) {
+                return widget.getHovered(context, mouseX, mouseY);
             }
             
             @Override

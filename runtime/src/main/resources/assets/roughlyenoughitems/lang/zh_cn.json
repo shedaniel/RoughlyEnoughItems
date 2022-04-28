@@ -260,7 +260,7 @@
   "config.roughlyenoughitems.leftSideMobEffects.boolean.false": "右侧 (原版)",
   "config.roughlyenoughitems.fixTabCloseContainer": "修复Tab（禁用配方手册时）：",
   "config.roughlyenoughitems.lighterButtonHover": "较轻的按钮：",
-  "config.roughlyenoughitems.layout.enableCraftableOnlyButton": "可合成过滤器：",
+  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "可合成过滤器：",
   "config.roughlyenoughitems.layout.showUtilsButtons": "工具按钮:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "游戏模式命令：",
   "config.roughlyenoughitems.commands.giveCommand": "作弊命令:",

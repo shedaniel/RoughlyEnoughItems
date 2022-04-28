@@ -40,9 +40,9 @@ import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProvider;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitor;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -67,7 +67,9 @@ import me.shedaniel.rei.impl.client.gui.dragging.CurrentDraggingStack;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.client.gui.modules.entries.*;
-import me.shedaniel.rei.impl.client.gui.widget.*;
+import me.shedaniel.rei.impl.client.gui.widget.DefaultDisplayChoosePageWidget;
+import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
+import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListSearchManager;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
@@ -233,8 +235,8 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public void init() {
-        draggingStack.set(DraggableStackProvider.from(() -> ScreenRegistry.getInstance().getDraggableProviders()),
-                DraggableStackVisitor.from(() -> ScreenRegistry.getInstance().getDraggableVisitors()));
+        draggingStack.set(DraggableComponentProvider.from(ScreenRegistry.getInstance()::getDraggableComponentProviders),
+                DraggableComponentVisitor.from(ScreenRegistry.getInstance()::getDraggableComponentVisitors));
         
         this.shouldReload = false;
         this.shouldReloadSearch = false;
@@ -413,7 +415,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                     } else if (ClientHelperImpl.getInstance().hasPermissionToUsePackets())
                         return new TranslatableComponent("text.rei.cheating_enabled");
                     else
-                    return new TranslatableComponent("text.rei.cheating_limited_enabled");
+                        return new TranslatableComponent("text.rei.cheating_limited_enabled");
                 }),
                 new SeparatorMenuEntry(),
                 ToggleMenuEntry.ofDeciding(new TranslatableComponent("text.rei.config.menu.dark_theme"),

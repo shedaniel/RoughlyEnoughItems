@@ -45,6 +45,7 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -57,9 +58,11 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
@@ -91,8 +94,9 @@ public class FilteringScreen extends Screen {
     private List<FilteringListEntry> entries = Collections.emptyList();
     private List<GuiEventListener> elements = Collections.emptyList();
     
-    private Point selectionPoint = null;
-    private Point secondPoint = null;
+    private record PointPair(Point firstPoint, @Nullable Point secondPoint) {}
+    
+    private List<PointPair> points = new ArrayList<>();
     
     private OverlaySearchField searchField;
     private Button selectAllButton;
@@ -100,7 +104,7 @@ public class FilteringScreen extends Screen {
     private Button hideButton;
     private Button showButton;
     private Button backButton;
-    private Rectangle selectionCache;
+    private Predicate<Rectangle> selectionCache;
     
     private SearchFilter lastFilter = SearchFilter.matchAll();
     
@@ -111,15 +115,14 @@ public class FilteringScreen extends Screen {
         {
             Component selectAllText = new TranslatableComponent("config.roughlyenoughitems.filteredEntries.selectAll");
             this.selectAllButton = new Button(0, 0, Minecraft.getInstance().font.width(selectAllText) + 10, 20, selectAllText, button -> {
-                this.selectionPoint = new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2);
-                this.secondPoint = new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2);
+                this.points.clear();
+                this.points.add(new PointPair(new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2), new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2)));
             });
         }
         {
             Component selectNoneText = new TranslatableComponent("config.roughlyenoughitems.filteredEntries.selectNone");
             this.selectNoneButton = new Button(0, 0, Minecraft.getInstance().font.width(selectNoneText) + 10, 20, selectNoneText, button -> {
-                this.selectionPoint = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
-                this.secondPoint = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
+                this.points.clear();
             });
         }
         {
@@ -268,27 +271,35 @@ public class FilteringScreen extends Screen {
         }
         
         this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
+        Component hint = new TranslatableComponent("config.roughlyenoughitems.filteringRulesScreen.hint").withStyle(ChatFormatting.YELLOW);
+        this.font.drawShadow(matrices, hint, this.width - this.font.width(hint) - 15, 12.0F, -1);
     }
     
-    private Rectangle getSelection() {
+    private Predicate<Rectangle> getSelection() {
         return selectionCache;
     }
     
     private void updateSelectionCache() {
-        if (selectionPoint != null) {
-            Point p = secondPoint;
-            if (p == null) {
-                p = PointHelper.ofMouse();
-                p.translate(0, scrolling.scrollAmountInt());
+        if (!points.isEmpty()) {
+            Predicate<Rectangle> predicate = rect -> false;
+            for (PointPair pair : points) {
+                Point firstPoint = pair.firstPoint();
+                Point secondPoint = pair.secondPoint();
+                if (secondPoint == null) {
+                    secondPoint = PointHelper.ofMouse();
+                    secondPoint.translate(0, scrolling.scrollAmountInt());
+                }
+                int left = Math.min(firstPoint.x, secondPoint.x);
+                int top = Math.min(firstPoint.y, secondPoint.y);
+                int right = Math.max(firstPoint.x, secondPoint.x);
+                int bottom = Math.max(firstPoint.y, secondPoint.y);
+                Rectangle rectangle = new Rectangle(left, top - scrolling.scrollAmountInt(), Math.max(1, right - left), Math.max(1, bottom - top));
+                predicate = predicate.or(rectangle::intersects);
             }
-            int left = Math.min(p.x, selectionPoint.x);
-            int top = Math.min(p.y, selectionPoint.y);
-            int right = Math.max(p.x, selectionPoint.x);
-            int bottom = Math.max(p.y, selectionPoint.y);
-            selectionCache = new Rectangle(left, top - scrolling.scrollAmountInt(), right - left, bottom - top);
+            selectionCache = predicate;
             return;
         }
-        selectionCache = new Rectangle(0, 0, 0, 0);
+        selectionCache = rect -> false;
     }
     
     @Override
@@ -349,41 +360,41 @@ public class FilteringScreen extends Screen {
     }
     
     @Override
-    public boolean mouseClicked(double double_1, double double_2, int int_1) {
-        if (scrolling.updateDraggingState(double_1, double_2, int_1))
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (scrolling.updateDraggingState(mouseX, mouseY, button))
             return true;
         
-        if (getBounds().contains(double_1, double_2)) {
-            if (searchField.mouseClicked(double_1, double_2, int_1)) {
-                this.selectionPoint = null;
-                this.secondPoint = null;
+        if (getBounds().contains(mouseX, mouseY)) {
+            if (searchField.mouseClicked(mouseX, mouseY, button)) {
+                this.points.clear();
                 return true;
-            } else if (selectAllButton.mouseClicked(double_1, double_2, int_1)) {
+            } else if (selectAllButton.mouseClicked(mouseX, mouseY, button)) {
                 return true;
-            } else if (selectNoneButton.mouseClicked(double_1, double_2, int_1)) {
+            } else if (selectNoneButton.mouseClicked(mouseX, mouseY, button)) {
                 return true;
-            } else if (hideButton.mouseClicked(double_1, double_2, int_1)) {
+            } else if (hideButton.mouseClicked(mouseX, mouseY, button)) {
                 return true;
-            } else if (showButton.mouseClicked(double_1, double_2, int_1)) {
+            } else if (showButton.mouseClicked(mouseX, mouseY, button)) {
                 return true;
-            }
-            if (int_1 == 0) {
-                this.selectionPoint = new Point(double_1, double_2 + scrolling.scrollAmount());
-                this.secondPoint = null;
+            } else if (button == 0) {
+                if (!Screen.hasShiftDown()) {
+                    this.points.clear();
+                }
+                this.points.add(new PointPair(new Point(mouseX, mouseY + scrolling.scrollAmount()), null));
                 return true;
             }
         }
-        return backButton.mouseClicked(double_1, double_2, int_1);
+        return backButton.mouseClicked(mouseX, mouseY, button);
     }
     
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (selectionPoint != null && button == 0 && secondPoint == null) {
-            this.secondPoint = new Point(mouseX, mouseY + scrolling.scrollAmount());
-            if (secondPoint.equals(selectionPoint)) {
-                secondPoint.translate(1, 1);
+        if (button == 0 && !points.isEmpty()) {
+            PointPair pair = this.points.get(points.size() - 1);
+            if (pair.secondPoint() == null) {
+                this.points.set(points.size() - 1, new PointPair(pair.firstPoint(), new Point(mouseX, mouseY + scrolling.scrollAmount())));
+                return true;
             }
-            return true;
         }
         return super.mouseReleased(mouseX, mouseY, button);
     }
@@ -402,8 +413,8 @@ public class FilteringScreen extends Screen {
             if (element.keyPressed(keyCode, scanCode, modifiers))
                 return true;
         if (Screen.isSelectAll(keyCode)) {
-            this.selectionPoint = new Point(0, 0);
-            this.secondPoint = new Point(Integer.MAX_VALUE, Integer.MAX_VALUE);
+            this.points.clear();
+            this.points.add(new PointPair(new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2), new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2)));
             return true;
         }
         if (keyCode == 256 && this.shouldCloseOnEsc()) {
@@ -469,7 +480,7 @@ public class FilteringScreen extends Screen {
         }
         
         public boolean isSelected() {
-            return getSelection().intersects(getBounds());
+            return getSelection().test(getBounds());
         }
         
         public boolean isFiltered() {
