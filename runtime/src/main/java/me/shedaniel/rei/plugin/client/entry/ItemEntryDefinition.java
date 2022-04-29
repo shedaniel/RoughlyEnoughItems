@@ -46,6 +46,7 @@ import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
+import me.shedaniel.rei.impl.common.entry.CondensedEntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
@@ -140,8 +141,36 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     @Override
     public long hash(EntryStack<ItemStack> entry, ItemStack value, ComparisonContext context) {
         int code = 1;
+
+        if(entry instanceof CondensedEntryStack condensedEntryStack){
+            int locationHash = condensedEntryStack.condensedEntryId.hashCode();
+
+            code = 31 * code + locationHash;
+
+            if (!condensedEntryStack.isChild) {
+                System.out.println(locationHash);
+
+                int setHash = condensedEntryStack.getChildrenEntrySet().hashCode();
+
+                code = 31 * code + setHash;
+
+            }
+
+            //----------------------------------------------------------------------------
+            code = 31 * code + System.identityHashCode(value.getItem());
+            code = 31 * code + Long.hashCode(ItemComparatorRegistry.getInstance().hashOf(context, value));
+
+            if (!condensedEntryStack.isChild) {
+                System.out.println(code);
+            }
+
+            return code;
+        }
+
         code = 31 * code + System.identityHashCode(value.getItem());
         code = 31 * code + Long.hashCode(ItemComparatorRegistry.getInstance().hashOf(context, value));
+
+
         return code;
     }
     
@@ -231,7 +260,8 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         
         @Override
         public BakedModel getExtraData(EntryStack<ItemStack> entry) {
-            return Minecraft.getInstance().getItemRenderer().getModel(entry.getValue(), null, null, 0);
+            if(entry instanceof CondensedEntryStack condensedStack) condensedStack.getExtraDataEvent();
+            return Minecraft.getInstance().getItemRenderer().getModel(entry.getDisplayValue(), null, null, 0);
         }
         
         @Override
@@ -239,7 +269,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
             BakedModel model = getExtraData(entry);
             setupGL(entry, model);
             if (!entry.isEmpty()) {
-                ItemStack value = entry.getValue();
+                ItemStack value = entry.getDisplayValue();
                 matrices.pushPose();
                 matrices.mulPoseMatrix(RenderSystem.getModelViewMatrix());
                 matrices.translate(bounds.getCenterX(), bounds.getCenterY(), entry.getZ());
@@ -288,7 +318,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         @Override
         public void renderBase(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
             if (!entry.isEmpty()) {
-                ItemStack value = entry.getValue();
+                ItemStack value = entry.getDisplayValue();
                 matrices.pushPose();
                 matrices.translate(bounds.getCenterX() / SCALE, bounds.getCenterY() / -SCALE, entry.getZ());
                 matrices.scale(bounds.getWidth() / SCALE, (bounds.getWidth() + bounds.getHeight()) / 2f / SCALE, 1.0F);
@@ -313,7 +343,13 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         public void renderOverlay(EntryStack<ItemStack> entry, Rectangle bounds) {
             if (!entry.isEmpty()) {
                 Minecraft.getInstance().getItemRenderer().blitOffset = entry.getZ();
-                Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, entry.getValue(), bounds.x, bounds.y, null);
+                Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, entry.getDisplayValue(), bounds.x, bounds.y, null);
+
+                if(entry instanceof CondensedEntryStack condensedEntryStack && !condensedEntryStack.isChild) {
+                    RenderSystem.setShaderTexture(0, PLUS_ICON);
+                    blit(new PoseStack(), bounds.x, bounds.y, entry.getZ(), 0, 0, 16, 16, 16, 16);
+                }
+
                 Minecraft.getInstance().getItemRenderer().blitOffset = 0.0F;
             }
         }
@@ -334,8 +370,8 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
             if (entry.isEmpty())
                 return null;
             Tooltip tooltip = Tooltip.create();
-            Optional<TooltipComponent> component = entry.getValue().getTooltipImage();
-            List<Component> components = tryGetItemStackToolTip(entry, entry.getValue(), true);
+            Optional<TooltipComponent> component = entry.getDisplayValue().getTooltipImage();
+            List<Component> components = tryGetItemStackToolTip(entry, entry.getDisplayValue(), true);
             if (!components.isEmpty()) {
                 tooltip.add(components.get(0));
             }

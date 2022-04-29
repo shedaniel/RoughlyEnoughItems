@@ -47,6 +47,9 @@ import java.util.stream.Stream;
  * @see EntryTypeRegistry
  */
 public interface EntryDefinition<T> {
+
+    ResourceLocation PLUS_ICON = new ResourceLocation("roughlyenoughitems", "textures/gui/plus_logo.png");
+
     /**
      * Returns the type of the entry.
      *

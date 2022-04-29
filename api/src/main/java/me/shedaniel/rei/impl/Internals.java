@@ -35,13 +35,18 @@ import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.impl.common.InternalLogger;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Field;
+import java.util.Collection;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
@@ -121,6 +126,12 @@ public final class Internals {
         EntryStack<Unit> empty();
         
         <T> EntryStack<T> of(EntryDefinition<T> definition, T value);
+
+        <T, B> EntryStack<T> ofCondensedEntry(EntryDefinition<T> definition, T value, ResourceLocation condensedEntryId, ResourceKey<Registry<B>> registryKey, Predicate<B> predicate, Function<B, T> defaultStackMethod, Function<T, B> entryFromStack);
+
+        <T, B> EntryStack<T> ofCondensedEntry(EntryDefinition<T> definition, T value, ResourceLocation condensedEntryId, ResourceKey<Registry<B>> registryKey, Collection<B> collection, Function<B, T> defaultStackMethod, Function<T, B> entryFromStack);
+
+        <T, B> EntryStack<T> ofCondensedEntry(EntryDefinition<T> definition, T value, ResourceLocation condensedEntryId, TagKey<B> entryTag, Function<B, T> defaultStackMethod, Function<T, B> entryFromStack);
     }
     
     public interface EntryIngredientProvider {

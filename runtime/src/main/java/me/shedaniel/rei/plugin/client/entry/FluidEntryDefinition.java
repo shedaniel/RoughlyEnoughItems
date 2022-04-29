@@ -45,6 +45,7 @@ import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.impl.common.entry.CondensedEntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -210,6 +211,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     
     @Environment(EnvType.CLIENT)
     public static class FluidEntryRenderer extends AbstractEntryRenderer<FluidStack> implements BatchedEntryRenderer<FluidStack, TextureAtlasSprite> {
+
         private static final Supplier<TextureAtlasSprite> MISSING_SPRITE = Suppliers.memoize(() -> {
             TextureAtlas atlas = Minecraft.getInstance().getModelManager().getAtlas(TextureAtlas.LOCATION_BLOCKS);
             return atlas.getSprite(MissingTextureAtlasSprite.getLocation());
@@ -217,7 +219,8 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
         
         @Override
         public TextureAtlasSprite getExtraData(EntryStack<FluidStack> entry) {
-            FluidStack stack = entry.getValue();
+            FluidStack stack = entry.getDisplayValue();
+            if(entry instanceof CondensedEntryStack condensedStack) condensedStack.getExtraDataEvent();
             if (stack.isEmpty()) return null;
             return FluidStackHooks.getStillTexture(stack);
         }
@@ -240,7 +243,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
             SpriteRenderer.beginPass()
                     .setup(immediate, RenderType.solid())
                     .sprite(s)
-                    .color(sprite == null ? 0xFFFFFF : FluidStackHooks.getColor(entry.getValue()))
+                    .color(sprite == null ? 0xFFFFFF : FluidStackHooks.getColor(entry.getDisplayValue()))
                     .light(0x00f000f0)
                     .overlay(OverlayTexture.NO_OVERLAY)
                     .alpha(0xff)
@@ -260,7 +263,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
         
         @Override
         public void render(EntryStack<FluidStack> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-            FluidStack stack = entry.getValue();
+            FluidStack stack = entry.getDisplayValue();
             if (stack.isEmpty()) return;
             TextureAtlasSprite sprite = FluidStackHooks.getStillTexture(stack);
             if (sprite == null) return;
@@ -288,15 +291,15 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
             if (entry.isEmpty())
                 return null;
             List<Component> toolTip = Lists.newArrayList(entry.asFormattedText());
-            long amount = entry.getValue().getAmount();
+            long amount = entry.getDisplayValue().getAmount();
             if (amount >= 0) {
-                String amountTooltip = I18n.get(FLUID_AMOUNT, entry.getValue().getAmount());
+                String amountTooltip = I18n.get(FLUID_AMOUNT, entry.getDisplayValue().getAmount());
                 if (amountTooltip != null) {
                     toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList()));
                 }
             }
             if (Minecraft.getInstance().options.advancedItemTooltips) {
-                ResourceLocation fluidId = Registry.FLUID.getKey(entry.getValue().getFluid());
+                ResourceLocation fluidId = Registry.FLUID.getKey(entry.getDisplayValue().getFluid());
                 toolTip.add((new TextComponent(fluidId.toString())).withStyle(ChatFormatting.DARK_GRAY));
             }
             return Tooltip.create(toolTip);

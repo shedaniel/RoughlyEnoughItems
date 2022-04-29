@@ -44,6 +44,7 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.util.CondensedEntryStacks;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
@@ -93,6 +94,7 @@ import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.WeatheringCopper;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
@@ -138,6 +140,32 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 registry.addEntry(EntryStacks.of(fluid));
             }
         }
+
+        registry.addEntry(CondensedEntryStacks.of(new ResourceLocation("planks_1"), Blocks.OAK_PLANKS, ItemTags.PLANKS));
+        registry.addEntry(CondensedEntryStacks.of(new ResourceLocation("planks_2"), Blocks.OAK_PLANKS, ItemTags.PLANKS));
+
+        registry.addEntry(CondensedEntryStacks.of(new ResourceLocation("planks_3"), Blocks.OAK_PLANKS, item -> {
+            if(item instanceof BlockItem blockItem){
+                Block block = blockItem.getBlock();
+
+                return Registry.BLOCK.getKey(block).getPath().contains("planks");
+            }
+
+            return false;
+        }));
+
+        List<Item> items = Stream.of(
+                Blocks.OAK_PLANKS,
+                Blocks.DARK_OAK_PLANKS,
+                Blocks.BIRCH_PLANKS,
+                Blocks.ACACIA_PLANKS,
+                Blocks.SPRUCE_PLANKS,
+                Blocks.JUNGLE_PLANKS,
+                Blocks.WARPED_PLANKS,
+                Blocks.CRIMSON_PLANKS,
+                Blocks.BEDROCK).map(Block::asItem).toList();
+
+        registry.addEntry(CondensedEntryStacks.of(new ResourceLocation("planks_and_bedrock"), Blocks.OAK_PLANKS, items));
     }
     
     @Override

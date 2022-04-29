@@ -27,9 +27,17 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.impl.Internals;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Unit;
+import org.checkerframework.checker.units.qual.A;
 
+import java.util.Collection;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public enum EntryStackProviderImpl implements Internals.EntryStackProvider {
     INSTANCE;
@@ -46,5 +54,35 @@ public enum EntryStackProviderImpl implements Internals.EntryStackProvider {
         }
         
         return new TypedEntryStack<>(definition, value);
+    }
+
+    @Override
+    public <T, B> EntryStack<T> ofCondensedEntry(EntryDefinition<T> definition, T value, ResourceLocation condensedEntryId, ResourceKey<Registry<B>> registryKey, Predicate<B> predicate, Function<B, T> defaultStackMethod, Function<T, B> entryFromStack) {
+        CondensedEntryStack<T, B> entryStack = new CondensedEntryStack<T, B>(condensedEntryId, definition, value, false);
+
+        entryStack.setupChildSet(registryKey, predicate, defaultStackMethod);
+        entryStack.setEntryFromStackFunction(entryFromStack);
+
+        return entryStack;
+    }
+
+    @Override
+    public <T, B> EntryStack<T> ofCondensedEntry(EntryDefinition<T> definition, T value, ResourceLocation condensedEntryId, TagKey<B> entryTag, Function<B, T> defaultStackMethod, Function<T, B> entryFromStack) {
+        CondensedEntryStack<T, B> entryStack = new CondensedEntryStack<T, B>(condensedEntryId, definition, value, false);
+
+        entryStack.setupChildSet(entryTag, defaultStackMethod);
+        entryStack.setEntryFromStackFunction(entryFromStack);
+
+        return entryStack;
+    }
+
+    @Override
+    public <T, B> EntryStack<T> ofCondensedEntry(EntryDefinition<T> definition, T value, ResourceLocation condensedEntryId, ResourceKey<Registry<B>> registryKey, Collection<B> collection, Function<B, T> defaultStackMethod, Function<T, B> entryFromStack) {
+        CondensedEntryStack<T, B> entryStack = new CondensedEntryStack<T, B>(condensedEntryId, definition, value, false);
+
+        entryStack.setupChildSet(registryKey, collection, defaultStackMethod);
+        entryStack.setEntryFromStackFunction(entryFromStack);
+
+        return entryStack;
     }
 }

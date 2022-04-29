@@ -70,6 +70,7 @@ import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
+import me.shedaniel.rei.impl.common.entry.CondensedEntryStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -522,6 +523,15 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                 if (!ConfigObject.getInstance().isItemListAscending()) {
                     Collections.reverse(list);
                 }
+
+                list = list.stream().filter(entryStack -> {
+                    if(entryStack instanceof CondensedEntryStack condensedEntry){
+                        return condensedEntry.currentlyVisible();
+                    }
+
+                    return true;
+                }).toList();
+
                 allStacks = list;
                 
                 if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
@@ -569,6 +579,10 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             }
             for (Widget widget : children())
                 if (widget.mouseReleased(mouseX, mouseY, button))
+                    if(widget instanceof EntryListEntry entry && entry.refreshList){
+                        this.updateSearch(REIRuntime.getInstance().getSearchTextField().getText(), true);
+                    }
+
                     return true;
         }
         return false;
@@ -608,6 +622,8 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         private Display display;
         private EntryStack<?> our;
         private NumberAnimator<Double> size = null;
+
+        private boolean refreshList = false;
         
         private EntryListEntry(int x, int y, int entrySize, boolean zoomed) {
             super(new Point(x, y), entrySize);
@@ -710,6 +726,15 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         
         @Override
         protected boolean doAction(double mouseX, double mouseY, int button) {
+            if((this.getCurrentEntry() instanceof CondensedEntryStack condensedEntryStack && !condensedEntryStack.isChild) && (Screen.hasShiftDown() || button == 1)){
+                condensedEntryStack.toggleChildren();
+                refreshList = true;
+
+                return true;
+            }else{
+                refreshList = false;
+            }
+
             if (!ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
                 try {
                     TransferHandler handler = getTransferHandler();

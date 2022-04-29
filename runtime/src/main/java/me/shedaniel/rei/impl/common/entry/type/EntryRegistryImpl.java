@@ -47,19 +47,25 @@ import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextImpl;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextType;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.common.entry.CondensedEntryStack;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.LongPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -184,6 +190,46 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     public void addEntryAfter(@Nullable EntryStack<?> afterEntry, EntryStack<?> stack) {
+        boolean addCondensedEntryStackSet = false;
+
+        if(stack instanceof CondensedEntryStack condensedEntryStack){
+//            EntryStack<?> stack1 = EntryStack.of(stack.getType().cast(), stack.getValue());
+//
+//            removeEntry(stack1);
+
+            Set<Object> values = (Set<Object>) condensedEntryStack.getChildrenEntrySet().stream()
+                    .map(o -> condensedEntryStack.entryFromStack.apply(((EntryStack<?>)o).cast().getValue()))
+                    .collect(Collectors.toSet());
+
+            values.add(condensedEntryStack.entryFromStack.apply(stack.getValue()));
+
+            removeEntryIf(entryStack -> {
+                if(entryStack.getType() == stack.getType()) {
+//                    Registry<Object> registry = Registry.REGISTRY.get(condensedEntryStack.registryKey);
+//
+//                    if (registry != null) {
+//                        ResourceLocation id = registry.getKey(condensedEntryStack.entryFromStack.apply(entryStack.cast().getValue()));
+//
+//                        if (id != null && Objects.equals(id.getNamespace(), "minecraft")) {
+//                            return false;
+//                        }
+//                    }
+
+                    if(!(entryStack instanceof CondensedEntryStack)){
+                        if(values.contains(condensedEntryStack.entryFromStack.apply(entryStack.cast().getValue()))){
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }else{
+                    return false;
+                }
+            });
+
+            addCondensedEntryStackSet = true;
+        }
+
         if (reloading) {
             int index = afterEntry != null ? reloadingRegistry.lastIndexOf(new HashedEntryStackWrapper(afterEntry)) : -1;
             HashedEntryStackWrapper wrapper = new HashedEntryStackWrapper(stack);
@@ -199,6 +245,12 @@ public class EntryRegistryImpl implements EntryRegistry {
             } else entries.add(stack);
             preFilteredList.addAll(refilterNew(true, Collections.singletonList(stack)));
             queueSearchUpdate();
+        }
+
+        if(addCondensedEntryStackSet){
+            CondensedEntryStack<?, ?> condensedEntryStack = (CondensedEntryStack<?, ?>) stack;
+
+            addEntriesAfter(stack, condensedEntryStack.getChildrenEntrySet());
         }
     }
     

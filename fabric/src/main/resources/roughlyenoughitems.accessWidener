@@ -38,3 +38,4 @@ accessible    method net/minecraft/client/gui/screens/Screen                    
 accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;ILnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
 accessible class net/minecraft/client/renderer/RenderType$OutlineProperty
 accessible class net/minecraft/client/renderer/RenderType$CompositeState
+accessible    field net/minecraft/core/MappedRegistry byValue Ljava/util/Map;

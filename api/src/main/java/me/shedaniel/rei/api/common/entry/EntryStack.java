@@ -38,18 +38,22 @@ import me.shedaniel.rei.api.common.util.TextRepresentable;
 import me.shedaniel.rei.impl.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Unit;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -60,7 +64,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     static EntryStack<Unit> empty() {
         return Internals.getEntryStackProvider().empty();
     }
-    
+
     static <T> EntryStack<T> of(EntryDefinition<T> definition, T value) {
         return Internals.getEntryStackProvider().of(definition, value);
     }
@@ -68,7 +72,39 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     static <T> EntryStack<T> of(EntryType<T> type, T value) {
         return of(type.getDefinition(), value);
     }
-    
+
+    //-----------
+
+    static <T, B> EntryStack<T> ofCondensedEntry(EntryDefinition<T> definition, T value, ResourceLocation condensedEntryId, TagKey<B> entryTag, Function<B, T> defaultStackMethod, Function<T, B> entryFromStack) {
+        return Internals.getEntryStackProvider().ofCondensedEntry(definition, value, condensedEntryId, entryTag, defaultStackMethod, entryFromStack);
+    }
+
+    static <T, B> EntryStack<T> ofCondensedEntry(EntryType<T> type, T value, ResourceLocation condensedEntryId, TagKey<B> entryTag, Function<B, T> defaultStackMethod, Function<T, B> entryFromStack) {
+        return ofCondensedEntry(type.getDefinition(), value, condensedEntryId, entryTag, defaultStackMethod, entryFromStack);
+    }
+
+    //-----------
+
+    static <T, B> EntryStack<T> ofCondensedEntry(EntryDefinition<T> definition, T value, ResourceLocation condensedEntryId, ResourceKey<Registry<B>> registryKey, Predicate<B> predicate, Function<B, T> defaultStackMethod, Function<T, B> entryFromStack) {
+        return Internals.getEntryStackProvider().ofCondensedEntry(definition, value, condensedEntryId, registryKey, predicate, defaultStackMethod, entryFromStack);
+    }
+
+    static <T, B> EntryStack<T> ofCondensedEntry(EntryType<T> type, T value, ResourceLocation condensedEntryId, ResourceKey<Registry<B>> registryKey, Predicate<B> predicate, Function<B, T> defaultStackMethod, Function<T, B> entryFromStack) {
+        return ofCondensedEntry(type.getDefinition(), value, condensedEntryId, registryKey, predicate, defaultStackMethod, entryFromStack);
+    }
+
+    //-----------
+
+    static <T, B> EntryStack<T> ofCondensedEntry(EntryDefinition<T> definition, T value, ResourceLocation condensedEntryId, ResourceKey<Registry<B>> registryKey, Collection<B> collection, Function<B, T> defaultStackMethod, Function<T, B> entryFromStack) {
+        return Internals.getEntryStackProvider().ofCondensedEntry(definition, value, condensedEntryId, registryKey, collection, defaultStackMethod, entryFromStack);
+    }
+
+    static <T, B> EntryStack<T> ofCondensedEntry(EntryType<T> type, T value, ResourceLocation condensedEntryId, ResourceKey<Registry<B>> registryKey, Collection<B> collection, Function<B, T> defaultStackMethod, Function<T, B> entryFromStack) {
+        return ofCondensedEntry(type.getDefinition(), value, condensedEntryId, registryKey, collection, defaultStackMethod, entryFromStack);
+    }
+
+    //-----------
+
     static EntryStack<?> read(CompoundTag tag) {
         ResourceLocation type = new ResourceLocation(tag.getString("type"));
         EntryDefinition<?> definition = EntryTypeRegistry.getInstance().get(type);
@@ -79,7 +115,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         }
         throw new UnsupportedOperationException(definition.getType().getId() + " does not support deserialization!");
     }
-    
+
     @Nullable
     default CompoundTag save() {
         if (supportSaving()) {
@@ -120,7 +156,21 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         EntryRenderer<?> renderer = get(Settings.RENDERER).apply(this);
         return renderer == null ? EntryRenderer.empty() : renderer.cast();
     }
-    
+
+    @Environment(EnvType.CLIENT)
+    default T getDisplayValue(){
+        return this.getValue();
+    }
+
+    @Environment(EnvType.CLIENT)
+    default void getExtraDataEvent(){
+
+    }
+
+    default boolean currentlyVisible(){
+        return true;
+    }
+
     @Nullable
     ResourceLocation getIdentifier();
     
