@@ -41,14 +41,14 @@ public class RoughlyEnoughItemsInitializerImpl {
                 ImmutableSet.<String>builder()
                         .add("fabric-api-base")
                         .add("fabric-resource-loader-v0")
-                        .add("fabric-networking-v0")
+                        .add("fabric-networking-api-v1")
                         .add("fabric-lifecycle-events-v1")
                         .add("fabric-rendering-fluids-v1")
                         .build() :
                 ImmutableSet.<String>builder()
                         .add("fabric-api-base")
                         .add("fabric-resource-loader-v0")
-                        .add("fabric-networking-v0")
+                        .add("fabric-networking-api-v1")
                         .add("fabric-lifecycle-events-v1")
                         .build();
         for (String module : requiredModules) {
