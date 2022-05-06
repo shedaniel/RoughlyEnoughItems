@@ -59,6 +59,8 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
     private Short2ObjectMap<Object> settings = null;
     @Environment(EnvType.CLIENT)
     private int blitOffset;
+
+    private boolean isVisible = true;
     
     @Override
     @Environment(EnvType.CLIENT)
@@ -168,6 +170,10 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
     
     protected EntryStack<A> wrap(A value, boolean copySettings) {
         TypedEntryStack<A> stack = new TypedEntryStack<>(getDefinition(), value);
+
+        if(!currentlyVisible())
+            stack.toggleVisibility();
+
         if (copySettings) {
             for (Short2ObjectMap.Entry<Object> entry : getSettings().short2ObjectEntrySet()) {
                 stack.setting(EntryStack.Settings.getById(entry.getShortKey()), entry.getValue());
@@ -203,7 +209,17 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
             throw CrashReportUtils.throwReport(report);
         }
     }
-    
+
+    @Override
+    public boolean currentlyVisible() {
+        return this.isVisible;
+    }
+
+    @Override
+    public void toggleVisibility() {
+        this.isVisible = !this.isVisible;
+    }
+
     @Override
     @Nullable
     public Tooltip getTooltip(Point mouse, boolean appendModName) {

@@ -171,6 +171,8 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         return true;
     }
 
+    void toggleVisibility();
+
     @Nullable
     ResourceLocation getIdentifier();
     
