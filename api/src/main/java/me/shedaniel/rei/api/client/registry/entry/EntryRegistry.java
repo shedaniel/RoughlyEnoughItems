@@ -124,7 +124,7 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
     default void addEntriesAfter(@Nullable EntryStack<?> afterStack, EntryStack<?>... stacks) {
         addEntriesAfter(afterStack, Arrays.asList(stacks));
     }
-    
+
     /**
      * Adds multiple stacks to the item list, after a certain stack.
      *
@@ -132,7 +132,33 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
      * @param stacks     the stacks to add
      */
     void addEntriesAfter(@Nullable EntryStack<?> afterStack, Collection<? extends EntryStack<?>> stacks);
-    
+
+    /**
+     * Adds an new stack to the entry list, before a certain stack.
+     *
+     * @param beforeEntry the stack to put after
+     * @param stack      the stack to add
+     */
+    void addEntryBefore(@Nullable EntryStack<?> beforeEntry, EntryStack<?> stack);
+
+    /**
+     * Adds multiple stacks to the item list, before a certain stack.
+     *
+     * @param beforeStack the stack to put after
+     * @param stacks     the stacks to add
+     */
+    default void addEntriesBefore(@Nullable EntryStack<?> beforeStack, EntryStack<?>... stacks) {
+        addEntriesBefore(beforeStack, Arrays.asList(stacks));
+    }
+
+    /**
+     * Adds multiple stacks to the item list, before a certain stack.
+     *
+     * @param beforeStack the stack to put after
+     * @param stacks     the stacks to add
+     */
+    void addEntriesBefore(@Nullable EntryStack<?> beforeStack, Collection<? extends EntryStack<?>> stacks);
+
     /**
      * Adds multiple stacks to the item list.
      *

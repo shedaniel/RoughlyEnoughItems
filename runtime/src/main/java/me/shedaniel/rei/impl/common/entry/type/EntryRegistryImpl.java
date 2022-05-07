@@ -36,7 +36,6 @@ import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -53,19 +52,16 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.LongPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -187,87 +183,205 @@ public class EntryRegistryImpl implements EntryRegistry {
         list.sort(STACK_COMPARATOR);
         return list;
     }
-    
+
+    private enum ListAddingDirection{
+        RIGHT(1, 1),
+        LEFT(-1, 0);
+
+        public final int directionalValue;
+        public final int initialDirectionValue;
+
+        ListAddingDirection(int directionalValue, int initialDirectionValue){
+            this.directionalValue = directionalValue;
+            this.initialDirectionValue = initialDirectionValue;
+        }
+    }
+
+    @Override
+    public void addEntryBefore(@Nullable EntryStack<?> beforeEntry, EntryStack<?> stack) {
+        addEntry(beforeEntry, stack, ListAddingDirection.LEFT);
+    }
+
     @Override
     public void addEntryAfter(@Nullable EntryStack<?> afterEntry, EntryStack<?> stack) {
-        boolean addCondensedEntryStackSet = false;
+        addEntry(afterEntry, stack, ListAddingDirection.RIGHT);
+    }
 
-        if(stack instanceof CondensedEntryStack condensedEntryStack){
-//            EntryStack<?> stack1 = EntryStack.of(stack.getType().cast(), stack.getValue());
-//
-//            removeEntry(stack1);
+    public void addEntry(@Nullable EntryStack<?> startingEntry, EntryStack<?> stack, ListAddingDirection shiftDirection){
+        boolean addEntryAtEnd = true;
 
+        if(stack instanceof CondensedEntryStack condensedEntryStack && !condensedEntryStack.isChild){
             Set<Object> values = (Set<Object>) condensedEntryStack.getChildrenEntrySet().stream()
-                    .map(o -> condensedEntryStack.entryFromStack.apply(((EntryStack<?>)o).cast().getValue()))
+                    .map(o -> condensedEntryStack.entryFromStack.apply(((EntryStack<?>) o).cast().getValue()))
                     .collect(Collectors.toSet());
 
             values.add(condensedEntryStack.entryFromStack.apply(stack.getValue()));
 
-            removeEntryIf(entryStack -> {
-                if(entryStack.getType() == stack.getType()) {
-//                    Registry<Object> registry = Registry.REGISTRY.get(condensedEntryStack.registryKey);
-//
-//                    if (registry != null) {
-//                        ResourceLocation id = registry.getKey(condensedEntryStack.entryFromStack.apply(entryStack.cast().getValue()));
-//
-//                        if (id != null && Objects.equals(id.getNamespace(), "minecraft")) {
-//                            return false;
-//                        }
-//                    }
-
-                    if(!(entryStack instanceof CondensedEntryStack)){
-                        if(values.contains(condensedEntryStack.entryFromStack.apply(entryStack.cast().getValue()))){
+            toggleEntryVisibilityIf(entryStack -> {
+                if (entryStack.getType() == stack.getType()) {
+                    if (!(entryStack instanceof CondensedEntryStack)) {
+                        if (values.contains(condensedEntryStack.entryFromStack.apply(entryStack.cast().getValue()))) {
                             return true;
                         }
                     }
-
-                    return false;
-                }else{
-                    return false;
                 }
-            });
+                return false;
+            }, false);
 
-            addCondensedEntryStackSet = true;
+            if (startingEntry == null) {
+                EntryStack<?> possibleAfterEntry = EntryStack.of(stack.getDefinition().cast(), stack.getValue());
+                if(alreadyContain(possibleAfterEntry)) {
+                    startingEntry = possibleAfterEntry;
+                }
+            }
         }
 
         if (reloading) {
-            int index = afterEntry != null ? reloadingRegistry.lastIndexOf(new HashedEntryStackWrapper(afterEntry)) : -1;
+            int index = startingEntry != null ? reloadingRegistry.lastIndexOf(new HashedEntryStackWrapper(startingEntry)) + shiftDirection.initialDirectionValue : -1;
             HashedEntryStackWrapper wrapper = new HashedEntryStackWrapper(stack);
             if (this.entriesHash.add(wrapper.hashExact())) {
-                if (index >= 0) {
-                    reloadingRegistry.add(index, wrapper);
-                } else reloadingRegistry.add(wrapper);
+                if (index >= 0 && index < reloadingRegistry.size()) {
+                    if (reloadingRegistry.get(index).unwrap() instanceof CondensedEntryStack condensedEntryStack &&
+                            (shiftDirection == ListAddingDirection.RIGHT || (shiftDirection == ListAddingDirection.LEFT && condensedEntryStack.isChild))) {
+
+                        for(boolean outOfCondensedEntryGroup = false; !outOfCondensedEntryGroup; index += shiftDirection.directionalValue) {
+                            if(index >= reloadingRegistry.size()) {
+                                outOfCondensedEntryGroup = true;
+                            } else {
+                                if (!(reloadingRegistry.get(index).unwrap() instanceof CondensedEntryStack condensedEntryStack1 && condensedEntryStack.isChild)) {
+                                    outOfCondensedEntryGroup = true;
+                                    addEntryAtEnd = false;
+                                }
+                            }
+                        }
+                    } else {
+                        addEntryAtEnd = false;
+                    }
+
+                    if(!addEntryAtEnd)
+                        reloadingRegistry.add(index, wrapper);
+
+                }
+
+                if(addEntryAtEnd)
+                    reloadingRegistry.add(wrapper);
             }
         } else if (this.entriesHash.add(EntryStacks.hashExact(stack))) {
-            if (afterEntry != null) {
-                int index = entries.lastIndexOf(afterEntry);
-                entries.add(index, stack);
-            } else entries.add(stack);
+            if (startingEntry != null) {
+                int index = entries.lastIndexOf(startingEntry) + shiftDirection.initialDirectionValue;
+
+                if (index >= 0 && index < entries.size()) {
+                    if (entries.get(index) instanceof CondensedEntryStack condensedEntryStack &&
+                            (shiftDirection == ListAddingDirection.RIGHT || (shiftDirection == ListAddingDirection.LEFT && condensedEntryStack.isChild))) {
+
+                        for(boolean outOfCondensedEntryGroup = false; !outOfCondensedEntryGroup; index += shiftDirection.directionalValue) {
+                            if(index >= entries.size()) {
+                                outOfCondensedEntryGroup = true;
+                            } else {
+                                if (!(entries.get(index) instanceof CondensedEntryStack condensedEntryStack1 && condensedEntryStack1.isChild)) {
+                                    outOfCondensedEntryGroup = true;
+                                    addEntryAtEnd = false;
+                                }
+                            }
+                        }
+                    }else{
+                        addEntryAtEnd = false;
+                    }
+
+                    if(!addEntryAtEnd)
+                        entries.add(index, stack);
+                }
+            }
+
+            if(addEntryAtEnd)
+                entries.add(stack);
+
             preFilteredList.addAll(refilterNew(true, Collections.singletonList(stack)));
             queueSearchUpdate();
         }
 
-        if(addCondensedEntryStackSet){
-            CondensedEntryStack<?, ?> condensedEntryStack = (CondensedEntryStack<?, ?>) stack;
+        if(stack instanceof CondensedEntryStack condensedEntryStack && !condensedEntryStack.isChild){
+            for(Object object : condensedEntryStack.getChildrenEntrySet()) {
+                EntryStack condensedEntry = (EntryStack) object;
 
-            addEntriesAfter(stack, condensedEntryStack.getChildrenEntrySet());
+                EntryStack<?> regularEntry = stack;
+
+                addEntryAfter(regularEntry, condensedEntry);
+            }
         }
     }
-    
+
+    @Override
+    public void addEntriesBefore(@Nullable EntryStack<?> beforeStack, Collection<? extends EntryStack<?>> stacks) {
+        addEntries(beforeStack, stacks, ListAddingDirection.LEFT);
+    }
+
+
     @Override
     public void addEntriesAfter(@Nullable EntryStack<?> afterEntry, Collection<? extends EntryStack<?>> stacks) {
+        addEntries(afterEntry, stacks, ListAddingDirection.RIGHT);
+    }
+
+    public void addEntries(@Nullable EntryStack<?> startingEntry, Collection<? extends EntryStack<?>> stacks, ListAddingDirection shiftDirection){
+        boolean addEntriesAtEnd = true;
+
         if (reloading) {
-            int index = afterEntry != null ? reloadingRegistry.lastIndexOf(new HashedEntryStackWrapper(afterEntry)) : -1;
+            int index = startingEntry != null ? reloadingRegistry.lastIndexOf(new HashedEntryStackWrapper(startingEntry)) + shiftDirection.initialDirectionValue : -1;
             List<HashedEntryStackWrapper> filtered = CollectionUtils.mapAndFilter(stacks, wrapper -> entriesHash.add(wrapper.hashExact()), HashedEntryStackWrapper::new);
-            if (index >= 0) {
-                reloadingRegistry.addAll(index, filtered);
-            } else reloadingRegistry.addAll(filtered);
+            if (index >= 0 && index < reloadingRegistry.size()) {
+                if(reloadingRegistry.get(index).unwrap() instanceof CondensedEntryStack condensedEntryStack &&
+                        (shiftDirection == ListAddingDirection.RIGHT || (shiftDirection == ListAddingDirection.LEFT && condensedEntryStack.isChild))) {
+
+                    for(boolean outOfCondensedEntryGroup = false; !outOfCondensedEntryGroup; index += shiftDirection.directionalValue) {
+                        if(index >= reloadingRegistry.size()) {
+                            outOfCondensedEntryGroup = true;
+                        } else {
+                            if (!(reloadingRegistry.get(index).unwrap() instanceof CondensedEntryStack condensedEntryStack1 && condensedEntryStack.isChild)) {
+                                outOfCondensedEntryGroup = true;
+                                addEntriesAtEnd = false;
+                            }
+                        }
+                    }
+                }else{
+                    addEntriesAtEnd = false;
+                }
+
+                if(!addEntriesAtEnd)
+                    reloadingRegistry.addAll(index, filtered);
+            }
+
+            if(addEntriesAtEnd)
+                reloadingRegistry.addAll(filtered);
         } else {
             List<EntryStack<?>> filtered = CollectionUtils.filterToList((Collection<EntryStack<?>>) stacks, stack -> entriesHash.add(EntryStacks.hashExact(stack)));
-            if (afterEntry != null) {
-                int index = entries.lastIndexOf(afterEntry);
-                entries.addAll(index, filtered);
-            } else entries.addAll(filtered);
+            if (startingEntry != null) {
+                int index = entries.lastIndexOf(startingEntry) + shiftDirection.initialDirectionValue;
+
+                if (index >= 0 && index < entries.size()) {
+                    if (entries.get(index) instanceof CondensedEntryStack condensedEntryStack &&
+                            (shiftDirection == ListAddingDirection.RIGHT || (shiftDirection == ListAddingDirection.LEFT && condensedEntryStack.isChild))) {
+                        for(boolean outOfCondensedEntryGroup = false; !outOfCondensedEntryGroup; index += shiftDirection.directionalValue) {
+                            if(index >= entries.size()) {
+                                outOfCondensedEntryGroup = true;
+                            } else {
+                                if (!(entries.get(index) instanceof CondensedEntryStack condensedEntryStack1 && condensedEntryStack1.isChild)) {
+                                    outOfCondensedEntryGroup = true;
+                                    addEntriesAtEnd = false;
+                                }
+                            }
+                        }
+                    } else{
+                        addEntriesAtEnd = false;
+                    }
+
+                    if(!addEntriesAtEnd)
+                        entries.addAll(index, filtered);
+                }
+            }
+
+            if(addEntriesAtEnd)
+                entries.addAll(filtered);
+
             preFilteredList.addAll(refilterNew(true, filtered));
             queueSearchUpdate();
         }
@@ -353,6 +467,44 @@ public class EntryRegistryImpl implements EntryRegistry {
             preFilteredList.removeIf(entryStackPredicate);
             return entries.removeIf(entryStackPredicate);
         }
+    }
+
+    private boolean toggleEntryVisibilityIf(Predicate<? extends EntryStack<?>> predicate, boolean isVisible) {
+        AtomicBoolean entryChangedVisibility = new AtomicBoolean(false);
+
+        if (reloading) {
+            for(int i = 0; i < reloadingRegistry.size(); i++){
+                HashedEntryStackWrapper wrapper = reloadingRegistry.get(i);
+
+                if (((Predicate<EntryStack<?>>) predicate).test(wrapper.unwrap())) {
+                    if(wrapper.unwrap().currentlyVisible() != isVisible) {
+                        wrapper.unwrap().toggleVisibility();
+                    }
+
+                    if(!entryChangedVisibility.get()) {
+                        entryChangedVisibility.set(true);
+                    }
+                }
+            }
+
+        } else {
+            Consumer<EntryStack<?>> entryStackPredicate = stack -> {
+                if (((Predicate<EntryStack<?>>) predicate).test(stack)) {
+                    if(stack.currentlyVisible() != isVisible) {
+                        stack.toggleVisibility();
+                    }
+
+                    if(!entryChangedVisibility.get()) {
+                        entryChangedVisibility.set(true);
+                    }
+                }
+            };
+
+            preFilteredList.forEach(entryStackPredicate);
+            entries.forEach(entryStackPredicate);
+        }
+
+        return entryChangedVisibility.get();
     }
     
     @Override
