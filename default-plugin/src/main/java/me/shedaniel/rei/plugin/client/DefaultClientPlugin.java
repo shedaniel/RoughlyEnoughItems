@@ -43,6 +43,7 @@ import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.CondensedEntryStacks;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
@@ -141,31 +142,39 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             }
         }
 
+        registry.addEntry(EntryStacks.of(Blocks.NETHERITE_BLOCK));
+        registry.addEntry(EntryStacks.of(Blocks.IRON_BLOCK));
+
         registry.addEntry(CondensedEntryStacks.of(new ResourceLocation("planks_1"), Blocks.OAK_PLANKS, ItemTags.PLANKS));
-        registry.addEntry(CondensedEntryStacks.of(new ResourceLocation("planks_2"), Blocks.OAK_PLANKS, ItemTags.PLANKS));
 
-        registry.addEntry(CondensedEntryStacks.of(new ResourceLocation("planks_3"), Blocks.OAK_PLANKS, item -> {
-            if(item instanceof BlockItem blockItem){
-                Block block = blockItem.getBlock();
+        registry.addEntryAfter(CondensedEntryStacks.of(new ResourceLocation("planks_1"), Blocks.OAK_PLANKS, ItemTags.PLANKS), EntryStacks.of(Blocks.DIAMOND_BLOCK));
 
-                return Registry.BLOCK.getKey(block).getPath().contains("planks");
-            }
-
-            return false;
-        }));
-
-        List<Item> items = Stream.of(
-                Blocks.OAK_PLANKS,
-                Blocks.DARK_OAK_PLANKS,
-                Blocks.BIRCH_PLANKS,
-                Blocks.ACACIA_PLANKS,
-                Blocks.SPRUCE_PLANKS,
-                Blocks.JUNGLE_PLANKS,
-                Blocks.WARPED_PLANKS,
-                Blocks.CRIMSON_PLANKS,
-                Blocks.BEDROCK).map(Block::asItem).toList();
-
-        registry.addEntry(CondensedEntryStacks.of(new ResourceLocation("planks_and_bedrock"), Blocks.OAK_PLANKS, items));
+        registry.addEntry(EntryStacks.of(Blocks.GOLD_BLOCK));
+        registry.addEntry(EntryStacks.of(Blocks.COPPER_BLOCK));
+//        registry.addEntry(CondensedEntryStacks.of(new ResourceLocation("planks_2"), Blocks.OAK_PLANKS, ItemTags.PLANKS));
+//
+//        registry.addEntry(CondensedEntryStacks.of(new ResourceLocation("planks_3"), Blocks.OAK_PLANKS, item -> {
+//            if(item instanceof BlockItem blockItem){
+//                Block block = blockItem.getBlock();
+//
+//                return Registry.BLOCK.getKey(block).getPath().contains("planks");
+//            }
+//
+//            return false;
+//        }));
+//
+//        List<Item> items = Stream.of(
+//                Blocks.OAK_PLANKS,
+//                Blocks.DARK_OAK_PLANKS,
+//                Blocks.BIRCH_PLANKS,
+//                Blocks.ACACIA_PLANKS,
+//                Blocks.SPRUCE_PLANKS,
+//                Blocks.JUNGLE_PLANKS,
+//                Blocks.WARPED_PLANKS,
+//                Blocks.CRIMSON_PLANKS,
+//                Blocks.BEDROCK).map(Block::asItem).toList();
+//
+//        registry.addEntry(CondensedEntryStacks.of(new ResourceLocation("planks_and_bedrock"), Blocks.OAK_PLANKS, items));
     }
     
     @Override

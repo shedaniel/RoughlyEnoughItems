@@ -345,9 +345,20 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
                 Minecraft.getInstance().getItemRenderer().blitOffset = entry.getZ();
                 Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, entry.getDisplayValue(), bounds.x, bounds.y, null);
 
-                if(entry instanceof CondensedEntryStack condensedEntryStack && !condensedEntryStack.isChild) {
-                    RenderSystem.setShaderTexture(0, PLUS_ICON);
-                    blit(new PoseStack(), bounds.x, bounds.y, entry.getZ(), 0, 0, 16, 16, 16, 16);
+                if(entry instanceof CondensedEntryStack condensedEntryStack) {
+                    if(CondensedEntryStack.CHILD_VISIBILITY.get(condensedEntryStack.condensedEntryId)) {
+                        fill(new PoseStack(),  bounds.getMinX() - 1, bounds.getMinY() - 1, bounds.getMaxX() + 1, bounds.getMaxY() + 1, 0x7F111111); //0x22222222
+                    }
+
+                    if(!condensedEntryStack.isChild) {
+                        if(!CondensedEntryStack.CHILD_VISIBILITY.get(condensedEntryStack.condensedEntryId)) {
+                            RenderSystem.setShaderTexture(0, PLUS_ICON);
+                        }else {
+                            RenderSystem.setShaderTexture(0, MINUS_ICON);
+                        }
+
+                        blit(new PoseStack(), bounds.x, bounds.y, entry.getZ() + 10, 0, 0, 16, 16, 16, 16);
+                    }
                 }
 
                 Minecraft.getInstance().getItemRenderer().blitOffset = 0.0F;

@@ -37,7 +37,7 @@ public final class CondensedEntryStacks {
     }
 
     public static EntryStack<ItemStack> of(ResourceLocation location, ItemStack stack, TagKey<Item> itemTagKey) {
-        return EntryStack.ofCondensedEntry(VanillaEntryTypes.ITEM, stack, location,itemTagKey, ITEM_DEFAULT_STACK, ITEM_STACK_TO_ITEM);
+        return EntryStack.ofCondensedEntry(VanillaEntryTypes.ITEM, stack, location, itemTagKey, ITEM_DEFAULT_STACK, ITEM_STACK_TO_ITEM);
     }
 
     public static EntryStack<ItemStack> of(ResourceLocation location, ItemLike item, TagKey<Item> itemTagKey) {
