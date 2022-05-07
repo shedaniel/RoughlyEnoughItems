@@ -49,6 +49,7 @@ import java.util.stream.Stream;
 public interface EntryDefinition<T> {
 
     ResourceLocation PLUS_ICON = new ResourceLocation("roughlyenoughitems", "textures/gui/plus_logo.png");
+    ResourceLocation MINUS_ICON = new ResourceLocation("roughlyenoughitems", "textures/gui/minus_logo.png");
 
     /**
      * Returns the type of the entry.
