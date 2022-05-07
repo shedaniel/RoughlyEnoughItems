@@ -68,6 +68,7 @@ import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.performance.entry.EntryListEntry;
 import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import me.shedaniel.rei.impl.common.entry.CondensedEntryStack;
@@ -96,6 +97,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -524,15 +526,15 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                     Collections.reverse(list);
                 }
 
-                list = list.stream().filter(entryStack -> {
-                    if(entryStack instanceof CondensedEntryStack condensedEntry){
-                        return condensedEntry.currentlyVisible();
-                    }
+                Predicate<EntryStack<?>> condensedEntrySort;
 
-                    return true;
-                }).toList();
+                if(searchTerm.isBlank()){
+                    condensedEntrySort = EntryStack::currentlyVisible;
+                }else{
+                    condensedEntrySort = entryStack -> !(entryStack instanceof CondensedEntryStack);
+                }
 
-                allStacks = list;
+                allStacks = list.stream().filter(condensedEntrySort).toList();
                 
                 if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
                     RoughlyEnoughItemsCore.LOGGER.info("Search Used: %s", stopwatch.stop().toString());
