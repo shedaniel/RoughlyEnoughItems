@@ -29,10 +29,12 @@ public class CondensedEntryStack<A, B> extends TypedEntryStack<A> {
 
     private EntryStack<A> currentlyActiveEntry = null;
 
-    private Set<CondensedEntryStack<A, B>> childrenSet;
+    private List<CondensedEntryStack<A, B>> childrenSet;
 
     public final ResourceLocation condensedEntryId;
     public final boolean isChild;
+
+    public boolean isLast = false;
 
     private long lastTick = 0;
 
@@ -52,14 +54,16 @@ public class CondensedEntryStack<A, B> extends TypedEntryStack<A> {
 
         setChildrenEntrySet(colletion.stream()
                 .map(colletionEntry -> new CondensedEntryStack<A, B>(this.condensedEntryId, this.getDefinition(), defaultStackMethod.apply(colletionEntry), true))
-                .collect(Collectors.toSet()));
+                .collect(Collectors.toList()));
+
+        getChildrenEntrySet().get(getChildrenEntrySet().size() - 1).isLast = true;
     }
 
     public void setupChildSet(ResourceKey<Registry<B>> registryKey, Predicate<B> predicate, Function<B, A> defaultStackMethod){
         Registry<B> registry = (Registry<B>) Registry.REGISTRY.get(registryKey.location());
         this.registryKey = registryKey;
 
-        Set<CondensedEntryStack<A, B>> childrenEntrySet = new HashSet<>();
+        List<CondensedEntryStack<A, B>> childrenEntrySet = new ArrayList<>();
 
         if(registry != null) {
             for (B registryEntry : registry) {
@@ -70,34 +74,41 @@ public class CondensedEntryStack<A, B> extends TypedEntryStack<A> {
         }
 
         setChildrenEntrySet(childrenEntrySet);
+
+        getChildrenEntrySet().get(getChildrenEntrySet().size() - 1).isLast = true;
     }
 
     public void setupChildSet(TagKey<B> entryTag, Function<B, A> defaultStackMethod){
         Registry<B> registry = (Registry<B>) Registry.REGISTRY.get(entryTag.registry().location());
         this.registryKey = entryTag.registry();
 
-        Set<CondensedEntryStack<A, B>> childrenEntrySet = new HashSet<>();
+        List<CondensedEntryStack<A, B>> childrenEntrySet = new ArrayList<>();
 
-        for (Map.Entry<ResourceKey<B>, B> entry : registry.entrySet()) {
+        if(registry == null)
+            throw new NullPointerException("A Tag used to create a Condensed Entry Stack was found to have no Valid Registry in the Main Registry! : [" + this.condensedEntryId + "]");
+
+        for (B registryEntry : registry) {
             if (registry instanceof MappedRegistry mappedRegistry) {
-                if (((Map<B, Holder.Reference<B>>) mappedRegistry.byValue).get(entry.getValue()).is(entryTag)) {
-                    childrenEntrySet.add(new CondensedEntryStack<A, B>(this.condensedEntryId, this.getDefinition(), defaultStackMethod.apply(entry.getValue()), true));
+                if (((Map<B, Holder.Reference<B>>) mappedRegistry.byValue).get(registryEntry).is(entryTag)) {
+                    childrenEntrySet.add(new CondensedEntryStack<A, B>(this.condensedEntryId, this.getDefinition(), defaultStackMethod.apply(registryEntry), true));
                 }
             }
         }
 
         setChildrenEntrySet(childrenEntrySet);
+
+        getChildrenEntrySet().get(getChildrenEntrySet().size() - 1).isLast = true;
     }
 
     public void setEntryFromStackFunction(Function<A, B> entryFromStack){
         this.entryFromStack = entryFromStack;
     }
 
-    public Set<CondensedEntryStack<A, B>> getChildrenEntrySet() {
+    public List<CondensedEntryStack<A, B>> getChildrenEntrySet() {
         return childrenSet;
     }
 
-    public void setChildrenEntrySet(Set<CondensedEntryStack<A, B>> childrenEntrySet) {
+    public void setChildrenEntrySet(List<CondensedEntryStack<A, B>> childrenEntrySet) {
         this.childrenSet = childrenEntrySet;
     }
 
@@ -151,6 +162,7 @@ public class CondensedEntryStack<A, B> extends TypedEntryStack<A> {
             stack.setChildrenEntrySet(this.getChildrenEntrySet());
         }
 
+        stack.isLast = isLast;
         stack.registryKey = registryKey;
 
         if (copySettings) {
@@ -161,6 +173,4 @@ public class CondensedEntryStack<A, B> extends TypedEntryStack<A> {
 
         return stack;
     }
-
-
 }
