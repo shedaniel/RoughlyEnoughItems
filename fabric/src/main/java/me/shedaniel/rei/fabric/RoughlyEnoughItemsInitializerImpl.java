@@ -59,13 +59,13 @@ public class RoughlyEnoughItemsInitializerImpl {
             }
         }
         if (!FabricLoader.getInstance().isModLoaded("architectury")) {
-            RoughlyEnoughItemsState.error("Architectury API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/architectury-fabric/files/all");
+            RoughlyEnoughItemsState.error("Architectury API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/architectury-forge/files/all");
         } else {
             Version version = FabricLoader.getInstance().getModContainer("architectury").get().getMetadata().getVersion();
             
             try {
                 if (version instanceof SemanticVersion && SemanticVersion.parse("2.6.0").compareTo((SemanticVersion) version) > 0) {
-                    RoughlyEnoughItemsState.error("Architectury API is too old, please update!", "https://www.curseforge.com/minecraft/mc-mods/architectury-fabric/files/all");
+                    RoughlyEnoughItemsState.error("Architectury API is too old, please update!", "https://www.curseforge.com/minecraft/mc-mods/architectury-forge/files/all");
                 }
             } catch (VersionParsingException e) {
                 e.printStackTrace();
