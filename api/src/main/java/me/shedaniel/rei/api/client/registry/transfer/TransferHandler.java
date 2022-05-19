@@ -65,14 +65,6 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         return Double.compare(getPriority(), o.getPriority());
     }
     
-    @Deprecated
-    @Environment(EnvType.CLIENT)
-    @Nullable
-    @ApiStatus.ScheduledForRemoval
-    default TransferHandlerErrorRenderer provideErrorRenderer(Context context, Object data) {
-        return null;
-    }
-    
     @ApiStatus.NonExtendable
     interface Result {
         /**
@@ -132,12 +124,6 @@ public interface TransferHandler extends Comparable<TransferHandler> {
          */
         Result color(int color);
         
-        /**
-         * Sets the error data, to be passed to {@link TransferHandler#provideErrorRenderer(Context, Object)}.
-         */
-        @Deprecated
-        Result errorRenderer(Object data);
-        
         Result renderer(TransferHandlerRenderer renderer);
         
         @ApiStatus.Experimental
@@ -191,12 +177,6 @@ public interface TransferHandler extends Comparable<TransferHandler> {
     
     @ApiStatus.NonExtendable
     interface Context {
-        @Deprecated
-        @ApiStatus.ScheduledForRemoval
-        static Context create(boolean actuallyCrafting, @Nullable AbstractContainerScreen<?> containerScreen, Display display) {
-            return create(actuallyCrafting, Screen.hasShiftDown(), containerScreen, display);
-        }
-        
         static Context create(boolean actuallyCrafting, boolean stackedCrafting, @Nullable AbstractContainerScreen<?> containerScreen, Display display) {
             return new ContextImpl(actuallyCrafting, stackedCrafting, containerScreen, () -> display);
         }
@@ -229,7 +209,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
     final class ResultImpl implements Result {
         private boolean successful, applicable, returningToScreen, blocking;
         private Component error;
-        private Object errorRenderer;
+        private TransferHandlerRenderer renderer;
         private BiConsumer<Point, TooltipSink> tooltipRenderer;
         private int color;
         
@@ -272,14 +252,8 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         }
         
         @Override
-        public Result errorRenderer(Object data) {
-            this.errorRenderer = data;
-            return this;
-        }
-        
-        @Override
         public Result renderer(TransferHandlerRenderer renderer) {
-            this.errorRenderer = renderer;
+            this.renderer = renderer;
             return this;
         }
         
@@ -316,11 +290,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         
         @Override
         public TransferHandlerRenderer getRenderer(TransferHandler handler, Context context) {
-            if (errorRenderer == null) return null;
-            if (errorRenderer instanceof TransferHandlerRenderer) return (TransferHandlerRenderer) errorRenderer;
-            if (isSuccessful()) return null;
-            TransferHandlerErrorRenderer renderer = handler.provideErrorRenderer(context, this.errorRenderer);
-            return renderer == null ? null : renderer.asNew();
+            return renderer;
         }
         
         @Override
