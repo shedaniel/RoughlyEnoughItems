@@ -207,7 +207,7 @@ curseforge {
             addGameVersion "Java 8"
             addGameVersion "Forge"
             relations {
-                requiredDependency "architectury-forge"
+                requiredDependency "architectury-api"
                 requiredDependency "cloth-config"
                 requiredDependency "roughly-enough-items-hacks"
             }
@@ -225,7 +225,7 @@ curseforge {
             addGameVersion "Java 8"
             addGameVersion "Forge"
             relations {
-                requiredDependency "architectury-forge"
+                requiredDependency "architectury-api"
                 requiredDependency "cloth-config"
             }
             mainArtifact(tasks.getByName("serverOnlyJar")) {
