@@ -78,19 +78,8 @@ public class QueuedTooltip implements Tooltip {
     }
     
     @Override
-    public List<TooltipComponent> components() {
-        return CollectionUtils.filterAndMap(entries, TooltipEntryImpl::isTooltipComponent, TooltipEntryImpl::getAsTooltipComponent);
-    }
-    
-    @Override
     public Tooltip add(Component text) {
         entries.add(new TooltipEntryImpl(text));
-        return this;
-    }
-    
-    @Override
-    public Tooltip add(ClientTooltipComponent component) {
-        entries.add(new TooltipEntryImpl(component));
         return this;
     }
     
@@ -124,6 +113,14 @@ public class QueuedTooltip implements Tooltip {
     }
     
     public record TooltipEntryImpl(Object obj) implements Tooltip.Entry {
+        public TooltipEntryImpl(Object obj) {
+            this.obj = obj;
+            
+            if (!(obj instanceof Component) && !(obj instanceof TooltipComponent)) {
+                throw new IllegalArgumentException("obj must be a Component or TooltipComponent");
+            }
+        }
+        
         @Override
         public Component getAsText() {
             return (Component) obj;
@@ -145,15 +142,6 @@ public class QueuedTooltip implements Tooltip {
         @Override
         public TooltipComponent getAsTooltipComponent() {
             return (TooltipComponent) obj;
-        }
-        
-        @Override
-        public ClientTooltipComponent getAsComponent() {
-            if (isTooltipComponent()) {
-                return ClientTooltipComponent.create((TooltipComponent) obj);
-            }
-            
-            return (ClientTooltipComponent) obj;
         }
     }
 }

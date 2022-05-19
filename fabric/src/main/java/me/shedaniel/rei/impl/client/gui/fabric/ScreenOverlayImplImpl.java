@@ -48,8 +48,6 @@ public class ScreenOverlayImplImpl {
                         Stream<FormattedCharSequence> sequenceStream = texts.isEmpty() ? Stream.of(component.getAsText().getVisualOrderText())
                                 : texts.stream().map(Language.getInstance()::getVisualOrder);
                         return sequenceStream.map(ClientTooltipComponent::create);
-                    } else if (!component.isTooltipComponent()) {
-                        return Stream.of(component.getAsComponent());
                     } else {
                         return Stream.empty();
                     }
