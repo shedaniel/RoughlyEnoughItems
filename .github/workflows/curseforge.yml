@@ -11,6 +11,7 @@ on:
       - 6.x-1.17
       - 7.x-1.18
       - 8.x-1.18.2
+      - 9.x-1.19
 
 jobs:
   build:
@@ -23,7 +24,8 @@ jobs:
         with:
           java-version: 17
       - name: Upload to CurseForge
-        run: ./gradlew build publish forge:curseforge fabric:curseforge jei-internals-workaround:curseforge --stacktrace
+        # run: ./gradlew build publish forge:curseforge fabric:curseforge jei-internals-workaround:curseforge --stacktrace
+        run: ./gradlew build publish fabric:curseforge --stacktrace
         env:
           danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
           BRANCH_NAME: ${{ github.ref }}
