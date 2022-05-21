@@ -121,7 +121,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     }
     
     protected DisplayCategoryView<Display> getCurrentCategoryView(Display display) {
-        return CategoryRegistry.getInstance().get(categories.get(selectedCategoryIndex).getCategoryIdentifier().cast())
+        return CategoryRegistry.getInstance().get(display.getCategoryIdentifier().cast())
                 .getView(display);
     }
     
@@ -131,7 +131,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         currentCategoryIndex--;
         if (currentCategoryIndex < 0)
             currentCategoryIndex = categories.size() - 1;
-        ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+        ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
     }
     
     @Override
@@ -140,7 +140,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         currentCategoryIndex++;
         if (currentCategoryIndex >= categories.size())
             currentCategoryIndex = 0;
-        ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+        ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
     }
     
     protected void transformIngredientNotice(List<Widget> setupDisplay, List<EntryStack<?>> noticeStacks) {
@@ -203,9 +203,8 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                 collection = Registry.FLUID.getTagNames();
                 objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<FluidStack>castValue().getFluid().builtInRegistryHolder());
             } else continue;
-            TagKey<?> firstOrNull = collection.filter(key ->
-                            CollectionUtils.anyMatch(objects, holder -> ((Holder<Object>) holder).is((TagKey<Object>) key)))
-                    .findAny().orElse(null);
+            TagKey<?> firstOrNull = CollectionUtils.findFirstOrNull(collection::iterator,
+                    key -> CollectionUtils.allMatch(objects, holder -> ((Holder<Object>) holder).is((TagKey<Object>) key)));
             if (firstOrNull != null) {
                 widget.tagMatch = firstOrNull.location();
             }

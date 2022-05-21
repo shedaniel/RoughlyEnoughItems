@@ -49,6 +49,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.StringUtil;
 
 import java.util.*;
@@ -62,7 +63,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.entrySize;
+import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
 @Environment(EnvType.CLIENT)
 public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRule> {

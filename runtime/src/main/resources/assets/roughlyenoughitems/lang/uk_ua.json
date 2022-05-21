@@ -212,7 +212,7 @@
   "config.roughlyenoughitems.disableRecipeBook.boolean.false": "§aТак",
   "config.roughlyenoughitems.fixTabCloseContainer": "Відновлення стандартної вкладки контейнера (коли книга рецептів відключена):",
   "config.roughlyenoughitems.lighterButtonHover": "Підсвічена кнопка при наведенні:",
-  "config.roughlyenoughitems.layout.enableCraftableOnlyButton": "Фільтр по створюваним предметів:",
+  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "Фільтр по створюваним предметів:",
   "config.roughlyenoughitems.layout.showUtilsButtons": "Кнопка утиліт:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "Команда зміни ігрового режиму:",
   "config.roughlyenoughitems.commands.giveCommand": "Команда видачі предметів:",

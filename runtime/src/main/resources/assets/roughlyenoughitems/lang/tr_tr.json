@@ -207,7 +207,7 @@
   "config.roughlyenoughitems.disableRecipeBook.boolean.false": "§aEvet",
   "config.roughlyenoughitems.fixTabCloseContainer": "Vanilla Sekme Penceresini Düzelt (Tarif Kitabı Devre Dışıyken):",
   "config.roughlyenoughitems.lighterButtonHover": "Daha Açık İmleç Üstü Tuş:",
-  "config.roughlyenoughitems.layout.enableCraftableOnlyButton": "Üretilebilme Filtresi:",
+  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "Üretilebilme Filtresi:",
   "config.roughlyenoughitems.layout.showUtilsButtons": "Araç Tuşları:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "Oyun Modu Komutu:",
   "config.roughlyenoughitems.commands.giveCommand": "Komut Ver:",

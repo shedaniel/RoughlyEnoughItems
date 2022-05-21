@@ -255,7 +255,14 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
                 modelViewStack.popPose();
                 RenderSystem.applyModelViewMatrix();
             }
+            PoseStack modelViewStack = RenderSystem.getModelViewStack();
+            modelViewStack.pushPose();
+            modelViewStack.mulPoseMatrix(matrices.last().pose());
+            modelViewStack.translate(bounds.x, bounds.y, 0);
+            modelViewStack.scale(bounds.width / 16f, (bounds.getWidth() + bounds.getHeight()) / 2f / 16f, 1.0F);
+            RenderSystem.applyModelViewMatrix();
             renderOverlay(entry, bounds);
+            modelViewStack.popPose();
             endGL(entry, model);
             RenderSystem.applyModelViewMatrix();
         }
@@ -306,13 +313,21 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         
         @Override
         public void renderOverlay(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
+            PoseStack modelViewStack = RenderSystem.getModelViewStack();
+            modelViewStack.pushPose();
+            modelViewStack.mulPoseMatrix(matrices.last().pose());
+            modelViewStack.translate(bounds.x, bounds.y, 0);
+            modelViewStack.scale(bounds.width / 16f, (bounds.getWidth() + bounds.getHeight()) / 2f / 16f, 1.0F);
+            RenderSystem.applyModelViewMatrix();
             renderOverlay(entry, bounds);
+            modelViewStack.popPose();
+            RenderSystem.applyModelViewMatrix();
         }
         
         public void renderOverlay(EntryStack<ItemStack> entry, Rectangle bounds) {
             if (!entry.isEmpty()) {
                 Minecraft.getInstance().getItemRenderer().blitOffset = entry.getZ();
-                Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, entry.getValue(), bounds.x, bounds.y, null);
+                Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, entry.getValue(), 0, 0, null);
                 Minecraft.getInstance().getItemRenderer().blitOffset = 0.0F;
             }
         }

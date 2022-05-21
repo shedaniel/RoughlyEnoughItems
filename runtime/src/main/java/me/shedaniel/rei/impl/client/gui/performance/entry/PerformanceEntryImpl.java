@@ -38,11 +38,11 @@ import java.util.Collections;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
-public class EntryListEntry extends PerformanceScreen.PerformanceEntry {
+public class PerformanceEntryImpl extends PerformanceScreen.PerformanceEntry {
     private final Component name;
     public final long time;
     
-    public EntryListEntry(Component name, long time) {
+    public PerformanceEntryImpl(Component name, long time) {
         this.name = name;
         this.time = time;
     }

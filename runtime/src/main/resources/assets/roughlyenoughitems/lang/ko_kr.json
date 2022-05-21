@@ -224,7 +224,7 @@
   "config.roughlyenoughitems.leftSideMobEffects.boolean.true": "왼쪽",
   "config.roughlyenoughitems.fixTabCloseContainer": "바닐라 탭 제작대 수정 (제작법 책이 사용안될 때):",
   "config.roughlyenoughitems.lighterButtonHover": "버튼 호버 효과 더 밝게:",
-  "config.roughlyenoughitems.layout.enableCraftableOnlyButton": "제작 가능 필터:",
+  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "제작 가능 필터:",
   "config.roughlyenoughitems.layout.showUtilsButtons": "유틸리티 버튼:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "게임 모드 명령어:",
   "config.roughlyenoughitems.commands.giveCommand": "주기 명령어:",

@@ -258,7 +258,7 @@
   "config.roughlyenoughitems.leftSideMobEffects.boolean.false": "Rechts (Vanilla)",
   "config.roughlyenoughitems.fixTabCloseContainer": "Korrigier den Vanilla Tab Container (wenn das Rezeptbuch deaktiviert ist):",
   "config.roughlyenoughitems.lighterButtonHover": "Helles Button-Hovern:",
-  "config.roughlyenoughitems.layout.enableCraftableOnlyButton": "Filter für Herstellbare Gegenstände:",
+  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "Filter für Herstellbare Gegenstände:",
   "config.roughlyenoughitems.layout.showUtilsButtons": "Werkzeugknöpfe:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "Befehl Spielmodus-Wechsel:",
   "config.roughlyenoughitems.commands.giveCommand": "Geben-Befehl:",

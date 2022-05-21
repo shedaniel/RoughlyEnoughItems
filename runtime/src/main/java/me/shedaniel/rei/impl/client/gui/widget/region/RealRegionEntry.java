@@ -28,14 +28,13 @@ import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
-import me.shedaniel.rei.impl.client.gui.widget.EntryStacksRegionWidget;
 
-import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.entrySize;
+import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
 public class RealRegionEntry<T extends RegionEntry<T>> {
     public EntryStacksRegionWidget<T> region;
     private T entry;
-    private final RegionEntryListEntry<T> widget;
+    private final RegionEntryWidget<T> widget;
     private boolean hidden;
     public ValueAnimator<FloatingPoint> pos = ValueAnimator.ofFloatingPoint();
     public NumberAnimator<Double> size = ValueAnimator.ofDouble();
@@ -43,7 +42,7 @@ public class RealRegionEntry<T extends RegionEntry<T>> {
     public RealRegionEntry(EntryStacksRegionWidget<T> region, T entry, int entrySize) {
         this.region = region;
         this.entry = entry;
-        this.widget = (RegionEntryListEntry<T>) new RegionEntryListEntry<>(this, 0, 0, entrySize).noBackground();
+        this.widget = (RegionEntryWidget<T>) new RegionEntryWidget<>(this, 0, 0, entrySize).noBackground();
     }
     
     public void remove() {
@@ -63,7 +62,7 @@ public class RealRegionEntry<T extends RegionEntry<T>> {
         this.getWidget().getBounds().y = (int) Math.round(pos.value().y + offsetSize) - (int) region.getScrollAmount();
     }
     
-    public RegionEntryListEntry<T> getWidget() {
+    public RegionEntryWidget<T> getWidget() {
         return widget;
     }
     

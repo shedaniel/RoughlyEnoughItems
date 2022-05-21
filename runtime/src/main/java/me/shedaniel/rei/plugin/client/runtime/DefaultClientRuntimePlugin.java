@@ -38,8 +38,8 @@ import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.config.ItemCheatingMode;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProviderWidget;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitorWidget;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -61,7 +61,7 @@ import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
-import me.shedaniel.rei.impl.client.gui.widget.FavoritesListWidget;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.fabricmc.api.EnvType;
@@ -135,19 +135,19 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         zones.register(Screen.class, screen -> {
             FavoritesListWidget widget = ScreenOverlayImpl.getFavoritesListWidget();
             if (widget != null) {
-                if (widget.favoritePanelButton.isVisible()) {
-                    return Collections.singletonList(widget.favoritePanelButton.bounds);
+                if (widget.togglePanelButton.isVisible()) {
+                    return Collections.singletonList(widget.togglePanelButton.bounds);
                 }
             }
             return Collections.emptyList();
         });
-        registry.registerDraggableStackProvider(DraggableStackProviderWidget.from(context -> {
+        registry.registerDraggableComponentProvider(DraggableComponentProviderWidget.from(context -> {
             if (RoughlyEnoughItemsCoreClient.shouldReturn(context.getScreen()) || !REIRuntime.getInstance().isOverlayVisible()) return Collections.emptyList();
-            return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableStackProviderWidget.class::isInstance);
+            return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableComponentProviderWidget.class::isInstance);
         }));
-        registry.registerDraggableStackVisitor(DraggableStackVisitorWidget.from(context -> {
+        registry.registerDraggableComponentVisitor(DraggableComponentVisitorWidget.from(context -> {
             if (RoughlyEnoughItemsCoreClient.shouldReturn(context.getScreen()) || !REIRuntime.getInstance().isOverlayVisible()) return Collections.emptyList();
-            return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableStackVisitorWidget.class::isInstance);
+            return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableComponentVisitorWidget.class::isInstance);
         }));
     }
     

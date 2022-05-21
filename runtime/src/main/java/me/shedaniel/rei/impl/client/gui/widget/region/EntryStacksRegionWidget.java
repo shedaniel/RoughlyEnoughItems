@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.widget;
+package me.shedaniel.rei.impl.client.gui.widget.region;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -44,10 +44,8 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
-import me.shedaniel.rei.impl.client.gui.widget.region.RegionDraggableStack;
-import me.shedaniel.rei.impl.client.gui.widget.region.RegionEntryListEntry;
-import me.shedaniel.rei.impl.client.gui.widget.region.RegionListener;
+import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
+import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
@@ -63,14 +61,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.entrySize;
-import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.notSteppingOnExclusionZones;
+import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
 public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWithBounds implements DraggableStackProviderWidget, DraggableStackVisitorWidget {
     public final RegionListener<T> listener;
     protected int blockedCount;
     private Rectangle bounds = new Rectangle(), innerBounds;
-    protected final ScrollingContainer scrolling = new ScrollingContainer() {
+    public final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
         public Rectangle getBounds() {
             return EntryStacksRegionWidget.this.getBounds();
@@ -91,7 +88,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     };
     private final Int2ObjectMap<RealRegionEntry<T>> entries = new Int2ObjectLinkedOpenHashMap<>();
     private final Int2ObjectMap<RealRegionEntry<T>> removedEntries = new Int2ObjectLinkedOpenHashMap<>();
-    private List<RegionEntryListEntry<T>> entriesList = Lists.newArrayList();
+    private List<RegionEntryWidget<T>> entriesList = Lists.newArrayList();
     private List<Widget> children = Lists.newArrayList();
     
     public EntryStacksRegionWidget(RegionListener<T> listener) {
@@ -127,7 +124,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         
         ScissorsHandler.INSTANCE.scissor(bounds);
         
-        Stream<RegionEntryListEntry<T>> entryStream = this.entriesList.stream()
+        Stream<RegionEntryWidget<T>> entryStream = this.entriesList.stream()
                 .filter(entry -> entry.getBounds().getMaxY() >= this.bounds.getY() && entry.getBounds().y <= this.bounds.getMaxY());
         
         new BatchedEntryRendererManager(entryStream.collect(Collectors.toList()))
@@ -162,7 +159,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (scrolling.mouseDragged(mouseX, mouseY, button, deltaX, deltaY, ConfigObject.getInstance().doesSnapToRows(), entrySize()))
+        if (scrolling.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
             return true;
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
@@ -298,7 +295,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         
         this.listener.onSetNewEntries(entriesList);
         this.listener.onSetNewEntries(entriesList.stream()
-                .map(RegionEntryListEntry::getEntry)
+                .map(RegionEntryWidget::getEntry)
                 .map(RealRegionEntry::getEntry));
     }
     
@@ -335,7 +332,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                     currentY++;
                 }
                 
-                if (notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize, innerBounds)) {
+                if (listener.notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize)) {
                     if (slotIndex++ == releaseIndex) {
                         continue;
                     }
@@ -369,7 +366,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                         currentY++;
                     }
                     
-                    if (notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize, innerBounds)) {
+                    if (listener.notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize)) {
                         entriesPoints.add(new Tuple<>(entry, new Point(xPos, yPos)));
                         break;
                     } else {
@@ -383,7 +380,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                 int xPos = currentX * entrySize + innerBounds.x;
                 int yPos = currentY * entrySize + innerBounds.y;
                 
-                if (notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize, innerBounds)) {
+                if (listener.notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize)) {
                     entriesPoints.add(new Tuple<>(null, new Point(xPos, yPos)));
                 }
             }

@@ -351,6 +351,8 @@ public class ViewsImpl implements Views {
         
         AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
         Set<EntryStack<?>> craftables = new HashSet<>();
+        boolean onlyIncludeHasMenu = false;
+        
         for (Map.Entry<CategoryIdentifier<?>, List<Display>> entry : DisplayRegistry.getInstance().getAll().entrySet()) {
             class InfoSerializationContext implements MenuSerializationContext<AbstractContainerMenu, LocalPlayer, Display> {
                 @Override
@@ -376,6 +378,10 @@ public class ViewsImpl implements Views {
                 MenuInfo<AbstractContainerMenu, Display> info = menu != null ?
                         MenuInfoRegistry.getInstance().getClient(display, context, menu)
                         : null;
+                
+                if (onlyIncludeHasMenu && info == null) {
+                    continue;
+                }
                 
                 Iterable<SlotAccessor> inputSlots = info != null ? info.getInputSlots(context.withDisplay(display)) : Collections.emptySet();
                 int slotsCraftable = 0;
@@ -417,6 +423,11 @@ public class ViewsImpl implements Views {
                     }
                 }
                 if (slotsCraftable == display.getRequiredEntries().size() && containsNonEmpty) {
+                    if (info != null && !onlyIncludeHasMenu) {
+                        onlyIncludeHasMenu = true;
+                        craftables.clear();
+                    }
+                    
                     display.getOutputEntries().stream().flatMap(Collection::stream).collect(Collectors.toCollection(() -> craftables));
                 }
             }

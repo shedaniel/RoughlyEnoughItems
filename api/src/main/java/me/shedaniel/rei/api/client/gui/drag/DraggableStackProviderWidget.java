@@ -23,6 +23,9 @@
 
 package me.shedaniel.rei.api.client.gui.drag;
 
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProviderWidget;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,7 +36,7 @@ import java.util.function.Function;
  * {@link DraggableStack}.
  */
 @FunctionalInterface
-public interface DraggableStackProviderWidget {
+public interface DraggableStackProviderWidget extends DraggableComponentProviderWidget<EntryStack<?>> {
     static DraggableStackProviderWidget from(Function<DraggingContext<Screen>, Iterable<DraggableStackProviderWidget>> providers) {
         return (context, mouseX, mouseY) -> {
             for (DraggableStackProviderWidget provider : providers.apply(context)) {
@@ -46,6 +49,12 @@ public interface DraggableStackProviderWidget {
     
     @Nullable
     DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY);
+    
+    @Override
+    @Nullable
+    default DraggableComponent<EntryStack<?>> getHovered(DraggingContext<Screen> context, double mouseX, double mouseY) {
+        return getHoveredStack(context, mouseX, mouseY);
+    }
     
     static DraggableStackProvider<Screen> toProvider(DraggableStackProviderWidget widget) {
         return toProvider(widget, 0D);

@@ -170,7 +170,7 @@
   "config.roughlyenoughitems.disableRecipeBook.boolean.false": "§ayez",
   "config.roughlyenoughitems.fixTabCloseContainer": "Fix Vaniwwa Tab Containew (When Wecipe Book Disabwed):",
   "config.roughlyenoughitems.lighterButtonHover": "Wightew Button Hovew:",
-  "config.roughlyenoughitems.layout.enableCraftableOnlyButton": "Cwaftable Fiwtew:",
+  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "Cwaftable Fiwtew:",
   "config.roughlyenoughitems.layout.showUtilsButtons": "Utiws Buttons:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "Game Mode Comwand:",
   "config.roughlyenoughitems.commands.giveCommand": "Give Comwand:",

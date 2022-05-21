@@ -202,7 +202,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     if (widget.selected)
                         return false;
-                    ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, tabCategory.getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+                    ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, tabCategory.getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
                     return true;
                 }));
                 tab.setRenderer(tabCategory, tabCategory.getIcon(), tabCategory.getTitle(), j == selectedCategoryIndex);
@@ -305,7 +305,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             else if (amount > 0) selectedCategoryIndex--;
             if (selectedCategoryIndex < 0) selectedCategoryIndex = categories.size() - 1;
             else if (selectedCategoryIndex >= categories.size()) selectedCategoryIndex = 0;
-            ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(selectedCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+            ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, categories.get(selectedCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
             return true;
         }
         if (bounds.contains(PointHelper.ofMouse())) {

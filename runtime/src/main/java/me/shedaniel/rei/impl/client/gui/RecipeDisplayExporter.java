@@ -34,15 +34,18 @@ import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.impl.client.gui.toast.ExportRecipeIdentifierToast;
+import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -53,13 +56,19 @@ public final class RecipeDisplayExporter extends Widget {
     
     private RecipeDisplayExporter() {}
     
-    public static void exportRecipeDisplay(Rectangle rectangle, List<Widget> widgets) {
-        INSTANCE.exportRecipe(rectangle, widgets);
-        ExportRecipeIdentifierToast.addToast(I18n.get("msg.rei.exported_recipe"), I18n.get("msg.rei.exported_recipe.desc"));
+    public static void exportRecipeDisplay(Rectangle rectangle, DisplaySpec display, List<Widget> widgets, boolean toast) {
+        INSTANCE.exportRecipe(rectangle, display, widgets);
+        if (toast) {
+            ExportRecipeIdentifierToast.addToast(I18n.get("msg.rei.exported_recipe"), I18n.get("msg.rei.exported_recipe.desc"));
+        }
     }
     
-    private static File getExportFilename(File directory) {
+    private static File getExportFilename(DisplaySpec display, File directory) {
+        Collection<ResourceLocation> locations = display.provideInternalDisplayIds();
         String string = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date());
+        if (!locations.isEmpty()) {
+            string = locations.iterator().next().toString().replace('/', '_');
+        }
         int i = 1;
         
         while (true) {
@@ -72,7 +81,7 @@ public final class RecipeDisplayExporter extends Widget {
         }
     }
     
-    private void exportRecipe(Rectangle rectangle, List<Widget> widgets) {
+    private void exportRecipe(Rectangle rectangle, DisplaySpec display, List<Widget> widgets) {
         Minecraft client = Minecraft.getInstance();
         Window window = client.getWindow();
         RenderTarget renderTarget = new TextureTarget(window.getWidth(), window.getHeight(), true, false);
@@ -105,9 +114,9 @@ public final class RecipeDisplayExporter extends Widget {
         }
         Util.ioPool().execute(() -> {
             try {
-                File export = new File(minecraft.gameDirectory, "rei_exports");
+                File export = new File(minecraft.gameDirectory, "rei_exports/" + display.provideInternalDisplay().getCategoryIdentifier().toString().replace('/', '_'));
                 export.mkdirs();
-                strippedImage.writeToFile(getExportFilename(export));
+                strippedImage.writeToFile(getExportFilename(display, export));
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
