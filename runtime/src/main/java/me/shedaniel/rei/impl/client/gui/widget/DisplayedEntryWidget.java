@@ -60,21 +60,6 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
     }
     
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (!interactable)
-            return super.mouseReleased(mouseX, mouseY, button);
-        if (containsMouse(mouseX, mouseY)) {
-            if (wasClicked()) {
-                if (doAction(mouseX, mouseY, button)) {
-                    return true;
-                } else {
-                    wasClicked = true;
-                }
-            }
-        }
-        return super.mouseReleased(mouseX, mouseY, button);
-    }
-    
     protected boolean doAction(double mouseX, double mouseY, int button) {
         if (!(ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen))) return false;
         EntryStack<?> entry = getCurrentEntry().copy();
@@ -88,7 +73,7 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
             return ClientHelper.getInstance().tryCheatingEntry(entry);
         }
         
-        return false;
+        return super.doAction(mouseX, mouseY, button);
     }
     
     @Override
