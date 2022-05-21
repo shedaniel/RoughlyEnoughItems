@@ -254,8 +254,25 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
             scroll.setTo(scroll.target() + ClothConfigInitializer.getScrollStep() * -2 * amount, ClothConfigInitializer.getScrollDuration());
             return true;
         }
+    
+        for (DisplayEntry entry : entries) {
+            if (entry.mouseScrolled(mouseX, mouseY, amount)) {
+                return true;
+            }
+        }
         
         return super.mouseScrolled(mouseX, mouseY, amount);
+    }
+    
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        for (DisplayEntry entry : entries) {
+            if (entry.mouseClicked(mouseX, mouseY, button)) {
+                return true;
+            }
+        }
+        
+        return super.mouseClicked(mouseX, mouseY, button);
     }
     
     @Override
@@ -277,6 +294,12 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
                         return true;
                     }
                 }
+            }
+        }
+    
+        for (DisplayEntry entry : entries) {
+            if (entry.mouseReleased(mouseX, mouseY, button)) {
+                return true;
             }
         }
         
@@ -302,6 +325,12 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
                         return true;
                     }
                 }
+            }
+        }
+    
+        for (DisplayEntry entry : entries) {
+            if (entry.keyPressed(keyCode, scanCode, modifiers)) {
+                return true;
             }
         }
         

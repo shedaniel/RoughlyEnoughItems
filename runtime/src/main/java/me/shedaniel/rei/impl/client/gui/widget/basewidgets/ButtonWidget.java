@@ -27,6 +27,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
+import me.shedaniel.clothconfig2.api.animator.ValueProvider;
 import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -71,12 +72,14 @@ public class ButtonWidget extends Button {
     @Nullable
     private BiFunction<Button, Point, Integer> textureIdFunction;
     private final ValueAnimator<Color> darkBackground;
+    private ValueProvider<Double> alpha;
     
     public ButtonWidget(Rectangle rectangle, Component text) {
         this.bounds = new Rectangle(Objects.requireNonNull(rectangle));
         this.text = Objects.requireNonNull(text);
         this.darkBackground = ValueAnimator.ofColor()
                 .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFFFFFFF : 0x00FFFFFF), ValueAnimator.typicalTransitionTime());
+        this.alpha = ValueProvider.constant(1.0);
     }
     
     @Override
@@ -150,6 +153,10 @@ public class ButtonWidget extends Button {
         this.focusable = focusable;
     }
     
+    public void setAlpha(ValueProvider<Double> alpha) {
+        this.alpha = alpha;
+    }
+    
     @Override
     @Nullable
     public final Component[] getTooltip() {
@@ -196,24 +203,31 @@ public class ButtonWidget extends Button {
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         darkBackground.update(delta);
+        alpha.update(delta);
         if (onRender != null) {
             onRender.accept(matrices, this);
         }
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
-        renderBackground(matrices, x, y, width, height, this.getTextureId(new Point(mouseX, mouseY)), false, Color.ofTransparent(0xFFFFFFFF));
-        renderBackground(matrices, x, y, width, height, this.getTextureId(new Point(mouseX, mouseY)), true, darkBackground.value());
+        int alphaAsInt = (int) (alpha.value() * 255);
+        renderBackground(matrices, x, y, width, height, this.getTextureId(new Point(mouseX, mouseY)), false, Color.ofTransparent(0xFFFFFF | (alphaAsInt << 24)));
+        Color darkBackgroundColor = darkBackground.value();
+        darkBackgroundColor = Color.ofRGBA(darkBackgroundColor.getRed(), darkBackgroundColor.getGreen(), darkBackgroundColor.getBlue(), (int) Math.round(darkBackgroundColor.getAlpha() * alpha.value()));
+        renderBackground(matrices, x, y, width, height, this.getTextureId(new Point(mouseX, mouseY)), true, darkBackgroundColor);
         
-        int color = 14737632;
+        int color = 0xe0e0e0;
         if (!this.enabled) {
-            color = 10526880;
+            color = 0xa0a0a0;
         } else if (isFocused(mouseX, mouseY)) {
-            color = 16777120;
+            color = 0xffffa0;
         }
         
-        if (tint != null)
+        if (tint != null) {
             fillGradient(matrices, x + 1, y + 1, x + width - 1, y + height - 1, tint, tint);
+        }
         
-        drawCenteredString(matrices, font, getText(), x + width / 2, y + (height - 8) / 2, color);
+        if (alphaAsInt > 10) {
+            drawCenteredString(matrices, font, getText(), x + width / 2, y + (height - 8) / 2, color | (alphaAsInt << 24));
+        }
         
         Component[] tooltip = getTooltip();
         if (tooltip != null) {

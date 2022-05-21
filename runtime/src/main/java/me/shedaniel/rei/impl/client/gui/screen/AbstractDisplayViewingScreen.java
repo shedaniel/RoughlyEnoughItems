@@ -131,7 +131,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         currentCategoryIndex--;
         if (currentCategoryIndex < 0)
             currentCategoryIndex = categories.size() - 1;
-        ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+        ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
     }
     
     @Override
@@ -140,7 +140,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         currentCategoryIndex++;
         if (currentCategoryIndex >= categories.size())
             currentCategoryIndex = 0;
-        ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+        ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
     }
     
     protected void transformIngredientNotice(List<Widget> setupDisplay, List<EntryStack<?>> noticeStacks) {

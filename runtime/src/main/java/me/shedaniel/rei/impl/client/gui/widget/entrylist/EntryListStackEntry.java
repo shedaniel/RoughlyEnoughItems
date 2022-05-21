@@ -59,8 +59,6 @@ import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.
 @SuppressWarnings("UnstableApiUsage")
 public class EntryListStackEntry extends DisplayedEntryWidget {
     private final EntryListWidget parent;
-    private long lastCheckTime = -1;
-    private Display display;
     public EntryStack<?> our;
     private NumberAnimator<Double> size = null;
     
@@ -107,87 +105,5 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
     @Override
     public boolean containsMouse(double mouseX, double mouseY) {
         return super.containsMouse(mouseX, mouseY) && parent.containsChecked(mouseX, mouseY, true);
-    }
-    
-    public TransferHandler getTransferHandler() {
-        if (PluginManager.areAnyReloading()) {
-            return null;
-        }
-        
-        if (display != null) {
-            if (ViewsImpl.isRecipesFor(getEntries(), display)) {
-                AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
-                if (result.successful) {
-                    return result.successfulHandler;
-                }
-            }
-            
-            display = null;
-            lastCheckTime = -1;
-        }
-        
-        if (lastCheckTime != -1 && Util.getMillis() - lastCheckTime < 2000) {
-            return null;
-        }
-        
-        return _getTransferHandler();
-    }
-    
-    @Nullable
-    private TransferHandler _getTransferHandler() {
-        lastCheckTime = Util.getMillis();
-        
-        for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
-            for (Display display : displays) {
-                if (ViewsImpl.isRecipesFor(getEntries(), display)) {
-                    AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
-                    if (result.successful) {
-                        this.display = display;
-                        return result.successfulHandler;
-                    }
-                }
-            }
-        }
-        
-        return null;
-    }
-    
-    @Override
-    @Nullable
-    public Tooltip getCurrentTooltip(Point point) {
-        Tooltip tooltip = super.getCurrentTooltip(point);
-        
-        if (tooltip != null && !ClientHelper.getInstance().isCheating() && getTransferHandler() != null) {
-            tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
-        }
-        
-        return tooltip;
-    }
-    
-    @Override
-    protected boolean doAction(double mouseX, double mouseY, int button) {
-        if (!ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
-            try {
-                TransferHandler handler = getTransferHandler();
-                
-                if (handler != null) {
-                    AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
-                    TransferHandler.Context context = TransferHandler.Context.create(true, Screen.hasShiftDown() || button == 1, containerScreen, display);
-                    TransferHandler.Result transferResult = handler.handle(context);
-                    
-                    if (transferResult.isBlocking()) {
-                        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                        if (transferResult.isReturningToScreen() && Minecraft.getInstance().screen != containerScreen) {
-                            Minecraft.getInstance().setScreen(containerScreen);
-                            REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
-                        }
-                        return true;
-                    }
-                }
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
-        }
-        return super.doAction(mouseX, mouseY, button);
     }
 }
