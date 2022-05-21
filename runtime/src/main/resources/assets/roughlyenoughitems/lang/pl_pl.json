@@ -234,7 +234,7 @@
   "config.roughlyenoughitems.leftSideMobEffects.boolean.false": "Prawa (Vanilla)",
   "config.roughlyenoughitems.fixTabCloseContainer": "Napraw kontener waniliowej karty (Kiedy Książka receptur jest wyłączona):",
   "config.roughlyenoughitems.lighterButtonHover": "Jaśniejszy przycisk podczas najechania kursorem:",
-  "config.roughlyenoughitems.layout.enableCraftableOnlyButton": "Filtr wykonywalnych przedmiotów:",
+  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "Filtr wykonywalnych przedmiotów:",
   "config.roughlyenoughitems.layout.showUtilsButtons": "Przyciski działań:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "Komenda do zmiany trybu gry:",
   "config.roughlyenoughitems.commands.giveCommand": "Komenda do pobierania przedmiotów:",

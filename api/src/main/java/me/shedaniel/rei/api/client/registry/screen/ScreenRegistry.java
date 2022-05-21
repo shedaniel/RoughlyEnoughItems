@@ -30,6 +30,10 @@ import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitor;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProvider;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProviderWidget;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitor;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitorWidget;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -113,9 +117,37 @@ public interface ScreenRegistry extends Reloadable<REIClientPlugin> {
         registerDraggableStackProvider(DraggableStackProviderWidget.toProvider(provider, priority));
     }
     
+    <T extends Screen> void registerDraggableComponentVisitor(DraggableComponentVisitor<T> visitor);
+    
+    <T extends Screen, A> void registerDraggableComponentProvider(DraggableComponentProvider<T, A> provider);
+    
+    default <T extends Screen> void registerDraggableComponentVisitor(DraggableComponentVisitorWidget visitor) {
+        registerDraggableComponentVisitor(DraggableComponentVisitorWidget.toVisitor(visitor));
+    }
+    
+    default <T extends Screen, A> void registerDraggableComponentProvider(DraggableComponentProviderWidget<A> provider) {
+        registerDraggableComponentProvider(DraggableComponentProviderWidget.toProvider(provider));
+    }
+    
+    default <T extends Screen> void registerDraggableComponentVisitor(double priority, DraggableComponentVisitorWidget visitor) {
+        registerDraggableComponentVisitor(DraggableComponentVisitorWidget.toVisitor(visitor, priority));
+    }
+    
+    default <T extends Screen, A> void registerDraggableComponentProvider(double priority, DraggableComponentProviderWidget<A> provider) {
+        registerDraggableComponentProvider(DraggableComponentProviderWidget.toProvider(provider, priority));
+    }
+    
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated(forRemoval = true)
     Iterable<DraggableStackProvider<Screen>> getDraggableProviders();
     
+    @ApiStatus.ScheduledForRemoval
+    @Deprecated(forRemoval = true)
     Iterable<DraggableStackVisitor<Screen>> getDraggableVisitors();
+    
+    Iterable<DraggableComponentProvider<Screen, Object>> getDraggableComponentProviders();
+    
+    Iterable<DraggableComponentVisitor<Screen>> getDraggableComponentVisitors();
     
     /**
      * Returns the main center screen bounds returned, provided by deciders.

@@ -23,12 +23,14 @@
 
 package me.shedaniel.rei.impl.client.gui.screen;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
+import it.unimi.dsi.fastutil.Pair;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Color;
@@ -53,18 +55,18 @@ import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.RecipeDisplayExporter;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.widget.DefaultDisplayChoosePageWidget;
-import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
-import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
-import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
+import me.shedaniel.rei.impl.client.gui.toast.ExportRecipeIdentifierToast;
+import me.shedaniel.rei.impl.client.gui.widget.*;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.PanelWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -81,7 +83,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private final List<Widget> preWidgets = Lists.newArrayList();
     private final List<Widget> widgets = Lists.newArrayList();
-    private final Map<Rectangle, List<Widget>> recipeBounds = Maps.newHashMap();
+    private final Map<Rectangle, Pair<DisplaySpec, List<Widget>>> recipeBounds = Maps.newHashMap();
     private final List<TabWidget> tabs = Lists.newArrayList();
     public int page;
     public int categoryPages = -1;
@@ -151,7 +153,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         int maxHeight = Math.min(largestHeight, CollectionUtils.<DisplayCategory<?>, Integer>mapAndMax(categories,
                 category -> (category.getDisplayHeight() + 4) * Math.max(1, Math.min(getRecipesPerPage(largestHeight, category) + 1, Math.max(categoryMap.get(category).size(), ConfigObject.getInstance().getMaxRecipePerPage()))) + 36, Comparator.naturalOrder()).orElse(66));
         int totalDisplayHeight = (getCurrentCategory().getDisplayHeight() + 4) * Math.max(1, getRecipesPerPage(maxHeight, getCurrentCategory()) + 1) + 36;
-        int guiWidth = Math.max(maxWidthDisplay + 10, 190);
+        int guiWidth = Math.max(maxWidthDisplay + 10 + 14 + 14, 190);
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - maxHeight / 2, guiWidth, maxHeight);
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
             this.bounds.setLocation(this.bounds.getX(), this.bounds.getY() + 15);
@@ -234,7 +236,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     if (widget.getId() + categoryPages * tabsPerPage == selectedCategoryIndex)
                         return false;
-                    ClientHelperImpl.getInstance().openRecipeViewingScreen(categoryMap, categories.get(widget.getId() + categoryPages * tabsPerPage).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+                    ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, categories.get(widget.getId() + categoryPages * tabsPerPage).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
                     return true;
                 }));
                 tab.setRenderer(categories.get(tabIndex), categories.get(tabIndex).getIcon(), categories.get(tabIndex).getTitle(), tab.getId() + categoryPages * tabsPerPage == selectedCategoryIndex);
@@ -274,9 +276,9 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
                 widget.removeTagMatch = true;
             }
-            this.recipeBounds.put(displayBounds, setupDisplay);
-            this.widgets.addAll(setupDisplay);
-            if (plusButtonArea.isPresent() && plusButtonArea.get().get(displayBounds) != null) {
+            this.recipeBounds.put(displayBounds, Pair.of(display, setupDisplay));
+            this.widgets.add(new DisplayCompositeWidget(display, setupDisplay, displayBounds));
+            if (plusButtonArea.isPresent()) {
                 this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, plusButtonArea.get().get(displayBounds), Component.literal(plusButtonArea.get().getButtonText()), displaySupplier, display::provideInternalDisplayIds, setupDisplay, getCurrentCategory()));
             }
         }
@@ -374,8 +376,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         {
             ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
             if (export.matchesCurrentKey() || export.matchesCurrentMouse()) {
-                for (Map.Entry<Rectangle, List<Widget>> entry : recipeBounds.entrySet()) {
-                    Rectangle bounds = entry.getKey();
+                for (Rectangle bounds : Iterables.concat(recipeBounds.keySet(), Iterables.transform(tabs, TabWidget::getBounds))) {
                     setBlitOffset(470);
                     if (bounds.contains(mouseX, mouseY)) {
                         fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744822402, 1744822402);
@@ -400,13 +401,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
         if (export.matchesKey(keyCode, scanCode)) {
-            for (Map.Entry<Rectangle, List<Widget>> entry : recipeBounds.entrySet()) {
-                Rectangle bounds = entry.getKey();
-                if (bounds.contains(PointHelper.ofMouse())) {
-                    RecipeDisplayExporter.exportRecipeDisplay(bounds, entry.getValue());
-                    break;
-                }
-            }
+            if (checkExportDisplays()) return true;
         }
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
@@ -439,18 +434,60 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
         if (export.matchesMouse(button)) {
-            for (Map.Entry<Rectangle, List<Widget>> entry : recipeBounds.entrySet()) {
-                Rectangle bounds = entry.getKey();
-                if (bounds.contains(PointHelper.ofMouse())) {
-                    RecipeDisplayExporter.exportRecipeDisplay(bounds, entry.getValue());
-                    break;
-                }
-            }
+            if (checkExportDisplays()) return true;
         }
         for (GuiEventListener entry : children())
             if (entry.mouseReleased(mouseX, mouseY, button))
                 return true;
         return super.mouseReleased(mouseX, mouseY, button);
+    }
+    
+    private boolean checkExportDisplays() {
+        for (Map.Entry<Rectangle, Pair<DisplaySpec, List<Widget>>> entry : recipeBounds.entrySet()) {
+            Rectangle bounds = entry.getKey();
+            if (bounds.contains(PointHelper.ofMouse())) {
+                RecipeDisplayExporter.exportRecipeDisplay(bounds, entry.getValue().left(), entry.getValue().right(), true);
+                return true;
+            }
+        }
+        for (TabWidget tab : tabs) {
+            Rectangle bounds = tab.getBounds();
+            if (bounds.contains(PointHelper.ofMouse())) {
+                minecraft.setScreen(new ConfirmScreen(confirmed -> {
+                    if (confirmed) {
+                        for (DisplaySpec spec : categoryMap.getOrDefault(tab.category, Collections.emptyList())) {
+                            Display display = spec.provideInternalDisplay();
+                            int displayWidth = getCurrentCategory().getDisplayWidth(display);
+                            int displayHeight = getCurrentCategory().getDisplayHeight();
+                            final Rectangle displayBounds = new Rectangle(0, 0, displayWidth, displayHeight);
+                            List<Widget> setupDisplay;
+                            try {
+                                setupDisplay = getCurrentCategoryView(display).setupDisplay(display, displayBounds);
+                            } catch (Throwable throwable) {
+                                throwable.printStackTrace();
+                                setupDisplay = new ArrayList<>();
+                                setupDisplay.add(Widgets.createRecipeBase(displayBounds).color(0xFFBB0000));
+                                setupDisplay.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() - 8), new TextComponent("Failed to initiate setupDisplay")));
+                                setupDisplay.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() + 1), new TextComponent("Check console for error")));
+                            }
+                            setupTags(setupDisplay);
+                            transformFiltering(setupDisplay);
+                            transformIngredientNotice(setupDisplay, ingredientStackToNotice);
+                            transformResultNotice(setupDisplay, resultStackToNotice);
+                            for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
+                                widget.removeTagMatch = true;
+                            }
+                            
+                            RecipeDisplayExporter.exportRecipeDisplay(displayBounds, spec, setupDisplay, false);
+                        }
+                        ExportRecipeIdentifierToast.addToast(I18n.get("msg.rei.exported_recipe"), I18n.get("msg.rei.exported_recipe.desc"));
+                    }
+                    minecraft.setScreen(DefaultDisplayViewingScreen.this);
+                }, new TranslatableComponent("text.rei.ask_to_export", tab.categoryName),
+                        new TranslatableComponent("text.rei.ask_to_export.subtitle", categoryMap.getOrDefault(tab.category, Collections.emptyList()).size())));
+            }
+        }
+        return false;
     }
     
     @Override

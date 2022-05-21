@@ -30,7 +30,6 @@ import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.client.gui.widget.EntryStacksRegionWidget;
 
 public class RegionDraggableStack<T extends RegionEntry<T>> implements DraggableStack {
     private RealRegionEntry<T> entry;

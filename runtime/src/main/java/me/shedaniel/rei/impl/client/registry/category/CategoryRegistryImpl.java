@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.registry.category;
 
+import com.google.common.base.MoreObjects;
 import dev.architectury.event.EventResult;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
@@ -133,7 +134,7 @@ public class CategoryRegistryImpl implements CategoryRegistry {
         private final List<EntryIngredient> workstations = Collections.synchronizedList(new ArrayList<>());
         private final List<CategoryExtensionProvider<T>> extensionProviders = Collections.synchronizedList(new ArrayList<>());
         
-        private Optional<ButtonArea> plusButtonArea = Optional.of(ButtonArea.defaultArea());
+        private ButtonArea plusButtonArea = ButtonArea.defaultArea();
         
         public Configuration(DisplayCategory<T> category) {
             this.category = category;
@@ -146,12 +147,12 @@ public class CategoryRegistryImpl implements CategoryRegistry {
         
         @Override
         public void setPlusButtonArea(ButtonArea area) {
-            this.plusButtonArea = Optional.ofNullable(area);
+            this.plusButtonArea = MoreObjects.firstNonNull(area, ButtonArea.defaultArea());
         }
         
         @Override
         public Optional<ButtonArea> getPlusButtonArea() {
-            return plusButtonArea;
+            return Optional.of(bounds -> Objects.requireNonNullElseGet(this.plusButtonArea.get(bounds), () -> ButtonArea.defaultArea().get(bounds)));
         }
         
         @Override

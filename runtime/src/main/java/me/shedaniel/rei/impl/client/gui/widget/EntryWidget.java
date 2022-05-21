@@ -32,6 +32,7 @@ import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -40,20 +41,33 @@ import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
 import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
+import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -80,6 +94,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     private List<EntryStack<?>> entryStacks;
     public ResourceLocation tagMatch;
     public boolean removeTagMatch = true;
+    
+    private long lastCheckTime = -1;
+    private Display display;
     
     public EntryWidget(Point point) {
         this(new Rectangle(point.x - 1, point.y - 1, 18, 18));
@@ -276,6 +293,49 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         return new Rectangle(bounds.x + 1, bounds.y + 1, bounds.width - 2, bounds.height - 2);
     }
     
+    @Nullable
+    private TransferHandler _getTransferHandler() {
+        lastCheckTime = Util.getMillis();
+        
+        for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
+            for (Display display : displays) {
+                if (ViewsImpl.isRecipesFor(getEntries(), display)) {
+                    AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
+                    if (result.successful) {
+                        this.display = display;
+                        return result.successfulHandler;
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    private TransferHandler getTransferHandler() {
+        if (PluginManager.areAnyReloading()) {
+            return null;
+        }
+        
+        if (display != null) {
+            if (ViewsImpl.isRecipesFor(getEntries(), display)) {
+                AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
+                if (result.successful) {
+                    return result.successfulHandler;
+                }
+            }
+            
+            display = null;
+            lastCheckTime = -1;
+        }
+        
+        if (lastCheckTime != -1 && Util.getMillis() - lastCheckTime < 2000) {
+            return null;
+        }
+        
+        return _getTransferHandler();
+    }
+    
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         drawBackground(matrices, mouseX, mouseY, delta);
@@ -312,10 +372,12 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             RenderSystem.setShaderTexture(0, RECIPE_GUI);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
-            RenderSystem.setShaderTexture(0, RECIPE_GUI_DARK);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value());
-            blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            if (darkBackgroundAlpha.value() > 0.0F) {
+                RenderSystem.setShaderTexture(0, RECIPE_GUI_DARK);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value());
+                blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            }
         }
     }
     
@@ -349,7 +411,14 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     @Override
     @Nullable
     public Tooltip getCurrentTooltip(me.shedaniel.math.Point point) {
-        return getCurrentEntry().getTooltip(point);
+        Tooltip tooltip = getCurrentEntry().getTooltip(point);
+        
+        if (tooltip != null && !ClientHelper.getInstance().isCheating() && getTransferHandler() != null
+            && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+            tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
+        }
+        
+        return tooltip;
     }
     
     private final NumberAnimator<Float> darkHighlightedAlpha = ValueAnimator.ofFloat()
@@ -405,30 +474,62 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         if (!interactable)
             return false;
         if (wasClicked() && containsMouse(mouseX, mouseY)) {
-            if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse()) && !getCurrentEntry().isEmpty()) {
-                ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
-                if (keyCode.matchesMouse(button)) {
-                    FavoriteEntry favoriteEntry = asFavoriteEntry();
-                    if (favoriteEntry != null) {
-                        if (reverseFavoritesAction())
-                            ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                        else {
-                            ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                            ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
+            if (doAction(mouseX, mouseY, button)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    protected boolean doAction(double mouseX, double mouseY, int button) {
+        if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse()) && !getCurrentEntry().isEmpty()) {
+            ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
+            if (keyCode.matchesMouse(button)) {
+                FavoriteEntry favoriteEntry = asFavoriteEntry();
+                if (favoriteEntry != null) {
+                    if (reverseFavoritesAction())
+                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
+                    else {
+                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
+                        ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
+                    }
+                    ConfigManager.getInstance().saveConfig();
+                    FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
+                    if (favoritesListWidget != null)
+                        favoritesListWidget.updateSearch();
+                    return true;
+                }
+            }
+        }
+        
+        if (!ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
+            try {
+                TransferHandler handler = getTransferHandler();
+                
+                if (handler != null) {
+                    AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
+                    TransferHandler.Context context = TransferHandler.Context.create(true, Screen.hasShiftDown() || button == 1, containerScreen, display);
+                    TransferHandler.Result transferResult = handler.handle(context);
+                    
+                    if (transferResult.isBlocking()) {
+                        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                        if (transferResult.isReturningToScreen() && Minecraft.getInstance().screen != containerScreen) {
+                            Minecraft.getInstance().setScreen(containerScreen);
+                            REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
                         }
-                        ConfigManager.getInstance().saveConfig();
-                        FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                        if (favoritesListWidget != null)
-                            favoritesListWidget.updateSearch();
                         return true;
                     }
                 }
+            } catch (Throwable e) {
+                e.printStackTrace();
             }
-            if ((ConfigObject.getInstance().getRecipeKeybind().getType() != InputConstants.Type.MOUSE && button == 0) || ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button))
-                return ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).open();
-            else if ((ConfigObject.getInstance().getUsageKeybind().getType() != InputConstants.Type.MOUSE && button == 1) || ConfigObject.getInstance().getUsageKeybind().matchesMouse(button))
-                return ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).open();
         }
+        
+        if ((ConfigObject.getInstance().getRecipeKeybind().getType() != InputConstants.Type.MOUSE && button == 0) || ConfigObject.getInstance().getRecipeKeybind().matchesMouse(button))
+            return ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).open();
+        else if ((ConfigObject.getInstance().getUsageKeybind().getType() != InputConstants.Type.MOUSE && button == 1) || ConfigObject.getInstance().getUsageKeybind().matchesMouse(button))
+            return ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).open();
+        
         return false;
     }
     
@@ -440,7 +541,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     @ApiStatus.Internal
-    protected boolean cancelDeleteItems(EntryStack<?> stack) {
+    public boolean cancelDeleteItems(EntryStack<?> stack) {
         return false;
     }
     
@@ -454,34 +555,39 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     @Override
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (!interactable)
-            return false;
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (containsMouse(PointHelper.ofMouse())) {
-            if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse()) && !getCurrentEntry().isEmpty()) {
-                ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
-                if (keyCode.matchesKey(int_1, int_2)) {
-                    FavoriteEntry favoriteEntry = asFavoriteEntry();
-                    if (favoriteEntry != null) {
-                        if (reverseFavoritesAction())
-                            ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                        else {
-                            ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                            ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
-                        }
-                        ConfigManager.getInstance().saveConfig();
-                        FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                        if (favoritesListWidget != null)
-                            favoritesListWidget.updateSearch();
-                        return true;
+            return keyPressedIgnoreContains(keyCode, scanCode, modifiers);
+        }
+        
+        return false;
+    }
+    
+    public boolean keyPressedIgnoreContains(int keyCode, int scanCode, int modifiers) {
+        if (!interactable) return false;
+        
+        if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse()) && !getCurrentEntry().isEmpty()) {
+            if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
+                FavoriteEntry favoriteEntry = asFavoriteEntry();
+                if (favoriteEntry != null) {
+                    if (reverseFavoritesAction())
+                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
+                    else {
+                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
+                        ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     }
+                    ConfigManager.getInstance().saveConfig();
+                    FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
+                    if (favoritesListWidget != null)
+                        favoritesListWidget.updateSearch();
+                    return true;
                 }
             }
-            if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(int_1, int_2))
-                return ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).open();
-            else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(int_1, int_2))
-                return ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).open();
         }
+        if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(keyCode, scanCode))
+            return ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).open();
+        else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(keyCode, scanCode))
+            return ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).open();
         return false;
     }
     

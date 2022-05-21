@@ -69,7 +69,9 @@ public final class ArrowWidget extends Arrow {
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         this.darkBackgroundAlpha.update(delta);
         renderBackground(matrices, false, 1.0F);
-        renderBackground(matrices, true, this.darkBackgroundAlpha.value());
+        if (darkBackgroundAlpha.value() > 0.0F) {
+            renderBackground(matrices, true, this.darkBackgroundAlpha.value());
+        }
     }
     
     public void renderBackground(PoseStack matrices, boolean dark, float alpha) {

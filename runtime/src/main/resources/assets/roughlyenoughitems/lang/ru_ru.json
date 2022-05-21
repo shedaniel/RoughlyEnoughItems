@@ -254,7 +254,7 @@
   "config.roughlyenoughitems.leftSideMobEffects.boolean.false": "Справа (Стандартное)",
   "config.roughlyenoughitems.fixTabCloseContainer": "Восстановление вкладки стандартного контейнера (когда книга рецептов отключена):",
   "config.roughlyenoughitems.lighterButtonHover": "Подсвеченная кнопка при наведении:",
-  "config.roughlyenoughitems.layout.enableCraftableOnlyButton": "Фильтр по создаваемым предметам:",
+  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "Фильтр по создаваемым предметам:",
   "config.roughlyenoughitems.layout.showUtilsButtons": "Кнопки утилит:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "Команда смены игрового режима:",
   "config.roughlyenoughitems.commands.giveCommand": "Команда выдачи предметов:",

@@ -306,6 +306,7 @@ public final class Widgets {
     public static <T> Iterable<T> walk(Iterable<? extends GuiEventListener> listeners, Predicate<GuiEventListener> predicate) {
         return () -> new AbstractIterator<T>() {
             Stack<Iterator<? extends GuiEventListener>> stack;
+            Set<T> visited = new HashSet<>();
             
             {
                 stack = new Stack<>();
@@ -323,7 +324,7 @@ public final class Widgets {
                     GuiEventListener listener = peek.next();
                     if (!peek.hasNext())
                         stack.pop();
-                    if (predicate.test(listener)) {
+                    if (predicate.test(listener) && visited.add((T) listener)) {
                         return (T) listener;
                     }
                     if (listener instanceof ContainerEventHandler handler) {

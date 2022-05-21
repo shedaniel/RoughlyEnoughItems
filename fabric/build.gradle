@@ -114,7 +114,7 @@ curseforge {
             addGameVersion "Java 17"
             addGameVersion "Fabric"
             relations {
-                requiredDependency "architectury-fabric"
+                requiredDependency "architectury-api"
                 requiredDependency "cloth-config"
                 requiredDependency "fabric-api"
             }

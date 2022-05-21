@@ -624,9 +624,7 @@ public class JEIPluginDetector {
         public boolean shouldBeForcefullyDoneOnMainThread(Reloadable<?> reloadable) {
             if (!mainThread) {
                 return false;
-            } else return reloadable instanceof CategoryRegistry ||
-                          reloadable instanceof DisplayRegistry ||
-                          reloadable instanceof ScreenRegistry;
+            } else return reloadable instanceof DisplayRegistry;
         }
     }
 }

@@ -129,7 +129,9 @@ public final class PanelWidget extends Panel {
         float green = ((color >> 8) & 0xFF) / 255f;
         float blue = (color & 0xFF) / 255f;
         renderBackground(matrices, x, y, width, height, false, alpha, red, green, blue);
-        renderBackground(matrices, x, y, width, height, true, this.darkBackgroundAlpha.value() * alpha, red, green, blue);
+        if (darkBackgroundAlpha.value() * alpha > 0.0F) {
+            renderBackground(matrices, x, y, width, height, true, this.darkBackgroundAlpha.value() * alpha, red, green, blue);
+        }
     }
     
     public void renderBackground(PoseStack matrices, int x, int y, int width, int height, boolean dark, float alpha, float red, float green, float blue) {

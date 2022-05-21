@@ -23,6 +23,9 @@
 
 package me.shedaniel.rei.api.client.gui.drag;
 
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProvider;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +34,7 @@ import java.util.function.Supplier;
 /**
  * A provider for supplying {@link DraggableStack} to the screen.
  */
-public interface DraggableStackProvider<T extends Screen> extends Comparable<DraggableStackProvider<T>> {
+public interface DraggableStackProvider<T extends Screen> extends DraggableComponentProvider<T, EntryStack<?>> {
     static <T extends Screen> DraggableStackProvider<T> from(Supplier<Iterable<DraggableStackProvider<T>>> providers) {
         return new DraggableStackProvider<T>() {
             @Override
@@ -61,8 +64,16 @@ public interface DraggableStackProvider<T extends Screen> extends Comparable<Dra
     @Nullable
     DraggableStack getHoveredStack(DraggingContext<T> context, double mouseX, double mouseY);
     
+    @Override
+    @Nullable
+    default DraggableComponent<EntryStack<?>> getHovered(DraggingContext<T> context, double mouseX, double mouseY) {
+        return getHoveredStack(context, mouseX, mouseY);
+    }
+    
+    @Override
     <R extends Screen> boolean isHandingScreen(R screen);
     
+    @Override
     default DraggingContext<T> getContext() {
         return DraggingContext.getInstance().cast();
     }
@@ -72,11 +83,11 @@ public interface DraggableStackProvider<T extends Screen> extends Comparable<Dra
      *
      * @return the priority
      */
+    @Override
     default double getPriority() {
         return 0f;
     }
     
-    @Override
     default int compareTo(DraggableStackProvider<T> o) {
         return Double.compare(getPriority(), o.getPriority());
     }

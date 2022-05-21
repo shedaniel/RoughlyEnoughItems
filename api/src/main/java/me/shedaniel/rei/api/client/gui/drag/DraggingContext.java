@@ -23,9 +23,12 @@
 
 package me.shedaniel.rei.api.client.gui.drag;
 
+import com.google.common.base.MoreObjects;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,6 +57,15 @@ public interface DraggingContext<S extends Screen> {
         return getCurrentStack() != null;
     }
     
+    /**
+     * Returns whether a draggable component is present.
+     *
+     * @return whether a draggable component is present
+     */
+    default boolean isDraggingComponent() {
+        return getDragged() != null;
+    }
+    
     S getScreen();
     
     /**
@@ -65,6 +77,14 @@ public interface DraggingContext<S extends Screen> {
     DraggableStack getCurrentStack();
     
     /**
+     * Returns the current dragged component, may be null.
+     *
+     * @return the current dragged component, may be null
+     */
+    @Nullable
+    DraggableComponent<?> getDragged();
+    
+    /**
      * Returns the current position of the dragged stack, this is usually the position of the mouse pointer,
      * but you should use this regardless to account for future changes.
      *
@@ -74,6 +94,15 @@ public interface DraggingContext<S extends Screen> {
     Point getCurrentPosition();
     
     /**
+     * Returns the current bounds of the dragged stack, this is usually on the mouse pointer,
+     * but you should use this regardless to account for future changes.
+     *
+     * @return the current bounds of the dragged stack
+     */
+    @Nullable
+    Rectangle getCurrentBounds();
+    
+    /**
      * Renders the draggable stack back to the position {@code position}.
      * This may be used to animate an unaccepted draggable stack returning to its initial position.
      *
@@ -81,7 +110,9 @@ public interface DraggingContext<S extends Screen> {
      * @param initialPosition the initial position of the stack
      * @param position        the position supplier of the destination
      */
-    void renderBackToPosition(DraggableStack stack, Point initialPosition, Supplier<Point> position);
+    default void renderBackToPosition(DraggableStack stack, Point initialPosition, Supplier<Point> position) {
+        renderBack(stack, initialPosition, position);
+    }
     
     /**
      * Renders the draggable stack back to the bounds {@code bounds}.
@@ -91,12 +122,40 @@ public interface DraggingContext<S extends Screen> {
      * @param initialPosition the initial bounds of the stack
      * @param bounds          the boundary supplier of the destination
      */
-    void renderBackToPosition(DraggableStack stack, Rectangle initialPosition, Supplier<Rectangle> bounds);
+    default void renderBackToPosition(DraggableStack stack, Rectangle initialPosition, Supplier<Rectangle> bounds) {
+        renderBack(stack, initialPosition, bounds);
+    }
     
     default void renderToVoid(DraggableStack stack) {
-        Point currentPosition = getCurrentPosition();
-        Rectangle targetBounds = new Rectangle(currentPosition.x, currentPosition.y, 1, 1);
-        renderBackToPosition(stack, new Rectangle(currentPosition.x - 8, currentPosition.y - 8, 16, 16), () -> targetBounds);
+        this.renderToVoid((DraggableComponent<?>) stack);
+    }
+    
+    /**
+     * Renders the draggable component back to the position {@code position}.
+     * This may be used to animate an unaccepted draggable component returning to its initial position.
+     *
+     * @param component       the component to use for render
+     * @param initialPosition the initial position of the component
+     * @param position        the position supplier of the destination
+     */
+    void renderBack(DraggableComponent<?> component, Point initialPosition, Supplier<Point> position);
+    
+    /**
+     * Renders the draggable component back to the bounds {@code bounds}.
+     * This may be used to animate an unaccepted draggable component returning to its initial position.
+     *
+     * @param component       the component to use for render
+     * @param initialPosition the initial bounds of the component
+     * @param bounds          the boundary supplier of the destination
+     */
+    void renderBack(DraggableComponent<?> component, Rectangle initialPosition, Supplier<Rectangle> bounds);
+    
+    default void renderToVoid(DraggableComponent<?> component) {
+        Rectangle currentBounds = MoreObjects.firstNonNull(getCurrentBounds(), component.getOriginBounds(PointHelper.ofMouse()));
+        Rectangle targetBounds = new Rectangle(currentBounds.getCenterX(), currentBounds.getCenterY(), 1, 1);
+        int width = component.getWidth();
+        int height = component.getHeight();
+        renderBack(component, currentBounds, () -> targetBounds);
     }
     
     default <T extends Screen> DraggingContext<T> cast() {

@@ -58,7 +58,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-import static me.shedaniel.rei.impl.client.gui.widget.EntryListWidget.entrySize;
+import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)

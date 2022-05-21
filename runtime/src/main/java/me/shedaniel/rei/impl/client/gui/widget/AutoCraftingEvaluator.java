@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
@@ -43,6 +44,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -63,6 +65,11 @@ public class AutoCraftingEvaluator {
         final List<Component> errorTooltip = new ArrayList<>();
         result.tooltipRenderer = (pos, sink) -> {
             List<Component> str = new ArrayList<>(errorTooltip);
+            
+            if (ConfigObject.getInstance().isFavoritesEnabled()) {
+                str.add(new TextComponent(" "));
+                str.add(new TranslatableComponent("text.rei.save.recipes", new TextComponent(ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString().toUpperCase(Locale.ROOT)).withStyle(ChatFormatting.BOLD)).withStyle(ChatFormatting.GRAY));
+            }
             
             if (Minecraft.getInstance().options.advancedItemTooltips && idsSupplier != null) {
                 Collection<ResourceLocation> locations = idsSupplier.get();

@@ -24,17 +24,64 @@
 package me.shedaniel.rei.api.client.gui.drag;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 
-public interface DraggableStack {
+public interface DraggableStack extends DraggableComponent<EntryStack<?>> {
+    static DraggableStack from(DraggableComponent<EntryStack<?>> component) {
+        return component instanceof DraggableStack ? (DraggableStack) component : new DraggableStack() {
+            @Override
+            public EntryStack<?> getStack() {
+                return component.get();
+            }
+            
+            @Override
+            public void drag() {
+                component.drag();
+            }
+            
+            @Override
+            public void release(DraggedAcceptorResult result) {
+                component.release(result);
+            }
+            
+            @Override
+            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                component.render(matrices, bounds, mouseX, mouseY, delta);
+            }
+            
+            @Override
+            public void render(PoseStack matrices, Point position, int mouseX, int mouseY, float delta) {
+                component.render(matrices, position, mouseX, mouseY, delta);
+            }
+        };
+    }
+    
     EntryStack<?> getStack();
     
+    @Override
+    default EntryStack<?> get() {
+        return getStack();
+    }
+    
     void drag();
+    
+    @Override
+    default int getWidth() {
+        return 18;
+    }
+    
+    @Override
+    default int getHeight() {
+        return 18;
+    }
     
     default void release(DraggedAcceptorResult result) {
     }
     
+    @Override
     default void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         getStack().render(matrices, bounds, mouseX, mouseY, delta);
     }
