@@ -23,7 +23,8 @@
 
 package me.shedaniel.rei.fabric;
 
-import com.google.common.collect.Iterables;
+import dev.architectury.platform.Platform;
+import dev.architectury.utils.Env;
 import me.shedaniel.rei.RoughlyEnoughItemsInitializer;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
@@ -32,22 +33,52 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Collection;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PluginDetectorImpl {
     private static <P extends REIPlugin<?>> void loadPlugin(Class<? extends P> pluginClass, Consumer<? super REIPluginProvider<P>> consumer) {
+        Map<String, Env> entrypoints = new LinkedHashMap<>();
+        entrypoints.put("rei_server", Env.SERVER);
+        entrypoints.put("rei_common", null);
+        entrypoints.put("rei", null);
+        entrypoints.put("rei_client", Env.CLIENT);
+        Set<String> deprecatedEntrypoints = new LinkedHashSet<>(Arrays.asList(
+                "rei_containers",
+                "rei_plugins",
+                "rei_plugins_v0",
+                "rei"
+        ));
+        List<Pair<EntrypointContainer<REIPluginProvider>, String>> containers = Stream.concat(entrypoints.entrySet().stream()
+                                .filter(entry -> entry.getValue() == null || Platform.getEnvironment() == entry.getValue())
+                                .map(Map.Entry::getKey)
+                        , deprecatedEntrypoints.stream())
+                .distinct()
+                .flatMap(name -> FabricLoader.getInstance().getEntrypointContainers(name, REIPluginProvider.class)
+                        .stream()
+                        .map(container -> Pair.of(container, name)))
+                .collect(Collectors.toList());
+        
         out:
-        for (EntrypointContainer<REIPluginProvider> container : Iterables.concat(
-                FabricLoader.getInstance().getEntrypointContainers("rei_containers", REIPluginProvider.class),
-                FabricLoader.getInstance().getEntrypointContainers("rei_server", REIPluginProvider.class),
-                FabricLoader.getInstance().getEntrypointContainers("rei", REIPluginProvider.class),
-                FabricLoader.getInstance().getEntrypointContainers("rei_common", REIPluginProvider.class),
-                FabricLoader.getInstance().getEntrypointContainers("rei_plugins", REIPluginProvider.class),
-                FabricLoader.getInstance().getEntrypointContainers("rei_plugins_v0", REIPluginProvider.class)
-        )) {
+        for (Pair<EntrypointContainer<REIPluginProvider>, String> pair : containers) {
+            EntrypointContainer<REIPluginProvider> container = pair.getLeft();
+            String name = pair.getRight();
             try {
+                if (deprecatedEntrypoints.contains(name)) {
+                    RoughlyEnoughItemsState.LOGGER.warn("The entrypoint used by %s, \"%s\" is deprecated and will be removed in a future version of Roughly Enough Items. Please use \"rei_server\", \"rei_client\" or \"rei_common\" instead.".formatted(container.getProvider().getMetadata().getName(), name));
+                }
+                
                 REIPluginProvider<P> plugin = container.getEntrypoint();
                 if (pluginClass.isAssignableFrom(plugin.getPluginProviderClass())) {
                     consumer.accept(new REIPluginProvider<P>() {
@@ -70,8 +101,10 @@ public class PluginDetectorImpl {
             } catch (Throwable t) {
                 Throwable throwable = t;
                 while (throwable != null) {
-                    if (throwable.getMessage() != null && throwable.getMessage().contains("environment type SERVER") && !RoughlyEnoughItemsInitializer.isClient())
+                    if (throwable.getMessage() != null && throwable.getMessage().contains("environment type SERVER") && !RoughlyEnoughItemsInitializer.isClient()) {
+                        RoughlyEnoughItemsState.LOGGER.warn("Rerached side issue when loading REI plugin by %s. Please use \"rei_server\", \"rei_client\" or \"rei_common\" instead.".formatted(container.getProvider().getMetadata().getName()));
                         continue out;
+                    }
                     throwable = throwable.getCause();
                 }
                 String error = "Could not create REI Plugin [" + getSimpleName(pluginClass) + "] due to errors, provided by '" + container.getProvider().getMetadata().getId() + "'!";

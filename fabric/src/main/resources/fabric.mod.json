@@ -22,9 +22,11 @@
       "me.shedaniel.rei.fabric.RoughlyEnoughItemsFabric",
       "me.shedaniel.rei.RoughlyEnoughItemsInitializer::onInitializeClient"
     ],
-    "rei": [
+    "rei_common": [
       "me.shedaniel.rei.plugin.common.DefaultPlugin",
-      "me.shedaniel.rei.plugin.common.DefaultRuntimePlugin",
+      "me.shedaniel.rei.plugin.common.DefaultRuntimePlugin"
+    ], 
+    "rei_client": [
       "me.shedaniel.rei.plugin.client.DefaultClientPlugin",
       "me.shedaniel.rei.plugin.client.DefaultClientRuntimePlugin"
     ]
