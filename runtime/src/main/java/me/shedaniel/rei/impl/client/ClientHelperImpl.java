@@ -270,7 +270,7 @@ public class ClientHelperImpl implements ClientHelper {
     }
     
     @ApiStatus.Internal
-    public void openRecipeViewingScreen(Map<DisplayCategory<?>, List<DisplaySpec>> map, @Nullable CategoryIdentifier<?> category, List<EntryStack<?>> ingredientNotice, List<EntryStack<?>> resultNotice) {
+    public void openDisplayViewingScreen(Map<DisplayCategory<?>, List<DisplaySpec>> map, @Nullable CategoryIdentifier<?> category, List<EntryStack<?>> ingredientNotice, List<EntryStack<?>> resultNotice) {
         LegacyWrapperViewSearchBuilder builder = new LegacyWrapperViewSearchBuilder(map);
         for (EntryStack<?> stack : ingredientNotice) {
             builder.addInputNotice(stack);
