@@ -61,16 +61,17 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
     
     @Override
     protected boolean doAction(double mouseX, double mouseY, int button) {
-        if (!(ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen))) return false;
-        EntryStack<?> entry = getCurrentEntry().copy();
-        if (!entry.isEmpty()) {
-            if (entry.getType() != VanillaEntryTypes.ITEM) {
-                EntryStack<ItemStack> cheatsAs = entry.cheatsAs();
-                entry = cheatsAs.isEmpty() ? entry : cheatsAs;
+        if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+            EntryStack<?> entry = getCurrentEntry().copy();
+            if (!entry.isEmpty()) {
+                if (entry.getType() != VanillaEntryTypes.ITEM) {
+                    EntryStack<ItemStack> cheatsAs = entry.cheatsAs();
+                    entry = cheatsAs.isEmpty() ? entry : cheatsAs;
+                }
+                if (entry.getValueType() == ItemStack.class)
+                    entry.<ItemStack>castValue().setCount(button != 1 && !Screen.hasShiftDown() == (ConfigObject.getInstance().getItemCheatingMode() == ItemCheatingMode.REI_LIKE) ? 1 : entry.<ItemStack>castValue().getMaxStackSize());
+                return ClientHelper.getInstance().tryCheatingEntry(entry);
             }
-            if (entry.getValueType() == ItemStack.class)
-                entry.<ItemStack>castValue().setCount(button != 1 && !Screen.hasShiftDown() == (ConfigObject.getInstance().getItemCheatingMode() == ItemCheatingMode.REI_LIKE) ? 1 : entry.<ItemStack>castValue().getMaxStackSize());
-            return ClientHelper.getInstance().tryCheatingEntry(entry);
         }
         
         return super.doAction(mouseX, mouseY, button);
