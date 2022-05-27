@@ -44,6 +44,7 @@ import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
@@ -392,7 +393,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        Tooltip tooltip = getCurrentTooltip(new Point(mouseX, mouseY));
+        Tooltip tooltip = getCurrentTooltip(TooltipContext.of(new Point(mouseX, mouseY)));
         if (tooltip != null) {
             if (interactableFavorites && ConfigObject.getInstance().doDisplayFavoritesTooltip() && !ConfigObject.getInstance().getFavoriteKeyCode().isUnknown()) {
                 String name = ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString();
@@ -414,8 +415,8 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     @Override
     @Nullable
-    public Tooltip getCurrentTooltip(Point point) {
-        Tooltip tooltip = getCurrentEntry().getTooltip(point);
+    public Tooltip getCurrentTooltip(TooltipContext context) {
+        Tooltip tooltip = getCurrentEntry().getTooltip(context);
         
         if (tooltip != null && !ClientHelper.getInstance().isCheating() && getTransferHandler() != null
             && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {

@@ -98,19 +98,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     
     @Nullable
     @Environment(EnvType.CLIENT)
-    default Tooltip getTooltip(Point mouse, boolean appendModName) {
-        return getTooltip(TooltipContext.of(mouse), appendModName);
-    }
-    
-    @Nullable
-    @Environment(EnvType.CLIENT)
     Tooltip getTooltip(TooltipContext context, boolean appendModName);
-    
-    @Override
-    @Nullable
-    default Tooltip getTooltip(Point mouse) {
-        return getTooltip(mouse, ConfigObject.getInstance().shouldAppendModNames());
-    }
     
     @Override
     @Nullable

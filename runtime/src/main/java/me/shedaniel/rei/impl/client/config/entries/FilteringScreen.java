@@ -36,6 +36,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
@@ -503,7 +504,7 @@ public class FilteringScreen extends Screen {
         protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
             if (searchField.containsMouse(mouseX, mouseY))
                 return;
-            Tooltip tooltip = getCurrentTooltip(new Point(mouseX, mouseY));
+            Tooltip tooltip = getCurrentTooltip(TooltipContext.of(new Point(mouseX, mouseY)));
             if (tooltip != null) {
                 FilteringScreen.this.tooltip = tooltip;
             }

@@ -37,6 +37,7 @@ import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -78,8 +79,8 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             return new CompoundFavoriteRenderer(showcase, renderers, () -> Minecraft.getInstance().gameMode.getPlayerMode().getId()) {
                 @Override
                 @Nullable
-                public Tooltip getTooltip(Point mouse) {
-                    return Tooltip.create(mouse, Component.translatable("text.rei.gamemode_button.tooltip.dropdown"));
+                public Tooltip getTooltip(TooltipContext context) {
+                    return Tooltip.create(context.getPoint(), Component.translatable("text.rei.gamemode_button.tooltip.dropdown"));
                 }
                 
                 @Override
@@ -121,8 +122,8 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             
             @Override
             @Nullable
-            public Tooltip getTooltip(Point mouse) {
-                return Tooltip.create(mouse, Component.translatable("text.rei.gamemode_button.tooltip.entry", type.getLongDisplayName().getString()));
+            public Tooltip getTooltip(TooltipContext context) {
+                return Tooltip.create(context.getPoint(), Component.translatable("text.rei.gamemode_button.tooltip.entry", type.getLongDisplayName().getString()));
             }
             
             @Override

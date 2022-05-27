@@ -194,16 +194,6 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     }
     
     @Override
-    public Iterable<DraggableStackProvider<Screen>> getDraggableProviders() {
-        return Iterables.filter(Collections.unmodifiableList(draggableProviders), (Class<DraggableStackProvider<Screen>>) (Class<?>) DraggableStackVisitor.class);
-    }
-    
-    @Override
-    public Iterable<DraggableStackVisitor<Screen>> getDraggableVisitors() {
-        return Iterables.filter(Collections.unmodifiableList(draggableVisitors), (Class<DraggableStackVisitor<Screen>>) (Class<?>) DraggableStackVisitor.class);
-    }
-    
-    @Override
     public Iterable<DraggableComponentProvider<Screen, Object>> getDraggableComponentProviders() {
         return Collections.unmodifiableList(draggableProviders);
     }

@@ -195,7 +195,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
             
             @Override
             @Nullable
-            public Tooltip getTooltip(Point mouse) {
+            public Tooltip getTooltip(TooltipContext context) {
                 List<Component> strings = category.getTooltipStrings(display.getBackingRecipe(), result, mouse.x - bounds.x - 4, mouse.y - bounds.y - 4);
                 if (strings.isEmpty()) {
                     return null;

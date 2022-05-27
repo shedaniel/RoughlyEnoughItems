@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -167,10 +168,10 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
         
         @Override
         @Nullable
-        public Tooltip getCurrentTooltip(Point point) {
-            point = PointHelper.ofMouse();
-            if (!panel.getInnerBounds().contains(point)) return null;
-            Tooltip tooltip = super.getCurrentTooltip(point);
+        public Tooltip getCurrentTooltip(TooltipContext context) {
+            context = TooltipContext.ofMouse();
+            if (!panel.getInnerBounds().contains(context.getPoint())) return null;
+            Tooltip tooltip = super.getCurrentTooltip(context);
             if (tooltip != null) {
                 tooltip.add(Component.empty());
                 tooltip.add(Component.translatable("tooltip.rei.drag_to_add_favorites"));

@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.api.client.gui;
 
-import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import net.fabricmc.api.EnvType;
@@ -42,7 +41,7 @@ public abstract class DisplayRenderer extends AbstractRenderer {
     
     @Override
     @Nullable
-    public Tooltip getTooltip(Point mouse) {
+    public Tooltip getTooltip(TooltipContext mouse) {
         return null;
     }
 }
