@@ -41,15 +41,8 @@ public interface Renderer {
     
     @Nullable
     @Environment(EnvType.CLIENT)
-    @Deprecated(forRemoval = true)
-    default Tooltip getTooltip(Point mouse) {
-        return null;
-    }
-    
-    @Nullable
-    @Environment(EnvType.CLIENT)
     default Tooltip getTooltip(TooltipContext context) {
-        return getTooltip(context.getPoint());
+        return null;
     }
     
     @Environment(EnvType.CLIENT)

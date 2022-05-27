@@ -43,6 +43,7 @@ import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitorW
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
@@ -108,8 +109,8 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                 
                 @Override
                 @Nullable
-                public Tooltip getTooltip(Point point) {
-                    return Tooltip.create(Component.literal("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
+                public Tooltip getTooltip(TooltipContext context) {
+                    return Tooltip.create(context.getPoint(), Component.literal("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
                 }
             }));
         }

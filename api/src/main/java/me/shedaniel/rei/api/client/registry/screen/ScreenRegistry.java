@@ -137,14 +137,6 @@ public interface ScreenRegistry extends Reloadable<REIClientPlugin> {
         registerDraggableComponentProvider(DraggableComponentProviderWidget.toProvider(provider, priority));
     }
     
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated(forRemoval = true)
-    Iterable<DraggableStackProvider<Screen>> getDraggableProviders();
-    
-    @ApiStatus.ScheduledForRemoval
-    @Deprecated(forRemoval = true)
-    Iterable<DraggableStackVisitor<Screen>> getDraggableVisitors();
-    
     Iterable<DraggableComponentProvider<Screen, Object>> getDraggableComponentProviders();
     
     Iterable<DraggableComponentVisitor<Screen>> getDraggableComponentVisitors();

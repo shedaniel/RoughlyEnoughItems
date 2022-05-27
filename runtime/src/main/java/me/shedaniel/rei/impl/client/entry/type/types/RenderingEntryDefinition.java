@@ -74,7 +74,7 @@ public class RenderingEntryDefinition {
         @Override
         @Nullable
         public Tooltip getTooltip(EntryStack<Renderer> entry, TooltipContext context) {
-            return entry.getValue().getTooltip(context.getPoint());
+            return entry.getValue().getTooltip(context);
         }
     }
 }

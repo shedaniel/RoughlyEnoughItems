@@ -28,6 +28,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
@@ -46,6 +47,12 @@ public class EmptyEntryDefinition {
         @Override
         public void render(EntryStack<Unit> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
             
+        }
+        
+        @Override
+        @Nullable
+        public Tooltip getTooltip(EntryStack<Unit> entry, TooltipContext context) {
+            return null;
         }
     }
 }

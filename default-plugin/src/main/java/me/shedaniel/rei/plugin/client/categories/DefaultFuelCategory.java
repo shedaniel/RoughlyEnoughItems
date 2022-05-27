@@ -29,10 +29,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
-import me.shedaniel.rei.api.client.gui.widgets.Slot;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -99,9 +96,9 @@ public class DefaultFuelCategory implements DisplayCategory<DefaultFuelDisplay> 
             
             @Nullable
             @Override
-            public Tooltip getTooltip(Point point) {
-                if (slot.containsMouse(point))
-                    return slot.getCurrentTooltip(point);
+            public Tooltip getTooltip(TooltipContext context) {
+                if (slot.containsMouse(context.getPoint()))
+                    return slot.getCurrentTooltip(context);
                 return null;
             }
             

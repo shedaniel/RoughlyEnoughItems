@@ -38,6 +38,7 @@ import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -97,8 +98,8 @@ public class TimeFavoriteEntry extends FavoriteEntry {
             return new CompoundFavoriteRenderer(showcase, renderers, () -> nextTime().ordinal()) {
                 @Override
                 @Nullable
-                public Tooltip getTooltip(Point mouse) {
-                    return Tooltip.create(mouse, Component.translatable("text.rei.time_button.tooltip.dropdown"));
+                public Tooltip getTooltip(TooltipContext context) {
+                    return Tooltip.create(context.getPoint(), Component.translatable("text.rei.time_button.tooltip.dropdown"));
                 }
                 
                 @Override
@@ -155,8 +156,8 @@ public class TimeFavoriteEntry extends FavoriteEntry {
             
             @Override
             @Nullable
-            public Tooltip getTooltip(Point mouse) {
-                return Tooltip.create(mouse, Component.translatable("text.rei.time_button.tooltip.entry", Component.translatable("text.rei.time_button.name." + time.name().toLowerCase(Locale.ROOT))));
+            public Tooltip getTooltip(TooltipContext context) {
+                return Tooltip.create(context.getPoint(), Component.translatable("text.rei.time_button.tooltip.entry", Component.translatable("text.rei.time_button.name." + time.name().toLowerCase(Locale.ROOT))));
             }
             
             @Override

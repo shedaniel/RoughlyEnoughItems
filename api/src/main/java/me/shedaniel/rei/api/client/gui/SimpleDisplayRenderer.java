@@ -30,10 +30,7 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.gui.widgets.Slot;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.gui.widgets.WidgetHolder;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -133,14 +130,14 @@ public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHold
     
     @Nullable
     @Override
-    public Tooltip getTooltip(Point point) {
+    public Tooltip getTooltip(TooltipContext context) {
         for (Slot widget : inputWidgets) {
-            if (widget.containsMouse(point))
-                return widget.getCurrentTooltip(point);
+            if (widget.containsMouse(context.getPoint()))
+                return widget.getCurrentTooltip(context);
         }
         for (Slot widget : outputWidgets) {
-            if (widget.containsMouse(point))
-                return widget.getCurrentTooltip(point);
+            if (widget.containsMouse(context.getPoint()))
+                return widget.getCurrentTooltip(context);
         }
         return null;
     }
