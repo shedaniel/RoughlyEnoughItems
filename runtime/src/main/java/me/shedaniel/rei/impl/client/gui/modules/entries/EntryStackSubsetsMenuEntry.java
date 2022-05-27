@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -76,7 +77,7 @@ public class EntryStackSubsetsMenuEntry extends AbstractMenuEntry {
             fill(matrices, getX(), getY(), getX() + getWidth(), getY() + 18, 1174405119);
         }
         if (containsMouse() && mouseX >= getX() + (getWidth() / 2) - 8 && mouseX <= getX() + (getWidth() / 2) + 8 && mouseY >= getY() + 1 && mouseY <= getY() + 17) {
-            REIRuntime.getInstance().queueTooltip(stack.getTooltip(new Point(mouseX, mouseY)));
+            REIRuntime.getInstance().queueTooltip(stack.getTooltip(TooltipContext.of(new Point(mouseX, mouseY))));
             if (RoughlyEnoughItemsCoreClient.isLeftMousePressed && !clickedLast) {
                 clickedLast = true;
                 if (getParent().scrolling.getScissorBounds().contains(mouseX, mouseY)) {

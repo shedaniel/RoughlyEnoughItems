@@ -27,6 +27,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -40,8 +41,15 @@ public interface Renderer {
     
     @Nullable
     @Environment(EnvType.CLIENT)
+    @Deprecated(forRemoval = true)
     default Tooltip getTooltip(Point mouse) {
         return null;
+    }
+    
+    @Nullable
+    @Environment(EnvType.CLIENT)
+    default Tooltip getTooltip(TooltipContext context) {
+        return getTooltip(context.getPoint());
     }
     
     @Environment(EnvType.CLIENT)

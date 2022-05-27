@@ -38,6 +38,7 @@ import me.shedaniel.rei.api.client.entry.renderer.AbstractEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.util.SpriteRenderer;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -289,7 +290,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
         
         @Override
         @Nullable
-        public Tooltip getTooltip(EntryStack<FluidStack> entry, Point mouse) {
+        public Tooltip getTooltip(EntryStack<FluidStack> entry, TooltipContext context) {
             if (entry.isEmpty())
                 return null;
             List<Component> toolTip = Lists.newArrayList(entry.asFormattedText());

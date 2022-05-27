@@ -25,6 +25,7 @@ package me.shedaniel.rei.api.client.entry.renderer;
 
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
@@ -50,8 +51,8 @@ public interface EntryRendererRegistry extends Reloadable<REIClientPlugin> {
             return new ForwardingEntryRenderer<T>(last) {
                 @Override
                 @Nullable
-                public Tooltip getTooltip(EntryStack<T> entry, Point mouse) {
-                    return transformer.transform(entry, mouse, super.getTooltip(entry, mouse));
+                public Tooltip getTooltip(EntryStack<T> entry, TooltipContext context) {
+                    return transformer.transform(entry, context.getPoint(), super.getTooltip(entry, context));
                 }
             };
         });

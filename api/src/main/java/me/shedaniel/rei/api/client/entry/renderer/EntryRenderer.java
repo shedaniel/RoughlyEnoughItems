@@ -27,6 +27,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
@@ -53,7 +54,16 @@ public interface EntryRenderer<T> extends EntryRendererProvider<T> {
     
     @Nullable
     @Environment(EnvType.CLIENT)
-    Tooltip getTooltip(EntryStack<T> entry, Point mouse);
+    @Deprecated(forRemoval = true, since = "8.3")
+    default Tooltip getTooltip(EntryStack<T> entry, Point mouse) {
+        return null;
+    }
+    
+    @Nullable
+    @Environment(EnvType.CLIENT)
+    default Tooltip getTooltip(EntryStack<T> entry, TooltipContext context) {
+        return getTooltip(entry, context.getPoint());
+    }
     
     @ApiStatus.NonExtendable
     default <O> EntryRenderer<O> cast() {

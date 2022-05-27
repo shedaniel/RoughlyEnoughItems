@@ -34,6 +34,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.settings.EntrySettingsAdapterRegistry;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -210,9 +211,9 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
     
     @Override
     @Nullable
-    public Tooltip getTooltip(Point mouse, boolean appendModName) {
+    public Tooltip getTooltip(TooltipContext context, boolean appendModName) {
         try {
-            Mutable<Tooltip> tooltip = new MutableObject<>(getRenderer().<A>cast().getTooltip(this, mouse));
+            Mutable<Tooltip> tooltip = new MutableObject<>(getRenderer().<A>cast().getTooltip(this, context));
             if (tooltip.getValue() == null) return null;
             tooltip.getValue().withContextStack(this);
             tooltip.getValue().addAllTexts(get(Settings.TOOLTIP_APPEND_EXTRA).apply(this));

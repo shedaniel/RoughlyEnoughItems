@@ -44,6 +44,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -65,6 +66,7 @@ public final class ClientInternals {
     private static Function<CompoundTag, DataResult<FavoriteEntry>> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
     private static BiFunction<@Nullable Point, Collection<Component>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
+    private static BiFunction<Point, @Nullable TooltipFlag, TooltipContext> tooltipContextProvider = (point, texts) -> throwNotSetup();
     private static Supplier<List<String>> jeiCompatMods = ClientInternals::throwNotSetup;
     private static Supplier<Object> builtinClientPlugin = ClientInternals::throwNotSetup;
     
@@ -119,6 +121,10 @@ public final class ClientInternals {
     
     public static Tooltip createTooltip(@Nullable Point point, Collection<Component> texts) {
         return tooltipProvider.apply(point, texts);
+    }
+    
+    public static TooltipContext createTooltipContext(Point point, @Nullable TooltipFlag flag) {
+        return tooltipContextProvider.apply(point, flag);
     }
     
     public static FavoriteEntry delegateFavoriteEntry(Supplier<DataResult<FavoriteEntry>> supplier, Supplier<CompoundTag> toJoin) {

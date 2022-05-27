@@ -27,6 +27,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchMode;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
@@ -35,6 +36,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.Unit;
+import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,7 +47,8 @@ import java.util.Locale;
 @Environment(EnvType.CLIENT)
 public final class TooltipArgumentType extends ArgumentType<Unit, String> {
     public static final TooltipArgumentType INSTANCE = new TooltipArgumentType();
-    public static final String INVALID = "INVALID_PIECE_OF_TOOLTIP_I_DONT_THINK_PEOPLE_WILL_EXACTLY_HAVE_THIS_REI_REI_REI";
+    private static final TooltipContext CONTEXT = TooltipContext.of(new Point(), TooltipFlag.Default.NORMAL);
+    public static String INVALID = "INVALID_PIECE_OF_TOOLTIP_I_DONT_THINK_PEOPLE_WILL_EXACTLY_HAVE_THIS_REI_REI_REI";
     private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xffe0ad));
     
     @Override
@@ -86,7 +89,7 @@ public final class TooltipArgumentType extends ArgumentType<Unit, String> {
     @Nullable
     public static String tryGetEntryStackTooltip(EntryStack<?> stack, int attempt) {
         try {
-            Tooltip tooltip = stack.getTooltip(new Point(), false);
+            Tooltip tooltip = stack.getTooltip(CONTEXT, false);
             if (tooltip != null) {
                 return CollectionUtils.mapAndJoinToString(tooltip.getText(), Component::getString, "\n");
             }

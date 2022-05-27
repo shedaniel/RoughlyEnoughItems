@@ -47,11 +47,5 @@ public class EmptyEntryDefinition {
         public void render(EntryStack<Unit> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
             
         }
-        
-        @Override
-        @Nullable
-        public Tooltip getTooltip(EntryStack<Unit> entry, Point mouse) {
-            return null;
-        }
     }
 }

@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.entry.type.BuiltinClientEntryTypes;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.impl.common.entry.type.types.BuiltinEntryDefinition;
@@ -46,7 +47,7 @@ public class RenderingEntryDefinition {
     public static final EntryDefinition<Renderer> RENDERING = new BuiltinEntryDefinition<Renderer>(Renderer.class, BuiltinClientEntryTypes.RENDERING, false, RenderingEntryDefinition::throwRendering, () -> () -> DeferredRenderer.INSTANCE) {
         @Override
         public Component asFormattedText(EntryStack<Renderer> entry, Renderer value) {
-            Tooltip tooltip = value.getTooltip(PointHelper.ofMouse());
+            Tooltip tooltip = value.getTooltip(TooltipContext.ofMouse());
             if (tooltip != null && !tooltip.getText().isEmpty()) {
                 return tooltip.getText().get(0);
             }
@@ -68,8 +69,8 @@ public class RenderingEntryDefinition {
         
         @Override
         @Nullable
-        public Tooltip getTooltip(EntryStack<Renderer> entry, Point mouse) {
-            return entry.getValue().getTooltip(mouse);
+        public Tooltip getTooltip(EntryStack<Renderer> entry, TooltipContext context) {
+            return entry.getValue().getTooltip(context.getPoint());
         }
     }
 }
