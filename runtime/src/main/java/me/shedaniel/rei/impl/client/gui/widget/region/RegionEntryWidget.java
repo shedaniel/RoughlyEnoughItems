@@ -137,7 +137,7 @@ public class RegionEntryWidget<T extends RegionEntry<T>> extends DisplayedEntryW
     
     @Override
     protected boolean doAction(double mouseX, double mouseY, int button) {
-        return entry.getEntry().doAction(button);
+        return entry.getEntry().doAction(button) || super.doAction(mouseX, mouseY, button);
     }
     
     public RealRegionEntry<T> getEntry() {
