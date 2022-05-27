@@ -34,7 +34,6 @@ import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
@@ -170,7 +169,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (containsMouse(PointHelper.ofMouse()))
+        if (containsMouse(mouse()))
             for (Widget widget : children())
                 if (widget.keyPressed(keyCode, scanCode, modifiers))
                     return true;
@@ -191,7 +190,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     }
     
     public EntryStack<?> getFocusedStack() {
-        Point mouse = PointHelper.ofMouse();
+        Point mouse = mouse();
         if (innerBounds.contains(mouse)) {
             for (RealRegionEntry<T> entry : entries.values()) {
                 if (entry.getWidget().containsMouse(mouse)) {

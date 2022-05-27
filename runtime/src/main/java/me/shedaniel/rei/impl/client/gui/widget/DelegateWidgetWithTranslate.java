@@ -27,6 +27,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector4f;
 import me.shedaniel.rei.api.client.gui.widgets.DelegateWidget;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 
 import java.util.function.Supplier;
@@ -82,5 +83,35 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     public boolean mouseScrolled(double d, double e, double f) {
         Vector4f mouse = transformMouse(d, e);
         return super.mouseScrolled(mouse.x(), mouse.y(), f);
+    }
+    
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        try {
+            Widget.translateMouse(translate.get());
+            return super.keyPressed(keyCode, scanCode, modifiers);
+        } finally {
+            Widget.popMouse();
+        }
+    }
+    
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        try {
+            Widget.translateMouse(translate.get());
+            return super.keyReleased(keyCode, scanCode, modifiers);
+        } finally {
+            Widget.popMouse();
+        }
+    }
+    
+    @Override
+    public boolean charTyped(char character, int modifiers) {
+        try {
+            Widget.translateMouse(translate.get());
+            return super.charTyped(character, modifiers);
+        } finally {
+            Widget.popMouse();
+        }
     }
 }

@@ -409,7 +409,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     
     public void renderBorder(PoseStack matrices) {
         if (this.hasBorder()) {
-            if (containsMouse(PointHelper.ofMouse()) || focused)
+            if (containsMouse(mouse()) || focused)
                 fill(matrices, this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, -1);
             else
                 fill(matrices, this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, -6250336);
