@@ -185,7 +185,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
                         }
                     }
                     
-                    Tooltip tooltip = getTooltip(mouse);
+                    Tooltip tooltip = getTooltip(TooltipContext.of(mouse));
                     
                     if (tooltip != null) {
                         tooltip.queue();

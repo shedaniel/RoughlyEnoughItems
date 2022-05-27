@@ -297,6 +297,10 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     private TransferHandler _getTransferHandler() {
         lastCheckTime = Util.getMillis();
         
+        if (PluginManager.areAnyReloading()) {
+            return null;
+        }
+        
         for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
             for (Display display : displays) {
                 if (ViewsImpl.isRecipesFor(getEntries(), display)) {
@@ -410,7 +414,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     @Override
     @Nullable
-    public Tooltip getCurrentTooltip(me.shedaniel.math.Point point) {
+    public Tooltip getCurrentTooltip(Point point) {
         Tooltip tooltip = getCurrentEntry().getTooltip(point);
         
         if (tooltip != null && !ClientHelper.getInstance().isCheating() && getTransferHandler() != null

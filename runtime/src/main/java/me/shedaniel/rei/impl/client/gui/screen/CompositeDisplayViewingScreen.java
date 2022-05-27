@@ -34,10 +34,7 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
-import me.shedaniel.rei.api.client.gui.widgets.Button;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.category.ButtonArea;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
@@ -370,7 +367,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             if (buttonList.get(i).getBounds().getMaxY() > scrollListBounds.getMinY() && buttonList.get(i).getBounds().getMinY() < scrollListBounds.getMaxY()) {
                 displayRenderers.get(i).setZ(1);
                 displayRenderers.get(i).render(matrices, buttonList.get(i).getBounds(), mouseX, mouseY, delta);
-                Optional.ofNullable(displayRenderers.get(i).getTooltip(new Point(mouseX, mouseY))).ifPresent(Tooltip::queue);
+                Optional.ofNullable(displayRenderers.get(i).getTooltip(TooltipContext.of(new Point(mouseX, mouseY)))).ifPresent(Tooltip::queue);
             }
         }
         scrolling.renderScrollBar(0, scrollBarAlpha, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);

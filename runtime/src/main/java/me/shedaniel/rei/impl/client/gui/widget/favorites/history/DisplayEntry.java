@@ -172,7 +172,7 @@ public class DisplayEntry extends WidgetWithBounds {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (containsMouse(mouseX, mouseY)) {
+        if (containsMouse(mouseX + xOffset, mouseY)) {
             for (Widget widget : widgets.get()) {
                 if (widget.mouseClicked(transformMouseX(mouseX), transformMouseY(mouseY), button)) {
                     return true;
@@ -185,7 +185,7 @@ public class DisplayEntry extends WidgetWithBounds {
     
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (containsMouse(mouseX, mouseY)) {
+        if (containsMouse(mouseX + xOffset, mouseY)) {
             for (Widget widget : widgets.get()) {
                 if (widget.mouseReleased(transformMouseX(mouseX), transformMouseY(mouseY), button)) {
                     return true;

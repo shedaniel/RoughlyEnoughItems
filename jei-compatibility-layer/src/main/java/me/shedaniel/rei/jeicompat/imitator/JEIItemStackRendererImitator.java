@@ -28,6 +28,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import mezz.jei.api.ingredients.IIngredientRenderer;
@@ -45,7 +46,7 @@ import java.util.List;
 public class JEIItemStackRendererImitator implements IIngredientRenderer<ItemStack> {
     @Override
     public List<Component> getTooltip(ItemStack ingredient, TooltipFlag tooltipFlag) {
-        Tooltip tooltip = EntryStacks.of(ingredient).getTooltip(new Point(0, 0));
+        Tooltip tooltip = EntryStacks.of(ingredient).getTooltip(TooltipContext.of(new Point(0, 0)));
         if (tooltip == null) return new ArrayList<>();
         return CollectionUtils.filterAndMap(tooltip.entries(), Tooltip.Entry::isText, Tooltip.Entry::getAsText);
     }
