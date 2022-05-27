@@ -68,8 +68,15 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
                     EntryStack<ItemStack> cheatsAs = entry.cheatsAs();
                     entry = cheatsAs.isEmpty() ? entry : cheatsAs;
                 }
-                if (entry.getValueType() == ItemStack.class)
-                    entry.<ItemStack>castValue().setCount(button != 1 && !Screen.hasShiftDown() == (ConfigObject.getInstance().getItemCheatingMode() == ItemCheatingMode.REI_LIKE) ? 1 : entry.<ItemStack>castValue().getMaxStackSize());
+                if (entry.getValueType() == ItemStack.class) {
+                    boolean all;
+                    if (ConfigObject.getInstance().getItemCheatingMode() == ItemCheatingMode.REI_LIKE) {
+                        all = button == 1 || Screen.hasShiftDown();
+                    } else {
+                        all = button != 1 || Screen.hasShiftDown();
+                    }
+                    entry.<ItemStack>castValue().setCount(!all ? 1 : entry.<ItemStack>castValue().getMaxStackSize());
+                }
                 return ClientHelper.getInstance().tryCheatingEntry(entry);
             }
         }
