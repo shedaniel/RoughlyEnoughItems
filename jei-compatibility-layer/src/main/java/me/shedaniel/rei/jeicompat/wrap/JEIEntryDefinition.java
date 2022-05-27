@@ -175,7 +175,10 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
         public void render(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
             Object value = entry.getValue();
             if (value instanceof FluidStack) value = FluidStackHooksForge.toForge((FluidStack) value);
-            ((IIngredientRenderer<Object>) ingredientRenderer).render(matrices, bounds.getCenterX() - ingredientRenderer.getWidth() / 2, bounds.getCenterY() - ingredientRenderer.getHeight() / 2, value);
+            matrices.pushPose();
+            matrices.translate(bounds.getCenterX() - ingredientRenderer.getWidth() / 2, bounds.getCenterY() - ingredientRenderer.getHeight() / 2, 0);
+            ((IIngredientRenderer<Object>) ingredientRenderer).render(matrices, value);
+            matrices.popPose();
         }
         
         @Override
