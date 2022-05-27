@@ -38,6 +38,7 @@ import me.shedaniel.rei.api.client.entry.renderer.AbstractEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
@@ -202,10 +203,10 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     }
     
     @Environment(EnvType.CLIENT)
-    private List<Component> tryGetItemStackToolTip(EntryStack<ItemStack> entry, ItemStack value, boolean careAboutAdvanced) {
+    private List<Component> tryGetItemStackToolTip(EntryStack<ItemStack> entry, ItemStack value, TooltipContext context) {
         if (!SEARCH_BLACKLISTED.contains(value.getItem()))
             try {
-                return value.getTooltipLines(Minecraft.getInstance().player, careAboutAdvanced && Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+                return value.getTooltipLines(Minecraft.getInstance().player, context.getFlag());
             } catch (Throwable e) {
                 e.printStackTrace();
                 SEARCH_BLACKLISTED.add(value.getItem());
@@ -344,12 +345,12 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         
         @Override
         @Nullable
-        public Tooltip getTooltip(EntryStack<ItemStack> entry, Point mouse) {
+        public Tooltip getTooltip(EntryStack<ItemStack> entry, TooltipContext context) {
             if (entry.isEmpty())
                 return null;
             Tooltip tooltip = Tooltip.create();
             Optional<TooltipComponent> component = entry.getValue().getTooltipImage();
-            List<Component> components = tryGetItemStackToolTip(entry, entry.getValue(), true);
+            List<Component> components = tryGetItemStackToolTip(entry, entry.getValue(), context);
             if (!components.isEmpty()) {
                 tooltip.add(components.get(0));
             }

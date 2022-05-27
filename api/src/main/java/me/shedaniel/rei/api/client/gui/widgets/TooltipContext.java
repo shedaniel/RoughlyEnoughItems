@@ -21,37 +21,33 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.entry.renderer;
+package me.shedaniel.rei.api.client.gui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
-import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
-import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.rei.impl.ClientInternals;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.world.item.TooltipFlag;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class ForwardingEntryRenderer<T> implements EntryRenderer<T> {
-    protected EntryRenderer<T> next;
-    
-    public ForwardingEntryRenderer(EntryRenderer<T> next) {
-        this.next = next;
+@Environment(EnvType.CLIENT)
+@ApiStatus.NonExtendable
+public interface TooltipContext {
+    static TooltipContext of(Point point) {
+        return TooltipContext.of(point, null);
     }
     
-    @Override
-    public void render(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-        this.next.render(entry, matrices, bounds, mouseX, mouseY, delta);
+    static TooltipContext of(Point point, @Nullable TooltipFlag flag) {
+        return ClientInternals.createTooltipContext(point, flag);
     }
     
-    @Override
-    @Nullable
-    public Tooltip getTooltip(EntryStack<T> entry, Point mouse) {
-        return this.next.getTooltip(entry, TooltipContext.of(mouse));
+    static TooltipContext ofMouse() {
+        return TooltipContext.of(PointHelper.ofMouse());
     }
     
-    @Override
-    @Nullable
-    public Tooltip getTooltip(EntryStack<T> entry, TooltipContext context) {
-        return this.next.getTooltip(entry, context);
-    }
+    TooltipFlag getFlag();
+    
+    Point getPoint();
 }

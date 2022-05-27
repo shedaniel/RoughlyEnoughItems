@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRendererRegistry;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
@@ -97,12 +98,24 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     
     @Nullable
     @Environment(EnvType.CLIENT)
-    Tooltip getTooltip(Point mouse, boolean appendModName);
+    default Tooltip getTooltip(Point mouse, boolean appendModName) {
+        return getTooltip(TooltipContext.of(mouse), appendModName);
+    }
+    
+    @Nullable
+    @Environment(EnvType.CLIENT)
+    Tooltip getTooltip(TooltipContext context, boolean appendModName);
     
     @Override
     @Nullable
     default Tooltip getTooltip(Point mouse) {
         return getTooltip(mouse, ConfigObject.getInstance().shouldAppendModNames());
+    }
+    
+    @Override
+    @Nullable
+    default Tooltip getTooltip(TooltipContext context) {
+        return getTooltip(context, ConfigObject.getInstance().shouldAppendModNames());
     }
     
     EntryDefinition<T> getDefinition();
@@ -197,8 +210,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     
     <R> R get(Settings<R> settings);
     
-    @Nullable
-    <R> R getNullable(Settings<R> settings);
+    @Nullable <R> R getNullable(Settings<R> settings);
     
     @Environment(EnvType.CLIENT)
     default EntryStack<T> tooltip(Component... tooltips) {
