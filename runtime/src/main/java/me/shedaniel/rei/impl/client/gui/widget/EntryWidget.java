@@ -298,6 +298,10 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     private TransferHandler _getTransferHandler() {
         lastCheckTime = Util.getMillis();
         
+        if (PluginManager.areAnyReloading()) {
+            return null;
+        }
+        
         for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
             for (Display display : displays) {
                 if (ViewsImpl.isRecipesFor(getEntries(), display)) {
