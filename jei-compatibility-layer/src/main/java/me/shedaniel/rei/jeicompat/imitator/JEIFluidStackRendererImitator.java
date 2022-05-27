@@ -29,6 +29,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -66,7 +67,7 @@ public class JEIFluidStackRendererImitator implements IIngredientRenderer<FluidS
     
     @Override
     public List<Component> getTooltip(FluidStack ingredient, TooltipFlag tooltipFlag) {
-        Tooltip tooltip = EntryStacks.of(FluidStackHooksForge.fromForge(ingredient)).getTooltip(new Point(0, 0));
+        Tooltip tooltip = EntryStacks.of(FluidStackHooksForge.fromForge(ingredient)).getTooltip(TooltipContext.of(new Point(0, 0)));
         if (tooltip == null) return new ArrayList<>();
         return CollectionUtils.filterAndMap(tooltip.entries(), Tooltip.Entry::isText, Tooltip.Entry::getAsText);
     }

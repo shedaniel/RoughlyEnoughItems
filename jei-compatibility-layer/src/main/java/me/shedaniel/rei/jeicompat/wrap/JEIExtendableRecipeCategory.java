@@ -30,6 +30,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -123,7 +124,7 @@ public class JEIExtendableRecipeCategory<T, D extends Display, W extends IRecipe
                     
                     Point mouse = PointHelper.ofMouse();
                     if (containsMouse(mouse)) {
-                        Tooltip tooltip = getTooltip(mouse);
+                        Tooltip tooltip = getTooltip(TooltipContext.of(mouse));
                         
                         if (tooltip != null) {
                             tooltip.queue();
