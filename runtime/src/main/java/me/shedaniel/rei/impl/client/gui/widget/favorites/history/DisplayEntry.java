@@ -210,18 +210,15 @@ public class DisplayEntry extends WidgetWithBounds {
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        for (Widget widget : widgets.get()) {
-            if (widget instanceof EntryWidget) {
-                double mouseX = PointHelper.getMouseFloatingX(), mouseY = PointHelper.getMouseFloatingY();
-                if (widget.containsMouse(transformMouseX(mouseX), transformMouseY(mouseY))
-                    && ((EntryWidget) widget).keyPressedIgnoreContains(keyCode, scanCode, modifiers)) {
-                    return true;
-                }
-            } else {
+        try {
+            Widget.translateMouse(xOffset, 0, 0);
+            for (Widget widget : widgets.get()) {
                 if (widget.keyPressed(keyCode, scanCode, modifiers)) {
                     return true;
                 }
             }
+        } finally {
+            Widget.popMouse();
         }
         
         return super.keyPressed(keyCode, scanCode, modifiers);

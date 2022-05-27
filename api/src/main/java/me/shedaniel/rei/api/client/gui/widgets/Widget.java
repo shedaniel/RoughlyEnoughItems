@@ -24,14 +24,19 @@
 package me.shedaniel.rei.api.client.gui.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+
+import java.util.Stack;
 
 /**
  * The base class for a screen widget
@@ -49,6 +54,34 @@ public abstract class Widget extends AbstractContainerEventHandler implements ne
      * The font for rendering text
      */
     protected final Font font = minecraft.font;
+    private static final Stack<Point> mouseStack = new Stack<>();
+    
+    public static Point mouse() {
+        return mouseStack.empty() ? PointHelper.ofMouse() : mouseStack.peek();
+    }
+    
+    public static Point pushMouse(Point mouse) {
+        return mouseStack.push(mouse);
+    }
+    
+    public static Point popMouse() {
+        return mouseStack.pop();
+    }
+    
+    public static Point translateMouse(PoseStack poses) {
+        return translateMouse(poses.last().pose());
+    }
+    
+    public static Point translateMouse(double x, double y, double z) {
+        return translateMouse(Matrix4f.createTranslateMatrix((float) x, (float) y, (float) z));
+    }
+    
+    public static Point translateMouse(Matrix4f pose) {
+        Point mouse = mouse();
+        Vector4f mouseVec = new Vector4f(mouse.x, mouse.y, 0, 1);
+        mouseVec.transform(pose);
+        return pushMouse(mouse);
+    }
     
     public int getZ() {
         return this.getBlitOffset();

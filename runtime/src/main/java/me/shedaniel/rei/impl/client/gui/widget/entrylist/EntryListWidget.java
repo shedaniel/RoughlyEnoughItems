@@ -354,7 +354,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (containsChecked(PointHelper.ofMouse(), false))
+        if (containsChecked(mouse(), false))
             for (Widget widget : children)
                 if (widget.keyPressed(keyCode, scanCode, modifiers))
                     return true;
@@ -498,7 +498,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     
     @Override
     public EntryStack<?> getFocusedStack() {
-        Point mouse = PointHelper.ofMouse();
+        Point mouse = mouse();
         if (containsChecked(mouse, false)) {
             for (EntryListStackEntry entry : entries) {
                 EntryStack<?> currentEntry = entry.getCurrentEntry();
