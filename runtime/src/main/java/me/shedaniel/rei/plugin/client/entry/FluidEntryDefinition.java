@@ -295,7 +295,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
                 return null;
             List<Component> toolTip = Lists.newArrayList(entry.asFormattedText());
             Fraction amount = entry.getValue().getAmount();
-            if (!amount.isLessThan(Fraction.zero())) {
+            if (!amount.isLessThan(Fraction.zero()) && entry.get(EntryStack.Settings.FLUID_AMOUNT_VISIBLE)) {
                 String amountTooltip = I18n.get(FLUID_AMOUNT, entry.getValue().getAmount());
                 if (amountTooltip != null) {
                     toolTip.addAll(Stream.of(amountTooltip.split("\n")).map(TextComponent::new).collect(Collectors.toList()));

@@ -243,6 +243,10 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
         @Environment(EnvType.CLIENT)
         public static Settings<Function<EntryStack<?>, List<Component>>> TOOLTIP_APPEND_EXTRA;
         @Environment(EnvType.CLIENT)
+        @Deprecated
+        @ApiStatus.Internal
+        public static Settings<Boolean> FLUID_AMOUNT_VISIBLE;
+        @Environment(EnvType.CLIENT)
         public static Settings<Float> FLUID_RENDER_RATIO;
         
         static {
@@ -252,6 +256,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
                 CONTAINING_NS = new Settings<>((stack, ns) -> ns);
                 TOOLTIP_APPEND_EXTRA = new Settings<>(stack -> Collections.emptyList());
                 FLUID_RENDER_RATIO = new Settings<>(1.0F);
+                FLUID_AMOUNT_VISIBLE = new Settings<>(true);
             });
         }
         
