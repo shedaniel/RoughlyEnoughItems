@@ -46,6 +46,7 @@ import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
@@ -301,8 +302,8 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                                 
                                 @Override
                                 @Nullable
-                                public Tooltip getTooltip(EntryStack<Object> entry, Point mouse) {
-                                    return stack.getDefinition().getRenderer().getTooltip(entry.cast(), mouse);
+                                public Tooltip getTooltip(EntryStack<Object> entry, TooltipContext context) {
+                                    return stack.getDefinition().getRenderer().getTooltip(entry.cast(), context);
                                 }
                             });
                         }

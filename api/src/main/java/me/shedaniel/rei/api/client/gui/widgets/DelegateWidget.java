@@ -90,4 +90,35 @@ public class DelegateWidget extends WidgetWithBounds {
     public boolean isDragging() {
         return true;
     }
+    
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        return widget.mouseScrolled(mouseX, mouseY, amount);
+    }
+    
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        return widget.keyPressed(keyCode, scanCode, modifiers);
+    }
+    
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        return widget.keyReleased(keyCode, scanCode, modifiers);
+    }
+    
+    @Override
+    public boolean charTyped(char character, int modifiers) {
+        return widget.charTyped(character, modifiers);
+    }
+    
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        return widget.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    }
+    
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        this.setDragging(false);
+        return widget.mouseReleased(mouseX, mouseY, button);
+    }
 }
