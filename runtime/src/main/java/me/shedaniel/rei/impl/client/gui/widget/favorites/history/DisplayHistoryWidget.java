@@ -254,7 +254,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
             scroll.setTo(scroll.target() + ClothConfigInitializer.getScrollStep() * -2 * amount, ClothConfigInitializer.getScrollDuration());
             return true;
         }
-    
+        
         for (DisplayEntry entry : entries) {
             if (entry.mouseScrolled(mouseX, mouseY, amount)) {
                 return true;
@@ -277,6 +277,12 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        for (DisplayEntry entry : entries) {
+            if (entry.mouseReleased(mouseX, mouseY, button)) {
+                return true;
+            }
+        }
+        
         if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
             Point mouse = PointHelper.ofMouse();
             
@@ -296,18 +302,18 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
                 }
             }
         }
-    
-        for (DisplayEntry entry : entries) {
-            if (entry.mouseReleased(mouseX, mouseY, button)) {
-                return true;
-            }
-        }
         
         return super.mouseReleased(mouseX, mouseY, button);
     }
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        for (DisplayEntry entry : entries) {
+            if (entry.keyPressed(keyCode, scanCode, modifiers)) {
+                return true;
+            }
+        }
+        
         if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
             Point mouse = PointHelper.ofMouse();
             
@@ -325,12 +331,6 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
                         return true;
                     }
                 }
-            }
-        }
-    
-        for (DisplayEntry entry : entries) {
-            if (entry.keyPressed(keyCode, scanCode, modifiers)) {
-                return true;
             }
         }
         
