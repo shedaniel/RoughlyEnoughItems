@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import com.google.common.base.MoreObjects;
 import dev.architectury.event.EventResult;
 import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -208,7 +209,7 @@ public enum JEIRecipeManager implements IRecipeManager {
         @Override
         public EventResult handleDisplay(DisplayCategory<?> category, Display display) {
             Set<Object> hidden = hiddenRecipes.get(category.getCategoryIdentifier());
-            if (hidden != null && hidden.contains(display.jeiValue())) {
+            if (hidden != null && hidden.contains(MoreObjects.firstNonNull(display.jeiValue(), display))) {
                 return EventResult.interruptFalse();
             }
             return EventResult.pass();
