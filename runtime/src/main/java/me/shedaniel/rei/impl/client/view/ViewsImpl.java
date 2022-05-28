@@ -28,6 +28,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
+import it.unimi.dsi.fastutil.longs.Long2LongMaps;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -375,60 +376,64 @@ public class ViewsImpl implements Views {
             
             List<Display> displays = entry.getValue();
             for (Display display : displays) {
-                MenuInfo<AbstractContainerMenu, Display> info = menu != null ?
-                        MenuInfoRegistry.getInstance().getClient(display, context, menu)
-                        : null;
-                
-                if (onlyIncludeHasMenu && info == null) {
-                    continue;
-                }
-                
-                Iterable<SlotAccessor> inputSlots = info != null ? info.getInputSlots(context.withDisplay(display)) : Collections.emptySet();
-                int slotsCraftable = 0;
-                boolean containsNonEmpty = false;
-                List<EntryIngredient> requiredInput = display.getRequiredEntries();
-                Long2LongMap invCount = new Long2LongOpenHashMap(CraftableFilter.INSTANCE.getInvStacks());
-                for (SlotAccessor inputSlot : inputSlots) {
-                    ItemStack stack = inputSlot.getItemStack();
+                try {
+                    MenuInfo<AbstractContainerMenu, Display> info = menu != null ?
+                            MenuInfoRegistry.getInstance().getClient(display, context, menu)
+                            : null;
                     
-                    EntryDefinition<ItemStack> definition;
-                    try {
-                        definition = VanillaEntryTypes.ITEM.getDefinition();
-                    } catch (NullPointerException e) {
-                        break;
-                    }
-                    
-                    if (!stack.isEmpty()) {
-                        long hash = definition.hash(null, stack, ComparisonContext.FUZZY);
-                        long newCount = invCount.get(hash) + Math.max(0, stack.getCount());
-                        invCount.put(hash, newCount);
-                    }
-                }
-                for (EntryIngredient slot : requiredInput) {
-                    if (slot.isEmpty()) {
-                        slotsCraftable++;
+                    if (onlyIncludeHasMenu && info == null) {
                         continue;
                     }
-                    for (EntryStack<?> slotPossible : slot) {
-                        if (slotPossible.getType() != VanillaEntryTypes.ITEM) continue;
-                        ItemStack stack = slotPossible.castValue();
-                        long hashFuzzy = EntryStacks.hashFuzzy(slotPossible);
-                        long availableAmount = invCount.get(hashFuzzy);
-                        if (availableAmount >= stack.getCount()) {
-                            invCount.put(hashFuzzy, availableAmount - stack.getCount());
-                            containsNonEmpty = true;
-                            slotsCraftable++;
+                    
+                    Iterable<SlotAccessor> inputSlots = info != null ? Iterables.concat(info.getInputSlots(context.withDisplay(display)), info.getInventorySlots(context.withDisplay(display))) : Collections.emptySet();
+                    int slotsCraftable = 0;
+                    boolean containsNonEmpty = false;
+                    List<EntryIngredient> requiredInput = display.getRequiredEntries();
+                    Long2LongMap invCount = new Long2LongOpenHashMap(info == null ? CraftableFilter.INSTANCE.getInvStacks() : Long2LongMaps.EMPTY_MAP);
+                    for (SlotAccessor inputSlot : inputSlots) {
+                        ItemStack stack = inputSlot.getItemStack();
+                        
+                        EntryDefinition<ItemStack> definition;
+                        try {
+                            definition = VanillaEntryTypes.ITEM.getDefinition();
+                        } catch (NullPointerException e) {
                             break;
                         }
+                        
+                        if (!stack.isEmpty()) {
+                            long hash = definition.hash(null, stack, ComparisonContext.FUZZY);
+                            long newCount = invCount.get(hash) + Math.max(0, stack.getCount());
+                            invCount.put(hash, newCount);
+                        }
                     }
-                }
-                if (slotsCraftable == display.getRequiredEntries().size() && containsNonEmpty) {
-                    if (info != null && !onlyIncludeHasMenu) {
-                        onlyIncludeHasMenu = true;
-                        craftables.clear();
+                    for (EntryIngredient slot : requiredInput) {
+                        if (slot.isEmpty()) {
+                            slotsCraftable++;
+                            continue;
+                        }
+                        for (EntryStack<?> slotPossible : slot) {
+                            if (slotPossible.getType() != VanillaEntryTypes.ITEM) continue;
+                            ItemStack stack = slotPossible.castValue();
+                            long hashFuzzy = EntryStacks.hashFuzzy(slotPossible);
+                            long availableAmount = invCount.get(hashFuzzy);
+                            if (availableAmount >= stack.getCount()) {
+                                invCount.put(hashFuzzy, availableAmount - stack.getCount());
+                                containsNonEmpty = true;
+                                slotsCraftable++;
+                                break;
+                            }
+                        }
                     }
-                    
-                    display.getOutputEntries().stream().flatMap(Collection::stream).collect(Collectors.toCollection(() -> craftables));
+                    if (slotsCraftable == display.getRequiredEntries().size() && containsNonEmpty) {
+                        if (info != null && !onlyIncludeHasMenu) {
+                            onlyIncludeHasMenu = true;
+                            craftables.clear();
+                        }
+                        
+                        display.getOutputEntries().stream().flatMap(Collection::stream).collect(Collectors.toCollection(() -> craftables));
+                    }
+                } catch (Throwable t) {
+                    RoughlyEnoughItemsCore.LOGGER.warn("Error while checking if display is craftable", t);
                 }
             }
         }
