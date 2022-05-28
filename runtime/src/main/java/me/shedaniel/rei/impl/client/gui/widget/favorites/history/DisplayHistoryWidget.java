@@ -251,7 +251,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
                 }
             }
             
-            scroll.setTo(scroll.target() + ClothConfigInitializer.getScrollStep() * -2 * amount, ClothConfigInitializer.getScrollDuration());
+            scroll.setTo(scroll.target() + ClothConfigInitializer.getScrollStep() * amount * (getBounds().getWidth() / -50.0), ClothConfigInitializer.getScrollDuration());
             return true;
         }
         
