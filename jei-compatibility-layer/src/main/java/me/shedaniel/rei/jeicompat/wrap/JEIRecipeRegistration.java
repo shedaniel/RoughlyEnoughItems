@@ -46,15 +46,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @ExtensionMethod(JEIPluginDetector.class)
@@ -132,8 +130,20 @@ public class JEIRecipeRegistration implements IRecipeRegistration {
     }
     
     private static void addRecipesOptimized(List<Object> recipes, @NotNull CategoryIdentifier<?> categoryId, DisplayRegistry registry) {
-        List<CompletableFuture<List<Collection<Display>>>> completableFutures = Lists.newArrayList();
-        Function<Object, Collection<Display>> tryFillDisplay = registry::tryFillDisplay;
+        List<CompletableFuture<List<Supplier<Collection<Display>>>>> completableFutures = Lists.newArrayList();
+        Function<Object, Supplier<Collection<Display>>> tryFillDisplay = o -> {
+            try {
+                Collection<Display> displays = registry.tryFillDisplay(o);
+                return () -> displays;
+            } catch (RuntimeException e) {
+                if (e.getCause() instanceof ConcurrentModificationException) {
+                    InternalLogger.getInstance().debug("Failed to parallelize recipe: %s for category %s", o, categoryId);
+                    return () -> registry.tryFillDisplay(o);
+                } else {
+                    throw e;
+                }
+            }
+        };
         CollectionUtils.partition(recipes, 50).forEach(list -> {
             completableFutures.add(CompletableFuture.supplyAsync(() -> {
                 return CollectionUtils.map(list, tryFillDisplay);
@@ -150,16 +160,16 @@ public class JEIRecipeRegistration implements IRecipeRegistration {
         boolean contains = false;
         boolean registered = false;
         
-        for (CompletableFuture<List<Collection<Display>>> future : completableFutures) {
-            List<Collection<Display>> displayCollection = future.getNow(null);
+        for (CompletableFuture<List<Supplier<Collection<Display>>>> future : completableFutures) {
+            List<Supplier<Collection<Display>>> displayCollection = future.getNow(null);
             
             if (displayCollection != null) {
                 int j = 0;
                 
-                for (Collection<Display> displays : displayCollection) {
+                for (Supplier<Collection<Display>> displays : displayCollection) {
                     Object origin = recipes.get(i * 50 + j);
                     
-                    for (Display display : displays) {
+                    for (Display display : displays.get()) {
                         if (Objects.equals(display.getCategoryIdentifier(), categoryId)) {
                             registry.add(display, origin);
                             registered = true;
