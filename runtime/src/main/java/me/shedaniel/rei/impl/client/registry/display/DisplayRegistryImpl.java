@@ -288,7 +288,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
                 return filler.mappingFunction.apply(value);
             }
         } catch (Throwable e) {
-            RoughlyEnoughItemsCore.LOGGER.error("Failed to fill displays!", e);
+            throw new RuntimeException("Failed to fill displays!", e);
         }
         
         return null;

@@ -53,10 +53,7 @@ import me.shedaniel.rei.impl.common.entry.comparison.NbtHasherProviderImpl;
 import me.shedaniel.rei.impl.common.entry.settings.EntrySettingsAdapterRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.EntryTypeRegistryImpl;
 import me.shedaniel.rei.impl.common.fluid.FluidSupportProviderImpl;
-import me.shedaniel.rei.impl.common.logging.FileLogger;
-import me.shedaniel.rei.impl.common.logging.Log4JLogger;
-import me.shedaniel.rei.impl.common.logging.MultiLogger;
-import me.shedaniel.rei.impl.common.logging.TransformingLogger;
+import me.shedaniel.rei.impl.common.logging.*;
 import me.shedaniel.rei.impl.common.logging.performance.PerformanceLogger;
 import me.shedaniel.rei.impl.common.logging.performance.PerformanceLoggerImpl;
 import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
@@ -66,6 +63,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -77,6 +75,7 @@ public class RoughlyEnoughItemsCore {
     @ApiStatus.Internal
     public static final InternalLogger LOGGER = new TransformingLogger(new MultiLogger(ImmutableList.of(
             new FileLogger(Platform.getGameFolder().resolve("logs/rei.log")),
+            new FilteringLogger(new FileLogger(Platform.getGameFolder().resolve("logs/rei-issues.log")), Level.WARN),
             new Log4JLogger(LogManager.getFormatterLogger("REI"))
     )), message -> "[REI] " + message);
     public static final PerformanceLogger PERFORMANCE_LOGGER = new PerformanceLoggerImpl();
