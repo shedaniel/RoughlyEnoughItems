@@ -418,7 +418,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public Tooltip getCurrentTooltip(Point point) {
         Tooltip tooltip = getCurrentEntry().getTooltip(point);
         
-        if (tooltip != null && !ClientHelper.getInstance().isCheating() && getTransferHandler() != null
+        if (tooltip != null && getTransferHandler() != null
             && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
             tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
         }
@@ -509,7 +509,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             }
         }
         
-        if (!ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
+        if (!(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
             try {
                 TransferHandler handler = getTransferHandler();
                 

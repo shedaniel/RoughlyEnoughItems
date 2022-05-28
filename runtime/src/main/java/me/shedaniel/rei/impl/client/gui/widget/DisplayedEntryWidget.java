@@ -61,7 +61,7 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
     
     @Override
     protected boolean doAction(double mouseX, double mouseY, int button) {
-        if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+        if (ClientHelper.getInstance().isCheating() && !Screen.hasControlDown() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
             EntryStack<?> entry = getCurrentEntry().copy();
             if (!entry.isEmpty()) {
                 if (entry.getType() != VanillaEntryTypes.ITEM) {
@@ -88,7 +88,7 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
     public boolean cancelDeleteItems(EntryStack<?> stack) {
         if (!interactable || !ConfigObject.getInstance().isGrabbingItems())
             return super.cancelDeleteItems(stack);
-        if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+        if (ClientHelper.getInstance().isCheating() && !Screen.hasControlDown() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
             EntryStack<?> entry = getCurrentEntry().copy();
             if (!entry.isEmpty()) {
                 if (entry.getType() != VanillaEntryTypes.ITEM) {
