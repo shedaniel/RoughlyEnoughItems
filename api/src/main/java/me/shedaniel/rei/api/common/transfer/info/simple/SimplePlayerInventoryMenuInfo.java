@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.api.common.transfer.info.simple;
 
-import com.google.common.base.MoreObjects;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.transfer.RecipeFinder;
 import me.shedaniel.rei.api.common.transfer.RecipeFinderPopulator;
@@ -53,7 +52,7 @@ public interface SimplePlayerInventoryMenuInfo<T extends AbstractContainerMenu, 
             for (SlotAccessor inventoryStack : getInventorySlots(context)) {
                 finder.addNormalItem(inventoryStack.getItemStack());
             }
-            populateRecipeFinder(context.getMenu(), finder);
+            populateRecipeFinder(context, finder);
         };
     }
     
@@ -76,11 +75,10 @@ public interface SimplePlayerInventoryMenuInfo<T extends AbstractContainerMenu, 
     default DumpHandler<T, D> getDumpHandler() {
         return (context, stackToDump) -> {
             Iterable<SlotAccessor> inventoryStacks = getInventorySlots(context);
+            SlotAccessor occupiedSlotWithRoomForStack = DumpHandler.getOccupiedSlotWithRoomForStack(stackToDump, inventoryStacks);
+            SlotAccessor emptySlot = DumpHandler.getEmptySlot(inventoryStacks);
             
-            SlotAccessor nextSlot = MoreObjects.firstNonNull(
-                    DumpHandler.getOccupiedSlotWithRoomForStack(stackToDump, inventoryStacks),
-                    DumpHandler.getEmptySlot(inventoryStacks)
-            );
+            SlotAccessor nextSlot = occupiedSlotWithRoomForStack == null ? emptySlot : occupiedSlotWithRoomForStack;
             if (nextSlot == null) {
                 return false;
             }
@@ -99,7 +97,15 @@ public interface SimplePlayerInventoryMenuInfo<T extends AbstractContainerMenu, 
                 .collect(Collectors.toList());
     }
     
+    @Deprecated(forRemoval = true)
     default void populateRecipeFinder(T menu, RecipeFinder finder) {}
+    
+    default void populateRecipeFinder(MenuInfoContext<T, ?, D> context, RecipeFinder finder) {
+        for (SlotAccessor inventoryStack : getInputSlots(context)) {
+            finder.addNormalItem(inventoryStack.getItemStack());
+        }
+        populateRecipeFinder(context.getMenu(), finder);
+    }
     
     /**
      * Used to forcefully clear the input slots, if things did not dump to the player's inventory successfully.

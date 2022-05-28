@@ -25,6 +25,8 @@ package me.shedaniel.rei.api.common.transfer.info.simple;
 
 import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
 import me.shedaniel.rei.api.common.transfer.RecipeFinder;
+import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
+import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 
@@ -50,8 +52,8 @@ public class RecipeBookGridMenuInfo<T extends RecipeBookMenu<?>, D extends Simpl
     }
     
     @Override
-    public void populateRecipeFinder(T menu, RecipeFinder finder) {
-        menu.fillCraftSlotsStackedContents(new net.minecraft.world.entity.player.StackedContents() {
+    public void populateRecipeFinder(MenuInfoContext<T, ?, D> context, RecipeFinder finder) {
+        context.getMenu().fillCraftSlotsStackedContents(new StackedContents() {
             @Override
             public void accountSimpleStack(ItemStack stack) {
                 finder.addNormalItem(stack);
