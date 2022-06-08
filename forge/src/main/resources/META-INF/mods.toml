@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[38,)"
+loaderVersion = "[41,)"
 issueTrackerURL = "https://github.com/shedaniel/RoughlyEnoughItems/issues"
 logoFile = "icon.png"
 authors = "shedaniel"
@@ -15,7 +15,7 @@ To allow players to view items and recipes.
 
 [[mods]]
 modId = "jei"
-version = "9.9999"
+version = "10.9999"
 displayName = "Roughly Enough Items (JEI Stub)"
 description = '''
 To allow players to view items and recipes.
@@ -24,13 +24,13 @@ To allow players to view items and recipes.
 [[dependencies.roughlyenoughitems]]
 modId = "architectury"
 mandatory = true
-versionRange = "[3.1.44,)"
+versionRange = "[5.5,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.roughlyenoughitems]]
 modId = "cloth_config"
 mandatory = true
-versionRange = "[6.0,)"
+versionRange = "[7.0,)"
 ordering = "NONE"
 side = "BOTH"

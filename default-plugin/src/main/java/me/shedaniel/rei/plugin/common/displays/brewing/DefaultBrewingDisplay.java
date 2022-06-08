@@ -24,7 +24,6 @@
 package me.shedaniel.rei.plugin.common.displays.brewing;
 
 import com.google.common.collect.Lists;
-import dev.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializer;
@@ -35,6 +34,7 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -104,8 +104,8 @@ public class DefaultBrewingDisplay implements Display {
             
             @Override
             public DefaultBrewingDisplay read(CompoundTag tag) {
-                EntryIngredient input = EntryIngredient.read(tag.getList("input", NbtType.COMPOUND));
-                EntryIngredient reactant = EntryIngredient.read(tag.getList("reactant", NbtType.COMPOUND));
+                EntryIngredient input = EntryIngredient.read(tag.getList("input", Tag.TAG_COMPOUND));
+                EntryIngredient reactant = EntryIngredient.read(tag.getList("reactant", Tag.TAG_COMPOUND));
                 EntryStack<?> output = EntryStack.read(tag.getCompound("output"));
                 return new DefaultBrewingDisplay(input, reactant, output);
             }

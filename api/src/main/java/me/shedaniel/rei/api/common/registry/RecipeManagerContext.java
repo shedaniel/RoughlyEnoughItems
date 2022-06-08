@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.api.common.registry;
 
-import dev.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -51,7 +51,7 @@ public interface RecipeManagerContext<P extends REIPlugin<?>> extends Reloadable
     RecipeManager getRecipeManager();
     
     default Recipe<?> byId(CompoundTag tag, String key) {
-        if (tag.contains(key, NbtType.STRING)) {
+        if (tag.contains(key, Tag.TAG_STRING)) {
             return getRecipeManager().byKey(new ResourceLocation(tag.getString(key))).orElse(null);
         }
         return null;
