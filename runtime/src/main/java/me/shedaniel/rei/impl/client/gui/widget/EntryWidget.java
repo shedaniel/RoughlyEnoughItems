@@ -418,7 +418,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public Tooltip getCurrentTooltip(TooltipContext context) {
         Tooltip tooltip = getCurrentEntry().getTooltip(context);
         
-        if (tooltip != null && !ClientHelper.getInstance().isCheating() && getTransferHandler() != null
+        if (tooltip != null && getTransferHandler() != null
             && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
             tooltip.add(Component.translatable("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
         }
@@ -487,7 +487,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     protected boolean doAction(double mouseX, double mouseY, int button) {
-        if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse()) && !getCurrentEntry().isEmpty()) {
+        if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && !getCurrentEntry().isEmpty()) {
             ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
             if (keyCode.matchesMouse(button)) {
                 FavoriteEntry favoriteEntry = asFavoriteEntry();
@@ -507,7 +507,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             }
         }
         
-        if (!ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
+        if (!(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
             try {
                 TransferHandler handler = getTransferHandler();
                 
@@ -561,7 +561,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (containsMouse(PointHelper.ofMouse())) {
+        if (containsMouse(mouse())) {
             return keyPressedIgnoreContains(keyCode, scanCode, modifiers);
         }
         
@@ -571,7 +571,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public boolean keyPressedIgnoreContains(int keyCode, int scanCode, int modifiers) {
         if (!interactable) return false;
         
-        if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse()) && !getCurrentEntry().isEmpty()) {
+        if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && !getCurrentEntry().isEmpty()) {
             if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
                 FavoriteEntry favoriteEntry = asFavoriteEntry();
                 if (favoriteEntry != null) {

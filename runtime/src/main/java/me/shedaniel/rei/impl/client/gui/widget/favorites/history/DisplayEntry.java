@@ -160,13 +160,26 @@ public class DisplayEntry extends WidgetWithBounds {
             if (result.hasApplicable) {
                 plusButton.setText(Component.literal("+"));
                 plusButton.render(poses, Math.round(mouse.x()), Math.round(mouse.y()), delta);
+                poses.popPose();
                 
                 if (plusButton.containsMouse(Math.round(mouse.x()), Math.round(mouse.y()))) {
                     result.tooltipRenderer.accept(new Point(mouseX, mouseY), Tooltip::queue);
+                    
+                    if (result.renderer != null) {
+                        poses.pushPose();
+                        if (!stable || !target.equals(bounds)) {
+                            poses.translate(0, 0, 600);
+                        }
+                        poses.translate(xOffset(), yOffset(), 0);
+                        poses.scale(xScale(), yScale(), 1.0F);
+                        
+                        result.renderer.render(poses, mouseX, mouseY, delta, widgets.get(), getBounds(), display);
+                        poses.popPose();
+                    }
                 }
+            } else {
+                poses.popPose();
             }
-            
-            poses.popPose();
         }
     }
     
@@ -210,18 +223,15 @@ public class DisplayEntry extends WidgetWithBounds {
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        for (Widget widget : widgets.get()) {
-            if (widget instanceof EntryWidget) {
-                double mouseX = PointHelper.getMouseFloatingX(), mouseY = PointHelper.getMouseFloatingY();
-                if (widget.containsMouse(transformMouseX(mouseX), transformMouseY(mouseY))
-                    && ((EntryWidget) widget).keyPressedIgnoreContains(keyCode, scanCode, modifiers)) {
-                    return true;
-                }
-            } else {
+        try {
+            Widget.pushMouse(new Point(transformMouseX(mouse().x), transformMouseY(mouse().y)));
+            for (Widget widget : widgets.get()) {
                 if (widget.keyPressed(keyCode, scanCode, modifiers)) {
                     return true;
                 }
             }
+        } finally {
+            Widget.popMouse();
         }
         
         return super.keyPressed(keyCode, scanCode, modifiers);

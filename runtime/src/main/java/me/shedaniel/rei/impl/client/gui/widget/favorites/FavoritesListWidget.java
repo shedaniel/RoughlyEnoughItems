@@ -155,7 +155,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
     
     @Override
     public EntryStack<?> getFocusedStack() {
-        Point mouse = PointHelper.ofMouse();
+        Point mouse = mouse();
         EntryStack<?> stack = region.getFocusedStack();
         if (stack != null && !stack.isEmpty()) return stack;
         stack = systemRegion.getFocusedStack();
@@ -264,7 +264,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (containsMouse(PointHelper.ofMouse()))
+        if (containsMouse(mouse()))
             for (Widget widget : children())
                 if (widget.keyPressed(keyCode, scanCode, modifiers))
                     return true;

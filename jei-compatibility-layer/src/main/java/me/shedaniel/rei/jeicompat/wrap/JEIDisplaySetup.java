@@ -160,6 +160,12 @@ public class JEIDisplaySetup {
                     }
                 }
                 
+                for (EntryStack<?> entry : slot.slot.getEntries()) {
+                    if (entry.getType() == VanillaEntryTypes.FLUID) {
+                        entry.setting(EntryStack.Settings.FLUID_AMOUNT_VISIBLE, false);
+                    }
+                }
+                
                 if (slot.overlay != null) {
                     widgets.add(slot.overlay);
                 }

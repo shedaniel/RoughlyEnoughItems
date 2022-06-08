@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import dev.architectury.utils.value.Value;
@@ -153,10 +154,14 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                     new MenuInfoProvider<C, Display>() {
                         @Override
                         public Optional<MenuInfo<C, Display>> provideClient(Display display, MenuSerializationContext<C, ?, Display> context, C menu) {
-                            if (!info.canHandle(menu, (R) display.jeiValue())) {
+                            Object jeiValue = display.jeiValue();
+                            if (jeiValue == null) {
                                 return Optional.empty();
                             }
-                            return Optional.of(new JEITransferMenuInfo<>(display, new JEIRecipeTransferData<>(info, menu, (R) display.jeiValue())));
+                            if (!info.canHandle(menu, (R) jeiValue)) {
+                                return Optional.empty();
+                            }
+                            return Optional.of(new JEITransferMenuInfo<>(display, new JEIRecipeTransferData<>(info, menu, (R) jeiValue)));
                         }
                         
                         @Override
@@ -219,11 +224,12 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                         }
                         IRecipeTransferHandler<AbstractContainerMenu, Object> handler = (IRecipeTransferHandler<AbstractContainerMenu, Object>) recipeTransferHandler;
                         IRecipeTransferError error;
+                        Object recipe = MoreObjects.firstNonNull(display.jeiValue(), display);
                         try {
-                            error = handler.transferRecipe(context.getMenu(), context.getDisplay().jeiValue(), view, context.getMinecraft().player, context.isStackedCrafting(), context.isActuallyCrafting());
+                            error = handler.transferRecipe(context.getMenu(), recipe, view, context.getMinecraft().player, context.isStackedCrafting(), context.isActuallyCrafting());
                         } catch (UnsupportedOperationException e) {
                             IRecipeLayout layout = new JEIRecipeLayoutLegacyAdapter(view);
-                            error = handler.transferRecipe(context.getMenu(), context.getDisplay().jeiValue(), layout, context.getMinecraft().player, context.isStackedCrafting(), context.isActuallyCrafting());
+                            error = handler.transferRecipe(context.getMenu(), recipe, layout, context.getMinecraft().player, context.isStackedCrafting(), context.isActuallyCrafting());
                         }
                         if (error == null) {
                             return TransferHandler.Result.createSuccessful();

@@ -83,7 +83,7 @@ public class DisplayCompositeWidget extends DelegateWidgetWithBounds implements 
             return true;
         }
         
-        if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse())) {
+        if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(mouse())) {
             if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
                 FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
                 

@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import com.google.common.base.MoreObjects;
 import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -35,6 +36,7 @@ import mezz.jei.api.recipe.IRecipeLookup;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @ExtensionMethod(JEIPluginDetector.class)
@@ -76,6 +78,6 @@ public class JEIRecipeLookup<R> implements IRecipeLookup<R> {
         }
         return builder.streamDisplays()
                 .map(DisplaySpec::provideInternalDisplay)
-                .map(display -> (R) display.jeiValue());
+                .map(display -> (R) MoreObjects.firstNonNull(display.jeiValue(), display));
     }
 }

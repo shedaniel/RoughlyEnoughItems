@@ -195,7 +195,7 @@ public class JEIPluginDetector {
         if (isWrappedCategory) {
             return ((JEIWrappedDisplay<?>) display).getBackingRecipe();
         } else {
-            return MoreObjects.firstNonNull(DisplayRegistry.getInstance().getDisplayOrigin(display), display);
+            return DisplayRegistry.getInstance().getDisplayOrigin(display);
         }
     }
     
