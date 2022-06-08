@@ -47,7 +47,7 @@ public class ScreenOverlayImplImpl {
         components = new ArrayList<>(components);
         for (Tooltip.Entry entry : tooltip.entries()) {
             if (!entry.isText()) {
-                components.add(1, entry.getAsComponent());
+                components.add(1, ClientTooltipComponent.create(entry.getAsTooltipComponent()));
             }
         }
         screen.tooltipStack = itemStack;

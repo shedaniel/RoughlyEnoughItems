@@ -24,7 +24,6 @@
 package me.shedaniel.rei.plugin.common.displays;
 
 import com.google.common.collect.Lists;
-import dev.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializer;
@@ -116,10 +115,10 @@ public class DefaultInformationDisplay implements Display {
             
             @Override
             public DefaultInformationDisplay read(CompoundTag tag) {
-                EntryIngredient stacks = EntryIngredient.read(tag.getList("stacks", NbtType.COMPOUND));
+                EntryIngredient stacks = EntryIngredient.read(tag.getList("stacks", Tag.TAG_COMPOUND));
                 Component name = Component.Serializer.fromJson(tag.getString("name"));
                 List<Component> descriptions = new ArrayList<>();
-                for (Tag descriptionTag : tag.getList("descriptions", NbtType.STRING)) {
+                for (Tag descriptionTag : tag.getList("descriptions", Tag.TAG_STRING)) {
                     descriptions.add(Component.Serializer.fromJson(descriptionTag.getAsString()));
                 }
                 return new DefaultInformationDisplay(stacks, name).lines(descriptions);

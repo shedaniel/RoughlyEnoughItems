@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.jeicompat.transfer;
 
-import dev.architectury.utils.NbtType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferInfo;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -73,8 +72,8 @@ public class JEIRecipeTransferData<C extends AbstractContainerMenu, R> {
     
     public static <C extends AbstractContainerMenu, R> JEIRecipeTransferData<C, R> read(C menu, CompoundTag tag) {
         ResourceLocation recipeCategoryUid = ResourceLocation.tryParse(tag.getString("recipeCategoryUid"));
-        List<Slot> recipeSlots = readSlots(menu, tag.getList("recipeSlots", NbtType.COMPOUND));
-        List<Slot> inventorySlots = readSlots(menu, tag.getList("inventorySlots", NbtType.COMPOUND));
+        List<Slot> recipeSlots = readSlots(menu, tag.getList("recipeSlots", Tag.TAG_COMPOUND));
+        List<Slot> inventorySlots = readSlots(menu, tag.getList("inventorySlots", Tag.TAG_COMPOUND));
         boolean requireCompleteSets = tag.getBoolean("requireCompleteSets");
         return new JEIRecipeTransferData<>(recipeCategoryUid, recipeSlots, inventorySlots, requireCompleteSets);
     }

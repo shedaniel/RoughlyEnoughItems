@@ -26,9 +26,9 @@ package me.shedaniel.rei.jeicompat;
 import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.jeicompat.imitator.IngredientInfoRecipe;
 import me.shedaniel.rei.plugin.common.displays.DefaultInformationDisplay;
+import net.minecraft.network.chat.Component;
 
 @ExtensionMethod(JEIPluginDetector.class)
 public class JEIExtraClientPlugin implements REIClientPlugin {

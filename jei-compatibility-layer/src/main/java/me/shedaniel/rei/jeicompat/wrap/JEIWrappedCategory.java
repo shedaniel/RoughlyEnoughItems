@@ -43,7 +43,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.LazyLoadedValue;
 import org.jetbrains.annotations.Nullable;
@@ -179,7 +178,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
                 if (containsMouse(mouse)) {
                     for (Slot slot : Widgets.<Slot>walk(widgets, listener -> listener instanceof Slot)) {
                         if (slot.containsMouse(mouse) && slot.isHighlightEnabled()) {
-                            if (slot.getCurrentTooltip(mouse) != null) {
+                            if (slot.getCurrentTooltip(TooltipContext.of(mouse)) != null) {
                                 return;
                             }
                         }
@@ -196,6 +195,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
             @Override
             @Nullable
             public Tooltip getTooltip(TooltipContext context) {
+                Point mouse = context.getPoint();
                 List<Component> strings = category.getTooltipStrings(display.getBackingRecipe(), result, mouse.x - bounds.x - 4, mouse.y - bounds.y - 4);
                 if (strings.isEmpty()) {
                     return null;

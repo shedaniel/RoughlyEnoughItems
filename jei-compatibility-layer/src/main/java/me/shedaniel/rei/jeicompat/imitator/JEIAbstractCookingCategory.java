@@ -37,12 +37,10 @@ import mezz.jei.api.ingredients.IIngredients;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.level.block.Block;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The following method is licensed with The MIT License (MIT)
@@ -112,7 +110,7 @@ public abstract class JEIAbstractCookingCategory<T extends AbstractCookingRecipe
     protected void drawExperience(T recipe, PoseStack matrixStack, int y) {
         float experience = recipe.getExperience();
         if (experience > 0) {
-            TranslatableComponent experienceString = Component.translatable("gui.jei.category.smelting.experience", experience);
+            Component experienceString = Component.translatable("gui.jei.category.smelting.experience", experience);
             Minecraft minecraft = Minecraft.getInstance();
             Font fontRenderer = minecraft.font;
             int stringWidth = fontRenderer.width(experienceString);
@@ -124,7 +122,7 @@ public abstract class JEIAbstractCookingCategory<T extends AbstractCookingRecipe
         int cookTime = recipe.getCookingTime();
         if (cookTime > 0) {
             int cookTimeSeconds = cookTime / 20;
-            TranslatableComponent timeString = Component.translatable("gui.jei.category.smelting.time.seconds", cookTimeSeconds);
+            Component timeString = Component.translatable("gui.jei.category.smelting.time.seconds", cookTimeSeconds);
             Minecraft minecraft = Minecraft.getInstance();
             Font fontRenderer = minecraft.font;
             int stringWidth = fontRenderer.width(timeString);

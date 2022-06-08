@@ -27,32 +27,24 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.fluid.FluidStack;
 import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
 import lombok.experimental.ExtensionMethod;
-import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.TooltipFlag;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
-import net.minecraftforge.registries.RegistryManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -146,21 +138,13 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
     
     @Override
     public Component asFormattedText(EntryStack<T> entry, T value) {
-        return new ImmutableTextComponent(ingredientHelper.getDisplayName(value));
+        return Component.literal(ingredientHelper.getDisplayName(value));
     }
     
     @Override
     public Stream<? extends TagKey<?>> getTagsFor(EntryStack<T> entry, T value) {
-        ResourceKey<Registry<T>> key;
-        if (value instanceof IForgeRegistryEntry<?>) {
-            Class<IForgeRegistryEntry<?>> type = ((IForgeRegistryEntry<IForgeRegistryEntry<?>>) value).getRegistryType();
-            IForgeRegistry<? extends IForgeRegistryEntry<?>> registry = RegistryManager.ACTIVE.getRegistry(type);
-            key = ResourceKey.createRegistryKey(registry.getRegistryName());
-        } else {
-            key = null;
-        }
         return ingredientHelper.getTags(value).stream()
-                .map(loc -> TagKey.create(key, loc));
+                .map(loc -> TagKey.create(null, loc));
     }
     
     @OnlyIn(Dist.CLIENT)
@@ -183,12 +167,12 @@ public class JEIEntryDefinition<T> implements EntryDefinition<T> {
         
         @Override
         @Nullable
-        public Tooltip getTooltip(EntryStack<T> entry, Point mouse) {
+        public Tooltip getTooltip(EntryStack<T> entry, TooltipContext context) {
             Object value = entry.getValue();
             if (value instanceof FluidStack) value = FluidStackHooksForge.toForge((FluidStack) value);
-            List<Component> components = ((IIngredientRenderer<Object>) ingredientRenderer).getTooltip(value, Minecraft.getInstance().options.advancedItemTooltips ? TooltipFlag.Default.ADVANCED : TooltipFlag.Default.NORMAL);
+            List<Component> components = ((IIngredientRenderer<Object>) ingredientRenderer).getTooltip(value, context.getFlag());
             if (components != null && !components.isEmpty()) {
-                return Tooltip.create(mouse, components);
+                return Tooltip.create(context.getPoint(), components);
             }
             return null;
         }

@@ -126,8 +126,7 @@ public class JEIDrawableBuilder implements IDrawableBuilder {
                 bufferBuilder.vertex(matrix, xEnd, yEnd, z).uv(uEnd, vEnd).endVertex();
                 bufferBuilder.vertex(matrix, xEnd, yStart, z).uv(uEnd, vStart).endVertex();
                 bufferBuilder.vertex(matrix, xStart, yStart, z).uv(uStart, vStart).endVertex();
-                bufferBuilder.end();
-                BufferUploader.end(bufferBuilder);
+                BufferUploader.drawWithShader(bufferBuilder.end());
             }
             
             @Override

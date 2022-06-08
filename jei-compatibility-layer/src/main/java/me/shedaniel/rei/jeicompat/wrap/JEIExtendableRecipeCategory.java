@@ -135,6 +135,7 @@ public class JEIExtendableRecipeCategory<T, D extends Display, W extends IRecipe
                 @Override
                 @Nullable
                 public Tooltip getTooltip(TooltipContext context) {
+                    Point mouse = context.getPoint();
                     List<Component> strings = extension.getTooltipStrings(mouse.x - bounds.x, mouse.y - bounds.y);
                     if (strings.isEmpty()) {
                         return null;

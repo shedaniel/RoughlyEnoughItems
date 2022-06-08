@@ -26,6 +26,7 @@ package me.shedaniel.rei.plugin.client.forge;
 import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.plugin.client.BuiltinClientPlugin;
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
@@ -36,7 +37,6 @@ import net.minecraftforge.common.brewing.BrewingRecipe;
 import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
 import net.minecraftforge.common.brewing.IBrewingRecipe;
 import net.minecraftforge.common.brewing.VanillaBrewingRecipe;
-import net.minecraftforge.registries.IRegistryDelegate;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -57,9 +57,9 @@ public class DefaultClientPluginImpl {
         Set<Potion> potions = Sets.newLinkedHashSet();
         for (Ingredient container : PotionBrewing.ALLOWED_CONTAINERS) {
             for (PotionBrewing.Mix<Potion> mix : PotionBrewing.POTION_MIXES) {
-                IRegistryDelegate<Potion> from = mix.f_43532_;
+                Holder.Reference<Potion> from = mix.f_43532_;
                 Ingredient ingredient = mix.ingredient;
-                IRegistryDelegate<Potion> to = mix.f_43534_;
+                Holder.Reference<Potion> to = mix.f_43534_;
                 Ingredient base = Ingredient.of(Arrays.stream(container.getItems())
                         .map(ItemStack::copy)
                         .map(stack -> PotionUtils.setPotion(stack, from.get())));
@@ -74,9 +74,9 @@ public class DefaultClientPluginImpl {
         }
         for (Potion potion : potions) {
             for (PotionBrewing.Mix<Item> mix : PotionBrewing.CONTAINER_MIXES) {
-                IRegistryDelegate<Item> from = mix.f_43532_;
+                Holder.Reference<Item> from = mix.f_43532_;
                 Ingredient ingredient = mix.ingredient;
-                IRegistryDelegate<Item> to = mix.f_43534_;
+                Holder.Reference<Item> to = mix.f_43534_;
                 Ingredient base = Ingredient.of(PotionUtils.setPotion(new ItemStack(from.get()), potion));
                 ItemStack output = PotionUtils.setPotion(new ItemStack(to.get()), potion);
                 clientPlugin.registerBrewingRecipe(base, ingredient, output);

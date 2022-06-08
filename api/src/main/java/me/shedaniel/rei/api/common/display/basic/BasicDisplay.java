@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.api.common.display.basic;
 
-import dev.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.SimpleDisplaySerializer;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -131,10 +131,10 @@ public abstract class BasicDisplay implements Display {
         
         @Override
         public P read(CompoundTag tag) {
-            List<EntryIngredient> input = EntryIngredients.read(tag.getList("input", NbtType.LIST));
-            List<EntryIngredient> output = EntryIngredients.read(tag.getList("output", NbtType.LIST));
+            List<EntryIngredient> input = EntryIngredients.read(tag.getList("input", Tag.TAG_LIST));
+            List<EntryIngredient> output = EntryIngredients.read(tag.getList("output", Tag.TAG_LIST));
             ResourceLocation location;
-            if (tag.contains("location", NbtType.STRING)) {
+            if (tag.contains("location", Tag.TAG_STRING)) {
                 location = new ResourceLocation(tag.getString("location"));
             } else {
                 location = null;
