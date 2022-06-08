@@ -222,18 +222,6 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         
         @Override
         public boolean doAction(int button) {
-            if (!(ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen))) return false;
-            EntryStack<?> entry = stack.copy();
-            if (!entry.isEmpty()) {
-                if (entry.getType() != VanillaEntryTypes.ITEM) {
-                    EntryStack<ItemStack> cheatsAs = entry.cheatsAs();
-                    entry = cheatsAs.isEmpty() ? entry : cheatsAs;
-                }
-                if (entry.getType() == VanillaEntryTypes.ITEM)
-                    entry.<ItemStack>castValue().setCount(button != 1 && !Screen.hasShiftDown() == (ConfigObject.getInstance().getItemCheatingMode() == ItemCheatingMode.REI_LIKE) ? 1 : entry.<ItemStack>castValue().getMaxStackSize());
-                return ClientHelper.getInstance().tryCheatingEntry(entry);
-            }
-            
             return false;
         }
         
