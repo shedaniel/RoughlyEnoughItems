@@ -149,6 +149,10 @@ public class QueuedTooltip implements Tooltip {
         
         @Override
         public ClientTooltipComponent getAsComponent() {
+            if (obj instanceof ClientTooltipComponent) {
+                return (ClientTooltipComponent) obj;
+            }
+            
             if (isTooltipComponent()) {
                 return ClientTooltipComponent.create((TooltipComponent) obj);
             }

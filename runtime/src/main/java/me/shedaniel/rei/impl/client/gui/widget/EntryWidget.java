@@ -31,8 +31,6 @@ import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -74,6 +72,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -93,6 +92,8 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     protected boolean wasClicked = false;
     private Rectangle bounds;
     private List<EntryStack<?>> entryStacks;
+    @Nullable
+    private Set<UnaryOperator<Tooltip>> tooltipProcessors;
     public ResourceLocation tagMatch;
     public boolean removeTagMatch = true;
     
@@ -395,18 +396,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
         Tooltip tooltip = getCurrentTooltip(new Point(mouseX, mouseY));
         if (tooltip != null) {
-            if (interactableFavorites && ConfigObject.getInstance().doDisplayFavoritesTooltip() && !ConfigObject.getInstance().getFavoriteKeyCode().isUnknown()) {
-                String name = ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString();
-                if (reverseFavoritesAction())
-                    tooltip.addAllTexts(Stream.of(I18n.get("text.rei.remove_favorites_tooltip", name).split("\n"))
-                            .map(TextComponent::new).collect(Collectors.toList()));
-                else
-                    tooltip.addAllTexts(Stream.of(I18n.get("text.rei.favorites_tooltip", name).split("\n"))
-                            .map(TextComponent::new).collect(Collectors.toList()));
-            }
-            if (tagMatch != null) {
-                tooltip.add(new TranslatableComponent("text.rei.tag_match", tagMatch.toString()).withStyle(ChatFormatting.GRAY));
-            }
             tooltip.queue();
         }
     }
@@ -421,6 +410,24 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         if (tooltip != null && getTransferHandler() != null
             && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
             tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
+        }
+        
+        if (tooltip != null) {
+            if (interactableFavorites && ConfigObject.getInstance().doDisplayFavoritesTooltip() && !ConfigObject.getInstance().getFavoriteKeyCode().isUnknown()) {
+                String name = ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString();
+                if (reverseFavoritesAction())
+                    tooltip.addAllTexts(Stream.of(I18n.get("text.rei.remove_favorites_tooltip", name).split("\n"))
+                            .map(TextComponent::new).collect(Collectors.toList()));
+                else
+                    tooltip.addAllTexts(Stream.of(I18n.get("text.rei.favorites_tooltip", name).split("\n"))
+                            .map(TextComponent::new).collect(Collectors.toList()));
+            }
+            
+            if (tooltipProcessors != null) {
+                for (UnaryOperator<Tooltip> processor : tooltipProcessors) {
+                    tooltip = processor.apply(tooltip);
+                }
+            }
         }
         
         return tooltip;
@@ -451,6 +458,17 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         boolean b = this.wasClicked;
         this.wasClicked = false;
         return b;
+    }
+    
+    public void tooltipProcessor(UnaryOperator<Tooltip> operator) {
+        if (tooltipProcessors == null) {
+            tooltipProcessors = Collections.singleton(operator);
+        } else {
+            if (!(tooltipProcessors instanceof LinkedHashSet)) {
+                tooltipProcessors = new LinkedHashSet<>(tooltipProcessors);
+            }
+            tooltipProcessors.add(operator);
+        }
     }
     
     @Override
