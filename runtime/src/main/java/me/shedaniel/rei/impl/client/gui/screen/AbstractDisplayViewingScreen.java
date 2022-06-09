@@ -28,6 +28,7 @@ import me.shedaniel.architectury.fluid.FluidStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -43,10 +44,12 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagCollection;
@@ -55,6 +58,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 public abstract class AbstractDisplayViewingScreen extends Screen implements DisplayScreen {
     protected final Map<DisplayCategory<?>, List<DisplaySpec>> categoryMap;
@@ -185,6 +189,8 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         TagContainer tags = Minecraft.getInstance().getConnection().getTags();
         outer:
         for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
+            if (widget.getNoticeMark() != EntryWidget.INPUT) continue;
+            addCyclingTooltip(widget);
             widget.removeTagMatch = false;
             if (widget.getEntries().size() <= 1) continue;
             EntryType<?> type = null;
@@ -210,5 +216,22 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                 widget.tagMatch = firstOrNull.getKey();
             }
         }
+    }
+    
+    private static final int MAX_WIDTH = 200;
+    
+    private void addCyclingTooltip(EntryWidget widget) {
+        class TooltipProcessor implements UnaryOperator<Tooltip> {
+            @Override
+            public Tooltip apply(Tooltip tooltip) {
+                if (widget.getEntries().size() > 1) {
+                    tooltip.add(new TranslatableComponent("text.rei.tag_accept", widget.tagMatch.toString())
+                            .withStyle(ChatFormatting.GRAY));
+                }
+                return tooltip;
+            }
+        }
+        
+        widget.tooltipProcessor(new TooltipProcessor());
     }
 }
