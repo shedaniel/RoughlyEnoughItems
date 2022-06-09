@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.ForgeHooksClient;
 
@@ -47,7 +48,14 @@ public class ScreenOverlayImplImpl {
         components = new ArrayList<>(components);
         for (Tooltip.Entry entry : tooltip.entries()) {
             if (!entry.isText()) {
-                components.add(1, ClientTooltipComponent.create(entry.getAsTooltipComponent()));
+                TooltipComponent component = entry.getAsTooltipComponent();
+                
+                if (component instanceof ClientTooltipComponent client) {
+                    components.add(client);
+                    continue;
+                }
+                
+                components.add(1, ClientTooltipComponent.create(component));
             }
         }
         screen.tooltipStack = itemStack;
