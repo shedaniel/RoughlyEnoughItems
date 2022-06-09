@@ -57,6 +57,11 @@ public class ScreenOverlayImplImpl {
             if (entry.isTooltipComponent()) {
                 TooltipComponent component = entry.getAsTooltipComponent();
                 
+                if (component instanceof ClientTooltipComponent client) {
+                    lines.add(client);
+                    continue;
+                }
+                
                 try {
                     ClientInternals.getClientTooltipComponent(lines, component);
                 } catch (Throwable exception) {
