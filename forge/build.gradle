@@ -24,6 +24,7 @@ processResources {
 
 repositories {
     maven { url "https://www.cursemaven.com" }
+    maven { url "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven" }
     maven {
         name "Modmaven"
         url "https://modmaven.dev/"

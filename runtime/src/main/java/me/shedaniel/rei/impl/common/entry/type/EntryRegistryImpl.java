@@ -36,6 +36,11 @@ import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
+import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
+import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -172,8 +177,19 @@ public class EntryRegistryImpl implements EntryRegistry {
     @Override
     public List<ItemStack> appendStacksForItem(Item item) {
         NonNullList<ItemStack> list = NonNullList.create();
-        CreativeModeTab category = item.getItemCategory();
-        item.fillItemCategory(MoreObjects.firstNonNull(category, CreativeModeTab.TAB_SEARCH), list);
+        LongSet set = new LongOpenHashSet();
+        EntryDefinition<ItemStack> itemDefinition = VanillaEntryTypes.ITEM.getDefinition();
+        for (CreativeModeTab tab : CreativeModeTab.TABS) {
+            if (tab != CreativeModeTab.TAB_HOTBAR && tab != CreativeModeTab.TAB_INVENTORY) {
+                NonNullList<ItemStack> tabList = NonNullList.create();
+                item.fillItemCategory(tab, tabList);
+                for (ItemStack stack : tabList) {
+                    if (set.add(itemDefinition.hash(null, stack, ComparisonContext.EXACT))) {
+                        list.add(stack);
+                    }
+                }
+            }
+        }
         if (list.isEmpty()) {
             return Collections.singletonList(item.getDefaultInstance());
         }
