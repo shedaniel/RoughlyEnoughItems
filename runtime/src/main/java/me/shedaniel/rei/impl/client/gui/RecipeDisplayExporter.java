@@ -65,7 +65,7 @@ public final class RecipeDisplayExporter extends Widget {
         Collection<ResourceLocation> locations = display.provideInternalDisplayIds();
         String string = new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date());
         if (!locations.isEmpty()) {
-            string = locations.iterator().next().toString().replace('/', '_');
+            string = locations.iterator().next().toString().replace('/', '_').replace(':', '_');
         }
         int i = 1;
         
@@ -114,7 +114,7 @@ public final class RecipeDisplayExporter extends Widget {
         }
         Util.ioPool().execute(() -> {
             try {
-                File export = new File(minecraft.gameDirectory, "rei_exports/" + display.provideInternalDisplay().getCategoryIdentifier().toString().replace('/', '_'));
+                File export = new File(minecraft.gameDirectory, "rei_exports/" + display.provideInternalDisplay().getCategoryIdentifier().toString().replace('/', '_').replace(':', '_'));
                 export.mkdirs();
                 strippedImage.writeToFile(getExportFilename(display, export));
             } catch (IOException e) {
