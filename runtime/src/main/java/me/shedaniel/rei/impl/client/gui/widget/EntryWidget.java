@@ -436,10 +436,10 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 String name = ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString();
                 if (reverseFavoritesAction())
                     tooltip.addAllTexts(Stream.of(I18n.get("text.rei.remove_favorites_tooltip", name).split("\n"))
-                            .map(TextComponent::new).collect(Collectors.toList()));
+                            .map(Component::literal).collect(Collectors.toList()));
                 else
                     tooltip.addAllTexts(Stream.of(I18n.get("text.rei.favorites_tooltip", name).split("\n"))
-                            .map(TextComponent::new).collect(Collectors.toList()));
+                            .map(Component::literal).collect(Collectors.toList()));
             }
             
             if (tooltipProcessors != null) {
