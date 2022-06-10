@@ -350,7 +350,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     public void registerFavorites(FavoriteEntryType.Registry registry) {
         registry.register(GameModeFavoriteEntry.ID, GameModeFavoriteEntry.Type.INSTANCE);
         registry.getOrCrateSection(new TranslatableComponent(GameModeFavoriteEntry.TRANSLATION_KEY))
-                .add(Stream.concat(
+                .add(true, Stream.concat(
                         Arrays.stream(GameType.values())
                                 .filter(type -> type.getId() >= 0),
                         Stream.of((GameType) null)

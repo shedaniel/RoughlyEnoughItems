@@ -270,9 +270,6 @@ public class ConfigManagerImpl implements ConfigManager {
     
     @Override
     public void saveConfig() {
-        if (getConfig().getFavoriteEntries() != null) {
-            getConfig().getFavoriteEntries().removeIf(Objects::isNull);
-        }
         if (getConfig().getFilteringRules().stream().noneMatch(filteringRule -> filteringRule instanceof ManualFilteringRule)) {
             getConfig().getFilteringRules().add(new ManualFilteringRule());
         }
