@@ -52,6 +52,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesEntriesManager;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import net.minecraft.ChatFormatting;
@@ -430,6 +431,24 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             }
         }
         
+        if (tooltip != null) {
+            if (interactableFavorites && ConfigObject.getInstance().doDisplayFavoritesTooltip() && !ConfigObject.getInstance().getFavoriteKeyCode().isUnknown()) {
+                String name = ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString();
+                if (reverseFavoritesAction())
+                    tooltip.addAllTexts(Stream.of(I18n.get("text.rei.remove_favorites_tooltip", name).split("\n"))
+                            .map(TextComponent::new).collect(Collectors.toList()));
+                else
+                    tooltip.addAllTexts(Stream.of(I18n.get("text.rei.favorites_tooltip", name).split("\n"))
+                            .map(TextComponent::new).collect(Collectors.toList()));
+            }
+            
+            if (tooltipProcessors != null) {
+                for (UnaryOperator<Tooltip> processor : tooltipProcessors) {
+                    tooltip = processor.apply(tooltip);
+                }
+            }
+        }
+        
         return tooltip;
     }
     
@@ -510,11 +529,10 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             if (keyCode.matchesMouse(button)) {
                 FavoriteEntry favoriteEntry = asFavoriteEntry();
                 if (favoriteEntry != null) {
-                    if (reverseFavoritesAction())
-                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                    else {
-                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                        ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
+                    if (reverseFavoritesAction()) {
+                        FavoritesEntriesManager.INSTANCE.remove(favoriteEntry);
+                    } else {
+                        FavoritesEntriesManager.INSTANCE.add(favoriteEntry);
                     }
                     ConfigManager.getInstance().saveConfig();
                     FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
@@ -593,11 +611,10 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
                 FavoriteEntry favoriteEntry = asFavoriteEntry();
                 if (favoriteEntry != null) {
-                    if (reverseFavoritesAction())
-                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                    else {
-                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                        ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
+                    if (reverseFavoritesAction()) {
+                        FavoritesEntriesManager.INSTANCE.remove(favoriteEntry);
+                    } else {
+                        FavoritesEntriesManager.INSTANCE.add(favoriteEntry);
                     }
                     ConfigManager.getInstance().saveConfig();
                     FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();

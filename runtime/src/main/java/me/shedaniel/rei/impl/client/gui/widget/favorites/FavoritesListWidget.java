@@ -281,7 +281,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
     
     public void updateSearch() {
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
-            region.setEntries(CollectionUtils.map(ConfigObject.getInstance().getFavoriteEntries(), FavoriteEntry::copy), EntryStacksRegionWidget.RemovalMode.DISAPPEAR);
+            region.setEntries(CollectionUtils.map(FavoritesEntriesManager.INSTANCE.getFavorites(), FavoriteEntry::copy), EntryStacksRegionWidget.RemovalMode.DISAPPEAR);
         } else region.setEntries(Collections.emptyList(), EntryStacksRegionWidget.RemovalMode.DISAPPEAR);
     }
     

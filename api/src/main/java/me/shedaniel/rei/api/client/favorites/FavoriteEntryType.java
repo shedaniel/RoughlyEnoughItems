@@ -68,15 +68,27 @@ public interface FavoriteEntryType<T extends FavoriteEntry> {
         
         Iterable<Section> sections();
         
+        /**
+         * @deprecated {@link FavoriteEntryType.Section#add(boolean, FavoriteEntry...)}
+         */
+        @Deprecated(forRemoval = true)
         <A extends FavoriteEntry> void registerSystemFavorites(SystemFavoriteEntryProvider<A> provider);
     }
     
     @ApiStatus.NonExtendable
     interface Section {
-        void add(FavoriteEntry... entries);
+        default void add(FavoriteEntry... entries) {
+            add(false, entries);
+        }
+    
+        @ApiStatus.Experimental
+        void add(boolean defaultFavorited, FavoriteEntry... entries);
         
         Component getText();
         
         List<FavoriteEntry> getEntries();
+        
+        @ApiStatus.Experimental
+        List<FavoriteEntry> getDefaultEntries();
     }
 }
