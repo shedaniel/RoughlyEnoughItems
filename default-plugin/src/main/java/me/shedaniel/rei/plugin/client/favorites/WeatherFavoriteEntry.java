@@ -174,7 +174,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
     
     @Override
     public long hashIgnoreAmount() {
-        return weather == null ? -1 : weather.ordinal();
+        return weather == null ? 31290831290L : weather.ordinal();
     }
     
     @Override

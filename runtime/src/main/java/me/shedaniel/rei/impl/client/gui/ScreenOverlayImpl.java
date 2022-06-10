@@ -72,6 +72,7 @@ import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListSearchManager;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesEntriesManager;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import me.shedaniel.rei.impl.common.util.Weather;
@@ -804,12 +805,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 return ViewSearchBuilder.builder().addUsagesFor(stack).open();
             } else if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
                 FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack);
-                ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
-                ConfigManager.getInstance().saveConfig();
-                FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                if (favoritesListWidget != null)
-                    favoritesListWidget.updateSearch();
+                FavoritesEntriesManager.INSTANCE.add(favoriteEntry);
                 return true;
             }
         }
@@ -878,12 +874,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 return ViewSearchBuilder.builder().addUsagesFor(stack).open();
             } else if (visible && ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
                 FavoriteEntry favoriteEntry = FavoriteEntry.fromEntryStack(stack);
-                ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
-                ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
-                ConfigManager.getInstance().saveConfig();
-                FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                if (favoritesListWidget != null)
-                    favoritesListWidget.updateSearch();
+                FavoritesEntriesManager.INSTANCE.add(favoriteEntry);
                 return true;
             }
         }

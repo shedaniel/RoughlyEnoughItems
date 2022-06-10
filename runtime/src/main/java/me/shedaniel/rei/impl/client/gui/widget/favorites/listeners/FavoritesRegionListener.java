@@ -28,6 +28,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesEntriesManager;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionEntryWidget;
@@ -37,6 +38,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FavoritesRegionListener implements RegionListener<FavoriteEntry> {
@@ -47,22 +49,14 @@ public class FavoritesRegionListener implements RegionListener<FavoriteEntry> {
     @Override
     public void onDrop(Stream<FavoriteEntry> entries) {
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
-            List<FavoriteEntry> favorites = ConfigObject.getInstance().getFavoriteEntries();
-            favorites.clear();
-            entries.forEach(entry -> {
-                favorites.add(entry.copy());
-            });
-            
-            ConfigManager.getInstance().saveConfig();
+            FavoritesEntriesManager.INSTANCE.setEntries(entries.collect(Collectors.toList()));
         }
     }
     
     @Override
     public void onRemove(RealRegionEntry<FavoriteEntry> entry) {
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
-            List<FavoriteEntry> favorites = ConfigObject.getInstance().getFavoriteEntries();
-            favorites.removeIf(favoriteEntry -> Objects.equals(entry.getEntry(), favoriteEntry));
-            ConfigManager.getInstance().saveConfig();
+            FavoritesEntriesManager.INSTANCE.remove(entry.getEntry());
         }
     }
     
