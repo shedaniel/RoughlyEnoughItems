@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import dev.architectury.fluid.FluidStack;
 import me.shedaniel.math.Rectangle;
@@ -252,7 +253,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             public int getHeight() {
                 int entrySize = EntryListWidget.entrySize();
                 int w = Math.max(1, MAX_WIDTH / entrySize);
-                int height = Mth.ceil(widget.getEntries().size() / (float) w) * entrySize + 2;
+                int height = Math.min(6, Mth.ceil(widget.getEntries().size() / (float) w)) * entrySize + 2;
                 height += 12;
                 if (widget.tagMatch != null) height += 12;
                 return height;
@@ -279,8 +280,16 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                 for (EntryStack<?> entry : widget.getEntries()) {
                     int x1 = x + (i % w) * entrySize;
                     int y1 = y + 13 + (i / w) * entrySize;
-                    entry.render(poses, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
                     i++;
+                    if (i / w > 5) {
+                        MultiBufferSource.BufferSource source = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+                        Component text = Component.literal("+" + (widget.getEntries().size() - w * 6 + 1)).withStyle(ChatFormatting.GRAY);
+                        font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, poses.last().pose(), source, false, 0, 15728880);
+                        source.endBatch();
+                        break;
+                    } else {
+                        entry.render(poses, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
+                    }
                 }
                 poses.popPose();
             }
@@ -295,7 +304,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                     int w = Math.max(1, MAX_WIDTH / entrySize);
                     font.drawInBatch(Component.translatable("text.rei.tag_accept", widget.tagMatch.toString())
                                     .withStyle(ChatFormatting.GRAY),
-                            x, y + 16 + Mth.ceil(widget.getEntries().size() / (float) entrySize) * entrySize,
+                            x, y + 16 + Math.min(6, Mth.ceil(widget.getEntries().size() / (float) w)) * entrySize,
                             -1, true, pose, buffers, false, 0, 15728880);
                 }
             }

@@ -34,6 +34,8 @@ import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.favorites.SystemFavoriteEntryProvider;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.mutable.MutableLong;
@@ -113,8 +115,8 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
     @Override
     public void endReload() {
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
-            List<FavoriteEntry> favorites = ConfigObject.getInstance().getFavoriteEntries();
-            favorites.removeIf(FavoriteEntry::isInvalid);
+            ConfigObject.getInstance().getFavoriteEntries().removeIf(FavoriteEntry::isInvalid);
+            ConfigManagerImpl.getInstance().getConfig().getHiddenFavoriteEntries().removeIf(FavoriteEntry::isInvalid);
             
             ConfigManager.getInstance().saveConfig();
         }
@@ -122,15 +124,16 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
     
     private static class SectionImpl implements FavoriteEntryType.Section {
         private final Component text;
-        private final List<FavoriteEntry> entries = new ArrayList<>();
+        private final List<CompoundEntry> entries = new ArrayList<>();
         
         public SectionImpl(Component text) {
             this.text = text;
         }
         
         @Override
-        public void add(FavoriteEntry... entries) {
-            Collections.addAll(this.entries, entries);
+        public void add(boolean defaultFavorited, FavoriteEntry... entries) {
+            this.entries.addAll(CollectionUtils.map(entries,
+                    entry -> new CompoundEntry(entry, defaultFavorited)));
         }
         
         @Override
@@ -140,7 +143,14 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
         
         @Override
         public List<FavoriteEntry> getEntries() {
-            return entries;
+            return CollectionUtils.map(entries, CompoundEntry::entry);
         }
+        
+        @Override
+        public List<FavoriteEntry> getDefaultEntries() {
+            return CollectionUtils.filterAndMap(entries, CompoundEntry::defaultFavorited, CompoundEntry::entry);
+        }
+        
+        public record CompoundEntry(FavoriteEntry entry, boolean defaultFavorited) {}
     }
 }
