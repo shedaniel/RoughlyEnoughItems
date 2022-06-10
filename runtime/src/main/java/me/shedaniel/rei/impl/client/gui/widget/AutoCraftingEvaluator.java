@@ -96,6 +96,7 @@ public class AutoCraftingEvaluator {
         }
         
         List<TransferHandler.Result> errors = new ArrayList<>();
+        TransferHandler.Result successfulResult = null;
         TransferHandler.Context context = TransferHandler.Context.create(actuallyCrafting, stackedCrafting, containerScreen, display);
         
         for (TransferHandler transferHandler : TransferHandlerRegistry.getInstance()) {
@@ -127,6 +128,7 @@ public class AutoCraftingEvaluator {
                     
                     if (transferResult.isSuccessful()) {
                         errors.clear();
+                        successfulResult = transferResult;
                         result.successful = true;
                         result.successfulHandler = transferHandler;
                         break;
@@ -152,6 +154,10 @@ public class AutoCraftingEvaluator {
         if (errors.isEmpty()) {
             errorTooltip.clear();
             errorTooltip.add(new TranslatableComponent("text.auto_craft.move_items"));
+            
+            if (successfulResult != null) {
+                successfulResult.fillTooltip(errorTooltip);
+            }
         } else {
             errorTooltip.clear();
             List<Component> tooltipsFilled = new ArrayList<>();
