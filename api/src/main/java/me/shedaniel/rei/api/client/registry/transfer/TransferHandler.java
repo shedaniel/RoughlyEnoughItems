@@ -38,6 +38,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -171,6 +172,8 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         @ApiStatus.Experimental
         Result overrideTooltipRenderer(BiConsumer<Point, TooltipSink> renderer);
         
+        Result tooltip(Component component);
+        
         /**
          * @return whether this handler has successfully handled the transfer.
          */
@@ -257,6 +260,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
     final class ResultImpl implements Result {
         private boolean successful, applicable, returningToScreen, blocking;
         private Component error;
+        private List<Component> tooltips = new ArrayList<>();
         private Object errorRenderer;
         private BiConsumer<Point, TooltipSink> tooltipRenderer;
         private int color;
@@ -318,6 +322,12 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         }
         
         @Override
+        public Result tooltip(Component component) {
+            this.tooltips.add(component);
+            return this;
+        }
+        
+        @Override
         public boolean isSuccessful() {
             return successful;
         }
@@ -358,8 +368,12 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         
         @Override
         public void fillTooltip(List<Component> components) {
-            if (!isSuccessful() && isApplicable()) {
-                components.add(getError());
+            if (isApplicable()) {
+                if (isSuccessful()) {
+                    components.addAll(tooltips);
+                } else {
+                    components.add(getError());
+                }
             }
         }
     }
