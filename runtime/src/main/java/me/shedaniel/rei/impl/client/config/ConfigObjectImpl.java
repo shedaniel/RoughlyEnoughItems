@@ -363,6 +363,10 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public List<FavoriteEntry> getFavoriteEntries() {
         return basics.favorites;
+    } 
+    
+    public List<FavoriteEntry> getHiddenFavoriteEntries() {
+        return basics.hiddenFavorites;
     }
     
     @Override
@@ -525,6 +529,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public static class Basics {
         @ConfigEntry.Gui.Excluded public List<FavoriteEntry> favorites = new ArrayList<>();
+        @ConfigEntry.Gui.Excluded public List<FavoriteEntry> hiddenFavorites = new ArrayList<>();
         @Comment("Declares whether cheating mode is on.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private CheatingMode cheating = CheatingMode.OFF;
         private boolean favoritesEnabled = true;

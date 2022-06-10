@@ -199,7 +199,7 @@ public class TimeFavoriteEntry extends FavoriteEntry {
     
     @Override
     public long hashIgnoreAmount() {
-        return time == null ? -1 : time.ordinal();
+        return time == null ? 31290831290L : time.ordinal();
     }
     
     @Override

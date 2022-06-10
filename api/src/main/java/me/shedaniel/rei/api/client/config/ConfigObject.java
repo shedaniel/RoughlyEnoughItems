@@ -156,7 +156,7 @@ public interface ConfigObject {
     
     boolean isLowerConfigButton();
     
-    @ApiStatus.Experimental
+    @Deprecated(forRemoval = true)
     List<FavoriteEntry> getFavoriteEntries();
     
     @ApiStatus.ScheduledForRemoval
