@@ -243,7 +243,7 @@ unifiedPublishing {
         gameLoaders = ["forge"]
         changelog = rootProject.releaseChangelog
 
-        mainPublication remapJar
+        mainPublication serverOnlyJar
 
         relations {
             depends {
@@ -266,6 +266,7 @@ unifiedPublishing {
 
         if (project.hasProperty("modrinth_key") || System.getenv("modrinth_key") != null) {
             modrinth {
+                releaseType = "release"
                 token = project.hasProperty("modrinth_key") ? project.property("modrinth_key") : System.getenv("modrinth_key")
                 id = "OM4ZYSws"
                 version = "$project.version+$project.name"
