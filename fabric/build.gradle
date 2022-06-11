@@ -101,30 +101,45 @@ publishing {
     }
 }
 
-curseforge {
-    if (project.hasProperty('danielshe_curse_api_key') || System.getenv('danielshe_curse_api_key') != null) {
-        apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
-        project {
-            id = "310111"
-            releaseType = "release"
-            changelogType = "html"
-            changelog = rootProject.releaseChangelog
-            addGameVersion "1.19"
-            addGameVersion "Java 17"
-            addGameVersion "Java 17"
-            addGameVersion "Fabric"
-            relations {
-                requiredDependency "architectury-api"
-                requiredDependency "cloth-config"
-                requiredDependency "fabric-api"
+unifiedPublishing {
+    project {
+        displayName = "[Fabric $rootProject.supported_version] v$project.version"
+        releaseType = "release"
+        gameVersions = ["1.19"]
+        gameLoaders = ["fabric"]
+        changelog = rootProject.releaseChangelog
+
+        mainPublication remapJar
+        
+        relations {
+            depends {
+                curseforge = "architectury-api"
+                modrinth = "architectury-api"
             }
-            mainArtifact(tasks.getByName("remapJar")) {
-                displayName = "[Fabric $project.supported_version] v$project.version"
+            depends {
+                curseforge = "cloth-config"
+                modrinth = "cloth-config"
+            }
+            depends {
+                curseforge = "fabric-api"
+                modrinth = "fabric-api"
             }
         }
-    }
-    options {
-        forgeGradleIntegration = false
-        javaVersionAutoDetect = false
+
+        if (project.hasProperty("danielshe_curse_api_key") || System.getenv("danielshe_curse_api_key") != null) {
+            curseforge {
+                token = project.hasProperty("danielshe_curse_api_key") ? project.property("danielshe_curse_api_key") : System.getenv("danielshe_curse_api_key")
+                id = "310111"
+                gameVersions.addAll "Java 17", "1.19-Snapshot"
+            }
+        }
+
+        if (project.hasProperty("modrinth_key") || System.getenv("modrinth_key") != null) {
+            modrinth {
+                token = project.hasProperty("modrinth_key") ? project.property("modrinth_key") : System.getenv("modrinth_key")
+                id = "nfn13YXA"
+                version = "$project.version+$project.name"
+            }
+        }
     }
 }

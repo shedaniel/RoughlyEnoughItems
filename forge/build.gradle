@@ -215,45 +215,82 @@ publishing {
     }
 }
 
-curseforge {
-    if (project.hasProperty('danielshe_curse_api_key') || System.getenv('danielshe_curse_api_key') != null) {
-        apiKey = project.hasProperty('danielshe_curse_api_key') ? project.property('danielshe_curse_api_key') : System.getenv('danielshe_curse_api_key')
-        project {
-            id = "310111"
-            releaseType = "beta"
-            changelogType = "html"
-            changelog = rootProject.releaseChangelog
-            addGameVersion "1.19"
-            addGameVersion "Java 17"
-            addGameVersion "Forge"
-            relations {
-                requiredDependency "architectury-api"
-                requiredDependency "cloth-config"
-                requiredDependency "roughly-enough-items-hacks"
+unifiedPublishing {
+    project {
+        displayName = "[Forge $rootProject.supported_version] v$project.version"
+        releaseType = "beta"
+        gameVersions = ["1.19"]
+        gameLoaders = ["forge"]
+        changelog = rootProject.releaseChangelog
+
+        mainPublication remapJar
+
+        relations {
+            depends {
+                curseforge = "architectury-api"
+                modrinth = "architectury-api"
             }
-            mainArtifact(tasks.getByName("remapJar")) {
-                displayName = "[Forge $project.supported_version] v$project.version"
+            depends {
+                curseforge = "cloth-config"
+                modrinth = "cloth-config"
             }
-        } 
-        project {
-            id = "567899"
-            releaseType = "release"
-            changelogType = "html"
-            changelog = rootProject.releaseChangelog
-            addGameVersion "1.19"
-            addGameVersion "Java 17"
-            addGameVersion "Forge"
-            relations {
-                requiredDependency "architectury-api"
-                requiredDependency "cloth-config"
+        }
+
+        if (project.hasProperty("danielshe_curse_api_key") || System.getenv("danielshe_curse_api_key") != null) {
+            curseforge {
+                token = project.hasProperty("danielshe_curse_api_key") ? project.property("danielshe_curse_api_key") : System.getenv("danielshe_curse_api_key")
+                id = "310111"
+                gameVersions.addAll "Java 17"
+                
+                relations {
+                    depends "roughly-enough-items-hacks"
+                }
             }
-            mainArtifact(tasks.getByName("serverOnlyJar")) {
-                displayName = "[Forge $project.supported_version] v$project.version"
+        }
+
+        if (project.hasProperty("modrinth_key") || System.getenv("modrinth_key") != null) {
+            modrinth {
+                token = project.hasProperty("modrinth_key") ? project.property("modrinth_key") : System.getenv("modrinth_key")
+                id = "nfn13YXA"
+                version = "$project.version+$project.name"
             }
         }
     }
-    options {
-        forgeGradleIntegration = false
-        javaVersionAutoDetect = false
+    project {
+        displayName = "[Forge $rootProject.supported_version] v$project.version"
+        releaseType = "beta"
+        gameVersions = ["1.19"]
+        gameLoaders = ["forge"]
+        changelog = rootProject.releaseChangelog
+
+        mainPublication serverOnlyJar
+
+        relations {
+            depends {
+                curseforge = "architectury-api"
+                modrinth = "architectury-api"
+            }
+            depends {
+                curseforge = "cloth-config"
+                modrinth = "cloth-config"
+            }
+        }
+
+        if (project.hasProperty("danielshe_curse_api_key") || System.getenv("danielshe_curse_api_key") != null) {
+            curseforge {
+                token = project.hasProperty("danielshe_curse_api_key") ? project.property("danielshe_curse_api_key") : System.getenv("danielshe_curse_api_key")
+                id = "567899"
+                gameVersions.addAll "Java 17"
+            }
+        }
+
+        if (project.hasProperty("modrinth_key") || System.getenv("modrinth_key") != null) {
+            modrinth {
+                releaseType = "release"
+                token = project.hasProperty("modrinth_key") ? project.property("modrinth_key") : System.getenv("modrinth_key")
+                id = "OM4ZYSws"
+                version = "$project.version+$project.name"
+            }
+        }
     }
 }
