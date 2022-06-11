@@ -136,9 +136,9 @@ task releaseOnCf {
     proc.waitFor()
     releaseChangelog = changes.toString()
     if (subprojects.any { it.name == "forge" }) {
-        dependsOn project("forge").tasks.getByName("modPublish")
+        dependsOn project("forge").tasks.getByName("publishUnified")
     }
     if (subprojects.any { it.name == "fabric" }) {
-        dependsOn project("fabric").tasks.getByName("modPublish")
+        dependsOn project("fabric").tasks.getByName("publishUnified")
     }
 }
