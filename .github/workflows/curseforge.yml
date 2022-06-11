@@ -23,9 +23,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 17
-      - name: Upload to CurseForge
-        run: ./gradlew build publish forge:curseforge fabric:curseforge jei-internals-workaround:curseforge --stacktrace
+      - name: Upload Mod
+        run: ./gradlew build publish forge:publishUnified fabric:publishUnified jei-internals-workaround:publishUnified --stacktrace
         env:
           danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
+          modrinth_key: ${{ secrets.MODRINTH_KEY }}
           BRANCH_NAME: ${{ github.ref }}
           MAVEN_PASS: ${{ secrets.MAVEN_PASS }}
