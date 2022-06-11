@@ -25,8 +25,9 @@ jobs:
         with:
           java-version: 17
       - name: Upload Mod
-        run: ./gradlew build publish forge:modPublish --stacktrace
+        run: ./gradlew build publish forge:publishUnified --stacktrace
         env:
           danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
+          modrinth_key: ${{ secrets.MODRINTH_KEY }}
           BRANCH_NAME: ${{ github.ref }}
           MAVEN_PASS: ${{ secrets.MAVEN_PASS }}
