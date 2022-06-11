@@ -2,7 +2,7 @@ plugins {
     id("architectury-plugin") version("3.4-SNAPSHOT")
     id("dev.architectury.loom") version("0.11.0-SNAPSHOT") apply false
     id("org.cadixdev.licenser") version("0.6.1")
-    id("com.matthewprenger.cursegradle") version("1.4.0")
+    id("me.shedaniel.unified-publishing") version("0.1.+")
     id("java")
     id("maven-publish")
 }
@@ -17,7 +17,7 @@ version = rootProject.base_version + "." + runNumber + (rootProject.unstable.toB
 group = "me.shedaniel"
 
 subprojects {
-    apply plugin: "com.matthewprenger.cursegradle"
+    apply plugin: "me.shedaniel.unified-publishing"
     apply plugin: "dev.architectury.loom"
 
     java {
@@ -124,82 +124,20 @@ task releaseOnCf {
     }
     def time = df.format(new Date())
     def changes = new StringBuilder()
-    changes << "<h2>REI v$project.version for $project.supported_version</h2>Updated at <b>$time</b>.<br><a href=\"https://www.github.com/shedaniel/RoughlyEnoughItems/commits/$branch\">Click here for changelog</a>"
+    changes << "## REI v$project.version for $project.supported_version\nUpdated at **$time**.\n![Click here for changelog](https://www.github.com/shedaniel/RoughlyEnoughItems/commits/$branch)"
     def proc = "git log --max-count=200 --pretty=format:%s".execute()
     proc.in.eachLine { line ->
         def processedLine = line.toString()
         if (!processedLine.contains("New translations") && !processedLine.contains("Merge") && !processedLine.contains("branch")) {
-            changes << "<br>- ${processedLine.capitalize()}"
+            changes << "\n- ${processedLine.capitalize()}"
         }
     }
     proc.waitFor()
     releaseChangelog = changes.toString()
     if (subprojects.any { it.name == "forge" }) {
-        dependsOn project("forge").tasks.getByName("curseforge")
+        dependsOn project("forge").tasks.getByName("modPublish")
     }
     if (subprojects.any { it.name == "fabric" }) {
-//        dependsOn project("fabric").tasks.getByName("curseforge")
+//        dependsOn project("fabric").tasks.getByName("modPublish")
     }
 }
-
-/*project {                                                                                                      
-    id = "310111"                                                                                                
-    releaseType = "release"                                                                                      
-    changelogType = "html"                                                                                       
-    changelog = releaseChangelog                                                                                 
-    addGameVersion "1.16-Snapshot"                                                                               
-    addGameVersion "1.16.2"                                                                                      
-    addGameVersion "1.16.3"                                                                                      
-    addGameVersion "1.16.4"                                                                                      
-    addGameVersion "Java 8"                                                                                      
-    addGameVersion "Fabric"                                                                                      
-    relations {                                                                                                  
-        requiredDependency "fabric-api"                                                                          
-        requiredDependency "cloth-config"                                                                        
-        embeddedLibrary "cloth-api"                                                                              
-    }                                                                                                            
-    mainArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}.jar")) {          
-        displayName = "[Fabric $project.supported_version] v$project.version"                                    
-    }                                                                                                            
-    addArtifact(file("${project.buildDir}/libs/${project.archivesBaseName}-${project.version}-sources.jar")) {   
-        displayName = "[Fabric $project.supported_version] v$project.version Sources"                            
-    }                                                                                                            
-    afterEvaluate {                                                                                              
-        uploadTask.dependsOn("build")                                                                            
-    }                                                                                                            
-}*/
-
-/*publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact(jar) {
-                builtBy remapJar
-            }
-            artifact(sourcesJar) {
-                builtBy remapSourcesJar
-            }
-            pom.withXml {
-                def depsNode = asNode().appendNode("dependencies")
-                subprojects.each {
-                    def depNode = depsNode.appendNode("dependency")
-                    depNode.appendNode("groupId", it.group)
-                    depNode.appendNode("artifactId", it.name)
-                    depNode.appendNode("version", it.version)
-                    depNode.appendNode("scope", "compile")
-                }
-            }
-        }
-    }
-
-    repositories {
-        if (System.getenv("MAVEN_PASS") != null) {
-            maven {
-                url = "https://deploy.shedaniel.me/"
-                credentials {
-                    username = "shedaniel"
-                    password = System.getenv("MAVEN_PASS")
-                }
-            }
-        }
-    }
-}*/

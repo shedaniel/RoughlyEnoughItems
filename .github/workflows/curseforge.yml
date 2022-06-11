@@ -24,8 +24,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 17
-      - name: Upload to CurseForge
-        run: ./gradlew build forge:publish curseforge --stacktrace
+      - name: Upload Mod
+        run: ./gradlew build publish forge:modPublish --stacktrace
         env:
           danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
           BRANCH_NAME: ${{ github.ref }}
