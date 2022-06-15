@@ -34,7 +34,6 @@ import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.registry.screen.DisplayBoundsProvider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.gui.handlers.*;
@@ -44,12 +43,9 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -126,12 +122,6 @@ public enum JEIGuiHandlerRegistration implements IGuiHandlerRegistration {
             
             return CompoundEventResult.interruptTrue(ingredient.unwrapStack());
         });
-    }
-    
-    @Override
-    public <T extends AbstractContainerScreen<?>> void addRecipeClickArea(@NotNull Class<? extends T> guiContainerClass, int xPos, int yPos, int width, int height, @NotNull ResourceLocation @NotNull ... recipeCategoryUids) {
-        ScreenRegistry.getInstance().registerContainerClickArea(new Rectangle(xPos, yPos, width, height), (Class<? extends AbstractContainerScreen<AbstractContainerMenu>>) guiContainerClass,
-                Arrays.stream(recipeCategoryUids).map(CategoryIdentifier::of).toArray(CategoryIdentifier<?>[]::new));
     }
     
     @Override

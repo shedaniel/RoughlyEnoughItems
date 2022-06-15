@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
@@ -37,21 +36,16 @@ public enum JEIRecipeTransferHandlerHelper implements IRecipeTransferHandlerHelp
     
     @Override
     public IRecipeTransferError createInternalError() {
-        return new JEIRecipeTransferError(IRecipeTransferError.Type.INTERNAL, Component.translatable("error.rei.internal.error", ""));
+        return new JEIRecipeTransferError(IRecipeTransferError.Type.INTERNAL, Component.translatable("error.rei.internal.error", ""), new HashSet<>());
     }
     
     @Override
     public IRecipeTransferError createUserErrorWithTooltip(Component tooltipMessage) {
-        return new JEIRecipeTransferError(IRecipeTransferError.Type.USER_FACING, tooltipMessage);
+        return new JEIRecipeTransferError(IRecipeTransferError.Type.USER_FACING, tooltipMessage, new HashSet<>());
     }
     
     @Override
     public IRecipeTransferError createUserErrorForMissingSlots(Component tooltipMessage, Collection<IRecipeSlotView> missingItemSlots) {
-        return new JEIRecipeTransferError.New(IRecipeTransferError.Type.USER_FACING, tooltipMessage, new HashSet<>(missingItemSlots));
-    }
-    
-    @Override
-    public IRecipeTransferError createUserErrorForSlots(Component tooltipMessage, Collection<Integer> missingItemSlots) {
-        return new JEIRecipeTransferError.Legacy(IRecipeTransferError.Type.USER_FACING, tooltipMessage, new IntArrayList(missingItemSlots));
+        return new JEIRecipeTransferError(IRecipeTransferError.Type.USER_FACING, tooltipMessage, new HashSet<>(missingItemSlots));
     }
 }

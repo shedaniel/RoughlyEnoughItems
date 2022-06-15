@@ -1,15 +1,16 @@
 package mezz.jei.api.ingredients;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import mezz.jei.api.registration.IModIngredientRegistration;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.TooltipFlag;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.world.item.TooltipFlag;
+
+import mezz.jei.api.registration.IModIngredientRegistration;
+import net.minecraft.network.chat.Component;
 
 /**
  * Renders a type of ingredient in JEI's item list and recipes.
@@ -26,10 +27,7 @@ public interface IIngredientRenderer<T> {
      * @param ingredient the ingredient to render.
      * @since 9.3.0
      */
-    default void render(PoseStack stack, T ingredient) {
-        // if not implemented, this calls the old render function for backward compatibility
-        render(stack, 0, 0, ingredient);
-    }
+    void render(PoseStack stack, T ingredient);
     
     /**
      * Get the tooltip text for this ingredient. JEI renders the tooltip based on this.
@@ -67,19 +65,5 @@ public interface IIngredientRenderer<T> {
      */
     default int getHeight() {
         return 16;
-    }
-    
-    /**
-     * Renders an ingredient at a specific location.
-     *
-     * @param xPosition  The x position to render the ingredient.
-     * @param yPosition  The y position to render the ingredient.
-     * @param ingredient the ingredient to render.
-     *                   May be null, some renderers (like fluid tanks) will render an empty background.
-     * @deprecated Use {@link #render(PoseStack, Object)} instead.
-     */
-    @Deprecated(forRemoval = true, since = "9.3.0")
-    default void render(PoseStack stack, int xPosition, int yPosition, @Nullable T ingredient) {
-        
     }
 }

@@ -27,7 +27,6 @@ import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientHelper;
@@ -51,14 +50,6 @@ public class JEIIngredientHelper<T> implements IIngredientHelper<T> {
         return definition.jeiType();
     }
     
-    @Nullable
-    @Override
-    public T getMatch(Iterable<T> ingredients, T ingredientToMatch, UidContext context) {
-        ComparisonContext comparisonContext = context.unwrapContext();
-        T value = ingredientToMatch.unwrapStack(definition).getValue();
-        return CollectionUtils.findFirstOrNull(ingredients, t -> definition.equals(t.unwrapStack(definition).getValue(), value, comparisonContext));
-    }
-    
     @Override
     public String getDisplayName(T ingredient) {
         EntryStack<T> entry = ingredient.unwrapStack(definition);
@@ -73,17 +64,10 @@ public class JEIIngredientHelper<T> implements IIngredientHelper<T> {
     }
     
     @Override
-    public String getModId(T ingredient) {
-        EntryStack<T> entry = ingredient.unwrapStack(definition);
-        String ns = entry.getContainingNamespace();
-        return ns == null ? "minecraft" : ns;
-    }
-    
-    @Override
-    public String getResourceId(T ingredient) {
+    public ResourceLocation getResourceLocation(T ingredient) {
         EntryStack<T> entry = ingredient.unwrapStack(definition);
         ResourceLocation location = entry.getIdentifier();
-        return location == null ? "unknown" : location .getPath();
+        return location == null ? new ResourceLocation("unknown") : location;
     }
     
     @Override

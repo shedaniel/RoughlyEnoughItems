@@ -34,8 +34,6 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
-import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
-
 public class JEIDrawableBuilder implements IDrawableBuilder {
     private ResourceLocation texture;
     private int u;

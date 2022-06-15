@@ -38,7 +38,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraftforge.client.RenderProperties;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,9 +51,9 @@ public class JEIItemStackRendererImitator implements IIngredientRenderer<ItemSta
     }
     
     @Override
-    public void render(PoseStack stack, int xPosition, int yPosition, @Nullable ItemStack ingredient) {
+    public void render(PoseStack stack, ItemStack ingredient) {
         if (ingredient == null) return;
-        EntryStacks.of(ingredient).render(stack, new Rectangle(xPosition, yPosition, getWidth(), getHeight()), PointHelper.getMouseX(), PointHelper.getMouseY(), Minecraft.getInstance().getDeltaFrameTime());
+        EntryStacks.of(ingredient).render(stack, new Rectangle(0, 0, getWidth(), getHeight()), PointHelper.getMouseX(), PointHelper.getMouseY(), Minecraft.getInstance().getDeltaFrameTime());
     }
     
     @Override

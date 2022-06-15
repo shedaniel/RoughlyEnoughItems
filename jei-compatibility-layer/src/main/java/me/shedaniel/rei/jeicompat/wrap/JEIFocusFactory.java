@@ -38,9 +38,4 @@ public enum JEIFocusFactory implements IFocusFactory {
     public <V> IFocus<V> createFocus(RecipeIngredientRole role, IIngredientType<V> ingredientType, V ingredient) {
         return new JEIFocus<>(role, new JEITypedIngredient<>(ingredientType, ingredient));
     }
-    
-    @Override
-    public <V> IFocus<V> createFocus(IFocus.Mode mode, V ingredient) {
-        return new JEIFocus<>(mode.toRole(), new JEITypedIngredient<>(ingredient.unwrapType().<V>cast().getDefinition().jeiType(), ingredient));
-    }
 }

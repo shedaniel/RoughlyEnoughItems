@@ -21,28 +21,38 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat.ingredient;
+package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.rei.jeicompat.wrap.JEIRecipeLayoutBuilder;
-import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.gui.ingredient.IGuiFluidStackGroup;
-import mezz.jei.api.ingredients.IIngredientType;
-import mezz.jei.api.recipe.RecipeIngredientRole;
+import com.google.common.primitives.Ints;
+import mezz.jei.api.forge.ForgeTypes;
+import mezz.jei.api.helpers.IPlatformFluidHelper;
+import mezz.jei.api.ingredients.IIngredientTypeWithSubtypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
-public class JEIGuiIngredientGroupFluid extends JEIGuiIngredientGroup<FluidStack> implements IGuiFluidStackGroup {
-    public JEIGuiIngredientGroupFluid(IIngredientType<FluidStack> type, JEIRecipeLayoutBuilder builder) {
-        super(type, builder);
+public enum JEIPlatformFluidHelper implements IPlatformFluidHelper<FluidStack> {
+    INSTANCE;
+    
+    @Override
+    public IIngredientTypeWithSubtypes<Fluid, FluidStack> getFluidIngredientType() {
+        return ForgeTypes.FLUID_STACK;
     }
     
     @Override
-    public void init(int slotIndex, boolean input, int xPosition, int yPosition, int width, int height, int capacityMb, boolean showCapacity, @Nullable IDrawable overlay) {
-        SlotWrapper slot = getSlot(slotIndex);
-        slot.slot.role = input ? RecipeIngredientRole.INPUT : RecipeIngredientRole.OUTPUT;
-        slot.slot.slot.getBounds().setLocation(xPosition - 1, yPosition - 1);
-        slot.slot.slot.getBounds().setSize(width + 2, height + 2);
-        slot.slot.capacityMb = capacityMb;
-        slot.slot.setOverlay(overlay, 0, 0);
+    public FluidStack create(Fluid fluid, long amount, @Nullable CompoundTag tag) {
+        return new FluidStack(fluid, Ints.saturatedCast(amount), tag);
+    }
+    
+    @Override
+    public FluidStack create(Fluid fluid, long amount) {
+        return new FluidStack(fluid, Ints.saturatedCast(amount));
+    }
+    
+    @Override
+    public long bucketVolume() {
+        return FluidAttributes.BUCKET_VOLUME;
     }
 }

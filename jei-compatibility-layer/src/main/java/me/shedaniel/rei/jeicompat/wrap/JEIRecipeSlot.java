@@ -62,7 +62,7 @@ public class JEIRecipeSlot implements IRecipeSlotBuilder, IRecipeSlotView {
     private boolean visible;
     @Nullable
     public String name;
-    public Integer capacityMb;
+    public Long capacityMb;
     public IRecipeSlotTooltipCallback tooltipCallback = (recipeSlotView, tooltip) -> {};
     public final Map<EntryType<?>, IIngredientRenderer<?>> renderers = new HashMap<>();
     @Nullable
@@ -103,7 +103,7 @@ public class JEIRecipeSlot implements IRecipeSlotBuilder, IRecipeSlotView {
     @Override
     public IRecipeSlotBuilder addIngredientsUnsafe(List<?> ingredients) {
         for (Object ingredient : ingredients) {
-            addIngredient(ingredient.unwrapDefinition().jeiType().cast(), ingredient);
+            addIngredient(ingredient.unwrapDefinition().cast().jeiType(), ingredient);
         }
         return this;
     }
@@ -137,9 +137,9 @@ public class JEIRecipeSlot implements IRecipeSlotBuilder, IRecipeSlotView {
     }
     
     @Override
-    public IRecipeSlotBuilder setFluidRenderer(int capacityMb, boolean showCapacity, int width, int height) {
+    public IRecipeSlotBuilder setFluidRenderer(long capacity, boolean showCapacity, int width, int height) {
         slot.getBounds().setSize(width + 2, height + 2);
-        this.capacityMb = capacityMb;
+        this.capacityMb = capacity;
         return this;
     }
     

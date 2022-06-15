@@ -1,8 +1,18 @@
 package mezz.jei.api;
 
-import mezz.jei.api.registration.*;
-import mezz.jei.api.runtime.IJeiRuntime;
+import mezz.jei.api.helpers.IPlatformFluidHelper;
 import net.minecraft.resources.ResourceLocation;
+
+import mezz.jei.api.registration.IAdvancedRegistration;
+import mezz.jei.api.registration.IGuiHandlerRegistration;
+import mezz.jei.api.registration.IModIngredientRegistration;
+import mezz.jei.api.registration.IRecipeCatalystRegistration;
+import mezz.jei.api.registration.IRecipeCategoryRegistration;
+import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.registration.IRecipeTransferRegistration;
+import mezz.jei.api.registration.ISubtypeRegistration;
+import mezz.jei.api.registration.IVanillaCategoryExtensionRegistration;
+import mezz.jei.api.runtime.IJeiRuntime;
 
 /**
  * The main class to implement to create a JEI plugin. Everything communicated between a mod and JEI is through this class.
@@ -24,9 +34,12 @@ public interface IModPlugin {
     }
     
     /**
-     * If your fluid has subtypes that depend on NBT or capabilities, use this to help JEI identify those subtypes correctly.
+     * If your fluid has subtypes that depend on NBT or capabilities,
+     * use this to help JEI identify those subtypes correctly.
+     *
+     * @since 10.1.0
      */
-    default void registerFluidSubtypes(ISubtypeRegistration registration) {
+    default <T> void registerFluidSubtypes(ISubtypeRegistration registration, IPlatformFluidHelper<T> platformFluidHelper) {
         
     }
     

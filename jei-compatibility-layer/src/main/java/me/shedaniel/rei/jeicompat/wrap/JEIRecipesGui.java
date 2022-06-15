@@ -27,19 +27,18 @@ import lombok.experimental.ExtensionMethod;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.runtime.IRecipesGui;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 @ExtensionMethod(JEIPluginDetector.class)
 public enum JEIRecipesGui implements IRecipesGui {
@@ -49,10 +48,10 @@ public enum JEIRecipesGui implements IRecipesGui {
     public <V> void show(IFocus<V> focus) {
         ViewSearchBuilder builder = ViewSearchBuilder.builder();
         if (focus != null) {
-            EntryStack<?> stack = focus.getValue().unwrapStack();
+            EntryStack<?> stack = focus.getTypedValue().unwrapStack();
             
             if (stack != null && !stack.isEmpty()) {
-                if (focus.getMode() == IFocus.Mode.INPUT) {
+                if (focus.getRole() == RecipeIngredientRole.INPUT || focus.getRole() == RecipeIngredientRole.CATALYST) {
                     builder.addUsagesFor(stack);
                 } else {
                     builder.addRecipesFor(stack);
@@ -67,7 +66,7 @@ public enum JEIRecipesGui implements IRecipesGui {
         ViewSearchBuilder builder = ViewSearchBuilder.builder();
         for (IFocus<?> focus : focuses) {
             EntryStack<?> stack = focus.getTypedValue().unwrapStack();
-            if (focus.getMode() == IFocus.Mode.INPUT) {
+            if (focus.getRole() == RecipeIngredientRole.INPUT || focus.getRole() == RecipeIngredientRole.CATALYST) {
                 builder.addUsagesFor(stack);
             } else {
                 builder.addRecipesFor(stack);
@@ -82,20 +81,14 @@ public enum JEIRecipesGui implements IRecipesGui {
     }
     
     @Override
-    public void showCategories(List<ResourceLocation> recipeCategoryUids) {
-        ViewSearchBuilder.builder().addCategories(CollectionUtils.map(recipeCategoryUids, CategoryIdentifier::of)).open();
-    }
-    
-    @Override
-    @Nullable
-    public <T> T getIngredientUnderMouse(IIngredientType<T> ingredientType) {
+    public <T> Optional<T> getIngredientUnderMouse(IIngredientType<T> ingredientType) {
         T ingredient = JEIJeiRuntime.INSTANCE.getIngredientListOverlay().getIngredientUnderMouse(ingredientType);
-        if (ingredient != null) return ingredient;
+        if (ingredient != null) return Optional.of(ingredient);
         ingredient = JEIJeiRuntime.INSTANCE.getBookmarkOverlay().getIngredientUnderMouse(ingredientType);
-        if (ingredient != null) return ingredient;
+        if (ingredient != null) return Optional.of(ingredient);
         EntryStack<?> focusedStack = ScreenRegistry.getInstance().getFocusedStack(Minecraft.getInstance().screen, PointHelper.ofMouse());
-        if (focusedStack == null) return null;
-        if (focusedStack.getType() != ingredientType.unwrapType()) return null;
-        return focusedStack.<T>cast().jeiValue();
+        if (focusedStack == null) return Optional.empty();
+        if (focusedStack.getType() != ingredientType.unwrapType()) return Optional.empty();
+        return Optional.ofNullable(focusedStack.<T>cast().jeiValue());
     }
 }

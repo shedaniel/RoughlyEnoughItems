@@ -23,10 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import mezz.jei.api.helpers.IGuiHelper;
-import mezz.jei.api.helpers.IJeiHelpers;
-import mezz.jei.api.helpers.IModIdHelper;
-import mezz.jei.api.helpers.IStackHelper;
+import mezz.jei.api.helpers.*;
 import mezz.jei.api.recipe.IFocusFactory;
 import org.jetbrains.annotations.NotNull;
 
@@ -54,5 +51,10 @@ public enum JEIJeiHelpers implements IJeiHelpers {
     @Override
     public IFocusFactory getFocusFactory() {
         return JEIFocusFactory.INSTANCE;
+    }
+    
+    @Override
+    public IPlatformFluidHelper<?> getPlatformFluidHelper() {
+        return JEIPlatformFluidHelper.INSTANCE;
     }
 }

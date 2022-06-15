@@ -33,7 +33,6 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
@@ -53,7 +52,6 @@ public class JEIWrappedDisplay<T> implements Display {
     private final T backingRecipe;
     private List<EntryIngredient> compiledInput;
     private List<EntryIngredient> compiledOutputs;
-    private JEIIngredients ingredients = null;
     
     public JEIWrappedDisplay(JEIWrappedCategory<T> backingCategory, T backingRecipe) {
         this.backingCategory = backingCategory;
@@ -66,23 +64,10 @@ public class JEIWrappedDisplay<T> implements Display {
         IRecipeCategory<T> category = getBackingCategory().getBackingCategory();
         category.setRecipe(builder, getBackingRecipe(), getFoci());
         
-        if (builder.isDirty()) {
-            this.compiledInput = CollectionUtils.filterAndMap(builder.slots, role -> role.role == RecipeIngredientRole.INPUT || role.role == RecipeIngredientRole.CATALYST,
-                    slot -> EntryIngredient.of(slot.slot.getEntries()));
-            this.compiledOutputs = CollectionUtils.filterAndMap(builder.slots, role -> role.role == RecipeIngredientRole.OUTPUT,
-                    slot -> EntryIngredient.of(slot.slot.getEntries()));
-            return;
-        }
-        
-        this.ingredients = new JEIIngredients();
-        backingCategory.getBackingCategory().setIngredients(this.backingRecipe, ingredients);
-        this.compiledInput = new ArrayList<>();
-        this.compiledOutputs = new ArrayList<>();
-        ingredients.compileIngredients(compiledInput, compiledOutputs);
-    }
-    
-    public IIngredients getLegacyIngredients() {
-        return ingredients;
+        this.compiledInput = CollectionUtils.filterAndMap(builder.slots, role -> role.role == RecipeIngredientRole.INPUT || role.role == RecipeIngredientRole.CATALYST,
+                slot -> EntryIngredient.of(slot.slot.getEntries()));
+        this.compiledOutputs = CollectionUtils.filterAndMap(builder.slots, role -> role.role == RecipeIngredientRole.OUTPUT,
+                slot -> EntryIngredient.of(slot.slot.getEntries()));
     }
     
     public JEIWrappedCategory<T> getBackingCategory() {

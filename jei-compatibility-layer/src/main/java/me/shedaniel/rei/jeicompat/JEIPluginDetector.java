@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.jeicompat;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicates;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -153,7 +152,7 @@ public class JEIPluginDetector {
         return new IRecipeManagerPlugin() {
             @Override
             @NotNull
-            public <V> List<ResourceLocation> getRecipeCategoryUids(@NotNull IFocus<V> focus) {
+            public <V> List<RecipeType<?>> getRecipeTypes(@NotNull IFocus<V> focus) {
                 throw TODO();
             }
             
@@ -222,7 +221,7 @@ public class JEIPluginDetector {
         if (stack == null) return null;
         T value = stack.getValue();
         if (value instanceof dev.architectury.fluid.FluidStack) {
-            return (ITypedIngredient<T>) new JEITypedIngredient<>(ForgeTypes.FLUID, FluidStackHooksForge.toForge((dev.architectury.fluid.FluidStack) value));
+            return (ITypedIngredient<T>) new JEITypedIngredient<>(ForgeTypes.FLUID_STACK, FluidStackHooksForge.toForge((dev.architectury.fluid.FluidStack) value));
         }
         return new JEITypedIngredient<>(jeiType(stack.getDefinition()), value);
     }
@@ -505,7 +504,7 @@ public class JEIPluginDetector {
         
         @Override
         public void registerFluidComparators(FluidComparatorRegistry registry) {
-            backingPlugin.registerFluidSubtypes(JEISubtypeRegistration.INSTANCE);
+            backingPlugin.registerFluidSubtypes(JEISubtypeRegistration.INSTANCE, JEIPlatformFluidHelper.INSTANCE);
         }
         
         @Override

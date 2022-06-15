@@ -1,22 +1,28 @@
 package mezz.jei.api.constants;
 
-import lombok.experimental.ExtensionMethod;
-import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import me.shedaniel.rei.plugin.client.BuiltinClientPlugin;
 import mezz.jei.api.recipe.RecipeType;
-import mezz.jei.api.recipe.vanilla.*;
+import mezz.jei.api.recipe.vanilla.IJeiAnvilRecipe;
+import mezz.jei.api.recipe.vanilla.IJeiBrewingRecipe;
+import mezz.jei.api.recipe.vanilla.IJeiCompostingRecipe;
+import mezz.jei.api.recipe.vanilla.IJeiFuelingRecipe;
+import mezz.jei.api.recipe.vanilla.IJeiIngredientInfoRecipe;
+import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.BlastingRecipe;
+import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
+import net.minecraft.world.item.crafting.SmokingRecipe;
+import net.minecraft.world.item.crafting.StonecutterRecipe;
+import net.minecraft.world.item.crafting.UpgradeRecipe;
 import net.minecraft.world.level.block.ComposterBlock;
-import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
 
 /**
  * List of all the built-in {@link RecipeType}s that are added by JEI.
  *
  * @since 9.5.0
  */
-@ExtensionMethod(JEIPluginDetector.class)
 public final class RecipeTypes {
     /**
      * The crafting recipe type.
@@ -26,7 +32,7 @@ public final class RecipeTypes {
      * @since 9.5.0
      */
     public static final RecipeType<CraftingRecipe> CRAFTING =
-            BuiltinClientPlugin.CRAFTING.asRecipeType(CraftingRecipe.class);
+            RecipeType.create(ModIds.MINECRAFT_ID, "crafting", CraftingRecipe.class);
     
     /**
      * The stonecutting recipe type.
@@ -36,7 +42,7 @@ public final class RecipeTypes {
      * @since 9.5.0
      */
     public static final RecipeType<StonecutterRecipe> STONECUTTING =
-            BuiltinClientPlugin.STONE_CUTTING.asRecipeType(StonecutterRecipe.class);
+            RecipeType.create(ModIds.MINECRAFT_ID, "stonecutting", StonecutterRecipe.class);
     
     /**
      * The smelting recipe type.
@@ -46,7 +52,7 @@ public final class RecipeTypes {
      * @since 9.5.0
      */
     public static final RecipeType<SmeltingRecipe> SMELTING =
-            BuiltinClientPlugin.SMELTING.asRecipeType(SmeltingRecipe.class);
+            RecipeType.create(ModIds.MINECRAFT_ID, "furnace", SmeltingRecipe.class);
     
     /**
      * The smoking recipe type.
@@ -56,7 +62,7 @@ public final class RecipeTypes {
      * @since 9.5.0
      */
     public static final RecipeType<SmokingRecipe> SMOKING =
-            BuiltinClientPlugin.SMOKING.asRecipeType(SmokingRecipe.class);
+            RecipeType.create(ModIds.MINECRAFT_ID, "smoking", SmokingRecipe.class);
     
     /**
      * The blasting recipe type.
@@ -66,7 +72,7 @@ public final class RecipeTypes {
      * @since 9.5.0
      */
     public static final RecipeType<BlastingRecipe> BLASTING =
-            BuiltinClientPlugin.BLASTING.asRecipeType(BlastingRecipe.class);
+            RecipeType.create(ModIds.MINECRAFT_ID, "blasting", BlastingRecipe.class);
     
     /**
      * The campfire cooking recipe type.
@@ -76,7 +82,7 @@ public final class RecipeTypes {
      * @since 9.5.0
      */
     public static final RecipeType<CampfireCookingRecipe> CAMPFIRE_COOKING =
-            BuiltinClientPlugin.CAMPFIRE.asRecipeType(CampfireCookingRecipe.class);
+            RecipeType.create(ModIds.MINECRAFT_ID, "campfire", CampfireCookingRecipe.class);
     
     /**
      * The fueling recipe type.
@@ -87,7 +93,7 @@ public final class RecipeTypes {
      * @since 9.5.0
      */
     public static final RecipeType<IJeiFuelingRecipe> FUELING =
-            BuiltinClientPlugin.FUEL.asRecipeType(IJeiFuelingRecipe.class);
+            RecipeType.create(ModIds.MINECRAFT_ID, "fuel", IJeiFuelingRecipe.class);
     
     /**
      * The brewing recipe type.
@@ -99,7 +105,7 @@ public final class RecipeTypes {
      * @since 9.5.0
      */
     public static final RecipeType<IJeiBrewingRecipe> BREWING =
-            BuiltinClientPlugin.BREWING.asRecipeType(IJeiBrewingRecipe.class);
+            RecipeType.create(ModIds.MINECRAFT_ID, "brewing", IJeiBrewingRecipe.class);
     
     /**
      * The anvil recipe type.
@@ -108,7 +114,7 @@ public final class RecipeTypes {
      * @since 9.5.0
      */
     public static final RecipeType<IJeiAnvilRecipe> ANVIL =
-            BuiltinClientPlugin.ANVIL.asRecipeType(IJeiAnvilRecipe.class);
+            RecipeType.create(ModIds.MINECRAFT_ID, "anvil", IJeiAnvilRecipe.class);
     
     /**
      * The smithing recipe type.
@@ -117,7 +123,7 @@ public final class RecipeTypes {
      * @since 9.5.0
      */
     public static final RecipeType<UpgradeRecipe> SMITHING =
-            BuiltinClientPlugin.SMITHING.asRecipeType(UpgradeRecipe.class);
+            RecipeType.create(ModIds.MINECRAFT_ID, "smithing", UpgradeRecipe.class);
     
     /**
      * The composting recipe type.
@@ -126,7 +132,7 @@ public final class RecipeTypes {
      * @since 9.5.0
      */
     public static final RecipeType<IJeiCompostingRecipe> COMPOSTING =
-            BuiltinClientPlugin.COMPOSTING.asRecipeType(IJeiCompostingRecipe.class);
+            RecipeType.create(ModIds.MINECRAFT_ID, "compostable", IJeiCompostingRecipe.class);
     
     /**
      * The JEI info recipe type.
@@ -135,7 +141,7 @@ public final class RecipeTypes {
      * @since 9.5.0
      */
     public static final RecipeType<IJeiIngredientInfoRecipe> INFORMATION =
-            BuiltinClientPlugin.INFO.asRecipeType(IJeiIngredientInfoRecipe.class);
+            RecipeType.create(ModIds.JEI_ID, "information", IJeiIngredientInfoRecipe.class);
     
     private RecipeTypes() {}
 }

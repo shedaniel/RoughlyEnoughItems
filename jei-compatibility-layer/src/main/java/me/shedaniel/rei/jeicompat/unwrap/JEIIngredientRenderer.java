@@ -39,7 +39,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,16 +54,16 @@ public class JEIIngredientRenderer<T> implements IIngredientRenderer<T> {
     }
     
     @Override
-    public void render(@NotNull PoseStack matrices, int xPosition, int yPosition, @Nullable T ingredient) {
+    public void render(PoseStack stack, T ingredient) {
         Point point = PointHelper.ofMouse();
-        renderer.render(ingredient.unwrapStack( type), matrices, new Rectangle(xPosition, yPosition, 16, 16),
+        renderer.render(ingredient.unwrapStack(type), stack, new Rectangle(0, 0, 16, 16),
                 point.x, point.y, Minecraft.getInstance().getDeltaFrameTime());
     }
     
     @Override
     @NotNull
     public List<Component> getTooltip(@NotNull T ingredient, @NotNull TooltipFlag tooltipFlag) {
-        Tooltip tooltip = renderer.getTooltip(ingredient.unwrapStack( type), TooltipContext.ofMouse());
+        Tooltip tooltip = renderer.getTooltip(ingredient.unwrapStack(type), TooltipContext.ofMouse());
         if (tooltip != null) {
             return CollectionUtils.filterAndMap(tooltip.entries(), Tooltip.Entry::isText, Tooltip.Entry::getAsText);
         }

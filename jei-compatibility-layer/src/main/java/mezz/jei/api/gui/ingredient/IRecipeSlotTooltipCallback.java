@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * Used to add tooltips to ingredients drawn on a recipe.
- *
+ * <p>
  * Implement a tooltip callback and add it with
  * {@link IRecipeSlotBuilder#addTooltipCallback(IRecipeSlotTooltipCallback)}
  *
@@ -15,10 +15,10 @@ import java.util.List;
  */
 @FunctionalInterface
 public interface IRecipeSlotTooltipCallback {
-	/**
-	 * Change the tooltip for an ingredient.
-	 *
-	 * @since 9.3.0
-	 */
-	void onTooltip(IRecipeSlotView recipeSlotView, List<Component> tooltip);
+    /**
+     * Change the tooltip for an ingredient.
+     *
+     * @since 9.3.0
+     */
+    void onTooltip(IRecipeSlotView recipeSlotView, List<Component> tooltip);
 }

@@ -73,8 +73,8 @@ public class JEIFluidStackRendererImitator implements IIngredientRenderer<FluidS
     }
     
     @Override
-    public void render(PoseStack stack, int xPosition, int yPosition, @Nullable FluidStack ingredient) {
+    public void render(PoseStack stack, FluidStack ingredient) {
         if (ingredient == null) return;
-        EntryStacks.of(FluidStackHooksForge.fromForge(ingredient)).render(stack, new Rectangle(xPosition, yPosition, getWidth(), getHeight()), PointHelper.getMouseX(), PointHelper.getMouseY(), Minecraft.getInstance().getDeltaFrameTime());
+        EntryStacks.of(FluidStackHooksForge.fromForge(ingredient)).render(stack, new Rectangle(0, 0, getWidth(), getHeight()), PointHelper.getMouseX(), PointHelper.getMouseY(), Minecraft.getInstance().getDeltaFrameTime());
     }
 }

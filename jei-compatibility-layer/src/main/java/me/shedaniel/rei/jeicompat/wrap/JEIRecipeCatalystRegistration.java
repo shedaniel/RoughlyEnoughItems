@@ -30,7 +30,6 @@ import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.runtime.IIngredientManager;
-import net.minecraft.resources.ResourceLocation;
 
 @ExtensionMethod(JEIPluginDetector.class)
 public enum JEIRecipeCatalystRegistration implements IRecipeCatalystRegistration {
@@ -45,13 +44,6 @@ public enum JEIRecipeCatalystRegistration implements IRecipeCatalystRegistration
     public <T> void addRecipeCatalyst(IIngredientType<T> ingredientType, T ingredient, RecipeType<?>... recipeTypes) {
         for (RecipeType<?> type : recipeTypes) {
             CategoryRegistry.getInstance().addWorkstations(type.categoryId(), ingredient.unwrapStack(ingredientType));
-        }
-    }
-    
-    @Override
-    public <T> void addRecipeCatalyst(IIngredientType<T> ingredientType, T ingredient, ResourceLocation... categoryIds) {
-        for (ResourceLocation id : categoryIds) {
-            CategoryRegistry.getInstance().addWorkstations(id.categoryId(), ingredient.unwrapStack(ingredientType));
         }
     }
 }

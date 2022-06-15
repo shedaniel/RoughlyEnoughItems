@@ -5,7 +5,6 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.Collection;
 import java.util.List;
 
 /**

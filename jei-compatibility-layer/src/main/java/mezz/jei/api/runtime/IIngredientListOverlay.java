@@ -1,8 +1,9 @@
 package mezz.jei.api.runtime;
 
+import org.jetbrains.annotations.Nullable;
+
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +25,12 @@ public interface IIngredientListOverlay {
      * @since 7.0.1
      */
     @Nullable <T> T getIngredientUnderMouse(IIngredientType<T> ingredientType);
+    
+    /**
+     * @return true if the ingredient list is currently displayed.
+     * @since 10.1.0
+     */
+    boolean isListDisplayed();
     
     /**
      * @return true if the text box is focused by the player.

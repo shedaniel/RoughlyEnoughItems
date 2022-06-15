@@ -2,6 +2,6 @@
 @MethodsReturnNonnullByDefault
 package mezz.jei.api.ingredients;
 
-import mezz.jei.api.MethodsReturnNonnullByDefault;
-
 import javax.annotation.ParametersAreNonnullByDefault;
+
+import net.minecraft.MethodsReturnNonnullByDefault;

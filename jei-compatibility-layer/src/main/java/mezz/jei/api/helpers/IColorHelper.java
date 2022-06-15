@@ -1,8 +1,8 @@
 package mezz.jei.api.helpers;
 
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-
 import java.util.List;
+
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 
 /**
  * Helper class for getting colors for sprites for purposes of implementing {@link mezz.jei.api.ingredients.IIngredientHelper#getColors(Object)}.

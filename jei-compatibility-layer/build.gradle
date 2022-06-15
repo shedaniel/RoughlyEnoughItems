@@ -1,3 +1,6 @@
+import java.nio.file.Files
+import java.util.zip.ZipFile
+
 archivesBaseName = rootProject.name + "-" + project.name
 
 dependencies {
@@ -8,4 +11,38 @@ dependencies {
     compileOnly(project(path: ":default-plugin")) { transitive false }
     compileOnly('com.google.code.findbugs:jsr305:3.0.2')
     compileClasspath(annotationProcessor("org.projectlombok:lombok:1.18.22"))
+}
+
+task updateJEIAPI {
+    doLast {
+        File jeiZip = file("build/jei_api.zip")
+        jeiZip.delete()
+        jeiZip.parentFile.mkdirs()
+        jeiZip.withOutputStream { out ->
+            new URL("https://github.com/mezz/JustEnoughItems/archive/refs/heads/1.19.zip").withInputStream { from -> out << from }
+        }
+        List<String> files = new ArrayList<>()
+        Files.walk(file("src/main/java/mezz").toPath())
+                .filter(Files::isRegularFile)
+                .filter { path -> path.fileName.toString().endsWith(".java") }
+                .forEach { path ->
+                    files.add(getProjectDir().toPath().relativize(path).toString())
+                }
+        new ZipFile(jeiZip).withCloseable { ZipFile zip ->
+            zip.stream().forEach { entry ->
+                String path = entry.name.substring(entry.name.indexOf('/') + 1)
+                if ((path.startsWith("CommonApi") || path.startsWith("ForgeApi")) && !entry.isDirectory() && path.endsWith(".java")) {
+                    String newPath = path.substring(path.indexOf('/') + 1)
+                    File newFile = file(newPath)
+                    files.remove(newPath)
+                    newFile.delete()
+                    newFile.parentFile.mkdirs()
+                    newFile.withOutputStream { out ->
+                        out << zip.getInputStream(entry)
+                    }
+                }
+            }
+        }
+        files.each { println "Delete: $it" }
+    }
 }

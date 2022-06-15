@@ -85,13 +85,6 @@ public class JEIRecipeRegistration implements IRecipeRegistration {
         return JEIIngredientVisibility.INSTANCE;
     }
     
-    @Override
-    public void addRecipes(@NotNull Collection<?> recipes, @NotNull ResourceLocation categoryId) {
-        post.add(() -> {
-            addRecipes0(recipes, categoryId);
-        });
-    }
-    
     public static void addRecipes0(@NotNull Collection<?> recipes, @NotNull ResourceLocation categoryId) {
         CategoryIdentifier<Display> categoryIdentifier = CategoryIdentifier.of(categoryId);
         DisplayRegistry registry = DisplayRegistry.getInstance();
@@ -125,7 +118,9 @@ public class JEIRecipeRegistration implements IRecipeRegistration {
     
     @Override
     public <T> void addRecipes(RecipeType<T> recipeType, List<T> recipes) {
-        addRecipes(recipes, recipeType.getUid());
+        post.add(() -> {
+            addRecipes0(recipes, recipeType.getUid());
+        });
     }
     
     private static void addRecipesOptimized(List<Object> recipes, @NotNull CategoryIdentifier<?> categoryId, DisplayRegistry registry) {

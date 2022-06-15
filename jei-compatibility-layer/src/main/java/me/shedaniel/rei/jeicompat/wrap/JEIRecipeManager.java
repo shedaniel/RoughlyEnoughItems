@@ -26,21 +26,15 @@ package me.shedaniel.rei.jeicompat.wrap;
 import com.google.common.base.MoreObjects;
 import dev.architectury.event.EventResult;
 import lombok.experimental.ExtensionMethod;
-import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.category.visibility.CategoryVisibilityPredicate;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibilityPredicate;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.entry.EntryIngredient;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
 import mezz.jei.api.gui.IRecipeLayoutDrawable;
-import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.*;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -55,74 +49,6 @@ public enum JEIRecipeManager implements IRecipeManager {
     Map<CategoryIdentifier<?>, Set<Object>> hiddenRecipes = new HashMap<>();
     public DisplayPredicate displayPredicate = new DisplayPredicate();
     public CategoryPredicate categoryPredicate = new CategoryPredicate();
-    
-    @Override
-    @Nullable
-    public IRecipeCategory<?> getRecipeCategory(ResourceLocation recipeCategoryUid, boolean includeHidden) {
-        try {
-            DisplayCategory<Display> category = CategoryRegistry.getInstance().get(recipeCategoryUid.categoryId()).getCategory();
-            if (CategoryRegistry.getInstance().isCategoryVisible(category)) {
-                return new JEIUnwrappedCategory<>(category);
-            }
-        } catch (NullPointerException ignored) {
-        }
-        return null;
-    }
-    
-    @Override
-    public <T> List<T> getRecipes(IRecipeCategory<T> recipeCategory, List<? extends IFocus<?>> focuses, boolean includeHidden) {
-        if (focuses != null && !focuses.isEmpty()) throw TODO();
-        return JEIPluginDetector.wrapRecipes(recipeCategory.getRecipeType().categoryId(), !includeHidden);
-    }
-    
-    @Override
-    public List<ITypedIngredient<?>> getRecipeCatalystsTyped(IRecipeCategory<?> recipeCategory, boolean includeHidden) {
-        List<ITypedIngredient<?>> objects = new ArrayList<>();
-        for (EntryIngredient stacks : CategoryRegistry.getInstance().get(recipeCategory.getRecipeType().categoryId()).getWorkstations()) {
-            objects.addAll(CollectionUtils.map(stacks, JEIPluginDetector::typedJeiValue));
-        }
-        return objects;
-    }
-    
-    @Override
-    public <V> IFocus<V> createFocus(IFocus.Mode mode, V ingredient) {
-        return JEIFocusFactory.INSTANCE.createFocus(mode, ingredient);
-    }
-    
-    @Override
-    public <V> List<IRecipeCategory<?>> getRecipeCategories(@Nullable IFocus<V> focus, boolean includeHidden) {
-        if (focus != null) throw TODO();
-        return CollectionUtils.filterAndMap(CategoryRegistry.getInstance(), config -> includeHidden || CategoryRegistry.getInstance().isCategoryVisible(config.getCategory()),
-                config -> new JEIUnwrappedCategory<>(config.getCategory()));
-    }
-    
-    @Override
-    public List<IRecipeCategory<?>> getRecipeCategories(Collection<? extends IFocus<?>> focuses, boolean includeHidden) {
-        if (focuses != null && !focuses.isEmpty()) throw TODO();
-        return CollectionUtils.filterAndMap(CategoryRegistry.getInstance(), config -> includeHidden || CategoryRegistry.getInstance().isCategoryVisible(config.getCategory()),
-                config -> new JEIUnwrappedCategory<>(config.getCategory()));
-    }
-    
-    @Override
-    public <V> List<IRecipeCategory<?>> getRecipeCategories(Collection<ResourceLocation> recipeCategoryUids, @Nullable IFocus<V> focus, boolean includeHidden) {
-        if (focus != null) throw TODO();
-        return CollectionUtils.map(recipeCategoryUids, id -> getRecipeCategory(id, includeHidden));
-    }
-    
-    @Override
-    public <T, V> List<T> getRecipes(IRecipeCategory<T> recipeCategory, @Nullable IFocus<V> focus, boolean includeHidden) {
-        if (focus != null) throw TODO();
-        return JEIPluginDetector.wrapRecipes(recipeCategory.getRecipeType().categoryId(), !includeHidden);
-    }
-    
-    @Override
-    public List<Object> getRecipeCatalysts(IRecipeCategory<?> recipeCategory, boolean includeHidden) {
-        List<Object> objects = new ArrayList<>();
-        for (EntryIngredient stacks : CategoryRegistry.getInstance().get(recipeCategory.getRecipeType().categoryId()).getWorkstations()) {
-            objects.addAll(CollectionUtils.map(stacks, JEIPluginDetector::jeiValue));
-        }
-        return objects;
-    }
     
     @Override
     public <R> IRecipeLookup<R> createRecipeLookup(RecipeType<R> recipeType) {
@@ -172,37 +98,6 @@ public enum JEIRecipeManager implements IRecipeManager {
     @Nullable
     public <T> IRecipeLayoutDrawable createRecipeLayoutDrawable(IRecipeCategory<T> recipeCategory, T recipe, @Nullable IFocus<?> focus) {
         throw TODO();
-    }
-    
-    @Override
-    public <T> void hideRecipe(T recipe, ResourceLocation recipeCategoryUid) {
-        Set<Object> recipes = hiddenRecipes.computeIfAbsent(recipeCategoryUid.categoryId(), $ -> new HashSet<>());
-        recipes.add(recipe);
-    }
-    
-    @Override
-    public <T> void unhideRecipe(T recipe, ResourceLocation recipeCategoryUid) {
-        CategoryIdentifier<Display> categoryIdentifier = recipeCategoryUid.categoryId();
-        Set<Object> recipes = hiddenRecipes.computeIfAbsent(categoryIdentifier, $ -> new HashSet<>());
-        recipes.remove(recipe);
-        if (recipes.isEmpty()) {
-            hiddenRecipes.remove(categoryIdentifier);
-        }
-    }
-    
-    @Override
-    public void hideRecipeCategory(ResourceLocation recipeCategoryUid) {
-        this.hiddenCategories.add(recipeCategoryUid.categoryId());
-    }
-    
-    @Override
-    public void unhideRecipeCategory(ResourceLocation recipeCategoryUid) {
-        this.hiddenCategories.remove(recipeCategoryUid.categoryId());
-    }
-    
-    @Override
-    public <T> void addRecipe(T recipe, ResourceLocation recipeCategoryUid) {
-        JEIRecipeRegistration.addRecipes0(Collections.singletonList(recipe), recipeCategoryUid);
     }
     
     public class DisplayPredicate implements DisplayVisibilityPredicate {

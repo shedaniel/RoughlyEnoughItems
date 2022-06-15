@@ -33,12 +33,9 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
-import mezz.jei.api.gui.ingredient.ITooltipCallback;
 import mezz.jei.api.ingredients.IIngredientRenderer;
-import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
@@ -84,35 +81,8 @@ public class JEIDisplaySetup {
         Result result = new Result();
         JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder(result.shapelessData);
         category.setRecipe(builder, display.getBackingRecipe(), focuses);
-        if (builder.isDirty()) {
-            result.setSlots(builder.slots);
-            return result;
-        }
-        // Legacy code
-        JEIRecipeLayout<T> layout = new JEIRecipeLayout<>(builder);
-        IIngredients ingredients = display.getLegacyIngredients();
-        if (ingredients != null) {
-            category.setRecipe(layout, display.getBackingRecipe(), ingredients);
-            applyLegacyTooltip(result, layout);
-        }
         result.setSlots(builder.slots);
         return result;
-    }
-    
-    public static void applyLegacyTooltip(Result result, JEIRecipeLayout<?> layout) {
-        for (JEIGuiIngredientGroup<?> group : layout.getGroups().values()) {
-            for (JEIGuiIngredientGroup<?>.SlotWrapper wrapper : group.getSlots().values()) {
-                wrapper.slot.addTooltipCallback((recipeSlotView, tooltip) -> {
-                    Optional<?> ingredient = recipeSlotView.getDisplayedIngredient(group.getType());
-                    
-                    if (ingredient.isPresent()) {
-                        for (ITooltipCallback callback : group.tooltipCallbacks) {
-                            callback.onTooltip(wrapper.index, wrapper.slot.role == RecipeIngredientRole.INPUT || wrapper.slot.role == RecipeIngredientRole.CATALYST, ingredient.get(), tooltip);
-                        }
-                    }
-                });
-            }
-        }
     }
     
     public static void addTo(List<Widget> widgets, Rectangle bounds, Result result) {
@@ -127,7 +97,7 @@ public class JEIDisplaySetup {
                 
                 RecipeIngredientRole role = slot.role;
                 
-                if (role == RecipeIngredientRole.INPUT || role == RecipeIngredientRole.CATALYST) {
+                if (role == RecipeIngredientRole.INPUT) {
                     slot.slot.markInput();
                 } else if (role == RecipeIngredientRole.OUTPUT) {
                     slot.slot.markOutput();

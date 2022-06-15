@@ -1,10 +1,10 @@
 package mezz.jei.api.gui.handlers;
 
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.Rect2i;
-
 import java.util.List;
 import java.util.function.Consumer;
+
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.Rect2i;
 
 /**
  * Lets mods accept ghost ingredients from JEI.

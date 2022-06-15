@@ -2,6 +2,7 @@ package mezz.jei.api.runtime;
 
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
+
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;

@@ -11,25 +11,25 @@ import java.util.stream.Stream;
  * @since 9.5.0
  */
 public interface IRecipeLookup<R> {
-	/**
-	 * Limit the results to only recipes matching the given focuses.
-	 *
-	 * @since 9.5.0
-	 */
-	IRecipeLookup<R> limitFocus(Collection<IFocus<?>> focuses);
-
-	/**
-	 * By default, hidden results are not returned.
-	 * Calling this will make this lookup include hidden recipes.
-	 *
-	 * @since 9.5.0
-	 */
-	IRecipeLookup<R> includeHidden();
-
-	/**
-	 * Get the recipe results for this lookup.
-	 *
-	 * @since 9.5.0
-	 */
-	Stream<R> get();
+    /**
+     * Limit the results to only recipes matching the given focuses.
+     *
+     * @since 9.5.0
+     */
+    IRecipeLookup<R> limitFocus(Collection<? extends IFocus<?>> focuses);
+    
+    /**
+     * By default, hidden results are not returned.
+     * Calling this will make this lookup include hidden recipes.
+     *
+     * @since 9.5.0
+     */
+    IRecipeLookup<R> includeHidden();
+    
+    /**
+     * Get the recipe results for this lookup.
+     *
+     * @since 9.5.0
+     */
+    Stream<R> get();
 }

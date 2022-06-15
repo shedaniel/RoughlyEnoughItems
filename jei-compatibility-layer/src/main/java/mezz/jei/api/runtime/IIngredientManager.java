@@ -1,14 +1,13 @@
 package mezz.jei.api.runtime;
 
+import java.util.Collection;
+
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Unmodifiable;
-
-import java.util.Collection;
 
 /**
  * The {@link IIngredientManager} has some useful functions related to recipe ingredients.
@@ -19,8 +18,7 @@ public interface IIngredientManager {
     /**
      * Returns an unmodifiable collection of all the ingredients known to JEI, of the specified type.
      */
-    @Unmodifiable
-    <V> Collection<V> getAllIngredients(IIngredientType<V> ingredientType);
+    @Unmodifiable <V> Collection<V> getAllIngredients(IIngredientType<V> ingredientType);
     
     /**
      * Returns the appropriate ingredient helper for this ingredient.
@@ -69,8 +67,4 @@ public interface IIngredientManager {
      * Helper method to get ingredient type from a legacy ingredient class.
      */
     <V> IIngredientType<V> getIngredientType(Class<? extends V> ingredientClass);
-    
-    @Deprecated
-    @ApiStatus.Internal
-    <V> boolean isIngredientVisible(V ingredient, IIngredientFilter ingredientFilter);
 }

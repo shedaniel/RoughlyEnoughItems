@@ -23,14 +23,11 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
-import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.ingredient.ICraftingGridHelper;
-import mezz.jei.api.gui.ingredient.IGuiIngredientGroup;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -81,23 +78,6 @@ public enum JEICraftingGridHelper implements ICraftingGridHelper {
     public <T> void setOutputs(IRecipeLayoutBuilder builder, IIngredientType<T> ingredientType, @Nullable List<@Nullable T> outputs) {
         builder.addSlot(RecipeIngredientRole.OUTPUT, 95, 19)
                 .addIngredients(ingredientType, outputs);
-    }
-    
-    @Override
-    public <T> void setInputs(@NotNull IGuiIngredientGroup<T> ingredientGroup, List<List<T>> inputs) {
-        int width = inputs.size() > 4 ? 3 : 2;
-        for (int i = 0; i < inputs.size(); i++) {
-            List<T> stacks = inputs.get(i);
-            ingredientGroup.set(DefaultCraftingDisplay.getSlotWithSize(width, i, 3), stacks);
-        }
-    }
-    
-    @Override
-    public <T> void setInputs(@NotNull IGuiIngredientGroup<T> ingredientGroup, List<List<T>> inputs, int width, int height) {
-        for (int i = 0; i < inputs.size(); i++) {
-            List<T> stacks = inputs.get(i);
-            ingredientGroup.set(DefaultCraftingDisplay.getSlotWithSize(width, i, 3), stacks);
-        }
     }
     
     private static int getShapelessSize(int total) {

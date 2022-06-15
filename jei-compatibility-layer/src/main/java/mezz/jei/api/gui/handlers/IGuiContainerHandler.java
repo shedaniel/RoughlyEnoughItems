@@ -1,14 +1,16 @@
 package mezz.jei.api.gui.handlers;
 
-import mezz.jei.api.registration.IGuiHandlerRegistration;
-import mezz.jei.api.registration.IModIngredientRegistration;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.Rect2i;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.Rect2i;
+
+import mezz.jei.api.registration.IGuiHandlerRegistration;
+import mezz.jei.api.registration.IModIngredientRegistration;
 
 /**
  * Allows plugins to change how JEI is displayed next to their mod's guis.
@@ -47,9 +49,11 @@ public interface IGuiContainerHandler<T extends AbstractContainerScreen<?>> {
      * <p>
      * Optionally, you can restrict what you return here based on the current mouse position.
      *
+     * @param guiMouseX the current X position of the mouse in gui-relative coordinates.
+     * @param guiMouseY the current Y position of the mouse in gui-relative coordinates.
      * @since 6.0.1
      */
-    default Collection<IGuiClickableArea> getGuiClickableAreas(T containerScreen, double mouseX, double mouseY) {
+    default Collection<IGuiClickableArea> getGuiClickableAreas(T containerScreen, double guiMouseX, double guiMouseY) {
         return Collections.emptyList();
     }
 }

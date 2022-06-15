@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import lombok.experimental.ExtensionMethod;
@@ -44,22 +45,22 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.util.LazyLoadedValue;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 @ExtensionMethod(JEIPluginDetector.class)
 public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<T>> {
     private final IRecipeCategory<T> backingCategory;
-    public final LazyLoadedValue<IDrawable> background;
+    public final Supplier<IDrawable> background;
     private final CategoryIdentifier<? extends JEIWrappedDisplay<T>> identifier;
     
     public JEIWrappedCategory(IRecipeCategory<T> backingCategory) {
         this.backingCategory = backingCategory;
-        this.background = new LazyLoadedValue<>(backingCategory::getBackground);
+        this.background = Suppliers.memoize(backingCategory::getBackground);
         this.identifier = backingCategory.getRecipeType().categoryId().cast();
     }
     
@@ -141,7 +142,7 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
         return setupDisplay(getBackingCategory(), display, JEIWrappedDisplay.getFoci(), bounds, this.background);
     }
     
-    public static <T> List<Widget> setupDisplay(IRecipeCategory<T> category, JEIWrappedDisplay<T> display, IFocusGroup focuses, Rectangle bounds, LazyLoadedValue<IDrawable> backgroundLazy) {
+    public static <T> List<Widget> setupDisplay(IRecipeCategory<T> category, JEIWrappedDisplay<T> display, IFocusGroup focuses, Rectangle bounds, Supplier<IDrawable> backgroundLazy) {
         List<Widget> widgets = new ArrayList<>();
         JEIDisplaySetup.Result result;
         try {

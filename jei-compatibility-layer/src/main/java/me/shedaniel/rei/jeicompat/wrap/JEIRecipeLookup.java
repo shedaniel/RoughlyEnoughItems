@@ -32,11 +32,11 @@ import me.shedaniel.rei.impl.display.DisplaySpec;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IRecipeLookup;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 @ExtensionMethod(JEIPluginDetector.class)
@@ -50,7 +50,7 @@ public class JEIRecipeLookup<R> implements IRecipeLookup<R> {
     }
     
     @Override
-    public IRecipeLookup<R> limitFocus(Collection<IFocus<?>> focuses) {
+    public IRecipeLookup<R> limitFocus(Collection<? extends IFocus<?>> focuses) {
         this.focui.addAll(focuses);
         return this;
     }
@@ -67,7 +67,7 @@ public class JEIRecipeLookup<R> implements IRecipeLookup<R> {
                 .filterCategory(categoryIdentifier);
         for (IFocus<?> focus : focui) {
             EntryStack<?> stack = focus.getTypedValue().unwrapStack();
-            if (focus.getMode() == IFocus.Mode.INPUT) {
+            if (focus.getRole() == RecipeIngredientRole.INPUT || focus.getRole() == RecipeIngredientRole.CATALYST) {
                 builder.addUsagesFor(stack);
             } else {
                 builder.addRecipesFor(stack);

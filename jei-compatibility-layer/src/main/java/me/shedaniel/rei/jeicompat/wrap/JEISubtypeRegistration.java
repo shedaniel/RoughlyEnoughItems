@@ -56,13 +56,11 @@ public enum JEISubtypeRegistration implements ISubtypeRegistration {
         }
     }
     
-    @Override
     public void registerSubtypeInterpreter(@NotNull Item item, @NotNull IIngredientSubtypeInterpreter<ItemStack> interpreter) {
         if (interpreter == null) return;
         ItemComparatorRegistry.getInstance().register(wrapItemComparator(interpreter), item);
     }
     
-    @Override
     public void registerSubtypeInterpreter(@NotNull Fluid fluid, @NotNull IIngredientSubtypeInterpreter<FluidStack> interpreter) {
         if (interpreter == null) return;
         FluidComparatorRegistry.getInstance().register(wrapFluidComparator(interpreter), fluid);
@@ -78,12 +76,10 @@ public enum JEISubtypeRegistration implements ISubtypeRegistration {
         FluidComparatorRegistry.getInstance().registerNbt(fluids);
     }
     
-    @Override
     public boolean hasSubtypeInterpreter(@NotNull ItemStack itemStack) {
         return ItemComparatorRegistry.getInstance().containsComparator(itemStack.getItem());
     }
     
-    @Override
     public boolean hasSubtypeInterpreter(@NotNull FluidStack fluidStack) {
         return FluidComparatorRegistry.getInstance().containsComparator(fluidStack.getFluid());
     }

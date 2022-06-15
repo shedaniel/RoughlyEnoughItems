@@ -1,8 +1,6 @@
 package mezz.jei.api.runtime;
 
-import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientType;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 
@@ -27,10 +25,4 @@ public interface IIngredientFilter {
      * To get all the ingredients known to JEI, see {@link IIngredientManager#getAllIngredients(IIngredientType)}.
      */
     <T> List<T> getFilteredIngredients(IIngredientType<T> ingredientType);
-    
-    @ApiStatus.Internal
-    <V> boolean isIngredientVisible(V ingredient);
-    
-    @ApiStatus.Internal
-    <V> boolean isIngredientVisible(V ingredient, IIngredientHelper<V> ingredientHelper);
 }

@@ -1,5 +1,7 @@
 package mezz.jei.api.registration;
 
+import java.util.Collection;
+
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.helpers.IColorHelper;
 import mezz.jei.api.ingredients.IIngredientHelper;
@@ -7,8 +9,6 @@ import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.subtypes.ISubtypeManager;
 import mezz.jei.api.runtime.IIngredientManager;
-
-import java.util.Collection;
 
 /**
  * Allows registration of new types of ingredients, beyond the basic ItemStack and FluidStack.

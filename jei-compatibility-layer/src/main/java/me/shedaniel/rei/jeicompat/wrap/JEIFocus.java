@@ -28,7 +28,6 @@ import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
@@ -52,15 +51,6 @@ public class JEIFocus<T> implements IFocus<T>, IFocusGroup {
     @Override
     public RecipeIngredientRole getRole() {
         return role;
-    }
-    
-    @Override
-    @NotNull
-    public Mode getMode() {
-        return switch (role) {
-            case INPUT, CATALYST -> IFocus.Mode.INPUT;
-            case OUTPUT, RENDER_ONLY -> IFocus.Mode.OUTPUT;
-        };
     }
     
     @Override

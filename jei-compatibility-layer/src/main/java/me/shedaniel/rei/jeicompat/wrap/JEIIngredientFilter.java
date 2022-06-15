@@ -28,20 +28,15 @@ import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
-import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.runtime.IIngredientFilter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 @ExtensionMethod(JEIPluginDetector.class)
@@ -72,21 +67,5 @@ public enum JEIIngredientFilter implements IIngredientFilter {
             }
         }
         return ImmutableList.copyOf(Arrays.copyOf(filtered, i));
-    }
-    
-    @Override
-    public <V> boolean isIngredientVisible(V ingredient) {
-        return isIngredientVisible(ingredient, null);
-    }
-    
-    @Override
-    public <V> boolean isIngredientVisible(V ingredient, @Nullable IIngredientHelper<V> ingredientHelper) {
-        EntryStack<?> stack = ingredientHelper == null ? ingredient.unwrapStack() : ingredient.unwrapStack(ingredientHelper.getIngredientType().unwrapDefinition());
-        EntryRegistry registry = EntryRegistry.getInstance();
-        if (!registry.alreadyContain(stack)) {
-            return false;
-        }
-        Collection<EntryStack<?>> stacks = registry.refilterNew(false, Collections.singletonList(stack));
-        return !stacks.isEmpty();
     }
 }

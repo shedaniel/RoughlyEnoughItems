@@ -181,30 +181,7 @@ public enum JEIGuiHelper implements IGuiHelper {
     }
     
     @Override
-    @NotNull
-    public <V> IDrawable createDrawableIngredient(@NotNull V ingredient) {
-        EntryStack<?> stack = ingredient.unwrapStack();
-        return new IDrawable() {
-            @Override
-            public int getWidth() {
-                return 16;
-            }
-            
-            @Override
-            public int getHeight() {
-                return 16;
-            }
-            
-            @Override
-            public void draw(@NotNull PoseStack matrixStack, int xOffset, int yOffset) {
-                stack.render(matrixStack, new Rectangle(xOffset, yOffset, getWidth(), getHeight()), PointHelper.getMouseX(), PointHelper.getMouseY(), 0);
-            }
-        };
-    }
-    
-    @Override
-    @NotNull
-    public ICraftingGridHelper createCraftingGridHelper(int craftInputSlot1) {
+    public ICraftingGridHelper createCraftingGridHelper() {
         return JEICraftingGridHelper.INSTANCE;
     }
     

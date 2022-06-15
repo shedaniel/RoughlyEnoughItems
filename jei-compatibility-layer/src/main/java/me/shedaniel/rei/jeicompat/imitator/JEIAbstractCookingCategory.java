@@ -28,12 +28,12 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.gui.IRecipeLayout;
+import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.drawable.IDrawableAnimated;
-import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
-import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.recipe.IFocusGroup;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
@@ -42,12 +42,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.level.block.Block;
 
-/**
- * The following method is licensed with The MIT License (MIT)
- * Copyright (c) 2014-2015 mezz
- * <p>
- * Full license text can be found in the https://github.com/mezz/JustEnoughItems/blob/1.17/LICENSE.txt
- */
+import static mezz.jei.api.recipe.RecipeIngredientRole.INPUT;
+import static mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT;
+
 public abstract class JEIAbstractCookingCategory<T extends AbstractCookingRecipe> extends JEIFurnaceVariantCategory<T> {
     private final IDrawable background;
     private final int regularCookTime;
@@ -59,11 +56,11 @@ public abstract class JEIAbstractCookingCategory<T extends AbstractCookingRecipe
         super(guiHelper);
         this.background = guiHelper.createDrawable(new ResourceLocation("jei:textures/gui/gui_vanilla.png"), 0, 114, 82, 54);
         this.regularCookTime = regularCookTime;
-        this.icon = guiHelper.createDrawableIngredient(new ItemStack(icon));
+        this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(icon));
         this.localizedName = Component.translatable(translationKey);
         this.cachedArrows = CacheBuilder.newBuilder()
                 .maximumSize(25)
-                .build(new CacheLoader<Integer, IDrawableAnimated>() {
+                .build(new CacheLoader<>() {
                     @Override
                     public IDrawableAnimated load(Integer cookTime) {
                         return guiHelper.drawableBuilder(new ResourceLocation("jei:textures/gui/gui_vanilla.png"), 82, 128, 24, 17)
@@ -91,34 +88,28 @@ public abstract class JEIAbstractCookingCategory<T extends AbstractCookingRecipe
     }
     
     @Override
-    public void setIngredients(T recipe, IIngredients ingredients) {
-        ingredients.setInputIngredients(recipe.getIngredients());
-        ingredients.setOutput(VanillaTypes.ITEM, recipe.getResultItem());
-    }
-    
-    @Override
-    public void draw(T recipe, PoseStack matrixStack, double mouseX, double mouseY) {
-        animatedFlame.draw(matrixStack, 1, 20);
+    public void draw(T recipe, IRecipeSlotsView recipeSlotsView, PoseStack poseStack, double mouseX, double mouseY) {
+        animatedFlame.draw(poseStack, 1, 20);
         
         IDrawableAnimated arrow = getArrow(recipe);
-        arrow.draw(matrixStack, 24, 18);
+        arrow.draw(poseStack, 24, 18);
         
-        drawExperience(recipe, matrixStack, 0);
-        drawCookTime(recipe, matrixStack, 45);
+        drawExperience(recipe, poseStack, 0);
+        drawCookTime(recipe, poseStack, 45);
     }
     
-    protected void drawExperience(T recipe, PoseStack matrixStack, int y) {
+    protected void drawExperience(T recipe, PoseStack poseStack, int y) {
         float experience = recipe.getExperience();
         if (experience > 0) {
             Component experienceString = Component.translatable("gui.jei.category.smelting.experience", experience);
             Minecraft minecraft = Minecraft.getInstance();
             Font fontRenderer = minecraft.font;
             int stringWidth = fontRenderer.width(experienceString);
-            fontRenderer.draw(matrixStack, experienceString, background.getWidth() - stringWidth, y, 0xFF808080);
+            fontRenderer.draw(poseStack, experienceString, background.getWidth() - stringWidth, y, 0xFF808080);
         }
     }
     
-    protected void drawCookTime(T recipe, PoseStack matrixStack, int y) {
+    protected void drawCookTime(T recipe, PoseStack poseStack, int y) {
         int cookTime = recipe.getCookingTime();
         if (cookTime > 0) {
             int cookTimeSeconds = cookTime / 20;
@@ -126,7 +117,7 @@ public abstract class JEIAbstractCookingCategory<T extends AbstractCookingRecipe
             Minecraft minecraft = Minecraft.getInstance();
             Font fontRenderer = minecraft.font;
             int stringWidth = fontRenderer.width(timeString);
-            fontRenderer.draw(matrixStack, timeString, background.getWidth() - stringWidth, y, 0xFF808080);
+            fontRenderer.draw(poseStack, timeString, background.getWidth() - stringWidth, y, 0xFF808080);
         }
     }
     
@@ -136,13 +127,12 @@ public abstract class JEIAbstractCookingCategory<T extends AbstractCookingRecipe
     }
     
     @Override
-    public void setRecipe(IRecipeLayout recipeLayout, T recipe, IIngredients ingredients) {
-        IGuiItemStackGroup guiItemStacks = recipeLayout.getItemStacks();
+    public void setRecipe(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses) {
+        builder.addSlot(INPUT, 1, 1)
+                .addIngredients(recipe.getIngredients().get(0));
         
-        guiItemStacks.init(inputSlot, true, 0, 0);
-        guiItemStacks.init(outputSlot, false, 60, 18);
-        
-        guiItemStacks.set(ingredients);
+        builder.addSlot(OUTPUT, 61, 19)
+                .addItemStack(recipe.getResultItem());
     }
     
     @Override

@@ -1,9 +1,9 @@
 package mezz.jei.api.recipe.category.extensions;
 
-import mezz.jei.api.recipe.category.IRecipeCategory;
-
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import mezz.jei.api.recipe.category.IRecipeCategory;
 
 public interface IExtendableRecipeCategory<T, W extends IRecipeCategoryExtension> extends IRecipeCategory<T> {
     /**

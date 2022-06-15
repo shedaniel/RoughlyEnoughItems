@@ -28,6 +28,7 @@ import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.runtime.IIngredientVisibility;
 
 import java.util.Collection;
@@ -46,5 +47,10 @@ public enum JEIIngredientVisibility implements IIngredientVisibility {
         }
         Collection<EntryStack<?>> stacks = registry.refilterNew(false, Collections.singletonList(stack));
         return !stacks.isEmpty();
+    }
+    
+    @Override
+    public <V> boolean isIngredientVisible(ITypedIngredient<V> typedIngredient) {
+        return isIngredientVisible(typedIngredient.getType(), typedIngredient.getIngredient());
     }
 }

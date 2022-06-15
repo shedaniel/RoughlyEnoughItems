@@ -66,7 +66,7 @@ public class JEIRecipeTransferData<C extends AbstractContainerMenu, R> {
     
     @OnlyIn(Dist.CLIENT)
     public JEIRecipeTransferData(IRecipeTransferInfo<C, R> info, C container, R recipe) {
-        this(info.getRecipeCategoryUid(), info.getRecipeSlots(container, recipe),
+        this(info.getRecipeType().getUid(), info.getRecipeSlots(container, recipe),
                 info.getInventorySlots(container, recipe), info.requireCompleteSets(container, recipe));
     }
     

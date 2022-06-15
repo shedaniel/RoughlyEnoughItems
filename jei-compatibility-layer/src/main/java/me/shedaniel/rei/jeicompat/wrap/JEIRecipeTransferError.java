@@ -24,9 +24,8 @@
 package me.shedaniel.rei.jeicompat.wrap;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -38,10 +37,13 @@ import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 public class JEIRecipeTransferError implements IRecipeTransferError {
     private final Type type;
     private final Component text;
+    @Nullable
+    private final Collection<IRecipeSlotView> redSlots;
     
-    public JEIRecipeTransferError(Type type, Component text) {
+    public JEIRecipeTransferError(Type type, Component text, Collection<IRecipeSlotView> redSlots) {
         this.type = type;
         this.text = text;
+        this.redSlots = redSlots;
     }
     
     @Override
@@ -53,38 +55,12 @@ public class JEIRecipeTransferError implements IRecipeTransferError {
         return text;
     }
     
+    public Collection<IRecipeSlotView> getRedSlots() {
+        return redSlots;
+    }
+    
     @Override
-    public void showError(PoseStack matrixStack, int mouseX, int mouseY, IRecipeLayout recipeLayout, int recipeX, int recipeY) {
+    public void showError(PoseStack matrixStack, int mouseX, int mouseY, IRecipeSlotsView recipeLayout, int recipeX, int recipeY) {
         TODO();
-    }
-    
-    public static class Legacy extends JEIRecipeTransferError {
-        @Nullable
-        private final IntArrayList redSlots;
-        
-        public Legacy(Type type, Component text, IntArrayList redSlots) {
-            super(type, text);
-            this.redSlots = redSlots;
-        }
-        
-        @Nullable
-        public IntArrayList getRedSlots() {
-            return redSlots;
-        }
-    }
-    
-    public static class New extends JEIRecipeTransferError {
-        @Nullable
-        private final Collection<IRecipeSlotView> redSlots;
-        
-        public New(Type type, Component text, Collection<IRecipeSlotView> redSlots) {
-            super(type, text);
-            this.redSlots = redSlots;
-        }
-        
-        @Nullable
-        public Collection<IRecipeSlotView> getRedSlots() {
-            return redSlots;
-        }
     }
 }

@@ -23,14 +23,13 @@
 
 package me.shedaniel.rei.jeicompat.imitator;
 
-import java.util.Locale;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.language.LanguageInfo;
 import net.minecraft.client.resources.language.LanguageManager;
 
 import javax.annotation.Nullable;
+import java.util.Locale;
 
 /**
  * The following method is licensed with The MIT License (MIT)

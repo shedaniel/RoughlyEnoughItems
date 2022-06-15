@@ -54,7 +54,6 @@ public enum JEISubtypeManager implements ISubtypeManager {
         return null;
     }
     
-    @Override
     @Nullable
     public String getSubtypeInfo(ItemStack itemStack, UidContext context) {
         if (ItemComparatorRegistry.getInstance().containsComparator(itemStack.getItem())) {
@@ -63,7 +62,6 @@ public enum JEISubtypeManager implements ISubtypeManager {
         return null;
     }
     
-    @Override
     @Nullable
     public String getSubtypeInfo(FluidStack fluidStack, UidContext context) {
         if (FluidComparatorRegistry.getInstance().containsComparator(fluidStack.getFluid())) {

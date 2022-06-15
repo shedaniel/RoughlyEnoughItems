@@ -32,9 +32,9 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.jeicompat.wrap.JEIFocus;
 import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.advanced.IRecipeManagerPlugin;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,12 +51,12 @@ public class JEIDynamicDisplayGenerator implements DynamicDisplayGenerator<Displ
     
     private Optional<List<Display>> getDisplays(EntryStack<?> entry, RecipeIngredientRole role) {
         JEIFocus<?> focus = new JEIFocus<>(role, entry.typedJeiValue());
-        List<ResourceLocation> categoryIds = plugin.getRecipeCategoryUids(focus);
+        List<RecipeType<?>> categoryIds = plugin.getRecipeTypes(focus);
         if (categoryIds.isEmpty()) {
             return Optional.empty();
         }
         List<Display> displays = null;
-        for (ResourceLocation categoryId : categoryIds) {
+        for (RecipeType<?> categoryId : categoryIds) {
             IRecipeCategory<Object> category = (IRecipeCategory<Object>) (CategoryRegistry.getInstance().get(categoryId.categoryId()).getCategory().wrapCategory());
             List<Object> recipes = plugin.getRecipes(category, focus);
             if (recipes != null && !recipes.isEmpty()) {

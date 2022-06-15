@@ -1,9 +1,8 @@
 package mezz.jei.api.gui.builder;
 
+import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-
-import java.util.List;
 
 /**
  * A builder passed to plugins that implement
@@ -64,6 +63,24 @@ public interface IRecipeLayoutBuilder {
      * @since 9.3.0
      */
     void setShapeless(int posX, int posY);
+    
+    /**
+     * Link slots together so that if one slot matches the current focus, the others will be limited too.
+     * This can only be set on slots that contains the same number of ingredients.
+     * <p>
+     * For example:
+     * Consider a recipe that has an input slot with every plank type
+     * and an output slot with stairs for each plank type.
+     * <p>
+     * The number of inputs and outputs are the same,
+     * and when the full recipe is displayed it rotates through all the different pairs of planks and their stairs.
+     * <p>
+     * If the slots are focus-linked, when the player focuses on acacia planks,
+     * the linked output slot will only display acacia stairs.
+     *
+     * @since 9.5.1
+     */
+    void createFocusLink(IIngredientAcceptor<?>... slots);
     
     /**
      * Link slots together so that if one slot matches the current focus, the others will be limited too.

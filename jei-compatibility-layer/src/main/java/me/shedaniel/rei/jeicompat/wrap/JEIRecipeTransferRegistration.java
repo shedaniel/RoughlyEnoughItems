@@ -50,10 +50,8 @@ import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.api.common.transfer.info.MenuSerializationContext;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import me.shedaniel.rei.jeicompat.ingredient.JEIGuiIngredientGroup;
 import me.shedaniel.rei.jeicompat.transfer.JEIRecipeTransferData;
 import me.shedaniel.rei.jeicompat.transfer.JEITransferMenuInfo;
-import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.helpers.IJeiHelpers;
@@ -67,8 +65,8 @@ import mezz.jei.api.registration.IRecipeTransferRegistration;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -99,31 +97,21 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
     }
     
     @Override
-    public <C extends AbstractContainerMenu> void addRecipeTransferHandler(Class<C> containerClass, ResourceLocation recipeCategoryUid, int recipeSlotStart, int recipeSlotCount, int inventorySlotStart, int inventorySlotCount) {
-        addRecipeTransferHandler(containerClass, new RecipeType<>(recipeCategoryUid, Object.class), recipeSlotStart, recipeSlotCount, inventorySlotStart, inventorySlotCount);
-    }
-    
-    @Override
-    public <C extends AbstractContainerMenu, R> void addRecipeTransferHandler(Class<C> containerClass, RecipeType<R> recipeType, int recipeSlotStart, int recipeSlotCount, int inventorySlotStart, int inventorySlotCount) {
+    public <C extends AbstractContainerMenu, R> void addRecipeTransferHandler(Class<? extends C> containerClass, @Nullable MenuType<C> menuType, RecipeType<R> recipeType, int recipeSlotStart, int recipeSlotCount, int inventorySlotStart, int inventorySlotCount) {
         addRecipeTransferHandler(new IRecipeTransferInfo<C, R>() {
             @Override
-            public Class<C> getContainerClass() {
+            public Class<? extends C> getContainerClass() {
                 return containerClass;
+            }
+            
+            @Override
+            public Optional<MenuType<C>> getMenuType() {
+                return Optional.ofNullable(menuType);
             }
             
             @Override
             public RecipeType<R> getRecipeType() {
                 return recipeType;
-            }
-            
-            @Override
-            public Class<R> getRecipeClass() {
-                return (Class<R>) recipeType.getRecipeClass();
-            }
-            
-            @Override
-            public ResourceLocation getRecipeCategoryUid() {
-                return recipeType.getUid();
             }
             
             @Override
@@ -150,7 +138,7 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
     @Override
     public <C extends AbstractContainerMenu, R> void addRecipeTransferHandler(IRecipeTransferInfo<C, R> info) {
         post.accept(() -> {
-            MenuInfoRegistry.getInstance().register(info.getRecipeCategoryUid().categoryId(), info.getContainerClass(),
+            MenuInfoRegistry.getInstance().register(info.getRecipeType().categoryId(), (Class<C>) info.getContainerClass(),
                     new MenuInfoProvider<C, Display>() {
                         @Override
                         public Optional<MenuInfo<C, Display>> provideClient(Display display, MenuSerializationContext<C, ?, Display> context, C menu) {
@@ -185,17 +173,12 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
     
     @Override
     public <C extends AbstractContainerMenu, R> void addRecipeTransferHandler(IRecipeTransferHandler<C, R> recipeTransferHandler, RecipeType<R> recipeCategoryUid) {
-        addRecipeTransferHandler(recipeTransferHandler, recipeCategoryUid.getUid());
-    }
-    
-    @Override
-    public <C extends AbstractContainerMenu, R> void addRecipeTransferHandler(IRecipeTransferHandler<C, R> recipeTransferHandler, ResourceLocation recipeCategoryUid) {
         TransferHandlerRegistry.getInstance().register(new TransferHandler() {
             @Override
             public Result handle(Context context) {
                 if (recipeTransferHandler.getContainerClass().isInstance(context.getMenu())) {
                     Display display = context.getDisplay();
-                    if (recipeCategoryUid == null || display.getCategoryIdentifier().getIdentifier().equals(recipeCategoryUid)) {
+                    if (recipeCategoryUid == null || display.getCategoryIdentifier().getIdentifier().equals(recipeCategoryUid.getUid())) {
                         Value<IDrawable> background = new Value<IDrawable>() {
                             @Override
                             public void accept(IDrawable iDrawable) {
@@ -223,14 +206,8 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                             context.getMinecraft().setScreen(context.getContainerScreen());
                         }
                         IRecipeTransferHandler<AbstractContainerMenu, Object> handler = (IRecipeTransferHandler<AbstractContainerMenu, Object>) recipeTransferHandler;
-                        IRecipeTransferError error;
                         Object recipe = MoreObjects.firstNonNull(display.jeiValue(), display);
-                        try {
-                            error = handler.transferRecipe(context.getMenu(), recipe, view, context.getMinecraft().player, context.isStackedCrafting(), context.isActuallyCrafting());
-                        } catch (UnsupportedOperationException e) {
-                            IRecipeLayout layout = new JEIRecipeLayoutLegacyAdapter(view);
-                            error = handler.transferRecipe(context.getMenu(), recipe, layout, context.getMinecraft().player, context.isStackedCrafting(), context.isActuallyCrafting());
-                        }
+                        IRecipeTransferError error = handler.transferRecipe(context.getMenu(), recipe, view, context.getMinecraft().player, context.isStackedCrafting(), context.isActuallyCrafting());
                         if (error == null) {
                             return TransferHandler.Result.createSuccessful();
                         } else if (error instanceof IRecipeTransferError) {
@@ -243,10 +220,8 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                             
                             if (error instanceof JEIRecipeTransferError) {
                                 JEIRecipeTransferError transferError = (JEIRecipeTransferError) error;
-                                if (error instanceof JEIRecipeTransferError.Legacy) {
-                                    result.renderer(forRedSlots(((JEIRecipeTransferError.Legacy) error).getRedSlots()));
-                                } else if (error instanceof JEIRecipeTransferError.New) {
-                                    result.renderer(forRedSlots(((JEIRecipeTransferError.New) error).getRedSlots()));
+                                if (error instanceof JEIRecipeTransferError) {
+                                    result.renderer(forRedSlots(((JEIRecipeTransferError) error).getRedSlots()));
                                 }
                                 return result;
                             } else {
@@ -255,8 +230,6 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
                                         .overrideTooltipRenderer((point, tooltipSink) -> {})
                                         .renderer((matrices, mouseX, mouseY, delta, widgets, bounds, d) -> {
                                             finalError.showError(matrices, mouseX, mouseY, view, bounds.x + 4, bounds.y + 4);
-                                            IRecipeLayout layout = new JEIRecipeLayoutLegacyAdapter(view);
-                                            finalError.showError(matrices, mouseX, mouseY, layout, bounds.x + 4, bounds.y + 4);
                                         });
                             }
                         }
@@ -272,14 +245,16 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
             DisplayCategory<?> category = Objects.requireNonNull(CategoryRegistry.getInstance().get(display.getCategoryIdentifier()))
                     .getCategory();
             if (category instanceof JEIWrappedCategory wrappedCategory) {
-                for (JEIGuiIngredientGroup<?>.SlotWrapper slotWrapper : Widgets.<JEIGuiIngredientGroup<?>.SlotWrapper>walk(widgets, widget -> widget instanceof JEIGuiIngredientGroup.SlotWrapper)) {
-                    if (slotWrapper.slot.role == RecipeIngredientRole.INPUT && redSlots.contains(slotWrapper.index)) {
+                int i = 0;
+                for (Slot slot : Widgets.<Slot>walk(widgets, widget -> widget instanceof Slot)) {
+                    if (slot.getNoticeMark() == Slot.INPUT && redSlots.contains(i)) {
                         matrices.pushPose();
                         matrices.translate(0, 0, 400);
-                        Rectangle innerBounds = slotWrapper.slot.slot.getInnerBounds();
+                        Rectangle innerBounds = slot.getInnerBounds();
                         GuiComponent.fill(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), 0x40ff0000);
                         matrices.popPose();
                     }
+                    i++;
                 }
             }
         };
@@ -290,14 +265,16 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
             DisplayCategory<?> category = Objects.requireNonNull(CategoryRegistry.getInstance().get(display.getCategoryIdentifier()))
                     .getCategory();
             if (category instanceof JEIWrappedCategory wrappedCategory) {
-                for (JEIGuiIngredientGroup<?>.SlotWrapper slotWrapper : Widgets.<JEIGuiIngredientGroup<?>.SlotWrapper>walk(widgets, widget -> widget instanceof JEIGuiIngredientGroup.SlotWrapper)) {
-                    if (redSlots.contains(slotWrapper.slot)) {
+                int i = 0;
+                for (Slot slot : Widgets.<Slot>walk(widgets, widget -> widget instanceof Slot)) {
+                    if (redSlots.stream().anyMatch(redSlot -> ((JEIRecipeSlot) redSlot).slot == slot)) {
                         matrices.pushPose();
                         matrices.translate(0, 0, 400);
-                        Rectangle innerBounds = slotWrapper.slot.slot.getInnerBounds();
+                        Rectangle innerBounds = slot.getInnerBounds();
                         GuiComponent.fill(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), 0x40ff0000);
                         matrices.popPose();
                     }
+                    i++;
                 }
             }
         };
@@ -331,6 +308,6 @@ public class JEIRecipeTransferRegistration implements IRecipeTransferRegistratio
     
     @Override
     public <C extends AbstractContainerMenu, R> void addUniversalRecipeTransferHandler(IRecipeTransferHandler<C, R> recipeTransferHandler) {
-        addRecipeTransferHandler(recipeTransferHandler, (ResourceLocation) null);
+        addRecipeTransferHandler(recipeTransferHandler, null);
     }
 }

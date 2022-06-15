@@ -52,6 +52,13 @@ public enum JEIIngredientListOverlay implements IIngredientListOverlay {
     }
     
     @Override
+    public boolean isListDisplayed() {
+        if (!REIRuntime.getInstance().isOverlayVisible()) return false;
+        ScreenOverlay overlay = REIRuntime.getInstance().getOverlay().get();
+        return overlay.getEntryList().getEntries().findAny().isPresent();
+    }
+    
+    @Override
     @Nullable
     public <T> T getIngredientUnderMouse(@NotNull IIngredientType<T> ingredientType) {
         return getIngredientUnderMouse().flatMap(ingredient -> ingredient.getIngredient(ingredientType)).orElse(null);

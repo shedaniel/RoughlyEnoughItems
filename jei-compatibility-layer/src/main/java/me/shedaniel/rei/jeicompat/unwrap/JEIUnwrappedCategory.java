@@ -28,18 +28,13 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.jeicompat.wrap.JEIWrappedCategory;
-import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
-import mezz.jei.api.ingredients.IIngredients;
-import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 import static me.shedaniel.rei.jeicompat.JEIPluginDetector.WILL_NOT_BE_IMPLEMENTED;
@@ -47,24 +42,20 @@ import static me.shedaniel.rei.jeicompat.JEIPluginDetector.WILL_NOT_BE_IMPLEMENT
 @ExtensionMethod(JEIPluginDetector.class)
 public class JEIUnwrappedCategory<T, D extends Display> implements IRecipeCategory<T> {
     private final DisplayCategory<D> backingCategory;
+    private final RecipeType<T> recipeType;
     
     public JEIUnwrappedCategory(DisplayCategory<D> backingCategory) {
         this.backingCategory = backingCategory;
+        this.recipeType = new RecipeType<>(backingCategory.getIdentifier(), (Class<? extends T>) Display.class);
     }
     
     @Override
-    @NotNull
-    public ResourceLocation getUid() {
-        return backingCategory.getIdentifier();
-    }
-    
-    @Override
-    @NotNull
-    public Class<? extends T> getRecipeClass() {
+    public RecipeType<T> getRecipeType() {
         if (backingCategory instanceof JEIWrappedCategory) {
-            return ((JEIWrappedCategory<T>) backingCategory).getBackingCategory().getRecipeType().getRecipeClass();
+            return ((JEIWrappedCategory<T>) backingCategory).getBackingCategory().getRecipeType();
+        } else {
+            return recipeType;
         }
-        return (Class<? extends T>) Display.class;
     }
     
     @Override
@@ -92,36 +83,9 @@ public class JEIUnwrappedCategory<T, D extends Display> implements IRecipeCatego
     }
     
     @Override
-    public void setIngredients(@NotNull T recipe, @NotNull IIngredients ingredients) {
-        if (backingCategory instanceof JEIWrappedCategory) {
-            ((JEIWrappedCategory<T>) backingCategory).getBackingCategory().setIngredients(recipe, ingredients);
-            return;
-        }
-        throw WILL_NOT_BE_IMPLEMENTED();
-    }
-    
-    @Override
     public void setRecipe(IRecipeLayoutBuilder builder, T recipe, IFocusGroup focuses) {
         if (backingCategory instanceof JEIWrappedCategory) {
             ((JEIWrappedCategory<T>) backingCategory).getBackingCategory().setRecipe(builder, recipe, focuses);
-            return;
-        }
-        throw WILL_NOT_BE_IMPLEMENTED();
-    }
-    
-    @Override
-    public void setRecipe(IRecipeLayoutBuilder builder, T recipe, List<? extends IFocus<?>> focuses) {
-        if (backingCategory instanceof JEIWrappedCategory) {
-            ((JEIWrappedCategory<T>) backingCategory).getBackingCategory().setRecipe(builder, recipe, focuses);
-            return;
-        }
-        throw WILL_NOT_BE_IMPLEMENTED();
-    }
-    
-    @Override
-    public void setRecipe(@NotNull IRecipeLayout recipeLayout, @NotNull T recipe, @NotNull IIngredients ingredients) {
-        if (backingCategory instanceof JEIWrappedCategory) {
-            ((JEIWrappedCategory<T>) backingCategory).getBackingCategory().setRecipe(recipeLayout, recipe, ingredients);
             return;
         }
         throw WILL_NOT_BE_IMPLEMENTED();

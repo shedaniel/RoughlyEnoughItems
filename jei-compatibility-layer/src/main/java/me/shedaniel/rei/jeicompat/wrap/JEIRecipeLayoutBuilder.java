@@ -112,6 +112,11 @@ public class JEIRecipeLayoutBuilder implements IRecipeLayoutBuilder {
         InternalLogger.getInstance().error("createFocusLink is not supported in REI yet!");
     }
     
+    @Override
+    public void createFocusLink(IIngredientAcceptor<?>... slots) {
+        InternalLogger.getInstance().error("createFocusLink is not supported in REI yet!");
+    }
+    
     private void markDirty() {
         this.dirty = true;
     }

@@ -5,13 +5,14 @@ import java.util.List;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * Helps set crafting-grid-style layouts.
  * This places smaller recipes in the grid in a consistent way.
- *
+ * <p>
  * This is passed to plugins that implement
  * {@link ICraftingCategoryExtension#setRecipe(IRecipeLayoutBuilder, ICraftingGridHelper, IFocusGroup)}
  * to help them override the default behavior.
@@ -39,20 +40,4 @@ public interface ICraftingGridHelper {
      * @since 9.3.0
      */
     <T> void setOutputs(IRecipeLayoutBuilder builder, IIngredientType<T> ingredientType, @Nullable List<@Nullable T> outputs);
-    
-    /**
-     * Place inputs ingredients onto the crafting grid in a consistent way.
-     *
-     * @deprecated Use {@link #setInputs(IRecipeLayoutBuilder, IIngredientType, List, int, int)} instead.
-     */
-    @Deprecated(forRemoval = true, since = "9.3.0")
-    <T> void setInputs(IGuiIngredientGroup<T> ingredientGroup, List<List<T>> inputs);
-    
-    /**
-     * Place inputs ingredients onto the crafting grid in a consistent way.
-     *
-     * @deprecated Use {@link #setInputs(IRecipeLayoutBuilder, IIngredientType, List, int, int)} instead.
-     */
-    @Deprecated(forRemoval = true, since = "9.3.0")
-    <T> void setInputs(IGuiIngredientGroup<T> ingredientGroup, List<List<T>> inputs, int width, int height);
 }
