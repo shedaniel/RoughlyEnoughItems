@@ -28,6 +28,7 @@ import me.shedaniel.rei.RoughlyEnoughItemsInitializer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.loading.moddiscovery.ModAnnotation;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -39,6 +40,7 @@ import org.objectweb.asm.Type;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -59,16 +61,29 @@ public class AnnotationUtils {
                     .collect(Collectors.toList());
             out:
             for (ModFileScanData.AnnotationData annotation : data.getAnnotations()) {
-                Object value = annotation.annotationData().get("value");
-                boolean enabled;
-                
-                if (value instanceof Dist[]) {
-                    enabled = Arrays.asList((Dist[]) value).contains(FMLEnvironment.dist);
-                } else {
-                    enabled = true;
-                }
-                
-                if (enabled && annotationType.equals(annotation.annotationType())) {
+                if (annotationType.equals(annotation.annotationType())) {
+                    Object value = annotation.annotationData().get("value");
+                    boolean enabled;
+                    
+                    if (value instanceof Dist[]) {
+                        enabled = Arrays.asList((Dist[]) value).contains(FMLEnvironment.dist);
+                    } else if (value instanceof ModAnnotation.EnumHolder) {
+                        enabled = Objects.equals(((ModAnnotation.EnumHolder) value).getValue(), FMLEnvironment.dist.name());
+                    } else if (value instanceof List) {
+                        List<ModAnnotation.EnumHolder> holders = ((List<?>) value).stream().filter(o -> o instanceof ModAnnotation.EnumHolder)
+                                .map(o -> (ModAnnotation.EnumHolder) o).toList();
+                        if (!holders.isEmpty()) {
+                            enabled = holders.stream()
+                                    .anyMatch(o -> Objects.equals(o.getValue(), FMLEnvironment.dist.name()));
+                        } else {
+                            enabled = true;
+                        }
+                    } else {
+                        enabled = true;
+                    }
+                    
+                    if (!enabled) continue;
+                    
                     try {
                         Class<T> clazz = (Class<T>) Class.forName(annotation.memberName());
                         if (predicate.test(clazz)) {

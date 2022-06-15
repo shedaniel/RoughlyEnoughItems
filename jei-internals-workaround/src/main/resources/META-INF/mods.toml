@@ -6,22 +6,21 @@ authors = "shedaniel"
 license = "MIT"
 
 [[mods]]
-modId = "rei_internals_workaround"
+modId = "rei_plugin_compatibilities"
 version = "${version}"
-displayName = "REI Internals Workaround"
+displayName = "REI Plugin Compatibilities"
 description = '''
-An external REI module to workaround issues brought forward by mods accessing JEI internals, by remapping these code back to their api equivalent code.
-This module is extremely unstable, invokes terrible hacks, and should be used as a last resort.
+This is an external REI module to add support for JEI plugins.
 '''
 
-[[dependencies.rei_internals_workaround]]
+[[dependencies.rei_plugin_compatibilities]]
 modId = "roughlyenoughitems"
 mandatory = true
 versionRange = "[7,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.rei_internals_workaround]]
+[[dependencies.rei_plugin_compatibilities]]
 modId = "forge"
 mandatory = true
 versionRange = "[38.0.6,)"

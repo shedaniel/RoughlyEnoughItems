@@ -33,8 +33,10 @@ import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoProvider;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.api.common.transfer.info.MenuSerializationContext;
+import me.shedaniel.rei.forge.REIPlugin;
 import me.shedaniel.rei.jeicompat.transfer.JEIRecipeTransferData;
 import me.shedaniel.rei.jeicompat.transfer.JEITransferMenuInfo;
+import mezz.jei.api.JeiPlugin;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraftforge.api.distmarker.Dist;
@@ -42,6 +44,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.Optional;
 
+@REIPlugin(Dist.DEDICATED_SERVER)
 public class JEIExtraPlugin implements REIServerPlugin {
     @Override
     public void registerMenuInfo(MenuInfoRegistry registry) {

@@ -21,25 +21,17 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.jeicompat;
+package me.shedaniel.rei.forge;
 
-import lombok.experimental.ExtensionMethod;
-import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
-import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
-import me.shedaniel.rei.forge.REIPlugin;
-import me.shedaniel.rei.jeicompat.imitator.IngredientInfoRecipe;
-import me.shedaniel.rei.plugin.common.displays.DefaultInformationDisplay;
-import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 
-@ExtensionMethod(JEIPluginDetector.class)
-@REIPlugin(Dist.CLIENT)
-public class JEIExtraClientPlugin implements REIClientPlugin {
-    @Override
-    public void registerDisplays(DisplayRegistry registry) {
-        registry.registerFiller((Class<IngredientInfoRecipe<Object>>) (Class<?>) IngredientInfoRecipe.class, (recipe) -> {
-            return DefaultInformationDisplay.createFromEntries(recipe.getIngredientType().unwrapList(recipe.getIngredients()), Component.empty().copy())
-                    .lines(recipe.getDescriptionREI());
-        });
-    }
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface REIPluginLoader {
+    Dist[] value() default {Dist.CLIENT, Dist.DEDICATED_SERVER};
 }

@@ -25,6 +25,6 @@ package me.shedaniel.rei.jeiinternalsworkaround;
 
 import net.minecraftforge.fml.common.Mod;
 
-@Mod("rei_internals_workaround")
+@Mod("rei_plugin_compatibilities")
 public class JEIREIInternalsWorkaround {
 }

@@ -102,11 +102,11 @@ public class UncertainDisplayViewingScreen extends Screen {
         this.parent = parent;
         this.showTips = showTips;
         if (showTips && false && Platform.isForge()) {
-            this.jeiEnabled = ConfigObject.getInstance().isJEICompatibilityLayerEnabled();
-            allModsUsingJEI = ClientInternals.getJeiCompatMods().stream()
-                    .distinct()
-                    .map(ClientHelper.getInstance()::getModFromModId)
-                    .collect(Collectors.toList());
+//            this.jeiEnabled = ConfigObject.getInstance().isJEICompatibilityLayerEnabled();
+//            allModsUsingJEI = ClientInternals.getJeiCompatMods().stream()
+//                    .distinct()
+//                    .map(ClientHelper.getInstance()::getModFromModId)
+//                    .collect(Collectors.toList());
         }
     }
     

@@ -1,15 +1,39 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.0.0"
+}
+
 import java.util.zip.ZipFile
 
 archivesBaseName = rootProject.name + "-" + project.name
 
+configurations {
+    runtimeDependencies
+    compileClasspath.extendsFrom runtimeDependencies
+    runtimeClasspath.extendsFrom runtimeDependencies
+    shadowed // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+}
+
 dependencies {
     forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
+    runtimeDependencies(project(path: ":jei-compatibility-layer", configuration: "namedElements")) { transitive false }
+    shadowed(project(path: ":jei-compatibility-layer", configuration: "namedElements")) { transitive false }
 }
 
 loom {
     forge {
         mixinConfig "rei-jei-internals-workaround.mixins.json"
     }
+}
+
+shadowJar {
+    configurations = [project.configurations.shadowed]
+    classifier "dev-shadow"
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    classifier null
 }
 
 processResources {

@@ -24,6 +24,7 @@
 package me.shedaniel.rei.jeicompat;
 
 import com.google.common.base.Predicates;
+import com.google.common.base.Suppliers;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -55,11 +56,15 @@ import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.plugins.PluginView;
+import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
+import me.shedaniel.rei.forge.AnnotationUtils;
+import me.shedaniel.rei.forge.REIPluginLoader;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.jeicompat.imitator.JEIInternalsClickedIngredient;
 import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
@@ -89,6 +94,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fluids.FluidStack;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.tuple.Triple;
@@ -97,8 +103,29 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.*;
+import java.util.stream.Collectors;
 
-public class JEIPluginDetector {
+@REIPluginLoader({Dist.CLIENT, Dist.DEDICATED_SERVER})
+public class JEIPluginDetector implements REIPluginProvider<REIPlugin<?>> {
+    private final Supplier<List<REIPluginProvider<?>>> jeiPlugins = Suppliers.memoize(() -> {
+        List<REIPluginProvider<?>> plugins = new ArrayList<>();
+        detect((aClass, consumer) -> AnnotationUtils.scanAnnotation((Class<Object>) aClass, c -> true,
+                (TriConsumer<List<String>, Supplier<Object>, Class<Object>>) (TriConsumer<?, ?, ?>) consumer), plugins::add);
+        InternalLogger.getInstance().info("Detected %d JEI plugins".formatted(plugins.size()));
+        return plugins;
+    });
+    
+    @Override
+    public Collection<REIPlugin<?>> provide() {
+        return jeiPlugins.get().stream().flatMap(provider -> provider.provide().stream())
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public Class<REIPlugin<?>> getPluginProviderClass() {
+        return (Class<REIPlugin<?>>) (Class<?>) REIPlugin.class;
+    }
+    
     private static final Renderer EMPTY_RENDERER = new Renderer() {
         @Override
         public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
