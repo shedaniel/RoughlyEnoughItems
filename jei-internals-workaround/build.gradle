@@ -53,13 +53,13 @@ task updateJEIAssets {
         jeiZip.delete()
         jeiZip.parentFile.mkdirs()
         jeiZip.withOutputStream { out ->
-            new URL("https://github.com/mezz/JustEnoughItems/archive/refs/heads/1.18.zip").withInputStream { from -> out << from; }
+            new URL("https://github.com/mezz/JustEnoughItems/archive/refs/heads/1.19.zip").withInputStream { from -> out << from; }
         }
         new ZipFile(jeiZip).withCloseable { ZipFile zip ->
             zip.stream().forEach { entry ->
                 String path = entry.name.substring(entry.name.indexOf('/') + 1)
-                if (path.startsWith("src/main/resources/assets") && !entry.isDirectory()) {
-                    File newFile = file(path)
+                if (path.startsWith("Common/src/main/resources/assets") && !entry.isDirectory()) {
+                    File newFile = file(path.replaceFirst("Common/", ""))
                     newFile.delete()
                     newFile.parentFile.mkdirs()
                     newFile.withOutputStream { out ->
