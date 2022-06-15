@@ -4,7 +4,7 @@ plugins {
 
 import java.util.zip.ZipFile
 
-archivesBaseName = rootProject.name + "-" + project.name
+archivesBaseName = rootProject.name + "-plugin-compatibilities-forge"
 
 configurations {
     runtimeDependencies
@@ -36,11 +36,38 @@ remapJar {
     classifier null
 }
 
+java {
+    withSourcesJar()
+}
+
+sourcesJar {
+    afterEvaluate {
+        def depSources = project(":jei-compatibility-layer").sourcesJar
+        dependsOn depSources
+        from depSources.archiveFile.map { zipTree(it) }
+    }
+}
+
 processResources {
     filesMatching("META-INF/mods.toml") {
         expand "version": project.version
     }
     inputs.property "version", project.version
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
+
+publishing {
+    publications {
+        mavenREIPluginCompatibilities(MavenPublication) {
+            artifactId = rootProject.name + "-plugin-compatibilities-forge"
+            from components.java
+        }
+    }
 }
 
 unifiedPublishing {
