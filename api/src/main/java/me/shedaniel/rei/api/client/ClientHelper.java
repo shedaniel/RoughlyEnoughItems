@@ -74,6 +74,15 @@ public interface ClientHelper {
     boolean tryCheatingEntry(EntryStack<?> stack);
     
     /**
+     * Tries to cheat stack into the given slot.
+     *
+     * @param stack        the stack to cheat in
+     * @param hotbarSlotId the hotbar slot id
+     * @return whether it failed
+     */
+    boolean tryCheatingEntryTo(EntryStack<?> stack, int hotbarSlotId);
+    
+    /**
      * Gets the mod from an item
      *
      * @param item the item to find
