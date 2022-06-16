@@ -169,6 +169,11 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     }
     
     @Override
+    public boolean acceptsNull() {
+        return false;
+    }
+    
+    @Override
     public CompoundTag save(EntryStack<ItemStack> entry, ItemStack value) {
         return value.save(new CompoundTag());
     }

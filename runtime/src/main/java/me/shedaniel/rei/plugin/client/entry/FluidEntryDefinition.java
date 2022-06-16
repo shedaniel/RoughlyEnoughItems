@@ -179,6 +179,11 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     }
     
     @Override
+    public boolean acceptsNull() {
+        return false;
+    }
+    
+    @Override
     public CompoundTag save(EntryStack<FluidStack> entry, FluidStack value) {
         return value.write(new CompoundTag());
     }

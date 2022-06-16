@@ -34,6 +34,11 @@ public class TypedEntryStack<T> extends AbstractEntryStack<T> {
     public TypedEntryStack(EntryDefinition<T> definition, T value) {
         this.definition = definition;
         this.value = value;
+        if (!definition.acceptsNull()) {
+            if (value == null) {
+                throw new IllegalArgumentException("Value cannot be null for " + definition.getType().getId());
+            }
+        }
     }
     
     @Override
