@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -62,6 +63,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.TextComponent;
@@ -73,6 +75,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -100,6 +103,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     private long lastCheckTime = -1;
     private Display display;
+    private Supplier<DisplayTooltipComponent> displayTooltipComponent;
     
     public EntryWidget(Point point) {
         this(new Rectangle(point.x - 1, point.y - 1, 18, 18));
@@ -310,6 +314,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                     AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
                     if (result.successful) {
                         this.display = display;
+                        this.displayTooltipComponent = Suppliers.memoize(() -> new DisplayTooltipComponent(display));
                         return result.successfulHandler;
                     }
                 }
@@ -333,6 +338,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             }
             
             display = null;
+            displayTooltipComponent = null;
             lastCheckTime = -1;
         }
         
@@ -411,6 +417,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         if (tooltip != null && getTransferHandler() != null
             && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
             tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
+            tooltip.add((ClientTooltipComponent) displayTooltipComponent.get());
         }
         
         if (tooltip != null) {
