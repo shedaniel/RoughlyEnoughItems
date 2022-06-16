@@ -485,8 +485,26 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         if (containsChecked(mouseX, mouseY, false)) {
             LocalPlayer player = minecraft.player;
             if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && player != null && player.containerMenu != null && !player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
-                ClientHelper.getInstance().sendDeletePacket();
-                return true;
+                EntryStack<?> stack = EntryStacks.of(minecraft.player.containerMenu.getCarried().copy());
+                if (stack.getType() != VanillaEntryTypes.ITEM) {
+                    EntryStack<ItemStack> cheatsAs = stack.cheatsAs();
+                    stack = cheatsAs.isEmpty() ? stack : cheatsAs;
+                }
+                boolean canDelete = true;
+                
+                for (Widget child : children()) {
+                    if (child.containsMouse(mouseX, mouseY) && child instanceof EntryWidget widget) {
+                        if (widget.cancelDeleteItems(stack)) {
+                            canDelete = false;
+                            break;
+                        }
+                    }
+                }
+                
+                if (canDelete) {
+                    ClientHelper.getInstance().sendDeletePacket();
+                    return true;
+                }
             }
             for (Widget widget : children())
                 if (widget.mouseReleased(mouseX, mouseY, button))
