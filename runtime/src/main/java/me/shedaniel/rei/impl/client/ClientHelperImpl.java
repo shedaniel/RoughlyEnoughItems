@@ -122,6 +122,10 @@ public class ClientHelperImpl implements ClientHelper {
         return NetworkManager.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET) && NetworkManager.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET) && NetworkManager.canServerReceive(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET);
     }
     
+    public boolean canUseHotbarPackets() {
+        return NetworkManager.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_HOTBAR_PACKET);
+    }
+    
     public boolean canDeleteItems() {
         return hasPermissionToUsePackets() || Minecraft.getInstance().gameMode.hasInfiniteItems();
     }
@@ -223,6 +227,37 @@ public class ClientHelperImpl implements ClientHelper {
             Minecraft.getInstance().player.chat(madeUpCommand);
             return true;
         }
+    }
+    
+    @Override
+    public boolean tryCheatingEntryTo(EntryStack<?> e, int hotbarSlotId) {
+        if (e.getType() != VanillaEntryTypes.ITEM)
+            return false;
+        EntryStack<ItemStack> entry = (EntryStack<ItemStack>) e;
+        if (Minecraft.getInstance().player == null) return false;
+        if (Minecraft.getInstance().player.getInventory() == null) return false;
+        if (Minecraft.getInstance().gameMode != null && Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
+            AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
+            EntryStack<ItemStack> stack = entry.copy();
+            if (menu.getCarried().isEmpty()) {
+                Minecraft.getInstance().player.getInventory().setItem(hotbarSlotId, stack.getValue().copy());
+                Minecraft.getInstance().player.inventoryMenu.broadcastChanges();
+                return true;
+            }
+        }
+        if (ClientHelperImpl.getInstance().canUseHotbarPackets()) {
+            AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
+            EntryStack<ItemStack> stack = entry.copy();
+            if (!menu.getCarried().isEmpty()) {
+                return false;
+            }
+            try {
+                NetworkManager.sendToServer(RoughlyEnoughItemsNetwork.CREATE_ITEMS_HOTBAR_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.getValue().copy()).writeVarInt(hotbarSlotId));
+                return true;
+            } catch (Exception exception) {
+                return false;
+            }
+        } else return false;
     }
     
     @ApiStatus.Internal
