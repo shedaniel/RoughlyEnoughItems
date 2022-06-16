@@ -172,6 +172,15 @@ public interface EntryDefinition<T> {
         return (EntryDefinition<O>) this;
     }
     
+    /**
+     * Returns whether this entry definition accepts {@code null} values.
+     *
+     * @return whether this entry definition accepts {@code null} values
+     */
+    default boolean acceptsNull() {
+        return true;
+    }
+    
     default void fillCrashReport(CrashReport report, CrashReportCategory category, EntryStack<T> entry) {
         category.setDetail("Entry definition class name", () -> getClass().getCanonicalName());
     }
