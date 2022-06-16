@@ -300,58 +300,56 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         final Rectangle configButtonArea = getConfigButtonArea();
         UUID configButtonUuid = UUID.fromString("4357bc36-0a4e-47d2-8e07-ddc220df4a0f");
         widgets.add(configButton = InternalWidgets.wrapLateRenderable(
-                Widgets.withTranslate(
-                        InternalWidgets.concatWidgets(
-                                Widgets.createButton(configButtonArea, NarratorChatListener.NO_TITLE)
-                                        .onClick(button -> {
-                                            if (Screen.hasShiftDown() || Screen.hasControlDown()) {
-                                                ClientHelper.getInstance().setCheating(!ClientHelper.getInstance().isCheating());
-                                                return;
-                                            }
-                                            ConfigManager.getInstance().openConfigScreen(REIRuntime.getInstance().getPreviousScreen());
-                                        })
-                                        .onRender((matrices, button) -> {
-                                            if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && ClientHelperImpl.getInstance().hasOperatorPermission()) {
-                                                button.setTint(ClientHelperImpl.getInstance().hasPermissionToUsePackets() ? 721354752 : 1476440063);
-                                            } else {
-                                                button.removeTint();
-                                            }
-                                            
-                                            boolean isOpened = isMenuOpened(configButtonUuid);
-                                            if (isOpened || !isAnyMenuOpened()) {
-                                                boolean inBounds = (isNotInExclusionZones(PointHelper.getMouseFloatingX(), PointHelper.getMouseFloatingY()) && button.containsMouse(PointHelper.ofMouse())) || isMenuInBounds(configButtonUuid);
-                                                if (isOpened != inBounds) {
-                                                    if (inBounds) {
-                                                        Menu menu = new Menu(button.getBounds(), provideConfigButtonMenu(), false);
-                                                        openMenu(configButtonUuid, menu, button::containsMouse, point -> true);
-                                                    } else {
-                                                        closeOverlayMenu();
-                                                    }
-                                                }
-                                            }
-                                        })
-                                        .focusable(false)
-                                        .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)),
-                                Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-                                    helper.setBlitOffset(helper.getBlitOffset() + 1);
-                                    RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
-                                    helper.blit(matrices, configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
-                                    helper.setBlitOffset(helper.getBlitOffset() - 1);
+                
+                InternalWidgets.concatWidgets(
+                        Widgets.createButton(configButtonArea, NarratorChatListener.NO_TITLE)
+                                .onClick(button -> {
+                                    if (Screen.hasShiftDown() || Screen.hasControlDown()) {
+                                        ClientHelper.getInstance().setCheating(!ClientHelper.getInstance().isCheating());
+                                        return;
+                                    }
+                                    ConfigManager.getInstance().openConfigScreen(REIRuntime.getInstance().getPreviousScreen());
                                 })
-                        ),
-                        0, 0, 600
+                                .onRender((matrices, button) -> {
+                                    if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && ClientHelperImpl.getInstance().hasOperatorPermission()) {
+                                        button.setTint(ClientHelperImpl.getInstance().hasPermissionToUsePackets() ? 721354752 : 1476440063);
+                                    } else {
+                                        button.removeTint();
+                                    }
+                                    
+                                    boolean isOpened = isMenuOpened(configButtonUuid);
+                                    if (isOpened || !isAnyMenuOpened()) {
+                                        boolean inBounds = (isNotInExclusionZones(PointHelper.getMouseFloatingX(), PointHelper.getMouseFloatingY()) && button.containsMouse(PointHelper.ofMouse())) || isMenuInBounds(configButtonUuid);
+                                        if (isOpened != inBounds) {
+                                            if (inBounds) {
+                                                Menu menu = new Menu(button.getBounds(), provideConfigButtonMenu(), false);
+                                                openMenu(configButtonUuid, menu, button::containsMouse, point -> true);
+                                            } else {
+                                                closeOverlayMenu();
+                                            }
+                                        }
+                                    }
+                                })
+                                .focusable(false)
+                                .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)),
+                        Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+                            helper.setBlitOffset(helper.getBlitOffset() + 1);
+                            RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
+                            helper.blit(matrices, configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
+                            helper.setBlitOffset(helper.getBlitOffset() - 1);
+                        })
                 )
         ));
         Rectangle subsetsButtonBounds = getSubsetsButtonBounds();
         if (ConfigObject.getInstance().isSubsetsEnabled()) {
-            widgets.add(InternalWidgets.wrapLateRenderable(Widgets.withTranslate(Widgets.createButton(subsetsButtonBounds, ClientHelperImpl.getInstance().isAprilFools.get() ? Component.translatable("text.rei.tiny_potato") : Component.translatable("text.rei.subsets"))
+            widgets.add(InternalWidgets.wrapLateRenderable(Widgets.createButton(subsetsButtonBounds, ClientHelperImpl.getInstance().isAprilFools.get() ? Component.translatable("text.rei.tiny_potato") : Component.translatable("text.rei.subsets"))
                     .onClick(button -> {
                         proceedOpenMenuOrElse(Menu.SUBSETS, () -> {
                             openMenu(Menu.SUBSETS, Menu.createSubsetsMenuFromRegistry(subsetsButtonBounds), point -> true, point -> true);
                         }, menu -> {
                             closeOverlayMenu();
                         });
-                    }), 0, 0, 600)));
+                    })));
         }
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             widgets.add(Widgets.createClickableLabel(new Point(bounds.x + ((bounds.width - 18) / 2), bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), NarratorChatListener.NO_TITLE, label -> {
@@ -373,7 +371,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             Rectangle area = getCraftableToggleArea();
             ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
             ItemStack icon = new ItemStack(Blocks.CRAFTING_TABLE);
-            this.widgets.add(Widgets.withTranslate(InternalWidgets.wrapLateRenderable(InternalWidgets.concatWidgets(
+            this.widgets.add(InternalWidgets.wrapLateRenderable(InternalWidgets.concatWidgets(
                     Widgets.createButton(area, NarratorChatListener.NO_TITLE)
                             .focusable(false)
                             .onClick(button -> {
@@ -390,7 +388,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                         itemRenderer.renderGuiItem(icon, (int) vector.x(), (int) vector.y());
                         itemRenderer.blitOffset = 0.0F;
                     }))
-            ), 0, 0, 600));
+            ));
         }
         
         widgets.add(draggingStack);
