@@ -822,6 +822,21 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        if (!hasSpace()) return false;
+        if (REIRuntime.getInstance().isOverlayVisible()) {
+            if (choosePageWidget == null) {
+                if (REIRuntimeImpl.getSearchField().keyReleased(keyCode, scanCode, modifiers))
+                    return true;
+                for (GuiEventListener listener : widgets)
+                    if (listener != REIRuntimeImpl.getSearchField() && listener == getFocused() && listener.keyPressed(keyCode, scanCode, modifiers))
+                        return true;
+            }
+        }
+        return false;
+    }
+    
+    @Override
     public boolean charTyped(char character, int modifiers) {
         if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
