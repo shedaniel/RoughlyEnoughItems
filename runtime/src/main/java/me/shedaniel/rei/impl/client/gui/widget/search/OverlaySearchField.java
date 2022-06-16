@@ -304,8 +304,18 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     }
     
     @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        if (this.isVisible() && this.isFocused() && isMain && keybindFocusKey != -1) {
+            keybindFocusTime = -1;
+            keybindFocusKey = -1;
+            return true;
+        }
+        return super.keyReleased(keyCode, scanCode, modifiers);
+    }
+    
+    @Override
     public boolean charTyped(char char_1, int int_1) {
-        if (System.currentTimeMillis() - keybindFocusTime < 1000 && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), keybindFocusKey)) {
+        if (isMain && System.currentTimeMillis() - keybindFocusTime < 1000 && keybindFocusKey != -1 && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), keybindFocusKey)) {
             keybindFocusTime = -1;
             keybindFocusKey = -1;
             return true;
