@@ -424,6 +424,18 @@ public class RoughlyEnoughItemsCoreClient {
                 return EventResult.interruptFalse();
             return EventResult.pass();
         });
+        ClientScreenInputEvent.KEY_RELEASED_PRE.register((minecraftClient, screen, i, i1, i2) -> {
+            if (shouldReturn(screen))
+                return EventResult.pass();
+            if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
+                if (!REIRuntimeImpl.getSearchField().isFocused())
+                    return EventResult.pass();
+            resetFocused(screen);
+            if (getOverlay().keyReleased(i, i1, i2)
+                && resetFocused(screen))
+                return EventResult.interruptFalse();
+            return EventResult.pass();
+        });
     }
     
     private boolean resetFocused(Screen screen) {
