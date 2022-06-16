@@ -47,6 +47,7 @@ import java.util.Collections;
 public class RoughlyEnoughItemsNetwork {
     public static final ResourceLocation DELETE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "delete_item");
     public static final ResourceLocation CREATE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "create_item");
+    public static final ResourceLocation CREATE_ITEMS_HOTBAR_PACKET = new ResourceLocation("roughlyenoughitems", "create_item_hotbar");
     public static final ResourceLocation CREATE_ITEMS_GRAB_PACKET = new ResourceLocation("roughlyenoughitems", "create_item_grab");
     public static final ResourceLocation CREATE_ITEMS_MESSAGE_PACKET = new ResourceLocation("roughlyenoughitems", "ci_msg");
     public static final ResourceLocation MOVE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "move_items");
@@ -96,6 +97,23 @@ public class RoughlyEnoughItemsNetwork {
             menu.setCarried(stack.copy());
             menu.broadcastChanges();
             NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(itemStack.copy()).writeUtf(player.getScoreboardName(), 32767));
+        });
+        NetworkManager.registerReceiver(NetworkManager.c2s(), CREATE_ITEMS_HOTBAR_PACKET, Collections.singletonList(new SplitPacketTransformer()), (buf, context) -> {
+            ServerPlayer player = (ServerPlayer) context.getPlayer();
+            if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {
+                player.displayClientMessage(new TranslatableComponent("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
+                return;
+            }
+            ItemStack stack = buf.readItem();
+            int hotbarSlotId = buf.readVarInt();
+            if (hotbarSlotId >= 0 && hotbarSlotId < 9) {
+                AbstractContainerMenu menu = player.containerMenu;
+                player.getInventory().items.set(hotbarSlotId, stack.copy());
+                menu.broadcastChanges();
+                NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.copy()).writeUtf(player.getScoreboardName(), 32767));
+            } else {
+                player.displayClientMessage(new TranslatableComponent("text.rei.failed_cheat_items"), false);
+            }
         });
         NetworkManager.registerReceiver(NetworkManager.c2s(), MOVE_ITEMS_PACKET, Collections.singletonList(new SplitPacketTransformer()), (packetByteBuf, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
