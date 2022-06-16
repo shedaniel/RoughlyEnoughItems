@@ -164,18 +164,18 @@ public class DisplayEntry extends WidgetWithBounds {
                 
                 if (plusButton.containsMouse(Math.round(mouse.x()), Math.round(mouse.y()))) {
                     result.tooltipRenderer.accept(new Point(mouseX, mouseY), Tooltip::queue);
-                    
-                    if (result.renderer != null) {
-                        poses.pushPose();
-                        if (!stable || !target.equals(bounds)) {
-                            poses.translate(0, 0, 600);
-                        }
-                        poses.translate(xOffset(), yOffset(), 0);
-                        poses.scale(xScale(), yScale(), 1.0F);
-                        
-                        result.renderer.render(poses, mouseX, mouseY, delta, widgets.get(), getBounds(), display);
-                        poses.popPose();
+                }
+                
+                if (result.renderer != null) {
+                    poses.pushPose();
+                    if (!stable || !target.equals(bounds)) {
+                        poses.translate(0, 0, 600);
                     }
+                    poses.translate(xOffset(), yOffset(), 0);
+                    poses.scale(xScale(), yScale(), 1.0F);
+                    
+                    result.renderer.render(poses, mouseX, mouseY, delta, widgets.get(), getBounds(), display);
+                    poses.popPose();
                 }
             } else {
                 poses.popPose();
