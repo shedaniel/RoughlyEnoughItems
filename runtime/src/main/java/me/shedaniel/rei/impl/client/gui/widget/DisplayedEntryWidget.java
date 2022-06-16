@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.item.ItemStack;
@@ -99,5 +100,30 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
             }
         }
         return super.cancelDeleteItems(stack);
+    }
+    
+    @Override
+    public boolean keyPressedIgnoreContains(int keyCode, int scanCode, int modifiers) {
+        if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+            EntryStack<?> entry = getCurrentEntry().copy();
+            if (!entry.isEmpty()) {
+                if (entry.getType() != VanillaEntryTypes.ITEM) {
+                    EntryStack<ItemStack> cheatsAs = entry.cheatsAs();
+                    entry = cheatsAs.isEmpty() ? entry : cheatsAs;
+                }
+                if (entry.getValueType() == ItemStack.class) {
+                    entry.<ItemStack>castValue().setCount(entry.<ItemStack>castValue().getMaxStackSize());
+                    
+                    KeyMapping[] keyHotbarSlots = Minecraft.getInstance().options.keyHotbarSlots;
+                    for (int i = 0; i < keyHotbarSlots.length; i++) {
+                        if (keyHotbarSlots[i].matches(keyCode, scanCode)) {
+                            return ClientHelper.getInstance().tryCheatingEntryTo(entry, i);
+                        }
+                    }
+                }
+            }
+        }
+        
+        return super.keyPressedIgnoreContains(keyCode, scanCode, modifiers);
     }
 }
