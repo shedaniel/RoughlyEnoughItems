@@ -105,7 +105,7 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
-@REIPluginLoader({Dist.CLIENT, Dist.DEDICATED_SERVER})
+@REIPluginLoader(Dist.CLIENT)
 public class JEIPluginDetector implements REIPluginProvider<REIPlugin<?>> {
     private final Supplier<List<REIPluginProvider<?>>> jeiPlugins = Suppliers.memoize(() -> {
         List<REIPluginProvider<?>> plugins = new ArrayList<>();
