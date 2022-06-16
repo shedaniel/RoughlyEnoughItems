@@ -40,6 +40,7 @@ public class ErrorDisplayer {
                     if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
                         RoughlyEnoughItemsState.clear();
                         RoughlyEnoughItemsState.continues();
+                        Minecraft.getInstance().setScreen(null);
                         Minecraft.getInstance().setScreen(parent);
                     } else {
                         Minecraft.getInstance().stop();
