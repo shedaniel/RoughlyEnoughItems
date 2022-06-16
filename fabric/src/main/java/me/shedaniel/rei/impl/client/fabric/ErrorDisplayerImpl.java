@@ -36,6 +36,7 @@ public class ErrorDisplayerImpl {
     
     public static void registerGuiInit(UnaryOperator<Screen> consumer) {
         consumerList.add(screen -> {
+            if (screen != Minecraft.getInstance().screen) return;
             Screen screen1 = consumer.apply(screen);
             if (screen1 != null) {
                 Minecraft minecraft = Minecraft.getInstance();
