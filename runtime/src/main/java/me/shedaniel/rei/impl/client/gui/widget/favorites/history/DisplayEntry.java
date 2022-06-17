@@ -80,6 +80,10 @@ public class DisplayEntry extends WidgetWithBounds {
         return uuid;
     }
     
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+    
     public void markBoundsDirty() {
         widgets.reset();
     }
