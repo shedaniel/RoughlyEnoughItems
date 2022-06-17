@@ -53,6 +53,7 @@ import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.history.DisplayHistoryManager;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.history.DisplayHistoryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.listeners.FavoritesRegionListener;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.listeners.FavoritesSystemRegionListener;
@@ -190,7 +191,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
         boolean draggingDisplay = DraggingContext.getInstance().isDraggingComponent()
                                   && DraggingContext.getInstance().getDragged().get() instanceof Display;
         int topOffsetHeight = 0;
-        this.favoritesBounds = displayHistory.getEntries().isEmpty() && !draggingDisplay
+        this.favoritesBounds = DisplayHistoryManager.INSTANCE.getEntries(displayHistory).isEmpty() && !draggingDisplay
                 ? fullBounds : RectangleUtils.excludeZones(this.fullBounds, Stream.of(displayHistory.createBounds(this.excludedBounds)));
         
         systemRegion.getBounds().setBounds(this.favoritesBounds.x, this.favoritesBounds.y + 1, this.favoritesBounds.width, Math.max(1, systemRegion.scrolling.getMaxScrollHeight()));
