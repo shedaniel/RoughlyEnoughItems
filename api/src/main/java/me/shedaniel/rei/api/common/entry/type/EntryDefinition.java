@@ -149,6 +149,11 @@ public interface EntryDefinition<T> {
      */
     T wildcard(EntryStack<T> entry, T value);
     
+    /**
+     * Returns the cheated stack of this {@link EntryStack}.
+     *
+     * @return the cheated stack of this {@link EntryStack}, or {@code null} if there is no such equivalent
+     */
     @Nullable
     default ItemStack cheatsAs(EntryStack<T> entry, T value) {
         return null;
@@ -163,6 +168,13 @@ public interface EntryDefinition<T> {
     
     Component asFormattedText(EntryStack<T> entry, T value);
     
+    /**
+     * Returns a stream of {@link TagKey} for an entry.
+     * It is not guaranteed that the stream is ordered, or that the {@link TagKey}
+     * contains the registry key.
+     *
+     * @return a stream of {@link TagKey} for an entry
+     */
     Stream<? extends TagKey<?>> getTagsFor(EntryStack<T> entry, T value);
     
     @ApiStatus.NonExtendable
