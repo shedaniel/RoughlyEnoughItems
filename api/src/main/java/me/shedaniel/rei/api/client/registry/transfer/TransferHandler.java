@@ -59,13 +59,33 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         return 0d;
     }
     
+    /**
+     * Handles the transfer of the specified display.
+     * <p>
+     * If {@link Context#isActuallyCrafting()} returns {@code false},
+     * the transfer handler should <b>not</b> instantiate the transfer.
+     *
+     * @param context the context
+     * @return the result of the transfer
+     */
     Result handle(Context context);
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     default int compareTo(TransferHandler o) {
         return Double.compare(getPriority(), o.getPriority());
     }
     
+    /**
+     * Returns the error renderer given the context and the error data.
+     *
+     * @param context the context
+     * @param data    the error data
+     * @return the error renderer, or {@code null}
+     * @deprecated use {@link Result#renderer(TransferHandlerRenderer)} directly instead
+     */
     @Deprecated
     @Environment(EnvType.CLIENT)
     @Nullable
@@ -139,11 +159,26 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         @Deprecated
         Result errorRenderer(Object data);
         
+        /**
+         * Sets the renderer of the transfer, to be used when the mouse hovers the plus button.
+         */
         Result renderer(TransferHandlerRenderer renderer);
         
+        /**
+         * Overrides the tooltip renderer completely.
+         *
+         * @param renderer the renderer
+         * @return the result
+         */
         @ApiStatus.Experimental
         Result overrideTooltipRenderer(BiConsumer<Point, TooltipSink> renderer);
         
+        /**
+         * Adds a line of tooltip to the result.
+         *
+         * @param component the component to add
+         * @return the result
+         */
         Result tooltip(Component component);
         
         /**
