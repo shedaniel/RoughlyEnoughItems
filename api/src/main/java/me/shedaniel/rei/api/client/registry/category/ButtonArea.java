@@ -28,11 +28,18 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 /**
- * The area for the + button.
+ * The provider of the area for the + button.
  */
 @FunctionalInterface
 @Environment(EnvType.CLIENT)
 public interface ButtonArea {
+    /**
+     * Returns the default button area provider.
+     * <p>
+     * The button is placed on the right side of the display, aligned to the bottom.
+     *
+     * @return the default button area provider
+     */
     static ButtonArea defaultArea() {
         return bounds -> new Rectangle(bounds.getMaxX() + 2, bounds.getMaxY() - 16, 10, 10);
     }

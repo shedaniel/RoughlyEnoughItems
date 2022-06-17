@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.client.view;
 
 import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -38,6 +39,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.stream.Stream;
 
+/**
+ * Builder for querying displays.
+ */
 public interface ViewSearchBuilder {
     /**
      * Creates a new {@link ViewSearchBuilder} for looking up displays.
@@ -103,6 +107,8 @@ public interface ViewSearchBuilder {
     
     /**
      * Filters the search to only include {@link Display}s that are recipes for the given {@link EntryStack}.
+     * <p>
+     * This will include any {@link Display}s containing {@link Display#getOutputEntries()} that match for the given {@link EntryStack}.
      *
      * @param stack the stack to filter by
      * @param <T>   the type of the stack
@@ -110,10 +116,18 @@ public interface ViewSearchBuilder {
      */
     <T> ViewSearchBuilder addRecipesFor(EntryStack<T> stack);
     
+    /**
+     * Returns the list of {@link EntryStack}s that will be used to filter the search for the recipes of the given {@link EntryStack}.
+     *
+     * @return the list of {@link EntryStack}s
+     * @see ViewSearchBuilder#addRecipesFor(EntryStack)
+     */
     List<EntryStack<?>> getRecipesFor();
     
     /**
      * Filters the search to only include {@link Display}s that are usages for the given {@link EntryStack}.
+     * <p>
+     * This will include any {@link Display}s containing {@link Display#getInputEntries()} that match for the given {@link EntryStack}.
      *
      * @param stack the stack to filter by
      * @param <T>   the type of the stack
@@ -121,10 +135,27 @@ public interface ViewSearchBuilder {
      */
     <T> ViewSearchBuilder addUsagesFor(EntryStack<T> stack);
     
+    /**
+     * Returns the list of {@link EntryStack}s that will be used to filter the search for the usages of the given {@link EntryStack}.
+     *
+     * @return the list of {@link EntryStack}s
+     * @see ViewSearchBuilder#addUsagesFor(EntryStack)
+     */
     List<EntryStack<?>> getUsagesFor();
     
+    /**
+     * Sets the preferred opened {@link DisplayCategory} for the view.
+     *
+     * @param category the preferred opened {@link DisplayCategory}, or {@code null} to use the first category
+     * @return the {@link ViewSearchBuilder} for chaining
+     */
     ViewSearchBuilder setPreferredOpenedCategory(@Nullable CategoryIdentifier<?> category);
     
+    /**
+     * Returns the preferred opened {@link DisplayCategory} for the view, or {@code null} if none is set.
+     *
+     * @return the preferred opened {@link DisplayCategory}
+     */
     @Nullable
     CategoryIdentifier<?> getPreferredOpenedCategory();
     
@@ -141,17 +172,57 @@ public interface ViewSearchBuilder {
     @ApiStatus.Internal
     Map<DisplayCategory<?>, List<DisplaySpec>> buildMapInternal();
     
+    /**
+     * Returns the stream of {@link DisplaySpec}s that match the search.
+     *
+     * @return the stream of {@link DisplaySpec}s
+     */
     @ApiStatus.Experimental
     Stream<DisplaySpec> streamDisplays();
     
+    /**
+     * Returns whether the search is merging equal {@link DisplaySpec}s.
+     *
+     * @return whether the search is merging equal {@link DisplaySpec}s
+     * @see ConfigObject#doMergeDisplayUnderOne() for the config option
+     * @see DisplayCategory#getDisplayMerger() for the merging strategy
+     */
     boolean isMergingDisplays();
     
+    /**
+     * Sets whether the search is merging equal {@link DisplaySpec}s.
+     *
+     * @param mergingDisplays whether the search is merging equal {@link DisplaySpec}s
+     * @return the {@link ViewSearchBuilder} for chaining
+     * @see ConfigObject#doMergeDisplayUnderOne() for the default config option
+     * @see DisplayCategory#getDisplayMerger() for the merging strategy
+     */
     ViewSearchBuilder mergingDisplays(boolean mergingDisplays);
     
+    /**
+     * Returns whether the search is processing visibility handlers.
+     *
+     * @return whether the search is processing visibility handlers
+     * @see me.shedaniel.rei.api.client.registry.category.visibility.CategoryVisibilityPredicate
+     * @see me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibilityPredicate
+     */
     boolean isProcessingVisibilityHandlers();
     
+    /**
+     * Sets whether the search is processing visibility handlers.
+     *
+     * @param processingVisibilityHandlers whether the search is processing visibility handlers
+     * @return the {@link ViewSearchBuilder} for chaining
+     * @see me.shedaniel.rei.api.client.registry.category.visibility.CategoryVisibilityPredicate
+     * @see me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibilityPredicate
+     */
     ViewSearchBuilder processingVisibilityHandlers(boolean processingVisibilityHandlers);
     
+    /**
+     * Opens the view after the search is complete.
+     *
+     * @return whether the view was opened
+     */
     default boolean open() {
         return ClientHelper.getInstance().openView(this);
     }

@@ -34,6 +34,9 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import java.util.List;
 
 public interface RecipeManagerContext<P extends REIPlugin<?>> extends Reloadable<P> {
+    /**
+     * @return the instance of {@link RecipeManagerContext}
+     */
     static RecipeManagerContext<REIPlugin<?>> getInstance() {
         return PluginManager.getInstance().get(RecipeManagerContext.class);
     }
@@ -44,7 +47,7 @@ public interface RecipeManagerContext<P extends REIPlugin<?>> extends Reloadable
     List<Recipe<?>> getAllSortedRecipes();
     
     /**
-     * Gets the vanilla recipe manager
+     * Returns the vanilla recipe manager
      *
      * @return the recipe manager
      */
