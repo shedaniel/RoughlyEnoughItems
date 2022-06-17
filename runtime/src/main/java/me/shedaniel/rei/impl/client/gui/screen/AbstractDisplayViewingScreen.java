@@ -236,6 +236,12 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             @Override
             public Tooltip apply(Tooltip tooltip) {
                 if (widget.getEntries().size() > 1) {
+                    for (Tooltip.Entry entry : tooltip.entries()) {
+                        if (entry.isTooltipComponent() && entry.getAsTooltipComponent() instanceof TooltipProcessor) {
+                            return tooltip;
+                        }
+                    }
+                    
                     tooltip.add((ClientTooltipComponent) this);
                 }
                 return tooltip;
