@@ -39,14 +39,15 @@ import java.util.List;
 
 /**
  * A view that displays a {@link Display}.
+ * <p>
+ * This view can be modified externally with {@link me.shedaniel.rei.api.client.registry.category.extension.CategoryExtensionProvider}.
  *
  * @param <T> the type of display
  */
 @ApiStatus.Experimental
 public interface DisplayCategoryView<T extends Display> {
     /**
-     * Returns the recipe renderer for the display, used
-     * in {@link me.shedaniel.rei.impl.client.gui.screen.CompositeDisplayViewingScreen} for rendering simple recipes.
+     * Returns the recipe renderer for the display, used in composite display viewing screen.
      *
      * @param display the display to render
      * @return the display renderer

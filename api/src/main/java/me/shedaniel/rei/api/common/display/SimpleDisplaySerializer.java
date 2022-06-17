@@ -29,7 +29,15 @@ import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
 
+/**
+ * A simple display serializer that serializes both the input and output of a display.
+ *
+ * @param <D> the display type
+ */
 public interface SimpleDisplaySerializer<D extends Display> extends DisplaySerializer<D> {
+    /**
+     * {@inheritDoc}
+     */
     @Override
     default CompoundTag save(CompoundTag tag, D display) {
         tag.put("input", EntryIngredients.save(getInputIngredients(display)));
@@ -38,13 +46,32 @@ public interface SimpleDisplaySerializer<D extends Display> extends DisplaySeria
         return tag;
     }
     
+    /**
+     * Returns the input ingredients of the display for serialization.
+     *
+     * @param display the display
+     * @return the input ingredients
+     */
     default List<EntryIngredient> getInputIngredients(D display) {
         return display.getInputEntries();
     }
     
+    /**
+     * Returns the output ingredients of the display for serialization.
+     *
+     * @param display the display
+     * @return the output ingredients
+     */
     default List<EntryIngredient> getOutputIngredients(D display) {
         return display.getOutputEntries();
     }
     
+    /**
+     * Serializes the extra data of the display into the tag.
+     *
+     * @param tag     the tag
+     * @param display the display
+     * @return the tag
+     */
     CompoundTag saveExtra(CompoundTag tag, D display);
 }

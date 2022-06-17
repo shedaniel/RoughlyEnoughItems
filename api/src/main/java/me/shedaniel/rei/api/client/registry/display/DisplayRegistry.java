@@ -70,13 +70,12 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
     /**
      * @return the instance of {@link DisplayRegistry}
      */
-    
     static DisplayRegistry getInstance() {
         return PluginManager.getClientInstance().get(DisplayRegistry.class);
     }
     
     /**
-     * Gets the total display count registered
+     * Returns the total display count
      *
      * @return the recipe count
      */
