@@ -66,8 +66,8 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class ViewsImpl implements Views {
@@ -83,12 +83,13 @@ public class ViewsImpl implements Views {
         Set<CategoryIdentifier<?>> filteringCategories = builder.getFilteringCategories();
         List<EntryStack<?>> recipesForStacks = builder.getRecipesFor();
         List<EntryStack<?>> usagesForStacks = builder.getUsagesFor();
-        recipesForStacks = Stream.concat(recipesForStacks.stream(), recipesForStacks.stream().map(EntryStack::wildcard))
-                .distinct()
-                .collect(Collectors.toList());
-        usagesForStacks = Stream.concat(usagesForStacks.stream(), usagesForStacks.stream().map(EntryStack::wildcard))
-                .distinct()
-                .collect(Collectors.toList());
+        Function<EntryStack<?>, Collection<EntryStack<?>>> wildcardFunction = stack -> {
+            EntryStack<?> wildcard = stack.wildcard();
+            if (EntryStacks.equalsFuzzy(wildcard, stack)) return Collections.emptyList();
+            return Collections.singletonList(wildcard);
+        };
+        List<EntryStack<?>> recipesForStacksWildcard = CollectionUtils.flatMap(recipesForStacks, wildcardFunction);
+        List<EntryStack<?>> usagesForStacksWildcard = CollectionUtils.flatMap(usagesForStacks, wildcardFunction);
         DisplayRegistry displayRegistry = DisplayRegistry.getInstance();
         
         Map<DisplayCategory<?>, List<Display>> result = Maps.newLinkedHashMap();
@@ -126,7 +127,24 @@ public class ViewsImpl implements Views {
                     }
                 }
             }
-            for (EntryStack<?> usagesFor : usagesForStacks) {
+            if (set.isEmpty() && (!recipesForStacksWildcard.isEmpty() || !usagesForStacksWildcard.isEmpty())) {
+                for (Display display : allRecipesFromCategory) {
+                    if (processingVisibilityHandlers && !displayRegistry.isDisplayVisible(display)) continue;
+                    if (!recipesForStacksWildcard.isEmpty()) {
+                        if (isRecipesFor(recipesForStacksWildcard, display)) {
+                            set.add(display);
+                            continue;
+                        }
+                    }
+                    if (!usagesForStacksWildcard.isEmpty()) {
+                        if (isUsagesFor(usagesForStacksWildcard, display)) {
+                            set.add(display);
+                            continue;
+                        }
+                    }
+                }
+            }
+            for (EntryStack<?> usagesFor : Iterables.concat(usagesForStacks, usagesForStacksWildcard)) {
                 if (isStackWorkStationOfCategory(categoryConfiguration, usagesFor)) {
                     if (processingVisibilityHandlers) {
                         set.addAll(CollectionUtils.filterToSet(allRecipesFromCategory, displayRegistry::isDisplayVisible));
