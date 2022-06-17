@@ -61,6 +61,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     private final FavoritesListWidget parent;
     private final Rectangle bounds = new Rectangle();
     private final NumberAnimator<Double> height;
+    private boolean ignoreNextMouse;
     
     private final NumberAnimator<Double> scroll = ValueAnimator.ofDouble();
     
@@ -263,7 +264,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         for (DisplayEntry entry : DisplayHistoryManager.INSTANCE.getEntries(this)) {
-            if (entry.mouseClicked(mouseX, mouseY, button)) {
+            if (!ignoreNextMouse && entry.mouseClicked(mouseX, mouseY, button)) {
                 return true;
             }
         }
@@ -273,6 +274,11 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (ignoreNextMouse) {
+            ignoreNextMouse = false;
+            return true;
+        }
+        
         Collection<DisplayEntry> entries = DisplayHistoryManager.INSTANCE.getEntries(this);
         
         for (DisplayEntry entry : entries) {
@@ -343,6 +349,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
             Point pos = context.getCurrentPosition();
             if (containsMouse(pos)) {
                 addDisplay(context.getCurrentBounds().clone(), display);
+                ignoreNextMouse = true;
                 return true;
             } else {
                 return false;
