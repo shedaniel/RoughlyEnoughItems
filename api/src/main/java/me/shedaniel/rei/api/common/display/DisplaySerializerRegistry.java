@@ -62,9 +62,31 @@ public interface DisplaySerializerRegistry extends Reloadable<REIPlugin<?>> {
      */
     <D extends Display> void registerNotSerializable(CategoryIdentifier<D> categoryId);
     
+    /**
+     * Returns whether a {@link DisplaySerializer} is registered for the given {@link CategoryIdentifier}.
+     *
+     * @param categoryId the identifier of the category
+     * @param <D>        the type of the display
+     * @return whether a serializer is registered for the given category
+     */
     <D extends Display> boolean hasSerializer(CategoryIdentifier<D> categoryId);
     
+    /**
+     * Serializes the display into a tag.
+     *
+     * @param tag     the tag to serialize into
+     * @param display the display to serialize
+     * @return the tag
+     * @see DisplaySerializer#save(CompoundTag, Display)
+     */
     <D extends Display> CompoundTag save(D display, CompoundTag tag);
     
+    /**
+     * Deserializes the display from a tag.
+     *
+     * @param tag the tag to deserialize from
+     * @return the display
+     * @see DisplaySerializer#read(CompoundTag)
+     */
     <D extends Display> D read(CategoryIdentifier<? extends D> categoryId, CompoundTag tag);
 }
