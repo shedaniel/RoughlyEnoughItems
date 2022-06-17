@@ -31,11 +31,34 @@ import net.minecraft.nbt.CompoundTag;
  * @param <T> the type of object to serialize
  */
 public interface EntrySerializer<T> {
+    /**
+     * Whether this serializer supports saving.
+     *
+     * @return whether this serializer supports saving
+     */
     boolean supportSaving();
     
+    /**
+     * Whether this serializer supports reading.
+     *
+     * @return whether this serializer supports reading
+     */
     boolean supportReading();
     
+    /**
+     * Serializes the given object into a {@link CompoundTag}.
+     *
+     * @param entry the entry stack
+     * @param value the value to serialize
+     * @return the serialized tag
+     */
     CompoundTag save(EntryStack<T> entry, T value);
     
+    /**
+     * Deserializes the given tag into an object.
+     *
+     * @param tag the tag to deserialize
+     * @return the deserialized object
+     */
     T read(CompoundTag tag);
 }

@@ -29,11 +29,33 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * An input ingredient is a {@link EntryIngredient} and index pair.
+ * <p>
+ * The index is the index of the ingredient slot-wise, and not necessarily the index of the ingredient in the list of inputs.
+ *
+ * @param <T> the type of entry
+ */
 public interface InputIngredient<T> {
+    /**
+     * Creates an empty input ingredient at the given index.
+     *
+     * @param index the index
+     * @param <T>   the type of entry
+     * @return the empty input ingredient
+     */
     static <T> InputIngredient<T> empty(int index) {
         return of(index, Collections.emptyList());
     }
     
+    /**
+     * Creates an input ingredient at the given index.
+     *
+     * @param index      the index
+     * @param ingredient the ingredient
+     * @param <T>        the type of entry
+     * @return the input ingredient
+     */
     static <T> InputIngredient<T> of(int index, List<T> ingredient) {
         return new InputIngredient<>() {
             @Override
@@ -48,6 +70,14 @@ public interface InputIngredient<T> {
         };
     }
     
+    /**
+     * Returns an input ingredient with only the stacks matching given entry type.
+     *
+     * @param ingredient the original ingredient
+     * @param type       the entry type
+     * @param <T>        the type of entry
+     * @return the input ingredient
+     */
     static <T> InputIngredient<T> withType(InputIngredient<EntryStack<?>> ingredient, EntryType<T> type) {
         return new InputIngredient<>() {
             @SuppressWarnings("RedundantTypeArguments")
@@ -66,7 +96,19 @@ public interface InputIngredient<T> {
         };
     }
     
+    /**
+     * Returns the ingredient.
+     *
+     * @return the ingredient
+     */
     List<T> get();
     
+    /**
+     * Returns the index.
+     * <p>
+     * This is the index of the ingredient slot-wise, and not necessarily the index of the ingredient in the list of inputs.
+     *
+     * @return the index
+     */
     int getIndex();
 }

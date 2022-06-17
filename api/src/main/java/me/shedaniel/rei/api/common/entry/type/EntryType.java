@@ -24,26 +24,51 @@
 package me.shedaniel.rei.api.common.entry.type;
 
 import me.shedaniel.rei.api.client.entry.type.BuiltinClientEntryTypes;
+import me.shedaniel.rei.api.common.util.Identifiable;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
  * A type of entry, used to defer an {@link EntryDefinition} once loaded into the game.
+ * <p>
+ * There should only be one instance of each {@link EntryType} in the game,
+ * reference equality is used to determine if two {@link EntryType}s are the same.
  *
  * @param <T> the type of entry
  * @see BuiltinEntryTypes
  * @see VanillaEntryTypes
  * @see BuiltinClientEntryTypes
+ * @see EntryTypeRegistry
  */
 @ApiStatus.NonExtendable
-public interface EntryType<T> {
+public interface EntryType<T> extends Identifiable {
+    /**
+     * Creates a deferred {@link EntryType} from the given {@link ResourceLocation}.
+     * It is crucial that the {@link ResourceLocation} is the same as the one used to register the {@link EntryDefinition}.
+     *
+     * @param id  the identifier used to resolve the {@link EntryDefinition}
+     * @param <T> the type of entry
+     * @return the deferred {@link EntryType}
+     */
     static <T> EntryType<T> deferred(ResourceLocation id) {
         return Internals.deferEntryType(id).cast();
     }
     
     ResourceLocation getId();
     
+    @Override
+    default ResourceLocation getIdentifier() {
+        return getId();
+    }
+    
+    /**
+     * Resolves the {@link EntryDefinition} for this {@link EntryType} using {@link EntryTypeRegistry}.
+     * It is not expected that the {@link EntryDefinition} will be different once resolved.
+     *
+     * @return the resolved {@link EntryDefinition}
+     * @throws NullPointerException if the {@link EntryDefinition} is not found
+     */
     EntryDefinition<T> getDefinition();
     
     @ApiStatus.NonExtendable
