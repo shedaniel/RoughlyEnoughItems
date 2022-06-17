@@ -68,6 +68,7 @@ public class DisplayHistoryManager {
                     if (CategoryRegistry.getInstance().tryGet(categoryIdentifier).isPresent()) {
                         Display display = DisplaySerializerRegistry.getInstance().read(categoryIdentifier, tag.getCompound("DisplayHistoryData"));
                         DisplayEntry newEntry = new DisplayEntry(parent, display, null);
+                        newEntry.setUuid(UUID.fromString(uuid));
                         entries.put(newEntry.getUuid().toString(), newEntry);
                     }
                 } catch (Exception e) {
@@ -109,7 +110,7 @@ public class DisplayHistoryManager {
         compoundTag.putBoolean("DisplayHistoryContains", false);
         compoundTag.putString("DisplayHistoryUUID", newEntry.getUuid().toString());
         compoundTag.putString("DisplayHistoryCategory", display.getCategoryIdentifier().toString());
-        displayHistory.add(compoundTag);
+        displayHistory.add(0, compoundTag);
         
         save();
     }
