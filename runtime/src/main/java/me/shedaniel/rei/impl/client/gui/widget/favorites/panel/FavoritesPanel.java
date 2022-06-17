@@ -98,7 +98,7 @@ public class FavoritesPanel extends WidgetWithBounds {
             matrices.translate(0, -scroller.scrollAmount(), 0);
             int y = innerBounds.y;
             for (FavoritesPanelRow row : rows.get()) {
-                row.render(matrices, innerBounds.x, y, innerBounds.width, row.getRowHeight(), mouseX, mouseY + scroller.scrollAmountInt(), delta);
+                row.render(matrices, innerBounds, innerBounds.x, y, innerBounds.width, row.getRowHeight(), mouseX, mouseY + scroller.scrollAmountInt(), delta);
                 y += row.getRowHeight();
             }
             matrices.popPose();
