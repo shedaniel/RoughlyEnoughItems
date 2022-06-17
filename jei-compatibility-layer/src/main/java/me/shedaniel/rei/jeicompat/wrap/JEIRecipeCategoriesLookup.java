@@ -23,32 +23,73 @@
 
 package me.shedaniel.rei.jeicompat.wrap;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
+import lombok.experimental.ExtensionMethod;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IRecipeCategoriesLookup;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Stream;
 
+@ExtensionMethod(JEIPluginDetector.class)
 public class JEIRecipeCategoriesLookup implements IRecipeCategoriesLookup {
+    private Set<CategoryIdentifier<?>> categoryFilter = Set.of();
+    private Set<CategoryIdentifier<?>> focusFilter = Set.of();
+    private boolean includeHidden = false;
+    
     @Override
     public IRecipeCategoriesLookup limitTypes(Collection<RecipeType<?>> recipeTypes) {
-        return null;
+        Preconditions.checkNotNull(recipeTypes, "recipeTypes");
+        this.categoryFilter = CollectionUtils.mapToSet(recipeTypes, type -> type.categoryId());
+        return this;
     }
     
     @Override
     public IRecipeCategoriesLookup limitFocus(Collection<? extends IFocus<?>> focuses) {
-        return null;
+        Preconditions.checkNotNull(focuses, "focuses");
+        if (!focuses.isEmpty()) {
+            ViewSearchBuilder builder = ViewSearchBuilder.builder();
+            for (IFocus<?> focus : focuses) {
+                EntryStack<?> stack = focus.getTypedValue().unwrapStack();
+                if (focus.getRole() == RecipeIngredientRole.INPUT || focus.getRole() == RecipeIngredientRole.CATALYST) {
+                    builder.addUsagesFor(stack);
+                } else {
+                    builder.addRecipesFor(stack);
+                }
+            }
+            this.focusFilter = CollectionUtils.mapToSet(builder.buildMapInternal().keySet(), DisplayCategory::getCategoryIdentifier);
+        }
+        return this;
     }
     
     @Override
     public IRecipeCategoriesLookup includeHidden() {
-        return null;
+        this.includeHidden = true;
+        return this;
     }
     
     @Override
     public Stream<IRecipeCategory<?>> get() {
-        return null;
+        Stream<? extends IRecipeCategory<?>> stream = CollectionUtils.filterAndMap(CategoryRegistry.getInstance(), cat -> {
+            if (!includeHidden && CategoryRegistry.getInstance().isCategoryInvisible(cat.getCategory())) {
+                return false;
+            }
+            
+            Set<CategoryIdentifier<?>> filter = Sets.intersection(categoryFilter, focusFilter);
+            return filter.isEmpty() || filter.contains(cat.getCategoryIdentifier());
+        }, cat -> cat.getCategory().wrapCategory()).stream();
+        return (Stream<IRecipeCategory<?>>) stream;
     }
 }

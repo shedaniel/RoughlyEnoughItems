@@ -138,6 +138,22 @@ public class CollectionUtils {
         }
         return l;
     }
+
+    public static <T, R> Set<R> mapToSet(Collection<T> list, Function<T, R> function) {
+        Set<R> l = new HashSet<>(list.size() + 1);
+        for (T t : list) {
+            l.add(function.apply(t));
+        }
+        return l;
+    }
+
+    public static <T, R> Set<R> mapToSet(Iterable<T> list, Function<T, R> function) {
+        Set<R> l = new HashSet<>();
+        for (T t : list) {
+            l.add(function.apply(t));
+        }
+        return l;
+    }
     
     public static <T, R> List<R> mapIndexed(Iterable<T> list, IndexedFunction<T, R> function) {
         List<R> l = list instanceof Collection ? new ArrayList<>(((Collection<T>) list).size() + 1) : new ArrayList<>();

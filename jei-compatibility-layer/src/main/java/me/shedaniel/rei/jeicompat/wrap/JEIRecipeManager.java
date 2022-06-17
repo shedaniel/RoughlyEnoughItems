@@ -131,12 +131,12 @@ public enum JEIRecipeManager implements IRecipeManager {
     
     @Override
     public IRecipeCategoriesLookup createRecipeCategoryLookup() {
-        return null;
+        return new JEIRecipeCategoriesLookup();
     }
     
     @Override
     public IRecipeCatalystLookup createRecipeCatalystLookup(RecipeType<?> recipeType) {
-        return null;
+        return new JEICatalystLookup(recipeType.categoryId());
     }
     
     @Override
