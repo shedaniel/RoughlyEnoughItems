@@ -28,6 +28,7 @@ import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Point;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
@@ -81,7 +82,7 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
     }
     
     @Override
-    public void render(PoseStack matrices, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
         this.lastY = y;
         int entrySize = entrySize();
         boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
