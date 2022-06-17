@@ -345,7 +345,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             widgets.add(InternalWidgets.wrapLateRenderable(Widgets.createButton(subsetsButtonBounds, ClientHelperImpl.getInstance().isAprilFools.get() ? Component.translatable("text.rei.tiny_potato") : Component.translatable("text.rei.subsets"))
                     .onClick(button -> {
                         proceedOpenMenuOrElse(Menu.SUBSETS, () -> {
-                            openMenu(Menu.SUBSETS, Menu.createSubsetsMenuFromRegistry(subsetsButtonBounds), point -> true, point -> true);
+                            openMenu(Menu.SUBSETS, Menu.createSubsetsMenuFromRegistry(subsetsButtonBounds), point -> true, point -> ConfigObject.getInstance().isSubsetsEnabled());
                         }, menu -> {
                             closeOverlayMenu();
                         });
