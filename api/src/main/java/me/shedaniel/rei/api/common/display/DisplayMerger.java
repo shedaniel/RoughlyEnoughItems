@@ -23,8 +23,29 @@
 
 package me.shedaniel.rei.api.common.display;
 
+import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+
+/**
+ * A merger used to determine whether two displays can be merged together.
+ *
+ * @param <T> the type of display
+ * @see DisplayCategory#getDisplayMerger() for where to return this
+ * @see DisplayCategory#getContentMerger() for a basic merger based on checking the inputs and outputs
+ */
 public interface DisplayMerger<T extends Display> {
+    /**
+     * Returns whether the two displays can be merged together.
+     *
+     * @param first  the first display
+     * @param second the second display
+     * @return whether the two displays can be merged together
+     */
     boolean canMerge(T first, T second);
     
+    /**
+     * Returns the hash code of a display.
+     *
+     * @param display the display
+     */
     int hashOf(T display);
 }

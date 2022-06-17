@@ -30,6 +30,14 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
 
+/**
+ * The provider to transform the {@link DisplayCategoryView}s.
+ * <p>
+ * Plugins may use this to alter how a display looks, for example to add a custom widget.
+ *
+ * @param <T> the type of the display
+ * @see me.shedaniel.rei.api.client.registry.category.CategoryRegistry.CategoryConfiguration#registerExtension(CategoryExtensionProvider)
+ */
 @FunctionalInterface
 @ApiStatus.Experimental
 @Environment(EnvType.CLIENT)
