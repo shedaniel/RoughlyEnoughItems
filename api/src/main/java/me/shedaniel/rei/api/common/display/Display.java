@@ -41,13 +41,16 @@ import java.util.Optional;
 
 /**
  * A display, holds ingredients and information for {@link me.shedaniel.rei.api.client.registry.display.DisplayCategory}
- * to setup widgets for.
+ * to set-up widgets for.
  *
  * @see me.shedaniel.rei.api.common.display.basic.BasicDisplay
  * @see me.shedaniel.rei.api.client.registry.display.DisplayRegistry
  */
 public interface Display extends DisplaySpec {
     /**
+     * Returns the list of inputs for this display. This only affects the stacks resolving for the display,
+     * and not necessarily the stacks that are displayed.
+     *
      * @return a list of inputs
      */
     List<EntryIngredient> getInputEntries();
@@ -57,26 +60,37 @@ public interface Display extends DisplaySpec {
         return getInputEntries();
     }
     
+    /**
+     * Returns the list of inputs for this display, aligned for the menu. This only affects the stacks resolving for the display,
+     * and not necessarily the stacks that are displayed.
+     * <p>
+     * Each ingredient is also provided with the corresponding index slot-wise. The order of the list does not matter.
+     *
+     * @return a list of inputs
+     */
     default List<InputIngredient<EntryStack<?>>> getInputIngredients(MenuSerializationContext<?, ?, ?> context, MenuInfo<?, ?> info, boolean fill) {
         return CollectionUtils.mapIndexed(getInputEntries(context, info, fill), InputIngredient::of);
     }
     
     /**
+     * Returns the list of outputs for this display. This only affects the stacks resolving for the display,
+     * and not necessarily the stacks that are displayed.
+     *
      * @return a list of outputs
      */
     List<EntryIngredient> getOutputEntries();
     
     /**
-     * Gets the required items used in craftable filters
+     * Returns the list of required inputs for this display. This only affects the craftable filter.
      *
-     * @return the list of required items
+     * @return a list of required inputs
      */
     default List<EntryIngredient> getRequiredEntries() {
         return getInputEntries();
     }
     
     /**
-     * Gets the display display category identifier
+     * Returns the identifier of the category this display belongs to.
      *
      * @return the identifier of the category
      */

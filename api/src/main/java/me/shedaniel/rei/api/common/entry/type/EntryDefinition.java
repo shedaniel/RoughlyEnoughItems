@@ -151,6 +151,11 @@ public interface EntryDefinition<T> {
         return normalize(entry, value);
     }
     
+    /**
+     * Returns the cheated stack of this {@link EntryStack}.
+     *
+     * @return the cheated stack of this {@link EntryStack}, or {@code null} if there is no such equivalent
+     */
     @Nullable
     default ItemStack cheatsAs(EntryStack<T> entry, T value) {
         return null;
