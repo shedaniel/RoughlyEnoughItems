@@ -45,18 +45,17 @@ import java.util.stream.Stream;
 
 @ExtensionMethod(JEIPluginDetector.class)
 public class JEIRecipeCategoriesLookup implements IRecipeCategoriesLookup {
-
     private Set<CategoryIdentifier<?>> categoryFilter = Set.of();
     private Set<CategoryIdentifier<?>> focusFilter = Set.of();
     private boolean includeHidden = false;
-
+    
     @Override
     public IRecipeCategoriesLookup limitTypes(Collection<RecipeType<?>> recipeTypes) {
         Preconditions.checkNotNull(recipeTypes, "recipeTypes");
         this.categoryFilter = CollectionUtils.mapToSet(recipeTypes, type -> type.categoryId());
         return this;
     }
-
+    
     @Override
     public IRecipeCategoriesLookup limitFocus(Collection<? extends IFocus<?>> focuses) {
         Preconditions.checkNotNull(focuses, "focuses");
@@ -74,20 +73,20 @@ public class JEIRecipeCategoriesLookup implements IRecipeCategoriesLookup {
         }
         return this;
     }
-
+    
     @Override
     public IRecipeCategoriesLookup includeHidden() {
         this.includeHidden = true;
         return this;
     }
-
+    
     @Override
     public Stream<IRecipeCategory<?>> get() {
         Stream<? extends IRecipeCategory<?>> stream = CollectionUtils.filterAndMap(CategoryRegistry.getInstance(), cat -> {
             if (!includeHidden && CategoryRegistry.getInstance().isCategoryInvisible(cat.getCategory())) {
                 return false;
             }
-
+            
             Set<CategoryIdentifier<?>> filter = Sets.intersection(categoryFilter, focusFilter);
             return filter.isEmpty() || filter.contains(cat.getCategoryIdentifier());
         }, cat -> cat.getCategory().wrapCategory()).stream();
