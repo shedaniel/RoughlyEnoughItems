@@ -23,12 +23,10 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.favorites.history;
 
-import com.google.common.collect.Iterables;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
-import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -50,12 +48,11 @@ import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -65,7 +62,6 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     private final Rectangle bounds = new Rectangle();
     private final NumberAnimator<Double> height;
     
-    private final List<DisplayEntry> entries = new ArrayList<>();
     private final NumberAnimator<Double> scroll = ValueAnimator.ofDouble();
     
     public DisplayHistoryWidget(FavoritesListWidget parent) {
@@ -85,13 +81,10 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
         return bounds;
     }
     
-    public List<DisplayEntry> getEntries() {
-        return entries;
-    }
-    
     @Override
     public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
         Rectangle fullBounds = parent.excludedBounds;
+        List<DisplayEntry> entries = new ArrayList<>(DisplayHistoryManager.INSTANCE.getEntries(this));
         if (updateBounds(fullBounds)) {
             for (DisplayEntry entry : entries) {
                 entry.markBoundsDirty();
@@ -212,7 +205,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
         this.scroll.update(delta);
         
         if (this.scroll.target() >= 0 && this.scroll.target() <= getMaxScrollDist()) {
-            if (entries.size() > 1) {
+            if (DisplayHistoryManager.INSTANCE.getEntries(this).size() > 1) {
                 int before = (int) (Math.floor(this.scroll.target() / getBounds().getWidth()) * getBounds().getWidth());
                 int after = (int) (Math.ceil(this.scroll.target() / getBounds().getWidth()) * getBounds().getWidth());
                 if (before <= this.scroll.target() && after >= this.scroll.target()) {
@@ -229,6 +222,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     }
     
     public int getContentHeight() {
+        Collection<DisplayEntry> entries = DisplayHistoryManager.INSTANCE.getEntries(this);
         if (entries.isEmpty()) return 0;
         return getBounds().getWidth() * entries.size();
     }
@@ -244,6 +238,8 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        Collection<DisplayEntry> entries = DisplayHistoryManager.INSTANCE.getEntries(this);
+        
         if (containsMouse(mouseX, mouseY)) {
             for (DisplayEntry entry : entries) {
                 if (!entry.isStable()) {
@@ -266,7 +262,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        for (DisplayEntry entry : entries) {
+        for (DisplayEntry entry : DisplayHistoryManager.INSTANCE.getEntries(this)) {
             if (entry.mouseClicked(mouseX, mouseY, button)) {
                 return true;
             }
@@ -277,6 +273,8 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        Collection<DisplayEntry> entries = DisplayHistoryManager.INSTANCE.getEntries(this);
+        
         for (DisplayEntry entry : entries) {
             if (entry.mouseReleased(mouseX, mouseY, button)) {
                 return true;
@@ -290,7 +288,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
                 double xOffset = -this.scroll.value();
                 for (DisplayEntry entry : entries) {
                     if (entry.isStable() && entry.getBounds().contains(mouse.x + xOffset, mouse.y)) {
-                        entries.remove(entry);
+                        DisplayHistoryManager.INSTANCE.removeEntry(entry);
                         scroll.setAs(scroll.target() - getBounds().getWidth());
                         scroll.setTo(scroll.target() + getBounds().getWidth(), 800);
                         DisplayCompositeWidget.DisplayDraggableComponent component = new DisplayCompositeWidget.DisplayDraggableComponent(Widgets.concat(entry.getWidgets()), entry.getDisplay(),
@@ -308,6 +306,8 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        Collection<DisplayEntry> entries = DisplayHistoryManager.INSTANCE.getEntries(this);
+        
         for (DisplayEntry entry : entries) {
             if (entry.keyPressed(keyCode, scanCode, modifiers)) {
                 return true;
@@ -321,7 +321,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
                 double xOffset = -this.scroll.value();
                 for (DisplayEntry entry : entries) {
                     if (entry.isStable() && entry.getBounds().contains(mouse.x + xOffset, mouse.y)) {
-                        entries.remove(entry);
+                        DisplayHistoryManager.INSTANCE.removeEntry(entry);
                         scroll.setAs(scroll.target() - getBounds().getWidth());
                         scroll.setTo(scroll.target() + getBounds().getWidth(), 800);
                         DisplayCompositeWidget.DisplayDraggableComponent component = new DisplayCompositeWidget.DisplayDraggableComponent(Widgets.concat(entry.getWidgets()), entry.getDisplay(),
@@ -350,14 +350,10 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
         }) ? DraggedAcceptorResult.CONSUMED : DraggedAcceptorResult.PASS;
     }
     
-    public void addDisplay(Rectangle bounds, Display display) {
-        this.entries.removeIf(displayEntry -> displayEntry.getDisplay() == display);
-        this.entries.add(0, new DisplayEntry(this, display, bounds));
+    public void addDisplay(@Nullable Rectangle bounds, Display display) {
+        DisplayHistoryManager.INSTANCE.addEntry(this, bounds, display);
         this.scroll.setAs(this.scroll.target() + getBounds().getWidth());
         this.scroll.setTo(0, 800);
-        while (entries.size() >= 10) {
-            entries.remove(Iterables.get(entries, entries.size() - 1));
-        }
     }
     
     @Override
@@ -365,6 +361,8 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     public DraggableComponent<Display> getHovered(DraggingContext<Screen> context, double mouseX, double mouseY) {
         if (containsMouse(mouseX, mouseY)) {
             double xOffset = -this.scroll.value();
+            Collection<DisplayEntry> entries = DisplayHistoryManager.INSTANCE.getEntries(this);
+            
             for (DisplayEntry entry : entries) {
                 if (entry.isStable() && entry.getBounds().contains(mouseX + xOffset, mouseY)) {
                     return new DisplayCompositeWidget.DisplayDraggableComponent(Widgets.concat(entry.getWidgets()), entry.getDisplay(),
@@ -372,7 +370,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
                             new Rectangle(0, 0, entry.getSize().width, entry.getSize().height)) {
                         @Override
                         public void drag() {
-                            entries.remove(entry);
+                            DisplayHistoryManager.INSTANCE.removeEntry(entry);
                             scroll.setAs(scroll.target() - getBounds().getWidth());
                             scroll.setTo(scroll.target() + getBounds().getWidth(), 800);
                         }
