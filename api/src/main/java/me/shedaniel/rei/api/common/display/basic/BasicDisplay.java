@@ -35,6 +35,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * A basic implementation of a display, consisting of a list of inputs, a list of outputs
+ * and a possible display location.
+ */
 public abstract class BasicDisplay implements Display {
     protected List<EntryIngredient> inputs;
     protected List<EntryIngredient> outputs;
@@ -50,39 +54,81 @@ public abstract class BasicDisplay implements Display {
         this.location = location;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<EntryIngredient> getInputEntries() {
         return inputs;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<EntryIngredient> getOutputEntries() {
         return outputs;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Optional<ResourceLocation> getDisplayLocation() {
         return location;
     }
     
+    /**
+     * A basic serializer for {@link BasicDisplay}s.
+     *
+     * @param <P> the type of the display
+     */
     public static class Serializer<P extends BasicDisplay> implements SimpleDisplaySerializer<P> {
         protected final Constructor<P> constructor;
         protected final ExtraSerializer<P> extraSerializer;
         protected EntryIngredientsProvider<P> inputEntries = EntryIngredientsProvider.pass();
         protected EntryIngredientsProvider<P> outputEntries = EntryIngredientsProvider.pass();
         
+        /**
+         * Creates a new serializer with a constructor for list of inputs, list of outputs and a possible location.
+         *
+         * @param constructor the constructor for the display
+         * @param <P>         the type of the display
+         * @return the serializer
+         */
         public static <P extends BasicDisplay> Serializer<P> ofSimple(SimpleConstructor<P> constructor) {
             return new Serializer<>(constructor, (p, tag) -> {});
         }
         
+        /**
+         * Creates a new serializer with a constructor for list of inputs, list of outputs and the serialization tag.
+         *
+         * @param constructor the constructor for the display
+         * @param <P>         the type of the display
+         * @return the serializer
+         */
         public static <P extends BasicDisplay> Serializer<P> ofRecipeLess(RecipeLessConstructor<P> constructor) {
             return new Serializer<>(constructor, (p, tag) -> {});
         }
         
+        /**
+         * Creates a new serializer with a constructor for list of inputs and list of outputs.
+         *
+         * @param constructor the constructor for the display
+         * @param <P>         the type of the display
+         * @return the serializer
+         */
         public static <P extends BasicDisplay> Serializer<P> ofSimpleRecipeLess(SimpleRecipeLessConstructor<P> constructor) {
             return new Serializer<>(constructor, (p, tag) -> {});
         }
         
+        /**
+         * Creates a new serializer with a constructor for list of inputs, list of outputs, a possible location, the serialization tag.
+         *
+         * @param constructor the constructor for the display
+         * @param <P>         the type of the display
+         * @return the serializer
+         */
         public static <P extends BasicDisplay> Serializer<P> of(Constructor<P> constructor) {
             return new Serializer<>(constructor, (p, tag) -> {});
         }
@@ -91,18 +137,54 @@ public abstract class BasicDisplay implements Display {
             this(constructor, (p, tag) -> {});
         }
         
+        /**
+         * Creates a new serializer with a constructor for list of inputs, list of outputs and a possible location,
+         * with a serializer for serializing extra data.
+         *
+         * @param constructor     the constructor for the display
+         * @param extraSerializer the extra serializer for the display
+         * @param <P>             the type of the display
+         * @return the serializer
+         */
         public static <P extends BasicDisplay> Serializer<P> ofSimple(SimpleConstructor<P> constructor, ExtraSerializer<P> extraSerializer) {
             return new Serializer<>(constructor, extraSerializer);
         }
         
+        /**
+         * Creates a new serializer with a constructor for list of inputs, list of outputs and the serialization tag,
+         * with a serializer for serializing extra data.
+         *
+         * @param constructor     the constructor for the display
+         * @param extraSerializer the extra serializer for the display
+         * @param <P>             the type of the display
+         * @return the serializer
+         */
         public static <P extends BasicDisplay> Serializer<P> ofRecipeLess(RecipeLessConstructor<P> constructor, ExtraSerializer<P> extraSerializer) {
             return new Serializer<>(constructor, extraSerializer);
         }
         
+        /**
+         * Creates a new serializer with a constructor for list of inputs and list of outputs,
+         * with a serializer for serializing extra data.
+         *
+         * @param constructor     the constructor for the display
+         * @param extraSerializer the extra serializer for the display
+         * @param <P>             the type of the display
+         * @return the serializer
+         */
         public static <P extends BasicDisplay> Serializer<P> ofSimpleRecipeLess(SimpleRecipeLessConstructor<P> constructor, ExtraSerializer<P> extraSerializer) {
             return new Serializer<>(constructor, extraSerializer);
         }
         
+        /**
+         * Creates a new serializer with a constructor for list of inputs, list of outputs, a possible location, the serialization tag,
+         * with a serializer for serializing extra data.
+         *
+         * @param constructor     the constructor for the display
+         * @param extraSerializer the extra serializer for the display
+         * @param <P>             the type of the display
+         * @return the serializer
+         */
         public static <P extends BasicDisplay> Serializer<P> of(Constructor<P> constructor, ExtraSerializer<P> extraSerializer) {
             return new Serializer<>(constructor, extraSerializer);
         }
@@ -112,16 +194,31 @@ public abstract class BasicDisplay implements Display {
             this.extraSerializer = extraSerializer;
         }
         
+        /**
+         * Sets the provider for the list of inputs.
+         *
+         * @param provider the provider
+         * @return the serializer, for chaining
+         */
         public Serializer<P> inputProvider(EntryIngredientsProvider<P> provider) {
             this.inputEntries = provider;
             return this;
         }
         
+        /**
+         * Sets the provider for the list of outputs.
+         *
+         * @param provider the provider
+         * @return the serializer, for chaining
+         */
         public Serializer<P> outputProvider(EntryIngredientsProvider<P> provider) {
             this.outputEntries = provider;
             return this;
         }
         
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public CompoundTag saveExtra(CompoundTag tag, P display) {
             display.getDisplayLocation().ifPresent(location -> tag.putString("location", location.toString()));
@@ -129,6 +226,9 @@ public abstract class BasicDisplay implements Display {
             return tag;
         }
         
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public P read(CompoundTag tag) {
             List<EntryIngredient> input = EntryIngredients.read(tag.getList("input", Tag.TAG_LIST));
@@ -142,6 +242,9 @@ public abstract class BasicDisplay implements Display {
             return constructor.construct(input, output, Optional.ofNullable(location), tag);
         }
         
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public List<EntryIngredient> getInputIngredients(P display) {
             List<EntryIngredient> entries = this.inputEntries.getEntries(display);
@@ -149,6 +252,9 @@ public abstract class BasicDisplay implements Display {
             return SimpleDisplaySerializer.super.getInputIngredients(display);
         }
         
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public List<EntryIngredient> getOutputIngredients(P display) {
             List<EntryIngredient> entries = this.outputEntries.getEntries(display);
