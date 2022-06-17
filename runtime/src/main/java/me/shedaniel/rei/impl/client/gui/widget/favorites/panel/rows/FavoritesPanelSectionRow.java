@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.widget.favorites.panel.rows;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -33,29 +34,29 @@ import java.util.Collections;
 import java.util.List;
 
 public class FavoritesPanelSectionRow extends FavoritesPanelRow {
-            private final Component sectionText;
-            private final Component styledText;
-            
-            public FavoritesPanelSectionRow(Component sectionText, Component styledText) {
-                this.sectionText = sectionText;
-                this.styledText = styledText;
-            }
-            
-            @Override
-            public int getRowHeight() {
-                return 11;
-            }
-            
-            @Override
-            public void render(PoseStack matrices, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
-                if (mouseX >= x && mouseY >= y && mouseX <= x + rowWidth && mouseY <= y + rowHeight) {
-                    Tooltip.create(sectionText).queue();
-                }
-                Minecraft.getInstance().font.draw(matrices, styledText, x, y + 1, 0xFFFFFFFF);
-            }
-            
-            @Override
-            public List<? extends GuiEventListener> children() {
-                return Collections.emptyList();
-            }
+    private final Component sectionText;
+    private final Component styledText;
+    
+    public FavoritesPanelSectionRow(Component sectionText, Component styledText) {
+        this.sectionText = sectionText;
+        this.styledText = styledText;
+    }
+    
+    @Override
+    public int getRowHeight() {
+        return 11;
+    }
+    
+    @Override
+    public void render(PoseStack matrices, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
+        if (innerBounds.contains(mouseX, mouseY) && mouseX >= x && mouseY >= y && mouseX <= x + rowWidth && mouseY <= y + rowHeight) {
+            Tooltip.create(sectionText).queue();
         }
+        Minecraft.getInstance().font.draw(matrices, styledText, x, y + 1, 0xFFFFFFFF);
+    }
+    
+    @Override
+    public List<? extends GuiEventListener> children() {
+        return Collections.emptyList();
+    }
+}
