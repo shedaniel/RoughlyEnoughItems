@@ -41,6 +41,7 @@ import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.ApiStatus;
@@ -363,10 +364,14 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public List<FavoriteEntry> getFavoriteEntries() {
         return basics.favorites;
-    } 
+    }
     
     public List<FavoriteEntry> getHiddenFavoriteEntries() {
         return basics.hiddenFavorites;
+    }
+    
+    public List<CompoundTag> getDisplayHistory() {
+        return basics.displayHistory;
     }
     
     @Override
@@ -530,6 +535,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     public static class Basics {
         @ConfigEntry.Gui.Excluded public List<FavoriteEntry> favorites = new ArrayList<>();
         @ConfigEntry.Gui.Excluded public List<FavoriteEntry> hiddenFavorites = new ArrayList<>();
+        @ConfigEntry.Gui.Excluded public List<CompoundTag> displayHistory = new ArrayList<>();
         @Comment("Declares whether cheating mode is on.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private CheatingMode cheating = CheatingMode.OFF;
         private boolean favoritesEnabled = true;

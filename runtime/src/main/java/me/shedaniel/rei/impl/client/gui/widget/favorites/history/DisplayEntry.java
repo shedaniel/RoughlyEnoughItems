@@ -45,26 +45,39 @@ import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class DisplayEntry extends WidgetWithBounds {
     private final LazyResettable<List<Widget>> widgets = new LazyResettable<>(this::setupWidgets);
     private final DisplayHistoryWidget parent;
     private final Display display;
     private final Dimension size = new Dimension(1, 1);
+    private boolean hasInitialBounds;
     private final ValueAnimator<FloatingRectangle> bounds = ValueAnimator.ofFloatingRectangle();
     private final Button plusButton;
     private double xOffset = 0;
     private boolean reachedStable = false;
+    private UUID uuid = UUID.randomUUID();
     
-    public DisplayEntry(DisplayHistoryWidget parent, Display display, Rectangle initialBounds) {
+    public DisplayEntry(DisplayHistoryWidget parent, Display display, @Nullable Rectangle initialBounds) {
         this.display = display;
         this.parent = parent;
-        this.bounds.setAs(initialBounds.getFloatingBounds());
-        this.plusButton = Widgets.createButton(new Rectangle(initialBounds.getMaxX() - 16, initialBounds.getMaxY() - 16, 10, 10), new TextComponent("+"));
+        this.hasInitialBounds = initialBounds != null;
+        if (this.hasInitialBounds) {
+            this.bounds.setAs(initialBounds.getFloatingBounds());
+            this.plusButton = Widgets.createButton(new Rectangle(initialBounds.getMaxX() - 16, initialBounds.getMaxY() - 16, 10, 10), new TextComponent("+"));
+        } else {
+            this.plusButton = Widgets.createButton(new Rectangle(-1000, -1000, 10, 10), new TextComponent("+"));
+        }
+    }
+    
+    public UUID getUuid() {
+        return uuid;
     }
     
     public void markBoundsDirty() {
@@ -87,10 +100,15 @@ public class DisplayEntry extends WidgetWithBounds {
         float x = parentBounds.getCenterX() - displayBounds.width / 2 * scale;
         float y = parentBounds.getCenterY() - displayBounds.height / 2 * scale;
         FloatingRectangle newBounds = new Rectangle(x, y, displayBounds.width * scale, displayBounds.height * scale).getFloatingBounds();
-        if (this.size.width == 1 && this.size.height == 1) {
-            this.bounds.setTo(newBounds, 700);
+        if (hasInitialBounds) {
+            if (this.size.width == 1 && this.size.height == 1) {
+                this.bounds.setTo(newBounds, 700);
+            } else {
+                this.bounds.setAs(newBounds);
+            }
         } else {
             this.bounds.setAs(newBounds);
+            hasInitialBounds = true;
         }
         this.size.setSize(displayBounds.getSize());
         return widgets;

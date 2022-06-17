@@ -187,6 +187,18 @@ public class ConfigManagerImpl implements ConfigManager {
             }
         });
         
+        // CompoundTag
+        builder.registerSerializer(CompoundTag.class, (value, marshaller) -> {
+            return marshaller.serialize(value.toString());
+        });
+        builder.registerDeserializer(String.class, CompoundTag.class, (value, marshaller) -> {
+            try {
+                return TagParser.parseTag(value);
+            } catch (CommandSyntaxException e) {
+                throw new DeserializationException(e);
+            }
+        });
+        
         // EntryStackProvider
         builder.registerSerializer(EntryStackProvider.class, (stack, marshaller) -> {
             try {
