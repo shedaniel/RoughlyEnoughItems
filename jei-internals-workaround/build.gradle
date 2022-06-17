@@ -33,7 +33,9 @@ shadowJar {
 remapJar {
     input.set shadowJar.archiveFile
     dependsOn shadowJar
+    dependsOn project(":forge").tasks.shadowJar
     classifier null
+    classpath.from project(":forge").tasks.shadowJar.archiveFile.get()
 }
 
 java {
