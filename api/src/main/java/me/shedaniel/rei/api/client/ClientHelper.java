@@ -100,7 +100,7 @@ public interface ClientHelper {
     void sendDeletePacket();
     
     /**
-     * Gets the formatted mod from an item
+     * Returns the formatted mod from an item
      *
      * @param item the item to find
      * @return the mod name with blue and italic formatting
@@ -113,7 +113,7 @@ public interface ClientHelper {
     }
     
     /**
-     * Gets the formatted mod from an identifier
+     * Returns the formatted mod from an identifier
      *
      * @param identifier the identifier to find
      * @return the mod name with blue and italic formatting
@@ -126,18 +126,25 @@ public interface ClientHelper {
     }
     
     /**
-     * Gets the mod from a modid
+     * Returns the mod from a modid
      *
-     * @param modid the modid of the mod
+     * @param modId the modid of the mod
      * @return the mod name with blue and italic formatting
      */
-    default Component getFormattedModFromModId(String modid) {
-        String mod = getModFromModId(modid);
+    default Component getFormattedModFromModId(String modId) {
+        String mod = getModFromModId(modId);
         if (mod.isEmpty())
             return NarratorChatListener.NO_TITLE;
         return Component.literal(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
     }
     
+    /**
+     * Appends the formatted mod to the list of tooltip components.
+     *
+     * @param components the list of tooltip components
+     * @param modId      the modid of the mod
+     * @return the list of tooltip components
+     */
     default List<Component> appendModIdToTooltips(List<Component> components, String modId) {
         final String modName = ClientHelper.getInstance().getModFromModId(modId);
         boolean alreadyHasMod = false;
@@ -151,10 +158,16 @@ public interface ClientHelper {
         return components;
     }
     
+    /**
+     * Appends the formatted mod to the tooltip.
+     *
+     * @param components the tooltip
+     * @param modId      the modid of the mod
+     */
     void appendModIdToTooltips(Tooltip components, String modId);
     
     /**
-     * Gets the mod from an identifier
+     * Returns the mod from an identifier
      *
      * @param identifier the identifier to find
      * @return the mod name
@@ -166,14 +179,25 @@ public interface ClientHelper {
     }
     
     /**
-     * Gets the mod from a modid
+     * Returns the mod from a modid
      *
      * @param modId the modid of the mod
      * @return the mod name
      */
     String getModFromModId(String modId);
     
+    /**
+     * Opens the view after the search is complete.
+     *
+     * @param builder the view search builder
+     * @return whether the view was opened
+     */
     boolean openView(ViewSearchBuilder builder);
     
+    /**
+     * Returns whether the client can use move items packets.
+     *
+     * @return whether the client can use move items packets
+     */
     boolean canUseMovePackets();
 }

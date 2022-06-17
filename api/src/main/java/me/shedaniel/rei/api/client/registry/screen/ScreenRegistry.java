@@ -59,6 +59,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * The registry for handling bounds and exclusion details of screens.
+ *
+ * @see ScreenRegistry#exclusionZones() for registering exclusion zones.
+ */
 @Environment(EnvType.CLIENT)
 public interface ScreenRegistry extends Reloadable<REIClientPlugin> {
     /**
@@ -160,8 +165,23 @@ public interface ScreenRegistry extends Reloadable<REIClientPlugin> {
      */
     <T extends Screen> Rectangle getOverlayBounds(DisplayPanelLocation location, T screen);
     
+    /**
+     * Returns the focused stack given the mouse position.
+     *
+     * @param screen the screen to check
+     * @param mouse  the mouse position
+     * @param <T>    the type of screen
+     * @return the focused stack, may be {@code null} if there are no focused stack
+     * @see ScreenRegistry#registerFocusedStack(FocusedStackProvider)
+     */
     @Nullable <T extends Screen> EntryStack<?> getFocusedStack(T screen, Point mouse);
     
+    /**
+     * Returns the exclusion zones registry for handling
+     * the registration and query of exclusion zones.
+     *
+     * @return the exclusion zones registry
+     */
     ExclusionZones exclusionZones();
     
     /**

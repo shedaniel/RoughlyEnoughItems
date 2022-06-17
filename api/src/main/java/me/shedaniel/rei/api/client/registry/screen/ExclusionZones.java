@@ -30,10 +30,13 @@ import net.minecraft.client.gui.screens.Screen;
 
 import java.util.List;
 
+/**
+ * The registry for querying and registering exclusion zones.
+ */
 @Environment(EnvType.CLIENT)
 public interface ExclusionZones extends OverlayDecider {
     /**
-     * Returns the exclusion zones by the screen class
+     * Returns the exclusion zones by the screen class.
      *
      * @param currentScreenClass the current screen class
      * @return the list of exclusion zones
@@ -45,7 +48,7 @@ public interface ExclusionZones extends OverlayDecider {
     }
     
     /**
-     * Returns the exclusion zones by the screen class
+     * Returns the exclusion zones by the screen class.
      *
      * @param currentScreenClass the current screen class
      * @return the list of exclusion zones
@@ -55,7 +58,7 @@ public interface ExclusionZones extends OverlayDecider {
     List<Rectangle> getExclusionZones(Class<?> currentScreenClass, boolean sort);
     
     /**
-     * Returns the exclusion zones by the screen
+     * Returns the exclusion zones by the screen.
      *
      * @param screen the screen
      * @return the list of exclusion zones
@@ -65,17 +68,22 @@ public interface ExclusionZones extends OverlayDecider {
     }
     
     /**
-     * Returns the exclusion zones by the screen
+     * Returns the exclusion zones by the screen.
      *
      * @param screen the screen
      * @return the list of exclusion zones
      */
     List<Rectangle> getExclusionZones(Screen screen, boolean sort);
     
+    /**
+     * Returns the number of exclusion zone providers registered.
+     *
+     * @return the number of exclusion zone providers registered
+     */
     int getZonesCount();
     
     /**
-     * Register an exclusion zone
+     * Register an exclusion zone.
      *
      * @param screenClass the screen class
      * @param provider    the exclusion zone provider, returns a collection of exclusion zones
