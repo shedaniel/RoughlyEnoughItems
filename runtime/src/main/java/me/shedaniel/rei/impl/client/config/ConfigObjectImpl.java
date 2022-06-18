@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.*;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesEntriesManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -369,6 +370,10 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public List<FavoriteEntry> getFavoriteEntries() {
+        return FavoritesEntriesManager.INSTANCE.asListView();
+    }
+    
+    public List<FavoriteEntry> getConfigFavoriteEntries() {
         return basics.favorites;
     }
     
