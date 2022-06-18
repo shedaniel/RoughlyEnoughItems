@@ -72,6 +72,8 @@ import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListSearchManager;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
+import me.shedaniel.rei.impl.client.gui.widget.entrylist.PaginatedEntryListWidget;
+import me.shedaniel.rei.impl.client.gui.widget.entrylist.ScrolledEntryListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import me.shedaniel.rei.impl.common.util.Weather;
@@ -108,7 +110,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private static final List<Tooltip> TOOLTIPS = Lists.newArrayList();
     private static final List<Runnable> AFTER_RENDER = Lists.newArrayList();
-    private static final EntryListWidget ENTRY_LIST_WIDGET = new EntryListWidget();
+    private static EntryListWidget entryListWidget = null;
     private static FavoritesListWidget favoritesListWidget = null;
     private final List<Widget> widgets = Lists.newLinkedList();
     public boolean shouldReload = false;
@@ -127,7 +129,25 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     
     
     public static EntryListWidget getEntryListWidget() {
-        return ENTRY_LIST_WIDGET;
+        if (entryListWidget != null) {
+            if (ConfigObject.getInstance().isEntryListWidgetScrolled() && entryListWidget instanceof ScrolledEntryListWidget) {
+                return entryListWidget;
+            } else if (!ConfigObject.getInstance().isEntryListWidgetScrolled() && entryListWidget instanceof PaginatedEntryListWidget) {
+                return entryListWidget;
+            }
+        }
+        
+        if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
+            entryListWidget = new ScrolledEntryListWidget();
+        } else if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
+            entryListWidget = new PaginatedEntryListWidget();
+        }
+        
+        Rectangle overlayBounds = ScreenOverlayImpl.getInstance().bounds;
+        entryListWidget.updateArea(Objects.requireNonNullElse(overlayBounds, new Rectangle()), REIRuntimeImpl.getSearchField() == null ? "" : REIRuntimeImpl.getSearchField().getText());
+        entryListWidget.updateEntriesPosition();
+        
+        return entryListWidget;
     }
     
     @Nullable
@@ -252,18 +272,18 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             favoritesListWidget.favoritePanel.resetRows();
             widgets.add(favoritesListWidget);
         }
-        ENTRY_LIST_WIDGET.updateArea(this.bounds, REIRuntimeImpl.getSearchField() == null ? "" : REIRuntimeImpl.getSearchField().getText());
-        widgets.add(ENTRY_LIST_WIDGET);
+        getEntryListWidget().updateArea(this.bounds, REIRuntimeImpl.getSearchField() == null ? "" : REIRuntimeImpl.getSearchField().getText());
+        widgets.add(getEntryListWidget());
         REIRuntimeImpl.getSearchField().getBounds().setBounds(getSearchFieldArea());
         this.widgets.add(REIRuntimeImpl.getSearchField());
-        REIRuntimeImpl.getSearchField().setResponder(s -> ENTRY_LIST_WIDGET.updateSearch(s, false));
+        REIRuntimeImpl.getSearchField().setResponder(s -> getEntryListWidget().updateSearch(s, false));
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             widgets.add(leftButton = Widgets.createButton(new Rectangle(bounds.x, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent("text.rei.left_arrow"))
                     .onClick(button -> {
-                        ENTRY_LIST_WIDGET.previousPage();
-                        if (ENTRY_LIST_WIDGET.getPage() < 0)
-                            ENTRY_LIST_WIDGET.setPage(ENTRY_LIST_WIDGET.getTotalPages() - 1);
-                        ENTRY_LIST_WIDGET.updateEntriesPosition();
+                        getEntryListWidget().previousPage();
+                        if (getEntryListWidget().getPage() < 0)
+                            getEntryListWidget().setPage(getEntryListWidget().getTotalPages() - 1);
+                        getEntryListWidget().updateEntriesPosition();
                     })
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
                     .tooltipLine(new TranslatableComponent("text.rei.previous_page"))
@@ -288,10 +308,10 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             }));
             widgets.add(rightButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent("text.rei.right_arrow"))
                     .onClick(button -> {
-                        ENTRY_LIST_WIDGET.nextPage();
-                        if (ENTRY_LIST_WIDGET.getPage() >= ENTRY_LIST_WIDGET.getTotalPages())
-                            ENTRY_LIST_WIDGET.setPage(0);
-                        ENTRY_LIST_WIDGET.updateEntriesPosition();
+                        getEntryListWidget().nextPage();
+                        if (getEntryListWidget().getPage() >= getEntryListWidget().getTotalPages())
+                            getEntryListWidget().setPage(0);
+                        getEntryListWidget().updateEntriesPosition();
                     })
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
                     .tooltipLine(new TranslatableComponent("text.rei.next_page"))
@@ -355,17 +375,17 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             widgets.add(Widgets.createClickableLabel(new Point(bounds.x + ((bounds.width - 18) / 2), bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), NarratorChatListener.NO_TITLE, label -> {
                 if (!Screen.hasShiftDown()) {
-                    ENTRY_LIST_WIDGET.setPage(0);
-                    ENTRY_LIST_WIDGET.updateEntriesPosition();
+                    getEntryListWidget().setPage(0);
+                    getEntryListWidget().updateEntriesPosition();
                 } else {
                     ScreenOverlayImpl.getInstance().choosePageWidget = new DefaultDisplayChoosePageWidget(page -> {
-                        ENTRY_LIST_WIDGET.setPage(page);
-                        ENTRY_LIST_WIDGET.updateEntriesPosition();
-                    }, ENTRY_LIST_WIDGET.getPage(), ENTRY_LIST_WIDGET.getTotalPages());
+                        getEntryListWidget().setPage(page);
+                        getEntryListWidget().updateEntriesPosition();
+                    }, getEntryListWidget().getPage(), getEntryListWidget().getTotalPages());
                 }
             }).tooltip(new TranslatableComponent("text.rei.go_back_first_page"), new TextComponent(" "), new TranslatableComponent("text.rei.shift_click_to", new TranslatableComponent("text.rei.choose_page")).withStyle(ChatFormatting.GRAY)).focusable(false).onRender((matrices, label) -> {
-                label.setClickable(ENTRY_LIST_WIDGET.getTotalPages() > 1);
-                label.setMessage(new TextComponent(String.format("%s/%s", ENTRY_LIST_WIDGET.getPage() + 1, Math.max(ENTRY_LIST_WIDGET.getTotalPages(), 1))));
+                label.setClickable(getEntryListWidget().getTotalPages() > 1);
+                label.setMessage(new TextComponent(String.format("%s/%s", getEntryListWidget().getPage() + 1, Math.max(getEntryListWidget().getTotalPages(), 1))));
             }).rainbow(new Random().nextFloat() < 1.0E-4D || ClientHelperImpl.getInstance().isAprilFools.get()));
         }
         if (ConfigObject.getInstance().isCraftableFilterEnabled()) {
@@ -377,7 +397,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                             .focusable(false)
                             .onClick(button -> {
                                 ConfigManager.getInstance().toggleCraftableOnly();
-                                ENTRY_LIST_WIDGET.updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
+                                getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
                             })
                             .onRender((matrices, button) -> button.setTint(ConfigManager.getInstance().isCraftableOnlyEnabled() ? 939579655 : 956235776))
                             .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
@@ -593,7 +613,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (shouldReload || !calculateOverlayBounds().equals(bounds)) {
             init();
-            ENTRY_LIST_WIDGET.updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
+            getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
         } else {
             for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(minecraft.screen)) {
                 if (decider != null && decider.shouldRecalculateArea(ConfigObject.getInstance().getDisplayPanelLocation(), bounds)) {
@@ -604,7 +624,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         }
         if (shouldReloadSearch || (ConfigManager.getInstance().isCraftableOnlyEnabled() && CraftableFilter.INSTANCE.wasDirty())) {
             shouldReloadSearch = false;
-            ENTRY_LIST_WIDGET.updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
+            getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
         }
         if (OverlaySearchField.isHighlighting) {
             RenderSystem.disableDepthTest();
@@ -732,8 +752,8 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         if (!REIRuntime.getInstance().isOverlayVisible())
             return;
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            leftButton.setEnabled(ENTRY_LIST_WIDGET.getTotalPages() > 1);
-            rightButton.setEnabled(ENTRY_LIST_WIDGET.getTotalPages() > 1);
+            leftButton.setEnabled(getEntryListWidget().getTotalPages() > 1);
+            rightButton.setEnabled(getEntryListWidget().getTotalPages() > 1);
         }
         for (Widget widget : widgets) {
             if (!(widget instanceof LateRenderable))
@@ -748,7 +768,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         if (overlayMenu != null && overlayMenu.wrappedMenu.mouseScrolled(mouseX, mouseY, amount))
             return true;
         if (isInside(PointHelper.ofMouse())) {
-            if (ENTRY_LIST_WIDGET.mouseScrolled(mouseX, mouseY, amount)) {
+            if (getEntryListWidget().mouseScrolled(mouseX, mouseY, amount)) {
                 return true;
             }
             if (!Screen.hasControlDown() && !ConfigObject.getInstance().isEntryListWidgetScrolled()) {
@@ -766,7 +786,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 return true;
         }
         for (Widget widget : widgets)
-            if (widget != ENTRY_LIST_WIDGET && (favoritesListWidget == null || widget != favoritesListWidget)
+            if (widget != getEntryListWidget() && (favoritesListWidget == null || widget != favoritesListWidget)
                 && (overlayMenu == null || widget != overlayMenu.wrappedMenu)
                 && widget.mouseScrolled(mouseX, mouseY, amount))
                 return true;
@@ -978,7 +998,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     
     @Override
     public OverlayListWidget getEntryList() {
-        return ENTRY_LIST_WIDGET;
+        return getEntryListWidget();
     }
     
     @Override
