@@ -232,12 +232,15 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
         
         scaleIndicator.update(delta);
         if (scaleIndicator.value() > 0.04) {
+            matrices.pushPose();
+            matrices.translate(0, 0, 500);
             Component component = Component.literal(Math.round(ConfigObject.getInstance().getEntrySize() * 100) + "%");
             int width = font.width(component);
             int backgroundColor = ((int) Math.round(0xa0 * Mth.clamp(scaleIndicator.value(), 0.0, 1.0))) << 24;
             int textColor = ((int) Math.round(0xdd * Mth.clamp(scaleIndicator.value(), 0.0, 1.0))) << 24;
             fillGradient(matrices, bounds.getCenterX() - width / 2 - 2, bounds.getCenterY() - 6, bounds.getCenterX() + width / 2 + 2, bounds.getCenterY() + 6, backgroundColor, backgroundColor);
             font.draw(matrices, component, bounds.getCenterX() - width / 2, bounds.getCenterY() - 4, 0xFFFFFF | textColor);
+            matrices.popPose();
         }
     }
     
