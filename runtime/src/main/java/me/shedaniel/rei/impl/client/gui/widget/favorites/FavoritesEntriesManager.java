@@ -31,6 +31,7 @@ import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,7 +51,7 @@ public class FavoritesEntriesManager {
         List<FavoriteEntry> defaultFavorites = getDefaultFavorites().collect(Collectors.toList());
         defaultFavorites.removeAll(config.getHiddenFavoriteEntries());
         
-        List<FavoriteEntry> favorites = new ArrayList<>(config.getFavoriteEntries());
+        List<FavoriteEntry> favorites = new ArrayList<>(config.getConfigFavoriteEntries());
         defaultFavorites.removeAll(favorites);
         favorites.addAll(0, defaultFavorites);
         favorites.removeIf(FavoriteEntry::isInvalid);
@@ -60,7 +61,7 @@ public class FavoritesEntriesManager {
     public void remove(FavoriteEntry entry) {
         ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
         
-        config.getFavoriteEntries().remove(entry);
+        config.getConfigFavoriteEntries().remove(entry);
         if (getDefaultFavorites().anyMatch(e -> e.equals(entry)) && !config.getHiddenFavoriteEntries().contains(entry)) {
             config.getHiddenFavoriteEntries().add(entry);
         }
@@ -76,21 +77,21 @@ public class FavoritesEntriesManager {
         ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
         List<FavoriteEntry> defaultFavorites = getDefaultFavorites().toList();
         
-        config.getFavoriteEntries().remove(entry);
+        config.getConfigFavoriteEntries().remove(entry);
         if (CollectionUtils.anyMatch(defaultFavorites, e -> e.equals(entry)) && !config.getHiddenFavoriteEntries().contains(entry)) {
             config.getHiddenFavoriteEntries().add(entry);
         }
         
         for (int i = defaultFavorites.size() - 1; i >= 0; i--) {
             FavoriteEntry e = defaultFavorites.get(i);
-            if (!config.getFavoriteEntries().contains(e) && !config.getHiddenFavoriteEntries().contains(e)) {
-                config.getFavoriteEntries().add(0, e);
+            if (!config.getConfigFavoriteEntries().contains(e) && !config.getHiddenFavoriteEntries().contains(e)) {
+                config.getConfigFavoriteEntries().add(0, e);
             }
         }
         
         config.getHiddenFavoriteEntries().remove(entry);
         if (!CollectionUtils.anyMatch(defaultFavorites, e -> e.equals(entry))) {
-            config.getFavoriteEntries().add(entry);
+            config.getConfigFavoriteEntries().add(entry);
         }
         
         ConfigManager.getInstance().saveConfig();
@@ -107,13 +108,42 @@ public class FavoritesEntriesManager {
         ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
         config.getHiddenFavoriteEntries().clear();
         config.getHiddenFavoriteEntries().addAll(hiddenDefaultFavorites);
-        config.getFavoriteEntries().clear();
-        config.getFavoriteEntries().addAll(entries);
+        config.getConfigFavoriteEntries().clear();
+        config.getConfigFavoriteEntries().addAll(entries);
         
         ConfigManager.getInstance().saveConfig();
         FavoritesListWidget widget = ScreenOverlayImpl.getFavoritesListWidget();
         if (widget != null) {
             widget.updateSearch();
         }
+    }
+    
+    public List<FavoriteEntry> asListView() {
+        return new AbstractList<>() {
+            @Override
+            public FavoriteEntry get(int index) {
+                return getFavorites().get(index);
+            }
+            
+            @Override
+            public int size() {
+                return getFavorites().size();
+            }
+            
+            @Override
+            public void add(int index, FavoriteEntry entry) {
+                FavoritesEntriesManager.this.add(entry);
+            }
+            
+            @Override
+            public boolean remove(Object o) {
+                if (o instanceof FavoriteEntry) {
+                    FavoritesEntriesManager.this.remove((FavoriteEntry) o);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        };
     }
 }
