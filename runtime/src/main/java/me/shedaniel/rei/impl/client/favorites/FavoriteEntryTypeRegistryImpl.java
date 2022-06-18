@@ -115,7 +115,7 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
     @Override
     public void endReload() {
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
-            ConfigObject.getInstance().getFavoriteEntries().removeIf(FavoriteEntry::isInvalid);
+            ConfigManagerImpl.getInstance().getConfig().getConfigFavoriteEntries().removeIf(FavoriteEntry::isInvalid);
             ConfigManagerImpl.getInstance().getConfig().getHiddenFavoriteEntries().removeIf(FavoriteEntry::isInvalid);
             
             ConfigManager.getInstance().saveConfig();

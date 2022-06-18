@@ -53,7 +53,6 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesEntriesManager;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import net.minecraft.ChatFormatting;
@@ -537,9 +536,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 FavoriteEntry favoriteEntry = asFavoriteEntry();
                 if (favoriteEntry != null) {
                     if (reverseFavoritesAction()) {
-                        FavoritesEntriesManager.INSTANCE.remove(favoriteEntry);
+                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
                     } else {
-                        FavoritesEntriesManager.INSTANCE.add(favoriteEntry);
+                        ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     }
                     ConfigManager.getInstance().saveConfig();
                     FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
@@ -619,9 +618,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 FavoriteEntry favoriteEntry = asFavoriteEntry();
                 if (favoriteEntry != null) {
                     if (reverseFavoritesAction()) {
-                        FavoritesEntriesManager.INSTANCE.remove(favoriteEntry);
+                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
                     } else {
-                        FavoritesEntriesManager.INSTANCE.add(favoriteEntry);
+                        ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     }
                     ConfigManager.getInstance().saveConfig();
                     FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
