@@ -32,7 +32,6 @@ import dev.architectury.event.events.client.ClientGuiEvent;
 import dev.architectury.event.events.client.ClientRecipeUpdateEvent;
 import dev.architectury.event.events.client.ClientScreenInputEvent;
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.platform.Platform;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -51,7 +50,9 @@ import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
+import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -109,9 +110,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
@@ -132,6 +131,7 @@ public class RoughlyEnoughItemsCoreClient {
         });
         return thread;
     });
+    private static final List<Future<?>> RELOAD_TASKS = new CopyOnWriteArrayList<>();
     
     public static void attachClientInternals() {
         InternalWidgets.attach();
@@ -321,8 +321,24 @@ public class RoughlyEnoughItemsCoreClient {
             reloadPlugins(startReload, ReloadStage.START);
         });
         ClientRecipeUpdateEvent.EVENT.register(recipeManager -> {
-            if (!Platform.isFabric()) RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
-            reloadPlugins(endReload, Platform.isFabric() ? ReloadStage.END : null);
+            reloadPlugins(endReload, ReloadStage.END);
+        });
+        ClientGuiEvent.INIT_PRE.register((screen, access) -> {
+            List<ReloadStage> stages = ((PluginManagerImpl<REIPlugin<?>>) PluginManager.getInstance()).getObservedStages();
+            
+            if (Minecraft.getInstance().level != null && Minecraft.getInstance().player != null && stages.contains(ReloadStage.START)
+                && !stages.contains(ReloadStage.END) && !PluginManager.areAnyReloading() && screen instanceof AbstractContainerScreen) {
+                for (Future<?> task : RELOAD_TASKS) {
+                    if (!task.isDone()) {
+                        return EventResult.pass();
+                    }
+                }
+                
+                RoughlyEnoughItemsCore.LOGGER.error("Detected missing stage: END! This is possibly due to issues during client recipe reload! REI will force a reload of the recipes now!");
+                reloadPlugins(endReload, ReloadStage.END);
+            }
+            
+            return EventResult.pass();
         });
         ClientGuiEvent.INIT_POST.register((screen, access) -> {
             REIRuntime.getInstance().getOverlay(false, true);
@@ -455,7 +471,17 @@ public class RoughlyEnoughItemsCoreClient {
             lastReload.setValue(System.currentTimeMillis());
         }
         if (ConfigObject.getInstance().doesRegisterRecipesInAnotherThread()) {
-            CompletableFuture.runAsync(() -> RoughlyEnoughItemsCore._reloadPlugins(start), RELOAD_PLUGINS);
+            Future<?>[] futures = new Future<?>[1];
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> RoughlyEnoughItemsCore._reloadPlugins(start), RELOAD_PLUGINS)
+                    .whenComplete((unused, throwable) -> {
+                        // Remove the future from the list of futures
+                        if (futures[0] != null) {
+                            RELOAD_TASKS.remove(futures[0]);
+                            futures[0] = null;
+                        }
+                    });
+            futures[0] = future;
+            RELOAD_TASKS.add(future);
         } else {
             RoughlyEnoughItemsCore._reloadPlugins(start);
         }
