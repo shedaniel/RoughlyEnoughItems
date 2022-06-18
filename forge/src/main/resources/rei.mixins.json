@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_8",
   "client": [
     "MixinClientPacketListener",
-    "MixinEffectRenderingInventoryScreen"
+    "MixinEffectRenderingInventoryScreen",
+    "MixinRecipeToast"
   ],
   "mixins": [
   ],
