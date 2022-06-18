@@ -23,37 +23,27 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.ClothConfigInitializer;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
-import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
-import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
 import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -61,8 +51,6 @@ import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
-import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionRenderingDebugger;
@@ -75,35 +63,19 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+@SuppressWarnings("UnstableApiUsage")
 @ApiStatus.Internal
-public class EntryListWidget extends WidgetWithBounds implements OverlayListWidget, DraggableStackVisitorWidget {
+public abstract class EntryListWidget extends WidgetWithBounds implements OverlayListWidget, DraggableStackVisitorWidget {
     private static final int SIZE = 18;
-    private int page;
-    protected final ScrollingContainer scrolling = new ScrollingContainer() {
-        @Override
-        public Rectangle getBounds() {
-            return EntryListWidget.this.getBounds();
-        }
-        
-        @Override
-        public int getMaxScrollHeight() {
-            return Mth.ceil((allStacks.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
-        }
-    };
-    protected int blockedCount;
-    private final RegionRenderingDebugger debugger = new RegionRenderingDebugger();
-    private Rectangle bounds, innerBounds;
-    private List<EntryStack<?>> allStacks = null;
-    private List<EntryListStackEntry> entries = Collections.emptyList();
-    private List<Widget> renders = Collections.emptyList();
-    private List<Widget> children = Collections.emptyList();
+    protected final RegionRenderingDebugger debugger = new RegionRenderingDebugger();
+    protected Rectangle bounds, innerBounds;
+    protected List<EntryStack<?>> allStacks = Collections.emptyList();
+    protected List<EntryListStackEntry> entries = Collections.emptyList();
     public final NumberAnimator<Double> scaleIndicator = ValueAnimator.ofDouble(0.0D)
             .withConvention(() -> 0.0D, 8000);
     
@@ -209,11 +181,9 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
                     REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
                     return true;
                 }
-            } else if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-                scrolling.offset(ClothConfigInitializer.getScrollStep() * -amount, true);
-                return true;
             }
         }
+        
         return super.mouseScrolled(mouseX, mouseY, amount);
     }
     
@@ -222,99 +192,26 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         return bounds;
     }
     
-    public int getPage() {
-        return page;
-    }
+    public abstract int getPage();
     
-    public void setPage(int page) {
-        this.page = page;
-    }
+    public abstract void setPage(int page);
     
     public void previousPage() {
-        page--;
+        setPage(getPage() - 1);
     }
     
     public void nextPage() {
-        page++;
+        setPage(getPage() + 1);
     }
     
-    public int getTotalPages() {
-        if (ConfigObject.getInstance().isEntryListWidgetScrolled())
-            return 1;
-        return Mth.ceil(allStacks.size() / (float) entries.size());
-    }
+    public abstract int getTotalPages();
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (!hasSpace()) return;
         
         boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
-        if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            ScissorsHandler.INSTANCE.scissor(bounds);
-            
-            int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / (float) entrySize()));
-            int nextIndex = skip * innerBounds.width / entrySize();
-            this.blockedCount = 0;
-            BatchedEntryRendererManager helper = new BatchedEntryRendererManager();
-            
-            int i = nextIndex;
-            for (int cont = nextIndex; cont < entries.size(); cont++) {
-                EntryListStackEntry entry = entries.get(cont);
-                Rectangle entryBounds = entry.getBounds();
-                
-                entryBounds.y = entry.backupY - scrolling.scrollAmountInt();
-                if (entryBounds.y > this.bounds.getMaxY()) break;
-                if (allStacks.size() <= i) break;
-                if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height)) {
-                    EntryStack<?> stack = allStacks.get(i++);
-                    entry.clearStacks();
-                    if (!stack.isEmpty()) {
-                        entry.entry(stack);
-                        helper.add(entry);
-                    }
-                } else {
-                    blockedCount++;
-                }
-            }
-            
-            helper.render(debugger.debugTime, debugger.size, debugger.time, matrices, mouseX, mouseY, delta);
-            
-            scrolling.updatePosition(delta);
-            ScissorsHandler.INSTANCE.removeLastScissor();
-            if (scrolling.getMaxScroll() > 0) {
-                scrolling.renderScrollBar(0, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
-            }
-        } else {
-            for (Widget widget : renders) {
-                widget.render(matrices, mouseX, mouseY, delta);
-            }
-            if (ConfigObject.getInstance().doesCacheEntryRendering()) {
-                for (EntryListStackEntry entry : entries) {
-                    if (entry.our == null) {
-                        CachedEntryListRender.Sprite sprite = CachedEntryListRender.get(entry.getCurrentEntry());
-                        if (sprite != null) {
-                            entry.our = ClientEntryStacks.setRenderer(entry.getCurrentEntry().copy().cast(), stack -> new EntryRenderer<Object>() {
-                                @Override
-                                public void render(EntryStack<Object> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                                    RenderSystem.setShaderTexture(0, CachedEntryListRender.cachedTextureLocation);
-                                    innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), sprite.u0, sprite.u1, sprite.v0, sprite.v1);
-                                }
-                                
-                                @Override
-                                @Nullable
-                                public Tooltip getTooltip(EntryStack<Object> entry, TooltipContext context) {
-                                    return stack.getDefinition().getRenderer().getTooltip(entry.cast(), context);
-                                }
-                            });
-                        }
-                    }
-                }
-                
-                BatchedEntryRendererManager.renderSlow(debugger.debugTime, debugger.size, debugger.time, matrices, mouseX, mouseY, delta, entries);
-            } else {
-                new BatchedEntryRendererManager(entries).render(debugger.debugTime, debugger.size, debugger.time, matrices, mouseX, mouseY, delta);
-            }
-        }
+        renderEntries(fastEntryRendering, matrices, mouseX, mouseY, delta);
         
         debugger.render(matrices, bounds.x, bounds.y, delta);
         
@@ -345,17 +242,12 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         }
     }
     
-    @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
-        if (hasSpace() && scrolling.mouseDragged(mouseX, mouseY, button, dx, dy))
-            return true;
-        return super.mouseDragged(mouseX, mouseY, button, dx, dy);
-    }
+    protected abstract void renderEntries(boolean fastEntryRendering, PoseStack matrices, int mouseX, int mouseY, float delta);
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (containsChecked(mouse(), false))
-            for (Widget widget : children)
+            for (Widget widget : entries)
                 if (widget.keyPressed(keyCode, scanCode, modifiers))
                     return true;
         return false;
@@ -385,11 +277,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         int entrySize = entrySize();
         boolean zoomed = ConfigObject.getInstance().isFocusModeZoomed();
         this.innerBounds = updateInnerBounds(bounds);
-        if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            updateScrolledEntries(entrySize, zoomed);
-        } else {
-            updatePaginatedEntries(entrySize, zoomed);
-        }
+        updateEntries(entrySize, zoomed);
         FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
         if (favoritesListWidget != null) {
             favoritesListWidget.getSystemRegion().updateEntriesPosition(entry -> true);
@@ -397,54 +285,7 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
         }
     }
     
-    private void updateScrolledEntries(int entrySize, boolean zoomed) {
-        page = 0;
-        int width = innerBounds.width / entrySize;
-        int pageHeight = innerBounds.height / entrySize;
-        int slotsToPrepare = Math.max(allStacks.size() * 3, width * pageHeight * 3);
-        int currentX = 0;
-        int currentY = 0;
-        List<EntryListStackEntry> entries = Lists.newArrayList();
-        for (int i = 0; i < slotsToPrepare; i++) {
-            int xPos = currentX * entrySize + innerBounds.x;
-            int yPos = currentY * entrySize + innerBounds.y;
-            entries.add((EntryListStackEntry) new EntryListStackEntry(this, xPos, yPos, entrySize, zoomed).noBackground());
-            currentX++;
-            if (currentX >= width) {
-                currentX = 0;
-                currentY++;
-            }
-        }
-        this.entries = entries;
-        this.children = Lists.newArrayList(renders);
-        this.children.addAll(entries);
-    }
-    
-    private void updatePaginatedEntries(int entrySize, boolean zoomed) {
-        this.renders = Lists.newArrayList();
-        page = Math.max(page, 0);
-        List<EntryListStackEntry> entries = Lists.newArrayList();
-        int width = innerBounds.width / entrySize;
-        int height = innerBounds.height / entrySize;
-        for (int currentY = 0; currentY < height; currentY++) {
-            for (int currentX = 0; currentX < width; currentX++) {
-                int slotX = currentX * entrySize + innerBounds.x;
-                int slotY = currentY * entrySize + innerBounds.y;
-                if (notSteppingOnExclusionZones(slotX - 1, slotY - 1, entrySize, entrySize)) {
-                    entries.add((EntryListStackEntry) new EntryListStackEntry(this, slotX, slotY, entrySize, zoomed).noBackground());
-                }
-            }
-        }
-        page = Math.max(Math.min(page, getTotalPages() - 1), 0);
-        List<EntryStack<?>> subList = allStacks.stream().skip(Math.max(0, page * entries.size())).limit(Math.max(0, entries.size() - Math.max(0, -page * entries.size()))).collect(Collectors.toList());
-        for (int i = 0; i < subList.size(); i++) {
-            EntryStack<?> stack = subList.get(i);
-            entries.get(i + Math.max(0, -page * entries.size())).clearStacks().entry(stack);
-        }
-        this.entries = entries;
-        this.children = Lists.newArrayList(renders);
-        this.children.addAll(entries);
-    }
+    protected abstract void updateEntries(int entrySize, boolean zoomed);
     
     @ApiStatus.Internal
     public List<EntryStack<?>> getAllStacks() {
@@ -465,16 +306,12 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
     
     @Override
     public List<? extends Widget> children() {
-        return children;
+        return entries;
     }
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!hasSpace()) return false;
-        if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            if (scrolling.updateDraggingState(mouseX, mouseY, button))
-                return true;
-        }
         for (Widget widget : children())
             if (widget.mouseClicked(mouseX, mouseY, button))
                 return true;
@@ -526,20 +363,5 @@ public class EntryListWidget extends WidgetWithBounds implements OverlayListWidg
             }
         }
         return EntryStack.empty();
-    }
-    
-    @Override
-    public Stream<EntryStack<?>> getEntries() {
-        if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / (float) entrySize()));
-            int nextIndex = skip * innerBounds.width / entrySize();
-            return (Stream<EntryStack<?>>) (Stream<? extends EntryStack<?>>) entries.stream()
-                    .skip(nextIndex)
-                    .filter(entry -> entry.getBounds().y <= this.bounds.getMaxY())
-                    .map(EntryWidget::getCurrentEntry)
-                    .filter(Predicates.not(EntryStack::isEmpty));
-        } else {
-            return entries.stream().map(EntryWidget::getCurrentEntry);
-        }
     }
 }
