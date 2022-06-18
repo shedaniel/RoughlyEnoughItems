@@ -60,7 +60,9 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     private final Map<Class<? extends Reloadable<P>>, Reloadable<? super P>> cache = new ConcurrentHashMap<>();
     private final Class<P> pluginClass;
     private final UnaryOperator<PluginView<P>> view;
-    private boolean reloading = false;
+    @Nullable
+    private ReloadStage reloading = null;
+    private List<ReloadStage> observedStages = new ArrayList<>();
     private final List<REIPluginProvider<P>> plugins = new ArrayList<>();
     private final LongConsumer reloadDoneListener;
     private final Stopwatch reloadStopwatch = Stopwatch.createUnstarted();
@@ -84,7 +86,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     
     @Override
     public boolean isReloading() {
-        return reloading;
+        return reloading != null;
     }
     
     @Override
@@ -224,6 +226,8 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         this.forcedMainThread = false;
         this.forceMainThreadStopwatch.reset();
         this.reloadStopwatch.reset().start();
+        this.observedStages.clear();
+        this.observedStages.add(stage);
         List<PluginWrapper<P>> plugins = new ArrayList<>(getPluginWrapped().toList());
         plugins.sort(Comparator.comparingDouble(PluginWrapper<P>::getPriority).reversed());
         Collections.reverse(plugins);
@@ -279,7 +283,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     public void startReload(ReloadStage stage) {
         try {
             this.reloadStopwatch.start();
-            reloading = true;
+            reloading = stage;
             
             // Pre Reload
             try (SectionClosable startReloadAll = section(stage, "start-reload/");
@@ -372,7 +376,11 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         } finally {
-            reloading = false;
+            reloading = null;
         }
+    }
+    
+    public List<ReloadStage> getObservedStages() {
+        return observedStages;
     }
 }
