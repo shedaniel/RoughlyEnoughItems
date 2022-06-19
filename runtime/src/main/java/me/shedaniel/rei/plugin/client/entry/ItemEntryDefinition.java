@@ -187,10 +187,16 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     
     @Override
     public Component asFormattedText(EntryStack<ItemStack> entry, ItemStack value) {
+        return asFormattedText(entry, value, TooltipContext.of());
+    }
+    
+    @Override
+    public Component asFormattedText(EntryStack<ItemStack> entry, ItemStack value, TooltipContext context) {
         if (!SEARCH_BLACKLISTED.contains(value.getItem()))
             try {
                 return value.getHoverName();
             } catch (Throwable e) {
+                if (context != null && context.isSearch()) throw e;
                 e.printStackTrace();
                 SEARCH_BLACKLISTED.add(value.getItem());
             }
@@ -213,10 +219,11 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
             try {
                 return value.getTooltipLines(Minecraft.getInstance().player, context.getFlag());
             } catch (Throwable e) {
+                if (context.isSearch()) throw e;
                 e.printStackTrace();
                 SEARCH_BLACKLISTED.add(value.getItem());
             }
-        return Lists.newArrayList(asFormattedText(entry, value));
+        return Lists.newArrayList(asFormattedText(entry, value, context));
     }
     
     @Override

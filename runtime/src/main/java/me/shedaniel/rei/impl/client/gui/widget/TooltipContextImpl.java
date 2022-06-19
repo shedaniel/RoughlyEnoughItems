@@ -35,10 +35,12 @@ public class TooltipContextImpl implements TooltipContext {
     private final Point point;
     @Nullable
     private final TooltipFlag flag;
+    private final boolean isSearch;
     
-    public TooltipContextImpl(Point point, @Nullable TooltipFlag flag) {
+    public TooltipContextImpl(Point point, @Nullable TooltipFlag flag, boolean isSearch) {
         this.point = Objects.requireNonNull(point);
         this.flag = flag;
+        this.isSearch = isSearch;
     }
     
     @Override
@@ -50,5 +52,10 @@ public class TooltipContextImpl implements TooltipContext {
     @Override
     public Point getPoint() {
         return point;
+    }
+    
+    @Override
+    public boolean isSearch() {
+        return isSearch;
     }
 }

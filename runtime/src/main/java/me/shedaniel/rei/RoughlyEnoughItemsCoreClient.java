@@ -100,6 +100,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.Ingredient;
+import org.apache.commons.lang3.function.TriFunction;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -143,7 +144,7 @@ public class RoughlyEnoughItemsCoreClient {
             return entryType.read(object);
         }, "favoriteEntryFromJson");
         ClientInternals.attachInstance((BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip>) QueuedTooltip::impl, "tooltipProvider");
-        ClientInternals.attachInstance((BiFunction<Point, @Nullable TooltipFlag, TooltipContext>) TooltipContextImpl::new, "tooltipContextProvider");
+        ClientInternals.attachInstance((TriFunction<Point, @Nullable TooltipFlag, Boolean, TooltipContext>) TooltipContextImpl::new, "tooltipContextProvider");
         ClientInternals.attachInstance((Function<Object, Tooltip.Entry>) QueuedTooltip.TooltipEntryImpl::new, "tooltipEntryProvider");
         ClientInternals.attachInstance((Function<@Nullable Boolean, ClickArea.Result>) successful -> new ClickArea.Result() {
             private List<CategoryIdentifier<?>> categories = Lists.newArrayList();
