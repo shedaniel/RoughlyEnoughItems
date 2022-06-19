@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.common.util;
 
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -31,6 +32,10 @@ import net.minecraft.network.chat.Component;
 public interface TextRepresentable {
     default Component asFormattedText() {
         return Component.empty();
+    }
+    
+    default Component asFormattedText(TooltipContext context) {
+        return asFormattedText();
     }
     
     default Component asFormatStrippedText() {
