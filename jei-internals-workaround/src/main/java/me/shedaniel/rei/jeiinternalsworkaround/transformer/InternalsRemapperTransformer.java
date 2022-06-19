@@ -51,6 +51,7 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
         classToInterface("mezz/jei/config/ServerInfo", "me/shedaniel/rei/jeicompat/imitator/JEIServerInfo");
         redirect("mezz/jei/color/ColorGetter", "me/shedaniel/rei/jeicompat/imitator/JEiColorGetterImitator");
         redirect("mezz/jei/plugins/jei/info/IngredientInfoRecipe", "me/shedaniel/rei/jeicompat/imitator/IngredientInfoRecipe");
+        redirect("mezz/jei/plugins/vanilla/crafting/CraftingCategoryExtension", "me/shedaniel/rei/jeicompat/imitator/JEICraftingCategoryExtension");
         redirect("mezz/jei/plugins/vanilla/cooking/AbstractCookingCategory", "me/shedaniel/rei/jeicompat/imitator/JEIAbstractCookingCategory");
         redirect("mezz/jei/plugins/vanilla/cooking/FurnaceVariantCategory", "me/shedaniel/rei/jeicompat/imitator/JEIFurnaceVariantCategory");
         redirect("mezz/jei/plugins/vanilla/ingredients/fluid/FluidStackRenderer", "me/shedaniel/rei/jeicompat/imitator/JEIFluidStackRendererImitator");

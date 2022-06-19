@@ -154,6 +154,11 @@ public class JEIWrappedCategory<T> implements DisplayCategory<JEIWrappedDisplay<
             widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() + 1), new TextComponent("Check console for error")));
             return widgets;
         }
+        return setupDisplay(result, category, display, bounds, backgroundLazy);
+    }
+    
+    public static <T> List<Widget> setupDisplay(JEIDisplaySetup.Result result, IRecipeCategory<T> category, JEIWrappedDisplay<T> display, Rectangle bounds, LazyLoadedValue<IDrawable> backgroundLazy) {
+        List<Widget> widgets = new ArrayList<>();
         widgets.add(Widgets.createRecipeBase(bounds));
         IDrawable background = category.getBackground();
         if (background != null) {

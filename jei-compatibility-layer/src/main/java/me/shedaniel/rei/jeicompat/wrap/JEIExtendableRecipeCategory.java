@@ -29,10 +29,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategoryView;
@@ -40,10 +37,14 @@ import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
+import mezz.jei.api.gui.ingredient.ICraftingGridHelper;
+import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.category.extensions.IExtendableRecipeCategory;
 import mezz.jei.api.recipe.category.extensions.IRecipeCategoryExtension;
+import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class JEIExtendableRecipeCategory<T, D extends Display, W extends IRecipeCategoryExtension> extends JEIUnwrappedCategory<T, D> implements IExtendableRecipeCategory<T, W> {
     private final JEIPluginDetector.JEIPluginWrapper wrapper;
@@ -104,7 +106,40 @@ public class JEIExtendableRecipeCategory<T, D extends Display, W extends IRecipe
             List<Widget> widgets = new ArrayList<>();
             
             if (category instanceof JEIWrappedCategory) {
-                widgets.addAll(JEIWrappedCategory.setupDisplay(((JEIWrappedCategory<R>) category).getBackingCategory(), (JEIWrappedDisplay<R>) display, JEIWrappedDisplay.getFoci(), bounds, ((JEIWrappedCategory<?>) category).background));
+                JEIDisplaySetup.Result result;
+                try {
+                    result = createForExtension(extension, (JEIWrappedDisplay<R>) display);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                    widgets.add(Widgets.createRecipeBase(bounds).color(0xFFFF0000));
+                    widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() - 8), new TextComponent("Failed to initiate JEI integration setRecipe")));
+                    widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() + 1), new TextComponent("Check console for error")));
+                    return widgets;
+                }
+                
+                widgets.addAll(JEIWrappedCategory.setupDisplay(result, ((JEIWrappedCategory<R>) category).getBackingCategory(), (JEIWrappedDisplay<R>) display, bounds, ((JEIWrappedCategory<?>) category).background));
+            } else if (extension instanceof ICraftingCategoryExtension) {
+                JEIDisplaySetup.Result result;
+                try {
+                    result = createCraftingForExtension((ICraftingCategoryExtension) extension);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                    widgets.add(Widgets.createRecipeBase(bounds).color(0xFFFF0000));
+                    widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() - 8), new TextComponent("Failed to initiate JEI integration setRecipe")));
+                    widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() + 1), new TextComponent("Check console for error")));
+                    return widgets;
+                }
+                
+                List<Widget> setupDisplay = this.lastView.setupDisplay(display, bounds);
+                widgets.addAll(setupDisplay.stream()
+                        .filter(widget -> !(widget instanceof Slot))
+                        .toList());
+                for (Widget widget : setupDisplay) {
+                    if (widget instanceof Slot slot && slot.isBackgroundEnabled()) {
+                        widgets.add(Widgets.createSlotBase(slot.getBounds()));
+                    }
+                }
+                JEIDisplaySetup.addTo(widgets, bounds, result);
             } else {
                 widgets.addAll(this.lastView.setupDisplay(display, bounds));
             }
@@ -161,6 +196,31 @@ public class JEIExtendableRecipeCategory<T, D extends Display, W extends IRecipe
             });
             
             return widgets;
+        }
+        
+        public static <T> JEIDisplaySetup.Result createForExtension(IRecipeCategoryExtension category, JEIWrappedDisplay<T> display) {
+            JEIDisplaySetup.Result result = new JEIDisplaySetup.Result();
+            JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder(result.shapelessData);
+            // Legacy code
+            JEIRecipeLayout<T> layout = new JEIRecipeLayout<>(builder);
+            IIngredients ingredients = display.getLegacyIngredients();
+            if (ingredients != null) {
+                category.setIngredients(ingredients);
+                JEIDisplaySetup.applyLegacyTooltip(result, layout);
+            }
+            result.setSlots(builder.slots);
+            return result;
+        }
+        
+        public static <T> JEIDisplaySetup.Result createCraftingForExtension(ICraftingCategoryExtension category) {
+            JEIDisplaySetup.Result result = new JEIDisplaySetup.Result();
+            JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder(result.shapelessData);
+            category.setRecipe(builder, JEICraftingGridHelper.INSTANCE, JEIWrappedDisplay.getFoci());
+            if (builder.isDirty()) {
+                result.setSlots(builder.slots);
+                return result;
+            }
+            return result;
         }
     }
 }

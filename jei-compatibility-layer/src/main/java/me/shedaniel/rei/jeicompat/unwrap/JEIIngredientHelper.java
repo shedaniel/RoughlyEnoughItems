@@ -24,6 +24,7 @@
 package me.shedaniel.rei.jeicompat.unwrap;
 
 import lombok.experimental.ExtensionMethod;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
@@ -62,7 +63,7 @@ public class JEIIngredientHelper<T> implements IIngredientHelper<T> {
     @Override
     public String getDisplayName(T ingredient) {
         EntryStack<T> entry = ingredient.unwrapStack(definition);
-        return definition.asFormattedText(entry, entry.getValue()).getString();
+        return definition.asFormattedText(entry, entry.getValue(), TooltipContext.of()).getString();
     }
     
     @Override
@@ -83,7 +84,7 @@ public class JEIIngredientHelper<T> implements IIngredientHelper<T> {
     public String getResourceId(T ingredient) {
         EntryStack<T> entry = ingredient.unwrapStack(definition);
         ResourceLocation location = entry.getIdentifier();
-        return location == null ? "unknown" : location .getPath();
+        return location == null ? "unknown" : location.getPath();
     }
     
     @Override
