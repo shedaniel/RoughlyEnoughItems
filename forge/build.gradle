@@ -119,6 +119,7 @@ dependencies {
     modRuntime("curse.maven:kubejs-238086:3533307")
     modRuntime("curse.maven:rhino-416294:3525704")
     modRuntime("curse.maven:enchantment-descriptions-250419:3566132")
+    modRuntime("curse.maven:nomadic-tents-238794:3829966")
 }
 
 def modRuntime(str) {
