@@ -60,6 +60,7 @@ import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.client.config.addon.ConfigAddonRegistryImpl;
 import me.shedaniel.rei.impl.client.entry.renderer.EntryRendererRegistryImpl;
 import me.shedaniel.rei.impl.client.favorites.DelegatingFavoriteEntryProviderImpl;
 import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
@@ -234,7 +235,8 @@ public class RoughlyEnoughItemsCoreClient {
                 new FavoriteEntryTypeRegistryImpl(),
                 new SubsetsRegistryImpl(),
                 new TransferHandlerRegistryImpl(),
-                new REIRuntimeImpl()), "clientPluginManager");
+                new REIRuntimeImpl(),
+                new ConfigAddonRegistryImpl()), "clientPluginManager");
     }
     
     public void onInitializeClient() {
