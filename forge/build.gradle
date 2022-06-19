@@ -138,6 +138,7 @@ dependencies {
     // modRuntime("curse.maven:mystical-agriculture-246640:3645812")
     // modRuntime("curse.maven:oreberries-replanted-454062:3776180")
     // modRuntime("curse.maven:farmers-delight-398521:3784851")
+    // modRuntime("curse.maven:nomadic-tents-238794:3829966")
 }
 
 def modRuntime(str) {
