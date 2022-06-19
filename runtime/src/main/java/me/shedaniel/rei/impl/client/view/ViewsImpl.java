@@ -56,7 +56,10 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
 import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
+import me.shedaniel.rei.impl.client.util.CrashReportUtils;
 import me.shedaniel.rei.impl.display.DisplaySpec;
+import net.minecraft.CrashReport;
+import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
@@ -189,7 +192,7 @@ public class ViewsImpl implements Views {
             generatorsCount += entry.getValue().size();
             
             for (DynamicDisplayGenerator<Display> generator : (List<DynamicDisplayGenerator<Display>>) (List<? extends DynamicDisplayGenerator<?>>) entry.getValue()) {
-                generateLiveDisplays(displayRegistry, generator, builder, set::add);
+                generateLiveDisplays(displayRegistry, wrapForError(generator), builder, set::add);
             }
             
             if (!set.isEmpty()) {
@@ -204,7 +207,7 @@ public class ViewsImpl implements Views {
         };
         for (DynamicDisplayGenerator<Display> generator : (List<DynamicDisplayGenerator<Display>>) (List<? extends DynamicDisplayGenerator<?>>) displayRegistry.getGlobalDisplayGenerators()) {
             generatorsCount++;
-            generateLiveDisplays(displayRegistry, generator, builder, displayConsumer);
+            generateLiveDisplays(displayRegistry, wrapForError(generator), builder, displayConsumer);
         }
         
         Map<DisplayCategory<?>, List<DisplaySpec>> resultSpeced = (Map<DisplayCategory<?>, List<DisplaySpec>>) (Map) new LinkedHashMap<>(result);
@@ -360,6 +363,45 @@ public class ViewsImpl implements Views {
                 }
             }
         }
+    }
+    
+    private static <T extends Display> DynamicDisplayGenerator<T> wrapForError(DynamicDisplayGenerator<T> generator) {
+        return new DynamicDisplayGenerator<>() {
+            @Override
+            public Optional<List<T>> getRecipeFor(EntryStack<?> entry) {
+                try {
+                    return generator.getRecipeFor(entry);
+                } catch (Throwable throwable) {
+                    CrashReport report = CrashReportUtils.essential(throwable, "Error while generating recipes for an entry stack");
+                    CrashReportUtils.renderer(report, entry);
+                    RoughlyEnoughItemsCore.LOGGER.throwException(new ReportedException(report));
+                    return Optional.empty();
+                }
+            }
+            
+            @Override
+            public Optional<List<T>> getUsageFor(EntryStack<?> entry) {
+                try {
+                    return generator.getUsageFor(entry);
+                } catch (Throwable throwable) {
+                    CrashReport report = CrashReportUtils.essential(throwable, "Error while generating usages for an entry stack");
+                    CrashReportUtils.renderer(report, entry);
+                    RoughlyEnoughItemsCore.LOGGER.throwException(new ReportedException(report));
+                    return Optional.empty();
+                }
+            }
+            
+            @Override
+            public Optional<List<T>> generate(ViewSearchBuilder builder) {
+                try {
+                    return generator.generate(builder);
+                } catch (Throwable throwable) {
+                    CrashReport report = CrashReportUtils.essential(throwable, "Error while generating recipes for a search");
+                    RoughlyEnoughItemsCore.LOGGER.throwException(new ReportedException(report));
+                    return Optional.empty();
+                }
+            }
+        };
     }
     
     @Override
