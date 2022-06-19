@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.client.plugins;
 
+import me.shedaniel.rei.api.client.config.addon.ConfigAddonRegistry;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRendererRegistry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -119,6 +120,17 @@ public interface REIClientPlugin extends REIPlugin<REIClientPlugin> {
      */
     @ApiStatus.OverrideOnly
     default void registerTransferHandlers(TransferHandlerRegistry registry) {
+    }
+    
+    /**
+     * Registers new config addons.
+     *
+     * @param registry the registry
+     * @since 8.3
+     */
+    @ApiStatus.OverrideOnly
+    @ApiStatus.Experimental
+    default void registerConfigAddons(ConfigAddonRegistry registry) {
     }
     
     @Override

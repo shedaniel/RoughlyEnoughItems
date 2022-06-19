@@ -70,6 +70,7 @@
   "text.rei.too_long_nbt": "§c物品 NBT 太长，不能应用于多人游戏.",
   "text.rei.tag_accept": "标签：#%s",
   "text.rei.performance": "性能分析",
+  "text.rei.addons": "REI 插件",
   "text.rei.shapeless": "无序合成",
   "ordering.rei.ascending": "顺序",
   "ordering.rei.descending": "倒序",
