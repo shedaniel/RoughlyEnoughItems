@@ -47,7 +47,7 @@ public enum JEICraftingGridHelper implements ICraftingGridHelper {
         List<IRecipeSlotBuilder> slotBuilders = new ArrayList<>();
         for (int y = 0; y < 3; ++y) {
             for (int x = 0; x < 3; ++x) {
-                slotBuilders.add(builder.addSlot(RecipeIngredientRole.INPUT, x * 18 + 1, y * 18 + 1));
+                slotBuilders.add(builder.addSlot(RecipeIngredientRole.INPUT, 13 + 1 + x * 18, 2 + 1 + y * 18));
             }
         }
         
@@ -76,7 +76,7 @@ public enum JEICraftingGridHelper implements ICraftingGridHelper {
     
     @Override
     public <T> void setOutputs(IRecipeLayoutBuilder builder, IIngredientType<T> ingredientType, @Nullable List<@Nullable T> outputs) {
-        builder.addSlot(RecipeIngredientRole.OUTPUT, 95, 19)
+        builder.addSlot(RecipeIngredientRole.OUTPUT, 13 + 95, 2 + 19)
                 .addIngredients(ingredientType, outputs);
     }
     

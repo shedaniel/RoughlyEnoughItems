@@ -41,7 +41,7 @@ public class JEIInternalsMixinPlugin implements IMixinConfigPlugin {
     
     static {
         EnumSet<ILaunchPluginService.Phase> NONE = EnumSet.noneOf(ILaunchPluginService.Phase.class);
-        EnumSet<ILaunchPluginService.Phase> AFTER = EnumSet.of(ILaunchPluginService.Phase.AFTER);
+        EnumSet<ILaunchPluginService.Phase> BEFORE = EnumSet.of(ILaunchPluginService.Phase.BEFORE);
         TRANSFORMERS.add(new InternalsRemapperTransformer());
         // committing crime
         LaunchPluginHandler launchPlugins = get(Launcher.INSTANCE, "launchPlugins");
@@ -59,7 +59,7 @@ public class JEIInternalsMixinPlugin implements IMixinConfigPlugin {
             
             @Override
             public EnumSet<Phase> handlesClass(Type classType, boolean isEmpty, String reason) {
-                return isEmpty || Objects.equals(reason, "mixin") || classType.getClassName().contains("jeiinternalsworkaround") ? NONE : AFTER;
+                return isEmpty || Objects.equals(reason, "mixin") || classType.getClassName().contains("jeiinternalsworkaround") ? NONE : BEFORE;
             }
             
             @Override
