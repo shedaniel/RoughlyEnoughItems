@@ -257,7 +257,12 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
     
     @Override
     public Component asFormattedText() {
-        return getDefinition().asFormattedText(this, getValue());
+        return getDefinition().asFormattedText(this, getValue(), TooltipContext.of());
+    }
+    
+    @Override
+    public Component asFormattedText(TooltipContext context) {
+        return getDefinition().asFormattedText(this, getValue(), context);
     }
     
     @Override
