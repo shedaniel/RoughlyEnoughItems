@@ -71,6 +71,7 @@
   "text.rei.accepts": "接受以下物品:",
   "text.rei.tag_accept": "標籤: #%s",
   "text.rei.performance": "效能分析",
+  "text.rei.addons": "REI 附加功能",
   "text.rei.shapeless": "無序合成",
   "ordering.rei.ascending": "從 A 到 Z",
   "ordering.rei.descending": "從 Z 到 A",
