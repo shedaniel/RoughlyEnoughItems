@@ -206,7 +206,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         bufferBuilder.end();
         BufferUploader.end(bufferBuilder);
         poses.pushPose();
-        poses.translate(0.0D, 0.0D, 400.0D);
+        poses.translate(0.0D, 0.0D, 200.0D);
         for (int i = 0; i < sequences.size(); i++) {
             Pair<HintProvider, FormattedCharSequence> pair = sequences.get(i);
             int lineWidth = font.drawShadow(poses, pair.getSecond(), x + 3, y + 3 + font.lineHeight * i, -1);
