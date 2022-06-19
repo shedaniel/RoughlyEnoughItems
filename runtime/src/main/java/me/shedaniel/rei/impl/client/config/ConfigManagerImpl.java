@@ -49,6 +49,7 @@ import me.shedaniel.clothconfig2.gui.entries.TextListEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
+import me.shedaniel.rei.api.client.config.addon.ConfigAddonRegistry;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.CheatingMode;
@@ -60,6 +61,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
+import me.shedaniel.rei.impl.client.config.addon.ConfigAddonRegistryImpl;
 import me.shedaniel.rei.impl.client.config.entries.*;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
@@ -376,6 +378,13 @@ public class ConfigManagerImpl implements ConfigManager {
                     builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, new PerformanceEntry(220));
                 }
                 return builder.setAfterInitConsumer(screen -> {
+                    ConfigAddonRegistryImpl addonRegistry = (ConfigAddonRegistryImpl) ConfigAddonRegistry.getInstance();
+                    if (!addonRegistry.getAddons().isEmpty()) {
+                        ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) new EmptyEntry(4));
+                        ConfigAddonsEntry configAddonsEntry = new ConfigAddonsEntry(220);
+                        configAddonsEntry.setScreen((AbstractConfigScreen) screen);
+                        ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) configAddonsEntry);
+                    }
                     ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) new EmptyEntry(4));
                     TextListEntry supportText = ConfigEntryBuilder.create().startTextDescription(
                             new TranslatableComponent("text.rei.support.me.desc",
