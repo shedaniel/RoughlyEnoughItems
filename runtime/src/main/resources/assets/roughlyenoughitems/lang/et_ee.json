@@ -183,7 +183,6 @@
   "config.roughlyenoughitems.disableRecipeBook.boolean.false": "§aJah",
   "config.roughlyenoughitems.fixTabCloseContainer": "Paranda vanilli Tab-konteiner (kui retseptiraamat on keelatud):",
   "config.roughlyenoughitems.lighterButtonHover": "Heledam nupul hõljumine:",
-  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "Meisterdavate filter:",
   "config.roughlyenoughitems.layout.showUtilsButtons": "Režiimide nupud:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "Mängurežiimi käsklus:",
   "config.roughlyenoughitems.commands.giveCommand": "Sohiga andmise käsklus:",

@@ -179,7 +179,6 @@
   "config.roughlyenoughitems.disableRecipeBook.boolean.false": "§aSì",
   "config.roughlyenoughitems.fixTabCloseContainer": "Sistema il Contenitore Tab Vanilla (Quando il Libro delle Ricette È Disabilitato):",
   "config.roughlyenoughitems.lighterButtonHover": "Pulsante Fluttuante Più Chiaro:",
-  "config.roughlyenoughitems.layout.showCraftableOnlyButton": "Filtro dei Fabbricabili",
   "config.roughlyenoughitems.layout.showUtilsButtons": "Pulsanti di Utilità:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "Comando della Modalità di Gioco:",
   "config.roughlyenoughitems.commands.giveCommand": "Comando per Givvare:",
