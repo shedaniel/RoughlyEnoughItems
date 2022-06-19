@@ -35,12 +35,20 @@ import org.jetbrains.annotations.Nullable;
 @Environment(EnvType.CLIENT)
 @ApiStatus.NonExtendable
 public interface TooltipContext {
+    static TooltipContext of() {
+        return TooltipContext.of(new Point());
+    }
+    
     static TooltipContext of(Point point) {
         return TooltipContext.of(point, null);
     }
     
     static TooltipContext of(Point point, @Nullable TooltipFlag flag) {
-        return ClientInternals.createTooltipContext(point, flag);
+        return TooltipContext.of(point, flag, false);
+    }
+    
+    static TooltipContext of(Point point, @Nullable TooltipFlag flag, boolean isSearch) {
+        return ClientInternals.createTooltipContext(point, flag, isSearch);
     }
     
     static TooltipContext ofMouse() {
@@ -50,4 +58,6 @@ public interface TooltipContext {
     TooltipFlag getFlag();
     
     Point getPoint();
+    
+    boolean isSearch();
 }
