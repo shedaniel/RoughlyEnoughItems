@@ -56,7 +56,7 @@ import java.util.function.UnaryOperator;
 
 public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugin> implements DisplayRegistry {
     private final WeakHashMap<Display, Object> displaysBase = new WeakHashMap<>();
-    private final Map<CategoryIdentifier<?>, List<Display>> displays = new ConcurrentHashMap<>();
+    private final Map<CategoryIdentifier<?>, DisplaysList> displays = new ConcurrentHashMap<>();
     private final Map<CategoryIdentifier<?>, List<Display>> unmodifiableDisplays;
     private final Map<CategoryIdentifier<?>, List<DynamicDisplayGenerator<?>>> displayGenerators = new ConcurrentHashMap<>();
     private final List<DynamicDisplayGenerator<?>> globalDisplayGenerators = new ArrayList<>();
@@ -161,7 +161,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
             }
         }
         
-        displays.computeIfAbsent(display.getCategoryIdentifier(), location -> new DisplaysList().synchronizedList)
+        displays.computeIfAbsent(display.getCategoryIdentifier(), location -> new DisplaysList())
                 .add(display);
         displayCount.increment();
         if (origin != null) {
