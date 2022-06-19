@@ -23,11 +23,15 @@
 
 package me.shedaniel.rei.impl.client.search.argument.type;
 
+import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.config.SearchMode;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.FormattingUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.Unit;
+import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +41,7 @@ import java.util.Locale;
 @Environment(EnvType.CLIENT)
 public final class TextArgumentType extends ArgumentType<Unit, String> {
     public static final TextArgumentType INSTANCE = new TextArgumentType();
+    private static final TooltipContext CONTEXT = TooltipContext.of(new Point(), TooltipFlag.Default.NORMAL, true);
     
     @Override
     public String getName() {
@@ -56,7 +61,7 @@ public final class TextArgumentType extends ArgumentType<Unit, String> {
     
     @Override
     public String cacheData(EntryStack<?> stack) {
-        return stack.asFormatStrippedText().getString().toLowerCase(Locale.ROOT);
+        return FormattingUtils.stripFormatting(stack.asFormattedText(CONTEXT).getString()).toLowerCase(Locale.ROOT);
     }
     
     @Override

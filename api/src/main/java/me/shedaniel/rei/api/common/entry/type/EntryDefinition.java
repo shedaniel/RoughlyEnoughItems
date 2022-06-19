@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.common.entry.type;
 
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
@@ -169,6 +170,10 @@ public interface EntryDefinition<T> {
     EntrySerializer<T> getSerializer();
     
     Component asFormattedText(EntryStack<T> entry, T value);
+    
+    default Component asFormattedText(EntryStack<T> entry, T value, TooltipContext context) {
+        return asFormattedText(entry, value);
+    }
     
     Collection<ResourceLocation> getTagsFor(TagContainer tagContainer, EntryStack<T> entry, T value);
     
