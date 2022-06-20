@@ -236,15 +236,18 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     @Override
     public void renderBorder(PoseStack matrices) {
         isHighlighting = isHighlighting && ConfigObject.getInstance().isInventoryHighlightingAllowed();
+        int borderColor;
         if (isMain && isHighlighting) {
-            fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -852212);
+            borderColor = 0xfff2ff0c;
         } else if (isMain && ScreenOverlayImpl.getEntryListWidget().getStacks().isEmpty() && !getText().isEmpty()) {
-            fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -43691);
+            borderColor = 0xffff5555;
         } else {
             super.renderBorder(matrices);
             return;
         }
-        fill(matrices, this.getBounds().x, this.getBounds().y, this.getBounds().x + this.getBounds().width, this.getBounds().y + this.getBounds().height, -16777216);
+        fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, 0xff000000);
+        fill(matrices, this.getBounds().x, this.getBounds().y, this.getBounds().x + this.getBounds().width, this.getBounds().y + this.getBounds().height, borderColor);
+        fill(matrices, this.getBounds().x + 1, this.getBounds().y + 1, this.getBounds().x + this.getBounds().width - 1, this.getBounds().y + this.getBounds().height - 1, 0xff000000);
     }
     
     public int getManhattanDistance(Point point1, Point point2) {
