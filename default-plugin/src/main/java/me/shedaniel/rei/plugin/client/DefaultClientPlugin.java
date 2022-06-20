@@ -43,7 +43,7 @@ import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
@@ -185,25 +185,21 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 registry.addWorkstations(PATHING, EntryStacks.of(item));
             }
         });
-        TagCollection<Item> itemTagCollection = Minecraft.getInstance().getConnection().getTags().getItems();
-        Tag<Item> axesTag = itemTagCollection.getTag(new ResourceLocation("c", "axes"));
-        if (axesTag != null) {
-            for (Item item : axesTag.getValues()) {
-                if (axes.add(item)) registry.addWorkstations(STRIPPING, EntryStacks.of(item));
+        for (EntryStack<?> stack : getTag(new ResourceLocation("c", "axes"))) {
+            if (axes.add(stack.<ItemStack>castValue().getItem())) {
+                registry.addWorkstations(STRIPPING, stack);
             }
         }
-        Tag<Item> hoesTag = itemTagCollection.getTag(new ResourceLocation("c", "hoes"));
-        if (hoesTag != null) {
-            for (Item item : hoesTag.getValues()) {
-                if (hoes.add(item)) registry.addWorkstations(TILLING, EntryStacks.of(item));
-            }
+        for (EntryStack<?> stack : getTag(new ResourceLocation("c", "hoes"))) {
+            if (hoes.add(stack.<ItemStack>castValue().getItem())) registry.addWorkstations(TILLING, stack);
         }
-        Tag<Item> shovelsTag = itemTagCollection.getTag(new ResourceLocation("c", "shovels"));
-        if (shovelsTag != null) {
-            for (Item item : shovelsTag.getValues()) {
-                if (shovels.add(item)) registry.addWorkstations(PATHING, EntryStacks.of(item));
-            }
+        for (EntryStack<?> stack : getTag(new ResourceLocation("c", "shovels"))) {
+            if (shovels.add(stack.<ItemStack>castValue().getItem())) registry.addWorkstations(PATHING, stack);
         }
+    }
+    
+    private static EntryIngredient getTag(ResourceLocation tagId) {
+        return EntryIngredients.ofItemTag(TagKey.create(Registry.ITEM_REGISTRY, tagId));
     }
     
     @Override
@@ -254,8 +250,8 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         DummyShovelItem.getPathBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultPathingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue().getBlock())));
         });
-        registry.add(new DefaultBeaconBaseDisplay(CollectionUtils.map(Lists.newArrayList(BlockTags.BEACON_BASE_BLOCKS.getValues()), ItemStack::new)));
-        registry.add(new DefaultBeaconPaymentDisplay(CollectionUtils.map(Lists.newArrayList(ItemTags.BEACON_PAYMENT_ITEMS.getValues()), ItemStack::new)));
+        registry.add(new DefaultBeaconBaseDisplay(Collections.singletonList(EntryIngredients.ofItemTag(BlockTags.BEACON_BASE_BLOCKS)), Collections.emptyList()));
+        registry.add(new DefaultBeaconPaymentDisplay(Collections.singletonList(EntryIngredients.ofItemTag(ItemTags.BEACON_PAYMENT_ITEMS)), Collections.emptyList()));
         if (Platform.isFabric()) {
             Set<Potion> potions = Sets.newLinkedHashSet();
             for (Ingredient container : PotionBrewing.ALLOWED_CONTAINERS) {
