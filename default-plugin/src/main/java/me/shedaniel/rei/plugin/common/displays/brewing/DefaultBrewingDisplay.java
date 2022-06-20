@@ -96,9 +96,9 @@ public class DefaultBrewingDisplay implements Display {
         return new DisplaySerializer<DefaultBrewingDisplay>() {
             @Override
             public CompoundTag save(CompoundTag tag, DefaultBrewingDisplay display) {
-                tag.put("input", display.input.save());
-                tag.put("reactant", display.reactant.save());
-                tag.put("output", display.output.save());
+                tag.put("input", display.input.saveIngredient());
+                tag.put("reactant", display.reactant.saveIngredient());
+                tag.put("output", display.output.saveStack());
                 return tag;
             }
             

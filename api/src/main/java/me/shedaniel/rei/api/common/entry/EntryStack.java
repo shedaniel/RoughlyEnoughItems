@@ -142,7 +142,8 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * @return the saved tag
      * @throws UnsupportedOperationException if the {@link EntryDefinition} does not support saving to a tag
      * @see EntrySerializer#supportSaving()
-     * @see EntryIngredient#save()
+     * @see EntryIngredient#saveIngredient()
+     * @since 8.3
      */
     @Nullable
     default CompoundTag saveStack() {
@@ -155,7 +156,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * @return the saved tag
      * @throws UnsupportedOperationException if the {@link EntryDefinition} does not support saving to a tag
      * @see EntrySerializer#supportSaving()
-     * @see EntryIngredient#save()
+     * @see EntryIngredient#saveIngredient()
      * @deprecated use {@link #saveStack()} instead
      */
     @Nullable

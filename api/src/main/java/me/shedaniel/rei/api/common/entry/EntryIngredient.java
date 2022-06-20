@@ -31,11 +31,13 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
  * An immutable representation of a list of {@link EntryStack}.
  */
+@ApiStatus.NonExtendable
 public interface EntryIngredient extends List<EntryStack<?>> {
     /**
      * Returns an empty entry ingredient. This is the singleton instance of {@link EntryIngredient} that is
@@ -119,6 +121,12 @@ public interface EntryIngredient extends List<EntryStack<?>> {
         return Internals.getEntryIngredientProvider().of(stacks);
     }
     
+    /**
+     * Returns a {@link Collector} that accumulates the stacks into a
+     * new {@link EntryIngredient}.
+     *
+     * @return the collector
+     */
     static Collector<EntryStack<?>, ?, EntryIngredient> collector() {
         return Collectors.collectingAndThen(Collectors.toList(), EntryIngredient::of);
     }
@@ -130,7 +138,22 @@ public interface EntryIngredient extends List<EntryStack<?>> {
      * @throws UnsupportedOperationException if an {@link EntryDefinition} does not support saving to a tag
      * @see EntrySerializer#supportSaving()
      * @see EntryStack#saveStack()
+     * @since 8.3
      */
+    default ListTag saveIngredient() {
+        return save();
+    }
+    
+    /**
+     * Saves the entry ingredient to a {@link ListTag}. This is only supported if every entry stack has a serializer.
+     *
+     * @return the saved tag
+     * @throws UnsupportedOperationException if an {@link EntryDefinition} does not support saving to a tag
+     * @see EntrySerializer#supportSaving()
+     * @see EntryStack#saveStack()
+     * @deprecated use {@link #saveIngredient()} instead
+     */
+    @Deprecated(forRemoval = true)
     ListTag save();
     
     /**

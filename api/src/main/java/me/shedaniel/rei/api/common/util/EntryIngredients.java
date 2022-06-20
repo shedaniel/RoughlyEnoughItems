@@ -147,7 +147,7 @@ public final class EntryIngredients {
     public static ListTag save(List<EntryIngredient> ingredients) {
         ListTag listTag = new ListTag();
         for (EntryIngredient ingredient : ingredients) {
-            listTag.add(ingredient.save());
+            listTag.add(ingredient.saveIngredient());
         }
         return listTag;
     }
