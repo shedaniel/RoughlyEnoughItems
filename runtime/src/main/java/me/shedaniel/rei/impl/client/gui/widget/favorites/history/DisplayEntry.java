@@ -286,19 +286,19 @@ public class DisplayEntry extends WidgetWithBounds {
         return (float) bounds.height / size.height;
     }
     
-    private int transformMouseX(int mouseX) {
+    protected int transformMouseX(int mouseX) {
         return Math.round((mouseX - xOffset()) / xScale());
     }
     
-    private int transformMouseY(int mouseY) {
+    protected int transformMouseY(int mouseY) {
         return Math.round((mouseY - yOffset()) / yScale());
     }
     
-    private double transformMouseX(double mouseX) {
+    protected double transformMouseX(double mouseX) {
         return (mouseX - xOffset()) / xScale();
     }
     
-    private double transformMouseY(double mouseY) {
+    protected double transformMouseY(double mouseY) {
         return (mouseY - yOffset()) / yScale();
     }
     

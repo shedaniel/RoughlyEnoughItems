@@ -60,7 +60,7 @@ import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableComponentVisitorWidget, DraggableComponentProviderWidget<Display> {
+public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableComponentVisitorWidget, DraggableComponentProviderWidget<Object> {
     private final FavoritesListWidget parent;
     private final Rectangle bounds = new Rectangle();
     private final NumberAnimator<Double> height;
@@ -366,14 +366,22 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     
     @Override
     @Nullable
-    public DraggableComponent<Display> getHovered(DraggingContext<Screen> context, double mouseX, double mouseY) {
+    public DraggableComponent<Object> getHovered(DraggingContext<Screen> context, double mouseX, double mouseY) {
         if (containsMouse(mouseX, mouseY)) {
             double xOffset = -this.scroll.value();
             Collection<DisplayEntry> entries = DisplayHistoryManager.INSTANCE.getEntries(this);
             
             for (DisplayEntry entry : entries) {
                 if (entry.isStable() && entry.getBounds().contains(mouseX + xOffset, mouseY)) {
-                    return new DisplayCompositeWidget.DisplayDraggableComponent(Widgets.concat(entry.getWidgets()), entry.getDisplay(),
+                    for (DraggableComponentProviderWidget<Object> widget : Widgets.<DraggableComponentProviderWidget<Object>>walk(entry.getWidgets(), child -> child instanceof DraggableComponentProviderWidget)) {
+                        DraggableComponent<Object> hovered = widget.getHovered(context, entry.transformMouseX(mouseX), entry.transformMouseY(mouseY));
+                        
+                        if (hovered != null) {
+                            return hovered;
+                        }
+                    }
+                    
+                    return (DraggableComponent<Object>) (DraggableComponent<?>) new DisplayCompositeWidget.DisplayDraggableComponent(Widgets.concat(entry.getWidgets()), entry.getDisplay(),
                             entry.getBounds().clone(),
                             new Rectangle(0, 0, entry.getSize().width, entry.getSize().height)) {
                         @Override
