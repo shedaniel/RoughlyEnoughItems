@@ -195,7 +195,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         
         @Override
         public CompoundTag save(EntryStackFavoriteEntry entry, CompoundTag tag) {
-            tag.put(key, entry.stack.save());
+            tag.put(key, entry.stack.saveStack());
             return tag;
         }
     }
