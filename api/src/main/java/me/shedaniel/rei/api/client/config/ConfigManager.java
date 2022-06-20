@@ -46,19 +46,19 @@ public interface ConfigManager extends Reloadable<REIClientPlugin> {
     void saveConfig();
     
     /**
-     * Gets if craftable only filter is enabled
+     * Returns whether the craftable only filter is enabled.
      *
      * @return whether craftable only filter is enabled
      */
     boolean isCraftableOnlyEnabled();
     
     /**
-     * Toggles the craftable only filter
+     * Toggles the craftable only filter.
      */
     void toggleCraftableOnly();
     
     /**
-     * Opens the config screen
+     * Opens the config screen.
      *
      * @param parent the screen shown before
      */
@@ -67,12 +67,18 @@ public interface ConfigManager extends Reloadable<REIClientPlugin> {
     }
     
     /**
-     * Gets the config screen
+     * Returns the config screen.
      *
      * @param parent the screen shown before
      * @return the config screen
      */
     Screen getConfigScreen(Screen parent);
     
+    /**
+     * Returns the config object.
+     *
+     * @return the config object
+     * @see ConfigObject#getInstance()
+     */
     ConfigObject getConfig();
 }
