@@ -23,22 +23,57 @@
 
 package me.shedaniel.rei.api.client.config.entry;
 
+import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
 
+/**
+ * A deferred {@link EntryStack} provider.
+ * Allows easier serialization of {@link EntryStack}s.
+ *
+ * @param <T> the type of {@link EntryStack}
+ */
 @ApiStatus.Experimental
 @ApiStatus.NonExtendable
 public interface EntryStackProvider<T> {
+    /**
+     * Resolves and returns the {@link EntryStack}.
+     *
+     * @return the {@link EntryStack}, or {@link EntryStack#empty()} if failed to resolve
+     */
     EntryStack<T> provide();
     
+    /**
+     * Serializes the {@link EntryStack} to a {@link CompoundTag}.
+     *
+     * @return the saved tag
+     * @throws UnsupportedOperationException if the {@link EntryDefinition} does not support saving to a tag
+     * @see EntrySerializer#supportSaving()
+     * @see EntryStack#saveStack()
+     * @since 8.3
+     */
     CompoundTag save();
     
+    /**
+     * Returns whether the {@link EntryStack} is valid.
+     *
+     * @return whether the {@link EntryStack} is valid
+     */
     boolean isValid();
     
+    /**
+     * Creates a new {@link EntryStackProvider} from the given {@link CompoundTag},
+     * the stack is not resolved immediately, but rather deferred until {@link #provide()} is called.
+     *
+     * @param tag the tag to load from
+     * @param <T> the type of {@link EntryStack}
+     * @return the {@link EntryStackProvider}
+     */
     static <T> EntryStackProvider<T> defer(CompoundTag tag) {
         return new EntryStackProvider<T>() {
             private EntryStack<T> stack;
@@ -84,6 +119,14 @@ public interface EntryStackProvider<T> {
         };
     }
     
+    /**
+     * Creates a new {@link EntryStackProvider} from the given {@link EntryStack}.
+     * This provider is not deferred, and will resolve the stack immediately.
+     *
+     * @param stack the stack to use
+     * @param <T>   the type of {@link EntryStack}
+     * @return the {@link EntryStackProvider}
+     */
     static <T> EntryStackProvider<T> ofStack(EntryStack<T> stack) {
         stack = stack.normalize();
         EntryStack<T> finalStack = stack;
