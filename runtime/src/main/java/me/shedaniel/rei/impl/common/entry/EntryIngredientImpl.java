@@ -348,7 +348,7 @@ public enum EntryIngredientImpl implements Internals.EntryIngredientProvider {
         @Override
         public ListTag save() {
             ListTag listTag = new ListTag();
-            listTag.add(stack.save());
+            listTag.add(stack.saveStack());
             return listTag;
         }
         
@@ -454,7 +454,7 @@ public enum EntryIngredientImpl implements Internals.EntryIngredientProvider {
         public ListTag save() {
             ListTag listTag = new ListTag();
             for (EntryStack<?> stack : array) {
-                listTag.add(stack.save());
+                listTag.add(stack.saveStack());
             }
             return listTag;
         }
