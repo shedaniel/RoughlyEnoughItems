@@ -37,10 +37,12 @@ import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class ScrolledEntryListWidget extends EntryListWidget {
+    private List<EntryStack<?>> stacks = new ArrayList<>();
     protected int blockedCount;
     protected final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
@@ -50,7 +52,7 @@ public class ScrolledEntryListWidget extends EntryListWidget {
         
         @Override
         public int getMaxScrollHeight() {
-            return Mth.ceil((allStacks.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
+            return Mth.ceil((stacks.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
         }
     };
     
@@ -70,9 +72,9 @@ public class ScrolledEntryListWidget extends EntryListWidget {
             
             entryBounds.y = entry.backupY - scrolling.scrollAmountInt();
             if (entryBounds.y > this.bounds.getMaxY()) break;
-            if (allStacks.size() <= i) break;
+            if (stacks.size() <= i) break;
             if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height)) {
-                EntryStack<?> stack = allStacks.get(i++);
+                EntryStack<?> stack = stacks.get(i++);
                 entry.clearStacks();
                 if (!stack.isEmpty()) {
                     entry.entry(stack);
@@ -109,7 +111,7 @@ public class ScrolledEntryListWidget extends EntryListWidget {
     protected void updateEntries(int entrySize, boolean zoomed) {
         int width = innerBounds.width / entrySize;
         int pageHeight = innerBounds.height / entrySize;
-        int slotsToPrepare = Math.max(allStacks.size() * 3, width * pageHeight * 3);
+        int slotsToPrepare = Math.max(stacks.size() * 3, width * pageHeight * 3);
         int currentX = 0;
         int currentY = 0;
         List<EntryListStackEntry> entries = Lists.newArrayList();
@@ -149,6 +151,16 @@ public class ScrolledEntryListWidget extends EntryListWidget {
         if (scrolling.updateDraggingState(mouseX, mouseY, button))
             return true;
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+    
+    @Override
+    public List<EntryStack<?>> getStacks() {
+        return stacks;
+    }
+    
+    @Override
+    public void setStacks(List<EntryStack<?>> stacks) {
+        this.stacks = stacks;
     }
     
     @Override
