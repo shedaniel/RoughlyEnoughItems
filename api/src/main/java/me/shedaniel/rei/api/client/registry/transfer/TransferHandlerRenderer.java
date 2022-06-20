@@ -27,11 +27,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.common.display.Display;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 
-@ApiStatus.Experimental
 @FunctionalInterface
 public interface TransferHandlerRenderer {
     void render(PoseStack matrices, int mouseX, int mouseY, float delta, List<Widget> widgets, Rectangle bounds, Display display);
