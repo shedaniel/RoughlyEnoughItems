@@ -40,10 +40,20 @@ public interface ItemComparatorRegistry extends EntryComparatorRegistry<ItemStac
         return PluginManager.getInstance().get(ItemComparatorRegistry.class);
     }
     
+    /**
+     * Registers an item to compare via its nbt.
+     *
+     * @param item the item to compare
+     */
     default void registerNbt(Item item) {
         register(EntryComparator.itemNbt(), item);
     }
     
+    /**
+     * Registers items to compare via their nbt.
+     *
+     * @param items the items to compare
+     */
     default void registerNbt(Item... items) {
         register(EntryComparator.itemNbt(), items);
     }

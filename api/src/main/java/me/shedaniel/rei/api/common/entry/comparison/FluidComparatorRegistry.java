@@ -40,10 +40,20 @@ public interface FluidComparatorRegistry extends EntryComparatorRegistry<FluidSt
         return PluginManager.getInstance().get(FluidComparatorRegistry.class);
     }
     
+    /**
+     * Registers a fluid to compare via its nbt.
+     *
+     * @param fluid the fluid to compare
+     */
     default void registerNbt(Fluid fluid) {
         register(EntryComparator.fluidNbt(), fluid);
     }
     
+    /**
+     * Registers fluids to compare via their nbt.
+     *
+     * @param fluids the fluids to compare
+     */
     default void registerNbt(Fluid... fluids) {
         register(EntryComparator.fluidNbt(), fluids);
     }

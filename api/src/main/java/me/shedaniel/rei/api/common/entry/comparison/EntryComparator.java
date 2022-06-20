@@ -36,10 +36,21 @@ import java.util.Objects;
  */
 @FunctionalInterface
 public interface EntryComparator<T> {
+    /**
+     * Creates an {@link EntryComparator} that does not compare anything.
+     *
+     * @param <T> the type of the entry
+     * @return an {@link EntryComparator} that does not compare anything
+     */
     static <T> EntryComparator<T> noop() {
         return (context, stack) -> 1;
     }
     
+    /**
+     * Creates an {@link EntryComparator} that compares the {@link ItemStack}'s NBT.
+     *
+     * @return an {@link EntryComparator} that compares the {@link ItemStack}'s NBT
+     */
     static EntryComparator<ItemStack> itemNbt() {
         EntryComparator<Tag> nbtHasher = nbt("Count");
         return (context, stack) -> {
@@ -48,6 +59,11 @@ public interface EntryComparator<T> {
         };
     }
     
+    /**
+     * Creates an {@link EntryComparator} that compares the {@link FluidStack}'s NBT.
+     *
+     * @return an {@link EntryComparator} that compares the {@link FluidStack}'s NBT
+     */
     static EntryComparator<FluidStack> fluidNbt() {
         EntryComparator<Tag> nbtHasher = nbt("Amount");
         return (context, stack) -> {
@@ -56,10 +72,24 @@ public interface EntryComparator<T> {
         };
     }
     
+    /**
+     * Creates an {@link EntryComparator} that compares the nbt, but
+     * ignoring some given keys.
+     *
+     * @param ignoredKeys the keys to ignore
+     * @return an {@link EntryComparator} that compares the nbt
+     */
     static EntryComparator<Tag> nbt(String... ignoredKeys) {
         return Internals.getNbtHasher(ignoredKeys);
     }
     
+    /**
+     * Returns hash code of the {@link T} stack.
+     *
+     * @param context the context to use
+     * @param stack   the stack to hash code
+     * @return the hash code of the {@code context} context
+     */
     long hash(ComparisonContext context, T stack);
     
     default EntryComparator<T> onlyExact() {
