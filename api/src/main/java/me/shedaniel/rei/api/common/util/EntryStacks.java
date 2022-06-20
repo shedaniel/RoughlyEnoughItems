@@ -147,7 +147,7 @@ public final class EntryStacks {
     }
     
     /**
-     * Hash Code of the {@code context} context.
+     * Returns hash code of the {@code context} context.
      *
      * @param stack   the stack to hash code
      * @param context the context to use
@@ -159,7 +159,7 @@ public final class EntryStacks {
     }
     
     /**
-     * Hash Code of the {@link ComparisonContext#EXACT} context.
+     * Returns hash code of the {@link ComparisonContext#EXACT} context.
      * <p>
      * The exact context type denotes that the equivalent stacks should be <b>functionally</b> the same.
      * <p>
@@ -175,7 +175,7 @@ public final class EntryStacks {
     }
     
     /**
-     * Hash Code of the {@link ComparisonContext#FUZZY} context.
+     * Returns hash code of the {@link ComparisonContext#FUZZY} context.
      * <p>
      * The fuzzy context type denotes that the equivalent stacks should be <b>primarily</b> the same.
      * <p>
