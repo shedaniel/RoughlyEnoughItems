@@ -44,6 +44,12 @@ public class HashedEntryStackWrapper {
         this.hashInt = Long.hashCode(this.hash);
     }
     
+    public HashedEntryStackWrapper(EntryStack<?> stack, long hash) {
+        this.stack = Objects.requireNonNull(stack);
+        this.hash = hash;
+        this.hashInt = Long.hashCode(this.hash);
+    }
+    
     @Override
     public boolean equals(Object o) {
         return o instanceof HashedEntryStackWrapper && hash == ((HashedEntryStackWrapper) o).hash;
