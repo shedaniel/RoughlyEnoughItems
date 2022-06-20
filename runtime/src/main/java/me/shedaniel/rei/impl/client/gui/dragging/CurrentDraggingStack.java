@@ -43,6 +43,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
@@ -88,7 +89,9 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
                 entry.bounds.update(delta);
                 int width = entry.component.getWidth();
                 int height = entry.component.getHeight();
-                entry.bounds.setTo(new FloatingRectangle(mouseX - width / 2, mouseY - height / 2, width, height), Util.getMillis() - entry.startDragging < 100 && width * height > 1000 ? 80 : 10);
+                Vec2 mouseStartOffset = entry.mouseStartOffset;
+                entry.bounds.setTo(new FloatingRectangle(mouseX - width / 2 - mouseStartOffset.x, mouseY - height / 2 - mouseStartOffset.y, width, height),
+                        30);
                 entry.component.render(matrices, entry.bounds.value().getBounds(), mouseX, mouseY, delta);
                 matrices.popPose();
                 
@@ -204,8 +207,9 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     @Nullable
     public Point getCurrentPosition() {
         if (!isDraggingComponent()) return null;
+        Vec2 mouseStartOffset = entry.mouseStartOffset;
         FloatingRectangle rectangle = entry.bounds.value();
-        return new Point(rectangle.getCenterX(), rectangle.getCenterY());
+        return new Point(rectangle.getCenterX() + mouseStartOffset.x, rectangle.getCenterY() + mouseStartOffset.y);
     }
     
     @Override
@@ -236,6 +240,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
         private final Point start;
         private long startDragging = -1;
         private final ValueAnimator<FloatingRectangle> bounds;
+        private final Vec2 mouseStartOffset;
         private boolean dragging = false;
         private DraggableBoundsProvider boundsProvider;
         
@@ -244,6 +249,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
             this.start = start;
             this.bounds = ValueAnimator.ofFloatingRectangle()
                     .setAs(component.getOriginBounds(start).getFloatingBounds());
+            this.mouseStartOffset = new Vec2((float) (start.x - bounds.value().getCenterX()), (float) (start.y - bounds.value().getCenterY()));
         }
         
         public DraggableBoundsProvider getBoundsProvider() {
