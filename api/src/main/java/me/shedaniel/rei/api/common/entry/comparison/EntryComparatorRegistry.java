@@ -25,7 +25,6 @@ package me.shedaniel.rei.api.common.entry.comparison;
 
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.registry.Reloadable;
-import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Registry for registering custom methods for identifying variants of {@link T}.
@@ -41,7 +40,6 @@ public interface EntryComparatorRegistry<T, S> extends Reloadable<REIPlugin<?>> 
         }
     }
     
-    @ApiStatus.Experimental
     void registerGlobal(EntryComparator<T> comparator);
     
     long hashOf(ComparisonContext context, T stack);

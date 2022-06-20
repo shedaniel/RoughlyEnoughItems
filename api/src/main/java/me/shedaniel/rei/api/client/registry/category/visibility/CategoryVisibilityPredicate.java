@@ -27,7 +27,6 @@ import dev.architectury.event.EventResult;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.world.InteractionResult;
 
 /**
  * Handler for determining the visibility of categories.
