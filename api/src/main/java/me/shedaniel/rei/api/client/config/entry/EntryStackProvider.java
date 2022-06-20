@@ -95,7 +95,7 @@ public interface EntryStackProvider<T> {
             
             @Override
             public CompoundTag save() {
-                return finalStack.save();
+                return finalStack.saveStack();
             }
             
             @Override
