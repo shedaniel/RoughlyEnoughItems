@@ -40,11 +40,13 @@ import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PaginatedEntryListWidget extends EntryListWidget {
+    private List<EntryStack<?>> stacks = new ArrayList<>();
     private int page;
     
     @Override
@@ -89,7 +91,7 @@ public class PaginatedEntryListWidget extends EntryListWidget {
     
     @Override
     public int getTotalPages() {
-        return Mth.ceil(allStacks.size() / (float) entries.size());
+        return Mth.ceil(stacks.size() / (float) entries.size());
     }
     
     @Override
@@ -108,12 +110,22 @@ public class PaginatedEntryListWidget extends EntryListWidget {
             }
         }
         page = Math.max(Math.min(page, getTotalPages() - 1), 0);
-        List<EntryStack<?>> subList = allStacks.stream().skip(Math.max(0, page * entries.size())).limit(Math.max(0, entries.size() - Math.max(0, -page * entries.size()))).collect(Collectors.toList());
+        List<EntryStack<?>> subList = stacks.stream().skip(Math.max(0, page * entries.size())).limit(Math.max(0, entries.size() - Math.max(0, -page * entries.size()))).collect(Collectors.toList());
         for (int i = 0; i < subList.size(); i++) {
             EntryStack<?> stack = subList.get(i);
             entries.get(i + Math.max(0, -page * entries.size())).clearStacks().entry(stack);
         }
         this.entries = entries;
+    }
+    
+    @Override
+    public List<EntryStack<?>> getStacks() {
+        return stacks;
+    }
+    
+    @Override
+    public void setStacks(List<EntryStack<?>> stacks) {
+        this.stacks = stacks;
     }
     
     @Override
