@@ -56,7 +56,6 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@ApiStatus.Experimental
 @ApiStatus.Internal
 public class Menu extends WidgetWithBounds implements LateRenderable {
     public static final UUID SUBSETS = UUID.randomUUID();

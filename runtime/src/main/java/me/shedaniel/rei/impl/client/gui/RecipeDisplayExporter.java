@@ -48,7 +48,6 @@ import java.util.Date;
 import java.util.List;
 
 @ApiStatus.Internal
-@ApiStatus.Experimental
 public final class RecipeDisplayExporter extends Widget {
     private static final RecipeDisplayExporter INSTANCE = new RecipeDisplayExporter();
     

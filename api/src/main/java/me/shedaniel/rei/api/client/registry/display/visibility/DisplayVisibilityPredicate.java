@@ -24,12 +24,10 @@
 package me.shedaniel.rei.api.client.registry.display.visibility;
 
 import me.shedaniel.architectury.event.EventResult;
-import me.shedaniel.rei.api.client.registry.category.visibility.CategoryVisibilityPredicate;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.world.InteractionResult;
 
 /**
  * Handler for determining the visibility of displays.

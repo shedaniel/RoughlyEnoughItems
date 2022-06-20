@@ -47,7 +47,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
-@ApiStatus.Experimental
 @ApiStatus.Internal
 public class SubSubsetsMenuEntry extends SubMenuEntry {
     private Tuple<Integer, Integer> filteredRatio = null;
