@@ -101,6 +101,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public boolean removeTagMatch = true;
     
     private long lastCheckTime = -1;
+    private long lastCheckedTime = -1;
     private Display display;
     private Supplier<DisplayTooltipComponent> displayTooltipComponent;
     
@@ -323,7 +324,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         return null;
     }
     
-    private TransferHandler getTransferHandler() {
+    private TransferHandler getTransferHandler(boolean query) {
         if (PluginManager.areAnyReloading()) {
             return null;
         }
@@ -345,7 +346,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             return null;
         }
         
-        return _getTransferHandler();
+        return query ? _getTransferHandler() : null;
     }
     
     @Override
@@ -413,10 +414,26 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public Tooltip getCurrentTooltip(TooltipContext context) {
         Tooltip tooltip = getCurrentEntry().getTooltip(context);
         
-        if (tooltip != null && getTransferHandler() != null
-            && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
-            tooltip.add(Component.translatable("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
-            tooltip.add((ClientTooltipComponent) displayTooltipComponent.get());
+        if (tooltip != null && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+            boolean exists = getTransferHandler(false) != null;
+            
+            if (!exists) {
+                if (lastCheckedTime == -1 || Util.getMillis() - lastCheckedTime > 400) {
+                    lastCheckedTime = Util.getMillis();
+                }
+                
+                if (Util.getMillis() - lastCheckedTime > 200) {
+                    lastCheckedTime = -1;
+                    exists = getTransferHandler(true) != null;
+                }
+            } else {
+                lastCheckedTime = -1;
+            }
+            
+            if (exists) {
+                tooltip.add(Component.translatable("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
+                tooltip.add((ClientTooltipComponent) displayTooltipComponent.get());
+            }
         }
         
         if (tooltip != null) {
@@ -551,7 +568,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         
         if (!(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
             try {
-                TransferHandler handler = getTransferHandler();
+                TransferHandler handler = getTransferHandler(true);
                 
                 if (handler != null) {
                     AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
