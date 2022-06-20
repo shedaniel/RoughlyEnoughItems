@@ -103,7 +103,7 @@ public class DefaultInformationDisplay implements Display {
         return new DisplaySerializer<DefaultInformationDisplay>() {
             @Override
             public CompoundTag save(CompoundTag tag, DefaultInformationDisplay display) {
-                tag.put("stacks", display.getEntryStacks().save());
+                tag.put("stacks", display.getEntryStacks().saveIngredient());
                 tag.putString("name", Component.Serializer.toJson(display.getName()));
                 ListTag descriptions = new ListTag();
                 for (Component text : display.getTexts()) {
