@@ -38,6 +38,8 @@ import java.util.stream.Collectors;
 
 /**
  * An immutable representation of a list of {@link EntryStack}.
+ *
+ * @see me.shedaniel.rei.api.common.util.EntryIngredients
  */
 @ApiStatus.NonExtendable
 public interface EntryIngredient extends List<EntryStack<?>> {

@@ -30,8 +30,13 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
@@ -41,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 public final class EntryIngredients {
     private EntryIngredients() {}
@@ -131,6 +137,45 @@ public final class EntryIngredients {
             emptyFlag = false;
         }
         return ImmutableList.copyOf(result);
+    }
+    
+    public static <S, T> EntryIngredient ofTag(TagKey<S> tagKey, Function<Holder<S>, EntryStack<T>> mapper) {
+        Registry<S> registry = ((Registry<Registry<S>>) Registry.REGISTRY).get((ResourceKey<Registry<S>>) tagKey.registry());
+        HolderSet.Named<S> holders = registry.getTag(tagKey).orElse(null);
+        if (holders == null) return EntryIngredient.empty();
+        EntryIngredient.Builder result = EntryIngredient.builder(holders.size());
+        for (Holder<S> holder : holders) {
+            EntryStack<T> stack = mapper.apply(holder);
+            if (!stack.isEmpty()) {
+                result.add(stack);
+            }
+        }
+        return result.build();
+    }
+    
+    public static <S, T> List<EntryIngredient> ofTags(Iterable<TagKey<S>> tagKeys, Function<Holder<S>, EntryStack<T>> mapper) {
+        if (tagKeys instanceof Collection collection && collection.isEmpty()) return Collections.emptyList();
+        ImmutableList.Builder<EntryIngredient> ingredients = ImmutableList.builder();
+        for (TagKey<S> tagKey : tagKeys) {
+            ingredients.add(ofTag(tagKey, mapper));
+        }
+        return ingredients.build();
+    }
+    
+    public static <T extends ItemLike> EntryIngredient ofItemTag(TagKey<T> tagKey) {
+        return ofTag(tagKey, holder -> EntryStacks.of(holder.value()));
+    }
+    
+    public static EntryIngredient ofFluidTag(TagKey<Fluid> tagKey) {
+        return ofTag(tagKey, holder -> EntryStacks.of(holder.value()));
+    }
+    
+    public static <T extends ItemLike> List<EntryIngredient> ofItemTags(Iterable<TagKey<T>> tagKey) {
+        return ofTags(tagKey, holder -> EntryStacks.of(holder.value()));
+    }
+    
+    public static List<EntryIngredient> ofFluidTags(Iterable<TagKey<Fluid>> tagKey) {
+        return ofTags(tagKey, holder -> EntryStacks.of(holder.value()));
     }
     
     public static <T> boolean testFuzzy(EntryIngredient ingredient, EntryStack<T> stack) {
