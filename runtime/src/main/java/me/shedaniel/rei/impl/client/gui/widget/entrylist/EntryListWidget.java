@@ -66,7 +66,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -76,7 +75,6 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     private static final int SIZE = 18;
     protected final RegionRenderingDebugger debugger = new RegionRenderingDebugger();
     protected Rectangle bounds, innerBounds;
-    protected List<EntryStack<?>> allStacks = Collections.emptyList();
     protected List<EntryListStackEntry> entries = Collections.emptyList();
     public final NumberAnimator<Double> scaleIndicator = ValueAnimator.ofDouble(0.0D)
             .withConvention(() -> 0.0D, 8000);
@@ -264,7 +262,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
         if (favoritesListWidget != null) {
             favoritesListWidget.updateFavoritesBounds(searchTerm);
         }
-        if (allStacks == null || (ConfigObject.getInstance().isFavoritesEnabled() && favoritesListWidget == null)) {
+        if (ConfigObject.getInstance().isFavoritesEnabled() && favoritesListWidget == null) {
             updateSearch(searchTerm, true);
         } else {
             updateEntriesPosition();
@@ -292,14 +290,13 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     
     protected abstract void updateEntries(int entrySize, boolean zoomed);
     
-    @ApiStatus.Internal
-    public List<EntryStack<?>> getAllStacks() {
-        return allStacks;
-    }
+    public abstract List<EntryStack<?>> getStacks();
+    
+    protected abstract void setStacks(List<EntryStack<?>> stacks);
     
     public void updateSearch(String searchTerm, boolean ignoreLastSearch) {
         EntryListSearchManager.INSTANCE.update(searchTerm, ignoreLastSearch, stacks -> {
-            allStacks = stacks;
+            setStacks(stacks);
             updateEntriesPosition();
         });
         debugger.debugTime = ConfigObject.getInstance().doDebugRenderTimeRequired();
