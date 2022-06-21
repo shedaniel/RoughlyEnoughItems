@@ -28,19 +28,22 @@ import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
+import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EntryListStackEntry extends DisplayedEntryWidget {
-    private final EntryListWidget parent;
+    private final CollapsingEntryListWidget parent;
     public EntryStack<?> our;
     private NumberAnimator<Double> size = null;
+    private CollapsedStack collapsedStack = null;
     
-    public EntryListStackEntry(EntryListWidget parent, int x, int y, int entrySize, boolean zoomed) {
+    public EntryListStackEntry(CollapsingEntryListWidget parent, int x, int y, int entrySize, boolean zoomed) {
         super(new Point(x, y), entrySize);
         this.parent = parent;
         if (zoomed) {
@@ -83,5 +86,27 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
     @Override
     public boolean containsMouse(double mouseX, double mouseY) {
         return super.containsMouse(mouseX, mouseY) && parent.containsChecked(mouseX, mouseY, true);
+    }
+    
+    @Override
+    protected boolean doAction(double mouseX, double mouseY, int button) {
+        if (collapsedStack != null) {
+            parent.updatedCount++;
+            collapsedStack.setExpanded(!collapsedStack.isExpanded());
+            parent.updateEntriesPosition();
+            Widgets.produceClickSound();
+            return true;
+        }
+        
+        return super.doAction(mouseX, mouseY, button);
+    }
+    
+    public void collapsed(CollapsedStack collapsedStack) {
+        this.collapsedStack = collapsedStack;
+    }
+    
+    @Override
+    protected long getCyclingInterval() {
+        return 100;
     }
 }

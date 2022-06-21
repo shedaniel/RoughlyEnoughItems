@@ -27,17 +27,19 @@ import com.google.common.base.Stopwatch;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.EntryPanelOrdering;
+import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
+import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
+import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class EntryListSearchManager {
@@ -55,13 +57,13 @@ public class EntryListSearchManager {
     
     private AsyncSearchManager searchManager = AsyncSearchManager.createDefault();
     
-    public void update(String searchTerm, boolean ignoreLastSearch, Consumer<List<EntryStack<?>>> update) {
+    public void update(String searchTerm, boolean ignoreLastSearch, Consumer<List</*EntryStack<?> | CollapsedStack*/ Object>> update) {
         Stopwatch stopwatch = Stopwatch.createStarted();
         if (ignoreLastSearch) searchManager.markDirty();
         searchManager.updateFilter(searchTerm);
         if (searchManager.isDirty()) {
             searchManager.getAsync(list -> {
-                List<EntryStack<?>> finalList = copyAndOrder(list);
+                List</*EntryStack<?> | CollapsedStack*/ Object> finalList = collapse(copyAndOrder(list));
                 
                 if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
                     RoughlyEnoughItemsCore.LOGGER.info("Search Used: %s", stopwatch.stop().toString());
@@ -83,6 +85,48 @@ public class EntryListSearchManager {
             list.sort(ENTRY_GROUP_COMPARER);
         if (!ConfigObject.getInstance().isItemListAscending()) {
             Collections.reverse(list);
+        }
+        
+        return list;
+    }
+    
+    private List</*EntryStack<?> | CollapsedStack*/ Object> collapse(List<EntryStack<?>> stacks) {
+        CollapsibleEntryRegistryImpl collapsibleRegistry = (CollapsibleEntryRegistryImpl) CollapsibleEntryRegistry.getInstance();
+        Map<CollapsibleEntryRegistryImpl.Matcher, @Nullable CollapsedStack> matchers = new HashMap<>();
+        
+        for (CollapsibleEntryRegistryImpl.Matcher matcher : collapsibleRegistry.getMatchers()) {
+            matchers.put(matcher, null);
+        }
+        
+        List</*EntryStack<?> | CollapsedStack*/ Object> list = new ArrayList<>();
+        
+        for (EntryStack<?> stack : stacks) {
+            long hashExact = EntryStacks.hashExact(stack);
+            boolean matchedAny = false;
+            
+            for (Map.Entry<CollapsibleEntryRegistryImpl.Matcher, @Nullable CollapsedStack> entry : matchers.entrySet()) {
+                CollapsibleEntryRegistryImpl.Matcher matcher = entry.getKey();
+                
+                if (matcher.matches(stack, hashExact)) {
+                    CollapsedStack collapsed = entry.getValue();
+                    
+                    if (collapsed == null) {
+                        List<EntryStack<?>> ingredient = new ArrayList<>();
+                        ingredient.add(stack);
+                        collapsed = new CollapsedStack(ingredient);
+                        entry.setValue(collapsed);
+                        list.add(collapsed);
+                    } else {
+                        collapsed.getIngredient().add(stack);
+                    }
+                    
+                    matchedAny = true;
+                }
+            }
+            
+            if (!matchedAny) {
+                list.add(stack);
+            }
         }
         
         return list;

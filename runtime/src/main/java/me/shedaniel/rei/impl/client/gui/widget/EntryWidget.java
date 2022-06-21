@@ -282,7 +282,11 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             return EntryStack.empty();
         if (size == 1)
             return entryStacks.get(0);
-        return entryStacks.get(Mth.floor(((System.currentTimeMillis() + stackDisplayOffset) / 1000 % (double) size)));
+        return entryStacks.get(Mth.floor(((System.currentTimeMillis() + stackDisplayOffset) / getCyclingInterval() % (double) size)));
+    }
+    
+    protected long getCyclingInterval() {
+        return 1000;
     }
     
     @Override
