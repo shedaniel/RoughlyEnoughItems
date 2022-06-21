@@ -32,15 +32,12 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
-import me.shedaniel.rei.api.client.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProviderWidget;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitorWidget;
-import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -52,7 +49,6 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.registry.Reloadable;
@@ -63,19 +59,19 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
+import me.shedaniel.rei.impl.common.entry.type.EntryRegistryListener;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Function;
 
 @Environment(EnvType.CLIENT)
@@ -114,7 +110,12 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
             }));
         }
         
-        ((EntryRegistryImpl) registry).refilterListener.add(filteredStacksVisibilityHandler::reset);
+        ((EntryRegistryImpl) registry).listeners.add(new EntryRegistryListener() {
+            @Override
+            public void onReFilter(List<EntryStack<?>> stacks) {
+                filteredStacksVisibilityHandler.reset();
+            }
+        });
     }
     
     @Override
