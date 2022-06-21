@@ -55,6 +55,11 @@ public class NormalEntryRegistryList implements EntryRegistryList {
     }
     
     @Override
+    public List<EntryStack<?>> collect() {
+        return list;
+    }
+    
+    @Override
     public int indexOf(EntryStack<?> stack) {
         return list.indexOf(stack);
     }
