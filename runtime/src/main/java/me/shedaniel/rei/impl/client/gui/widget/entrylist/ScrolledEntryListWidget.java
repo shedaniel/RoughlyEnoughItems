@@ -40,11 +40,13 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
     private List</*EntryStack<?> | EntryIngredient*/ Object> stacks = new ArrayList<>();
+    protected List<EntryListStackEntry> entries = Collections.emptyList();
     protected int blockedCount;
     protected final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
@@ -90,7 +92,7 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
                     List<EntryStack<?>> ingredient = (List<EntryStack<?>>) stack;
                     if (!ingredient.isEmpty()) {
                         entry.entries(ingredient);
-                        helper.add(entry);
+                        helper.addSlow(entry);
                     }
                 }
                 
@@ -187,5 +189,10 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
                 .filter(entry -> entry.getBounds().y <= this.bounds.getMaxY())
                 .map(EntryWidget::getCurrentEntry)
                 .filter(Predicates.not(EntryStack::isEmpty));
+    }
+    
+    @Override
+    protected List<EntryListStackEntry> getEntryWidgets() {
+        return entries;
     }
 }
