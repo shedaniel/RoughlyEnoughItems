@@ -28,6 +28,7 @@ import me.shedaniel.rei.api.client.entry.renderer.EntryRendererRegistry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
@@ -93,6 +94,16 @@ public interface REIClientPlugin extends REIPlugin<REIClientPlugin> {
      */
     @ApiStatus.OverrideOnly
     default void registerEntries(EntryRegistry registry) {
+    }
+    
+    /**
+     * Registers entries to collapse on the entry panel.
+     *
+     * @param registry the collapsible entry registry
+     */
+    @ApiStatus.OverrideOnly
+    @ApiStatus.Experimental
+    default void registerCollapsibleEntries(CollapsibleEntryRegistry registry) {
     }
     
     /**
