@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
+import org.jetbrains.annotations.Nullable;
 
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
@@ -103,6 +104,11 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
     
     public void collapsed(CollapsedStack collapsedStack) {
         this.collapsedStack = collapsedStack;
+    }
+    
+    @Nullable
+    public CollapsedStack getCollapsedStack() {
+        return collapsedStack;
     }
     
     @Override
