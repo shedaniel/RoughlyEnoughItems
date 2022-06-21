@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
 import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
@@ -66,7 +67,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -75,7 +75,6 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     private static final int SIZE = 18;
     protected final RegionRenderingDebugger debugger = new RegionRenderingDebugger();
     protected Rectangle bounds, innerBounds;
-    protected List<EntryListStackEntry> entries = Collections.emptyList();
     public final NumberAnimator<Double> scaleIndicator = ValueAnimator.ofDouble(0.0D)
             .withConvention(() -> 0.0D, 8000);
     
@@ -250,7 +249,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (containsChecked(mouse(), false))
-            for (Widget widget : entries)
+            for (Widget widget : getEntryWidgets())
                 if (widget.keyPressed(keyCode, scanCode, modifiers))
                     return true;
         return false;
@@ -308,7 +307,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     
     @Override
     public List<? extends Widget> children() {
-        return entries;
+        return getEntryWidgets();
     }
     
     @Override
@@ -357,7 +356,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     public EntryStack<?> getFocusedStack() {
         Point mouse = mouse();
         if (containsChecked(mouse, false)) {
-            for (EntryListStackEntry entry : entries) {
+            for (Slot entry : getEntryWidgets()) {
                 EntryStack<?> currentEntry = entry.getCurrentEntry();
                 if (!currentEntry.isEmpty() && entry.containsMouse(mouse)) {
                     return currentEntry.copy();
@@ -366,4 +365,6 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
         }
         return EntryStack.empty();
     }
+    
+    protected abstract List<EntryListStackEntry> getEntryWidgets();
 }
