@@ -29,10 +29,11 @@ import java.util.List;
 
 public class CollapsedStack {
     private final List<EntryStack<?>> ingredient;
-    private boolean expanded;
+    private final CollapsibleEntryRegistryImpl.Entry entry;
     
-    public CollapsedStack(List<EntryStack<?>> ingredient) {
+    public CollapsedStack(List<EntryStack<?>> ingredient, CollapsibleEntryRegistryImpl.Entry entry) {
         this.ingredient = ingredient;
+        this.entry = entry;
     }
     
     public List<EntryStack<?>> getIngredient() {
@@ -40,10 +41,10 @@ public class CollapsedStack {
     }
     
     public boolean isExpanded() {
-        return expanded;
+        return entry.isExpanded();
     }
     
     public void setExpanded(boolean expanded) {
-        this.expanded = expanded;
+        this.entry.setExpanded(expanded);
     }
 }

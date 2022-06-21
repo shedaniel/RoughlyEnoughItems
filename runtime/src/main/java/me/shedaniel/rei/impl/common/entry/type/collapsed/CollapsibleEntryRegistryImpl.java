@@ -36,23 +36,23 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
-    private final List<Matcher> matchers = new ArrayList<>();
+    private final List<Entry> entries = new ArrayList<>();
     
     @Override
     public <T> void group(List<? extends EntryStack<? extends T>> stacks) {
         Objects.requireNonNull(stacks, "stacks");
-        this.matchers.add(new ListMatcher(stacks));
+        this.entries.add(new Entry(new ListMatcher(stacks)));
     }
     
     @Override
     public void group(Predicate<? extends EntryStack<?>> predicate) {
         Objects.requireNonNull(predicate, "predicate");
-        this.matchers.add((stack, hashExact) -> ((Predicate<EntryStack<?>>) predicate).test(stack));
+        this.entries.add(new Entry((stack, hashExact) -> ((Predicate<EntryStack<?>>) predicate).test(stack)));
     }
     
     @Override
     public void startReload() {
-        this.matchers.clear();
+        this.entries.clear();
     }
     
     @Override
@@ -60,9 +60,31 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
         plugin.registerCollapsibleEntries(this);
     }
     
-    public List<Matcher> getMatchers() {
-        return matchers;
+    public List<Entry> getEntries() {
+        return entries;
     }
+    
+    public static class Entry {
+        private final Matcher matcher;
+        private boolean expanded;
+        
+        public Entry(Matcher matcher) {
+            this.matcher = matcher;
+        }
+        
+        public Matcher getMatcher() {
+            return matcher;
+        }
+        
+        public boolean isExpanded() {
+            return expanded;
+        }
+        
+        public void setExpanded(boolean expanded) {
+            this.expanded = expanded;
+        }
+    }
+    
     
     @FunctionalInterface
     public interface Matcher {
