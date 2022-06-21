@@ -78,13 +78,13 @@ public class EntryRegistryImpl implements EntryRegistry {
         registryList = new ReloadingEntryRegistryList();
         entriesHash = new LongOpenHashSet();
         preFilteredList = new PreFilteredEntryList(this);
+        listeners.add(preFilteredList);
         reloading = true;
     }
     
     @Override
     public void endReload() {
         reloading = false;
-        preFilteredList = new PreFilteredEntryList(this);
         if (!(registryList instanceof ReloadingEntryRegistryList)) {
             throw new IllegalStateException("Expected ReloadingEntryRegistryList, got " + registryList.getClass().getName());
         }
