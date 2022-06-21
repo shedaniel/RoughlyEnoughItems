@@ -25,10 +25,12 @@ package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
@@ -38,15 +40,21 @@ import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
     private List</*EntryStack<?> | EntryIngredient*/ Object> stacks = new ArrayList<>();
+    protected List<EntryListStackEntry> entries = Collections.emptyList();
     private int page;
     
     @Override
@@ -63,30 +71,35 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
     protected void renderEntries(boolean fastEntryRendering, PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (ConfigObject.getInstance().doesCacheEntryRendering()) {
             for (EntryListStackEntry entry : entries) {
+                CollapsedStack collapsedStack = entry.getCollapsedStack();
+                if (collapsedStack != null && !collapsedStack.isExpanded()) {
+                    continue;
+                }
+                
                 if (entry.our == null) {
                     CachedEntryListRender.Sprite sprite = CachedEntryListRender.get(entry.getCurrentEntry());
                     if (sprite != null) {
-                        entry.our = ClientEntryStacks.setRenderer(entry.getCurrentEntry().copy().cast(), stack -> new EntryRenderer<Object>() {
-                            @Override
-                            public void render(EntryStack<Object> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                                RenderSystem.setShaderTexture(0, CachedEntryListRender.cachedTextureLocation);
-                                innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), sprite.u0, sprite.u1, sprite.v0, sprite.v1);
-                            }
-                            
-                            @Override
-                            @Nullable
-                            public Tooltip getTooltip(EntryStack<Object> entry, TooltipContext context) {
-                                return stack.getDefinition().getRenderer().getTooltip(entry.cast(), context);
-                            }
-                        });
+                        CachingEntryRenderer renderer = new CachingEntryRenderer(sprite, this::getBlitOffset);
+                        entry.our = ClientEntryStacks.setRenderer(entry.getCurrentEntry().copy().cast(), stack -> renderer);
                     }
                 }
             }
-            
-            BatchedEntryRendererManager.renderSlow(debugger.debugTime, debugger.size, debugger.time, matrices, mouseX, mouseY, delta, entries);
-        } else {
-            new BatchedEntryRendererManager(entries).render(debugger.debugTime, debugger.size, debugger.time, matrices, mouseX, mouseY, delta);
         }
+        
+        BatchedEntryRendererManager manager = new BatchedEntryRendererManager();
+        if (manager.isFastEntryRendering()) {
+            for (EntryListStackEntry entry : entries) {
+                CollapsedStack collapsedStack = entry.getCollapsedStack();
+                if (collapsedStack != null && !collapsedStack.isExpanded()) {
+                    manager.addSlow(entry);
+                } else {
+                    manager.add(entry);
+                }
+            }
+        } else {
+            manager.addAllSlow(entries);
+        }
+        manager.render(debugger.debugTime, debugger.size, debugger.time, matrices, mouseX, mouseY, delta);
     }
     
     @Override
@@ -143,5 +156,10 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
     @Override
     public Stream<EntryStack<?>> getEntries() {
         return entries.stream().map(EntryWidget::getCurrentEntry);
+    }
+    
+    @Override
+    protected List<EntryListStackEntry> getEntryWidgets() {
+        return entries;
     }
 }
