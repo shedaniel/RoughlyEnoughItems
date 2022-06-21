@@ -92,10 +92,10 @@ public class EntryListSearchManager {
     
     private List</*EntryStack<?> | CollapsedStack*/ Object> collapse(List<EntryStack<?>> stacks) {
         CollapsibleEntryRegistryImpl collapsibleRegistry = (CollapsibleEntryRegistryImpl) CollapsibleEntryRegistry.getInstance();
-        Map<CollapsibleEntryRegistryImpl.Matcher, @Nullable CollapsedStack> matchers = new HashMap<>();
+        Map<CollapsibleEntryRegistryImpl.Entry, @Nullable CollapsedStack> entries = new HashMap<>();
         
-        for (CollapsibleEntryRegistryImpl.Matcher matcher : collapsibleRegistry.getMatchers()) {
-            matchers.put(matcher, null);
+        for (CollapsibleEntryRegistryImpl.Entry entry : collapsibleRegistry.getEntries()) {
+            entries.put(entry, null);
         }
         
         List</*EntryStack<?> | CollapsedStack*/ Object> list = new ArrayList<>();
@@ -104,17 +104,17 @@ public class EntryListSearchManager {
             long hashExact = EntryStacks.hashExact(stack);
             boolean matchedAny = false;
             
-            for (Map.Entry<CollapsibleEntryRegistryImpl.Matcher, @Nullable CollapsedStack> entry : matchers.entrySet()) {
-                CollapsibleEntryRegistryImpl.Matcher matcher = entry.getKey();
+            for (Map.Entry<CollapsibleEntryRegistryImpl.Entry, @Nullable CollapsedStack> mapEntry : entries.entrySet()) {
+                CollapsibleEntryRegistryImpl.Entry entry = mapEntry.getKey();
                 
-                if (matcher.matches(stack, hashExact)) {
-                    CollapsedStack collapsed = entry.getValue();
+                if (entry.getMatcher().matches(stack, hashExact)) {
+                    CollapsedStack collapsed = mapEntry.getValue();
                     
                     if (collapsed == null) {
                         List<EntryStack<?>> ingredient = new ArrayList<>();
                         ingredient.add(stack);
-                        collapsed = new CollapsedStack(ingredient);
-                        entry.setValue(collapsed);
+                        collapsed = new CollapsedStack(ingredient, entry);
+                        mapEntry.setValue(collapsed);
                         list.add(collapsed);
                     } else {
                         collapsed.getIngredient().add(stack);
