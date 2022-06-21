@@ -288,13 +288,13 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     
     protected abstract void updateEntries(int entrySize, boolean zoomed);
     
-    public abstract List<EntryStack<?>> getStacks();
+    public abstract List</*EntryStack<?> | CollapsedStack*/ Object> getCollapsedStacks();
     
-    protected abstract void setStacks(List<EntryStack<?>> stacks);
+    protected abstract void setCollapsedStacks(List</*EntryStack<?> | CollapsedStack*/ Object> stacks);
     
     public void updateSearch(String searchTerm, boolean ignoreLastSearch) {
         EntryListSearchManager.INSTANCE.update(searchTerm, ignoreLastSearch, stacks -> {
-            setStacks(stacks);
+            setCollapsedStacks(stacks);
             updateEntriesPosition();
         });
         debugger.debugTime = ConfigObject.getInstance().doDebugRenderTimeRequired();
