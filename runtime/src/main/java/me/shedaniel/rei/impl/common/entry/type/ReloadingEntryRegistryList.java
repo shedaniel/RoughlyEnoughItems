@@ -49,6 +49,11 @@ public class ReloadingEntryRegistryList implements EntryRegistryList {
     }
     
     @Override
+    public List<EntryStack<?>> collect() {
+        return CollectionUtils.map(list, HashedEntryStackWrapper::unwrap);
+    }
+    
+    @Override
     public int indexOf(EntryStack<?> stack) {
         return list.indexOf(new HashedEntryStackWrapper(stack));
     }
