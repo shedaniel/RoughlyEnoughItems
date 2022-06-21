@@ -55,13 +55,17 @@ public class BatchedEntryRendererManager {
         addAll(widgets);
     }
     
+    public boolean isFastEntryRendering() {
+        return fastEntryRendering;
+    }
+    
     public void addAll(Collection<? extends EntryWidget> widgets) {
         if (fastEntryRendering) {
             for (EntryWidget widget : widgets) {
                 add(widget);
             }
         } else {
-            toRender.addAll(widgets);
+            addAllSlow(widgets);
         }
     }
     
@@ -93,6 +97,15 @@ public class BatchedEntryRendererManager {
                 return;
             }
         }
+        
+        addSlow(widget);
+    }
+    
+    public void addAllSlow(Collection<? extends EntryWidget> widgets) {
+        toRender.addAll(widgets);
+    }
+    
+    public void addSlow(EntryWidget widget) {
         toRender.add(widget);
     }
     
