@@ -199,4 +199,12 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
      * @return whether it was successful to remove any entry
      */
     boolean removeEntryFuzzyHashIf(LongPredicate predicate);
+    
+    /**
+     * Returns whether the registry is in its reloading phase.
+     * Registration after the reloading phase will be slow and may not be reflected immediately.
+     *
+     * @return whether the registry is in its reloading phase
+     */
+    boolean isReloading();
 }
