@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
@@ -34,6 +35,7 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 
@@ -41,8 +43,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ScrolledEntryListWidget extends EntryListWidget {
-    private List<EntryStack<?>> stacks = new ArrayList<>();
+public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
+    private List</*EntryStack<?> | EntryIngredient*/ Object> stacks = new ArrayList<>();
     protected int blockedCount;
     protected final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
@@ -64,6 +66,7 @@ public class ScrolledEntryListWidget extends EntryListWidget {
         int nextIndex = skip * innerBounds.width / entrySize();
         this.blockedCount = 0;
         BatchedEntryRendererManager helper = new BatchedEntryRendererManager();
+        Int2ObjectMap<CollapsedStack> indexedCollapsedStack = getCollapsedStackIndexed();
         
         int i = nextIndex;
         for (int cont = nextIndex; cont < entries.size(); cont++) {
@@ -74,12 +77,24 @@ public class ScrolledEntryListWidget extends EntryListWidget {
             if (entryBounds.y > this.bounds.getMaxY()) break;
             if (stacks.size() <= i) break;
             if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height)) {
-                EntryStack<?> stack = stacks.get(i++);
+                /*EntryStack<?> | List<EntryStack<?>>*/
+                Object stack = stacks.get(i++);
                 entry.clearStacks();
-                if (!stack.isEmpty()) {
-                    entry.entry(stack);
-                    helper.add(entry);
+                
+                if (stack instanceof EntryStack<?> entryStack) {
+                    if (!entryStack.isEmpty()) {
+                        entry.entry(entryStack);
+                        helper.add(entry);
+                    }
+                } else {
+                    List<EntryStack<?>> ingredient = (List<EntryStack<?>>) stack;
+                    if (!ingredient.isEmpty()) {
+                        entry.entries(ingredient);
+                        helper.add(entry);
+                    }
                 }
+                
+                entry.collapsed(indexedCollapsedStack.get(i - 1));
             } else {
                 blockedCount++;
             }
@@ -154,12 +169,12 @@ public class ScrolledEntryListWidget extends EntryListWidget {
     }
     
     @Override
-    public List<EntryStack<?>> getStacks() {
+    public List</*EntryStack<?> | List<EntryStack<?>>*/ Object> getStacks() {
         return stacks;
     }
     
     @Override
-    public void setStacks(List<EntryStack<?>> stacks) {
+    public void setStacks(List</*EntryStack<?> | List<EntryStack<?>>*/ Object> stacks) {
         this.stacks = stacks;
     }
     

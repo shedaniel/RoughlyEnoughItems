@@ -76,6 +76,7 @@ import me.shedaniel.rei.impl.client.subsets.SubsetsRegistryImpl;
 import me.shedaniel.rei.impl.client.transfer.TransferHandlerRegistryImpl;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
+import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.types.EmptyEntryDefinition;
 import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
 import me.shedaniel.rei.impl.common.util.IssuesDetector;
@@ -225,6 +226,7 @@ public class RoughlyEnoughItemsCoreClient {
                 new SearchProviderImpl(),
                 new ConfigManagerImpl(),
                 new EntryRegistryImpl(),
+                new CollapsibleEntryRegistryImpl(),
                 new CategoryRegistryImpl(),
                 new DisplayRegistryImpl(),
                 new ScreenRegistryImpl(),

@@ -26,27 +26,27 @@ package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class PaginatedEntryListWidget extends EntryListWidget {
-    private List<EntryStack<?>> stacks = new ArrayList<>();
+public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
+    private List</*EntryStack<?> | EntryIngredient*/ Object> stacks = new ArrayList<>();
     private int page;
     
     @Override
@@ -110,21 +110,33 @@ public class PaginatedEntryListWidget extends EntryListWidget {
             }
         }
         page = Math.max(Math.min(page, getTotalPages() - 1), 0);
-        List<EntryStack<?>> subList = stacks.stream().skip(Math.max(0, page * entries.size())).limit(Math.max(0, entries.size() - Math.max(0, -page * entries.size()))).collect(Collectors.toList());
+        int skip = Math.max(0, page * entries.size());
+        List</*EntryStack<?> | List<EntryStack<?>>*/ Object> subList = stacks.stream().skip(skip).limit(Math.max(0, entries.size() - Math.max(0, -page * entries.size()))).toList();
+        Int2ObjectMap<CollapsedStack> indexedCollapsedStack = getCollapsedStackIndexed();
         for (int i = 0; i < subList.size(); i++) {
-            EntryStack<?> stack = subList.get(i);
-            entries.get(i + Math.max(0, -page * entries.size())).clearStacks().entry(stack);
+            /*EntryStack<?> | List<EntryStack<?>>*/
+            Object stack = subList.get(i);
+            EntryListStackEntry entry = entries.get(i + Math.max(0, -page * entries.size()));
+            entry.clearStacks();
+            
+            if (stack instanceof EntryStack<?> entryStack) {
+                entry.entry(entryStack);
+            } else {
+                entry.entries((List<EntryStack<?>>) stack);
+            }
+            
+            entry.collapsed(indexedCollapsedStack.get(i + skip));
         }
         this.entries = entries;
     }
     
     @Override
-    public List<EntryStack<?>> getStacks() {
+    public List</*EntryStack<?> | List<EntryStack<?>>*/ Object> getStacks() {
         return stacks;
     }
     
     @Override
-    public void setStacks(List<EntryStack<?>> stacks) {
+    public void setStacks(List</*EntryStack<?> | List<EntryStack<?>>*/ Object> stacks) {
         this.stacks = stacks;
     }
     
