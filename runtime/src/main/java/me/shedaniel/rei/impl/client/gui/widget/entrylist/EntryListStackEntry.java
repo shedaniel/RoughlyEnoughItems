@@ -28,41 +28,22 @@ import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.client.ClientHelper;
-import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
-import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
-import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
-import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.plugins.PluginManager;
-import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
-import me.shedaniel.rei.impl.client.view.ViewsImpl;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.sounds.SoundEvents;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
+import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EntryListStackEntry extends DisplayedEntryWidget {
-    private final EntryListWidget parent;
+    private final CollapsingEntryListWidget parent;
     public EntryStack<?> our;
     private NumberAnimator<Double> size = null;
+    private CollapsedStack collapsedStack = null;
     
-    public EntryListStackEntry(EntryListWidget parent, int x, int y, int entrySize, boolean zoomed) {
+    public EntryListStackEntry(CollapsingEntryListWidget parent, int x, int y, int entrySize, boolean zoomed) {
         super(new Point(x, y), entrySize);
         this.parent = parent;
         if (zoomed) {
@@ -105,5 +86,27 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
     @Override
     public boolean containsMouse(double mouseX, double mouseY) {
         return super.containsMouse(mouseX, mouseY) && parent.containsChecked(mouseX, mouseY, true);
+    }
+    
+    @Override
+    protected boolean doAction(double mouseX, double mouseY, int button) {
+        if (collapsedStack != null) {
+            parent.updatedCount++;
+            collapsedStack.setExpanded(!collapsedStack.isExpanded());
+            parent.updateEntriesPosition();
+            Widgets.produceClickSound();
+            return true;
+        }
+        
+        return super.doAction(mouseX, mouseY, button);
+    }
+    
+    public void collapsed(CollapsedStack collapsedStack) {
+        this.collapsedStack = collapsedStack;
+    }
+    
+    @Override
+    protected long getCyclingInterval() {
+        return 100;
     }
 }

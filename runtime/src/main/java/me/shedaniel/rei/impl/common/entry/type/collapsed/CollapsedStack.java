@@ -21,37 +21,29 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.overlay;
+package me.shedaniel.rei.impl.common.entry.type.collapsed;
 
-import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
-import java.util.stream.Stream;
+import java.util.List;
 
-@Environment(EnvType.CLIENT)
-public interface OverlayListWidget {
-    /**
-     * Returns the mouse hovered stack within the overlay list widget.
-     *
-     * @return the mouse hovered stack, returns {@link EntryStack#empty()} if none is hovered
-     */
-    EntryStack<?> getFocusedStack();
+public class CollapsedStack {
+    private final List<EntryStack<?>> ingredient;
+    private boolean expanded;
     
-    /**
-     * Returns the currently visible stacks in the overlay list widget.
-     *
-     * @return the currently visible stacks
-     */
-    Stream<EntryStack<?>> getEntries();
+    public CollapsedStack(List<EntryStack<?>> ingredient) {
+        this.ingredient = ingredient;
+    }
     
-    /**
-     * Returns whether the mouse is within the overlay list widget,
-     * accounting for excluded areas.
-     *
-     * @param point the mouse position
-     * @return whether the mouse is within the overlay list widget
-     */
-    boolean containsMouse(Point point);
+    public List<EntryStack<?>> getIngredient() {
+        return ingredient;
+    }
+    
+    public boolean isExpanded() {
+        return expanded;
+    }
+    
+    public void setExpanded(boolean expanded) {
+        this.expanded = expanded;
+    }
 }
