@@ -25,36 +25,21 @@ package me.shedaniel.rei.impl.common.entry.type;
 
 import it.unimi.dsi.fastutil.longs.LongList;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.LongPredicate;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
-public interface EntryRegistryList {
-    int size();
+public interface EntryRegistryListener {
+    default void addEntryAfter(@Nullable EntryStack<?> afterEntry, EntryStack<?> stack, long stackHashExact) {}
     
-    Stream<EntryStack<?>> stream();
+    default void addEntriesAfter(@Nullable EntryStack<?> afterEntry, List<EntryStack<?>> stacks, @Nullable LongList hashes) {}
     
-    List<EntryStack<?>> collect();
+    default void removeEntry(EntryStack<?> stack, long hashExact) {}
     
-    int indexOf(EntryStack<?> stack);
+    default void removeEntries(List<EntryStack<?>> stacks, @Nullable LongList hashes) {}
     
-    int lastIndexOf(EntryStack<?> stack);
+    default void removeEntriesIf(Predicate<EntryStack<?>> predicate) {}
     
-    void add(EntryStack<?> stack, long hashExact);
-    
-    void add(int index, EntryStack<?> stack, long hashExact);
-    
-    void addAll(List<EntryStack<?>> stacks, LongList hashes);
-    
-    void addAll(int index, List<EntryStack<?>> stacks, LongList hashes);
-    
-    void remove(EntryStack<?> stack, long hashExact);
-    
-    boolean removeIf(Predicate<? extends EntryStack<?>> predicate);
-    
-    boolean removeExactIf(LongPredicate predicate);
-    
-    boolean needsHash();
+    default void onReFilter(List<EntryStack<?>> stacks) {}
 }
