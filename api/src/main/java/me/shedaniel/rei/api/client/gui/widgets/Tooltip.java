@@ -54,8 +54,6 @@ public interface Tooltip {
         return ClientInternals.createTooltipEntry(text);
     }
     
-    @Deprecated
-    @ApiStatus.ScheduledForRemoval
     static Tooltip.Entry entry(TooltipComponent text) {
         return ClientInternals.createTooltipEntry(text);
     }

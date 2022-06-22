@@ -148,6 +148,12 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
         return new ItemStack(bucket);
     }
     
+    @Nullable
+    @Override
+    public FluidStack add(FluidStack o1, FluidStack o2) {
+        return o1.copyWithAmount(o1.getAmount() + o2.getAmount());
+    }
+    
     @Override
     public long hash(EntryStack<FluidStack> entry, FluidStack value, ComparisonContext context) {
         int code = 1;

@@ -41,6 +41,8 @@ import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.api.common.transfer.info.MenuTransferException;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -51,8 +53,10 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
@@ -92,7 +96,8 @@ public class DefaultCategoryHandler implements TransferHandler {
                     .renderer((matrices, mouseX, mouseY, delta, widgets, bounds, d) -> {
                         menuInfo.renderMissingInput(menuInfoContext, oldInputs, missingIndices, matrices, mouseX, mouseY, delta, widgets, bounds);
                         menuInfo.renderMissingInput(menuInfoContext, input, missing, missingIndicesSet, matrices, mouseX, mouseY, delta, widgets, bounds);
-                    });
+                    })
+                    .tooltipMissing(CollectionUtils.map(missing, ingredient -> EntryIngredients.ofItemStacks(ingredient.get())));
         }
         if (!ClientHelper.getInstance().canUseMovePackets()) {
             return Result.createFailed(new TranslatableComponent("error.rei.not.on.server"));
