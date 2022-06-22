@@ -28,6 +28,8 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -53,38 +55,46 @@ public interface CollapsibleEntryRegistry extends Reloadable<REIClientPlugin> {
     /**
      * Groups the given {@link EntryStack}s into a single entry in the entry panel.
      *
+     * @param id     the identifier of the group
+     * @param name   the name of the group
      * @param stacks the stacks to group
      * @param <T>    the type of the stacks
      */
-    <T> void group(List<? extends EntryStack<? extends T>> stacks);
+    <T> void group(ResourceLocation id, Component name, List<? extends EntryStack<? extends T>> stacks);
     
     /**
      * Groups the given {@link EntryStack}s into a single entry in the entry panel.
      *
+     * @param id     the identifier of the group
+     * @param name   the name of the group
      * @param stacks the stacks to group
      * @param <T>    the type of the stacks
      */
-    default <T> void group(EntryStack<? extends T>... stacks) {
-        group(Arrays.asList(stacks));
+    default <T> void group(ResourceLocation id, Component name, EntryStack<? extends T>... stacks) {
+        group(id, name, Arrays.asList(stacks));
     }
     
     /**
      * Groups the matching {@link EntryStack}s via the given predicate into
      * a single entry in the entry panel.
      *
+     * @param id        the identifier of the group
+     * @param name      the name of the group
      * @param predicate the predicate to match the stacks
      */
-    void group(Predicate<? extends EntryStack<?>> predicate);
+    void group(ResourceLocation id, Component name, Predicate<? extends EntryStack<?>> predicate);
     
     /**
      * Groups the matching {@link EntryStack}s via the given predicate into
      * a single entry in the entry panel.
      *
+     * @param id        the identifier of the group
+     * @param name      the name of the group
      * @param type      the entry type to match
      * @param predicate the predicate to match the stacks
      * @param <T>       the type of the stacks
      */
-    default <T> void group(EntryType<T> type, Predicate<EntryStack<T>> predicate) {
-        group(stack -> stack.getType() == type && predicate.test(stack.cast()));
+    default <T> void group(ResourceLocation id, Component name, EntryType<T> type, Predicate<EntryStack<T>> predicate) {
+        group(id, name, stack -> stack.getType() == type && predicate.test(stack.cast()));
     }
 }

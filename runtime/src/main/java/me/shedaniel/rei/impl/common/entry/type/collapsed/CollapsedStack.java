@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.common.entry.type.collapsed;
 
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import net.minecraft.network.chat.Component;
 
 import java.util.List;
 
@@ -46,5 +47,13 @@ public class CollapsedStack {
     
     public void setExpanded(boolean expanded) {
         this.entry.setExpanded(expanded);
+    }
+    
+    public Component getName() {
+        return entry.getName();
+    }
+    
+    public String getModId() {
+        return entry.getModId();
     }
 }
