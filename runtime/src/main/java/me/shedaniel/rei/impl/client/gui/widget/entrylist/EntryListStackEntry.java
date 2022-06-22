@@ -40,6 +40,7 @@ import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.Nullable;
 
@@ -190,8 +191,8 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
         
         Tooltip tooltip = super.getCurrentTooltip(point);
         if (tooltip != null && this.collapsedStack != null) {
-            tooltip.add(new TranslatableComponent("text.rei.collapsed.entry.hint.collapse", collapsedStack.getName(), collapsedStack.getIngredient().size())
-                    .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+            tooltip.entries().add(Mth.clamp(tooltip.entries().size() - 1, 0, tooltip.entries().size() - 1), Tooltip.entry(new TranslatableComponent("text.rei.collapsed.entry.hint.collapse", collapsedStack.getName(), collapsedStack.getIngredient().size())
+                    .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)));
         }
         return tooltip;
     }
