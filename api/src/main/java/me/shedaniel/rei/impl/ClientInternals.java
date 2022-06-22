@@ -36,6 +36,8 @@ import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -70,6 +72,7 @@ public final class ClientInternals {
     private static TriFunction<Point, @Nullable TooltipFlag, Boolean, TooltipContext> tooltipContextProvider = (point, texts, search) -> throwNotSetup();
     private static Supplier<List<String>> jeiCompatMods = ClientInternals::throwNotSetup;
     private static Supplier<Object> builtinClientPlugin = ClientInternals::throwNotSetup;
+    private static Function<List<EntryIngredient>, TooltipComponent> missingTooltip = (stacks) -> throwNotSetup();
     
     private static <T> T throwNotSetup() {
         throw new AssertionError("REI Internals have not been initialized!");
@@ -146,6 +149,10 @@ public final class ClientInternals {
     
     public static PluginManager<REIClientPlugin> getPluginManager() {
         return clientPluginManager.get();
+    }
+    
+    public static TooltipComponent createMissingTooltip(List<EntryIngredient> stacks) {
+        return missingTooltip.apply(stacks);
     }
     
     @Environment(EnvType.CLIENT)

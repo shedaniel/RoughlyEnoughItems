@@ -35,6 +35,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetHolder;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.client.Minecraft;
@@ -70,12 +71,29 @@ public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHold
                 .disableTooltips();
     }
     
-    private static List<EntryIngredient> simplify(List<EntryIngredient> original) {
+    public static List<EntryIngredient> simplify(List<EntryIngredient> original) {
         List<EntryIngredient> out = new ArrayList<>();
         for (EntryIngredient ingredient : original) {
             EntryIngredient filter = ingredient.filter(Predicates.not(EntryStack::isEmpty));
-            if (!filter.isEmpty() && out.stream().noneMatch(s -> equalsList(filter, s))) {
+            if (filter.isEmpty()) continue;
+            EntryIngredient orNull = CollectionUtils.findFirstOrNull(out, s -> equalsList(filter, s));
+            if (orNull == null) {
                 out.add(filter);
+            } else {
+                out.set(out.indexOf(orNull), orNull.map(stack -> {
+                    for (EntryStack<?> filterStack : filter) {
+                        if (EntryStacks.equalsExact(filterStack, stack)) {
+                            EntryDefinition<Object> definition = (EntryDefinition<Object>) filterStack.getDefinition();
+                            Object newValue = definition.add(stack.getValue(), filterStack.getValue());
+                            
+                            if (newValue != null) {
+                                stack = EntryStack.of(definition, newValue);
+                            }
+                        }
+                    }
+                    
+                    return stack;
+                }));
             }
         }
         return out;

@@ -138,6 +138,12 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         return value.copy();
     }
     
+    @Nullable
+    @Override
+    public ItemStack add(ItemStack o1, ItemStack o2) {
+        return ItemStackHooks.copyWithCount(o1, o1.getCount() + o2.getCount());
+    }
+    
     @Override
     public long hash(EntryStack<ItemStack> entry, ItemStack value, ComparisonContext context) {
         int code = 1;
