@@ -70,7 +70,7 @@ public class CollapsedEntriesTooltip implements ClientTooltipComponent, TooltipC
         poses.translate(0, 0, z + 50);
         for (EntryStack<?> entry : stack.getIngredient()) {
             int x1 = x + (i % w) * entrySize;
-            int y1 = y + 1 + (i / w) * entrySize;
+            int y1 = y + (i / w) * entrySize;
             i++;
             if (i / w > 3 - 1) {
                 poses.translate(0, 0, 200);
