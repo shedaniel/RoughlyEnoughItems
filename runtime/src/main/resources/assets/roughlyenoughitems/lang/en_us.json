@@ -270,6 +270,7 @@
   "config.roughlyenoughitems.layout.showUtilsButtons": "Utils Buttons:",
   "config.roughlyenoughitems.commands.gamemodeCommand": "Game Mode Command:",
   "config.roughlyenoughitems.commands.giveCommand": "Give Command:",
+  "config.roughlyenoughitems.commands.timeCommand": "Time Command:",
   "config.roughlyenoughitems.miscellaneous.loadDefaultPlugin": "Load Default Plugin:",
   "config.roughlyenoughitems.miscellaneous.loadDefaultPlugin.boolean.false": "§cNo (Dangerous)",
   "config.roughlyenoughitems.miscellaneous.registerRecipesInAnotherThread": "REI Reload Thread:",
