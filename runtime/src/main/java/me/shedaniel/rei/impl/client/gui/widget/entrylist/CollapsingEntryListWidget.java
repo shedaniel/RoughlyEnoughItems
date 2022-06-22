@@ -97,6 +97,13 @@ public abstract class CollapsingEntryListWidget extends EntryListWidget {
             
             if (collapsedStack != null) {
                 collapsedStackIndexed.put(index, collapsedStack);
+    
+                if (collapsedStack.isExpanded()) {
+                    int size = collapsedStack.getIngredient().size();
+                    for (int i = 1; i < size; i++) {
+                        collapsedStackIndexed.put(index + i, collapsedStack);
+                    }
+                }
             }
             
             index++;
