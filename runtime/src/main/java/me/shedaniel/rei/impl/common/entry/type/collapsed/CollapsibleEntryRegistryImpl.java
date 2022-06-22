@@ -29,6 +29,8 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,15 +41,15 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
     private final List<Entry> entries = new ArrayList<>();
     
     @Override
-    public <T> void group(List<? extends EntryStack<? extends T>> stacks) {
+    public <T> void group(ResourceLocation id, Component name, List<? extends EntryStack<? extends T>> stacks) {
         Objects.requireNonNull(stacks, "stacks");
-        this.entries.add(new Entry(new ListMatcher(stacks)));
+        this.entries.add(new Entry(id.getNamespace(), name, new ListMatcher(stacks)));
     }
     
     @Override
-    public void group(Predicate<? extends EntryStack<?>> predicate) {
+    public void group(ResourceLocation id, Component name, Predicate<? extends EntryStack<?>> predicate) {
         Objects.requireNonNull(predicate, "predicate");
-        this.entries.add(new Entry((stack, hashExact) -> ((Predicate<EntryStack<?>>) predicate).test(stack)));
+        this.entries.add(new Entry(id.getNamespace(), name, (stack, hashExact) -> ((Predicate<EntryStack<?>>) predicate).test(stack)));
     }
     
     @Override
@@ -65,11 +67,23 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
     }
     
     public static class Entry {
+        private final String modId;
+        private final Component name;
         private final Matcher matcher;
         private boolean expanded;
         
-        public Entry(Matcher matcher) {
+        public Entry(String modId, Component name, Matcher matcher) {
+            this.modId = modId;
+            this.name = name;
             this.matcher = matcher;
+        }
+        
+        public String getModId() {
+            return modId;
+        }
+        
+        public Component getName() {
+            return name;
         }
         
         public Matcher getMatcher() {
