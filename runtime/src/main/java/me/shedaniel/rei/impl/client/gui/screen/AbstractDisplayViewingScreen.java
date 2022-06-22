@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.client.gui.screen;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 import dev.architectury.fluid.FluidStack;
 import me.shedaniel.math.Rectangle;
@@ -210,15 +211,18 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                 }
             }
             // TODO: Don't hardcode
-            Stream<? extends TagKey<?>> collection;
+            Registry<?> registry;
             List<Holder<?>> objects;
             if (type == VanillaEntryTypes.ITEM) {
-                collection = Registry.ITEM.getTagNames();
+                registry = Registry.ITEM;
                 objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<ItemStack>castValue().getItem().builtInRegistryHolder());
             } else if (type == VanillaEntryTypes.FLUID) {
-                collection = Registry.FLUID.getTagNames();
+                registry = Registry.FLUID;
                 objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<FluidStack>castValue().getFluid().builtInRegistryHolder());
             } else continue;
+            Stream<? extends TagKey<?>> collection = registry.getTags()
+                    .filter(pair -> pair.getSecond().size() == objects.size())
+                    .map(Pair::getFirst);
             TagKey<?> firstOrNull = CollectionUtils.findFirstOrNull(collection::iterator,
                     key -> CollectionUtils.allMatch(objects, holder -> ((Holder<Object>) holder).is((TagKey<Object>) key)));
             if (firstOrNull != null) {
