@@ -28,6 +28,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.architectury.hooks.item.ItemStackHooks;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
@@ -135,6 +136,12 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     @Nullable
     public ItemStack cheatsAs(EntryStack<ItemStack> entry, ItemStack value) {
         return value.copy();
+    }
+    
+    @Nullable
+    @Override
+    public ItemStack add(ItemStack o1, ItemStack o2) {
+        return ItemStackHooks.copyWithCount(o1, o1.getCount() + o2.getCount());
     }
     
     @Override

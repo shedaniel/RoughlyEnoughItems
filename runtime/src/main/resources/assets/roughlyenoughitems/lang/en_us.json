@@ -70,6 +70,7 @@
   "text.rei.too_long_nbt": "§cItem NBT is too long to be applied in multiplayer.",
   "text.rei.accepts": "Accepts following:",
   "text.rei.tag_accept": "Tag: #%s",
+  "text.rei.missing": "Missing following:",
   "text.rei.performance": "Performance Analysis",
   "text.rei.addons": "REI Addons",
   "text.rei.shapeless": "Shapeless",

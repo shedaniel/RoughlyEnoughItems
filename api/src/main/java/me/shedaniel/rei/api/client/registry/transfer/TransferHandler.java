@@ -26,6 +26,9 @@ package me.shedaniel.rei.api.client.registry.transfer;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -33,6 +36,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -160,6 +164,26 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         Result tooltip(Component component);
         
         /**
+         * Adds a line of tooltip to the result.
+         *
+         * @param component the component to add
+         * @return the result
+         * @since 8.3
+         */
+        @ApiStatus.Experimental
+        Result tooltip(TooltipComponent component);
+        
+        /**
+         * Adds a tooltip component for the missing items.
+         *
+         * @param stacks the missing stacks
+         * @return the result
+         * @since 8.3
+         */
+        @ApiStatus.Experimental
+        Result tooltipMissing(List<EntryIngredient> stacks);
+        
+        /**
          * @return whether this handler has successfully handled the transfer.
          */
         boolean isSuccessful();
@@ -197,7 +221,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         BiConsumer<Point, TooltipSink> getTooltipRenderer();
         
         @ApiStatus.Internal
-        void fillTooltip(List<Component> components);
+        void fillTooltip(List<Tooltip.Entry> entries);
         
         @FunctionalInterface
         interface TooltipSink {
@@ -239,7 +263,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
     final class ResultImpl implements Result {
         private boolean successful, applicable, returningToScreen, blocking;
         private Component error;
-        private List<Component> tooltips = new ArrayList<>();
+        private List<Tooltip.Entry> tooltips = new ArrayList<>();
         private TransferHandlerRenderer renderer;
         private BiConsumer<Point, TooltipSink> tooltipRenderer;
         private int color;
@@ -296,8 +320,19 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         
         @Override
         public Result tooltip(Component component) {
-            this.tooltips.add(component);
+            this.tooltips.add(Tooltip.entry(component));
             return this;
+        }
+        
+        @Override
+        public Result tooltip(TooltipComponent component) {
+            this.tooltips.add(Tooltip.entry(component));
+            return this;
+        }
+        
+        @Override
+        public Result tooltipMissing(List<EntryIngredient> ingredients) {
+            return tooltip(ClientInternals.createMissingTooltip(ingredients));
         }
         
         @Override
@@ -336,13 +371,12 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         }
         
         @Override
-        public void fillTooltip(List<Component> components) {
+        public void fillTooltip(List<Tooltip.Entry> entries) {
             if (isApplicable()) {
-                if (isSuccessful()) {
-                    components.addAll(tooltips);
-                } else {
-                    components.add(getError());
+                if (!isSuccessful()) {
+                    entries.add(Tooltip.entry(getError()));
                 }
+                entries.addAll(tooltips);
             }
         }
     }
