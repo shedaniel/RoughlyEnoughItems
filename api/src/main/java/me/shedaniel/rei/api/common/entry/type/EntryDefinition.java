@@ -160,6 +160,25 @@ public interface EntryDefinition<T> {
         return null;
     }
     
+    /**
+     * Returns a merged copy for two entries.
+     * <p>
+     * It is guaranteed that the two entries satisfy {@link #equals(Object, Object, ComparisonContext)}
+     * with the {@link ComparisonContext#EXACT} context.
+     * <p>
+     * Implementation of this method should just need to copy the first value and sets the count to
+     * the sum of both values.
+     *
+     * @param o1 the first value
+     * @param o2 the second value
+     * @return the merged copy
+     * @since 8.3
+     */
+    @Nullable
+    default T add(T o1, T o2) {
+        return null;
+    }
+    
     long hash(EntryStack<T> entry, T value, ComparisonContext context);
     
     boolean equals(T o1, T o2, ComparisonContext context);

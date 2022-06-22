@@ -62,34 +62,34 @@ public class AutoCraftingEvaluator {
     public static AutoCraftingResult evaluateAutoCrafting(boolean actuallyCrafting, boolean stackedCrafting, Display display, Supplier<Collection<ResourceLocation>> idsSupplier) {
         AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
         AutoCraftingResult result = new AutoCraftingResult();
-        final List<Component> errorTooltip = new ArrayList<>();
+        final List<Tooltip.Entry> errorTooltip = new ArrayList<>();
         result.tooltipRenderer = (pos, sink) -> {
-            List<Component> str = new ArrayList<>(errorTooltip);
+            List<Tooltip.Entry> str = new ArrayList<>(errorTooltip);
             
             if (ConfigObject.getInstance().isFavoritesEnabled()) {
-                str.add(Component.literal(" "));
-                str.add(Component.translatable("text.rei.save.recipes", Component.literal(ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString().toUpperCase(Locale.ROOT)).withStyle(ChatFormatting.BOLD)).withStyle(ChatFormatting.GRAY));
+                str.add(Tooltip.entry(Component.literal(" ")));
+                str.add(Tooltip.entry(Component.translatable("text.rei.save.recipes", Component.literal(ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString().toUpperCase(Locale.ROOT)).withStyle(ChatFormatting.BOLD)).withStyle(ChatFormatting.GRAY)));
             }
             
             if (Minecraft.getInstance().options.advancedItemTooltips && idsSupplier != null) {
                 Collection<ResourceLocation> locations = idsSupplier.get();
                 if (!locations.isEmpty()) {
-                    str.add(Component.literal(" "));
+                    str.add(Tooltip.entry(Component.literal(" ")));
                     for (ResourceLocation location : locations) {
                         String t = I18n.get("text.rei.recipe_id", "", location.toString());
                         if (t.startsWith("\n")) {
                             t = t.substring("\n".length());
                         }
-                        str.add(Component.literal(t).withStyle(ChatFormatting.GRAY));
+                        str.add(Tooltip.entry(Component.literal(t).withStyle(ChatFormatting.GRAY)));
                     }
                 }
             }
             
-            sink.accept(Tooltip.create(pos, str));
+            sink.accept(Tooltip.from(pos, str));
         };
         
         if (containerScreen == null) {
-            errorTooltip.add(Component.translatable("error.rei.not.supported.move.items").withStyle(ChatFormatting.RED));
+            errorTooltip.add(Tooltip.entry(Component.translatable("error.rei.not.supported.move.items").withStyle(ChatFormatting.RED)));
             return result;
         }
         
@@ -145,38 +145,46 @@ public class AutoCraftingEvaluator {
         
         if (!result.hasApplicable) {
             errorTooltip.clear();
-            errorTooltip.add(Component.translatable("error.rei.not.supported.move.items").withStyle(ChatFormatting.RED));
+            errorTooltip.add(Tooltip.entry(Component.translatable("error.rei.not.supported.move.items").withStyle(ChatFormatting.RED)));
             return result;
         }
         
         if (errors.isEmpty()) {
             errorTooltip.clear();
-            errorTooltip.add(Component.translatable("text.auto_craft.move_items"));
+            errorTooltip.add(Tooltip.entry(Component.translatable("text.auto_craft.move_items")));
             
             if (successfulResult != null) {
                 successfulResult.fillTooltip(errorTooltip);
             }
         } else {
             errorTooltip.clear();
-            List<Component> tooltipsFilled = new ArrayList<>();
+            List<Tooltip.Entry> tooltipsFilled = new ArrayList<>();
             for (TransferHandler.Result error : errors) {
                 error.fillTooltip(tooltipsFilled);
             }
             
             if (errors.size() == 1) {
-                for (Component tooltipFilled : tooltipsFilled) {
-                    MutableComponent colored = tooltipFilled.copy().withStyle(ChatFormatting.RED);
-                    if (!CollectionUtils.anyMatch(errorTooltip, ss -> ss.getString().equalsIgnoreCase(tooltipFilled.getString()))) {
-                        errorTooltip.add(colored);
+                for (Tooltip.Entry tooltipFilled : tooltipsFilled) {
+                    if (tooltipFilled.isText()) {
+                        MutableComponent colored = tooltipFilled.getAsText().copy().withStyle(ChatFormatting.RED);
+                        if (!CollectionUtils.anyMatch(errorTooltip, ss -> ss.isText() && ss.getAsText().getString().equalsIgnoreCase(colored.getString()))) {
+                            errorTooltip.add(Tooltip.entry(colored));
+                        }
+                    } else {
+                        errorTooltip.add(tooltipFilled);
                     }
                 }
             } else {
-                errorTooltip.add(Component.translatable("error.rei.multi.errors").withStyle(ChatFormatting.RED));
-                for (Component tooltipFilled : tooltipsFilled) {
-                    MutableComponent colored = Component.literal("- ").withStyle(ChatFormatting.RED)
-                            .append(tooltipFilled.copy().withStyle(ChatFormatting.RED));
-                    if (!CollectionUtils.anyMatch(errorTooltip, ss -> ss.getString().equalsIgnoreCase(colored.getString()))) {
-                        errorTooltip.add(colored);
+                errorTooltip.add(Tooltip.entry(Component.translatable(new TranslatableComponent("error.rei.multi.errors").withStyle(ChatFormatting.RED))));
+                for (Tooltip.Entry tooltipFilled : tooltipsFilled) {
+                    if (tooltipFilled.isText()) {
+                        MutableComponent colored = Component.literal("- ").withStyle(ChatFormatting.RED)
+                                .append(tooltipFilled.getAsText().copy().withStyle(ChatFormatting.RED));
+                        if (!CollectionUtils.anyMatch(errorTooltip, ss -> ss.isText() && ss.getAsText().getString().equalsIgnoreCase(colored.getString()))) {
+                            errorTooltip.add(Tooltip.entry(colored));
+                        }
+                    } else {
+                        errorTooltip.add(tooltipFilled);
                     }
                 }
             }
