@@ -26,12 +26,15 @@ package me.shedaniel.rei.jeicompat.unwrap;
 import lombok.experimental.ExtensionMethod;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DynamicDisplayGenerator;
+import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.jeicompat.wrap.JEIFocus;
 import mezz.jei.api.recipe.RecipeIngredientRole;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.advanced.IRecipeManagerPlugin;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.resources.ResourceLocation;
@@ -51,21 +54,16 @@ public class JEIDynamicDisplayGenerator implements DynamicDisplayGenerator<Displ
     
     private Optional<List<Display>> getDisplays(EntryStack<?> entry, RecipeIngredientRole role) {
         JEIFocus<?> focus = new JEIFocus<>(role, entry.typedJeiValue());
-        List<ResourceLocation> categoryIds = plugin.getRecipeCategoryUids(focus);
+        List<RecipeType<?>> categoryIds = plugin.getRecipeTypes(focus);
         if (categoryIds.isEmpty()) {
             return Optional.empty();
         }
         List<Display> displays = null;
-        for (ResourceLocation categoryId : categoryIds) {
+        for (RecipeType<?> categoryId : categoryIds) {
             IRecipeCategory<Object> category = (IRecipeCategory<Object>) (CategoryRegistry.getInstance().get(categoryId.categoryId()).getCategory().wrapCategory());
             List<Object> recipes = plugin.getRecipes(category, focus);
             if (recipes != null && !recipes.isEmpty()) {
                 if (displays == null) displays = CollectionUtils.flatMap(recipes, JEIPluginDetector::createDisplayFrom);
-                else displays.addAll(CollectionUtils.flatMap(recipes, JEIPluginDetector::createDisplayFrom));
-            }
-            recipes = plugin.getRecipes(category);
-            if (recipes != null && !recipes.isEmpty()) {
-                if (displays == null) displays = new ArrayList<>(CollectionUtils.flatMap(recipes, JEIPluginDetector::createDisplayFrom));
                 else displays.addAll(CollectionUtils.flatMap(recipes, JEIPluginDetector::createDisplayFrom));
             }
         }
@@ -83,5 +81,22 @@ public class JEIDynamicDisplayGenerator implements DynamicDisplayGenerator<Displ
     @Override
     public Optional<List<Display>> getUsageFor(EntryStack<?> entry) {
         return getDisplays(entry, RecipeIngredientRole.INPUT);
+    }
+    
+    @Override
+    public Optional<List<Display>> generate(ViewSearchBuilder builder) {
+        List<Display> displays = null;
+        for (CategoryIdentifier<?> category : builder.getCategories()) {
+            IRecipeCategory<Object> jeiCategory = (IRecipeCategory<Object>) (CategoryRegistry.getInstance().get(category).getCategory().wrapCategory());
+            List<Object> recipes = plugin.getRecipes(jeiCategory);
+            if (recipes != null && !recipes.isEmpty()) {
+                if (displays == null) displays = new ArrayList<>(CollectionUtils.flatMap(recipes, JEIPluginDetector::createDisplayFrom));
+                else displays.addAll(CollectionUtils.flatMap(recipes, JEIPluginDetector::createDisplayFrom));
+            }
+        }
+        if (displays == null) {
+            return Optional.empty();
+        }
+        return Optional.of(CollectionUtils.filterToList(displays, Objects::nonNull));
     }
 }
