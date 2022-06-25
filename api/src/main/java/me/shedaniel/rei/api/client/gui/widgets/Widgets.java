@@ -308,6 +308,11 @@ public final class Widgets {
         return ClientInternals.getWidgetsProvider().noOp();
     }
     
+    @ApiStatus.Experimental
+    public static Widget overflowed(Rectangle bounds, WidgetWithBounds widget) {
+        return ClientInternals.getWidgetsProvider().wrapOverflow(bounds, widget);
+    }
+    
     public static <T> Iterable<T> walk(Iterable<? extends GuiEventListener> listeners, Predicate<GuiEventListener> predicate) {
         return () -> new AbstractIterator<T>() {
             Stack<Iterator<? extends GuiEventListener>> stack;

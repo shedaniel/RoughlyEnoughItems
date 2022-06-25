@@ -54,6 +54,7 @@ import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconBaseCategor
 import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconPaymentCategory;
 import me.shedaniel.rei.plugin.client.categories.cooking.DefaultCookingCategory;
 import me.shedaniel.rei.plugin.client.categories.crafting.DefaultCraftingCategory;
+import me.shedaniel.rei.plugin.client.categories.tag.DefaultTagCategory;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultPotionEffectExclusionZones;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultRecipeBookExclusionZones;
 import me.shedaniel.rei.plugin.client.favorites.GameModeFavoriteEntry;
@@ -71,6 +72,7 @@ import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmeltingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomDisplay;
+import me.shedaniel.rei.plugin.common.displays.tag.DefaultTagDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -156,6 +158,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 new DefaultBeaconPaymentCategory(),
                 new DefaultTillingCategory(),
                 new DefaultPathingCategory(),
+                new DefaultTagCategory(),
                 new DefaultInformationCategory()
         );
         
@@ -213,6 +216,17 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.registerRecipeFiller(UpgradeRecipe.class, RecipeType.SMITHING, DefaultSmithingDisplay::new);
         registry.registerFiller(AnvilRecipe.class, DefaultAnvilDisplay::new);
         registry.registerFiller(BrewingRecipe.class, DefaultBrewingDisplay::new);
+        registry.registerFiller(TagKey.class, tagKey -> {
+            if (tagKey.isFor(Registry.ITEM_REGISTRY)) {
+                return DefaultTagDisplay.ofItems(tagKey);
+            } else if (tagKey.isFor(Registry.BLOCK_REGISTRY)) {
+                return DefaultTagDisplay.ofItems(tagKey);
+            } else if (tagKey.isFor(Registry.FLUID_REGISTRY)) {
+                return DefaultTagDisplay.ofFluids(tagKey);
+            }
+            
+            return null;
+        });
         for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.getFuel().entrySet()) {
             registry.add(new DefaultFuelDisplay(Collections.singletonList(EntryIngredients.of(entry.getKey())), Collections.emptyList(), entry.getValue()));
         }
@@ -283,6 +297,10 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             }
         } else {
             registerForgePotions(registry, this);
+        }
+        
+        for (Registry<?> reg : Registry.REGISTRY) {
+            reg.getTags().forEach(tagPair -> registry.add(tagPair.getFirst()));
         }
     }
     

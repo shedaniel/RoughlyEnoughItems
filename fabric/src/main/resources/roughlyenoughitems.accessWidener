@@ -34,5 +34,11 @@ accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContaine
 mutable       field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        draggingItem            Lnet/minecraft/world/item/ItemStack;
 extendable    method net/minecraft/client/gui/screens/Screen                                   init                    (Lnet/minecraft/client/Minecraft;II)V
 accessible    method net/minecraft/client/gui/screens/Screen                                   addWidget               (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
-accessible class net/minecraft/client/renderer/RenderType$OutlineProperty
-accessible class net/minecraft/client/renderer/RenderType$CompositeState
+accessible class net/minecraft/tags/Tag$OptionalTagEntry
+accessible field net/minecraft/tags/Tag$OptionalTagEntry id Lnet/minecraft/resources/ResourceLocation;
+accessible class net/minecraft/tags/Tag$TagEntry
+accessible field net/minecraft/tags/Tag$TagEntry id Lnet/minecraft/resources/ResourceLocation;
+accessible class net/minecraft/tags/Tag$OptionalElementEntry
+accessible field net/minecraft/tags/Tag$OptionalElementEntry id Lnet/minecraft/resources/ResourceLocation;
+accessible class net/minecraft/tags/Tag$ElementEntry
+accessible field net/minecraft/tags/Tag$ElementEntry id Lnet/minecraft/resources/ResourceLocation;
