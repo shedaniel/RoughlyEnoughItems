@@ -32,7 +32,11 @@ import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
+import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.impl.common.util.RectangleUtils;
+
+import java.io.Closeable;
 
 @SuppressWarnings("UnstableApiUsage")
 public class OverflowWidget extends DelegateWidgetWithTranslate {
@@ -84,9 +88,9 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
                 ScrollingContainer.handleBounceBack(this.velocity.target().y, 0, delta, .0001)
         ), 20);
         
-        ScissorsHandler.INSTANCE.scissor(this.bounds);
-        super.render(poseStack, mouseX, mouseY, delta);
-        ScissorsHandler.INSTANCE.removeLastScissor();
+        try (CloseableScissors scissors = scissor(poseStack, this.bounds)) {
+            super.render(poseStack, mouseX, mouseY, delta);
+        }
     }
     
     @Override
