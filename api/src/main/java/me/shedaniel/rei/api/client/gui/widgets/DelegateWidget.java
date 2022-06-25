@@ -41,9 +41,13 @@ public class DelegateWidget extends WidgetWithBounds {
         this.children = Collections.singletonList(widget);
     }
     
+    public Widget delegate() {
+        return widget;
+    }
+    
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        widget.render(poseStack, i, j, f);
+        delegate().render(poseStack, i, j, f);
     }
     
     @Override
@@ -53,37 +57,38 @@ public class DelegateWidget extends WidgetWithBounds {
     
     @Override
     public Rectangle getBounds() {
-        return widget instanceof WidgetWithBounds ? ((WidgetWithBounds) widget).getBounds() : EMPTY;
+        return delegate() instanceof WidgetWithBounds withBounds ? withBounds.getBounds() : EMPTY;
     }
     
     @Override
     public void setZ(int z) {
-        widget.setZ(z);
+        delegate().setZ(z);
     }
     
     @Override
     public int getZ() {
-        return widget.getZ();
+        return delegate().getZ();
     }
     
     @Nullable
     @Override
     public GuiEventListener getFocused() {
-        return widget;
+        return delegate();
     }
     
     @Override
     public void setFocused(@Nullable GuiEventListener guiEventListener) {
-        if (guiEventListener == widget) {
-            super.setFocused(widget);
+        Widget delegate = delegate();
+        if (guiEventListener == delegate) {
+            super.setFocused(delegate);
         } else {
-            widget.setFocused(guiEventListener);
+            delegate.setFocused(guiEventListener);
         }
     }
     
     @Override
     public boolean containsMouse(double mouseX, double mouseY) {
-        return widget.containsMouse(mouseX, mouseY);
+        return delegate().containsMouse(mouseX, mouseY);
     }
     
     @Override
@@ -93,32 +98,32 @@ public class DelegateWidget extends WidgetWithBounds {
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        return widget.mouseScrolled(mouseX, mouseY, amount);
+        return delegate().mouseScrolled(mouseX, mouseY, amount);
     }
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        return widget.keyPressed(keyCode, scanCode, modifiers);
+        return delegate().keyPressed(keyCode, scanCode, modifiers);
     }
     
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        return widget.keyReleased(keyCode, scanCode, modifiers);
+        return delegate().keyReleased(keyCode, scanCode, modifiers);
     }
     
     @Override
     public boolean charTyped(char character, int modifiers) {
-        return widget.charTyped(character, modifiers);
+        return delegate().charTyped(character, modifiers);
     }
     
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return widget.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return delegate().mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
     
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         this.setDragging(false);
-        return widget.mouseReleased(mouseX, mouseY, button);
+        return delegate().mouseReleased(mouseX, mouseY, button);
     }
 }

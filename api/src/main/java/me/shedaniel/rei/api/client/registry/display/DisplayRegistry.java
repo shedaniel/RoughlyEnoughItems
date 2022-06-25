@@ -219,7 +219,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param <T>       the type of object
      * @param <D>       the type of display
      */
-    default <T extends Recipe<?>, D extends Display> void registerRecipeFiller(Class<T> typeClass, RecipeType<? super T> recipeType, Function<? extends T, D> filler) {
+    default <T extends Recipe<?>, D extends Display> void registerRecipeFiller(Class<T> typeClass, RecipeType<? super T> recipeType, Function<? extends T, @Nullable D> filler) {
         registerRecipeFiller(typeClass, type -> Objects.equals(recipeType, type), filler);
     }
     
@@ -234,7 +234,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param <T>       the type of object
      * @param <D>       the type of display
      */
-    default <T extends Recipe<?>, D extends Display> void registerRecipeFiller(Class<T> typeClass, Predicate<RecipeType<? super T>> recipeType, Function<? extends T, D> filler) {
+    default <T extends Recipe<?>, D extends Display> void registerRecipeFiller(Class<T> typeClass, Predicate<RecipeType<? super T>> recipeType, Function<? extends T, @Nullable D> filler) {
         registerRecipeFiller(typeClass, recipeType, Predicates.alwaysTrue(), filler);
     }
     
@@ -249,7 +249,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param <T>       the type of object
      * @param <D>       the type of display
      */
-    default <T extends Recipe<?>, D extends Display> void registerRecipeFiller(Class<T> typeClass, Predicate<RecipeType<? super T>> recipeType, Predicate<? extends T> predicate, Function<? extends T, D> filler) {
+    default <T extends Recipe<?>, D extends Display> void registerRecipeFiller(Class<T> typeClass, Predicate<RecipeType<? super T>> recipeType, Predicate<? extends T> predicate, Function<? extends T, @Nullable D> filler) {
         registerFiller(typeClass, recipe -> recipeType.test((RecipeType<? super T>) recipe.getType()) && ((Predicate<T>) predicate).test(recipe), filler);
     }
     
@@ -264,7 +264,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param <T>       the type of object
      * @param <D>       the type of display
      */
-    default <T, D extends Display> void registerFiller(Class<T> typeClass, Function<? extends T, D> filler) {
+    default <T, D extends Display> void registerFiller(Class<T> typeClass, Function<? extends T, @Nullable D> filler) {
         registerFiller(typeClass, Predicates.alwaysTrue(), filler);
     }
     
@@ -280,7 +280,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param <T>       the type of object
      * @param <D>       the type of display
      */
-    <T, D extends Display> void registerFiller(Class<T> typeClass, Predicate<? extends T> predicate, Function<? extends T, D> filler);
+    <T, D extends Display> void registerFiller(Class<T> typeClass, Predicate<? extends T> predicate, Function<? extends T, @Nullable D> filler);
     
     /**
      * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
@@ -295,7 +295,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param <D>       the type of display
      */
     @ApiStatus.Experimental
-    <T, D extends Display> void registerFiller(Class<T> typeClass, BiPredicate<? extends T, DisplayAdditionReasons> predicate, Function<? extends T, D> filler);
+    <T, D extends Display> void registerFiller(Class<T> typeClass, BiPredicate<? extends T, DisplayAdditionReasons> predicate, Function<? extends T, @Nullable D> filler);
     
     /**
      * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
@@ -307,7 +307,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param filler    the filler, taking an object and returning a {@code D}
      * @param <D>       the type of display
      */
-    <D extends Display> void registerFiller(Predicate<?> predicate, Function<?, D> filler);
+    <D extends Display> void registerFiller(Predicate<?> predicate, Function<?, @Nullable D> filler);
     
     /**
      * Tries to fill displays from {@code T}.
