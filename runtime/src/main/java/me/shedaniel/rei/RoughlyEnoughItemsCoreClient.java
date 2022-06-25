@@ -38,6 +38,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
@@ -362,7 +363,7 @@ public class RoughlyEnoughItemsCoreClient {
         });
         ClientScreenInputEvent.MOUSE_CLICKED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
             isLeftMousePressed = true;
-            if (shouldReturn(screen))
+            if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             resetFocused(screen);
             if (getOverlay().mouseClicked(mouseX, mouseY, button)) {
@@ -376,7 +377,7 @@ public class RoughlyEnoughItemsCoreClient {
         });
         ClientScreenInputEvent.MOUSE_RELEASED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
             isLeftMousePressed = false;
-            if (shouldReturn(screen))
+            if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             resetFocused(screen);
             if (REIRuntime.getInstance().isOverlayVisible() && getOverlay().mouseReleased(mouseX, mouseY, button)
@@ -386,7 +387,7 @@ public class RoughlyEnoughItemsCoreClient {
             return EventResult.pass();
         });
         ClientScreenInputEvent.MOUSE_SCROLLED_PRE.register((minecraftClient, screen, mouseX, mouseY, amount) -> {
-            if (shouldReturn(screen))
+            if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             resetFocused(screen);
             if (REIRuntime.getInstance().isOverlayVisible() && getOverlay().mouseScrolled(mouseX, mouseY, amount)
@@ -395,7 +396,7 @@ public class RoughlyEnoughItemsCoreClient {
             return EventResult.pass();
         });
         ClientScreenInputEvent.CHAR_TYPED_PRE.register((minecraftClient, screen, character, keyCode) -> {
-            if (shouldReturn(screen))
+            if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
                 if (!REIRuntimeImpl.getSearchField().isFocused())
@@ -415,7 +416,7 @@ public class RoughlyEnoughItemsCoreClient {
             resetFocused(screen);
         });
         ClientScreenInputEvent.MOUSE_DRAGGED_PRE.register((minecraftClient, screen, mouseX1, mouseY1, button, mouseX2, mouseY2) -> {
-            if (shouldReturn(screen))
+            if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             resetFocused(screen);
             if (getOverlay().mouseDragged(mouseX1, mouseY1, button, mouseX2, mouseY2)
@@ -424,7 +425,7 @@ public class RoughlyEnoughItemsCoreClient {
             return EventResult.pass();
         });
         ClientScreenInputEvent.KEY_PRESSED_PRE.register((minecraftClient, screen, i, i1, i2) -> {
-            if (shouldReturn(screen))
+            if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             if (screen instanceof AbstractContainerScreen && ConfigObject.getInstance().doesDisableRecipeBook() && ConfigObject.getInstance().doesFixTabCloseContainer()) {
                 if (i == 258 && minecraftClient.options.keyInventory.matches(i, i1)) {
@@ -442,7 +443,7 @@ public class RoughlyEnoughItemsCoreClient {
             return EventResult.pass();
         });
         ClientScreenInputEvent.KEY_RELEASED_PRE.register((minecraftClient, screen, i, i1, i2) -> {
-            if (shouldReturn(screen))
+            if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
                 if (!REIRuntimeImpl.getSearchField().isFocused())

@@ -41,13 +41,13 @@ public class DelegateWidget extends WidgetWithBounds {
         this.children = Collections.singletonList(widget);
     }
     
-    public Widget delegate() {
+    protected Widget delegate() {
         return widget;
     }
     
     @Override
-    public void render(PoseStack poseStack, int i, int j, float f) {
-        delegate().render(poseStack, i, j, f);
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float delta) {
+        delegate().render(poseStack, mouseX, mouseY, delta);
     }
     
     @Override
