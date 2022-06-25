@@ -268,5 +268,10 @@ public final class InternalWidgets {
         public Widget concatWidgets(List<Widget> widgets) {
             return InternalWidgets.concatWidgets(widgets);
         }
+        
+        @Override
+        public Widget noOp() {
+            return NoOpWidget.INSTANCE;
+        }
     }
 }

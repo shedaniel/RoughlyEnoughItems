@@ -201,5 +201,7 @@ public final class ClientInternals {
         Widget createShapelessIcon(Point point);
         
         Widget concatWidgets(List<Widget> widgets);
+        
+        Widget noOp();
     }
 }
