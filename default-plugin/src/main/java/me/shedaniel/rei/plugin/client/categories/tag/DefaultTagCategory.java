@@ -86,9 +86,9 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
             new GuiComponent() {
                 {
                     fillGradient(matrices, 0, 0, 1000, 1000, 0xff3489eb, 0xffc41868);
-                    for (int x = 0; x < 20; x++) {
-                        for (int y = 0; y < 20; y++) {
-                            Widgets.createSlot(new Point(500 - 9 * 20 + x * 18, 500 - 9 * 20 + y * 18))
+                    for (int x = 0; x < 10; x++) {
+                        for (int y = 0; y < 10; y++) {
+                            Widgets.createSlot(new Point(500 - 9 * 10 + x * 18, 500 - 9 * 10 + y * 18))
                                     .entry(EntryStacks.of(Registry.ITEM.byId(x + y * 10 + 1)))
                                     .disableBackground()
                                     .render(matrices, mouseX, mouseY, delta);

@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -192,18 +193,18 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             scrolling.updatePosition(delta);
             Rectangle innerBounds = scrolling.getScissorBounds();
-            ScissorsHandler.INSTANCE.scissor(innerBounds);
-            int currentY = -scrolling.scrollAmountInt() + innerBounds.y;
-            for (FormattedCharSequence text : texts) {
-                if (text != null && currentY + font.lineHeight >= innerBounds.y && currentY <= innerBounds.getMaxY()) {
-                    font.draw(matrices, text, innerBounds.x + 2, currentY + 2, REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF090909);
+            try (CloseableScissors scissors = scissor(matrices, innerBounds)) {
+                int currentY = -scrolling.scrollAmountInt() + innerBounds.y;
+                for (FormattedCharSequence text : texts) {
+                    if (text != null && currentY + font.lineHeight >= innerBounds.y && currentY <= innerBounds.getMaxY()) {
+                        font.draw(matrices, text, innerBounds.x + 2, currentY + 2, REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF090909);
+                    }
+                    currentY += text == null ? 4 : font.lineHeight;
                 }
-                currentY += text == null ? 4 : font.lineHeight;
             }
-            ScissorsHandler.INSTANCE.removeLastScissor();
-            ScissorsHandler.INSTANCE.scissor(scrolling.getBounds());
-            scrolling.renderScrollBar(0xff000000, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
-            ScissorsHandler.INSTANCE.removeLastScissor();
+            try (CloseableScissors scissors = scissor(matrices, scrolling.getBounds())) {
+                scrolling.renderScrollBar(0xff000000, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+            }
         }
         
         @Override
