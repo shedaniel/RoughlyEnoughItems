@@ -10,7 +10,10 @@
     "MixinScreen"
   ],
   "mixins": [
-    "MixinPacketEncoder"
+    "MixinPacketEncoder",
+    "MixinTagBuilder",
+    "MixinTagLoader",
+    "MixinTagManager"
   ],
   "injectors": {
     "maxShiftBy": 5,

@@ -273,5 +273,10 @@ public final class InternalWidgets {
         public Widget noOp() {
             return NoOpWidget.INSTANCE;
         }
+    
+        @Override
+        public Widget wrapOverflow(Rectangle bounds, WidgetWithBounds widget) {
+            return new OverflowWidget(bounds, widget);
+        }
     }
 }

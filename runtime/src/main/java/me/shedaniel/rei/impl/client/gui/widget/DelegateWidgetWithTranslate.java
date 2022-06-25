@@ -40,18 +40,22 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
         this.translate = translate;
     }
     
+    protected Matrix4f translate() {
+        return translate.get();
+    }
+    
     @Override
-    public void render(PoseStack poseStack, int i, int j, float f) {
+    public void render(PoseStack poseStack, int mouseX, int mouseY, float delta) {
         poseStack.pushPose();
-        poseStack.last().pose().multiply(translate.get());
-        Vector4f mouse = transformMouse(i, j);
-        super.render(poseStack, (int) mouse.x(), (int) mouse.y(), f);
+        poseStack.last().pose().multiply(translate());
+        Vector4f mouse = transformMouse(mouseX, mouseY);
+        super.render(poseStack, (int) mouse.x(), (int) mouse.y(), delta);
         poseStack.popPose();
     }
     
     private Vector4f transformMouse(double mouseX, double mouseY) {
         Vector4f mouse = new Vector4f((float) mouseX, (float) mouseY, 0, 1);
-        mouse.transform(translate.get());
+        mouse.transform(translate());
         return mouse;
     }
     
@@ -62,33 +66,33 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     }
     
     @Override
-    public boolean mouseClicked(double d, double e, int i) {
-        Vector4f mouse = transformMouse(d, e);
-        return super.mouseClicked(mouse.x(), mouse.y(), i);
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        Vector4f mouse = transformMouse(mouseX, mouseY);
+        return super.mouseClicked(mouse.x(), mouse.y(), button);
     }
     
     @Override
-    public boolean mouseReleased(double d, double e, int i) {
-        Vector4f mouse = transformMouse(d, e);
-        return super.mouseReleased(mouse.x(), mouse.y(), i);
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        Vector4f mouse = transformMouse(mouseX, mouseY);
+        return super.mouseReleased(mouse.x(), mouse.y(), button);
     }
     
     @Override
-    public boolean mouseDragged(double d, double e, int i, double f, double g) {
-        Vector4f mouse = transformMouse(d, e);
-        return super.mouseDragged(mouse.x(), mouse.y(), i, f, g);
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        Vector4f mouse = transformMouse(mouseX, mouseY);
+        return super.mouseDragged(mouse.x(), mouse.y(), button, deltaX, deltaY);
     }
     
     @Override
-    public boolean mouseScrolled(double d, double e, double f) {
-        Vector4f mouse = transformMouse(d, e);
-        return super.mouseScrolled(mouse.x(), mouse.y(), f);
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        Vector4f mouse = transformMouse(mouseX, mouseY);
+        return super.mouseScrolled(mouse.x(), mouse.y(), amount);
     }
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         try {
-            Widget.translateMouse(translate.get());
+            Widget.translateMouse(translate());
             return super.keyPressed(keyCode, scanCode, modifiers);
         } finally {
             Widget.popMouse();
@@ -98,7 +102,7 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         try {
-            Widget.translateMouse(translate.get());
+            Widget.translateMouse(translate());
             return super.keyReleased(keyCode, scanCode, modifiers);
         } finally {
             Widget.popMouse();
@@ -108,7 +112,7 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     @Override
     public boolean charTyped(char character, int modifiers) {
         try {
-            Widget.translateMouse(translate.get());
+            Widget.translateMouse(translate());
             return super.charTyped(character, modifiers);
         } finally {
             Widget.popMouse();
