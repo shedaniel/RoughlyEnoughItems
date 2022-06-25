@@ -64,7 +64,7 @@ public class RoughlyEnoughItemsInitializerImpl {
             Version version = FabricLoader.getInstance().getModContainer("architectury").get().getMetadata().getVersion();
             
             try {
-                if (version instanceof SemanticVersion && SemanticVersion.parse("2.6.0").compareTo((SemanticVersion) version) > 0) {
+                if (version instanceof SemanticVersion && SemanticVersion.parse("4.5.75").compareTo((SemanticVersion) version) > 0) {
                     RoughlyEnoughItemsState.error("Architectury API is too old, please update!", "https://www.curseforge.com/minecraft/mc-mods/architectury-api/files/all");
                 }
             } catch (VersionParsingException e) {

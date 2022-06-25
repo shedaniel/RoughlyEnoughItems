@@ -16,7 +16,7 @@ To allow players to view items and recipes.
 [[dependencies.roughlyenoughitems_servercomponent]]
 modId = "architectury"
 mandatory = true
-versionRange = "[5.5,)"
+versionRange = "[5.7,)"
 ordering = "NONE"
 side = "BOTH"
 
