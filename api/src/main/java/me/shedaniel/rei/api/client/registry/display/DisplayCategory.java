@@ -46,13 +46,13 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public interface DisplayCategory<T extends Display> extends DisplayCategoryView<T>, Identifiable {
     /**
-     * Returns the renderer of the icon displayed in the category tab.
-     * <p>
-     * A simple implementation is the {@link me.shedaniel.rei.api.common.entry.EntryStack}.
+     * Returns the identifier of this {@link DisplayCategory}.
+     * This identifier must be the same one used to register the category
+     * in {@link me.shedaniel.rei.api.client.registry.category.CategoryRegistry}.
      *
-     * @return the renderer of the icon
+     * @return the identifier of this category
      */
-    Renderer getIcon();
+    CategoryIdentifier<? extends T> getCategoryIdentifier();
     
     /**
      * Returns the category title for the category.
@@ -60,6 +60,15 @@ public interface DisplayCategory<T extends Display> extends DisplayCategoryView<
      * @return the title
      */
     Component getTitle();
+    
+    /**
+     * Returns the renderer of the icon displayed in the category tab.
+     * <p>
+     * A simple implementation is the {@link me.shedaniel.rei.api.common.entry.EntryStack}.
+     *
+     * @return the renderer of the icon
+     */
+    Renderer getIcon();
     
     /**
      * {@inheritDoc}
@@ -115,15 +124,6 @@ public interface DisplayCategory<T extends Display> extends DisplayCategoryView<
     default int getFixedDisplaysPerPage() {
         return -1;
     }
-    
-    /**
-     * Returns the identifier of this {@link DisplayCategory}.
-     * This identifier must be the same one used to register the category
-     * in {@link me.shedaniel.rei.api.client.registry.category.CategoryRegistry}.
-     *
-     * @return the identifier of this category
-     */
-    CategoryIdentifier<? extends T> getCategoryIdentifier();
     
     /**
      * Returns the display merger for this category.
