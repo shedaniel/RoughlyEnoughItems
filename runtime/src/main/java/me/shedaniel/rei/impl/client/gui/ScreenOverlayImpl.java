@@ -79,6 +79,7 @@ import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import me.shedaniel.rei.impl.common.util.Weather;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -108,6 +109,8 @@ import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.
 @ApiStatus.Internal
 public class ScreenOverlayImpl extends ScreenOverlay {
     private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
+    private static final ResourceLocation ARROW_LEFT_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/arrow_left.png");
+    private static final ResourceLocation ARROW_RIGHT_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/arrow_right.png");
     private static final List<Tooltip> TOOLTIPS = Lists.newArrayList();
     private static final List<Runnable> AFTER_RENDER = Lists.newArrayList();
     private static EntryListWidget entryListWidget = null;
@@ -278,7 +281,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         this.widgets.add(REIRuntimeImpl.getSearchField());
         REIRuntimeImpl.getSearchField().setResponder(s -> getEntryListWidget().updateSearch(s, false));
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            widgets.add(leftButton = Widgets.createButton(new Rectangle(bounds.x, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent("text.rei.left_arrow"))
+            widgets.add(leftButton = Widgets.createButton(new Rectangle(bounds.x, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TextComponent(""))
                     .onClick(button -> {
                         getEntryListWidget().previousPage();
                         if (getEntryListWidget().getPage() < 0)
@@ -288,8 +291,17 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
                     .tooltipLine(new TranslatableComponent("text.rei.previous_page"))
                     .focusable(false));
+            widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+                helper.setBlitOffset(helper.getBlitOffset() + 1);
+                RenderSystem.setShaderTexture(0, ARROW_LEFT_TEXTURE);
+                Rectangle bounds = leftButton.getBounds();
+                matrices.pushPose();
+                blit(matrices, bounds.x + 4, bounds.y + 4, 0, 0, 9, 9, 9, 9);
+                matrices.popPose();
+                helper.setBlitOffset(helper.getBlitOffset() - 1);
+            }));
             Button changelogButton;
-            widgets.add(changelogButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18 - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent(""))
+            widgets.add(changelogButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18 - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TextComponent(""))
                     .onClick(button -> {
                         ChangelogLoader.show();
                     })
@@ -306,7 +318,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 matrices.popPose();
                 helper.setBlitOffset(helper.getBlitOffset() - 1);
             }));
-            widgets.add(rightButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TranslatableComponent("text.rei.right_arrow"))
+            widgets.add(rightButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TextComponent(""))
                     .onClick(button -> {
                         getEntryListWidget().nextPage();
                         if (getEntryListWidget().getPage() >= getEntryListWidget().getTotalPages())
@@ -316,6 +328,16 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                     .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
                     .tooltipLine(new TranslatableComponent("text.rei.next_page"))
                     .focusable(false));
+            widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+                helper.setBlitOffset(helper.getBlitOffset() + 1);
+                RenderSystem.setShaderTexture(0, ARROW_RIGHT_TEXTURE);
+                Rectangle bounds = rightButton.getBounds();
+                matrices.pushPose();
+                matrices.translate(-0.5, 0, 0);
+                blit(matrices, bounds.x + 4, bounds.y + 4, 0, 0, 9, 9, 9, 9);
+                matrices.popPose();
+                helper.setBlitOffset(helper.getBlitOffset() - 1);
+            }));
         }
         
         final Rectangle configButtonArea = getConfigButtonArea();
