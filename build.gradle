@@ -28,10 +28,6 @@ subprojects {
         silentMojangMappingsLicense()
     }
 
-    repositories {
-        mavenLocal()
-    }
-    
     dependencies {
         minecraft("com.mojang:minecraft:${rootProject.minecraft_version}")
         mappings(loom.layered {
