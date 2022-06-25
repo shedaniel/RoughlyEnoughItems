@@ -30,11 +30,13 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 import dev.architectury.fluid.FluidStack;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategoryView;
@@ -323,5 +325,55 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         }
         
         widget.tooltipProcessor(new TooltipProcessor());
+    }
+    
+    private static ScreenOverlay getOverlay() {
+        return REIRuntime.getInstance().getOverlay().orElseThrow(() -> new IllegalStateException("Overlay not initialized!"));
+    }
+    
+    private boolean handleFocuses(int button) {
+        if (button == 0) {
+            setDragging(true);
+        }
+        handleFocuses();
+        return true;
+    }
+    
+    private boolean handleFocuses() {
+        if (getFocused() instanceof ScreenOverlay || getFocused() == this) {
+            setFocused(null);
+        }
+        
+        return true;
+    }
+    
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return super.mouseClicked(mouseX, mouseY, button) || (getOverlay().mouseClicked(mouseX, mouseY, button) && handleFocuses());
+    }
+    
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        return super.mouseReleased(mouseX, mouseY, button) || (getOverlay().mouseReleased(mouseX, mouseY, button) && handleFocuses());
+    }
+    
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || (getOverlay().mouseDragged(mouseX, mouseY, button, deltaX, deltaY) && handleFocuses());
+    }
+    
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        return super.mouseScrolled(mouseX, mouseY, amount) || (getOverlay().mouseScrolled(mouseX, mouseY, amount) && handleFocuses());
+    }
+    
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        return super.keyReleased(keyCode, scanCode, modifiers) || (getOverlay().keyReleased(keyCode, scanCode, modifiers) && handleFocuses());
+    }
+    
+    @Override
+    public boolean charTyped(char character, int modifiers) {
+        return super.charTyped(character, modifiers) || (getOverlay().charTyped(character, modifiers) && handleFocuses());
     }
 }

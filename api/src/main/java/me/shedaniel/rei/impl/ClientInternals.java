@@ -37,7 +37,6 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
-import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -203,5 +202,7 @@ public final class ClientInternals {
         Widget concatWidgets(List<Widget> widgets);
         
         Widget noOp();
+        
+        Widget wrapOverflow(Rectangle bounds, WidgetWithBounds widget);
     }
 }
