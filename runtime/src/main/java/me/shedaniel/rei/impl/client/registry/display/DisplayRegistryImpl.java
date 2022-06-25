@@ -260,6 +260,12 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
                 addWithReason(recipe, DisplayAdditionReason.RECIPE_MANAGER);
             }
         }
+        
+        for (CategoryIdentifier<?> identifier : displays.keySet()) {
+            if (CategoryRegistry.getInstance().tryGet(identifier).isEmpty()) {
+                RoughlyEnoughItemsCore.LOGGER.throwException(new IllegalStateException("Displays registered for unknown registry: " + identifier));
+            }
+        }
     }
     
     @Override
