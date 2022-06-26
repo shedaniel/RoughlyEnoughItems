@@ -85,7 +85,7 @@ public abstract class Widget extends AbstractContainerEventHandler implements ne
         Point mouse = mouse();
         Vector4f mouseVec = new Vector4f(mouse.x, mouse.y, 0, 1);
         mouseVec.transform(pose);
-        return pushMouse(mouse);
+        return pushMouse(new Point(mouseVec.x(), mouseVec.y()));
     }
     
     public int getZ() {
