@@ -368,6 +368,11 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     }
     
     @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        return super.keyPressed(keyCode, scanCode, modifiers) || (getOverlay().keyPressed(keyCode, scanCode, modifiers) && handleFocuses());
+    }
+    
+    @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         return super.keyReleased(keyCode, scanCode, modifiers) || (getOverlay().keyReleased(keyCode, scanCode, modifiers) && handleFocuses());
     }

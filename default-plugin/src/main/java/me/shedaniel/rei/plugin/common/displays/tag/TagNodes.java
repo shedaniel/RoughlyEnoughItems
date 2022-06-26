@@ -36,6 +36,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
@@ -187,11 +188,15 @@ public class TagNodes {
         if (tagData == null) return DataResult.error("Tag Missing: " + tagKey.location());
         
         TagNode<T> self = TagNode.ofReference(tagKey);
+        List<Holder<T>> holders = new ArrayList<>();
         for (int element : tagData.otherElements()) {
             Optional<Holder<T>> holder = registry.getHolder(element);
             if (holder.isPresent()) {
-                self.addValueChild(holder.get());
+                holders.add(holder.get());
             }
+        }
+        if (!holders.isEmpty()) {
+            self.addValuesChild(HolderSet.direct(holders));
         }
         for (ResourceLocation childTagId : tagData.otherTags()) {
             TagKey<T> childTagKey = TagKey.create(tagKey.registry(), childTagId);

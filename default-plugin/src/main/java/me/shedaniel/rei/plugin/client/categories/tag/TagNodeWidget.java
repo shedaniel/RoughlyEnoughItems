@@ -21,33 +21,23 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.widget;
+package me.shedaniel.rei.plugin.client.categories.tag;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import net.minecraft.client.gui.components.events.GuiEventListener;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
+import net.minecraft.core.Holder;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.function.Function;
 
-public class NoOpWidget extends WidgetWithBounds {
-    public static final NoOpWidget INSTANCE = new NoOpWidget();
-    
-    private NoOpWidget() {
-    }
-    
-    @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-    }
-    
-    @Override
-    public List<? extends GuiEventListener> children() {
-        return Collections.emptyList();
-    }
-    
-    @Override
-    public Rectangle getBounds() {
-        return new Rectangle();
+public abstract class TagNodeWidget<S, T> extends WidgetWithBounds {
+    static <S, T> TagNodeWidget<S, T> create(TagNode<S> node, Function<Holder<S>, EntryStack<T>> mapper) {
+        if (node.getReference() != null) {
+            return new ReferenceTagNodeWidget<>(node, mapper);
+        } else if (node.getValue() != null) {
+            return new ValueTagNodeWidget<>(node, mapper);
+        } else {
+            throw new IllegalArgumentException("TagNode has no value or reference");
+        }
     }
 }
