@@ -24,14 +24,14 @@
 package me.shedaniel.rei.plugin.common.displays.tag;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public abstract class TagNode<T> {
@@ -41,8 +41,8 @@ public abstract class TagNode<T> {
         this.children = new ArrayList<>();
     }
     
-    public static <T> TagNode<T> ofValue(Holder<T> value) {
-        return new ValueTagNode<>(value);
+    public static <T> TagNode<T> ofValues(HolderSet<T> value) {
+        return new ValuesTagNode<>(value);
     }
     
     public static <T> TagNode<T> ofReference(TagKey<T> key) {
@@ -57,8 +57,8 @@ public abstract class TagNode<T> {
         children.add(child);
     }
     
-    public void addValueChild(Holder<T> child) {
-        children.add(ofValue(child));
+    public void addValuesChild(HolderSet<T> child) {
+        children.add(ofValues(child));
     }
     
     public void addReferenceChild(TagKey<T> child) {
@@ -66,29 +66,27 @@ public abstract class TagNode<T> {
     }
     
     public String asTree() {
-        StringBuilder buffer = new StringBuilder(50);
-        printTree(buffer, "", "");
-        return buffer.toString();
+        StringBuilder builder = new StringBuilder(50);
+        printTree(builder, "", "");
+        return builder.toString();
     }
     
-    private void printTree(StringBuilder buffer, String prefix, String childrenPrefix) {
-        buffer.append(prefix);
-        buffer.append(asText());
-        buffer.append('\n');
+    private void printTree(StringBuilder builder, String prefix, String childrenPrefix) {
+        asText(prefix, builder);
         for (Iterator<TagNode<T>> it = children.iterator(); it.hasNext(); ) {
             TagNode<T> next = it.next();
             if (it.hasNext()) {
-                next.printTree(buffer, childrenPrefix + "├── ", childrenPrefix + "│   ");
+                next.printTree(builder, childrenPrefix + "├── ", childrenPrefix + "│   ");
             } else {
-                next.printTree(buffer, childrenPrefix + "└── ", childrenPrefix + "    ");
+                next.printTree(builder, childrenPrefix + "└── ", childrenPrefix + "    ");
             }
         }
     }
     
-    protected abstract String asText();
+    protected abstract void asText(String prefix, StringBuilder builder);
     
     @Nullable
-    public Holder<T> getValue() {
+    public HolderSet<T> getValue() {
         return null;
     }
     
@@ -97,21 +95,27 @@ public abstract class TagNode<T> {
         return null;
     }
     
-    private static class ValueTagNode<T> extends TagNode<T> {
-        private final Holder<T> value;
+    private static class ValuesTagNode<T> extends TagNode<T> {
+        private final HolderSet<T> value;
         
-        public ValueTagNode(Holder<T> value) {
+        public ValuesTagNode(HolderSet<T> value) {
             this.value = value;
         }
         
         @Override
-        public Holder<T> getValue() {
+        public HolderSet<T> getValue() {
             return value;
         }
         
         @Override
-        protected String asText() {
-            return value.unwrapKey().map(ResourceKey::location).orElse(null) + "";
+        protected void asText(String prefix, StringBuilder builder) {
+            for (Holder<T> holder : value) {
+                holder.unwrapKey().ifPresent(key -> {
+                    builder.append(prefix);
+                    builder.append(key.location().toString());
+                    builder.append('\n');
+                });
+            }
         }
     }
     
@@ -128,8 +132,10 @@ public abstract class TagNode<T> {
         }
         
         @Override
-        protected String asText() {
-            return key.location() + "";
+        protected void asText(String prefix, StringBuilder builder) {
+            builder.append(prefix);
+            builder.append(key.location());
+            builder.append('\n');
         }
     }
 }

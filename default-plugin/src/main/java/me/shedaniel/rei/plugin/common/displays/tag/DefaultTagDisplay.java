@@ -95,4 +95,8 @@ public class DefaultTagDisplay<S, T> implements Display {
     public TagKey<S> getKey() {
         return key;
     }
+    
+    public Function<Holder<S>, EntryStack<T>> getMapper() {
+        return mapper;
+    }
 }

@@ -304,13 +304,28 @@ public final class Widgets {
         return ClientInternals.getWidgetsProvider().concatWidgets(widgets);
     }
     
-    public static Widget noOp() {
+    public static WidgetWithBounds noOp() {
         return ClientInternals.getWidgetsProvider().noOp();
     }
     
     @ApiStatus.Experimental
-    public static Widget overflowed(Rectangle bounds, WidgetWithBounds widget) {
+    public static WidgetWithBounds overflowed(Rectangle bounds, WidgetWithBounds widget) {
         return ClientInternals.getWidgetsProvider().wrapOverflow(bounds, widget);
+    }
+    
+    @ApiStatus.Experimental
+    public static WidgetWithBounds padded(int padding, WidgetWithBounds widget) {
+        return padded(padding, padding, padding, padding, widget);
+    }
+    
+    @ApiStatus.Experimental
+    public static WidgetWithBounds padded(int padX, int padY, WidgetWithBounds widget) {
+        return padded(padX, padX, padY, padY, widget);
+    }
+    
+    @ApiStatus.Experimental
+    public static WidgetWithBounds padded(int padLeft, int padRight, int padTop, int padBottom, WidgetWithBounds widget) {
+        return ClientInternals.getWidgetsProvider().wrapPadded(padLeft, padRight, padTop, padBottom, widget);
     }
     
     public static <T> Iterable<T> walk(Iterable<? extends GuiEventListener> listeners, Predicate<GuiEventListener> predicate) {
