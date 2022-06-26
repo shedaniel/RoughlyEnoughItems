@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
@@ -34,9 +33,6 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.impl.common.util.RectangleUtils;
-
-import java.io.Closeable;
 
 @SuppressWarnings("UnstableApiUsage")
 public class OverflowWidget extends DelegateWidgetWithTranslate {
@@ -70,15 +66,17 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     public void render(PoseStack poseStack, int mouseX, int mouseY, float delta) {
         Rectangle widgetBounds = ((WidgetWithBounds) widget).getBounds();
         this.scale.update(delta);
-        this.scale.setTarget(ScrollingContainer.handleBounceBack(this.scale.target() - 1,
-                Math.min(widgetBounds.width * 1.0F / getBounds().width, widgetBounds.height * 1.0F / getBounds().height) - 1, delta, .001) + 1);
+        this.scale.setTarget(ScrollingContainer.handleBounceBack(this.scale.target() - 0.78,
+                Math.min(widgetBounds.width * 1.0F / getBounds().width, widgetBounds.height * 1.0F / getBounds().height) - 0.78, delta, .001) + 0.78);
         this.translate.update(delta);
-        this.translate.setAs(new FloatingPoint(
-                ScrollingContainer.handleBounceBack(this.translate.target().x + widgetBounds.width - getBounds().width / 2 * scale.value(),
-                        widgetBounds.width - getBounds().width * scale.value(), delta, .001) - (widgetBounds.width - getBounds().width / 2 * scale.value()),
-                ScrollingContainer.handleBounceBack(this.translate.target().y + widgetBounds.height - getBounds().height / 2 * scale.value(),
-                        widgetBounds.height - getBounds().height * scale.value(), delta, .001) - (widgetBounds.height - getBounds().height / 2 * scale.value())
-        ));
+        for (int i = 0; i < 3; i++) {
+            this.translate.setAs(new FloatingPoint(
+                    ScrollingContainer.handleBounceBack(this.translate.target().x + widgetBounds.width - getBounds().width / 2 * scale.value(),
+                            widgetBounds.width - getBounds().width * scale.value(), delta, .0001) - (widgetBounds.width - getBounds().width / 2 * scale.value()),
+                    ScrollingContainer.handleBounceBack(this.translate.target().y + widgetBounds.height - getBounds().height / 2 * scale.value(),
+                            widgetBounds.height - getBounds().height * scale.value(), delta, .0001) - (widgetBounds.height - getBounds().height / 2 * scale.value())
+            ));
+        }
         if (!RoughlyEnoughItemsCoreClient.isLeftMousePressed) {
             this.translate.setAs(new FloatingPoint(this.translate.value().x + this.velocity.value().x, this.translate.value().y + this.velocity.value().y));
         }
@@ -89,7 +87,13 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
         ), 20);
         
         try (CloseableScissors scissors = scissor(poseStack, this.bounds)) {
-            super.render(poseStack, mouseX, mouseY, delta);
+            boolean containsMouse = this.bounds.contains(mouseX, mouseY);
+            
+            if (containsMouse) {
+                super.render(poseStack, mouseX, mouseY, delta);
+            } else {
+                super.render(poseStack, Integer.MAX_VALUE, Integer.MAX_VALUE, delta);
+            }
         }
     }
     
