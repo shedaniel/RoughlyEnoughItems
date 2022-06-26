@@ -23,31 +23,29 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 
-import java.util.Collections;
-import java.util.List;
-
-public class NoOpWidget extends WidgetWithBounds {
-    public static final NoOpWidget INSTANCE = new NoOpWidget();
+public class PaddedWidget extends DelegateWidgetWithTranslate {
+    private final int padLeft, padRight, padTop, padBottom;
     
-    private NoOpWidget() {
+    public PaddedWidget(int padLeft, int padRight, int padTop, int padBottom, WidgetWithBounds widget) {
+        super(widget, Matrix4f::new);
+        this.padLeft = padLeft;
+        this.padRight = padRight;
+        this.padTop = padTop;
+        this.padBottom = padBottom;
     }
     
     @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-    }
-    
-    @Override
-    public List<? extends GuiEventListener> children() {
-        return Collections.emptyList();
+    protected Matrix4f translate() {
+        return Matrix4f.createTranslateMatrix(padLeft, padRight, 0);
     }
     
     @Override
     public Rectangle getBounds() {
-        return new Rectangle();
+        Rectangle widgetBounds = ((WidgetWithBounds) widget).getBounds();
+        return new Rectangle(widgetBounds.x - padLeft, widgetBounds.y - padTop, widgetBounds.width + padLeft + padRight, widgetBounds.height + padTop + padBottom);
     }
 }

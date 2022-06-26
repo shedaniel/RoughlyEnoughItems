@@ -25,6 +25,8 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
+import com.mojang.math.Transformation;
+import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import me.shedaniel.rei.api.client.gui.widgets.DelegateWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -44,6 +46,13 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
         return translate.get();
     }
     
+    protected final Matrix4f inverseTranslate() {
+        Transformation transformation = new Transformation(translate());
+        Transformation inverse = transformation.inverse();
+        if (inverse != null) inverse.getScale(); // This has a side effect
+        return inverse == null ? Transformation.identity().getMatrix() : inverse.getMatrix();
+    }
+    
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float delta) {
         poseStack.pushPose();
@@ -55,7 +64,7 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     
     private Vector4f transformMouse(double mouseX, double mouseY) {
         Vector4f mouse = new Vector4f((float) mouseX, (float) mouseY, 0, 1);
-        mouse.transform(translate());
+        mouse.transform(inverseTranslate());
         return mouse;
     }
     
@@ -92,7 +101,7 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         try {
-            Widget.translateMouse(translate());
+            Widget.translateMouse(inverseTranslate());
             return super.keyPressed(keyCode, scanCode, modifiers);
         } finally {
             Widget.popMouse();
@@ -102,7 +111,7 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         try {
-            Widget.translateMouse(translate());
+            Widget.translateMouse(inverseTranslate());
             return super.keyReleased(keyCode, scanCode, modifiers);
         } finally {
             Widget.popMouse();
@@ -112,7 +121,7 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     @Override
     public boolean charTyped(char character, int modifiers) {
         try {
-            Widget.translateMouse(translate());
+            Widget.translateMouse(inverseTranslate());
             return super.charTyped(character, modifiers);
         } finally {
             Widget.popMouse();
