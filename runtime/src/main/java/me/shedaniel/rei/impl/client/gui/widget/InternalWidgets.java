@@ -76,7 +76,7 @@ public final class InternalWidgets {
                 if (result.hasApplicable) {
                     autoCraftingButton.setText(text);
                 } else {
-                    autoCraftingButton.setText(Component.literal("?"));
+                    autoCraftingButton.setText(Component.literal("!"));
                 }
                 
                 if (result.hasApplicable && (containsMouse(mouseX, mouseY) || autoCraftingButton.isFocused()) && result.renderer != null) {
@@ -268,13 +268,18 @@ public final class InternalWidgets {
         }
         
         @Override
-        public Widget noOp() {
+        public WidgetWithBounds noOp() {
             return NoOpWidget.INSTANCE;
         }
-    
+        
         @Override
-        public Widget wrapOverflow(Rectangle bounds, WidgetWithBounds widget) {
-            return new OverflowWidget(bounds, widget);
+        public WidgetWithBounds wrapOverflow(Rectangle bounds, WidgetWithBounds widget) {
+            return new OverflowWidget(bounds, new PaddedCenterWidget(bounds, widget));
+        }
+        
+        @Override
+        public WidgetWithBounds wrapPadded(int padLeft, int padRight, int padTop, int padBottom, WidgetWithBounds widget) {
+            return new PaddedWidget(padLeft, padRight, padTop, padBottom, widget);
         }
     }
 }

@@ -23,31 +23,36 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 
-import java.util.Collections;
-import java.util.List;
-
-public class NoOpWidget extends WidgetWithBounds {
-    public static final NoOpWidget INSTANCE = new NoOpWidget();
+public class PaddedCenterWidget extends DelegateWidgetWithTranslate {
+    private final Rectangle bounds;
     
-    private NoOpWidget() {
+    public PaddedCenterWidget(Rectangle bounds, WidgetWithBounds widget) {
+        super(widget, Matrix4f::new);
+        this.bounds = bounds;
     }
     
     @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-    }
-    
-    @Override
-    public List<? extends GuiEventListener> children() {
-        return Collections.emptyList();
+    protected Matrix4f translate() {
+        Rectangle widgetBounds = ((WidgetWithBounds) widget).getBounds();
+        float xTranslate = 0, yTranslate = 0;
+        if (widgetBounds.width < bounds.width) {
+            xTranslate = (bounds.width - widgetBounds.width) / 2f;
+        }
+        if (widgetBounds.height < bounds.height) {
+            yTranslate = (bounds.height - widgetBounds.height) / 2f;
+        }
+        return Matrix4f.createTranslateMatrix(xTranslate, yTranslate, 0);
     }
     
     @Override
     public Rectangle getBounds() {
-        return new Rectangle();
+        Rectangle widgetBounds = ((WidgetWithBounds) widget).getBounds();
+        int newWidth = Math.max(widgetBounds.width, bounds.width);
+        int newHeight = Math.max(widgetBounds.height, bounds.height);
+        return new Rectangle(bounds.getCenterX() - newWidth / 2f, bounds.getCenterY() - newHeight / 2f, newWidth, newHeight);
     }
 }

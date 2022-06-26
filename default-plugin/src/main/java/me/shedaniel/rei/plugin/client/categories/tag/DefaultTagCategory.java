@@ -26,7 +26,7 @@ package me.shedaniel.rei.plugin.client.categories.tag;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.Renderer;
-import me.shedaniel.rei.api.client.gui.widgets.DelegateWidget;
+import me.shedaniel.rei.api.client.gui.widgets.DelegateWidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -38,8 +38,6 @@ import me.shedaniel.rei.plugin.common.displays.tag.DefaultTagDisplay;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -73,39 +71,31 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
         Rectangle innerBounds = new Rectangle(bounds.x + 6 + 14, bounds.y + 6, bounds.width - 12 - 14, bounds.height - 12);
         widgets.add(Widgets.createSlotBase(innerBounds));
         
-        Widget[] delegate = new Widget[]{Widgets.noOp()};
+        WidgetWithBounds[] delegate = new WidgetWithBounds[]{Widgets.noOp()};
         TagNode<?>[] tagNode = new TagNode[]{null};
         Rectangle overflowBounds = new Rectangle(innerBounds.x + 1, innerBounds.y + 1, innerBounds.width - 2, innerBounds.height - 2);
-        WidgetWithBounds inner = Widgets.withBounds(new DelegateWidget(Widgets.noOp()) {
+        widgets.add(Widgets.withTranslate(Widgets.overflowed(overflowBounds, new DelegateWidgetWithBounds(Widgets.noOp(), Rectangle::new) {
             @Override
-            protected Widget delegate() {
+            protected WidgetWithBounds delegate() {
                 return delegate[0];
             }
-        }, overflowBounds);
-        widgets.add(Widgets.withTranslate(Widgets.overflowed(overflowBounds, Widgets.withBounds(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            new GuiComponent() {
-                {
-                    fillGradient(matrices, 0, 0, 1000, 1000, 0xff3489eb, 0xffc41868);
-                    for (int x = 0; x < 10; x++) {
-                        for (int y = 0; y < 10; y++) {
-                            Widgets.createSlot(new Point(500 - 9 * 10 + x * 18, 500 - 9 * 10 + y * 18))
-                                    .entry(EntryStacks.of(Registry.ITEM.byId(x + y * 10 + 1)))
-                                    .disableBackground()
-                                    .render(matrices, mouseX, mouseY, delta);
-                        }
-                    }
-                }
-            };
-        }), new Rectangle(0, 0, 1000, 1000))), 0, 0, 20));
+            
+            @Override
+            public Rectangle getBounds() {
+                return delegate().getBounds();
+            }
+        }), 0, 0, 20));
         
         TagNodes.create(display.getKey(), dataResult -> {
             if (dataResult.error().isPresent()) {
-                delegate[0] = Widgets.concat(
+                delegate[0] = Widgets.withBounds(Widgets.concat(
                         Widgets.createLabel(new Point(innerBounds.getCenterX(), innerBounds.getCenterY() - 8), new TextComponent("Failed to resolve tags!")),
                         Widgets.createLabel(new Point(innerBounds.getCenterX(), innerBounds.getCenterY() - 8), new TextComponent(dataResult.error().get().message()))
-                );
+                ), overflowBounds);
             } else {
                 tagNode[0] = dataResult.result().get();
+                //noinspection rawtypes
+                delegate[0] = Widgets.padded(16, new TagTreeWidget(tagNode[0], display.getMapper()));
             }
         });
         
