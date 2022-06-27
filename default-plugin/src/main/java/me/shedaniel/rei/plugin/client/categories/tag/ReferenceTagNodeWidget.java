@@ -35,7 +35,7 @@ import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.Holder;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collections;
@@ -72,7 +72,7 @@ public class ReferenceTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
         this.slot.getBounds().setLocation(bounds.getCenterX() - this.slot.getBounds().getWidth() / 2, bounds.y + (bounds.height - this.slot.getBounds().getHeight()) / 2 + 1);
         this.slot.render(poses, mouseX, mouseY, delta);
         if (this.containsMouse(mouseX, mouseY)) {
-            Tooltip.create(new TextComponent("#" + this.node.getReference().location().toString())).queue();
+            Tooltip.create(Component.literal("#" + this.node.getReference().location().toString())).queue();
         }
     }
     
