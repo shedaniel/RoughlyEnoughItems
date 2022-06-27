@@ -63,7 +63,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -405,7 +404,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        Tooltip tooltip = getCurrentTooltip(TooltipContext.ofMouse().getPoint());
+        Tooltip tooltip = getCurrentTooltip(TooltipContext.ofMouse());
         if (tooltip != null) {
             tooltip.queue();
         }
@@ -436,7 +435,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             
             if (exists) {
                 tooltip.add(Component.translatable("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
-                tooltip.add((ClientTooltipComponent) displayTooltipComponent.get());
+                tooltip.add(displayTooltipComponent.get());
             }
         }
         

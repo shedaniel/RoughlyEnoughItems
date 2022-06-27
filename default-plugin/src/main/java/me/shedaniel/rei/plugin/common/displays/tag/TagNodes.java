@@ -32,6 +32,7 @@ import dev.architectury.utils.EnvExecutor;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -42,7 +43,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.Tag;
 import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -58,9 +58,27 @@ public class TagNodes {
     
     public static final Map<String, ResourceKey<? extends Registry<?>>> TAG_DIR_MAP = new HashMap<>();
     public static final ThreadLocal<String> CURRENT_TAG_DIR = new ThreadLocal<>();
-    public static final Map<String, Map<Tag<?>, RawTagData>> RAW_TAG_DATA_MAP = new ConcurrentHashMap<>();
+    public static final Map<String, Map<CollectionWrapper<?>, RawTagData>> RAW_TAG_DATA_MAP = new ConcurrentHashMap<>();
     public static final Map<ResourceKey<? extends Registry<?>>, Map<ResourceLocation, TagData>> TAG_DATA_MAP = new HashMap<>();
     public static Map<ResourceKey<? extends Registry<?>>, Consumer<Consumer<DataResult<Map<ResourceLocation, TagData>>>>> requestedTags = new HashMap<>();
+    
+    public static class CollectionWrapper<T> {
+        private final Collection<T> collection;
+        
+        public CollectionWrapper(Collection<T> collection) {
+            this.collection = collection;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof CollectionWrapper && ((CollectionWrapper) obj).collection == collection;
+        }
+        
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(collection);
+        }
+    }
     
     public record RawTagData(List<ResourceLocation> otherElements, List<ResourceLocation> otherTags) {
     }

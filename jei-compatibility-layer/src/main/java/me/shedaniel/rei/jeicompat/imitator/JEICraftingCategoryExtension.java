@@ -32,7 +32,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraftforge.common.crafting.IShapedRecipe;
-import net.minecraftforge.common.util.Size2i;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -67,16 +66,6 @@ public class JEICraftingCategoryExtension<T extends CraftingRecipe> implements I
     @Override
     public ResourceLocation getRegistryName() {
         return recipe.getId();
-    }
-    
-    @SuppressWarnings("removal")
-    @Nullable
-    @Override
-    public Size2i getSize() {
-        if (recipe instanceof IShapedRecipe<?> shapedRecipe) {
-            return new Size2i(shapedRecipe.getRecipeWidth(), shapedRecipe.getRecipeHeight());
-        }
-        return null;
     }
     
     @Override

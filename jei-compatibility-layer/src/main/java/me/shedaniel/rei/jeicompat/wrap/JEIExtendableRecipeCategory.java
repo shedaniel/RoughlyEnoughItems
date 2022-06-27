@@ -37,14 +37,11 @@ import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
 import me.shedaniel.rei.jeicompat.unwrap.JEIUnwrappedCategory;
-import mezz.jei.api.gui.ingredient.ICraftingGridHelper;
-import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.category.extensions.IExtendableRecipeCategory;
 import mezz.jei.api.recipe.category.extensions.IRecipeCategoryExtension;
 import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -52,7 +49,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+
+import static me.shedaniel.rei.jeicompat.JEIPluginDetector.TODO;
 
 public class JEIExtendableRecipeCategory<T, D extends Display, W extends IRecipeCategoryExtension> extends JEIUnwrappedCategory<T, D> implements IExtendableRecipeCategory<T, W> {
     private final JEIPluginDetector.JEIPluginWrapper wrapper;
@@ -112,8 +110,8 @@ public class JEIExtendableRecipeCategory<T, D extends Display, W extends IRecipe
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                     widgets.add(Widgets.createRecipeBase(bounds).color(0xFFFF0000));
-                    widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() - 8), new TextComponent("Failed to initiate JEI integration setRecipe")));
-                    widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() + 1), new TextComponent("Check console for error")));
+                    widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() - 8), Component.literal("Failed to initiate JEI integration setRecipe")));
+                    widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() + 1), Component.literal("Check console for error")));
                     return widgets;
                 }
                 
@@ -125,8 +123,8 @@ public class JEIExtendableRecipeCategory<T, D extends Display, W extends IRecipe
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                     widgets.add(Widgets.createRecipeBase(bounds).color(0xFFFF0000));
-                    widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() - 8), new TextComponent("Failed to initiate JEI integration setRecipe")));
-                    widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() + 1), new TextComponent("Check console for error")));
+                    widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() - 8), Component.literal("Failed to initiate JEI integration setRecipe")));
+                    widgets.add(Widgets.createLabel(new Point(bounds.getCenterX(), bounds.getCenterY() + 1), Component.literal("Check console for error")));
                     return widgets;
                 }
                 
@@ -202,14 +200,15 @@ public class JEIExtendableRecipeCategory<T, D extends Display, W extends IRecipe
         public static <T> JEIDisplaySetup.Result createForExtension(IRecipeCategoryExtension category, JEIWrappedDisplay<T> display) {
             JEIDisplaySetup.Result result = new JEIDisplaySetup.Result();
             JEIRecipeLayoutBuilder builder = new JEIRecipeLayoutBuilder(result.shapelessData);
+            if (true) TODO();
             // Legacy code
-            JEIRecipeLayout<T> layout = new JEIRecipeLayout<>(builder);
-            IIngredients ingredients = display.getLegacyIngredients();
-            if (ingredients != null) {
-                category.setIngredients(ingredients);
-                JEIDisplaySetup.applyLegacyTooltip(result, layout);
-            }
-            result.setSlots(builder.slots);
+//            JEIRecipeLayout<T> layout = new JEIRecipeLayout<>(builder);
+//            IIngredients ingredients = display.getLegacyIngredients();
+//            if (ingredients != null) {
+//                category.setIngredients(ingredients);
+//                JEIDisplaySetup.applyLegacyTooltip(result, layout);
+//            }
+//            result.setSlots(builder.slots);
             return result;
         }
         

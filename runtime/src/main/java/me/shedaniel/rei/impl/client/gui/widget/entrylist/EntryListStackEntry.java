@@ -26,22 +26,21 @@ package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
-import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.FloatingRectangle;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -177,21 +176,21 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
     
     @Override
     @Nullable
-    public Tooltip getCurrentTooltip(Point point) {
+    public Tooltip getCurrentTooltip(TooltipContext context) {
         if (this.collapsedStack != null) {
             if (!this.collapsedStack.isExpanded()) {
-                Tooltip tooltip = Tooltip.create(point, new TranslatableComponent("text.rei.collapsed.entry", collapsedStack.getName()));
-                tooltip.add((TooltipComponent) new CollapsedEntriesTooltip(collapsedStack));
-                tooltip.add(new TranslatableComponent("text.rei.collapsed.entry.hint.expand", collapsedStack.getName(), collapsedStack.getIngredient().size())
+                Tooltip tooltip = Tooltip.create(context.getPoint(), Component.translatable("text.rei.collapsed.entry", collapsedStack.getName()));
+                tooltip.add(new CollapsedEntriesTooltip(collapsedStack));
+                tooltip.add(Component.translatable("text.rei.collapsed.entry.hint.expand", collapsedStack.getName(), collapsedStack.getIngredient().size())
                         .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
                 ClientHelper.getInstance().appendModIdToTooltips(tooltip, collapsedStack.getModId());
                 return tooltip;
             }
         }
         
-        Tooltip tooltip = super.getCurrentTooltip(point);
+        Tooltip tooltip = super.getCurrentTooltip(context);
         if (tooltip != null && this.collapsedStack != null) {
-            tooltip.entries().add(Mth.clamp(tooltip.entries().size() - 1, 0, tooltip.entries().size() - 1), Tooltip.entry(new TranslatableComponent("text.rei.collapsed.entry.hint.collapse", collapsedStack.getName(), collapsedStack.getIngredient().size())
+            tooltip.entries().add(Mth.clamp(tooltip.entries().size() - 1, 0, tooltip.entries().size() - 1), Tooltip.entry(Component.translatable("text.rei.collapsed.entry.hint.collapse", collapsedStack.getName(), collapsedStack.getIngredient().size())
                     .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)));
         }
         return tooltip;

@@ -34,7 +34,6 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
@@ -75,7 +74,7 @@ public class CollapsedEntriesTooltip implements ClientTooltipComponent, TooltipC
             if (i / w > 3 - 1) {
                 poses.translate(0, 0, 200);
                 MultiBufferSource.BufferSource source = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-                Component text = new TextComponent("+" + (stack.getIngredient().size() - w * 3 + 1)).withStyle(ChatFormatting.GRAY);
+                Component text = Component.literal("+" + (stack.getIngredient().size() - w * 3 + 1)).withStyle(ChatFormatting.GRAY);
                 font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, poses.last().pose(), source, false, 0, 15728880);
                 source.endBatch();
                 break;
