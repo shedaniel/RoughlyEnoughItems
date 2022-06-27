@@ -23,15 +23,20 @@
 
 package me.shedaniel.rei.plugin.client.categories.tag;
 
+import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
+import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
+import me.shedaniel.math.FloatingRectangle;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.Renderer;
-import me.shedaniel.rei.api.client.gui.widgets.DelegateWidgetWithBounds;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.tag.DefaultTagDisplay;
@@ -45,6 +50,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, ?>> {
@@ -67,24 +73,50 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
     public List<Widget> setupDisplay(DefaultTagDisplay<?, ?> display, Rectangle bounds) {
         List<Widget> widgets = new ArrayList<>();
         
-        widgets.add(Widgets.createRecipeBase(bounds));
+        Window window = Minecraft.getInstance().getWindow();
+        Rectangle boundsBig = new Rectangle(window.getGuiScaledWidth() * 0.05, window.getGuiScaledHeight() * 0.1, window.getGuiScaledWidth() * 0.9, window.getGuiScaledHeight() * 0.8);
+        Rectangle recipeBounds = bounds.clone();
+        
+        boolean[] expanded = {false};
+        
         Rectangle innerBounds = new Rectangle(bounds.x + 6 + 14, bounds.y + 6, bounds.width - 12 - 14, bounds.height - 12);
+        Rectangle overflowBounds = new Rectangle(innerBounds.x + 1, innerBounds.y + 1, innerBounds.width - 2, innerBounds.height - 2);
+        
+        Rectangle expandButtonBounds = new Rectangle(bounds.x + 5, bounds.y + 6, 13, 13);
+        Rectangle expandOverlayBounds = new Rectangle(bounds.x + 5 + 2, bounds.y + 6 + 2, 13 - 4, 13 - 4);
+        Rectangle copyButtonBounds = new Rectangle(bounds.x + 5, bounds.getMaxY() - 6 - 13, 13, 13);
+        Rectangle copyOverlayBounds = new Rectangle(bounds.x + 5 + 2, bounds.getMaxY() - 6 - 13 + 2, 13 - 4, 13 - 4);
+        
+        ValueAnimator<FloatingRectangle> boundsAnimator = ValueAnimator.ofFloatingRectangle(bounds.getFloatingBounds())
+                .withConvention(() -> {
+                    if (expanded[0]) {
+                        return boundsBig.getFloatingBounds();
+                    } else {
+                        return bounds.getFloatingBounds();
+                    }
+                }, 1400);
+        
+        widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+            innerBounds.setBounds(recipeBounds.x + 6 + 14, recipeBounds.y + 6, recipeBounds.width - 12 - 14, recipeBounds.height - 12);
+            overflowBounds.setBounds(innerBounds.x + 1, innerBounds.y + 1, innerBounds.width - 2, innerBounds.height - 2);
+            expandButtonBounds.setBounds(recipeBounds.x + 5, recipeBounds.y + 6, 13, 13);
+            copyButtonBounds.setBounds(recipeBounds.x + 5, recipeBounds.getMaxY() - 6 - 13, 13, 13);
+            expandOverlayBounds.setBounds(recipeBounds.x + 5 + 2, recipeBounds.y + 6 + 2, 13 - 4, 13 - 4);
+            copyOverlayBounds.setBounds(recipeBounds.x + 5 + 2, recipeBounds.getMaxY() - 6 - 13 + 2, 13 - 4, 13 - 4);
+            recipeBounds.setBounds(boundsAnimator.value());
+            boundsAnimator.update(delta);
+            
+            if (overflowBounds.contains(mouseX, mouseY)) {
+                REIRuntime.getInstance().clearTooltips();
+            }
+        }));
+        
+        widgets.add(Widgets.createRecipeBase(recipeBounds));
         widgets.add(Widgets.createSlotBase(innerBounds));
         
         WidgetWithBounds[] delegate = new WidgetWithBounds[]{Widgets.noOp()};
         TagNode<?>[] tagNode = new TagNode[]{null};
-        Rectangle overflowBounds = new Rectangle(innerBounds.x + 1, innerBounds.y + 1, innerBounds.width - 2, innerBounds.height - 2);
-        widgets.add(Widgets.withTranslate(Widgets.overflowed(overflowBounds, new DelegateWidgetWithBounds(Widgets.noOp(), Rectangle::new) {
-            @Override
-            protected WidgetWithBounds delegate() {
-                return delegate[0];
-            }
-            
-            @Override
-            public Rectangle getBounds() {
-                return delegate().getBounds();
-            }
-        }), 0, 0, 20));
+        widgets.add(Widgets.withTranslate(Widgets.delegateWithBounds(() -> delegate[0]), 0, 0, 20));
         
         TagNodes.create(display.getKey(), dataResult -> {
             if (dataResult.error().isPresent()) {
@@ -95,18 +127,19 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
             } else {
                 tagNode[0] = dataResult.result().get();
                 //noinspection rawtypes
-                delegate[0] = Widgets.padded(16, new TagTreeWidget(tagNode[0], display.getMapper()));
+                delegate[0] = Widgets.overflowed(overflowBounds, Widgets.padded(16, new TagTreeWidget(tagNode[0], display.getMapper())));
             }
         });
         
-        widgets.add(Widgets.createButton(new Rectangle(bounds.x + 5, bounds.y + 6, 13, 13), new TextComponent(""))
+        widgets.add(Widgets.createButton(expandButtonBounds, new TextComponent(""))
                 .onRender((poseStack, button) -> {
                     button.setEnabled(tagNode[0] != null);
                 })
                 .onClick(button -> {
+                    expanded[0] = !expanded[0];
                 })
-                .tooltipLine(new TranslatableComponent("text.rei.expand.view")));
-        widgets.add(Widgets.createButton(new Rectangle(bounds.x + 5, bounds.getMaxY() - 6 - 13, 13, 13), new TextComponent(""))
+                .tooltipSupplier(button -> new Component[]{new TranslatableComponent(!expanded[0] ? "text.rei.expand.view" : "text.rei.expand.view.close")}));
+        widgets.add(Widgets.createButton(copyButtonBounds, new TextComponent(""))
                 .onRender((poseStack, button) -> {
                     button.setEnabled(tagNode[0] != null);
                 })
@@ -118,11 +151,24 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
                     }
                 })
                 .tooltipLine(new TranslatableComponent("text.rei.tag.copy.clipboard")));
-        widgets.add(Widgets.withTranslate(Widgets.createTexturedWidget(new ResourceLocation("roughlyenoughitems", "textures/gui/expand.png"),
-                new Rectangle(bounds.x + 5 + 2, bounds.y + 6 + 2, 13 - 4, 13 - 4), 0, 0, 9, 9), 0, 0, 10));
-        widgets.add(Widgets.withTranslate(Widgets.createTexturedWidget(new ResourceLocation("roughlyenoughitems", "textures/gui/clipboard.png"),
-                new Rectangle(bounds.x + 5 + 2, bounds.getMaxY() - 6 - 13 + 2, 13 - 4, 13 - 4), 0, 0, 9, 9), 0, 0.5, 10));
+        widgets.add(Widgets.withTranslate(new DelegateWidget(Widgets.noOp()) {
+            @Override
+            protected Widget delegate() {
+                ResourceLocation expandTexture = !expanded[0] ? new ResourceLocation("roughlyenoughitems", "textures/gui/expand.png")
+                        : new ResourceLocation("roughlyenoughitems", "textures/gui/shrink.png");
+                return Widgets.concat(
+                        Widgets.createTexturedWidget(expandTexture,
+                                new Rectangle(recipeBounds.x + 5 + 2, recipeBounds.y + 6 + 2, 13 - 4, 13 - 4), 0, 0, 9, 9),
+                        Widgets.createTexturedWidget(new ResourceLocation("roughlyenoughitems", "textures/gui/clipboard.png"),
+                                new Rectangle(recipeBounds.x + 5 + 2, recipeBounds.getMaxY() - 6 - 13 + 2, 13 - 4, 13 - 4), 0, 0, 9, 9)
+                );
+            }
+        }, 0, 0, 10));
         
-        return widgets;
+        Matrix4f translateMatrix = Matrix4f.createTranslateMatrix(0, 0, 200);
+        Matrix4f identity = new Matrix4f();
+        identity.setIdentity();
+        return CollectionUtils.map(widgets, widget -> Widgets.withTranslate(widget, () ->
+                expanded[0] || !boundsAnimator.value().equals(boundsAnimator.target()) ? translateMatrix : identity));
     }
 }
