@@ -32,10 +32,13 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
@@ -43,15 +46,19 @@ import me.shedaniel.rei.plugin.common.displays.tag.DefaultTagDisplay;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, ?>> {
     @Override
@@ -127,7 +134,30 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
             } else {
                 tagNode[0] = dataResult.result().get();
                 //noinspection rawtypes
-                delegate[0] = Widgets.overflowed(overflowBounds, Widgets.padded(16, new TagTreeWidget(tagNode[0], display.getMapper())));
+                Function<? extends Holder<?>, ? extends EntryStack<?>> displayMapper = display.getMapper();
+                Function<Holder<?>, EntryStack<?>> mapper = holder -> {
+                    EntryStack<?> stack = ((Function<Holder<?>, EntryStack<?>>) displayMapper).apply(holder);
+                    if (stack.isEmpty()) {
+                        return ClientEntryStacks.of(new AbstractRenderer() {
+                            @Override
+                            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                                Minecraft instance = Minecraft.getInstance();
+                                Font font = instance.font;
+                                String text = "?";
+                                int width = font.width(text);
+                                font.draw(matrices, text, bounds.getCenterX() - width / 2f + 0.2f, bounds.getCenterY() - font.lineHeight / 2f + 1f, REIRuntime.getInstance().isDarkThemeEnabled() ? -4473925 : -12566464);
+                            }
+                            
+                            @Override
+                            @Nullable
+                            public Tooltip getTooltip(TooltipContext context) {
+                                return Tooltip.create(context.getPoint(), new TextComponent(holder.unwrapKey().map(key -> key.location().toString()).orElse("null")));
+                            }
+                        });
+                    }
+                    return stack;
+                };
+                delegate[0] = Widgets.overflowed(overflowBounds, Widgets.padded(16, new TagTreeWidget(tagNode[0], mapper)));
             }
         });
         
