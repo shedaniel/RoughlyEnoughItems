@@ -58,7 +58,10 @@ public class MixinTagLoader<T> {
     
     @Inject(method = "build", at = @At("RETURN"))
     private void loadPost(Map<ResourceLocation, Tag.Builder> map, CallbackInfoReturnable<Map<ResourceLocation, Tag<T>>> cir) {
-        HashBiMap<ResourceLocation, Tag<T>> biMap = HashBiMap.create(cir.getReturnValue());
+        Map<Tag<T>, ResourceLocation> inverseMap = new HashMap<>(cir.getReturnValue().size());
+        for (Map.Entry<ResourceLocation, Tag<T>> entry : cir.getReturnValue().entrySet()) {
+            inverseMap.put(entry.getValue(), entry.getKey());
+        }
         ResourceKey<? extends Registry<?>> resourceKey = TagNodes.TAG_DIR_MAP.get(directory);
         if (resourceKey == null) return;
         TagNodes.TAG_DATA_MAP.put(resourceKey, new HashMap<>());
@@ -77,7 +80,7 @@ public class MixinTagLoader<T> {
             entryIterator.remove();
             
             if (registry != null) {
-                ResourceLocation tagLoc = biMap.inverse().get(tag);
+                ResourceLocation tagLoc = inverseMap.get(tag);
                 
                 if (tagLoc != null) {
                     TagNodes.RawTagData rawTagData = entry.getValue();
