@@ -47,6 +47,7 @@ import me.shedaniel.rei.plugin.common.displays.cooking.DefaultCookingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmeltingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
+import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -60,6 +61,10 @@ import java.util.stream.Stream;
 
 @ApiStatus.Internal
 public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
+    static {
+        TagNodes.init();
+    }
+    
     @Override
     public void registerItemComparators(ItemComparatorRegistry registry) {
         EntryComparator<Tag> nbtHasher = EntryComparator.nbt();

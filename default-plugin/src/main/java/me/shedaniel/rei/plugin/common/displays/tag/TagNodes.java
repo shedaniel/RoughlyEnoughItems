@@ -156,7 +156,7 @@ public class TagNodes {
             ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(world -> {
                 requestedTags.clear();
             });
-            NetworkManager.registerReceiver(NetworkManager.s2c(), REQUEST_TAGS_PACKET_S2C, Collections.singletonList(new SplitPacketTransformer()), (buf, context) -> {
+            NetworkManager.registerReceiver(NetworkManager.s2c(), REQUEST_TAGS_PACKET_S2C, (buf, context) -> {
                 UUID uuid = buf.readUUID();
                 if (nextUUID.equals(uuid)) {
                     Map<ResourceLocation, TagData> map = new HashMap<>();
