@@ -29,6 +29,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagBuilder;
+import net.minecraft.tags.TagEntry;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,9 +44,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-@Mixin(Tag.Builder.class)
+@Mixin(TagBuilder.class)
 public class MixinTagBuilder<T> {
-    @Shadow @Final private List<Tag.BuilderEntry> entries;
+    @Shadow @Final private List<TagEntry> entries;
     
     @Inject(method = "build", at = @At("RETURN"))
     private void load(Function<ResourceLocation, Tag<T>> tagResolver, Function<ResourceLocation, T> valueResolver, CallbackInfoReturnable<Either<Collection<Tag.BuilderEntry>, Tag<T>>> cir) {

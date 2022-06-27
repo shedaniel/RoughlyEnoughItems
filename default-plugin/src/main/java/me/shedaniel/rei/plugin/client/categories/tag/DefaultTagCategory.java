@@ -30,7 +30,6 @@ import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingRectangle;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
@@ -49,14 +48,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -68,7 +64,7 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
     
     @Override
     public Component getTitle() {
-        return new TranslatableComponent("category.rei.tag");
+        return Component.translatable("category.rei.tag");
     }
     
     @Override
@@ -128,8 +124,8 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
         TagNodes.create(display.getKey(), dataResult -> {
             if (dataResult.error().isPresent()) {
                 delegate[0] = Widgets.withBounds(Widgets.concat(
-                        Widgets.createLabel(new Point(innerBounds.getCenterX(), innerBounds.getCenterY() - 8), new TextComponent("Failed to resolve tags!")),
-                        Widgets.createLabel(new Point(innerBounds.getCenterX(), innerBounds.getCenterY() - 8), new TextComponent(dataResult.error().get().message()))
+                        Widgets.createLabel(new Point(innerBounds.getCenterX(), innerBounds.getCenterY() - 8), Component.literal("Failed to resolve tags!")),
+                        Widgets.createLabel(new Point(innerBounds.getCenterX(), innerBounds.getCenterY() - 8), Component.literal(dataResult.error().get().message()))
                 ), overflowBounds);
             } else {
                 tagNode[0] = dataResult.result().get();
@@ -151,7 +147,7 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
                             @Override
                             @Nullable
                             public Tooltip getTooltip(TooltipContext context) {
-                                return Tooltip.create(context.getPoint(), new TextComponent(holder.unwrapKey().map(key -> key.location().toString()).orElse("null")));
+                                return Tooltip.create(context.getPoint(), Component.literal(holder.unwrapKey().map(key -> key.location().toString()).orElse("null")));
                             }
                         });
                     }
@@ -161,15 +157,15 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
             }
         });
         
-        widgets.add(Widgets.createButton(expandButtonBounds, new TextComponent(""))
+        widgets.add(Widgets.createButton(expandButtonBounds, Component.literal(""))
                 .onRender((poseStack, button) -> {
                     button.setEnabled(tagNode[0] != null);
                 })
                 .onClick(button -> {
                     expanded[0] = !expanded[0];
                 })
-                .tooltipSupplier(button -> new Component[]{new TranslatableComponent(!expanded[0] ? "text.rei.expand.view" : "text.rei.expand.view.close")}));
-        widgets.add(Widgets.createButton(copyButtonBounds, new TextComponent(""))
+                .tooltipSupplier(button -> new Component[]{Component.translatable(!expanded[0] ? "text.rei.expand.view" : "text.rei.expand.view.close")}));
+        widgets.add(Widgets.createButton(copyButtonBounds, Component.literal(""))
                 .onRender((poseStack, button) -> {
                     button.setEnabled(tagNode[0] != null);
                 })
@@ -180,7 +176,7 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
                         Minecraft.getInstance().keyboardHandler.setClipboard(node.asTree());
                     }
                 })
-                .tooltipLine(new TranslatableComponent("text.rei.tag.copy.clipboard")));
+                .tooltipLine(Component.translatable("text.rei.tag.copy.clipboard")));
         widgets.add(Widgets.withTranslate(new DelegateWidget(Widgets.noOp()) {
             @Override
             protected Widget delegate() {
