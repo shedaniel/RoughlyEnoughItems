@@ -45,7 +45,7 @@ public class PaddedWidget extends DelegateWidgetWithTranslate {
     
     @Override
     public Rectangle getBounds() {
-        Rectangle widgetBounds = ((WidgetWithBounds) widget).getBounds();
+        Rectangle widgetBounds = ((WidgetWithBounds) delegate()).getBounds();
         return new Rectangle(widgetBounds.x - padLeft, widgetBounds.y - padTop, widgetBounds.width + padLeft + padRight, widgetBounds.height + padTop + padBottom);
     }
 }

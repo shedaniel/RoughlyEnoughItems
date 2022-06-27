@@ -411,7 +411,9 @@ public class RoughlyEnoughItemsCoreClient {
             if (shouldReturn(screen))
                 return;
             resetFocused(screen);
-            getOverlay().render(matrices, mouseX, mouseY, delta);
+            if (!(screen instanceof DisplayScreen)) {
+                getOverlay().render(matrices, mouseX, mouseY, delta);
+            }
             ((ScreenOverlayImpl) getOverlay()).lateRender(matrices, mouseX, mouseY, delta);
             resetFocused(screen);
         });
