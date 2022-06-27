@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.common.entry.type;
 
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
@@ -149,8 +150,32 @@ public interface EntryDefinition<T> {
      */
     T wildcard(EntryStack<T> entry, T value);
     
+    /**
+     * Returns the cheated stack of this {@link EntryStack}.
+     *
+     * @return the cheated stack of this {@link EntryStack}, or {@code null} if there is no such equivalent
+     */
     @Nullable
     default ItemStack cheatsAs(EntryStack<T> entry, T value) {
+        return null;
+    }
+    
+    /**
+     * Returns a merged copy for two entries.
+     * <p>
+     * It is guaranteed that the two entries satisfy {@link #equals(Object, Object, ComparisonContext)}
+     * with the {@link ComparisonContext#EXACT} context.
+     * <p>
+     * Implementation of this method should just need to copy the first value and sets the count to
+     * the sum of both values.
+     *
+     * @param o1 the first value
+     * @param o2 the second value
+     * @return the merged copy
+     * @since 8.3
+     */
+    @Nullable
+    default T add(T o1, T o2) {
         return null;
     }
     
@@ -163,6 +188,17 @@ public interface EntryDefinition<T> {
     
     Component asFormattedText(EntryStack<T> entry, T value);
     
+    default Component asFormattedText(EntryStack<T> entry, T value, TooltipContext context) {
+        return asFormattedText(entry, value);
+    }
+    
+    /**
+     * Returns a stream of {@link TagKey} for an entry.
+     * It is not guaranteed that the stream is ordered, or that the {@link TagKey}
+     * contains the registry key.
+     *
+     * @return a stream of {@link TagKey} for an entry
+     */
     Stream<? extends TagKey<?>> getTagsFor(EntryStack<T> entry, T value);
     
     @ApiStatus.NonExtendable

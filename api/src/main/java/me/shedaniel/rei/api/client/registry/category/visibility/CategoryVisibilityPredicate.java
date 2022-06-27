@@ -27,14 +27,18 @@ import dev.architectury.event.EventResult;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.world.InteractionResult;
 
+/**
+ * Handler for determining the visibility of categories.
+ * This is preferred comparing to removing the categories from the registry.
+ *
+ * @see me.shedaniel.rei.api.client.registry.category.CategoryRegistry#registerVisibilityPredicate(CategoryVisibilityPredicate)
+ */
 @Environment(EnvType.CLIENT)
 public interface CategoryVisibilityPredicate extends Comparable<CategoryVisibilityPredicate> {
     /**
-     * Gets the priority of the handler, the higher the priority, the earlier this is called.
+     * Returns the priority of the handler, the higher the priority, the earlier this is called.
      *
-     * @return the priority
      * @return the priority
      */
     default double getPriority() {
@@ -43,15 +47,16 @@ public interface CategoryVisibilityPredicate extends Comparable<CategoryVisibili
     
     /**
      * Handles the visibility of the category.
-     * {@link InteractionResult#PASS} to pass the handling to another handler
-     * {@link InteractionResult#SUCCESS} to always display it
-     * {@link InteractionResult#FAIL} to never display it
      *
      * @param category the category of the display
      * @return the visibility
+     * @see EventResult
      */
     EventResult handleCategory(DisplayCategory<?> category);
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     default int compareTo(CategoryVisibilityPredicate o) {
         return Double.compare(getPriority(), o.getPriority());

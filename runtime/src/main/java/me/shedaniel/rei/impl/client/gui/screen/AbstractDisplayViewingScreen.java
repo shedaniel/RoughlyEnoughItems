@@ -26,14 +26,17 @@ package me.shedaniel.rei.impl.client.gui.screen;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 import dev.architectury.fluid.FluidStack;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategoryView;
@@ -95,8 +98,11 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         }
     }
     
-    public List<GuiEventListener> _children() {
-        return (List<GuiEventListener>) children();
+    @Override
+    public List<GuiEventListener> children() {
+        List<? extends GuiEventListener> children = super.children();
+        children.sort(Comparator.comparingDouble(value -> value instanceof Widget widget ? widget.getZRenderingPriority() : 0).reversed());
+        return (List<GuiEventListener>) children;
     }
     
     @Override
@@ -212,15 +218,18 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                 }
             }
             // TODO: Don't hardcode
-            Stream<? extends TagKey<?>> collection;
+            Registry<?> registry;
             List<Holder<?>> objects;
             if (type == VanillaEntryTypes.ITEM) {
-                collection = Registry.ITEM.getTagNames();
+                registry = Registry.ITEM;
                 objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<ItemStack>castValue().getItem().builtInRegistryHolder());
             } else if (type == VanillaEntryTypes.FLUID) {
-                collection = Registry.FLUID.getTagNames();
+                registry = Registry.FLUID;
                 objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<FluidStack>castValue().getFluid().builtInRegistryHolder());
             } else continue;
+            Stream<? extends TagKey<?>> collection = registry.getTags()
+                    .filter(pair -> pair.getSecond().size() == objects.size())
+                    .map(Pair::getFirst);
             TagKey<?> firstOrNull = CollectionUtils.findFirstOrNull(collection::iterator,
                     key -> CollectionUtils.allMatch(objects, holder -> ((Holder<Object>) holder).is((TagKey<Object>) key)));
             if (firstOrNull != null) {
@@ -319,5 +328,60 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         }
         
         widget.tooltipProcessor(new TooltipProcessor());
+    }
+    
+    protected static ScreenOverlay getOverlay() {
+        return REIRuntime.getInstance().getOverlay().orElseThrow(() -> new IllegalStateException("Overlay not initialized!"));
+    }
+    
+    private boolean handleFocuses(int button) {
+        if (button == 0) {
+            setDragging(true);
+        }
+        handleFocuses();
+        return true;
+    }
+    
+    private boolean handleFocuses() {
+        if (getFocused() instanceof ScreenOverlay || getFocused() == this) {
+            setFocused(null);
+        }
+        
+        return true;
+    }
+    
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return super.mouseClicked(mouseX, mouseY, button) || (getOverlay().mouseClicked(mouseX, mouseY, button) && handleFocuses());
+    }
+    
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        return super.mouseReleased(mouseX, mouseY, button) || (getOverlay().mouseReleased(mouseX, mouseY, button) && handleFocuses());
+    }
+    
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || (getOverlay().mouseDragged(mouseX, mouseY, button, deltaX, deltaY) && handleFocuses());
+    }
+    
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        return super.mouseScrolled(mouseX, mouseY, amount) || (getOverlay().mouseScrolled(mouseX, mouseY, amount) && handleFocuses());
+    }
+    
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        return super.keyPressed(keyCode, scanCode, modifiers) || (getOverlay().keyPressed(keyCode, scanCode, modifiers) && handleFocuses());
+    }
+    
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        return super.keyReleased(keyCode, scanCode, modifiers) || (getOverlay().keyReleased(keyCode, scanCode, modifiers) && handleFocuses());
+    }
+    
+    @Override
+    public boolean charTyped(char character, int modifiers) {
+        return super.charTyped(character, modifiers) || (getOverlay().charTyped(character, modifiers) && handleFocuses());
     }
 }

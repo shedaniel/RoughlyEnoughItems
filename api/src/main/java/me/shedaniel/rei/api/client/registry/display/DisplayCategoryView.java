@@ -23,18 +23,31 @@
 
 package me.shedaniel.rei.api.client.registry.display;
 
+import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.DrawableConsumer;
+import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Collection;
 import java.util.List;
 
+/**
+ * A view that displays a {@link Display}.
+ * <p>
+ * This view can be modified externally with {@link me.shedaniel.rei.api.client.registry.category.extension.CategoryExtensionProvider}.
+ *
+ * @param <T> the type of display
+ */
 @ApiStatus.Experimental
 public interface DisplayCategoryView<T extends Display> {
     /**
-     * Gets the recipe renderer for the category, used in {@link me.shedaniel.rei.impl.client.gui.CompositeRecipeViewingScreen} for rendering simple recipes
+     * Returns the recipe renderer for the display, used in composite display viewing screen.
      *
      * @param display the display to render
      * @return the display renderer
@@ -43,9 +56,33 @@ public interface DisplayCategoryView<T extends Display> {
     DisplayRenderer getDisplayRenderer(T display);
     
     /**
-     * Setup the widgets for displaying the recipe
+     * Returns the list of widgets for displaying the display.
+     * <p>
+     * For consistency, the widgets list should start with a {@link Widgets#createRecipeBase(Rectangle)} widget.
+     * <p>
+     * Slots may be added with {@link Widgets#createSlot(Point)}, the content of the slot
+     * can be set with either {@link Slot#entry(EntryStack)} or {@link Slot#entries(Collection)}.
+     * <p>
+     * To configure the tooltips of the slots, you may take a look at {@link EntryStack#getTooltip(TooltipContext, boolean)}
+     * for how the tooltip is resolved.
+     * <p>
+     * It is recommended to mark these slots for I/O using {@link Slot#markInput()} and {@link Slot#markOutput()},
+     * and the background of the slots may be disabled using {@link Slot#disableBackground()}.
+     * <p>
+     * Arbitrary text may be added to the widgets list with {@link Widgets#createLabel(Point, Component)},
+     * you may configure the horizontal alignment of the text using {@link Label#centered()},
+     * {@link Label#leftAligned()} and {@link Label#rightAligned()}.<br>
+     * It is recommended to remove the shadow of the label with {@link Label#noShadow()}, and
+     * set the color of the label to {@code 0xFF404040} under light mode and {@code 0xFFBBBBBB} under dark mode,
+     * you may use {@link Label#color(int, int)} for setting the label color depending on the color theme.
+     * <p>
+     * Lastly, {@link Widgets} contains many methods for the most common widgets,
+     * such as adding tooltips, creating texture rectangles, arrows, burning fire, buttons, etc.
+     * <p>
+     * You may use {@link Widgets#createDrawableWidget(DrawableConsumer)} for rendering anything you want, or
+     * wrap vanilla widgets using {@link Widgets#wrapVanillaWidget(GuiEventListener)}.
      *
-     * @param display the recipe
+     * @param display the display
      * @param bounds  the bounds of the display, configurable with overriding the width, height methods.
      * @return the list of widgets
      */

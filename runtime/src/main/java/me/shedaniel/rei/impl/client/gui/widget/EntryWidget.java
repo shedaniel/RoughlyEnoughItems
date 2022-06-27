@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -42,6 +43,7 @@ import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
@@ -51,7 +53,6 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesEntriesManager;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import net.minecraft.ChatFormatting;
@@ -62,6 +63,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.TextComponent;
@@ -73,6 +75,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -99,7 +102,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public boolean removeTagMatch = true;
     
     private long lastCheckTime = -1;
+    private long lastCheckedTime = -1;
     private Display display;
+    private Supplier<DisplayTooltipComponent> displayTooltipComponent;
     
     public EntryWidget(Point point) {
         this(new Rectangle(point.x - 1, point.y - 1, 18, 18));
@@ -278,7 +283,11 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             return EntryStack.empty();
         if (size == 1)
             return entryStacks.get(0);
-        return entryStacks.get(Mth.floor(((System.currentTimeMillis() + stackDisplayOffset) / 1000 % (double) size)));
+        return entryStacks.get(Mth.floor(((System.currentTimeMillis() + stackDisplayOffset) / getCyclingInterval() % (double) size)));
+    }
+    
+    protected long getCyclingInterval() {
+        return 1000;
     }
     
     @Override
@@ -310,6 +319,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                     AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
                     if (result.successful) {
                         this.display = display;
+                        this.displayTooltipComponent = Suppliers.memoize(() -> new DisplayTooltipComponent(display));
                         return result.successfulHandler;
                     }
                 }
@@ -319,7 +329,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         return null;
     }
     
-    private TransferHandler getTransferHandler() {
+    private TransferHandler getTransferHandler(boolean query) {
         if (PluginManager.areAnyReloading()) {
             return null;
         }
@@ -333,6 +343,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             }
             
             display = null;
+            displayTooltipComponent = null;
             lastCheckTime = -1;
         }
         
@@ -340,7 +351,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             return null;
         }
         
-        return _getTransferHandler();
+        return query ? _getTransferHandler() : null;
     }
     
     @Override
@@ -395,7 +406,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        Tooltip tooltip = getCurrentTooltip(new Point(mouseX, mouseY));
+        Tooltip tooltip = getCurrentTooltip(TooltipContext.ofMouse().getPoint());
         if (tooltip != null) {
             tooltip.queue();
         }
@@ -406,11 +417,28 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     @Override
     @Nullable
     public Tooltip getCurrentTooltip(Point point) {
-        Tooltip tooltip = getCurrentEntry().getTooltip(point);
+        Tooltip tooltip = getCurrentEntry().getTooltip(TooltipContext.of(point));
         
-        if (tooltip != null && getTransferHandler() != null
-            && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
-            tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
+        if (tooltip != null && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+            boolean exists = getTransferHandler(false) != null;
+            
+            if (!exists) {
+                if (lastCheckedTime == -1 || Util.getMillis() - lastCheckedTime > 400) {
+                    lastCheckedTime = Util.getMillis();
+                }
+                
+                if (Util.getMillis() - lastCheckedTime > 200) {
+                    lastCheckedTime = -1;
+                    exists = getTransferHandler(true) != null;
+                }
+            } else {
+                lastCheckedTime = -1;
+            }
+            
+            if (exists) {
+                tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
+                tooltip.add((ClientTooltipComponent) displayTooltipComponent.get());
+            }
         }
         
         if (tooltip != null) {
@@ -512,9 +540,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 FavoriteEntry favoriteEntry = asFavoriteEntry();
                 if (favoriteEntry != null) {
                     if (reverseFavoritesAction()) {
-                        FavoritesEntriesManager.INSTANCE.remove(favoriteEntry);
+                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
                     } else {
-                        FavoritesEntriesManager.INSTANCE.add(favoriteEntry);
+                        ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     }
                     ConfigManager.getInstance().saveConfig();
                     FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
@@ -527,7 +555,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         
         if (!(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
             try {
-                TransferHandler handler = getTransferHandler();
+                TransferHandler handler = getTransferHandler(true);
                 
                 if (handler != null) {
                     AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
@@ -594,9 +622,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 FavoriteEntry favoriteEntry = asFavoriteEntry();
                 if (favoriteEntry != null) {
                     if (reverseFavoritesAction()) {
-                        FavoritesEntriesManager.INSTANCE.remove(favoriteEntry);
+                        ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
                     } else {
-                        FavoritesEntriesManager.INSTANCE.add(favoriteEntry);
+                        ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     }
                     ConfigManager.getInstance().saveConfig();
                     FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();

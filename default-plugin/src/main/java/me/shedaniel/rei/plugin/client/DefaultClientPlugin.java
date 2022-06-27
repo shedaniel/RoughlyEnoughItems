@@ -43,7 +43,7 @@ import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
@@ -54,6 +54,7 @@ import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconBaseCategor
 import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconPaymentCategory;
 import me.shedaniel.rei.plugin.client.categories.cooking.DefaultCookingCategory;
 import me.shedaniel.rei.plugin.client.categories.crafting.DefaultCraftingCategory;
+import me.shedaniel.rei.plugin.client.categories.tag.DefaultTagCategory;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultPotionEffectExclusionZones;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultRecipeBookExclusionZones;
 import me.shedaniel.rei.plugin.client.favorites.GameModeFavoriteEntry;
@@ -71,16 +72,14 @@ import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmeltingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomDisplay;
+import me.shedaniel.rei.plugin.common.displays.tag.DefaultTagDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.inventory.*;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
@@ -163,6 +162,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 new DefaultWaxScrapingCategory(),
                 new DefaultOxidizingCategory(),
                 new DefaultOxidationScrapingCategory(),
+                new DefaultTagCategory(),
                 new DefaultInformationCategory()
         );
         
@@ -195,32 +195,23 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 registry.addWorkstations(PATHING, EntryStacks.of(item));
             }
         });
-        for (Item item : getTag(new ResourceLocation("c", "axes"))) {
-            if (axes.add(item)) {
-                registry.addWorkstations(STRIPPING, EntryStacks.of(item));
-                registry.addWorkstations(WAX_SCRAPING, EntryStacks.of(item));
-                registry.addWorkstations(OXIDATION_SCRAPING, EntryStacks.of(item));
+        for (EntryStack<?> stack : getTag(new ResourceLocation("c", "axes"))) {
+            if (axes.add(stack.<ItemStack>castValue().getItem())) {
+                registry.addWorkstations(STRIPPING, stack);
+                registry.addWorkstations(WAX_SCRAPING, stack);
+                registry.addWorkstations(OXIDATION_SCRAPING, stack);
             }
         }
-        for (Item item : getTag(new ResourceLocation("c", "hoes"))) {
-            if (hoes.add(item)) registry.addWorkstations(TILLING, EntryStacks.of(item));
+        for (EntryStack<?> stack : getTag(new ResourceLocation("c", "hoes"))) {
+            if (hoes.add(stack.<ItemStack>castValue().getItem())) registry.addWorkstations(TILLING, stack);
         }
-        for (Item item : getTag(new ResourceLocation("c", "shovels"))) {
-            if (shovels.add(item)) registry.addWorkstations(PATHING, EntryStacks.of(item));
+        for (EntryStack<?> stack : getTag(new ResourceLocation("c", "shovels"))) {
+            if (shovels.add(stack.<ItemStack>castValue().getItem())) registry.addWorkstations(PATHING, stack);
         }
     }
     
-    private static <T> Iterable<T> resolveTag(TagKey<T> tagKey) {
-        Registry<T> registry = ((Registry<Registry<T>>) Registry.REGISTRY).get((ResourceKey<Registry<T>>) tagKey.registry());
-        HolderSet.Named<T> holders = registry.getTag(tagKey).orElse(null);
-        if (holders == null) return Collections.emptyList();
-        return () -> holders.stream()
-                .map(Holder::value)
-                .iterator();
-    }
-    
-    private static Iterable<Item> getTag(ResourceLocation tagId) {
-        return resolveTag(TagKey.create(Registry.ITEM_REGISTRY, tagId));
+    private static EntryIngredient getTag(ResourceLocation tagId) {
+        return EntryIngredients.ofItemTag(TagKey.create(Registry.ITEM_REGISTRY, tagId));
     }
     
     @Override
@@ -234,6 +225,17 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.registerRecipeFiller(UpgradeRecipe.class, RecipeType.SMITHING, DefaultSmithingDisplay::new);
         registry.registerFiller(AnvilRecipe.class, DefaultAnvilDisplay::new);
         registry.registerFiller(BrewingRecipe.class, DefaultBrewingDisplay::new);
+        registry.registerFiller(TagKey.class, tagKey -> {
+            if (tagKey.isFor(Registry.ITEM_REGISTRY)) {
+                return DefaultTagDisplay.ofItems(tagKey);
+            } else if (tagKey.isFor(Registry.BLOCK_REGISTRY)) {
+                return DefaultTagDisplay.ofItems(tagKey);
+            } else if (tagKey.isFor(Registry.FLUID_REGISTRY)) {
+                return DefaultTagDisplay.ofFluids(tagKey);
+            }
+            
+            return null;
+        });
         for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.getFuel().entrySet()) {
             registry.add(new DefaultFuelDisplay(Collections.singletonList(EntryIngredients.of(entry.getKey())), Collections.emptyList(), entry.getValue()));
         }
@@ -271,8 +273,8 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         DummyShovelItem.getPathBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultPathingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue().getBlock())));
         });
-        registry.add(new DefaultBeaconBaseDisplay(CollectionUtils.map(resolveTag(BlockTags.BEACON_BASE_BLOCKS), ItemStack::new)));
-        registry.add(new DefaultBeaconPaymentDisplay(CollectionUtils.map(resolveTag(ItemTags.BEACON_PAYMENT_ITEMS), ItemStack::new)));
+        registry.add(new DefaultBeaconBaseDisplay(Collections.singletonList(EntryIngredients.ofItemTag(BlockTags.BEACON_BASE_BLOCKS)), Collections.emptyList()));
+        registry.add(new DefaultBeaconPaymentDisplay(Collections.singletonList(EntryIngredients.ofItemTag(ItemTags.BEACON_PAYMENT_ITEMS)), Collections.emptyList()));
         HoneycombItem.WAXABLES.get().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultWaxingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
         });
@@ -317,6 +319,10 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         } else {
             registerForgePotions(registry, this);
         }
+        
+        for (Registry<?> reg : Registry.REGISTRY) {
+            reg.getTags().forEach(tagPair -> registry.add(tagPair.getFirst()));
+        }
     }
     
     @ExpectPlatform
@@ -350,7 +356,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     public void registerFavorites(FavoriteEntryType.Registry registry) {
         registry.register(GameModeFavoriteEntry.ID, GameModeFavoriteEntry.Type.INSTANCE);
         registry.getOrCrateSection(new TranslatableComponent(GameModeFavoriteEntry.TRANSLATION_KEY))
-                .add(true, Stream.concat(
+                .add(Stream.concat(
                         Arrays.stream(GameType.values())
                                 .filter(type -> type.getId() >= 0),
                         Stream.of((GameType) null)

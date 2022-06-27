@@ -43,26 +43,43 @@ import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class DisplayEntry extends WidgetWithBounds {
     private final LazyResettable<List<Widget>> widgets = new LazyResettable<>(this::setupWidgets);
     private final DisplayHistoryWidget parent;
     private final Display display;
     private final Dimension size = new Dimension(1, 1);
+    private boolean hasInitialBounds;
     private final ValueAnimator<FloatingRectangle> bounds = ValueAnimator.ofFloatingRectangle();
     private final Button plusButton;
     private double xOffset = 0;
     private boolean reachedStable = false;
+    private UUID uuid = UUID.randomUUID();
     
-    public DisplayEntry(DisplayHistoryWidget parent, Display display, Rectangle initialBounds) {
+    public DisplayEntry(DisplayHistoryWidget parent, Display display, @Nullable Rectangle initialBounds) {
         this.display = display;
         this.parent = parent;
-        this.bounds.setAs(initialBounds.getFloatingBounds());
-        this.plusButton = Widgets.createButton(new Rectangle(initialBounds.getMaxX() - 16, initialBounds.getMaxY() - 16, 10, 10), new TextComponent("+"));
+        this.hasInitialBounds = initialBounds != null;
+        if (this.hasInitialBounds) {
+            this.bounds.setAs(initialBounds.getFloatingBounds());
+            this.plusButton = Widgets.createButton(new Rectangle(initialBounds.getMaxX() - 16, initialBounds.getMaxY() - 16, 10, 10), new TextComponent("+"));
+        } else {
+            this.plusButton = Widgets.createButton(new Rectangle(-1000, -1000, 10, 10), new TextComponent("+"));
+        }
+    }
+    
+    public UUID getUuid() {
+        return uuid;
+    }
+    
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
     
     public void markBoundsDirty() {
@@ -85,10 +102,15 @@ public class DisplayEntry extends WidgetWithBounds {
         float x = parentBounds.getCenterX() - displayBounds.width / 2 * scale;
         float y = parentBounds.getCenterY() - displayBounds.height / 2 * scale;
         FloatingRectangle newBounds = new Rectangle(x, y, displayBounds.width * scale, displayBounds.height * scale).getFloatingBounds();
-        if (this.size.width == 1 && this.size.height == 1) {
-            this.bounds.setTo(newBounds, 700);
+        if (hasInitialBounds) {
+            if (this.size.width == 1 && this.size.height == 1) {
+                this.bounds.setTo(newBounds, 700);
+            } else {
+                this.bounds.setAs(newBounds);
+            }
         } else {
             this.bounds.setAs(newBounds);
+            hasInitialBounds = true;
         }
         this.size.setSize(displayBounds.getSize());
         return widgets;
@@ -164,18 +186,18 @@ public class DisplayEntry extends WidgetWithBounds {
                 
                 if (plusButton.containsMouse(Math.round(mouse.x()), Math.round(mouse.y()))) {
                     result.tooltipRenderer.accept(new Point(mouseX, mouseY), Tooltip::queue);
-                    
-                    if (result.renderer != null) {
-                        poses.pushPose();
-                        if (!stable || !target.equals(bounds)) {
-                            poses.translate(0, 0, 600);
-                        }
-                        poses.translate(xOffset(), yOffset(), 0);
-                        poses.scale(xScale(), yScale(), 1.0F);
-                        
-                        result.renderer.render(poses, mouseX, mouseY, delta, widgets.get(), getBounds(), display);
-                        poses.popPose();
+                }
+                
+                if (result.renderer != null) {
+                    poses.pushPose();
+                    if (!stable || !target.equals(bounds)) {
+                        poses.translate(0, 0, 600);
                     }
+                    poses.translate(xOffset(), yOffset(), 0);
+                    poses.scale(xScale(), yScale(), 1.0F);
+                    
+                    result.renderer.render(poses, mouseX, mouseY, delta, widgets.get(), getBounds(), display);
+                    poses.popPose();
                 }
             } else {
                 poses.popPose();
@@ -262,19 +284,19 @@ public class DisplayEntry extends WidgetWithBounds {
         return (float) bounds.height / size.height;
     }
     
-    private int transformMouseX(int mouseX) {
+    protected int transformMouseX(int mouseX) {
         return Math.round((mouseX - xOffset()) / xScale());
     }
     
-    private int transformMouseY(int mouseY) {
+    protected int transformMouseY(int mouseY) {
         return Math.round((mouseY - yOffset()) / yScale());
     }
     
-    private double transformMouseX(double mouseX) {
+    protected double transformMouseX(double mouseX) {
         return (mouseX - xOffset()) / xScale();
     }
     
-    private double transformMouseY(double mouseY) {
+    protected double transformMouseY(double mouseY) {
         return (mouseY - yOffset()) / yScale();
     }
     

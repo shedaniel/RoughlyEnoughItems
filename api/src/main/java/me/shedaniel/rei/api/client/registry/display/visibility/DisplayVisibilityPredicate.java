@@ -28,12 +28,17 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.world.InteractionResult;
 
+/**
+ * Handler for determining the visibility of displays.
+ * This is preferred comparing to removing the displays from the registry.
+ *
+ * @see me.shedaniel.rei.api.client.registry.display.DisplayRegistry#registerVisibilityPredicate(DisplayVisibilityPredicate)
+ */
 @Environment(EnvType.CLIENT)
 public interface DisplayVisibilityPredicate extends Comparable<DisplayVisibilityPredicate> {
     /**
-     * Gets the priority of the handler, the higher the priority, the earlier this is called.
+     * Returns the priority of the handler, the higher the priority, the earlier this is called.
      *
      * @return the priority
      */
@@ -43,16 +48,17 @@ public interface DisplayVisibilityPredicate extends Comparable<DisplayVisibility
     
     /**
      * Handles the visibility of the display.
-     * {@link InteractionResult#PASS} to pass the handling to another handler
-     * {@link InteractionResult#SUCCESS} to always display it
-     * {@link InteractionResult#FAIL} to never display it
      *
      * @param category the category of the display
      * @param display  the display of the recipe
      * @return the visibility
+     * @see EventResult
      */
     EventResult handleDisplay(DisplayCategory<?> category, Display display);
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     default int compareTo(DisplayVisibilityPredicate o) {
         return Double.compare(getPriority(), o.getPriority());

@@ -33,8 +33,21 @@ import net.minecraft.nbt.CompoundTag;
  * @see DisplaySerializerRegistry
  */
 public interface DisplaySerializer<D extends Display> {
+    /**
+     * Serializes the display into a tag.
+     *
+     * @param tag     the tag to serialize into
+     * @param display the display to serialize
+     * @return the tag
+     */
     CompoundTag save(CompoundTag tag, D display);
     
+    /**
+     * Deserializes the display from a tag.
+     *
+     * @param tag the tag to deserialize from
+     * @return the display
+     */
     D read(CompoundTag tag);
     
     /**

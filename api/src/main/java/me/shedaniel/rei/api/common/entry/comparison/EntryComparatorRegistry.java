@@ -25,7 +25,6 @@ package me.shedaniel.rei.api.common.entry.comparison;
 
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.registry.Reloadable;
-import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Registry for registering custom methods for identifying variants of {@link T}.
@@ -33,20 +32,54 @@ import org.jetbrains.annotations.ApiStatus;
  * and nbt when exact.
  */
 public interface EntryComparatorRegistry<T, S> extends Reloadable<REIPlugin<?>> {
+    /**
+     * Registers an {@link EntryComparator} for the given entry {@link S}.
+     *
+     * @param comparator the comparator to register
+     * @param entry      the entry to register the comparator for
+     */
     void register(EntryComparator<T> comparator, S entry);
     
+    /**
+     * Registers an {@link EntryComparator} for the given entries {@link S}.
+     *
+     * @param comparator the comparator to register
+     * @param entries    the entries to register the comparator for
+     */
     default void register(EntryComparator<T> comparator, S... entries) {
         for (S entry : entries) {
             register(comparator, entry);
         }
     }
     
-    @ApiStatus.Experimental
+    /**
+     * Registers an {@link EntryComparator} globally for all entries {@link S}.
+     *
+     * @param comparator the comparator to register
+     */
     void registerGlobal(EntryComparator<T> comparator);
     
+    /**
+     * Returns hash code of the {@link T} stack.
+     *
+     * @param context the context to use
+     * @param stack   the stack to hash code
+     * @return the hash code of the {@code context} context
+     */
     long hashOf(ComparisonContext context, T stack);
     
+    /**
+     * Returns whether there are any comparators registered for the {@link S} entry.
+     *
+     * @param entry the entry to check
+     * @return whether there are any comparators registered for the {@code entry} entry
+     */
     boolean containsComparator(S entry);
     
+    /**
+     * Returns the number of registered comparators for this registry.
+     *
+     * @return the number of registered comparators for this registry
+     */
     int comparatorSize();
 }

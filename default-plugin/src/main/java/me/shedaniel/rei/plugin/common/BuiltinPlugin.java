@@ -33,6 +33,7 @@ import me.shedaniel.rei.plugin.common.displays.cooking.DefaultBlastingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmeltingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
+import me.shedaniel.rei.plugin.common.displays.tag.DefaultTagDisplay;
 import org.jetbrains.annotations.ApiStatus;
 
 public interface BuiltinPlugin {
@@ -60,5 +61,7 @@ public interface BuiltinPlugin {
     CategoryIdentifier<DefaultOxidizingDisplay> OXIDIZING = CategoryIdentifier.of("minecraft", "plugins/oxidizing");
     @ApiStatus.Experimental
     CategoryIdentifier<DefaultOxidationScrapingDisplay> OXIDATION_SCRAPING = CategoryIdentifier.of("minecraft", "plugins/oxidation_scraping");
+    @ApiStatus.Experimental
+    CategoryIdentifier<DefaultTagDisplay<?, ?>> TAG = CategoryIdentifier.of("minecraft", "plugins/tag");
     CategoryIdentifier<DefaultInformationDisplay> INFO = CategoryIdentifier.of("roughlyenoughitems", "plugins/information");
 }

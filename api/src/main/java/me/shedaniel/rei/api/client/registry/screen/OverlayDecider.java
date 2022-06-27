@@ -38,6 +38,13 @@ import static net.minecraft.world.InteractionResult.PASS;
  */
 @Environment(EnvType.CLIENT)
 public interface OverlayDecider extends Comparable<OverlayDecider> {
+    /**
+     * Returns whether this decider should be used to handle the specified screen.
+     *
+     * @param screen the screen
+     * @param <R>    the type of the screen
+     * @return whether this decider should be used to handle the specified screen
+     */
     <R extends Screen> boolean isHandingScreen(Class<R> screen);
     
     @ApiStatus.ScheduledForRemoval
@@ -81,6 +88,9 @@ public interface OverlayDecider extends Comparable<OverlayDecider> {
         return PASS;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     default int compareTo(OverlayDecider o) {
         return Double.compare(getPriority(), o.getPriority());

@@ -130,9 +130,11 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     
     private static class DisplaysList extends ArrayList<Display> {
         private final List<Display> unmodifiableList;
+        private final List<Display> synchronizedList;
         
         public DisplaysList() {
-            this.unmodifiableList = Collections.unmodifiableList(this);
+            this.synchronizedList = Collections.synchronizedList(this);
+            this.unmodifiableList = Collections.unmodifiableList(synchronizedList);
         }
     }
     
@@ -256,6 +258,12 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
             for (int i = allSortedRecipes.size() - 1; i >= 0; i--) {
                 Recipe<?> recipe = allSortedRecipes.get(i);
                 addWithReason(recipe, DisplayAdditionReason.RECIPE_MANAGER);
+            }
+        }
+        
+        for (CategoryIdentifier<?> identifier : displays.keySet()) {
+            if (CategoryRegistry.getInstance().tryGet(identifier).isEmpty()) {
+                RoughlyEnoughItemsCore.LOGGER.throwException(new IllegalStateException("Displays registered for unknown registry: " + identifier));
             }
         }
     }

@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -47,6 +48,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.TooltipFlag;
+import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,10 +72,11 @@ public final class ClientInternals {
     private static Function<Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
     private static BiConsumer<List<ClientTooltipComponent>, TooltipComponent> clientTooltipComponentProvider = (tooltip, result) -> throwNotSetup();
     private static BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
-    private static BiFunction<Point, @Nullable TooltipFlag, TooltipContext> tooltipContextProvider = (point, texts) -> throwNotSetup();
+    private static TriFunction<Point, @Nullable TooltipFlag, Boolean, TooltipContext> tooltipContextProvider = (point, texts, search) -> throwNotSetup();
     private static Function<Object, Tooltip.Entry> tooltipEntryProvider = (component) -> throwNotSetup();
     private static Supplier<List<String>> jeiCompatMods = ClientInternals::throwNotSetup;
     private static Supplier<Object> builtinClientPlugin = ClientInternals::throwNotSetup;
+    private static Function<List<EntryIngredient>, TooltipComponent> missingTooltip = (stacks) -> throwNotSetup();
     
     private static <T> T throwNotSetup() {
         throw new AssertionError("REI Internals have not been initialized!");
@@ -132,8 +135,8 @@ public final class ClientInternals {
         return tooltipProvider.apply(point, texts);
     }
     
-    public static TooltipContext createTooltipContext(Point point, @Nullable TooltipFlag flag) {
-        return tooltipContextProvider.apply(point, flag);
+    public static TooltipContext createTooltipContext(Point point, @Nullable TooltipFlag flag, boolean isSearch) {
+        return tooltipContextProvider.apply(point, flag, isSearch);
     }
     
     public static Tooltip.Entry createTooltipEntry(Object component) {
@@ -158,6 +161,10 @@ public final class ClientInternals {
     
     public static PluginManager<REIClientPlugin> getPluginManager() {
         return clientPluginManager.get();
+    }
+    
+    public static TooltipComponent createMissingTooltip(List<EntryIngredient> stacks) {
+        return missingTooltip.apply(stacks);
     }
     
     @Environment(EnvType.CLIENT)
@@ -193,5 +200,11 @@ public final class ClientInternals {
         Widget createShapelessIcon(Point point);
         
         Widget concatWidgets(List<Widget> widgets);
+        
+        WidgetWithBounds noOp();
+        
+        WidgetWithBounds wrapOverflow(Rectangle bounds, WidgetWithBounds widget);
+        
+        WidgetWithBounds wrapPadded(int padLeft, int padRight, int padTop, int padBottom, WidgetWithBounds widget);
     }
 }

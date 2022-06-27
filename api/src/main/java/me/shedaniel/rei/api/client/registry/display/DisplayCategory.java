@@ -46,24 +46,32 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public interface DisplayCategory<T extends Display> extends DisplayCategoryView<T>, Identifiable {
     /**
-     * Returns the renderer of the icon.
+     * Returns the identifier of this {@link DisplayCategory}.
+     * This identifier must be the same one used to register the category
+     * in {@link me.shedaniel.rei.api.client.registry.category.CategoryRegistry}.
      *
-     * @return the renderer of the icon
+     * @return the identifier of this category
      */
-    Renderer getIcon();
+    CategoryIdentifier<? extends T> getCategoryIdentifier();
     
     /**
-     * Returns the category title.
+     * Returns the category title for the category.
      *
      * @return the title
      */
     Component getTitle();
     
     /**
-     * Gets the recipe renderer for the category, used in {@link me.shedaniel.rei.impl.client.gui.CompositeRecipeViewingScreen} for rendering simple recipes
+     * Returns the renderer of the icon displayed in the category tab.
+     * <p>
+     * A simple implementation is the {@link me.shedaniel.rei.api.common.entry.EntryStack}.
      *
-     * @param display the display to render
-     * @return the display renderer
+     * @return the renderer of the icon
+     */
+    Renderer getIcon();
+    
+    /**
+     * {@inheritDoc}
      */
     @ApiStatus.OverrideOnly
     @Override
@@ -72,11 +80,7 @@ public interface DisplayCategory<T extends Display> extends DisplayCategoryView<
     }
     
     /**
-     * Setup the widgets for displaying the recipe
-     *
-     * @param display the recipe
-     * @param bounds  the bounds of the display, configurable with overriding the width, height methods.
-     * @return the list of widgets
+     * {@inheritDoc}
      */
     @ApiStatus.OverrideOnly
     @Override
@@ -85,19 +89,19 @@ public interface DisplayCategory<T extends Display> extends DisplayCategoryView<
     }
     
     /**
-     * Gets the recipe display height
+     * Returns the display height, the display height is consistent between all displays in the category.
      *
-     * @return the recipe display height
+     * @return the display height
      */
     default int getDisplayHeight() {
         return 66;
     }
     
     /**
-     * Gets the display width
+     * Returns the display width, the display width can be display-dependent.
      *
-     * @param display the recipe display
-     * @return the recipe display width
+     * @param display the display
+     * @return the display width
      */
     default int getDisplayWidth(T display) {
         return 150;
@@ -115,19 +119,31 @@ public interface DisplayCategory<T extends Display> extends DisplayCategoryView<
     /**
      * Gets the fixed number of displays per page.
      *
-     * @return the number of displays, returns -1 if not fixed
+     * @return the number of displays, or {@code -1} if not fixed
      */
     default int getFixedDisplaysPerPage() {
         return -1;
     }
     
-    CategoryIdentifier<? extends T> getCategoryIdentifier();
-    
+    /**
+     * Returns the display merger for this category.
+     * <p>
+     * A display merger is used to determine whether two displays can be merged together.
+     *
+     * @return the display merger, or {@code null}
+     * @see DisplayCategory#getContentMerger() for a basic merger based on checking the inputs and outputs
+     */
     @Nullable
     default DisplayMerger<T> getDisplayMerger() {
         return null;
     }
     
+    /**
+     * Creates a content merger for this category that is dependent on the inputs and outputs of the displays.
+     *
+     * @param <T> the type of the display
+     * @return the content merger
+     */
     static <T extends Display> DisplayMerger<T> getContentMerger() {
         return new DisplayMerger<T>() {
             @Override
@@ -145,6 +161,9 @@ public interface DisplayCategory<T extends Display> extends DisplayCategoryView<
         };
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     default ResourceLocation getIdentifier() {
         return getCategoryIdentifier().getIdentifier();

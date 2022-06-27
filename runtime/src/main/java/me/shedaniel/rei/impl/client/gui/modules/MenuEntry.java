@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.gui.modules;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.Experimental
 @ApiStatus.Internal
 public abstract class MenuEntry extends Widget {
     @ApiStatus.Internal

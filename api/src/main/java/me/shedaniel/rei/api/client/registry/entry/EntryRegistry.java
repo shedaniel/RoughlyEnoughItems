@@ -46,16 +46,17 @@ import java.util.stream.Stream;
 
 /**
  * Registry for registering {@link EntryStack} for display on the overlay entry list.
- *
- * <p>The default REI plugin iterates both {@link Registry#ITEM} and {@link Registry#FLUID}
+ * <p>
+ * The default REI plugin iterates both {@link Registry#ITEM} and {@link Registry#FLUID}
  * to register new entries. Other plugins may override this default behaviour, altering
  * the entry list.
- *
- * <p>REI plugins should only add entries during reload, modifications outside the
- * reload phase may not be reflected immediately.
- *
- * <p>While this registry can be used for registering variants of stacks, there may be
- * native alternatives such as {@link Item#fillItemCategory(CreativeModeTab, NonNullList)}.
+ * <p>
+ * REI plugins should only add entries during reload, modifications outside the
+ * reload phase may not be reflected immediately.<br>
+ * Runtime modifications are also warned about.
+ * <p>
+ * While this registry can be used for registering variants of stacks, there may be
+ * better alternatives such as {@link Item#fillItemCategory(CreativeModeTab, NonNullList)}.
  *
  * @see REIClientPlugin#registerEntries(EntryRegistry)
  */
@@ -80,7 +81,7 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
     
     /**
      * @return the unmodifiable list of filtered entry stacks,
-     * only available after plugins reload.
+     * only available <b>after</b> plugins reload.
      */
     List<EntryStack<?>> getPreFilteredList();
     
@@ -91,7 +92,7 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
     void refilter();
     
     /**
-     * Gets all possible stacks from an item, tries to invoke {@link Item#appendStacks(net.minecraft.item.ItemGroup, net.minecraft.util.collection.DefaultedList)}.
+     * Returns all possible stacks from an item, tries to invoke {@link Item#fillItemCategory(CreativeModeTab, NonNullList)}.
      *
      * @param item the item to find
      * @return the list of possible stacks, will never be empty.
@@ -99,7 +100,7 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
     List<ItemStack> appendStacksForItem(Item item);
     
     /**
-     * Adds an new stack to the entry list.
+     * Adds a new stack to the entry list.
      *
      * @param stack the stack to add
      */
@@ -108,7 +109,7 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
     }
     
     /**
-     * Adds an new stack to the entry list, after a certain stack.
+     * Adds a new stack to the entry list, after a certain stack.
      *
      * @param afterEntry the stack to put after
      * @param stack      the stack to add
@@ -198,4 +199,12 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
      * @return whether it was successful to remove any entry
      */
     boolean removeEntryFuzzyHashIf(LongPredicate predicate);
+    
+    /**
+     * Returns whether the registry is in its reloading phase.
+     * Registration after the reloading phase will be slow and may not be reflected immediately.
+     *
+     * @return whether the registry is in its reloading phase
+     */
+    boolean isReloading();
 }

@@ -23,10 +23,12 @@
 
 package me.shedaniel.rei.api.client.plugins;
 
+import me.shedaniel.rei.api.client.config.addon.ConfigAddonRegistry;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRendererRegistry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
@@ -95,6 +97,16 @@ public interface REIClientPlugin extends REIPlugin<REIClientPlugin> {
     }
     
     /**
+     * Registers entries to collapse on the entry panel.
+     *
+     * @param registry the collapsible entry registry
+     */
+    @ApiStatus.OverrideOnly
+    @ApiStatus.Experimental
+    default void registerCollapsibleEntries(CollapsibleEntryRegistry registry) {
+    }
+    
+    /**
      * Registers favorite entry types.
      *
      * @param registry the registry
@@ -119,6 +131,17 @@ public interface REIClientPlugin extends REIPlugin<REIClientPlugin> {
      */
     @ApiStatus.OverrideOnly
     default void registerTransferHandlers(TransferHandlerRegistry registry) {
+    }
+    
+    /**
+     * Registers new config addons.
+     *
+     * @param registry the registry
+     * @since 8.3
+     */
+    @ApiStatus.OverrideOnly
+    @ApiStatus.Experimental
+    default void registerConfigAddons(ConfigAddonRegistry registry) {
     }
     
     @Override

@@ -33,6 +33,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 
 public interface Views extends Reloadable<REIClientPlugin> {
+    /**
+     * @return the instance of {@link Views}
+     */
     static Views getInstance() {
         return PluginManager.getClientInstance().get(Views.class);
     }

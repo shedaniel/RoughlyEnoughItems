@@ -303,6 +303,53 @@ public final class Widgets {
         return ClientInternals.getWidgetsProvider().concatWidgets(widgets);
     }
     
+    public static WidgetWithBounds noOp() {
+        return ClientInternals.getWidgetsProvider().noOp();
+    }
+    
+    @ApiStatus.Experimental
+    public static WidgetWithBounds overflowed(Rectangle bounds, WidgetWithBounds widget) {
+        return ClientInternals.getWidgetsProvider().wrapOverflow(bounds, widget);
+    }
+    
+    @ApiStatus.Experimental
+    public static WidgetWithBounds padded(int padding, WidgetWithBounds widget) {
+        return padded(padding, padding, padding, padding, widget);
+    }
+    
+    @ApiStatus.Experimental
+    public static WidgetWithBounds padded(int padX, int padY, WidgetWithBounds widget) {
+        return padded(padX, padX, padY, padY, widget);
+    }
+    
+    @ApiStatus.Experimental
+    public static WidgetWithBounds padded(int padLeft, int padRight, int padTop, int padBottom, WidgetWithBounds widget) {
+        return ClientInternals.getWidgetsProvider().wrapPadded(padLeft, padRight, padTop, padBottom, widget);
+    }
+    
+    public static Widget delegate(Supplier<Widget> supplier) {
+        return new DelegateWidget(Widgets.noOp()) {
+            @Override
+            protected Widget delegate() {
+                return supplier.get();
+            }
+        };
+    }
+    
+    public static WidgetWithBounds delegateWithBounds(Supplier<WidgetWithBounds> supplier) {
+        return new DelegateWidgetWithBounds(Widgets.noOp(), Rectangle::new) {
+            @Override
+            protected WidgetWithBounds delegate() {
+                return supplier.get();
+            }
+            
+            @Override
+            public Rectangle getBounds() {
+                return delegate().getBounds();
+            }
+        };
+    }
+    
     public static <T> Iterable<T> walk(Iterable<? extends GuiEventListener> listeners, Predicate<GuiEventListener> predicate) {
         return () -> new AbstractIterator<T>() {
             Stack<Iterator<? extends GuiEventListener>> stack;

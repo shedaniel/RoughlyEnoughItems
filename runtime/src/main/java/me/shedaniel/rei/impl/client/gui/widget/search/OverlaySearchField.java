@@ -94,7 +94,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         return TextTransformations.forwardWithTransformation(text, (s, charIndex, c) -> {
             byte arg = highlighter.highlighted[charIndex + index];
             Style style = Style.EMPTY;
-            if (isMain && ScreenOverlayImpl.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
+            if (isMain && ScreenOverlayImpl.getEntryListWidget().getCollapsedStacks().isEmpty() && !getText().isEmpty()) {
                 style = ERROR_STYLE;
             }
             if (arg > 0) {
@@ -206,7 +206,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         bufferBuilder.end();
         BufferUploader.end(bufferBuilder);
         poses.pushPose();
-        poses.translate(0.0D, 0.0D, 400.0D);
+        poses.translate(0.0D, 0.0D, 350.0D);
         for (int i = 0; i < sequences.size(); i++) {
             Pair<HintProvider, FormattedCharSequence> pair = sequences.get(i);
             int lineWidth = font.drawShadow(poses, pair.getSecond(), x + 3, y + 3 + font.lineHeight * i, -1);
@@ -237,15 +237,18 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     @Override
     public void renderBorder(PoseStack matrices) {
         isHighlighting = isHighlighting && ConfigObject.getInstance().isInventoryHighlightingAllowed();
+        int borderColor;
         if (isMain && isHighlighting) {
-            fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -852212);
-        } else if (isMain && ScreenOverlayImpl.getEntryListWidget().getAllStacks().isEmpty() && !getText().isEmpty()) {
-            fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, -43691);
+            borderColor = 0xfff2ff0c;
+        } else if (isMain && ScreenOverlayImpl.getEntryListWidget().getCollapsedStacks().isEmpty() && !getText().isEmpty()) {
+            borderColor = 0xffff5555;
         } else {
             super.renderBorder(matrices);
             return;
         }
-        fill(matrices, this.getBounds().x, this.getBounds().y, this.getBounds().x + this.getBounds().width, this.getBounds().y + this.getBounds().height, -16777216);
+        fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, 0xff000000);
+        fill(matrices, this.getBounds().x, this.getBounds().y, this.getBounds().x + this.getBounds().width, this.getBounds().y + this.getBounds().height, borderColor);
+        fill(matrices, this.getBounds().x + 1, this.getBounds().y + 1, this.getBounds().x + this.getBounds().width - 1, this.getBounds().y + this.getBounds().height - 1, 0xff000000);
     }
     
     public int getManhattanDistance(Point point1, Point point2) {

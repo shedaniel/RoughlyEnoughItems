@@ -84,10 +84,8 @@ import java.util.function.Supplier;
 @ApiStatus.Internal
 public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    private final List<Widget> preWidgets = Lists.newArrayList();
-    private final List<Widget> widgets = Lists.newArrayList();
     private final Map<Rectangle, Pair<DisplaySpec, List<Widget>>> recipeBounds = Maps.newHashMap();
-    private final List<TabWidget> tabs = Lists.newArrayList();
+    private List<Widget> widgets = Lists.newArrayList();
     public int page;
     public int categoryPages = -1;
     @Nullable
@@ -148,8 +146,6 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         super.init();
         this.children().clear();
         this.recipeBounds.clear();
-        this.tabs.clear();
-        this.preWidgets.clear();
         this.widgets.clear();
         int largestHeight = Math.min(Math.max(height - 34 - 30, 100), ConfigObject.getInstance().getMaxRecipesPageHeight());
         int maxWidthDisplay = CollectionUtils.<DisplaySpec, Integer>mapAndMax(getCurrentDisplayed(), display -> getCurrentCategory().getDisplayWidth(display.provideInternalDisplay()), Comparator.naturalOrder()).orElse(150);
@@ -235,7 +231,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             int tabIndex = id + categoryPages * tabsPerPage;
             if (categories.size() > tabIndex) {
                 TabWidget tab;
-                tabs.add(tab = TabWidget.create(id, tabSize, bounds.x + bounds.width / 2 - Math.min(categories.size() - categoryPages * tabsPerPage, tabsPerPage) * tabSize / 2, bounds.y, 0, isCompactTabs ? 166 : 192, widget -> {
+                widgets.add(tab = TabWidget.create(id, tabSize, bounds.x + bounds.width / 2 - Math.min(categories.size() - categoryPages * tabsPerPage, tabsPerPage) * tabSize / 2, bounds.y, 0, isCompactTabs ? 166 : 192, widget -> {
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     if (widget.getId() + categoryPages * tabsPerPage == selectedCategoryIndex)
                         return false;
@@ -246,11 +242,15 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             }
         }
         initDisplays();
-        initWorkstations(preWidgets);
+        widgets = CollectionUtils.map(widgets, widget -> Widgets.withTranslate(widget, 0, 0, 10));
+        widgets.add(Widgets.withTranslate(new PanelWidget(bounds), 0, 0, 5));
+        widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+            fill(matrices, bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, darkStripesColor.value().getColor());
+            fill(matrices, bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 31, darkStripesColor.value().getColor());
+        }), 0, 0, 6));
+        initWorkstations(widgets);
         
-        _children().addAll(tabs);
-        _children().addAll(widgets);
-        _children().addAll(preWidgets);
+        children().addAll(widgets);
     }
     
     private void initDisplays() {
@@ -287,7 +287,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         }
     }
     
-    private void initWorkstations(List<Widget> preWidgets) {
+    private void initWorkstations(List<Widget> widgets) {
         workingStationsBaseWidget = null;
         List<EntryIngredient> workstations = CategoryRegistry.getInstance().get(getCurrentCategoryId()).getWorkstations();
         if (!workstations.isEmpty()) {
@@ -296,12 +296,12 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             int innerWidth = Mth.ceil(workstations.size() / ((float) hh));
             int xx = bounds.x - (8 + innerWidth * 16) + 6;
             int yy = bounds.y + 16;
-            preWidgets.add(workingStationsBaseWidget = Widgets.createCategoryBase(new Rectangle(xx - 5, yy - 5, 15 + innerWidth * 16, 10 + actualHeight * 16)));
-            preWidgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, innerWidth * 16 + 2, actualHeight * 16 + 2)));
+            widgets.add(workingStationsBaseWidget = Widgets.createCategoryBase(new Rectangle(xx - 5, yy - 5, 15 + innerWidth * 16, 10 + actualHeight * 16)));
+            widgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, innerWidth * 16 + 2, actualHeight * 16 + 2)));
             int index = 0;
             xx += (innerWidth - 1) * 16;
             for (EntryIngredient workingStation : workstations) {
-                preWidgets.add(new WorkstationSlotWidget(xx, yy, workingStation));
+                widgets.add(new WorkstationSlotWidget(xx, yy, workingStation));
                 index++;
                 yy += 16;
                 if (index >= hh) {
@@ -313,7 +313,8 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         }
     }
     
-    public List<Widget> getWidgets() {
+    public List<Widget> widgets() {
+        widgets.sort(Comparator.comparingDouble(Widget::getZRenderingPriority));
         return widgets;
     }
     
@@ -355,31 +356,16 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         darkStripesColor.update(delta);
         renderBackground(matrices);
-        for (Widget widget : preWidgets) {
-            widget.render(matrices, mouseX, mouseY, delta);
-        }
-        PanelWidget.render(matrices, bounds, -1, delta);
-        fill(matrices, bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, darkStripesColor.value().getColor());
-        fill(matrices, bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 31, darkStripesColor.value().getColor());
-        for (TabWidget tab : tabs) {
-            if (!tab.isSelected()) {
-                tab.render(matrices, mouseX, mouseY, delta);
-            }
-        }
         super.render(matrices, mouseX, mouseY, delta);
-        for (Widget widget : widgets) {
+        getOverlay().render(matrices, mouseX, mouseY, delta);
+        for (Widget widget : widgets()) {
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             widget.render(matrices, mouseX, mouseY, delta);
-        }
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        for (TabWidget tab : tabs) {
-            if (tab.isSelected()) {
-                tab.render(matrices, mouseX, mouseY, delta);
-            }
         }
         {
             ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
             if (export.matchesCurrentKey() || export.matchesCurrentMouse()) {
-                for (Rectangle bounds : Iterables.concat(recipeBounds.keySet(), Iterables.transform(tabs, TabWidget::getBounds))) {
+                for (Rectangle bounds : Iterables.concat(recipeBounds.keySet(), Iterables.transform(getTabs(), TabWidget::getBounds))) {
                     setBlitOffset(470);
                     if (bounds.contains(mouseX, mouseY)) {
                         fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744822402, 1744822402);
@@ -400,6 +386,10 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         }
     }
     
+    private Iterable<TabWidget> getTabs() {
+        return Widgets.walk(widgets(), widget -> widget instanceof TabWidget);
+    }
+    
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
@@ -418,19 +408,19 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     }
     
     @Override
-    public boolean charTyped(char char_1, int int_1) {
+    public boolean charTyped(char character, int modifiers) {
         for (GuiEventListener listener : children())
-            if (listener.charTyped(char_1, int_1))
+            if (listener.charTyped(character, modifiers))
                 return true;
-        return super.charTyped(char_1, int_1);
+        return super.charTyped(character, modifiers);
     }
     
     @Override
-    public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         for (GuiEventListener entry : children())
-            if (entry.mouseDragged(double_1, double_2, int_1, double_3, double_4))
+            if (entry.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
                 return true;
-        return super.mouseDragged(double_1, double_2, int_1, double_3, double_4);
+        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
     
     @Override
@@ -453,7 +443,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 return true;
             }
         }
-        for (TabWidget tab : tabs) {
+        for (TabWidget tab : getTabs()) {
             Rectangle bounds = tab.getBounds();
             if (bounds.contains(PointHelper.ofMouse())) {
                 minecraft.setScreen(new ConfirmScreen(confirmed -> {
@@ -477,7 +467,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                             transformFiltering(setupDisplay);
                             transformIngredientNotice(setupDisplay, ingredientStackToNotice);
                             transformResultNotice(setupDisplay, resultStackToNotice);
-                            for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
+                            for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets(), EntryWidget.class::isInstance)) {
                                 widget.removeTagMatch = true;
                             }
                             
@@ -551,5 +541,4 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             return getInnerBounds().contains(mouseX, mouseY);
         }
     }
-    
 }

@@ -26,6 +26,9 @@ package me.shedaniel.rei.api.client.registry.transfer;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -33,6 +36,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,13 +63,33 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         return 0d;
     }
     
+    /**
+     * Handles the transfer of the specified display.
+     * <p>
+     * If {@link Context#isActuallyCrafting()} returns {@code false},
+     * the transfer handler should <b>not</b> instantiate the transfer.
+     *
+     * @param context the context
+     * @return the result of the transfer
+     */
     Result handle(Context context);
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     default int compareTo(TransferHandler o) {
         return Double.compare(getPriority(), o.getPriority());
     }
     
+    /**
+     * Returns the error renderer given the context and the error data.
+     *
+     * @param context the context
+     * @param data    the error data
+     * @return the error renderer, or {@code null}
+     * @deprecated use {@link Result#renderer(TransferHandlerRenderer)} directly instead
+     */
     @Deprecated
     @Environment(EnvType.CLIENT)
     @Nullable
@@ -139,12 +163,47 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         @Deprecated
         Result errorRenderer(Object data);
         
+        /**
+         * Sets the renderer of the transfer, to be used when the mouse hovers the plus button.
+         */
         Result renderer(TransferHandlerRenderer renderer);
         
+        /**
+         * Overrides the tooltip renderer completely.
+         *
+         * @param renderer the renderer
+         * @return the result
+         */
         @ApiStatus.Experimental
         Result overrideTooltipRenderer(BiConsumer<Point, TooltipSink> renderer);
         
+        /**
+         * Adds a line of tooltip to the result.
+         *
+         * @param component the component to add
+         * @return the result
+         */
         Result tooltip(Component component);
+        
+        /**
+         * Adds a line of tooltip to the result.
+         *
+         * @param component the component to add
+         * @return the result
+         * @since 8.3
+         */
+        @ApiStatus.Experimental
+        Result tooltip(TooltipComponent component);
+        
+        /**
+         * Adds a tooltip component for the missing items.
+         *
+         * @param stacks the missing stacks
+         * @return the result
+         * @since 8.3
+         */
+        @ApiStatus.Experimental
+        Result tooltipMissing(List<EntryIngredient> stacks);
         
         /**
          * @return whether this handler has successfully handled the transfer.
@@ -184,7 +243,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         BiConsumer<Point, TooltipSink> getTooltipRenderer();
         
         @ApiStatus.Internal
-        void fillTooltip(List<Component> components);
+        void fillTooltip(List<Tooltip.Entry> entries);
         
         @FunctionalInterface
         interface TooltipSink {
@@ -232,7 +291,7 @@ public interface TransferHandler extends Comparable<TransferHandler> {
     final class ResultImpl implements Result {
         private boolean successful, applicable, returningToScreen, blocking;
         private Component error;
-        private List<Component> tooltips = new ArrayList<>();
+        private List<Tooltip.Entry> tooltips = new ArrayList<>();
         private Object errorRenderer;
         private BiConsumer<Point, TooltipSink> tooltipRenderer;
         private int color;
@@ -295,8 +354,19 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         
         @Override
         public Result tooltip(Component component) {
-            this.tooltips.add(component);
+            this.tooltips.add(Tooltip.entry(component));
             return this;
+        }
+        
+        @Override
+        public Result tooltip(TooltipComponent component) {
+            this.tooltips.add(Tooltip.entry(component));
+            return this;
+        }
+        
+        @Override
+        public Result tooltipMissing(List<EntryIngredient> ingredients) {
+            return tooltip(ClientInternals.createMissingTooltip(ingredients));
         }
         
         @Override
@@ -339,13 +409,12 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         }
         
         @Override
-        public void fillTooltip(List<Component> components) {
+        public void fillTooltip(List<Tooltip.Entry> entries) {
             if (isApplicable()) {
-                if (isSuccessful()) {
-                    components.addAll(tooltips);
-                } else {
-                    components.add(getError());
+                if (!isSuccessful()) {
+                    entries.add(Tooltip.entry(getError()));
                 }
+                entries.addAll(tooltips);
             }
         }
     }

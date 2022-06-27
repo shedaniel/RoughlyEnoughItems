@@ -26,30 +26,22 @@ package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
+import me.shedaniel.math.FloatingPoint;
+import me.shedaniel.math.FloatingRectangle;
 import me.shedaniel.math.Point;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.ClientHelper;
-import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
-import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
-import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
-import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.plugins.PluginManager;
-import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
-import me.shedaniel.rei.impl.client.view.ViewsImpl;
+import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -58,11 +50,13 @@ import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.
 
 @SuppressWarnings("UnstableApiUsage")
 public class EntryListStackEntry extends DisplayedEntryWidget {
-    private final EntryListWidget parent;
+    private final CollapsingEntryListWidget parent;
     public EntryStack<?> our;
     private NumberAnimator<Double> size = null;
+    private CollapsedStack collapsedStack = null;
+    private List<FloatingRectangle> collapsedBounds = null;
     
-    public EntryListStackEntry(EntryListWidget parent, int x, int y, int entrySize, boolean zoomed) {
+    public EntryListStackEntry(CollapsingEntryListWidget parent, int x, int y, int entrySize, boolean zoomed) {
         super(new Point(x, y), entrySize);
         this.parent = parent;
         if (zoomed) {
@@ -105,5 +99,111 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
     @Override
     public boolean containsMouse(double mouseX, double mouseY) {
         return super.containsMouse(mouseX, mouseY) && parent.containsChecked(mouseX, mouseY, true);
+    }
+    
+    @Override
+    protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        Rectangle bounds = getBounds();
+        
+        if (collapsedStack != null) {
+            fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0x34FFFFFF, 0x34FFFFFF);
+        }
+        
+        super.drawBackground(matrices, mouseX, mouseY, delta);
+    }
+    
+    @Override
+    protected void drawCurrentEntry(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        if (collapsedStack != null && !collapsedStack.isExpanded()) {
+            Rectangle bounds = getBounds();
+            List<EntryStack<?>> stacks = collapsedStack.getIngredient();
+            float fullSize = bounds.getWidth();
+            
+            matrices.pushPose();
+            matrices.translate(0, 0, 10);
+            
+            for (int i = stacks.size() - 1; i >= 0; i--) {
+                EntryStack<?> stack = stacks.get(i);
+                
+                if (i >= collapsedBounds.size()) {
+                    continue;
+                }
+                
+                FloatingRectangle value = collapsedBounds.get(i);
+                double x = bounds.x + value.x * fullSize;
+                double y = bounds.y + value.y * fullSize;
+                
+                double scaledSize = value.width * fullSize;
+                
+                stack.render(matrices, new Rectangle(x - scaledSize / 2, y - scaledSize / 2, scaledSize, scaledSize), mouseX, mouseY, delta);
+                
+                matrices.translate(0, 0, 10);
+            }
+            
+            matrices.popPose();
+        } else {
+            super.drawCurrentEntry(matrices, mouseX, mouseY, delta);
+        }
+    }
+    
+    @Override
+    protected boolean doAction(double mouseX, double mouseY, int button) {
+        if (collapsedStack != null) {
+            parent.updatedCount++;
+            collapsedStack.setExpanded(!collapsedStack.isExpanded());
+            parent.updateEntriesPosition();
+            Widgets.produceClickSound();
+            return true;
+        }
+        
+        return super.doAction(mouseX, mouseY, button);
+    }
+    
+    public void collapsed(CollapsedStack collapsedStack) {
+        this.collapsedStack = collapsedStack;
+        if (collapsedStack == null) {
+            this.collapsedBounds = null;
+        } else {
+            List<EntryStack<?>> ingredient = collapsedStack.getIngredient();
+            if (ingredient.size() == 0) this.collapsedBounds = null;
+            else if (ingredient.size() == 1) {
+                this.collapsedBounds = List.of(new FloatingRectangle(0, 0, 1, 1));
+            } else {
+                this.collapsedBounds = List.of(new FloatingRectangle(0.44, 0.56, 0.9, 0.8),
+                        new FloatingRectangle(0.56, 0.44, 0.9, 0.8));
+            }
+        }
+    }
+    
+    @Override
+    @Nullable
+    public Tooltip getCurrentTooltip(Point point) {
+        if (this.collapsedStack != null) {
+            if (!this.collapsedStack.isExpanded()) {
+                Tooltip tooltip = Tooltip.create(point, new TranslatableComponent("text.rei.collapsed.entry", collapsedStack.getName()));
+                tooltip.add((TooltipComponent) new CollapsedEntriesTooltip(collapsedStack));
+                tooltip.add(new TranslatableComponent("text.rei.collapsed.entry.hint.expand", collapsedStack.getName(), collapsedStack.getIngredient().size())
+                        .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+                ClientHelper.getInstance().appendModIdToTooltips(tooltip, collapsedStack.getModId());
+                return tooltip;
+            }
+        }
+        
+        Tooltip tooltip = super.getCurrentTooltip(point);
+        if (tooltip != null && this.collapsedStack != null) {
+            tooltip.entries().add(Mth.clamp(tooltip.entries().size() - 1, 0, tooltip.entries().size() - 1), Tooltip.entry(new TranslatableComponent("text.rei.collapsed.entry.hint.collapse", collapsedStack.getName(), collapsedStack.getIngredient().size())
+                    .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)));
+        }
+        return tooltip;
+    }
+    
+    @Nullable
+    public CollapsedStack getCollapsedStack() {
+        return collapsedStack;
+    }
+    
+    @Override
+    protected long getCyclingInterval() {
+        return 100;
     }
 }

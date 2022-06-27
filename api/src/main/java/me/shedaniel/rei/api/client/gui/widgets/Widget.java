@@ -26,6 +26,7 @@ package me.shedaniel.rei.api.client.gui.widgets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector4f;
+import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -35,6 +36,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Stack;
 
@@ -80,7 +82,7 @@ public abstract class Widget extends AbstractContainerEventHandler implements ne
         Point mouse = mouse();
         Vector4f mouseVec = new Vector4f(mouse.x, mouse.y, 0, 1);
         mouseVec.transform(pose);
-        return pushMouse(mouse);
+        return pushMouse(new Point(mouseVec.x(), mouseVec.y()));
     }
     
     public int getZ() {
@@ -114,5 +116,29 @@ public abstract class Widget extends AbstractContainerEventHandler implements ne
     @Deprecated
     public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         render(matrices, mouseX, mouseY, delta);
+    }
+    
+    @ApiStatus.Experimental
+    public double getZRenderingPriority() {
+        return 0;
+    }
+    
+    @ApiStatus.Experimental
+    public static CloseableScissors scissor(PoseStack matrices, Rectangle bounds) {
+        return scissor(matrices.last().pose(), bounds);
+    }
+    
+    @ApiStatus.Experimental
+    public static CloseableScissors scissor(Matrix4f matrix, Rectangle bounds) {
+        Vector4f vec1 = new Vector4f((float) bounds.x, (float) bounds.y, 0, 1);
+        vec1.transform(matrix);
+        Vector4f vec2 = new Vector4f((float) bounds.getMaxX(), (float) bounds.getMaxY(), 0, 1);
+        vec2.transform(matrix);
+        int x1 = Math.round(vec1.x());
+        int x2 = Math.round(vec2.x());
+        int y1 = Math.round(vec1.y());
+        int y2 = Math.round(vec2.y());
+        ScissorsHandler.INSTANCE.scissor(new Rectangle(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1)));
+        return ScissorsHandler.INSTANCE::removeLastScissor;
     }
 }

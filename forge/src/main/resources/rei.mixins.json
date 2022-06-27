@@ -3,7 +3,9 @@
   "package": "me.shedaniel.rei.mixin.forge",
   "compatibilityLevel": "JAVA_8",
   "client": [
-    "MixinEffectRenderingInventoryScreen"
+    "MixinClientPacketListener",
+    "MixinEffectRenderingInventoryScreen",
+    "MixinRecipeToast"
   ],
   "mixins": [
   ],

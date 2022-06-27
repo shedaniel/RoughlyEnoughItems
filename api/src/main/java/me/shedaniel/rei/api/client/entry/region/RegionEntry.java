@@ -26,15 +26,12 @@ package me.shedaniel.rei.api.client.entry.region;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-@ApiStatus.Experimental
-@ApiStatus.Internal
 public interface RegionEntry<T extends RegionEntry<T>> {
     EntryStack<?> toStack();
     

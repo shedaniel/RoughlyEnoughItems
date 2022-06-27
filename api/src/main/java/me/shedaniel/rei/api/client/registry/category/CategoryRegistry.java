@@ -110,23 +110,54 @@ public interface CategoryRegistry extends Reloadable<REIClientPlugin>, Iterable<
         }
     }
     
+    /**
+     * Returns the category configuration for the given category identifier.
+     *
+     * @param category the identifier of the category
+     * @param <T>      the type of the display
+     * @return the category configuration
+     * @throws NullPointerException if no {@link CategoryConfiguration} is found for the given identifier
+     */
     <T extends Display> CategoryConfiguration<T> get(CategoryIdentifier<T> category);
     
+    /**
+     * Returns the category configuration for the given category identifier.
+     *
+     * @param category the identifier of the category
+     * @param <T>      the type of the display
+     * @return the category configuration
+     */
     <T extends Display> Optional<CategoryConfiguration<T>> tryGet(CategoryIdentifier<T> category);
     
+    /**
+     * Configures the category configuration for the given category identifier.
+     * <p>
+     * This method is deferred to when the category is registered. This means that configuration can be
+     * done anytime during the reload phase.
+     *
+     * @param category the identifier of the category
+     * @param action   the action to perform
+     * @param <T>      the type of the display
+     */
     <T extends Display> void configure(CategoryIdentifier<T> category, Consumer<CategoryConfiguration<T>> action);
     
+    /**
+     * Returns the size of the category registry.
+     *
+     * @return the size of the category registry
+     */
     int size();
     
     /**
-     * Registers a category visibility predicate
+     * Registers a category visibility predicate. This is used to determine if a category is visible or not.
      *
      * @param predicate the predicate to be registered
+     * @see CategoryVisibilityPredicate
      */
     void registerVisibilityPredicate(CategoryVisibilityPredicate predicate);
     
     /**
-     * Tests the category against all visibility predicates to determine whether it is visible
+     * Returns whether the category is visible against visibility predicates.
      *
      * @param category the category to test against
      * @return whether the category is visible
@@ -134,7 +165,7 @@ public interface CategoryRegistry extends Reloadable<REIClientPlugin>, Iterable<
     boolean isCategoryVisible(DisplayCategory<?> category);
     
     /**
-     * Tests the category against all visibility predicates to determine whether it is invisible
+     * Returns whether the category is invisible against visibility predicates.
      *
      * @param category the category to test against
      * @return whether the category is invisible
@@ -150,42 +181,81 @@ public interface CategoryRegistry extends Reloadable<REIClientPlugin>, Iterable<
      */
     List<CategoryVisibilityPredicate> getVisibilityPredicates();
     
+    /**
+     * Registers workstations for a category.
+     * <p>
+     * This method is deferred to when the category is registered. This means that registration can be
+     * done anytime during the reload phase.
+     *
+     * @param category the category to register the workstation for
+     * @param stations the workstations to register
+     * @param <D>      the type of the display
+     */
     default <D extends Display> void addWorkstations(CategoryIdentifier<D> category, EntryIngredient... stations) {
         configure(category, config -> config.addWorkstations(stations));
     }
     
+    /**
+     * Registers workstations for a category.
+     * <p>
+     * This method is deferred to when the category is registered. This means that registration can be
+     * done anytime during the reload phase.
+     *
+     * @param category the category to register the workstation for
+     * @param stations the workstations to register
+     * @param <D>      the type of the display
+     */
     default <D extends Display> void addWorkstations(CategoryIdentifier<D> category, EntryStack<?>... stations) {
         configure(category, config -> config.addWorkstations(stations));
     }
     
+    /**
+     * Removes the plus button from a category.
+     *
+     * @param category the category to remove the plus button from
+     * @param <D>      the type of the display
+     * @deprecated No longer supported, the plus button is not available for removal
+     */
     @Deprecated(forRemoval = true)
     default <D extends Display> void removePlusButton(CategoryIdentifier<D> category) {
         configure(category, CategoryConfiguration::removePlusButton);
     }
     
+    /**
+     * Sets a plus button area provider for a category.
+     * <p>
+     * This method is deferred to when the category is registered. This means that registration can be
+     * done anytime during the reload phase.
+     *
+     * @param category the category to set the plus button area provider for
+     * @param area     the area provider
+     * @param <D>      the type of the display
+     */
     default <D extends Display> void setPlusButtonArea(CategoryIdentifier<D> category, ButtonArea area) {
         configure(category, config -> config.setPlusButtonArea(area));
     }
     
     interface CategoryConfiguration<T extends Display> extends Identifiable {
         /**
-         * Registers the working stations of a category
+         * Registers workstations for a category.
          *
-         * @param stations the working stations
+         * @param stations the workstations to register
          */
         void addWorkstations(EntryIngredient... stations);
         
         /**
-         * Registers the working stations of a category
+         * Registers workstations for a category.
          *
-         * @param stations the working stations
+         * @param stations the workstations to register
          */
         default void addWorkstations(EntryStack<?>... stations) {
             addWorkstations(CollectionUtils.map(stations, EntryIngredient::of).toArray(new EntryIngredient[0]));
         }
         
         /**
-         * Removes the plus button.
+         * Removes the plus button from a category.
+         *
+         * @deprecated No longer supported, the plus button is not available for removal
          */
         @Deprecated(forRemoval = true)
         default void removePlusButton() {
@@ -193,39 +263,64 @@ public interface CategoryRegistry extends Reloadable<REIClientPlugin>, Iterable<
         }
         
         /**
-         * Sets the plus button area
+         * Sets a plus button area provider for a category.
          *
-         * @param area the button area
+         * @param area the area provider
          */
         void setPlusButtonArea(ButtonArea area);
         
         /**
-         * Returns the optional plus button area
+         * Returns the optional plus button area provider
          *
-         * @return the optional plus button area
+         * @return the optional plus button area provider
+         * @implNote This method no longer returns an empty optional
          */
         Optional<ButtonArea> getPlusButtonArea();
         
+        /**
+         * Returns the list of workstations for the category.
+         *
+         * @return the list of workstations for the category
+         */
         List<EntryIngredient> getWorkstations();
         
         /**
+         * Returns the underlying category.
+         *
          * @return the underlying category
          */
         DisplayCategory<T> getCategory();
         
         /**
-         * Gets the display display category identifier
+         * Returns the category identifier
          *
          * @return the identifier of the category
          */
         CategoryIdentifier<?> getCategoryIdentifier();
         
+        /**
+         * Returns an extension for the category.
+         * <p>
+         * An extension may be used to modify how the category set-ups widgets for displays.
+         *
+         * @param provider the provider to register
+         * @see CategoryExtensionProvider
+         */
         @ApiStatus.Experimental
         void registerExtension(CategoryExtensionProvider<T> provider);
         
+        /**
+         * Returns a category view for a display.
+         *
+         * @param display the display
+         * @return the category view
+         */
         @ApiStatus.Experimental
         DisplayCategoryView<T> getView(T display);
         
+        /**
+         * {@inheritDoc}
+         */
         @Override
         default ResourceLocation getIdentifier() {
             return getCategoryIdentifier().getIdentifier();

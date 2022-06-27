@@ -32,13 +32,13 @@ import dev.architectury.event.events.client.ClientGuiEvent;
 import dev.architectury.event.events.client.ClientRecipeUpdateEvent;
 import dev.architectury.event.events.client.ClientScreenInputEvent;
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.platform.Platform;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
@@ -51,7 +51,9 @@ import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
+import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -59,6 +61,7 @@ import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.client.config.addon.ConfigAddonRegistryImpl;
 import me.shedaniel.rei.impl.client.entry.renderer.EntryRendererRegistryImpl;
 import me.shedaniel.rei.impl.client.favorites.DelegatingFavoriteEntryProviderImpl;
 import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
@@ -75,6 +78,7 @@ import me.shedaniel.rei.impl.client.subsets.SubsetsRegistryImpl;
 import me.shedaniel.rei.impl.client.transfer.TransferHandlerRegistryImpl;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
+import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.types.EmptyEntryDefinition;
 import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
 import me.shedaniel.rei.impl.common.util.IssuesDetector;
@@ -102,6 +106,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.Ingredient;
+import org.apache.commons.lang3.function.TriFunction;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -109,9 +114,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
@@ -122,7 +125,6 @@ import java.util.stream.Stream;
 @Environment(EnvType.CLIENT)
 public class RoughlyEnoughItemsCoreClient {
     public static final Event<ClientRecipeUpdateEvent> PRE_UPDATE_RECIPES = EventFactory.createLoop();
-    @ApiStatus.Experimental
     public static boolean isLeftMousePressed = false;
     private static final ExecutorService RELOAD_PLUGINS = Executors.newSingleThreadScheduledExecutor(task -> {
         Thread thread = new Thread(task, "REI-ReloadPlugins");
@@ -132,6 +134,7 @@ public class RoughlyEnoughItemsCoreClient {
         });
         return thread;
     });
+    private static final List<Future<?>> RELOAD_TASKS = new CopyOnWriteArrayList<>();
     
     public static void attachClientInternals() {
         InternalWidgets.attach();
@@ -146,7 +149,7 @@ public class RoughlyEnoughItemsCoreClient {
             return entryType.read(object);
         }, "favoriteEntryFromJson");
         ClientInternals.attachInstance((BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip>) QueuedTooltip::impl, "tooltipProvider");
-        ClientInternals.attachInstance((BiFunction<Point, @Nullable TooltipFlag, TooltipContext>) TooltipContextImpl::new, "tooltipContextProvider");
+        ClientInternals.attachInstance((TriFunction<Point, @Nullable TooltipFlag, Boolean, TooltipContext>) TooltipContextImpl::new, "tooltipContextProvider");
         ClientInternals.attachInstance((Function<Object, Tooltip.Entry>) QueuedTooltip.TooltipEntryImpl::new, "tooltipEntryProvider");
         ClientInternals.attachInstance((Function<@Nullable Boolean, ClickArea.Result>) successful -> new ClickArea.Result() {
             private List<CategoryIdentifier<?>> categories = Lists.newArrayList();
@@ -227,13 +230,15 @@ public class RoughlyEnoughItemsCoreClient {
                 new SearchProviderImpl(),
                 new ConfigManagerImpl(),
                 new EntryRegistryImpl(),
+                new CollapsibleEntryRegistryImpl(),
                 new CategoryRegistryImpl(),
                 new DisplayRegistryImpl(),
                 new ScreenRegistryImpl(),
                 new FavoriteEntryTypeRegistryImpl(),
                 new SubsetsRegistryImpl(),
                 new TransferHandlerRegistryImpl(),
-                new REIRuntimeImpl()), "clientPluginManager");
+                new REIRuntimeImpl(),
+                new ConfigAddonRegistryImpl()), "clientPluginManager");
     }
     
     public void onInitializeClient() {
@@ -321,8 +326,24 @@ public class RoughlyEnoughItemsCoreClient {
             reloadPlugins(startReload, ReloadStage.START);
         });
         ClientRecipeUpdateEvent.EVENT.register(recipeManager -> {
-            if (!Platform.isFabric()) RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
-            reloadPlugins(endReload, Platform.isFabric() ? ReloadStage.END : null);
+            reloadPlugins(endReload, ReloadStage.END);
+        });
+        ClientGuiEvent.INIT_PRE.register((screen, access) -> {
+            List<ReloadStage> stages = ((PluginManagerImpl<REIPlugin<?>>) PluginManager.getInstance()).getObservedStages();
+            
+            if (Minecraft.getInstance().level != null && Minecraft.getInstance().player != null && stages.contains(ReloadStage.START)
+                && !stages.contains(ReloadStage.END) && !PluginManager.areAnyReloading() && screen instanceof AbstractContainerScreen) {
+                for (Future<?> task : RELOAD_TASKS) {
+                    if (!task.isDone()) {
+                        return EventResult.pass();
+                    }
+                }
+                
+                RoughlyEnoughItemsCore.LOGGER.error("Detected missing stage: END! This is possibly due to issues during client recipe reload! REI will force a reload of the recipes now!");
+                reloadPlugins(endReload, ReloadStage.END);
+            }
+            
+            return EventResult.pass();
         });
         ClientGuiEvent.INIT_POST.register((screen, access) -> {
             REIRuntime.getInstance().getOverlay(false, true);
@@ -345,7 +366,7 @@ public class RoughlyEnoughItemsCoreClient {
         });
         ClientScreenInputEvent.MOUSE_CLICKED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
             isLeftMousePressed = true;
-            if (shouldReturn(screen))
+            if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             resetFocused(screen);
             if (getOverlay().mouseClicked(mouseX, mouseY, button)) {
@@ -359,7 +380,7 @@ public class RoughlyEnoughItemsCoreClient {
         });
         ClientScreenInputEvent.MOUSE_RELEASED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
             isLeftMousePressed = false;
-            if (shouldReturn(screen))
+            if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             resetFocused(screen);
             if (REIRuntime.getInstance().isOverlayVisible() && getOverlay().mouseReleased(mouseX, mouseY, button)
@@ -369,7 +390,7 @@ public class RoughlyEnoughItemsCoreClient {
             return EventResult.pass();
         });
         ClientScreenInputEvent.MOUSE_SCROLLED_PRE.register((minecraftClient, screen, mouseX, mouseY, amount) -> {
-            if (shouldReturn(screen))
+            if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             resetFocused(screen);
             if (REIRuntime.getInstance().isOverlayVisible() && getOverlay().mouseScrolled(mouseX, mouseY, amount)
@@ -378,7 +399,7 @@ public class RoughlyEnoughItemsCoreClient {
             return EventResult.pass();
         });
         ClientScreenInputEvent.CHAR_TYPED_PRE.register((minecraftClient, screen, character, keyCode) -> {
-            if (shouldReturn(screen))
+            if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
                 if (!REIRuntimeImpl.getSearchField().isFocused())
@@ -393,12 +414,14 @@ public class RoughlyEnoughItemsCoreClient {
             if (shouldReturn(screen))
                 return;
             resetFocused(screen);
-            getOverlay().render(matrices, mouseX, mouseY, delta);
+            if (!(screen instanceof DisplayScreen)) {
+                getOverlay().render(matrices, mouseX, mouseY, delta);
+            }
             ((ScreenOverlayImpl) getOverlay()).lateRender(matrices, mouseX, mouseY, delta);
             resetFocused(screen);
         });
         ClientScreenInputEvent.MOUSE_DRAGGED_PRE.register((minecraftClient, screen, mouseX1, mouseY1, button, mouseX2, mouseY2) -> {
-            if (shouldReturn(screen))
+            if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             resetFocused(screen);
             if (getOverlay().mouseDragged(mouseX1, mouseY1, button, mouseX2, mouseY2)
@@ -407,7 +430,7 @@ public class RoughlyEnoughItemsCoreClient {
             return EventResult.pass();
         });
         ClientScreenInputEvent.KEY_PRESSED_PRE.register((minecraftClient, screen, i, i1, i2) -> {
-            if (shouldReturn(screen))
+            if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             if (screen instanceof AbstractContainerScreen && ConfigObject.getInstance().doesDisableRecipeBook() && ConfigObject.getInstance().doesFixTabCloseContainer()) {
                 if (i == 258 && minecraftClient.options.keyInventory.matches(i, i1)) {
@@ -425,7 +448,7 @@ public class RoughlyEnoughItemsCoreClient {
             return EventResult.pass();
         });
         ClientScreenInputEvent.KEY_RELEASED_PRE.register((minecraftClient, screen, i, i1, i2) -> {
-            if (shouldReturn(screen))
+            if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
                 if (!REIRuntimeImpl.getSearchField().isFocused())
@@ -455,7 +478,17 @@ public class RoughlyEnoughItemsCoreClient {
             lastReload.setValue(System.currentTimeMillis());
         }
         if (ConfigObject.getInstance().doesRegisterRecipesInAnotherThread()) {
-            CompletableFuture.runAsync(() -> RoughlyEnoughItemsCore._reloadPlugins(start), RELOAD_PLUGINS);
+            Future<?>[] futures = new Future<?>[1];
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> RoughlyEnoughItemsCore._reloadPlugins(start), RELOAD_PLUGINS)
+                    .whenComplete((unused, throwable) -> {
+                        // Remove the future from the list of futures
+                        if (futures[0] != null) {
+                            RELOAD_TASKS.remove(futures[0]);
+                            futures[0] = null;
+                        }
+                    });
+            futures[0] = future;
+            RELOAD_TASKS.add(future);
         } else {
             RoughlyEnoughItemsCore._reloadPlugins(start);
         }

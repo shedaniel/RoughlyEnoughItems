@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Interface for generating dynamic displays at runtime.
- * Invoked per display view search, so please keep this performant.
+ * Generator of dynamic displays at runtime.
+ * Invoked per display view search, please keep this performant.
  *
  * @param <T> the type of displays to generate
  * @see DisplayRegistry#registerDisplayGenerator(CategoryIdentifier, DynamicDisplayGenerator)
@@ -43,14 +43,40 @@ import java.util.Optional;
  */
 @Environment(EnvType.CLIENT)
 public interface DynamicDisplayGenerator<T extends Display> {
+    /**
+     * Returns the list of displays generated for querying the recipes of the given stack.
+     * <p>
+     * Displays generated should have the given stack as an output, but that
+     * is not required.
+     *
+     * @param entry the recipes of the stack to query for
+     * @return the list of displays generated
+     * @see ViewSearchBuilder#addRecipesFor(EntryStack)
+     */
     default Optional<List<T>> getRecipeFor(EntryStack<?> entry) {
         return Optional.empty();
     }
     
+    /**
+     * Returns the list of displays generated for querying the usages of the given stack.
+     * <p>
+     * Displays generated should have the given stack as an input, but that
+     * is not required.
+     *
+     * @param entry the usages of the stack to query for
+     * @return the list of displays generated
+     * @see ViewSearchBuilder#addUsagesFor(EntryStack)
+     */
     default Optional<List<T>> getUsageFor(EntryStack<?> entry) {
         return Optional.empty();
     }
     
+    /**
+     * Returns the list of displays generated for a given view search.
+     *
+     * @param builder the builder of the view search
+     * @return the list of displays generated
+     */
     default Optional<List<T>> generate(ViewSearchBuilder builder) {
         return Optional.empty();
     }

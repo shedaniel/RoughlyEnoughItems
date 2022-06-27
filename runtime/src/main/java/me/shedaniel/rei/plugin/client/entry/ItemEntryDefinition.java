@@ -28,6 +28,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.architectury.hooks.item.ItemStackHooks;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
@@ -138,6 +139,12 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         return value.copy();
     }
     
+    @Nullable
+    @Override
+    public ItemStack add(ItemStack o1, ItemStack o2) {
+        return ItemStackHooks.copyWithCount(o1, o1.getCount() + o2.getCount());
+    }
+    
     @Override
     public long hash(EntryStack<ItemStack> entry, ItemStack value, ComparisonContext context) {
         int code = 1;
@@ -188,10 +195,16 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     
     @Override
     public Component asFormattedText(EntryStack<ItemStack> entry, ItemStack value) {
+        return asFormattedText(entry, value, TooltipContext.of());
+    }
+    
+    @Override
+    public Component asFormattedText(EntryStack<ItemStack> entry, ItemStack value, TooltipContext context) {
         if (!SEARCH_BLACKLISTED.contains(value.getItem()))
             try {
                 return value.getHoverName();
             } catch (Throwable e) {
+                if (context != null && context.isSearch()) throw e;
                 e.printStackTrace();
                 SEARCH_BLACKLISTED.add(value.getItem());
             }
@@ -214,10 +227,11 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
             try {
                 return value.getTooltipLines(Minecraft.getInstance().player, context.getFlag());
             } catch (Throwable e) {
+                if (context.isSearch()) throw e;
                 e.printStackTrace();
                 SEARCH_BLACKLISTED.add(value.getItem());
             }
-        return Lists.newArrayList(asFormattedText(entry, value));
+        return Lists.newArrayList(asFormattedText(entry, value, context));
     }
     
     @Override

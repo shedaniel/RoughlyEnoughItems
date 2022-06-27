@@ -39,7 +39,19 @@ public interface OverlayListWidget {
      */
     EntryStack<?> getFocusedStack();
     
+    /**
+     * Returns the currently visible stacks in the overlay list widget.
+     *
+     * @return the currently visible stacks
+     */
     Stream<EntryStack<?>> getEntries();
     
+    /**
+     * Returns whether the mouse is within the overlay list widget,
+     * accounting for excluded areas.
+     *
+     * @param point the mouse position
+     * @return whether the mouse is within the overlay list widget
+     */
     boolean containsMouse(Point point);
 }

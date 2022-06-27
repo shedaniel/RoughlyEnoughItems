@@ -26,8 +26,11 @@ package me.shedaniel.rei.impl.client.gui.widget;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -107,5 +110,11 @@ public class MergedWidget extends Widget {
                 return true;
         }
         return false;
+    }
+    
+    @Override
+    public double getZRenderingPriority() {
+        return CollectionUtils.max(widgets, Comparator.comparingDouble(Widget::getZRenderingPriority))
+                .map(Widget::getZRenderingPriority).orElse(0.0);
     }
 }
