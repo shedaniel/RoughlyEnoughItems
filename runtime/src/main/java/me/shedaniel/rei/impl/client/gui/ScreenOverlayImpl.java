@@ -732,10 +732,9 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         }
         Screen currentScreen = Minecraft.getInstance().screen;
         if (choosePageWidget == null) {
-            for (Tooltip tooltip : TOOLTIPS) {
-                if (tooltip != null)
-                    renderTooltip(matrices, tooltip);
-            }
+            TOOLTIPS.stream().filter(Objects::nonNull)
+                    .reduce((tooltip, tooltip2) -> tooltip2)
+                    .ifPresent(tooltip -> renderTooltip(matrices, tooltip));
         }
         TOOLTIPS.clear();
         if (REIRuntime.getInstance().isOverlayVisible()) {
@@ -761,6 +760,10 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     public void addTooltip(@Nullable Tooltip tooltip) {
         if (tooltip != null)
             TOOLTIPS.add(tooltip);
+    }
+    
+    public void clearTooltips() {
+        TOOLTIPS.clear();
     }
     
     public void renderWidgets(PoseStack matrices, int mouseX, int mouseY, float delta) {

@@ -147,6 +147,15 @@ public interface REIRuntime extends Reloadable<REIClientPlugin> {
     void queueTooltip(@Nullable Tooltip tooltip);
     
     /**
+     * Clear all queued tooltips.
+     *
+     * @see Tooltip#queue()
+     * @since 8.3
+     */
+    @ApiStatus.Experimental
+    void clearTooltips();
+    
+    /**
      * Returns the texture location of the default display background.
      * <p>
      * This is different depending on whether dark mode is enabled.

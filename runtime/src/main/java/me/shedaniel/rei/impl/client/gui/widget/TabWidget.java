@@ -150,6 +150,11 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     }
     
     @Override
+    public double getZRenderingPriority() {
+        return selected ? 10 : -10;
+    }
+    
+    @Override
     @Nullable
     public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
         if (isShown() && renderer instanceof EntryStack<?> && containsMouse(mouseX, mouseY)) {

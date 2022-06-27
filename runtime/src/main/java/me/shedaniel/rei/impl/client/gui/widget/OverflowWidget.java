@@ -48,7 +48,7 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
         this.scale = ValueAnimator.ofFloat()
                 .setAs(1f);
         this.translate = ValueAnimator.ofFloatingPoint()
-                .setAs(new FloatingPoint(-widget.getBounds().width / 2f, -widget.getBounds().height / 2f));
+                .setAs(new FloatingPoint(-widget.getBounds().width / 2f, -bounds.height / 2f));
         this.velocity = ValueAnimator.ofFloatingPoint()
                 .setAs(new FloatingPoint(0f, 0f));
     }
@@ -64,7 +64,7 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float delta) {
-        Rectangle widgetBounds = ((WidgetWithBounds) widget).getBounds();
+        Rectangle widgetBounds = ((WidgetWithBounds) delegate()).getBounds();
         this.scale.update(delta);
         this.scale.setTarget(ScrollingContainer.handleBounceBack(this.scale.target() - 0.78,
                 Math.min(widgetBounds.width * 1.0F / getBounds().width, widgetBounds.height * 1.0F / getBounds().height) - 0.78, delta, .001) + 0.78);
@@ -120,8 +120,11 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (super.mouseClicked(mouseX, mouseY, button)) return true;
-        if (containsMouse(mouseX, mouseY) && button == 0) {
-            dragging = true;
+        if (containsMouse(mouseX, mouseY)) {
+            if (button == 0) {
+                dragging = true;
+            }
+            
             return true;
         }
         
