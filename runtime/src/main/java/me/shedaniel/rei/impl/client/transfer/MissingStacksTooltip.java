@@ -37,8 +37,6 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
@@ -67,7 +65,7 @@ public class MissingStacksTooltip implements ClientTooltipComponent, TooltipComp
         int w = Math.max(1, MAX_WIDTH / entrySize);
         int size = stacks.size();
         int width = Math.min(size, w) * entrySize;
-        width = Math.max(width, font.width(new TranslatableComponent("text.rei.missing")));
+        width = Math.max(width, font.width(Component.translatable("text.rei.missing")));
         return width;
     }
     
@@ -84,7 +82,7 @@ public class MissingStacksTooltip implements ClientTooltipComponent, TooltipComp
             i++;
             if (i / w > 5) {
                 MultiBufferSource.BufferSource source = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-                Component text = new TextComponent("+" + (stacks.size() - w * 6 + 1)).withStyle(ChatFormatting.GRAY);
+                Component text = Component.literal("+" + (stacks.size() - w * 6 + 1)).withStyle(ChatFormatting.GRAY);
                 font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, poses.last().pose(), source, false, 0, 15728880);
                 source.endBatch();
                 break;
@@ -101,7 +99,7 @@ public class MissingStacksTooltip implements ClientTooltipComponent, TooltipComp
     
     @Override
     public void renderText(Font font, int x, int y, Matrix4f pose, MultiBufferSource.BufferSource buffers) {
-        font.drawInBatch(new TranslatableComponent("text.rei.missing").withStyle(ChatFormatting.GRAY),
+        font.drawInBatch(Component.translatable("text.rei.missing").withStyle(ChatFormatting.GRAY),
                 x, y + 2, -1, true, pose, buffers, false, 0, 15728880);
     }
 }

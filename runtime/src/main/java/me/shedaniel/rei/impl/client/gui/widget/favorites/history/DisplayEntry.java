@@ -70,7 +70,7 @@ public class DisplayEntry extends WidgetWithBounds {
             this.bounds.setAs(initialBounds.getFloatingBounds());
             this.plusButton = Widgets.createButton(new Rectangle(initialBounds.getMaxX() - 16, initialBounds.getMaxY() - 16, 10, 10), Component.literal("+"));
         } else {
-            this.plusButton = Widgets.createButton(new Rectangle(-1000, -1000, 10, 10), new TextComponent("+"));
+            this.plusButton = Widgets.createButton(new Rectangle(-1000, -1000, 10, 10), Component.literal("+"));
         }
     }
     

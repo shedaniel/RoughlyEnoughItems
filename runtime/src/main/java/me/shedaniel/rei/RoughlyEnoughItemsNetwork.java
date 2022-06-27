@@ -101,7 +101,7 @@ public class RoughlyEnoughItemsNetwork {
         NetworkManager.registerReceiver(NetworkManager.c2s(), CREATE_ITEMS_HOTBAR_PACKET, Collections.singletonList(new SplitPacketTransformer()), (buf, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
             if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {
-                player.displayClientMessage(new TranslatableComponent("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
+                player.displayClientMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
                 return;
             }
             ItemStack stack = buf.readItem();
@@ -112,7 +112,7 @@ public class RoughlyEnoughItemsNetwork {
                 menu.broadcastChanges();
                 NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.copy()).writeUtf(player.getScoreboardName(), 32767));
             } else {
-                player.displayClientMessage(new TranslatableComponent("text.rei.failed_cheat_items"), false);
+                player.displayClientMessage(Component.translatable("text.rei.failed_cheat_items"), false);
             }
         });
         NetworkManager.registerReceiver(NetworkManager.c2s(), MOVE_ITEMS_PACKET, Collections.singletonList(new SplitPacketTransformer()), (packetByteBuf, context) -> {
