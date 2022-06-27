@@ -37,7 +37,7 @@ public class PaddedCenterWidget extends DelegateWidgetWithTranslate {
     
     @Override
     protected Matrix4f translate() {
-        Rectangle widgetBounds = ((WidgetWithBounds) widget).getBounds();
+        Rectangle widgetBounds = ((WidgetWithBounds) delegate()).getBounds();
         float xTranslate = 0, yTranslate = 0;
         if (widgetBounds.width < bounds.width) {
             xTranslate = (bounds.width - widgetBounds.width) / 2f;
@@ -50,7 +50,7 @@ public class PaddedCenterWidget extends DelegateWidgetWithTranslate {
     
     @Override
     public Rectangle getBounds() {
-        Rectangle widgetBounds = ((WidgetWithBounds) widget).getBounds();
+        Rectangle widgetBounds = ((WidgetWithBounds) delegate()).getBounds();
         int newWidth = Math.max(widgetBounds.width, bounds.width);
         int newHeight = Math.max(widgetBounds.height, bounds.height);
         return new Rectangle(bounds.getCenterX() - newWidth / 2f, bounds.getCenterY() - newHeight / 2f, newWidth, newHeight);

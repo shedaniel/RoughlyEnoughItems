@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
@@ -228,9 +229,9 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             ViewSearchBuilder.builder().addAllCategories().open();
         }).tooltip(Component.translatable("text.rei.view_all_categories")).noShadow().color(0xFF404040, 0xFFBBBBBB).hoveredColor(0xFF0041FF, 0xFFFFBD4D));
         
-        this._children().addAll(buttonList);
+        this.children().addAll(buttonList);
         this.widgets.addAll(tabs);
-        this._children().addAll(widgets);
+        this.children().addAll(widgets);
     }
     
     @Override
@@ -350,10 +351,12 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         scrolling.updatePosition(delta);
         renderBackground(matrices);
         int yOffset = 0;
+        getOverlay().render(matrices, mouseX, mouseY, delta);
+        super.render(matrices, mouseX, mouseY, delta);
         for (Widget widget : widgets) {
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             widget.render(matrices, mouseX, mouseY, delta);
         }
-        super.render(matrices, mouseX, mouseY, delta);
         matrices.pushPose();
         ScissorsHandler.INSTANCE.scissor(scrolling.getBounds());
         for (Button button : buttonList) {

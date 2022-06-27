@@ -96,8 +96,11 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         }
     }
     
-    public List<GuiEventListener> _children() {
-        return (List<GuiEventListener>) children();
+    @Override
+    public List<GuiEventListener> children() {
+        List<? extends GuiEventListener> children = super.children();
+        children.sort(Comparator.comparingDouble(value -> value instanceof Widget widget ? widget.getZRenderingPriority() : 0).reversed());
+        return (List<GuiEventListener>) children;
     }
     
     @Override
@@ -325,7 +328,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         widget.tooltipProcessor(new TooltipProcessor());
     }
     
-    private static ScreenOverlay getOverlay() {
+    protected static ScreenOverlay getOverlay() {
         return REIRuntime.getInstance().getOverlay().orElseThrow(() -> new IllegalStateException("Overlay not initialized!"));
     }
     
