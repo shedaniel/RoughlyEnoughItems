@@ -43,6 +43,7 @@ import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
@@ -405,7 +406,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        Tooltip tooltip = getCurrentTooltip(new Point(mouseX, mouseY));
+        Tooltip tooltip = getCurrentTooltip(TooltipContext.ofMouse().getPoint());
         if (tooltip != null) {
             tooltip.queue();
         }
@@ -416,7 +417,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     @Override
     @Nullable
     public Tooltip getCurrentTooltip(Point point) {
-        Tooltip tooltip = getCurrentEntry().getTooltip(point);
+        Tooltip tooltip = getCurrentEntry().getTooltip(TooltipContext.of(point));
         
         if (tooltip != null && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
             boolean exists = getTransferHandler(false) != null;
