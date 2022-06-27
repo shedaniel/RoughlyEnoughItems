@@ -35,7 +35,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -54,8 +54,8 @@ public class ConfigAddonsEntry extends AbstractConfigListEntry<Unit> {
         super(NarratorChatListener.NO_TITLE, false);
         this.width = width;
         this.buttonWidget.setMessage(REIRuntime.getInstance().getPreviousContainerScreen() != null && Minecraft.getInstance().getConnection() != null
-                                     && Minecraft.getInstance().getConnection().getRecipeManager() != null ? new TranslatableComponent("text.rei.addons")
-                : new TranslatableComponent("config.roughlyenoughitems.filteredEntries.loadWorldFirst"));
+                                     && Minecraft.getInstance().getConnection().getRecipeManager() != null ? Component.translatable("text.rei.addons")
+                : Component.translatable("config.roughlyenoughitems.filteredEntries.loadWorldFirst"));
     }
     
     @Override

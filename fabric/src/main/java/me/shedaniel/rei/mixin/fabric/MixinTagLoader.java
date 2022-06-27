@@ -25,17 +25,20 @@ package me.shedaniel.rei.mixin.fabric;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.BiMap;
+import com.google.common.collect.Comparators;
 import com.google.common.collect.HashBiMap;
+import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectMaps;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagKey;
+import net.minecraft.tags.TagEntry;
 import net.minecraft.tags.TagLoader;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,15 +53,18 @@ import java.util.*;
 public class MixinTagLoader<T> {
     @Shadow @Final private String directory;
     
-    @Inject(method = "build", at = @At("HEAD"))
-    private void load(Map<ResourceLocation, Tag.Builder> map, CallbackInfoReturnable<Map<ResourceLocation, Tag<T>>> cir) {
+    @Inject(method = "build(Ljava/util/Map;)Ljava/util/Map;", at = @At("HEAD"))
+    private void load(Map<ResourceLocation, TagLoader.EntryWithSource> map, CallbackInfoReturnable<Map<ResourceLocation, Collection<T>>> cir) {
         TagNodes.RAW_TAG_DATA_MAP.put(directory, new HashMap<>());
         TagNodes.CURRENT_TAG_DIR.set(directory);
     }
     
-    @Inject(method = "build", at = @At("RETURN"))
-    private void loadPost(Map<ResourceLocation, Tag.Builder> map, CallbackInfoReturnable<Map<ResourceLocation, Tag<T>>> cir) {
-        HashBiMap<ResourceLocation, Tag<T>> biMap = HashBiMap.create(cir.getReturnValue());
+    @Inject(method = "build(Ljava/util/Map;)Ljava/util/Map;", at = @At("RETURN"))
+    private void loadPost(Map<ResourceLocation, TagLoader.EntryWithSource> map, CallbackInfoReturnable<Map<ResourceLocation, Collection<T>>> cir) {
+        Map<TagNodes.CollectionWrapper<T>, ResourceLocation> inverseMap = new HashMap<>(cir.getReturnValue().size());
+        for (Map.Entry<ResourceLocation, Collection<T>> entry : cir.getReturnValue().entrySet()) {
+            inverseMap.put(new TagNodes.CollectionWrapper<>(entry.getValue()), entry.getKey());
+        }
         ResourceKey<? extends Registry<?>> resourceKey = TagNodes.TAG_DIR_MAP.get(directory);
         if (resourceKey == null) return;
         TagNodes.TAG_DATA_MAP.put(resourceKey, new HashMap<>());
@@ -66,18 +72,18 @@ public class MixinTagLoader<T> {
         Registry<T> registry = ((Registry<Registry<T>>) Registry.REGISTRY).get((ResourceKey<Registry<T>>) resourceKey);
         Stopwatch stopwatch = Stopwatch.createStarted();
         
-        Iterator<Map.Entry<Tag<?>, TagNodes.RawTagData>> entryIterator = TagNodes.RAW_TAG_DATA_MAP.getOrDefault(directory, Collections.emptyMap())
+        Iterator<Map.Entry<TagNodes.CollectionWrapper<?>, TagNodes.RawTagData>> entryIterator = TagNodes.RAW_TAG_DATA_MAP.getOrDefault(directory, Reference2ObjectMaps.emptyMap())
                 .entrySet().iterator();
         
         if (!entryIterator.hasNext()) return;
         
         while (entryIterator.hasNext()) {
-            Map.Entry<Tag<?>, TagNodes.RawTagData> entry = entryIterator.next();
-            Tag<?> tag = entry.getKey();
+            Map.Entry<TagNodes.CollectionWrapper<?>, TagNodes.RawTagData> entry = entryIterator.next();
+            TagNodes.CollectionWrapper<?> tag = entry.getKey();
             entryIterator.remove();
             
             if (registry != null) {
-                ResourceLocation tagLoc = biMap.inverse().get(tag);
+                ResourceLocation tagLoc = inverseMap.get(tag);
                 
                 if (tagLoc != null) {
                     TagNodes.RawTagData rawTagData = entry.getValue();
@@ -94,5 +100,37 @@ public class MixinTagLoader<T> {
         }
         
         RoughlyEnoughItemsCore.LOGGER.info("Processed %d tags in %s for %s", tagDataMap.size(), stopwatch.stop(), resourceKey.location());
+    }
+    
+    @Inject(method = "build(Lnet/minecraft/tags/TagEntry$Lookup;Ljava/util/List;)Lcom/mojang/datafixers/util/Either;", at = @At("RETURN"))
+    private void load(TagEntry.Lookup<T> lookup, List<TagLoader.EntryWithSource> entries, CallbackInfoReturnable<Either<Collection<TagLoader.EntryWithSource>, Collection<T>>> cir) {
+        Collection<T> tag = cir.getReturnValue().right().orElse(null);
+        if (tag != null) {
+            String currentTagDirectory = TagNodes.CURRENT_TAG_DIR.get();
+            if (currentTagDirectory == null) return;
+            ResourceKey<? extends Registry<?>> resourceKey = TagNodes.TAG_DIR_MAP.get(currentTagDirectory);
+            if (resourceKey == null) return;
+            Map<TagNodes.CollectionWrapper<?>, TagNodes.RawTagData> dataMap = TagNodes.RAW_TAG_DATA_MAP.get(currentTagDirectory);
+            if (dataMap == null) return;
+            List<ResourceLocation> otherElements = new ArrayList<>();
+            List<ResourceLocation> otherTags = new ArrayList<>();
+            
+            for (TagLoader.EntryWithSource builderEntry : entries) {
+                TagEntry entry = builderEntry.entry();
+                if (entry.tag) {
+                    Collection<T> apply = lookup.tag(entry.id);
+                    if (apply != null) {
+                        otherTags.add(entry.id);
+                    }
+                } else {
+                    T apply = lookup.element(entry.id);
+                    if (apply != null) {
+                        otherElements.add(entry.id);
+                    }
+                }
+            }
+            
+            dataMap.put(new TagNodes.CollectionWrapper<>(tag), new TagNodes.RawTagData(otherElements, otherTags));
+        }
     }
 }

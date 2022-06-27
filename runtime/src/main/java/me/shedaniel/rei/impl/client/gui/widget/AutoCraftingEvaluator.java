@@ -175,7 +175,7 @@ public class AutoCraftingEvaluator {
                     }
                 }
             } else {
-                errorTooltip.add(Tooltip.entry(Component.translatable(new TranslatableComponent("error.rei.multi.errors").withStyle(ChatFormatting.RED))));
+                errorTooltip.add(Tooltip.entry(Component.translatable("error.rei.multi.errors").withStyle(ChatFormatting.RED)));
                 for (Tooltip.Entry tooltipFilled : tooltipsFilled) {
                     if (tooltipFilled.isText()) {
                         MutableComponent colored = Component.literal("- ").withStyle(ChatFormatting.RED)

@@ -36,11 +36,5 @@ accessible    method net/minecraft/client/gui/screens/Screen                    
 accessible    method net/minecraft/client/gui/screens/Screen                                   addWidget               (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
 accessible    method net/minecraft/client/gui/screens/Screen                                   renderTooltipInternal   (Lcom/mojang/blaze3d/vertex/PoseStack;Ljava/util/List;II)V
 accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;ILnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
-accessible class net/minecraft/tags/Tag$OptionalTagEntry
-accessible field net/minecraft/tags/Tag$OptionalTagEntry id Lnet/minecraft/resources/ResourceLocation;
-accessible class net/minecraft/tags/Tag$TagEntry
-accessible field net/minecraft/tags/Tag$TagEntry id Lnet/minecraft/resources/ResourceLocation;
-accessible class net/minecraft/tags/Tag$OptionalElementEntry
-accessible field net/minecraft/tags/Tag$OptionalElementEntry id Lnet/minecraft/resources/ResourceLocation;
-accessible class net/minecraft/tags/Tag$ElementEntry
-accessible field net/minecraft/tags/Tag$ElementEntry id Lnet/minecraft/resources/ResourceLocation;
+accessible field net/minecraft/tags/TagEntry tag Z
+accessible field net/minecraft/tags/TagEntry id Lnet/minecraft/resources/ResourceLocation;
