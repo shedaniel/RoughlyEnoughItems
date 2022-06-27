@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.plugin.client.categories.tag;
 
+import com.google.common.base.Predicates;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
@@ -50,7 +51,8 @@ public class ValueTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
         int width = Math.min(4, holders.size());
         int height = Math.max((int) Math.ceil(holders.size() * 1.0 / width), 1);
         this.bounds = new Rectangle(0, 0, 16 * width + 12, 16 * height + 12);
-        Panel background = Widgets.createRecipeBase(bounds.clone());
+        Panel background = Widgets.createRecipeBase(bounds.clone())
+                .rendering(Predicates.alwaysTrue());
         Panel slotBackground = Widgets.createSlotBase(new Rectangle(5, 5, 16 * width + 2, 16 * height + 2));
         int i = 0;
         List<Widget> widgets = new ArrayList<>();

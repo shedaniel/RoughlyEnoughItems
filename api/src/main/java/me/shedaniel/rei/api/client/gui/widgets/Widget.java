@@ -37,10 +37,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.Stack;
 
 /**
@@ -119,6 +116,11 @@ public abstract class Widget extends AbstractContainerEventHandler implements ne
     @Deprecated
     public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
         render(matrices, mouseX, mouseY, delta);
+    }
+    
+    @ApiStatus.Experimental
+    public double getZRenderingPriority() {
+        return 0;
     }
     
     @ApiStatus.Experimental

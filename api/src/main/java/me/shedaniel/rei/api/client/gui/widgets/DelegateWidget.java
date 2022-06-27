@@ -34,11 +34,9 @@ import java.util.List;
 public class DelegateWidget extends WidgetWithBounds {
     private static final Rectangle EMPTY = new Rectangle();
     protected final Widget widget;
-    private final List<Widget> children;
     
     public DelegateWidget(Widget widget) {
         this.widget = widget;
-        this.children = Collections.singletonList(widget);
     }
     
     protected Widget delegate() {
@@ -52,7 +50,7 @@ public class DelegateWidget extends WidgetWithBounds {
     
     @Override
     public List<? extends GuiEventListener> children() {
-        return children;
+        return Collections.singletonList(delegate());
     }
     
     @Override
@@ -125,5 +123,10 @@ public class DelegateWidget extends WidgetWithBounds {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         this.setDragging(false);
         return delegate().mouseReleased(mouseX, mouseY, button);
+    }
+    
+    @Override
+    public double getZRenderingPriority() {
+        return delegate().getZRenderingPriority();
     }
 }

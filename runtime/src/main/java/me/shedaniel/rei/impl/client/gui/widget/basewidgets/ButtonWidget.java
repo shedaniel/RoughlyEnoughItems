@@ -75,7 +75,7 @@ public class ButtonWidget extends Button {
     private ValueProvider<Double> alpha;
     
     public ButtonWidget(Rectangle rectangle, Component text) {
-        this.bounds = new Rectangle(Objects.requireNonNull(rectangle));
+        this.bounds = Objects.requireNonNull(rectangle);
         this.text = Objects.requireNonNull(text);
         this.darkBackground = ValueAnimator.ofColor()
                 .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFFFFFFF : 0x00FFFFFF), ValueAnimator.typicalTransitionTime());

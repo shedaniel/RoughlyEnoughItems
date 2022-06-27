@@ -327,6 +327,29 @@ public final class Widgets {
         return ClientInternals.getWidgetsProvider().wrapPadded(padLeft, padRight, padTop, padBottom, widget);
     }
     
+    public static Widget delegate(Supplier<Widget> supplier) {
+        return new DelegateWidget(Widgets.noOp()) {
+            @Override
+            protected Widget delegate() {
+                return supplier.get();
+            }
+        };
+    }
+    
+    public static WidgetWithBounds delegateWithBounds(Supplier<WidgetWithBounds> supplier) {
+        return new DelegateWidgetWithBounds(Widgets.noOp(), Rectangle::new) {
+            @Override
+            protected WidgetWithBounds delegate() {
+                return supplier.get();
+            }
+            
+            @Override
+            public Rectangle getBounds() {
+                return delegate().getBounds();
+            }
+        };
+    }
+    
     public static <T> Iterable<T> walk(Iterable<? extends GuiEventListener> listeners, Predicate<GuiEventListener> predicate) {
         return () -> new AbstractIterator<T>() {
             Stack<Iterator<? extends GuiEventListener>> stack;

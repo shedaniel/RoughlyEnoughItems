@@ -99,6 +99,13 @@ public class REIRuntimeImpl implements REIRuntime {
     }
     
     @Override
+    public void clearTooltips() {
+        if (overlay != null) {
+            overlay.clearTooltips();
+        }
+    }
+    
+    @Override
     @Nullable
     public TextField getSearchTextField() {
         if (searchField == null) {
