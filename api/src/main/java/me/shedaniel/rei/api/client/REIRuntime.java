@@ -37,6 +37,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -142,6 +143,15 @@ public interface REIRuntime extends Reloadable<REIClientPlugin> {
      * @see Tooltip#queue()
      */
     void queueTooltip(@Nullable Tooltip tooltip);
+    
+    /**
+     * Clear all queued tooltips.
+     *
+     * @see Tooltip#queue()
+     * @since 8.3
+     */
+    @ApiStatus.Experimental
+    void clearTooltips();
     
     /**
      * Returns the texture location of the default display background.

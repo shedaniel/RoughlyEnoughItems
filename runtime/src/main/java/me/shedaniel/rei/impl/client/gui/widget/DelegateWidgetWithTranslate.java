@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.gui.widget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
-import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 import me.shedaniel.rei.api.client.gui.widgets.DelegateWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -126,5 +125,11 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
         } finally {
             Widget.popMouse();
         }
+    }
+    
+    @Override
+    public double getZRenderingPriority() {
+        Transformation transformation = new Transformation(translate());
+        return transformation.getTranslation().z() + super.getZRenderingPriority();
     }
 }

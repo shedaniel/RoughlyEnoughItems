@@ -84,6 +84,7 @@
   "text.auto_craft.move_items.tooltip": "Ctrl-Click to Quick Craft",
   "text.auto_craft.move_items.yog": "Generate NullPointerException!!",
   "text.rei.expand.view": "Open Expanded View",
+  "text.rei.expand.view.close": "Close Expanded View",
   "text.rei.tag.copy.clipboard": "Save Tag Tree to clipboard",
   "error.rei.transfer.too_small": "Unable to move items to a %dx%d grid.",
   "error.rei.not.on.server": "REI is not on the server.",
