@@ -405,7 +405,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        Tooltip tooltip = getCurrentTooltip(TooltipContext.of(new Point(mouseX, mouseY)));
+        Tooltip tooltip = getCurrentTooltip(TooltipContext.ofMouse().getPoint());
         if (tooltip != null) {
             tooltip.queue();
         }
