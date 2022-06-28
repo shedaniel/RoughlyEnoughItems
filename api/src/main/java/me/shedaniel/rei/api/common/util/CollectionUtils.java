@@ -138,7 +138,7 @@ public class CollectionUtils {
         }
         return l;
     }
-
+    
     public static <T, R> Set<R> mapToSet(Collection<T> list, Function<T, R> function) {
         Set<R> l = new HashSet<>(list.size() + 1);
         for (T t : list) {
@@ -146,7 +146,7 @@ public class CollectionUtils {
         }
         return l;
     }
-
+    
     public static <T, R> Set<R> mapToSet(Iterable<T> list, Function<T, R> function) {
         Set<R> l = new HashSet<>();
         for (T t : list) {
@@ -347,6 +347,17 @@ public class CollectionUtils {
             sum += t;
         }
         return sum;
+    }
+    
+    public static <T> List<T> distinctToList(Iterable<T> list) {
+        List<T> newList = new ArrayList<>();
+        Set<T> set = new HashSet<>();
+        for (T t : list) {
+            if (set.add(t)) {
+                newList.add(t);
+            }
+        }
+        return newList;
     }
     
     public static <T> Iterable<List<T>> partition(List<T> list, int size) {
