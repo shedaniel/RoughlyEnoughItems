@@ -9,7 +9,6 @@
   ],
   "mixins": [
     "MixinPacketEncoder",
-    "MixinTagBuilder",
     "MixinTagLoader",
     "MixinTagManager"
   ],
