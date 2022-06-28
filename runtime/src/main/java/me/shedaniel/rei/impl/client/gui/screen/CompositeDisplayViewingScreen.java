@@ -43,8 +43,10 @@ import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
@@ -207,7 +209,8 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 tab.setRenderer(tabCategory, tabCategory.getIcon(), tabCategory.getTitle(), j == selectedCategoryIndex);
             }
         }
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + 2, bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), new TranslatableComponent("text.rei.left_arrow"))
+        Button tabLeft, tabRight;
+        this.widgets.add(tabLeft = Widgets.createButton(new Rectangle(bounds.x + 2, bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), ImmutableTextComponent.EMPTY)
                 .onClick(button -> {
                     tabsPage--;
                     if (tabsPage < 0)
@@ -216,7 +219,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 })
                 .tooltipLine(new TranslatableComponent("text.rei.previous_page"))
                 .enabled(categories.size() > tabsPerPage));
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - (isCompactTabButtons ? tabButtonsSize + 2 : tabButtonsSize + 3), bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), new TranslatableComponent("text.rei.right_arrow"))
+        this.widgets.add(tabRight = Widgets.createButton(new Rectangle(bounds.x + bounds.width - (isCompactTabButtons ? tabButtonsSize + 2 : tabButtonsSize + 3), bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), ImmutableTextComponent.EMPTY)
                 .onClick(button -> {
                     tabsPage++;
                     if (tabsPage > Mth.ceil(categories.size() / (float) tabsPerPage) - 1)
@@ -225,6 +228,24 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 })
                 .tooltipLine(new TranslatableComponent("text.rei.next_page"))
                 .enabled(categories.size() > tabsPerPage));
+        this.widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+            Rectangle tabLeftBounds = tabLeft.getBounds();
+            Rectangle tabRightBounds = tabRight.getBounds();
+            if (isCompactTabButtons) {
+                matrices.pushPose();
+                matrices.translate(0, 0.5, 0);
+                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_LEFT_SMALL_TEXTURE);
+                blit(matrices, tabLeftBounds.x + 2, tabLeftBounds.y + 2, 0, 0, 6, 6, 6, 6);
+                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_RIGHT_SMALL_TEXTURE);
+                blit(matrices, tabRightBounds.x + 2, tabRightBounds.y + 2, 0, 0, 6, 6, 6, 6);
+                matrices.popPose();
+            } else {
+                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_LEFT_TEXTURE);
+                blit(matrices, tabLeftBounds.x + 4, tabLeftBounds.y + 4, 0, 0, 8, 8, 8, 8);
+                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_RIGHT_TEXTURE);
+                blit(matrices, tabRightBounds.x + 4, tabRightBounds.y + 4, 0, 0, 8, 8, 8, 8);
+            }
+        }), 0, 0, 1));
         
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), categories.get(selectedCategoryIndex).getTitle(), label -> {
             ViewSearchBuilder.builder().addAllCategories().open();

@@ -169,7 +169,8 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         }
         
         this.page = Mth.clamp(page, 0, getCurrentTotalPages() - 1);
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x, bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), new TranslatableComponent("text.rei.left_arrow"))
+        Button tabLeft, tabRight;
+        this.widgets.add(tabLeft = Widgets.createButton(new Rectangle(bounds.x, bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), ImmutableTextComponent.EMPTY)
                 .onClick(button -> {
                     categoryPages--;
                     if (categoryPages < 0)
@@ -178,7 +179,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 })
                 .tooltipLine(new TranslatableComponent("text.rei.previous_page"))
                 .enabled(categories.size() > tabsPerPage));
-        this.widgets.add(Widgets.createButton(new Rectangle(bounds.x + bounds.width - tabButtonsSize - (isCompactTabButtons ? 0 : 1), bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), new TranslatableComponent("text.rei.right_arrow"))
+        this.widgets.add(tabRight = Widgets.createButton(new Rectangle(bounds.x + bounds.width - tabButtonsSize - (isCompactTabButtons ? 0 : 1), bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), ImmutableTextComponent.EMPTY)
                 .onClick(button -> {
                     categoryPages++;
                     if (categoryPages > Mth.ceil(categories.size() / (float) tabsPerPage) - 1)
@@ -187,17 +188,49 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 })
                 .tooltipLine(new TranslatableComponent("text.rei.next_page"))
                 .enabled(categories.size() > tabsPerPage));
-        this.widgets.add(categoryBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.left_arrow"))
+        this.widgets.add(categoryBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), ImmutableTextComponent.EMPTY)
                 .onClick(button -> previousCategory()).tooltipLine(new TranslatableComponent("text.rei.previous_category")));
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), getCurrentCategory().getTitle(), clickableLabelWidget -> {
             ViewSearchBuilder.builder().addAllCategories().open();
         }).tooltip(new TranslatableComponent("text.rei.view_all_categories")));
-        this.widgets.add(categoryNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
+        this.widgets.add(categoryNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), ImmutableTextComponent.EMPTY)
                 .onClick(button -> nextCategory()).tooltipLine(new TranslatableComponent("text.rei.next_category")));
         this.categoryBack.setEnabled(categories.size() > 1);
         this.categoryNext.setEnabled(categories.size() > 1);
+        this.widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+            Rectangle tabLeftBounds = tabLeft.getBounds();
+            Rectangle tabRightBounds = tabRight.getBounds();
+            if (isCompactTabButtons) {
+                matrices.pushPose();
+                matrices.translate(0, 0.5, 0);
+                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_LEFT_SMALL_TEXTURE);
+                blit(matrices, tabLeftBounds.x + 2, tabLeftBounds.y + 2, 0, 0, 6, 6, 6, 6);
+                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_RIGHT_SMALL_TEXTURE);
+                blit(matrices, tabRightBounds.x + 2, tabRightBounds.y + 2, 0, 0, 6, 6, 6, 6);
+                matrices.popPose();
+            } else {
+                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_LEFT_TEXTURE);
+                blit(matrices, tabLeftBounds.x + 4, tabLeftBounds.y + 4, 0, 0, 8, 8, 8, 8);
+                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_RIGHT_TEXTURE);
+                blit(matrices, tabRightBounds.x + 4, tabRightBounds.y + 4, 0, 0, 8, 8, 8, 8);
+            }
+            Rectangle recipeBackBounds = recipeBack.getBounds();
+            Rectangle recipeNextBounds = recipeNext.getBounds();
+            Rectangle categoryBackBounds = categoryBack.getBounds();
+            Rectangle categoryNextBounds = categoryNext.getBounds();
+            matrices.pushPose();
+            matrices.translate(0.5, 0.5, 0);
+            RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_LEFT_TEXTURE);
+            blit(matrices, recipeBackBounds.x + 2, recipeBackBounds.y + 2, 0, 0, 8, 8, 8, 8);
+            blit(matrices, categoryBackBounds.x + 2, categoryBackBounds.y + 2, 0, 0, 8, 8, 8, 8);
+            matrices.translate(-0.5, 0, 0);
+            RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_RIGHT_TEXTURE);
+            blit(matrices, recipeNextBounds.x + 2, recipeNextBounds.y + 2, 0, 0, 8, 8, 8, 8);
+            blit(matrices, categoryNextBounds.x + 2, categoryNextBounds.y + 2, 0, 0, 8, 8, 8, 8);
+            matrices.popPose();
+        }), 0, 0, 1));
         
-        this.widgets.add(recipeBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 19, 12, 12), new TranslatableComponent("text.rei.left_arrow"))
+        this.widgets.add(recipeBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 19, 12, 12), ImmutableTextComponent.EMPTY)
                 .onClick(button -> {
                     page--;
                     if (page < 0)
@@ -218,7 +251,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             label.setMessage(new ImmutableTextComponent(String.format("%d/%d", page + 1, getCurrentTotalPages())));
             label.setClickable(getCurrentTotalPages() > 1);
         }).tooltipFunction(label -> label.isClickable() ? new Component[]{new TranslatableComponent("text.rei.go_back_first_page"), new TextComponent(" "), new TranslatableComponent("text.rei.shift_click_to", new TranslatableComponent("text.rei.choose_page")).withStyle(ChatFormatting.GRAY)} : null));
-        this.widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), new TranslatableComponent("text.rei.right_arrow"))
+        this.widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), ImmutableTextComponent.EMPTY)
                 .onClick(button -> {
                     page++;
                     if (page >= getCurrentTotalPages())
