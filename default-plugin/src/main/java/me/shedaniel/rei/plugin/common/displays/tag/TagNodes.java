@@ -179,7 +179,7 @@ public class TagNodes {
     public static <T> void create(TagKey<T> tagKey, Consumer<DataResult<TagNode<T>>> callback) {
         Registry<T> registry = ((Registry<Registry<T>>) Registry.REGISTRY).get((ResourceKey<Registry<T>>) tagKey.registry());
         requestTagData(tagKey.registry(), result -> {
-            callback.accept(result.flatMap(dataMap -> resolveTag(tagKey, registry, dataMap)));
+            callback.accept(result.flatMap(dataMap -> dataMap != null ? resolveTag(tagKey, registry, dataMap) : DataResult.error("No tag data")));
         });
     }
     
