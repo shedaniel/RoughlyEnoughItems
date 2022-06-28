@@ -26,6 +26,7 @@ package me.shedaniel.rei.jeiinternalsworkaround.transformer;
 import org.objectweb.asm.Handle;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.ClassRemapper;
 import org.objectweb.asm.commons.MethodRemapper;
 import org.objectweb.asm.commons.Remapper;
@@ -88,6 +89,26 @@ public class InternalsRemapperTransformer extends Remapper implements Consumer<C
     public String mapSignature(String signature, boolean typeSignature) {
         if (signature == null || signature.isEmpty()) return signature;
         return super.mapSignature(signature, typeSignature);
+    }
+    
+    @Override
+    public String mapType(String internalName) {
+        if (internalName == null) {
+            return null;
+        }
+        Type type = Type.getObjectType(internalName);
+        if (type.getSort() == Type.ARRAY) {
+            try {
+                type.getElementType();
+            } catch (IllegalArgumentException e) {
+                // Enigmatic Legacy is officially my favorite mod
+                // I hope JVM comes around and breaks your mod >:(
+                System.out.println("REI: Failed to get element type of " + internalName +
+                                   ", this is caused by an intentional obfuscation, and is intended to prevent others to read and modify their code, so we will ignore it");
+                return internalName;
+            }
+        }
+        return super.mapType(internalName);
     }
     
     @Override
