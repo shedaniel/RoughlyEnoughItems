@@ -24,16 +24,12 @@
 package me.shedaniel.rei.mixin.fabric;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.Comparators;
-import com.google.common.collect.HashBiMap;
 import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectMaps;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -130,7 +126,7 @@ public class MixinTagLoader<T> {
                 }
             }
             
-            dataMap.put(new TagNodes.CollectionWrapper<>(tag), new TagNodes.RawTagData(otherElements, otherTags));
+            dataMap.put(new TagNodes.CollectionWrapper<>(tag), new TagNodes.RawTagData(CollectionUtils.distinctToList(otherElements), CollectionUtils.distinctToList(otherTags)));
         }
     }
 }

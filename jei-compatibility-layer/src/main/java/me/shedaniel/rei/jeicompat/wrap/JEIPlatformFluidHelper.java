@@ -29,8 +29,8 @@ import mezz.jei.api.helpers.IPlatformFluidHelper;
 import mezz.jei.api.ingredients.IIngredientTypeWithSubtypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
 import org.jetbrains.annotations.Nullable;
 
 public enum JEIPlatformFluidHelper implements IPlatformFluidHelper<FluidStack> {
@@ -53,6 +53,6 @@ public enum JEIPlatformFluidHelper implements IPlatformFluidHelper<FluidStack> {
     
     @Override
     public long bucketVolume() {
-        return FluidAttributes.BUCKET_VOLUME;
+        return FluidType.BUCKET_VOLUME;
     }
 }
