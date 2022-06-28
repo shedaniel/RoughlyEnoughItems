@@ -109,8 +109,10 @@ import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.
 @ApiStatus.Internal
 public class ScreenOverlayImpl extends ScreenOverlay {
     private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    private static final ResourceLocation ARROW_LEFT_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/arrow_left.png");
-    private static final ResourceLocation ARROW_RIGHT_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/arrow_right.png");
+    public static final ResourceLocation ARROW_LEFT_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/arrow_left.png");
+    public static final ResourceLocation ARROW_RIGHT_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/arrow_right.png");
+    public static final ResourceLocation ARROW_LEFT_SMALL_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/arrow_left_small.png");
+    public static final ResourceLocation ARROW_RIGHT_SMALL_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/arrow_right_small.png");
     private static final List<Tooltip> TOOLTIPS = Lists.newArrayList();
     private static final List<Runnable> AFTER_RENDER = Lists.newArrayList();
     private static EntryListWidget entryListWidget = null;
@@ -296,7 +298,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 RenderSystem.setShaderTexture(0, ARROW_LEFT_TEXTURE);
                 Rectangle bounds = leftButton.getBounds();
                 matrices.pushPose();
-                blit(matrices, bounds.x + 4, bounds.y + 4, 0, 0, 9, 9, 9, 9);
+                blit(matrices, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
                 matrices.popPose();
                 helper.setBlitOffset(helper.getBlitOffset() - 1);
             }));
@@ -333,8 +335,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 RenderSystem.setShaderTexture(0, ARROW_RIGHT_TEXTURE);
                 Rectangle bounds = rightButton.getBounds();
                 matrices.pushPose();
-                matrices.translate(-0.5, 0, 0);
-                blit(matrices, bounds.x + 4, bounds.y + 4, 0, 0, 9, 9, 9, 9);
+                blit(matrices, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
                 matrices.popPose();
                 helper.setBlitOffset(helper.getBlitOffset() - 1);
             }));
