@@ -24,6 +24,7 @@
 package me.shedaniel.rei.mixin.fabric;
 
 import com.mojang.datafixers.util.Either;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -83,7 +84,7 @@ public class MixinTagBuilder<T> {
                 }
             }
             
-            dataMap.put(tag, new TagNodes.RawTagData(otherElements, otherTags));
+            dataMap.put(tag, new TagNodes.RawTagData(CollectionUtils.distinctToList(otherElements), CollectionUtils.distinctToList(otherTags)));
         }
     }
 }
