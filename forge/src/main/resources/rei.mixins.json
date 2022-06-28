@@ -8,6 +8,10 @@
     "MixinRecipeToast"
   ],
   "mixins": [
+    "MixinPacketEncoder",
+    "MixinTagBuilder",
+    "MixinTagLoader",
+    "MixinTagManager"
   ],
   "injectors": {
     "maxShiftBy": 5,
