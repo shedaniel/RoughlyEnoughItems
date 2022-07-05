@@ -34,7 +34,6 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
-import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.DefaultCompostingDisplay;
@@ -44,13 +43,13 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ComposterBlock;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
 public class DefaultCompostingCategory implements DisplayCategory<DefaultCompostingDisplay> {
@@ -95,15 +94,15 @@ public class DefaultCompostingCategory implements DisplayCategory<DefaultCompost
         int i = 0;
         for (int y = 0; y < 5; y++)
             for (int x = 0; x < 7; x++) {
-                EntryIngredient entryStack = stacks.size() > i ? stacks.get(i) : EntryIngredient.empty();
-                if (!entryStack.isEmpty()) {
-                    ComposterBlock.COMPOSTABLES.object2FloatEntrySet().stream().filter(entry -> entry.getKey() != null && Objects.equals(entry.getKey().asItem(), entryStack.get(0).getValue())).findAny().map(Map.Entry::getValue).ifPresent(chance -> {
-                        for (EntryStack<?> stack : entryStack) {
-                            stack.tooltip(Component.translatable("text.rei.composting.chance", Mth.fastFloor(chance * 100)).withStyle(ChatFormatting.YELLOW));
-                        }
-                    });
+                EntryIngredient entryIngredient = stacks.size() > i ? stacks.get(i) : EntryIngredient.empty();
+                if (!entryIngredient.isEmpty()) {
+                    ItemStack firstStack = (ItemStack) entryIngredient.get(0).getValue();
+                    float chance = ComposterBlock.COMPOSTABLES.object2FloatEntrySet().stream().filter(entry -> entry.getKey() != null && firstStack.is(entry.getKey().asItem())).findAny().map(Map.Entry::getValue).orElse(0f);
+                    if (chance > 0.0f) {
+                        entryIngredient = entryIngredient.map(stack -> stack.copy().tooltip(Component.translatable("text.rei.composting.chance", Mth.clamp(Mth.fastFloor(chance * 100), 0, 100)).withStyle(ChatFormatting.YELLOW)));
+                    }
                 }
-                widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 72 + 9 + x * 18, bounds.y + 12 + y * 18)).entries(entryStack).markInput());
+                widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 72 + 9 + x * 18, bounds.y + 12 + y * 18)).entries(entryIngredient).markInput());
                 i++;
             }
         widgets.add(Widgets.createArrow(new Point(startingPoint.x - 1 - 5, startingPoint.y + 7 - 5)));

@@ -261,11 +261,10 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         if (ComposterBlock.COMPOSTABLES.isEmpty()) {
             ComposterBlock.bootStrap();
         }
-        int page = 0;
-        Iterator<List<Object2FloatMap.Entry<ItemLike>>> iterator = Iterators.partition(ComposterBlock.COMPOSTABLES.object2FloatEntrySet().stream().sorted(Map.Entry.comparingByValue()).iterator(), 35);
+        Iterator<List<EntryIngredient>> iterator = Iterators.partition(ComposterBlock.COMPOSTABLES.object2FloatEntrySet().stream().sorted(Map.Entry.comparingByValue()).map(entry -> EntryIngredients.of(entry.getKey())).iterator(), 35);
         while (iterator.hasNext()) {
-            List<Object2FloatMap.Entry<ItemLike>> entries = iterator.next();
-            registry.add(DefaultCompostingDisplay.of(entries, Collections.singletonList(EntryIngredients.of(new ItemStack(Items.BONE_MEAL))), page++));
+            List<EntryIngredient> entries = iterator.next();
+            registry.add(new DefaultCompostingDisplay(entries, Collections.singletonList(EntryIngredients.of(new ItemStack(Items.BONE_MEAL)))));
         }
         DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultStrippingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
