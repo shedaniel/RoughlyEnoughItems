@@ -42,7 +42,7 @@ public class DefaultCompostingDisplay extends BasicDisplay {
 
     private final int page;
 
-    @Deprecated
+    @Deprecated(forRemoval = true)
     public static DefaultCompostingDisplay of(List<Object2FloatMap.Entry<ItemLike>> inputs, List<EntryIngredient> output, int page) {
         EntryIngredient[] inputIngredients = new EntryIngredient[inputs.size()];
         int i = 0;
