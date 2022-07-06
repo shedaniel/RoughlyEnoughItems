@@ -157,9 +157,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 new DefaultBeaconBaseCategory(),
                 new DefaultBeaconPaymentCategory(),
                 new DefaultTillingCategory(),
-                new DefaultPathingCategory(),
-                new DefaultTagCategory(),
-                new DefaultInformationCategory()
+                new DefaultPathingCategory()
         );
         
         registry.addWorkstations(CRAFTING, EntryStacks.of(Items.CRAFTING_TABLE));
@@ -207,6 +205,8 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerDisplays(DisplayRegistry registry) {
+        CategoryRegistry.getInstance().add(new DefaultInformationCategory(), new DefaultTagCategory());
+        
         registry.registerRecipeFiller(CraftingRecipe.class, RecipeType.CRAFTING, DefaultCraftingDisplay::of);
         registry.registerRecipeFiller(SmeltingRecipe.class, RecipeType.SMELTING, DefaultSmeltingDisplay::new);
         registry.registerRecipeFiller(SmokingRecipe.class, RecipeType.SMOKING, DefaultSmokingDisplay::new);
