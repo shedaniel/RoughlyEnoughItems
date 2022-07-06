@@ -116,9 +116,9 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
     @Override
     public List<Widget> setupDisplay(DefaultInformationDisplay display, Rectangle bounds) {
         List<Widget> widgets = Lists.newArrayList();
+        widgets.add(Widgets.createRecipeBase(bounds));
         widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 15 - 9)).entries(display.getEntryStacks()));
-        Rectangle rectangle = new Rectangle(bounds.getCenterX() - (bounds.width / 2), bounds.y + 35 - 9, bounds.width, bounds.height - 40 + 9);
-        widgets.add(Widgets.createSlotBase(rectangle));
+        Rectangle rectangle = new Rectangle(bounds.getCenterX() - (bounds.width * 0.95 / 2), bounds.y + 35 - 9, bounds.width * 0.95, bounds.height - 40 + 9);
         widgets.add(new ScrollableTextWidget(rectangle, display.getTexts()));
         return widgets;
     }
@@ -164,9 +164,9 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
         }
         
         @Override
-        public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-            if (containsMouse(double_1, double_2)) {
-                scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
+        public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+            if (containsMouse(mouseX, mouseY)) {
+                scrolling.offset(ClothConfigInitializer.getScrollStep() * -amount, true);
                 return true;
             }
             return false;
@@ -204,8 +204,16 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
                     currentY += text == null ? 4 : font.lineHeight;
                 }
             }
+            if (scrolling.hasScrollBar()) {
+                if (scrolling.scrollAmount() > 8) {
+                    fillGradient(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.y + 16, 0xFFC6C6C6, 0x00C6C6C6);
+                }
+                if (scrolling.getMaxScroll() - scrolling.scrollAmount() > 8) {
+                    fillGradient(matrices, innerBounds.x, innerBounds.getMaxY() - 16, innerBounds.getMaxX(), innerBounds.getMaxY(), 0x00C6C6C6, 0xFFC6C6C6);
+                }
+            }
             try (CloseableScissors scissors = scissor(matrices, scrolling.getBounds())) {
-                scrolling.renderScrollBar(0xff000000, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+                scrolling.renderScrollBar(0, 1, 1f);
             }
         }
         
