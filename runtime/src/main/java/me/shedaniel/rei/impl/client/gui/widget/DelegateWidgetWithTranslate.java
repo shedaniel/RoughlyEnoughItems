@@ -30,6 +30,7 @@ import com.mojang.math.Vector4f;
 import me.shedaniel.rei.api.client.gui.widgets.DelegateWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.client.util.MatrixUtils;
 
 import java.util.function.Supplier;
 
@@ -46,10 +47,7 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     }
     
     protected final Matrix4f inverseTranslate() {
-        Transformation transformation = new Transformation(translate());
-        Transformation inverse = transformation.inverse();
-        if (inverse != null) inverse.getScale(); // This has a side effect
-        return inverse == null ? Transformation.identity().getMatrix() : inverse.getMatrix();
+        return MatrixUtils.inverse(translate());
     }
     
     @Override
