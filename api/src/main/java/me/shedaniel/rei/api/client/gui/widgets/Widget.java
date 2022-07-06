@@ -32,6 +32,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
 import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.util.MatrixUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -130,15 +131,7 @@ public abstract class Widget extends AbstractContainerEventHandler implements ne
     
     @ApiStatus.Experimental
     public static CloseableScissors scissor(Matrix4f matrix, Rectangle bounds) {
-        Vector4f vec1 = new Vector4f((float) bounds.x, (float) bounds.y, 0, 1);
-        vec1.transform(matrix);
-        Vector4f vec2 = new Vector4f((float) bounds.getMaxX(), (float) bounds.getMaxY(), 0, 1);
-        vec2.transform(matrix);
-        int x1 = Math.round(vec1.x());
-        int x2 = Math.round(vec2.x());
-        int y1 = Math.round(vec1.y());
-        int y2 = Math.round(vec2.y());
-        ScissorsHandler.INSTANCE.scissor(new Rectangle(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1)));
+        ScissorsHandler.INSTANCE.scissor(MatrixUtils.transform(matrix, bounds));
         return ScissorsHandler.INSTANCE::removeLastScissor;
     }
 }

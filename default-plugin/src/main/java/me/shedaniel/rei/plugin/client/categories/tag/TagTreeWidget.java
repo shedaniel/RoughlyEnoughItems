@@ -24,9 +24,9 @@
 package me.shedaniel.rei.plugin.client.categories.tag;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.math.Color;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -40,16 +40,18 @@ import java.util.stream.Stream;
 public class TagTreeWidget<S, T> extends WidgetWithBounds {
     private final Rectangle bounds;
     private final TagNode<S> node;
+    private final Rectangle overflowBounds;
     private final TagNodeWidget<S, T> rootWidget;
     private final List<TagTreeWidget<S, T>> childWidgets;
     private final List<WidgetWithBounds> children;
     
-    public TagTreeWidget(TagNode<S> node, Function<Holder<S>, EntryStack<T>> mapper) {
+    public TagTreeWidget(TagNode<S> node, Function<Holder<S>, EntryStack<T>> mapper, Rectangle overflowBounds) {
         this.node = node;
-        this.rootWidget = TagNodeWidget.create(node, mapper);
+        this.overflowBounds = overflowBounds;
+        this.rootWidget = TagNodeWidget.create(node, mapper, overflowBounds);
         this.childWidgets = new ArrayList<>();
         for (TagNode<S> childNode : node.children()) {
-            TagTreeWidget<S, T> childWidget = new TagTreeWidget<>(childNode, mapper);
+            TagTreeWidget<S, T> childWidget = new TagTreeWidget<>(childNode, mapper, overflowBounds);
             childWidget.getBounds().y = rootWidget.getBounds().getMaxY() + 16;
             this.childWidgets.add(childWidget);
         }
@@ -89,7 +91,9 @@ public class TagTreeWidget<S, T> extends WidgetWithBounds {
                     rootWidget.getBounds().getMaxY() + 6, rootWidget.getBounds().getMaxY() + 16, 0xFFFFFFFF);
             childWidget.getBounds().setLocation(getBounds().getCenterX() - childrenTotalWidth / 2 + x,
                     this.rootWidget.getBounds().getMaxY() + 16);
-            childWidget.render(poses, mouseX, mouseY, delta);
+            if (this.overflowBounds.intersects(MatrixUtils.transform(poses.last().pose(), childWidget.getBounds()))) {
+                childWidget.render(poses, mouseX, mouseY, delta);
+            }
             x += childWidget.getBounds().width + 6;
         }
     }
