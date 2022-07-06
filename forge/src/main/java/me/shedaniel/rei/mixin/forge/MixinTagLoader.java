@@ -40,10 +40,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 @Mixin(TagLoader.class)
 public class MixinTagLoader<T> {
@@ -65,6 +62,7 @@ public class MixinTagLoader<T> {
         if (resourceKey == null) return;
         TagNodes.TAG_DATA_MAP.put(resourceKey, new HashMap<>());
         Map<ResourceLocation, TagNodes.TagData> tagDataMap = TagNodes.TAG_DATA_MAP.get(resourceKey);
+        if (tagDataMap == null) return;
         Registry<T> registry = ((Registry<Registry<T>>) Registry.REGISTRY).get((ResourceKey<Registry<T>>) resourceKey);
         Stopwatch stopwatch = Stopwatch.createStarted();
         
