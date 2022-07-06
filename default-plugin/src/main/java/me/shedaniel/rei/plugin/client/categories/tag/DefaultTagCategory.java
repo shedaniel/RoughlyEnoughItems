@@ -125,7 +125,7 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
             if (dataResult.error().isPresent()) {
                 delegate[0] = Widgets.withBounds(Widgets.concat(
                         Widgets.createLabel(new Point(innerBounds.getCenterX(), innerBounds.getCenterY() - 8), Component.literal("Failed to resolve tags!")),
-                        Widgets.createLabel(new Point(innerBounds.getCenterX(), innerBounds.getCenterY() - 8), Component.literal(dataResult.error().get().message()))
+                        Widgets.createLabel(new Point(innerBounds.getCenterX(), innerBounds.getCenterY() + 1), Component.literal(dataResult.error().get().message()))
                 ), overflowBounds);
             } else {
                 tagNode[0] = dataResult.result().get();
@@ -153,7 +153,7 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
                     }
                     return stack;
                 };
-                delegate[0] = Widgets.overflowed(overflowBounds, Widgets.padded(16, new TagTreeWidget(tagNode[0], mapper)));
+                delegate[0] = Widgets.overflowed(overflowBounds, Widgets.padded(16, new TagTreeWidget(tagNode[0], mapper, overflowBounds)));
             }
         });
         
