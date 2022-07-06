@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.plugin.client.categories.tag;
 
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
@@ -31,11 +32,11 @@ import net.minecraft.core.Holder;
 import java.util.function.Function;
 
 public abstract class TagNodeWidget<S, T> extends WidgetWithBounds {
-    static <S, T> TagNodeWidget<S, T> create(TagNode<S> node, Function<Holder<S>, EntryStack<T>> mapper) {
+    static <S, T> TagNodeWidget<S, T> create(TagNode<S> node, Function<Holder<S>, EntryStack<T>> mapper, Rectangle overflowBounds) {
         if (node.getReference() != null) {
-            return new ReferenceTagNodeWidget<>(node, mapper);
+            return new ReferenceTagNodeWidget<>(node, mapper, overflowBounds);
         } else if (node.getValue() != null) {
-            return new ValueTagNodeWidget<>(node, mapper);
+            return new ValueTagNodeWidget<>(node, mapper, overflowBounds);
         } else {
             throw new IllegalArgumentException("TagNode has no value or reference");
         }
