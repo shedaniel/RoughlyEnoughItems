@@ -59,8 +59,15 @@ public class EntryRegistryImpl implements EntryRegistry {
     public List<EntryRegistryListener> listeners = Lists.newCopyOnWriteArrayList();
     private PreFilteredEntryList preFilteredList;
     private EntryRegistryList registryList;
-    private LongSet entriesHash = new LongOpenHashSet();
+    private LongSet entriesHash;
     private boolean reloading;
+    
+    public EntryRegistryImpl() {
+        registryList = new NormalEntryRegistryList();
+        entriesHash = new LongOpenHashSet();
+        preFilteredList = new PreFilteredEntryList(this);
+        listeners.add(preFilteredList);
+    }
     
     @Override
     public void acceptPlugin(REIClientPlugin plugin) {
