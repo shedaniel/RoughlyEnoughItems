@@ -197,13 +197,13 @@ public class TagNodes {
     public static <T> void create(TagKey<T> tagKey, Consumer<DataResult<TagNode<T>>> callback) {
         Registry<T> registry = ((Registry<Registry<T>>) Registry.REGISTRY).get((ResourceKey<Registry<T>>) tagKey.registry());
         requestTagData(tagKey.registry(), result -> {
-            callback.accept(result.flatMap(dataMap -> dataMap != null ? resolveTag(tagKey, registry, dataMap) : DataResult.error("No tag data")));
+            callback.accept(result.flatMap(dataMap -> dataMap != null ? resolveTag(tagKey, registry, dataMap).orElse(DataResult.error("No tag data")) : DataResult.error("No tag data")));
         });
     }
     
-    private static <T> DataResult<TagNode<T>> resolveTag(TagKey<T> tagKey, Registry<T> registry, Map<ResourceLocation, TagData> tagDataMap) {
+    private static <T> Optional<DataResult<TagNode<T>>> resolveTag(TagKey<T> tagKey, Registry<T> registry, Map<ResourceLocation, TagData> tagDataMap) {
         TagData tagData = tagDataMap.get(tagKey.location());
-        if (tagData == null) return DataResult.error("Tag Missing: " + tagKey.location());
+        if (tagData == null) return Optional.empty();
         
         TagNode<T> self = TagNode.ofReference(tagKey);
         List<Holder<T>> holders = new ArrayList<>();
@@ -219,11 +219,14 @@ public class TagNodes {
         for (ResourceLocation childTagId : tagData.otherTags()) {
             TagKey<T> childTagKey = TagKey.create(tagKey.registry(), childTagId);
             if (registry.getTag(childTagKey).isPresent()) {
-                DataResult<TagNode<T>> result = resolveTag(childTagKey, registry, tagDataMap);
-                if (result.error().isPresent()) return DataResult.error(result.error().get().message());
-                self.addChild(result.result().get());
+                Optional<DataResult<TagNode<T>>> resultOptional = resolveTag(childTagKey, registry, tagDataMap);
+                if (resultOptional.isPresent()) {
+                    DataResult<TagNode<T>> result = resultOptional.get();
+                    if (result.error().isPresent()) return Optional.of(DataResult.error(result.error().get().message()));
+                    self.addChild(result.result().get());
+                }
             }
         }
-        return DataResult.success(self);
+        return Optional.of(DataResult.success(self));
     }
 }
