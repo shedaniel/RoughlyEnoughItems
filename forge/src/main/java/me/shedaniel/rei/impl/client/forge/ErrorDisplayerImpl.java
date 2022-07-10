@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.forge;
 
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraftforge.client.event.ScreenOpenEvent;
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 
 import java.util.ArrayList;
@@ -42,11 +42,11 @@ public class ErrorDisplayerImpl {
         CONSUMERS.add(consumer);
     }
     
-    public static void onGuiOpen(ScreenOpenEvent event) {
+    public static void onGuiOpen(ScreenEvent.Opening event) {
         for (UnaryOperator<Screen> consumer : CONSUMERS) {
             Screen screen = consumer.apply(event.getScreen());
             if (screen != null) {
-                event.setScreen(screen);
+                event.setNewScreen(screen);
             }
         }
     }
