@@ -34,3 +34,10 @@ mandatory = true
 versionRange = "[7.0,)"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.roughlyenoughitems]]
+modId = "forge"
+mandatory = true
+versionRange = "[41.0.64,)"
+ordering = "NONE"
+side = "BOTH"

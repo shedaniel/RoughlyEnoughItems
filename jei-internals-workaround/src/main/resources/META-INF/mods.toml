@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[33,)"
+loaderVersion = "[41,)"
 issueTrackerURL = "https://github.com/shedaniel/RoughlyEnoughItems/issues"
 logoFile = "icon.png"
 authors = "shedaniel"
@@ -23,6 +23,6 @@ side = "BOTH"
 [[dependencies.rei_plugin_compatibilities]]
 modId = "forge"
 mandatory = true
-versionRange = "[38.0.6,)"
+versionRange = "[41.0.64,)"
 ordering = "NONE"
 side = "BOTH"

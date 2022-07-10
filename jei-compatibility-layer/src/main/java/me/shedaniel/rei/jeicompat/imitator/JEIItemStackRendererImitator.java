@@ -37,7 +37,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraftforge.client.RenderProperties;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +58,7 @@ public class JEIItemStackRendererImitator implements IIngredientRenderer<ItemSta
     
     @Override
     public Font getFontRenderer(Minecraft minecraft, ItemStack ingredient) {
-        Font font = RenderProperties.get(ingredient).getFont(ingredient);
+        Font font = IClientItemExtensions.of(ingredient).getFont(ingredient, IClientItemExtensions.FontContext.TOOLTIP);
         if (font == null) return minecraft.font;
         return font;
     }
