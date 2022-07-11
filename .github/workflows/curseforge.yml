@@ -17,13 +17,15 @@ jobs:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'ci skip')"
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Set up JDK 17
         uses: actions/setup-java@v1
         with:
           java-version: 17
       - name: Upload Mod
-        run: ./gradlew build publish forge:publishUnified fabric:publishUnified jei-internals-workaround:publishUnified --stacktrace
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build publish forge:publishUnified fabric:publishUnified jei-internals-workaround:publishUnified --stacktrace
         env:
           danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
           modrinth_key: ${{ secrets.MODRINTH_KEY }}
