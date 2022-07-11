@@ -30,7 +30,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -40,14 +39,9 @@ import java.util.concurrent.Executor;
 
 @Mixin(TagManager.class)
 public abstract class MixinTagManager<T> {
-    @Shadow
-    public static String getTagDir(ResourceKey<? extends Registry<?>> resourceKey) {
-        return null;
-    }
-    
     @Inject(method = "createLoader", at = @At("HEAD"))
     private void load(ResourceManager resourceManager, Executor executor, RegistryAccess.RegistryEntry<T> registryEntry, CallbackInfoReturnable<CompletableFuture<TagManager.LoadResult<T>>> cir) {
         ResourceKey<? extends Registry<T>> resourceKey = registryEntry.key();
-        TagNodes.TAG_DIR_MAP.put(getTagDir(resourceKey), resourceKey);
+        TagNodes.TAG_DIR_MAP.put(TagManager.getTagDir(resourceKey), resourceKey);
     }
 }
