@@ -32,33 +32,53 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class DefaultCustomShapedDisplay extends DefaultCraftingDisplay<Recipe<?>> {
-    private int width;
-    private int height;
-    
-    public DefaultCustomShapedDisplay(@Nullable Recipe<?> possibleRecipe, List<EntryIngredient> input, List<EntryIngredient> output, int width, int height) {
-        this(null, possibleRecipe, input, output, width, height);
+public class DefaultCustomShapelessDisplay extends DefaultCraftingDisplay<Recipe<?>> {
+    public DefaultCustomShapelessDisplay(@Nullable Recipe<?> possibleRecipe, List<EntryIngredient> input, List<EntryIngredient> output) {
+        this(null, possibleRecipe, input, output);
     }
     
-    public DefaultCustomShapedDisplay(@Nullable ResourceLocation location, @Nullable Recipe<?> possibleRecipe, List<EntryIngredient> input, List<EntryIngredient> output, int width, int height) {
+    public DefaultCustomShapelessDisplay(@Nullable ResourceLocation location, @Nullable Recipe<?> possibleRecipe, List<EntryIngredient> input, List<EntryIngredient> output) {
         super(input, output, Optional.ofNullable(location == null && possibleRecipe != null ? possibleRecipe.getId() : location), Optional.ofNullable(possibleRecipe));
-        this.width = width;
-        this.height = height;
     }
     
-    public static DefaultCustomShapedDisplay simple(List<EntryIngredient> input, List<EntryIngredient> output, int width, int height, Optional<ResourceLocation> location) {
+    public static DefaultCustomShapelessDisplay simple(List<EntryIngredient> input, List<EntryIngredient> output, Optional<ResourceLocation> location) {
         Recipe<?> optionalRecipe = location.flatMap(resourceLocation -> RecipeManagerContext.getInstance().getRecipeManager().byKey(resourceLocation))
                 .orElse(null);
-        return new DefaultCustomShapedDisplay(location.orElse(null), optionalRecipe, input, output, width, height);
+        return new DefaultCustomShapelessDisplay(location.orElse(null), optionalRecipe, input, output);
     }
     
     @Override
     public int getWidth() {
-        return width;
+        return getInputEntries().size() > 4 ? 3 : 2;
     }
     
     @Override
     public int getHeight() {
-        return height;
+        return getInputEntries().size() > 4 ? 3 : 2;
+    }
+    
+    @Override
+    public int getInputWidth() {
+        return Math.min(getInputEntries().size(), 3);
+    }
+    
+    @Override
+    public int getInputWidth(int craftingWidth, int craftingHeight) {
+        return craftingWidth * craftingHeight <= getInputEntries().size() ? craftingWidth : Math.min(getInputEntries().size(), 3);
+    }
+    
+    @Override
+    public int getInputHeight() {
+        return (int) Math.ceil(getInputEntries().size() / (double) getInputWidth());
+    }
+    
+    @Override
+    public int getInputHeight(int craftingWidth, int craftingHeight) {
+        return (int) Math.ceil(getInputEntries().size() / (double) getInputWidth(craftingWidth, craftingHeight));
+    }
+    
+    @Override
+    public boolean isShapeless() {
+        return true;
     }
 }
