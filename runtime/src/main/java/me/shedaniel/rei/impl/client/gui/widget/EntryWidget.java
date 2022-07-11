@@ -311,17 +311,23 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             return null;
         }
         
-        for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
-            for (Display display : displays) {
-                if (ViewsImpl.isRecipesFor(getEntries(), display)) {
-                    AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
-                    if (result.successful) {
-                        this.display = display;
-                        this.displayTooltipComponent = Suppliers.memoize(() -> new DisplayTooltipComponent(display));
-                        return result.successfulHandler;
+        try {
+            for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
+                for (Display display : displays) {
+                    if (ViewsImpl.isRecipesFor(getEntries(), display)) {
+                        AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
+                        if (result.successful) {
+                            this.display = display;
+                            this.displayTooltipComponent = Suppliers.memoize(() -> new DisplayTooltipComponent(display));
+                            return result.successfulHandler;
+                        }
                     }
                 }
             }
+        } catch (ConcurrentModificationException ignored) {
+            display = null;
+            displayTooltipComponent = null;
+            lastCheckTime = -1;
         }
         
         return null;

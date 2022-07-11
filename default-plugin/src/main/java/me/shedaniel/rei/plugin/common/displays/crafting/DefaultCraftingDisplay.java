@@ -24,6 +24,8 @@
 package me.shedaniel.rei.plugin.common.displays.crafting;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import it.unimi.dsi.fastutil.ints.IntIntImmutablePair;
+import it.unimi.dsi.fastutil.ints.IntIntPair;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
 import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
@@ -47,10 +49,7 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicDisplay implements SimpleGridMenuDisplay {
     protected Optional<C> recipe;
@@ -148,7 +147,7 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     }
     
     public static int getSlotWithSize(DefaultCraftingDisplay<?> display, int index, int craftingGridWidth) {
-        return getSlotWithSize(display.getInputWidth(), index, craftingGridWidth);
+        return getSlotWithSize(display.getInputWidth(craftingGridWidth, 3), index, craftingGridWidth);
     }
     
     public static int getSlotWithSize(int recipeWidth, int index, int craftingGridWidth) {
@@ -158,8 +157,24 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     }
     
     public static BasicDisplay.Serializer<DefaultCraftingDisplay<?>> serializer() {
-        return BasicDisplay.Serializer.<DefaultCraftingDisplay<?>>ofSimple(DefaultCustomDisplay::simple)
-                .inputProvider(display -> display.getOrganisedInputEntries(3, 3));
+        return BasicDisplay.Serializer.<DefaultCraftingDisplay<?>>of((input, output, location, tag) -> {
+            if (tag.contains("REIRecipeType")) {
+                String type = tag.getString("REIRecipeType");
+                return switch (type) {
+                    case "Shapeless" -> DefaultCustomShapelessDisplay.simple(input, output, location);
+                    case "Shaped" -> DefaultCustomShapedDisplay.simple(input, output, tag.getInt("RecipeWidth"), tag.getInt("RecipeHeight"), location);
+                    default -> throw new IllegalArgumentException("Unknown recipe type: " + type);
+                };
+            } else {
+                return DefaultCustomDisplay.simple(input, output, location);
+            }
+        }, (display, tag) -> {
+            tag.putString("REIRecipeType", display.isShapeless() ? "Shapeless" : "Shaped");
+            if (!display.isShapeless()) {
+                tag.putInt("RecipeWidth", display.getInputWidth(3, 3));
+                tag.putInt("RecipeHeight", display.getInputHeight(3, 3));
+            }
+        });
     }
     
     @Override
@@ -175,14 +190,19 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     }
     
     public List<InputIngredient<EntryStack<?>>> getInputIngredients(int craftingWidth, int craftingHeight) {
-        int inputWidth = Math.max(3, getInputWidth());
-        int inputHeight = Math.max(3, getInputHeight());
+        int inputWidth = getInputWidth(craftingWidth, craftingHeight);
+        int inputHeight = getInputHeight(craftingWidth, craftingHeight);
         
-        InputIngredient<EntryStack<?>>[][] grid = new InputIngredient[Math.max(inputWidth, craftingWidth)][Math.max(inputHeight, craftingHeight)];
+        Map<IntIntPair, InputIngredient<EntryStack<?>>> grid = new HashMap<>();
         
         List<EntryIngredient> inputEntries = getInputEntries();
         for (int i = 0; i < inputEntries.size(); i++) {
-            grid[i % getInputWidth()][i / getInputWidth()] = InputIngredient.of(getSlotWithSize(getInputWidth(), i, craftingWidth), inputEntries.get(i));
+            EntryIngredient stacks = inputEntries.get(i);
+            if (stacks.isEmpty()) {
+                continue;
+            }
+            int index = getSlotWithSize(inputWidth, i, craftingWidth);
+            grid.put(new IntIntImmutablePair(i % inputWidth, i / inputWidth), InputIngredient.of(index, stacks));
         }
         
         List<InputIngredient<EntryStack<?>>> list = new ArrayList<>(craftingWidth * craftingHeight);
@@ -192,9 +212,10 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
         
         for (int x = 0; x < craftingWidth; x++) {
             for (int y = 0; y < craftingHeight; y++) {
-                if (grid[x][y] != null) {
+                InputIngredient<EntryStack<?>> ingredient = grid.get(new IntIntImmutablePair(x, y));
+                if (ingredient != null) {
                     int index = craftingWidth * y + x;
-                    list.set(index, grid[x][y]);
+                    list.set(index, ingredient);
                 }
             }
         }

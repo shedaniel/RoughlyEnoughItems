@@ -38,28 +38,34 @@ public class DefaultShapelessDisplay extends DefaultCraftingDisplay<ShapelessRec
         );
     }
     
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public int getWidth() {
-        return recipe.get().getIngredients().size() > 4 ? 3 : 2;
+        return getInputEntries().size() > 4 ? 3 : 2;
     }
     
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public int getHeight() {
-        return recipe.get().getIngredients().size() > 4 ? 3 : 2;
+        return getInputEntries().size() > 4 ? 3 : 2;
     }
     
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public int getInputWidth() {
-        return Math.min(recipe.get().getIngredients().size(), 3);
+        return Math.min(getInputEntries().size(), 3);
     }
     
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @Override
+    public int getInputWidth(int craftingWidth, int craftingHeight) {
+        return craftingWidth * craftingHeight <= getInputEntries().size() ? craftingWidth : Math.min(getInputEntries().size(), 3);
+    }
+    
     @Override
     public int getInputHeight() {
-        return (int) Math.ceil(recipe.get().getIngredients().size() / 3.0);
+        return (int) Math.ceil(getInputEntries().size() / (double) getInputWidth());
+    }
+    
+    @Override
+    public int getInputHeight(int craftingWidth, int craftingHeight) {
+        return (int) Math.ceil(getInputEntries().size() / (double) getInputWidth(craftingWidth, craftingHeight));
     }
     
     @Override
