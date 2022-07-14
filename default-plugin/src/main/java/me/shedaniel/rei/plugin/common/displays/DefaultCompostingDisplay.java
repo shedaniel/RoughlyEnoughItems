@@ -24,6 +24,8 @@
 package me.shedaniel.rei.plugin.common.displays;
 
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
+import org.jetbrains.annotations.ApiStatus;
+
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
@@ -36,8 +38,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class DefaultCompostingDisplay extends BasicDisplay {
-    private int page;
-    
+    private static int pages;
+
+    private final int page;
+
+    @Deprecated(forRemoval = true)
     public static DefaultCompostingDisplay of(List<Object2FloatMap.Entry<ItemLike>> inputs, List<EntryIngredient> output, int page) {
         EntryIngredient[] inputIngredients = new EntryIngredient[inputs.size()];
         int i = 0;
@@ -47,18 +52,30 @@ public class DefaultCompostingDisplay extends BasicDisplay {
         }
         return new DefaultCompostingDisplay(Arrays.asList(inputIngredients), output, page);
     }
-    
+
+    @ApiStatus.Internal
     public DefaultCompostingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, CompoundTag tag) {
         this(inputs, outputs, tag.getInt("page"));
     }
-    
+
+    public DefaultCompostingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs) {
+        super(inputs, outputs);
+        this.page = pages++;
+    }
+
+    @ApiStatus.Internal
     public DefaultCompostingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, int page) {
         super(inputs, outputs);
         this.page = page;
+        if (pages <= page) pages = page + 1;
     }
     
     public int getPage() {
         return page;
+    }
+
+    public static int getPages() {
+        return pages;
     }
     
     @Override
