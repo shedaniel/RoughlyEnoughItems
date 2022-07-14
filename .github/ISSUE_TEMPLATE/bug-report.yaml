@@ -68,5 +68,5 @@ body:
     attributes:
       label: By submitting this issue, I have confirmed my REI and REI\'s dependencies are up to date.
       options:
-        - label: Yes
+        - label: 'Yes'
           required: true
