@@ -56,3 +56,17 @@ body:
         Before submitting a bug report, please make sure that this issue has not already been reported. You can use the search feature to find existing issues.
 
         Thanks for taking the time to fill out this bug report!
+  - type: checkboxes
+    id: logs
+    attributes:
+      label: By submitting this issue, I have included the necessary logs by pasting the contents into the correct location or attaching the file as an upload.
+      options:
+        - label: Yes, and I did not use any paste services other than GitHub Gists.
+          required: true
+  - type: checkboxes
+    id: updates
+    attributes:
+      label: By submitting this issue, I have confirmed my REI and REI's dependencies are up to date.
+      options:
+        - label: Yes
+          required: true
