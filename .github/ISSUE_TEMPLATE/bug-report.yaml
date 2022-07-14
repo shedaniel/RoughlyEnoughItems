@@ -57,7 +57,7 @@ body:
 
         Thanks for taking the time to fill out this bug report!
   - type: checkboxes
-    id: logs
+    id: logs-confirm
     attributes:
       label: By submitting this issue, I have included the necessary logs by pasting the contents into the correct location or attaching the file as an upload.
       options:
