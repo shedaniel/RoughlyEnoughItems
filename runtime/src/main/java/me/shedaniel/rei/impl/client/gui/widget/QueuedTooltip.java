@@ -138,10 +138,6 @@ public class QueuedTooltip implements Tooltip {
             return obj instanceof TooltipComponent;
         }
         
-        public boolean isClientComponent() {
-            return obj instanceof ClientTooltipComponent;
-        }
-        
         @Override
         public TooltipComponent getAsTooltipComponent() {
             return (TooltipComponent) obj;

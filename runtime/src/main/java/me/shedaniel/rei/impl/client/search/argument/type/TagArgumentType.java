@@ -69,7 +69,8 @@ public final class TagArgumentType extends ArgumentType<Unit, String[]> {
     @Override
     public String[] cacheData(EntryStack<?> stack) {
         Stream<TagKey<?>> tags = stack.getTagsFor();
-        return tags.map(TagArgumentType::toString).toArray(String[]::new);
+        String[] array = tags.map(TagArgumentType::toString).toArray(String[]::new);
+        return array.length == 0 ? EMPTY_ARRAY : array;
     }
     
     @Override

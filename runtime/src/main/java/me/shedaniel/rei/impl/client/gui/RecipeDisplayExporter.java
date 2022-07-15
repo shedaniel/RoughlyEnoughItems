@@ -37,7 +37,6 @@ import me.shedaniel.rei.impl.client.gui.toast.ExportRecipeIdentifierToast;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
@@ -50,13 +49,11 @@ import java.util.Date;
 import java.util.List;
 
 @ApiStatus.Internal
-public final class RecipeDisplayExporter extends Widget {
-    private static final RecipeDisplayExporter INSTANCE = new RecipeDisplayExporter();
-    
+public final class RecipeDisplayExporter {
     private RecipeDisplayExporter() {}
     
     public static void exportRecipeDisplay(Rectangle rectangle, DisplaySpec display, List<Widget> widgets, boolean toast) {
-        INSTANCE.exportRecipe(rectangle, display, widgets);
+        exportRecipe(rectangle, display, widgets);
         if (toast) {
             ExportRecipeIdentifierToast.addToast(I18n.get("msg.rei.exported_recipe"), I18n.get("msg.rei.exported_recipe.desc"));
         }
@@ -80,7 +77,7 @@ public final class RecipeDisplayExporter extends Widget {
         }
     }
     
-    private void exportRecipe(Rectangle rectangle, DisplaySpec display, List<Widget> widgets) {
+    private static void exportRecipe(Rectangle rectangle, DisplaySpec display, List<Widget> widgets) {
         Minecraft client = Minecraft.getInstance();
         Window window = client.getWindow();
         RenderTarget renderTarget = new TextureTarget(window.getWidth(), window.getHeight(), true, false);
@@ -113,7 +110,7 @@ public final class RecipeDisplayExporter extends Widget {
         }
         Util.ioPool().execute(() -> {
             try {
-                File export = new File(minecraft.gameDirectory, "rei_exports/" + display.provideInternalDisplay().getCategoryIdentifier().toString().replace('/', '_').replace(':', '_'));
+                File export = new File(Minecraft.getInstance().gameDirectory, "rei_exports/" + display.provideInternalDisplay().getCategoryIdentifier().toString().replace('/', '_').replace(':', '_'));
                 export.mkdirs();
                 strippedImage.writeToFile(getExportFilename(display, export));
             } catch (IOException e) {
@@ -129,15 +126,5 @@ public final class RecipeDisplayExporter extends Widget {
         Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
         poseStack.popPose();
         RenderSystem.applyModelViewMatrix();
-    }
-    
-    @Override
-    public void render(PoseStack matrixStack, int mouseY, int i, float f) {
-        
-    }
-    
-    @Override
-    public List<? extends GuiEventListener> children() {
-        return null;
     }
 }
