@@ -76,18 +76,13 @@ import me.shedaniel.rei.impl.client.gui.widget.entrylist.PaginatedEntryListWidge
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.ScrolledEntryListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
-import me.shedaniel.rei.impl.common.util.Weather;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -95,7 +90,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -221,14 +215,6 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     @ApiStatus.Internal
-    @Nullable
-    public Menu getOverlayMenu() {
-        if (isMenuOpened(Menu.SUBSETS))
-            return this.overlayMenu.menu;
-        throw new IllegalStateException("Subsets menu accessed when subsets are not opened!");
-    }
-    
-    @ApiStatus.Internal
     @Override
     public void closeOverlayMenu() {
         OverlayMenu tmpOverlayMenu = this.overlayMenu;
@@ -253,10 +239,6 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     
     protected boolean hasSpace() {
         return !this.bounds.isEmpty();
-    }
-    
-    public void init(boolean useless) {
-        init();
     }
     
     public void init() {
@@ -384,17 +366,6 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                         })
                 )
         ));
-        Rectangle subsetsButtonBounds = getSubsetsButtonBounds();
-        if (ConfigObject.getInstance().isSubsetsEnabled()) {
-            widgets.add(InternalWidgets.wrapLateRenderable(Widgets.createButton(subsetsButtonBounds, ClientHelperImpl.getInstance().isAprilFools.get() ? new TranslatableComponent("text.rei.tiny_potato") : new TranslatableComponent("text.rei.subsets"))
-                    .onClick(button -> {
-                        proceedOpenMenuOrElse(Menu.SUBSETS, () -> {
-                            openMenu(Menu.SUBSETS, Menu.createSubsetsMenuFromRegistry(subsetsButtonBounds), point -> true, point -> ConfigObject.getInstance().isSubsetsEnabled());
-                        }, menu -> {
-                            closeOverlayMenu();
-                        });
-                    })));
-        }
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
             widgets.add(Widgets.createClickableLabel(new Point(bounds.x + ((bounds.width - 18) / 2), bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), NarratorChatListener.NO_TITLE, label -> {
                 if (!Screen.hasShiftDown()) {
@@ -515,63 +486,16 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         );
     }
     
-    private Rectangle getSubsetsButtonBounds() {
-        if (ConfigObject.getInstance().isSubsetsEnabled()) {
-            ScreenRegistry registry = ScreenRegistry.getInstance();
-            Rectangle screenBounds = registry.getScreenBounds(minecraft.screen);
-            return new Rectangle(screenBounds.x, 3, screenBounds.width, 18);
-        }
-        return null;
-    }
-    
-    private Weather getNextWeather() {
-        try {
-            Weather current = getCurrentWeather();
-            int next = current.getId() + 1;
-            if (next >= 3)
-                next = 0;
-            return Weather.byId(next);
-        } catch (Exception e) {
-            return Weather.CLEAR;
-        }
-    }
-    
-    private Weather getCurrentWeather() {
-        ClientLevel world = Minecraft.getInstance().level;
-        if (world.isThundering())
-            return Weather.THUNDER;
-        if (world.getLevelData().isRaining())
-            return Weather.RAIN;
-        return Weather.CLEAR;
-    }
-    
-    private String getGameModeShortText(GameType gameMode) {
-        return I18n.get("text.rei.short_gamemode." + gameMode.getName());
-    }
-    
-    private String getGameModeText(GameType gameMode) {
-        return I18n.get("selectWorld.gameMode." + gameMode.getName());
-    }
-    
-    private GameType getCurrentGameMode() {
-        PlayerInfo info = Minecraft.getInstance().getConnection().getPlayerInfo(Minecraft.getInstance().player.getGameProfile().getId());
-        return info == null ? GameType.SURVIVAL : info.getGameMode();
-    }
-    
     private Rectangle getSearchFieldArea() {
         int widthRemoved = 1;
         if (ConfigObject.getInstance().isCraftableFilterEnabled()) widthRemoved += 22;
         if (ConfigObject.getInstance().isLowerConfigButton()) widthRemoved += 22;
         SearchFieldLocation searchFieldLocation = REIRuntime.getInstance().getContextualSearchFieldLocation();
-        switch (searchFieldLocation) {
-            case TOP_SIDE:
-                return getTopSideSearchFieldArea(widthRemoved);
-            case BOTTOM_SIDE:
-                return getBottomSideSearchFieldArea(widthRemoved);
-            default:
-            case CENTER:
-                return getCenterSearchFieldArea(widthRemoved);
-        }
+        return switch (searchFieldLocation) {
+            case TOP_SIDE -> getTopSideSearchFieldArea(widthRemoved);
+            case BOTTOM_SIDE -> getBottomSideSearchFieldArea(widthRemoved);
+            case CENTER -> getCenterSearchFieldArea(widthRemoved);
+        };
     }
     
     private Rectangle getTopSideSearchFieldArea(int widthRemoved) {
@@ -606,10 +530,6 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             return area;
         }
         return new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getGuiScaledWidth() - 30 : 10, 10, 20, 20);
-    }
-    
-    private String getCheatModeText() {
-        return I18n.get(String.format("%s%s", "text.rei.", ClientHelper.getInstance().isCheating() ? "cheat" : "nocheat"));
     }
     
     @Override
@@ -672,22 +592,26 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         this.renderWidgets(matrices, mouseX, mouseY, delta);
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             Screen screen = Minecraft.getInstance().screen;
-            ClickArea.ClickAreaContext<Screen> context = new ClickArea.ClickAreaContext<Screen>() {
-                @Override
-                public Screen getScreen() {
-                    return screen;
-                }
-                
-                @Override
-                public Point getMousePosition() {
-                    return new Point(mouseX, mouseY);
-                }
-            };
+            ClickArea.ClickAreaContext<Screen> context = createClickAreaContext(mouseX, mouseY, screen);
             List<Component> clickAreaTooltips = ScreenRegistry.getInstance().getClickAreaTooltips((Class<Screen>) screen.getClass(), context);
             if (clickAreaTooltips != null && !clickAreaTooltips.isEmpty()) {
                 Tooltip.create(clickAreaTooltips).queue();
             }
         }
+    }
+    
+    private ClickArea.ClickAreaContext<Screen> createClickAreaContext(double mouseX, double mouseY, Screen screen) {
+        return new ClickArea.ClickAreaContext<>() {
+            @Override
+            public Screen getScreen() {
+                return screen;
+            }
+            
+            @Override
+            public Point getMousePosition() {
+                return new Point(mouseX, mouseY);
+            }
+        };
     }
     
     private static Rectangle calculateOverlayBounds() {
@@ -731,7 +655,6 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 choosePageWidget.render(matrices, mouseX, mouseY, delta);
             }
         }
-        Screen currentScreen = Minecraft.getInstance().screen;
         if (choosePageWidget == null) {
             TOOLTIPS.stream().filter(Objects::nonNull)
                     .reduce((tooltip, tooltip2) -> tooltip2)
@@ -941,17 +864,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         }
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             Screen screen = Minecraft.getInstance().screen;
-            ClickArea.ClickAreaContext<Screen> context = new ClickArea.ClickAreaContext<Screen>() {
-                @Override
-                public Screen getScreen() {
-                    return screen;
-                }
-                
-                @Override
-                public Point getMousePosition() {
-                    return new Point(mouseX, mouseY);
-                }
-            };
+            ClickArea.ClickAreaContext<Screen> context = createClickAreaContext(mouseX, mouseY, screen);
             if (ScreenRegistry.getInstance().executeClickArea((Class<Screen>) screen.getClass(), context)) {
                 return true;
             }

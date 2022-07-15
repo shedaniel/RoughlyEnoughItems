@@ -73,7 +73,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     private static final Style SPLITTER_STYLE = Style.EMPTY.withColor(ChatFormatting.GRAY);
     private static final Style QUOTES_STYLE = Style.EMPTY.withColor(ChatFormatting.GOLD);
     private static final Style ERROR_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xff5555));
-    private final OverlaySearchFieldSyntaxHighlighter highlighter = new OverlaySearchFieldSyntaxHighlighter(this);
+    private final OverlaySearchFieldSyntaxHighlighter highlighter = new OverlaySearchFieldSyntaxHighlighter(getText());
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
     public boolean isMain = true;

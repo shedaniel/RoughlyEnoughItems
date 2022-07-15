@@ -154,10 +154,6 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         int totalDisplayHeight = (getCurrentCategory().getDisplayHeight() + 4) * Math.max(1, getRecipesPerPage(maxHeight, getCurrentCategory()) + 1) + 36;
         int guiWidth = Math.max(maxWidthDisplay + 10 + 14 + 14, 190);
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - maxHeight / 2, guiWidth, maxHeight);
-        if (ConfigObject.getInstance().isSubsetsEnabled()) {
-            this.bounds.setLocation(this.bounds.getX(), this.bounds.getY() + 15);
-            this.bounds.setSize(this.bounds.getWidth(), this.bounds.getHeight() - 10);
-        }
         
         boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
         boolean isCompactTabButtons = ConfigObject.getInstance().isUsingCompactTabButtons();
