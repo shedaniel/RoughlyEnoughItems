@@ -53,7 +53,6 @@ public final class PanelWidget extends Panel {
     private int color = -1;
     private int xTextureOffset = 0;
     private int yTextureOffset = RecipeBorderType.DEFAULT.getYOffset();
-    private ResourceLocation texture = null;
     private Predicate<Panel> rendering = Predicates.alwaysTrue();
     private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
             .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
@@ -65,12 +64,6 @@ public final class PanelWidget extends Panel {
     
     public PanelWidget(Rectangle bounds) {
         this.bounds = Objects.requireNonNull(bounds);
-    }
-    
-    public static void render(PoseStack matrices, Rectangle bounds, int color, float delta) {
-        TEMP.bounds.setBounds(Objects.requireNonNull(bounds));
-        TEMP.color = color;
-        TEMP.render(matrices, 0, 0, delta);
     }
     
     @Override

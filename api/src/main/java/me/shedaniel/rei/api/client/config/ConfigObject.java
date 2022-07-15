@@ -313,6 +313,7 @@ public interface ConfigObject {
     @ApiStatus.Experimental
     boolean doDebugSearchTimeRequired();
     
+    @Deprecated(forRemoval = true)
     boolean isSubsetsEnabled();
     
     boolean isInventoryHighlightingAllowed();

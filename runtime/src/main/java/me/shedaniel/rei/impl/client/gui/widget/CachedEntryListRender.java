@@ -146,7 +146,6 @@ public class CachedEntryListRender {
         
         hash = new Long2LongOpenHashMap(list.size() + 10);
         Minecraft minecraft = Minecraft.getInstance();
-        Window window = minecraft.getWindow();
         TextureTarget target = new TextureTarget(width, height, true, false);
         target.bindWrite(true);
         Matrix4f projectionMatrix = Matrix4f.orthographic(0.0F, width, 0.0F, height, 1000.0F, 3000.0F);
