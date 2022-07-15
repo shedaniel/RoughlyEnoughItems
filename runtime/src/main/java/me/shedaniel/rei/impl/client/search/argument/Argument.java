@@ -70,10 +70,8 @@ import java.util.regex.Pattern;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class Argument<T, R> {
-    public static final String SPACE = " ", EMPTY = "";
     public static final Short2ObjectMap<Long2ObjectMap<Object>> SEARCH_CACHE = Short2ObjectMaps.synchronize(new Short2ObjectOpenHashMap<>());
     private static final AtomicReference<String> lastLanguage = new AtomicReference<>();
-    static final Argument<Unit, Unit> ALWAYS = new Argument<>(AlwaysMatchingArgumentType.INSTANCE, EMPTY, true, -1, -1, true);
     private ArgumentType<T, R> argumentType;
     private String text;
     private T filterData;

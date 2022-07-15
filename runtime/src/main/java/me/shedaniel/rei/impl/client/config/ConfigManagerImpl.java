@@ -100,7 +100,6 @@ public class ConfigManagerImpl implements ConfigManager {
     private ConfigObjectImpl object;
     
     public ConfigManagerImpl() {
-        Jankson jankson = Jankson.builder().build();
         AutoConfig.register(ConfigObjectImpl.class, (definition, configClass) -> new JanksonConfigSerializer<>(definition, configClass, buildJankson(Jankson.builder())));
         GuiRegistry guiRegistry = AutoConfig.getGuiRegistry(ConfigObjectImpl.class);
         guiRegistry.registerPredicateProvider((i13n, field, config, defaults, guiProvider) -> {

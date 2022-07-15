@@ -24,41 +24,26 @@
 package me.shedaniel.rei.impl.client.gui.modules;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
-import me.shedaniel.rei.api.client.subsets.SubsetsRegistry;
-import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.impl.client.gui.modules.entries.EntryStackSubsetsMenuEntry;
 import me.shedaniel.rei.impl.client.gui.modules.entries.SubMenuEntry;
-import me.shedaniel.rei.impl.client.gui.modules.entries.SubSubsetsMenuEntry;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.core.Registry;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.UUID;
 
 @ApiStatus.Internal
 public class Menu extends WidgetWithBounds implements LateRenderable {
-    public static final UUID SUBSETS = UUID.randomUUID();
     public static final UUID WEATHER = UUID.randomUUID();
     public static final UUID GAME_TYPE = UUID.randomUUID();
     
@@ -104,96 +89,6 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
         this.facingRight = facingRight;
         int x = facingRight ? menuStart.x : menuStart.getMaxX() - (getMaxEntryWidth() + 2 + (hasScrollBar ? 6 : 0));
         this.menuStartPoint = new Point(x, y);
-    }
-    
-    public static Menu createSubsetsMenuFromRegistry(Rectangle menuStart) {
-        EntryRegistry instance = EntryRegistry.getInstance();
-        List<? extends EntryStack<?>> stacks = instance.getEntryStacks().collect(Collectors.toList());
-        Map<String, Object> entries = Maps.newHashMap();
-        {
-            // All Entries group
-            Map<String, Object> allEntries = getOrCreateSubEntryInMap(entries, "roughlyenoughitems:all_entries");
-            for (EntryStack<?> stack : stacks) {
-                putEntryInMap(allEntries, stack);
-            }
-        }
-        {
-            // Item Groups group
-            Map<String, Object> itemGroups = getOrCreateSubEntryInMap(entries, "roughlyenoughitems:item_groups");
-            for (Item item : Registry.ITEM) {
-                CreativeModeTab group = item.getItemCategory();
-                if (group == null)
-                    continue;
-                List<ItemStack> list;
-                try {
-                    list = instance.appendStacksForItem(item);
-                    Map<String, Object> groupMenu = getOrCreateSubEntryInMap(itemGroups, "_item_group_" + group.langId);
-                    for (ItemStack stack : list) {
-                        putEntryInMap(groupMenu, EntryStacks.of(stack));
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        Set<String> paths = SubsetsRegistry.getInstance().getPaths();
-        for (String path : paths) {
-            Map<String, Object> lastMap = entries;
-            String[] pathSegments = path.split("/");
-            for (String pathSegment : pathSegments) {
-                lastMap = getOrCreateSubEntryInMap(lastMap, pathSegment);
-            }
-            for (EntryStack<?> entry : SubsetsRegistry.getInstance().getPathEntries(path)) {
-                EntryStack<?> firstStack = CollectionUtils.findFirstOrNullEqualsExact(stacks, entry);
-                if (firstStack != null) {
-                    putEntryInMap(lastMap, firstStack);
-                }
-            }
-        }
-        return new Menu(menuStart, buildEntries(entries), true);
-    }
-    
-    private static Map<String, Object> getOrCreateSubEntryInMap(Map<String, Object> parent, String pathSegment) {
-        putEntryInMap(parent, pathSegment);
-        return (Map<String, Object>) parent.get(pathSegment);
-    }
-    
-    private static void putEntryInMap(Map<String, Object> parent, String pathSegment) {
-        if (!parent.containsKey(pathSegment)) {
-            parent.put(pathSegment, Maps.newHashMap());
-        }
-    }
-    
-    private static void putEntryInMap(Map<String, Object> parent, EntryStack<?> stack) {
-        Set<EntryStack<?>> items = (Set<EntryStack<?>>) parent.get("items");
-        if (items == null) {
-            items = Sets.newLinkedHashSet();
-            parent.put("items", items);
-        }
-        items.add(stack);
-    }
-    
-    private static List<MenuEntry> buildEntries(Map<String, Object> map) {
-        List<MenuEntry> entries = Lists.newArrayList();
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            if (entry.getKey().equals("items")) {
-                Set<EntryStack<?>> items = (Set<EntryStack<?>>) entry.getValue();
-                for (EntryStack<?> item : items) {
-                    entries.add(new EntryStackSubsetsMenuEntry(item));
-                }
-            } else {
-                Map<String, Object> entryMap = (Map<String, Object>) entry.getValue();
-                if (entry.getKey().startsWith("_item_group_")) {
-                    entries.add(new SubSubsetsMenuEntry(Component.translatable(entry.getKey().replace("_item_group_", "itemGroup.")), buildEntries(entryMap)));
-                } else {
-                    String translationKey = "subsets.rei." + entry.getKey().replace(':', '.');
-                    if (!I18n.exists(translationKey))
-                        RoughlyEnoughItemsCore.LOGGER.warn("Subsets menu " + translationKey + " does not have a translation");
-                    entries.add(new SubSubsetsMenuEntry(Component.translatable(translationKey), buildEntries(entryMap)));
-                }
-            }
-        }
-        return entries;
     }
     
     @SuppressWarnings("deprecation")
