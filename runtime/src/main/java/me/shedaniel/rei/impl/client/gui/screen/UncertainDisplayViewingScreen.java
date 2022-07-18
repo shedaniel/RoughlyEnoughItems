@@ -38,10 +38,8 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
-import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
-import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -66,7 +64,6 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class UncertainDisplayViewingScreen extends Screen {

@@ -74,6 +74,7 @@ import me.shedaniel.rei.impl.client.registry.category.CategoryRegistryImpl;
 import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
 import me.shedaniel.rei.impl.client.registry.screen.ScreenRegistryImpl;
 import me.shedaniel.rei.impl.client.search.SearchProviderImpl;
+import me.shedaniel.rei.impl.client.search.method.InputMethodRegistryImpl;
 import me.shedaniel.rei.impl.client.subsets.SubsetsRegistryImpl;
 import me.shedaniel.rei.impl.client.transfer.TransferHandlerRegistryImpl;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
@@ -227,6 +228,7 @@ public class RoughlyEnoughItemsCoreClient {
                 },
                 new EntryRendererRegistryImpl(),
                 new ViewsImpl(),
+                new InputMethodRegistryImpl(),
                 new SearchProviderImpl(),
                 new ConfigManagerImpl(),
                 new EntryRegistryImpl(),

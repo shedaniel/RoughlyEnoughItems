@@ -70,12 +70,12 @@ public final class ModArgumentType extends ArgumentType<Unit, ModArgumentType.@N
     }
     
     @Override
-    public boolean matches(@Nullable ModInfoPair pair, EntryStack<?> stack, String searchText, Unit filterData) {
-        if (pair.modId == null || pair.modId.contains(searchText)) return true;
+    public void matches(@Nullable ModInfoPair pair, EntryStack<?> stack, Unit filterData, ResultSink sink) {
+        if (pair.modId == null || sink.testString(pair.modId)) return;
         if (pair.modName == null) {
             pair.modName = ClientHelper.getInstance().getModFromModId(pair.modId).toLowerCase(Locale.ROOT);
         }
-        return pair.modName.contains(searchText);
+        sink.testString(pair.modName);
     }
     
     @Override
@@ -86,9 +86,6 @@ public final class ModArgumentType extends ArgumentType<Unit, ModArgumentType.@N
     @Override
     public Style getHighlightedStyle() {
         return STYLE;
-    }
-    
-    private ModArgumentType() {
     }
     
     protected static class ModInfoPair {

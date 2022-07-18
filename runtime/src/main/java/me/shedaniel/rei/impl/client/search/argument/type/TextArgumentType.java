@@ -40,7 +40,6 @@ import java.util.Locale;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public final class TextArgumentType extends ArgumentType<Unit, String> {
-    public static final TextArgumentType INSTANCE = new TextArgumentType();
     private static final TooltipContext CONTEXT = TooltipContext.of(new Point(), TooltipFlag.Default.NORMAL, true);
     
     @Override
@@ -65,15 +64,12 @@ public final class TextArgumentType extends ArgumentType<Unit, String> {
     }
     
     @Override
-    public boolean matches(String value, EntryStack<?> stack, String searchText, Unit filterData) {
-        return value.contains(searchText);
+    public void matches(String value, EntryStack<?> stack, Unit filterData, ResultSink sink) {
+        sink.testString(value);
     }
     
     @Override
     public Unit prepareSearchFilter(String searchText) {
         return null;
-    }
-    
-    private TextArgumentType() {
     }
 }

@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.subsets;
 
-import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.subsets.SubsetsRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
@@ -43,11 +42,6 @@ public class SubsetsRegistryImpl implements SubsetsRegistry {
     @Override
     public ReloadStage getStage() {
         return ReloadStage.START;
-    }
-    
-    @Override
-    public void acceptPlugin(REIClientPlugin plugin) {
-        plugin.registerSubsets(this);
     }
     
     @Override

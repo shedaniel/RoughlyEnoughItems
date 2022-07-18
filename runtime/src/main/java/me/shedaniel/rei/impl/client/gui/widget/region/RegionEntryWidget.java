@@ -34,7 +34,7 @@ import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.modules.Menu;
+import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -74,21 +74,11 @@ public class RegionEntryWidget<T extends RegionEntry<T>> extends DisplayedEntryW
         FloatingPoint target = entry.pos.target();
         if (Math.abs(value.x - target.x) < 1 && Math.abs(value.y - target.y) < 1 && overlayOptional.isPresent() && menuEntries.isPresent()) {
             ScreenOverlayImpl overlay = (ScreenOverlayImpl) overlayOptional.get();
+            MenuAccess access = overlay.menuAccess();
             UUID uuid = entry.getEntry().getUuid();
             
-            boolean isOpened = overlay.isMenuOpened(uuid);
-            if (isOpened || !overlay.isAnyMenuOpened()) {
-                boolean inBounds = containsMouse(mouseX, mouseY) || overlay.isMenuInBounds(uuid);
-                if (isOpened != inBounds) {
-                    if (inBounds) {
-                        Menu menu = new Menu(getBounds(),
-                                CollectionUtils.map(menuEntries.get().get(), entry -> convertMenu(overlay, entry)), false);
-                        overlay.openMenu(uuid, menu, this::containsMouse, point -> entry.region.has(entry));
-                    } else {
-                        overlay.closeOverlayMenu();
-                    }
-                }
-            }
+            access.openOrClose(uuid, getBounds(), () ->
+                    CollectionUtils.map(menuEntries.get().get(), entry -> convertMenu(overlay, entry)));
         }
         Vector4f vector4f = new Vector4f(mouseX, mouseY, 0, 1.0F);
         vector4f.transform(matrices.last().pose());
@@ -119,7 +109,7 @@ public class RegionEntryWidget<T extends RegionEntry<T>> extends DisplayedEntryW
             
             @Override
             public void updateInformation(int xPos, int yPos, boolean selected, boolean containsMouse, boolean rendering, int width) {
-                entry.closeMenu = overlay::closeOverlayMenu;
+                entry.closeMenu = overlay.menuAccess()::close;
                 entry.updateInformation(xPos, yPos, selected, containsMouse, rendering, width);
             }
             

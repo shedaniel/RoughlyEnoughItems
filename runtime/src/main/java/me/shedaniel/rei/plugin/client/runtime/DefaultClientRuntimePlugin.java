@@ -27,7 +27,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
-import me.shedaniel.math.Point;
+import dev.architectury.platform.Platform;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.ClientHelper;
@@ -47,6 +47,7 @@ import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
+import me.shedaniel.rei.api.client.search.method.InputMethodRegistry;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
@@ -58,6 +59,11 @@ import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
+import me.shedaniel.rei.impl.client.search.method.DefaultInputMethod;
+import me.shedaniel.rei.impl.client.search.method.unihan.BomopofoInputMethod;
+import me.shedaniel.rei.impl.client.search.method.unihan.JyutpingInputMethod;
+import me.shedaniel.rei.impl.client.search.method.unihan.PinyinInputMethod;
+import me.shedaniel.rei.impl.client.search.method.unihan.UniHanManager;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryListener;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
@@ -88,6 +94,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         REIRuntimeImpl.getInstance().addHintProvider(watcher);
         REIRuntimeImpl.getInstance().addHintProvider(new SearchBarHighlightWatcher());
         REIRuntimeImpl.getInstance().addHintProvider(new SearchFilterPrepareWatcher());
+        REIRuntimeImpl.getInstance().addHintProvider(new InputMethodWatcher());
     }
     
     @Override
@@ -160,6 +167,15 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
     @Override
     public void registerTransferHandlers(TransferHandlerRegistry registry) {
         registry.register(new DefaultCategoryHandler());
+    }
+    
+    @Override
+    public void registerInputMethods(InputMethodRegistry registry) {
+        registry.add(DefaultInputMethod.ID, DefaultInputMethod.INSTANCE);
+        UniHanManager manager = new UniHanManager(Platform.getConfigFolder().resolve("roughlyenoughitems/unihan.zip"));
+        registry.add(new ResourceLocation("rei:pinyin"), new PinyinInputMethod(manager));
+        registry.add(new ResourceLocation("rei:jyutping"), new JyutpingInputMethod(manager));
+        registry.add(new ResourceLocation("rei:bomopofo"), new BomopofoInputMethod(manager));
     }
     
     private enum EntryStackFavoriteType implements FavoriteEntryType<EntryStackFavoriteEntry> {

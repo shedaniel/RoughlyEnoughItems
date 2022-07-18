@@ -28,6 +28,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -46,8 +47,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
-
-import static me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen.CHEST_GUI_TEXTURE;
 
 public class FilteringRulesScreen extends Screen {
     private final FilteringEntry entry;
@@ -193,7 +192,7 @@ public class FilteringRulesScreen extends Screen {
                 @Override
                 protected void renderBg(PoseStack matrices, Minecraft client, int mouseX, int mouseY) {
                     super.renderBg(matrices, client, mouseX, mouseY);
-                    RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
+                    RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
                     blit(matrices, x + 3, y + 3, 0, 0, 14, 14);
                 }
             };

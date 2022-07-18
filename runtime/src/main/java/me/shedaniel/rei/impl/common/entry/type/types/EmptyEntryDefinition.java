@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.common.entry.type.types;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;

@@ -23,12 +23,16 @@
 
 package me.shedaniel.rei.impl.client.search.argument.type;
 
+import me.shedaniel.math.Point;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.client.search.result.ArgumentApplicableResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,7 +43,7 @@ import java.util.regex.PatternSyntaxException;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public final class RegexArgumentType extends ArgumentType<@Nullable Pattern, String> {
-    public static final RegexArgumentType INSTANCE = new RegexArgumentType();
+    private static final TooltipContext CONTEXT = TooltipContext.of(new Point(), TooltipFlag.Default.NORMAL, true);
     private static final String EMPTY = "";
     private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xbfffa8));
     
@@ -80,17 +84,16 @@ public final class RegexArgumentType extends ArgumentType<@Nullable Pattern, Str
     
     @Override
     public String cacheData(EntryStack<?> stack) {
-        return stack.asFormatStrippedText().getString();
+        return FormattingUtils.stripFormatting(stack.asFormattedText(CONTEXT).getString());
     }
     
     @Override
-    public boolean matches(String data, EntryStack<?> stack, String searchText, @Nullable Pattern filterData) {
-        if (filterData == null) return false;
+    public void matches(String data, EntryStack<?> stack, @Nullable Pattern filterData, ResultSink sink) {
+        if (filterData == null) return;
         Matcher matcher = filterData.matcher(data);
-        return matcher != null && matcher.matches();
-    }
-    
-    private RegexArgumentType() {
+        if (matcher != null && matcher.matches()) {
+            sink.testTrue();
+        }
     }
 }
 
