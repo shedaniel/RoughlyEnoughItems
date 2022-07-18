@@ -47,11 +47,14 @@ import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
+import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
@@ -81,8 +84,6 @@ import java.util.stream.Stream;
 public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     @ApiStatus.Internal
     public static long stackDisplayOffset = 0;
-    protected static final ResourceLocation RECIPE_GUI = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    protected static final ResourceLocation RECIPE_GUI_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     
     @ApiStatus.Internal
     private byte noticeMark = 0;
@@ -391,11 +392,11 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             RenderSystem.enableBlend();
             RenderSystem.blendFuncSeparate(770, 771, 1, 0);
             RenderSystem.blendFunc(770, 771);
-            RenderSystem.setShaderTexture(0, RECIPE_GUI);
+            RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
             if (darkBackgroundAlpha.value() > 0.0F) {
-                RenderSystem.setShaderTexture(0, RECIPE_GUI_DARK);
+                RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE_DARK);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value());
                 blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -477,6 +478,19 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             if (tooltipProcessors != null) {
                 for (UnaryOperator<Tooltip> processor : tooltipProcessors) {
                     tooltip = processor.apply(tooltip);
+                }
+            }
+            
+            if (!tooltip.entries().isEmpty()) {
+                Tooltip.Entry entry = tooltip.entries().get(0);
+                
+                if (entry.isText()) {
+                    String name = FormattingUtils.stripFormatting(entry.getAsText().getString());
+                    InputMethod<?> active = InputMethod.active();
+                    String suggested = active.suggestInputString(name);
+                    if (suggested != null) {
+                        tooltip.entries().add(1, Tooltip.entry(Component.literal(suggested).withStyle(ChatFormatting.GRAY)));
+                    }
                 }
             }
         }

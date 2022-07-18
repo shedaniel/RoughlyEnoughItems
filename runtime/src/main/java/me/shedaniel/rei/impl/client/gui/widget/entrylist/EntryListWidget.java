@@ -188,20 +188,6 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
         return bounds;
     }
     
-    public abstract int getPage();
-    
-    public abstract void setPage(int page);
-    
-    public void previousPage() {
-        setPage(getPage() - 1);
-    }
-    
-    public void nextPage() {
-        setPage(getPage() + 1);
-    }
-    
-    public abstract int getTotalPages();
-    
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (!hasSpace()) return;
@@ -364,4 +350,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     }
     
     protected abstract List<EntryListStackEntry> getEntryWidgets();
+    
+    public void init(ScreenOverlayImpl overlay) {
+    }
 }

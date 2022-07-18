@@ -84,12 +84,18 @@ public abstract class ArgumentType<T, R> {
     
     public abstract R cacheData(EntryStack<?> stack);
     
-    public abstract boolean matches(R data, EntryStack<?> stack, String searchText, T filterData);
-    
     public abstract T prepareSearchFilter(String searchText);
+    
+    public abstract void matches(R data, EntryStack<?> stack, T filterData, ResultSink sink);
     
     public int getIndex() {
         if (index >= 0) return index;
         return index = ArgumentTypesRegistry.ARGUMENT_TYPE_LIST.indexOf(this);
+    }
+    
+    public interface ResultSink {
+        boolean testTrue();
+        
+        boolean testString(String text);
     }
 }

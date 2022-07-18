@@ -38,7 +38,6 @@ import org.jetbrains.annotations.Nullable;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public final class IdentifierArgumentType extends ArgumentType<Unit, String> {
-    public static final IdentifierArgumentType INSTANCE = new IdentifierArgumentType();
     private static final String EMPTY = "";
     private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x8d7eed));
     
@@ -76,15 +75,14 @@ public final class IdentifierArgumentType extends ArgumentType<Unit, String> {
     }
     
     @Override
-    public boolean matches(String identifier, EntryStack<?> stack, String searchText, Unit filterData) {
-        return !identifier.isEmpty() && identifier.contains(searchText);
+    public void matches(String identifier, EntryStack<?> stack, Unit filterData, ResultSink sink) {
+        if (!identifier.isEmpty()) {
+            sink.testString(identifier);
+        }
     }
     
     @Override
     public Unit prepareSearchFilter(String searchText) {
         return Unit.INSTANCE;
-    }
-    
-    private IdentifierArgumentType() {
     }
 }

@@ -27,18 +27,18 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.longs.LongList;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringCacheImpl;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextImpl;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextType;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.Nullable;
@@ -189,9 +189,7 @@ public class PreFilteredEntryList implements EntryRegistryListener {
     }
     
     private void queueSearchUpdate() {
-        if (REIRuntimeImpl.getSearchField() != null) {
-            ScreenOverlayImpl.getInstance().queueReloadSearch();
-        }
+        REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadSearch);
     }
     
     public List<EntryStack<?>> getList() {

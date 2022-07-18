@@ -29,10 +29,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
-import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
@@ -117,7 +117,7 @@ public class SubMenuEntry extends AbstractMenuEntry {
         }
         font.draw(poses, text, getX() + 2, getY() + 2, isSelected() ? 16777215 : 8947848);
         if (!entries.isEmpty()) {
-            RenderSystem.setShaderTexture(0, TabWidget.CHEST_GUI_TEXTURE);
+            RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
             blit(poses, getX() + getWidth() - 15, getY() - 2, 0, 28, 18, 18);
         }
     }

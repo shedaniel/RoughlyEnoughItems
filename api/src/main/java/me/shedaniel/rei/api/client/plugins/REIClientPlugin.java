@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
+import me.shedaniel.rei.api.client.search.method.InputMethodRegistry;
 import me.shedaniel.rei.api.client.subsets.SubsetsRegistry;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import net.fabricmc.api.EnvType;
@@ -143,6 +144,17 @@ public interface REIClientPlugin extends REIPlugin<REIClientPlugin> {
     @ApiStatus.OverrideOnly
     @ApiStatus.Experimental
     default void registerConfigAddons(ConfigAddonRegistry registry) {
+    }
+    
+    /**
+     * Registers new input methods.
+     *
+     * @param registry the registry
+     * @since 8.3
+     */
+    @ApiStatus.OverrideOnly
+    @ApiStatus.Experimental
+    default void registerInputMethods(InputMethodRegistry registry) {
     }
     
     @Override

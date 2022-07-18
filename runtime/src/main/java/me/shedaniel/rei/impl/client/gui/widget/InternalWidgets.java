@@ -149,10 +149,6 @@ public final class InternalWidgets {
         return new LateRenderableWidget(widget);
     }
     
-    public static Widget concatWidgets(Widget widget1, Widget widget2) {
-        return new MergedWidget(widget2, widget1);
-    }
-    
     public static Widget concatWidgets(List<Widget> widgets) {
         return new MergedWidget(widgets);
     }
