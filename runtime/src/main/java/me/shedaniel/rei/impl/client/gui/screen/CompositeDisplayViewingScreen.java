@@ -46,7 +46,7 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
@@ -234,15 +234,15 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             if (isCompactTabButtons) {
                 matrices.pushPose();
                 matrices.translate(0, 0.5, 0);
-                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_LEFT_SMALL_TEXTURE);
+                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_SMALL_TEXTURE);
                 blit(matrices, tabLeftBounds.x + 2, tabLeftBounds.y + 2, 0, 0, 6, 6, 6, 6);
-                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_RIGHT_SMALL_TEXTURE);
+                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_SMALL_TEXTURE);
                 blit(matrices, tabRightBounds.x + 2, tabRightBounds.y + 2, 0, 0, 6, 6, 6, 6);
                 matrices.popPose();
             } else {
-                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_LEFT_TEXTURE);
+                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_TEXTURE);
                 blit(matrices, tabLeftBounds.x + 4, tabLeftBounds.y + 4, 0, 0, 8, 8, 8, 8);
-                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_RIGHT_TEXTURE);
+                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_TEXTURE);
                 blit(matrices, tabRightBounds.x + 4, tabRightBounds.y + 4, 0, 0, 8, 8, 8, 8);
             }
         }), 0, 0, 1));

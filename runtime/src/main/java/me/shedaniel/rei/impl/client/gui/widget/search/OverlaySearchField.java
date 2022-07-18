@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
@@ -61,6 +62,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.Objects;
@@ -73,6 +75,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     private static final Style SPLITTER_STYLE = Style.EMPTY.withColor(ChatFormatting.GRAY);
     private static final Style QUOTES_STYLE = Style.EMPTY.withColor(ChatFormatting.GOLD);
     private static final Style ERROR_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xff5555));
+    private boolean previouslyClicking = false;
     private final OverlaySearchFieldSyntaxHighlighter highlighter = new OverlaySearchFieldSyntaxHighlighter(getText());
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
@@ -153,6 +156,13 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     }
     
     private void drawHint(PoseStack poses, int mouseX, int mouseY) {
+        boolean mouseDown = GLFW.glfwGetMouseButton(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT) != 0;
+        boolean clicking = false;
+        if (mouseDown != previouslyClicking) {
+            previouslyClicking = mouseDown;
+            clicking = mouseDown;
+        }
+        
         List<HintProvider> hintProviders = REIRuntimeImpl.getInstance().getHintProviders();
         List<Pair<HintProvider, Component>> hints = CollectionUtils.flatMap(hintProviders, provider ->
                 CollectionUtils.map(provider.provide(), component -> new Pair<>(provider, component)));
@@ -162,6 +172,10 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                 CollectionUtils.map(font.split(pair.getSecond(), width - 6), sequence -> new Pair<>(pair.getFirst(), sequence)));
         OptionalDouble progress = hintProviders.stream().map(HintProvider::getProgress).filter(Objects::nonNull).mapToDouble(Double::doubleValue)
                 .average();
+        List<HintProvider.HintButton> buttons = hints.stream().map(Pair::getFirst).distinct()
+                .map(HintProvider::getButtons)
+                .flatMap(List::stream)
+                .toList();
         boolean hasProgress = progress.isPresent();
         if (!hasProgress) {
             this.progress.setAs(0);
@@ -178,7 +192,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                     int b = color1.getBlue() - (color1.getBlue() - color2.getBlue()) / 2;
                     return Color.ofRGBA(r, g, b, (color1.getAlpha() + color2.getAlpha()) / 2);
                 }).orElse(Color.ofTransparent(0x50000000));
-        int height = 6 + font.lineHeight * sequences.size() + (hasProgress ? 2 : 0);
+        int height = 6 + font.lineHeight * sequences.size() + (hasProgress ? 2 : 0) + (buttons.isEmpty() ? 0 : (int) Math.ceil(buttons.size() / 3.0) * 20);
         int x = getBounds().getX() + 2;
         int y = getBounds().getY() - height;
         Tesselator tesselator = Tesselator.getInstance();
@@ -206,17 +220,36 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         bufferBuilder.end();
         BufferUploader.end(bufferBuilder);
         poses.pushPose();
-        poses.translate(0.0D, 0.0D, 350.0D);
+        poses.translate(0.0D, 0.0D, 450.0D);
         for (int i = 0; i < sequences.size(); i++) {
             Pair<HintProvider, FormattedCharSequence> pair = sequences.get(i);
             int lineWidth = font.drawShadow(poses, pair.getSecond(), x + 3, y + 3 + font.lineHeight * i, -1);
             if (new Rectangle(x + 3, y + 3 + font.lineHeight * i, lineWidth, font.lineHeight).contains(mouseX, mouseY)) {
                 Tooltip tooltip = pair.getFirst().provideTooltip(new Point(mouseX, mouseY));
                 if (tooltip != null) {
-                    tooltip.queue();
+                    ScreenOverlayImpl.getInstance().clearTooltips();
+                    ScreenOverlayImpl.getInstance().renderTooltip(poses, tooltip);
                 }
             }
         }
+        
+        int split = 2;
+        for (HintProvider.HintButton button : buttons) {
+            int x1 = x + 4 + ((width - 8 - 8) / split) * (buttons.indexOf(button) % split);
+            int y1 = y + height - 20 - 20 * (int) Math.floor(buttons.indexOf(button) / (float) split);
+            int x2 = x1 + (width - 8 - 8) / split;
+            int y2 = y1 + 16;
+            Rectangle bounds = new Rectangle(x1, y1, x2 - x1 - 4, y2 - y1);
+            int buttonColor = bounds.contains(mouseX, mouseY) ? 0x8f8f8f8f : 0x66666666;
+            fillGradient(poses, x1, y1, x2 - 4, y2, buttonColor, buttonColor);
+            font.drawShadow(poses, button.name(), (x1 + x2 - 4 - font.width(button.name())) / 2, y1 + 4, -1);
+            
+            if (bounds.contains(mouseX, mouseY) && clicking) {
+                Widgets.produceClickSound();
+                button.action().accept(bounds);
+            }
+        }
+        
         poses.popPose();
     }
     
@@ -278,13 +311,13 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     }
     
     @Override
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (this.isVisible() && this.isFocused() && isMain)
-            if (int_1 == 257 || int_1 == 335) {
+            if (keyCode == 257 || keyCode == 335) {
                 addToHistory(getText());
                 setFocused(false);
                 return true;
-            } else if (int_1 == 265) {
+            } else if (keyCode == 265) {
                 int i = history.indexOf(getText()) - 1;
                 if (i < -1 && getText().isEmpty())
                     i = history.size() - 1;
@@ -296,14 +329,14 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                     setText(history.get(i));
                     return true;
                 }
-            } else if (int_1 == 264) {
+            } else if (keyCode == 264) {
                 int i = history.indexOf(getText()) + 1;
                 if (i > 0) {
                     setText(i < history.size() ? history.get(i) : "");
                     return true;
                 }
             }
-        return super.keyPressed(int_1, int_2, int_3);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
     
     @Override
@@ -317,13 +350,13 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     }
     
     @Override
-    public boolean charTyped(char char_1, int int_1) {
+    public boolean charTyped(char character, int modifiers) {
         if (isMain && System.currentTimeMillis() - keybindFocusTime < 1000 && keybindFocusKey != -1 && InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), keybindFocusKey)) {
             keybindFocusTime = -1;
             keybindFocusKey = -1;
             return true;
         }
-        return super.charTyped(char_1, int_1);
+        return super.charTyped(character, modifiers);
     }
     
     @Override

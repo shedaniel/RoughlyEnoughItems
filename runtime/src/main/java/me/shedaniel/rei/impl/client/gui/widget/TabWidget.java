@@ -41,12 +41,12 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,10 +56,6 @@ import java.util.function.Predicate;
 
 @ApiStatus.Internal
 public class TabWidget extends WidgetWithBounds implements DraggableStackProviderWidget {
-    
-    public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    public static final ResourceLocation CHEST_GUI_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
-    
     public boolean selected = false;
     public Renderer renderer;
     public int id;
@@ -122,10 +118,10 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
             RenderSystem.enableBlend();
             RenderSystem.blendFuncSeparate(770, 771, 1, 0);
             RenderSystem.blendFunc(770, 771);
-            Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
+            Minecraft.getInstance().getTextureManager().bind(InternalTextures.CHEST_GUI_TEXTURE);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             this.blit(matrices, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
-            Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE_DARK);
+            Minecraft.getInstance().getTextureManager().bind(InternalTextures.CHEST_GUI_TEXTURE_DARK);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value());
             this.blit(matrices, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);

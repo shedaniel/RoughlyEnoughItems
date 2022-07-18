@@ -27,27 +27,21 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector4f;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
-import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProvider;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitor;
-import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
-import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
@@ -56,93 +50,65 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
-import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
-import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
-import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
-import me.shedaniel.rei.impl.client.gui.changelog.ChangelogLoader;
 import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
 import me.shedaniel.rei.impl.client.gui.dragging.CurrentDraggingStack;
-import me.shedaniel.rei.impl.client.gui.modules.Menu;
-import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
-import me.shedaniel.rei.impl.client.gui.modules.entries.*;
-import me.shedaniel.rei.impl.client.gui.widget.DefaultDisplayChoosePageWidget;
-import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
-import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
-import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListSearchManager;
+import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
+import me.shedaniel.rei.impl.client.gui.modules.MenuHolder;
+import me.shedaniel.rei.impl.client.gui.widget.*;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.PaginatedEntryListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.ScrolledEntryListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
 @ApiStatus.Internal
 public class ScreenOverlayImpl extends ScreenOverlay {
-    private static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    public static final ResourceLocation ARROW_LEFT_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/arrow_left.png");
-    public static final ResourceLocation ARROW_RIGHT_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/arrow_right.png");
-    public static final ResourceLocation ARROW_LEFT_SMALL_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/arrow_left_small.png");
-    public static final ResourceLocation ARROW_RIGHT_SMALL_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/arrow_right_small.png");
     private static final List<Tooltip> TOOLTIPS = Lists.newArrayList();
-    private static final List<Runnable> AFTER_RENDER = Lists.newArrayList();
     private static EntryListWidget entryListWidget = null;
     private static FavoritesListWidget favoritesListWidget = null;
     private final List<Widget> widgets = Lists.newLinkedList();
     public boolean shouldReload = false;
     public boolean shouldReloadSearch = false;
-    private Rectangle screenBounds;
     private Rectangle bounds;
     private Window window;
-    private Button leftButton, rightButton;
     private Widget configButton;
     private CurrentDraggingStack draggingStack = new CurrentDraggingStack();
     @Nullable
     public DefaultDisplayChoosePageWidget choosePageWidget;
-    
-    @Nullable
-    private ScreenOverlayImpl.OverlayMenu overlayMenu = null;
-    
+    private MenuHolder menuHolder = new MenuHolder();
     
     public static EntryListWidget getEntryListWidget() {
+        boolean widgetScrolled = ConfigObject.getInstance().isEntryListWidgetScrolled();
+        
         if (entryListWidget != null) {
-            if (ConfigObject.getInstance().isEntryListWidgetScrolled() && entryListWidget instanceof ScrolledEntryListWidget) {
+            if (widgetScrolled && entryListWidget instanceof ScrolledEntryListWidget) {
                 return entryListWidget;
-            } else if (!ConfigObject.getInstance().isEntryListWidgetScrolled() && entryListWidget instanceof PaginatedEntryListWidget) {
+            } else if (!widgetScrolled && entryListWidget instanceof PaginatedEntryListWidget) {
                 return entryListWidget;
             }
         }
         
-        if (ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            entryListWidget = new ScrolledEntryListWidget();
-        } else if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            entryListWidget = new PaginatedEntryListWidget();
-        }
+        entryListWidget = widgetScrolled ? new ScrolledEntryListWidget() : new PaginatedEntryListWidget();
         
-        Rectangle overlayBounds = ScreenOverlayImpl.getInstance().bounds;
+        ScreenOverlayImpl overlay = ScreenOverlayImpl.getInstance();
+        Rectangle overlayBounds = overlay.bounds;
         entryListWidget.updateArea(Objects.requireNonNullElse(overlayBounds, new Rectangle()), REIRuntimeImpl.getSearchField() == null ? "" : REIRuntimeImpl.getSearchField().getText());
         entryListWidget.updateEntriesPosition();
         
@@ -167,67 +133,12 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         }
     }
     
-    private static class OverlayMenu {
-        private UUID uuid;
-        private Menu menu;
-        private Widget wrappedMenu;
-        private Predicate<Point> inBounds;
-        
-        public OverlayMenu(UUID uuid, Menu menu, Widget wrappedMenu, Predicate<Point> or, Predicate<Point> and) {
-            this.uuid = uuid;
-            this.menu = menu;
-            this.wrappedMenu = wrappedMenu;
-            this.inBounds = or.or(menu::containsMouse).and(and);
-        }
-    }
-    
-    public boolean isMenuOpened(UUID uuid) {
-        return overlayMenu != null && overlayMenu.uuid.equals(uuid);
-    }
-    
-    public boolean isAnyMenuOpened() {
-        return overlayMenu != null;
-    }
-    
-    public boolean isMenuInBounds(UUID uuid) {
-        return isMenuOpened(uuid) && overlayMenu.inBounds.test(PointHelper.ofMouse());
-    }
-    
-    private void proceedOpenMenu(UUID uuid, Runnable runnable) {
-        proceedOpenMenuOrElse(uuid, runnable, menu -> {});
-    }
-    
-    private void proceedOpenMenuOrElse(UUID uuid, Runnable runnable, Consumer<OverlayMenu> orElse) {
-        if (overlayMenu == null || !overlayMenu.uuid.equals(uuid)) {
-            closeOverlayMenu();
-            runnable.run();
-        } else {
-            orElse.accept(this.overlayMenu);
-        }
-    }
-    
-    public void openMenu(UUID uuid, Menu menu) {
-        openMenu(uuid, menu, point -> false, point -> true);
-    }
-    
-    public void openMenu(UUID uuid, Menu menu, Predicate<Point> or, Predicate<Point> and) {
-        this.overlayMenu = new OverlayMenu(uuid, menu, Widgets.withTranslate(menu, 0, 0, 400), or, and);
-    }
-    
-    @ApiStatus.Internal
-    @Override
-    public void closeOverlayMenu() {
-        OverlayMenu tmpOverlayMenu = this.overlayMenu;
-        if (tmpOverlayMenu != null)
-            AFTER_RENDER.add(() -> this.widgets.remove(tmpOverlayMenu.wrappedMenu));
-        this.overlayMenu = null;
-    }
-    
     @Override
     public void queueReloadOverlay() {
         shouldReload = true;
     }
     
+    @Override
     public void queueReloadSearch() {
         shouldReloadSearch = true;
     }
@@ -242,248 +153,39 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public void init() {
-        draggingStack.set(DraggableComponentProvider.from(ScreenRegistry.getInstance()::getDraggableComponentProviders),
+        this.draggingStack.set(DraggableComponentProvider.from(ScreenRegistry.getInstance()::getDraggableComponentProviders),
                 DraggableComponentVisitor.from(ScreenRegistry.getInstance()::getDraggableComponentVisitors));
         
         this.shouldReload = false;
         this.shouldReloadSearch = false;
-        //Update Variables
         this.children().clear();
         this.window = Minecraft.getInstance().getWindow();
-        this.screenBounds = ScreenRegistry.getInstance().getScreenBounds(Minecraft.getInstance().screen);
         this.bounds = calculateOverlayBounds();
+        
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
             if (favoritesListWidget == null) {
                 favoritesListWidget = new FavoritesListWidget();
             }
             favoritesListWidget.favoritePanel.resetRows();
-            widgets.add(favoritesListWidget);
-        }
-        getEntryListWidget().updateArea(this.bounds, REIRuntimeImpl.getSearchField() == null ? "" : REIRuntimeImpl.getSearchField().getText());
-        widgets.add(getEntryListWidget());
-        REIRuntimeImpl.getSearchField().getBounds().setBounds(getSearchFieldArea());
-        this.widgets.add(REIRuntimeImpl.getSearchField());
-        REIRuntimeImpl.getSearchField().setResponder(s -> getEntryListWidget().updateSearch(s, false));
-        if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            widgets.add(leftButton = Widgets.createButton(new Rectangle(bounds.x, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TextComponent(""))
-                    .onClick(button -> {
-                        getEntryListWidget().previousPage();
-                        if (getEntryListWidget().getPage() < 0)
-                            getEntryListWidget().setPage(getEntryListWidget().getTotalPages() - 1);
-                        getEntryListWidget().updateEntriesPosition();
-                    })
-                    .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
-                    .tooltipLine(new TranslatableComponent("text.rei.previous_page"))
-                    .focusable(false));
-            widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-                helper.setBlitOffset(helper.getBlitOffset() + 1);
-                RenderSystem.setShaderTexture(0, ARROW_LEFT_TEXTURE);
-                Rectangle bounds = leftButton.getBounds();
-                matrices.pushPose();
-                blit(matrices, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
-                matrices.popPose();
-                helper.setBlitOffset(helper.getBlitOffset() - 1);
-            }));
-            Button changelogButton;
-            widgets.add(changelogButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18 - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TextComponent(""))
-                    .onClick(button -> {
-                        ChangelogLoader.show();
-                    })
-                    .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
-                    .tooltipLine(new TranslatableComponent("text.rei.changelog.title"))
-                    .focusable(false));
-            widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-                helper.setBlitOffset(helper.getBlitOffset() + 1);
-                Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
-                Rectangle bounds = changelogButton.getBounds();
-                matrices.pushPose();
-                matrices.translate(0.5f, 0, 0);
-                helper.blit(matrices, bounds.x + 1, bounds.y + 2, !ChangelogLoader.hasVisited() ? 28 : 14, 0, 14, 14);
-                matrices.popPose();
-                helper.setBlitOffset(helper.getBlitOffset() - 1);
-            }));
-            widgets.add(rightButton = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 18, bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TextComponent(""))
-                    .onClick(button -> {
-                        getEntryListWidget().nextPage();
-                        if (getEntryListWidget().getPage() >= getEntryListWidget().getTotalPages())
-                            getEntryListWidget().setPage(0);
-                        getEntryListWidget().updateEntriesPosition();
-                    })
-                    .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
-                    .tooltipLine(new TranslatableComponent("text.rei.next_page"))
-                    .focusable(false));
-            widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-                helper.setBlitOffset(helper.getBlitOffset() + 1);
-                RenderSystem.setShaderTexture(0, ARROW_RIGHT_TEXTURE);
-                Rectangle bounds = rightButton.getBounds();
-                matrices.pushPose();
-                blit(matrices, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
-                matrices.popPose();
-                helper.setBlitOffset(helper.getBlitOffset() - 1);
-            }));
+            this.widgets.add(favoritesListWidget);
         }
         
-        final Rectangle configButtonArea = getConfigButtonArea();
-        UUID configButtonUuid = UUID.fromString("4357bc36-0a4e-47d2-8e07-ddc220df4a0f");
-        widgets.add(configButton = InternalWidgets.wrapLateRenderable(
-                
-                InternalWidgets.concatWidgets(
-                        Widgets.createButton(configButtonArea, NarratorChatListener.NO_TITLE)
-                                .onClick(button -> {
-                                    if (Screen.hasShiftDown() || Screen.hasControlDown()) {
-                                        ClientHelper.getInstance().setCheating(!ClientHelper.getInstance().isCheating());
-                                        return;
-                                    }
-                                    ConfigManager.getInstance().openConfigScreen(REIRuntime.getInstance().getPreviousScreen());
-                                })
-                                .onRender((matrices, button) -> {
-                                    if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && ClientHelperImpl.getInstance().hasOperatorPermission()) {
-                                        button.setTint(ClientHelperImpl.getInstance().hasPermissionToUsePackets() ? 721354752 : 1476440063);
-                                    } else {
-                                        button.removeTint();
-                                    }
-                                    
-                                    boolean isOpened = isMenuOpened(configButtonUuid);
-                                    if (isOpened || !isAnyMenuOpened()) {
-                                        boolean inBounds = (isNotInExclusionZones(PointHelper.getMouseFloatingX(), PointHelper.getMouseFloatingY()) && button.containsMouse(PointHelper.ofMouse())) || isMenuInBounds(configButtonUuid);
-                                        if (isOpened != inBounds) {
-                                            if (inBounds) {
-                                                Menu menu = new Menu(button.getBounds(), provideConfigButtonMenu(), false);
-                                                openMenu(configButtonUuid, menu, button::containsMouse, point -> true);
-                                            } else {
-                                                closeOverlayMenu();
-                                            }
-                                        }
-                                    }
-                                })
-                                .focusable(false)
-                                .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y)),
-                        Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-                            helper.setBlitOffset(helper.getBlitOffset() + 1);
-                                    Minecraft.getInstance().getTextureManager().bind(CHEST_GUI_TEXTURE);
-                            helper.blit(matrices, configButtonArea.x + 3, configButtonArea.y + 3, 0, 0, 14, 14);
-                            helper.setBlitOffset(helper.getBlitOffset() - 1);
-                        })
-                )
-        ));
-        if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            widgets.add(Widgets.createClickableLabel(new Point(bounds.x + ((bounds.width - 18) / 2), bounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), NarratorChatListener.NO_TITLE, label -> {
-                if (!Screen.hasShiftDown()) {
-                    getEntryListWidget().setPage(0);
-                    getEntryListWidget().updateEntriesPosition();
-                } else {
-                    ScreenOverlayImpl.getInstance().choosePageWidget = new DefaultDisplayChoosePageWidget(page -> {
-                        getEntryListWidget().setPage(page);
-                        getEntryListWidget().updateEntriesPosition();
-                    }, getEntryListWidget().getPage(), getEntryListWidget().getTotalPages());
-                }
-            }).tooltip(new TranslatableComponent("text.rei.go_back_first_page"), new TextComponent(" "), new TranslatableComponent("text.rei.shift_click_to", new TranslatableComponent("text.rei.choose_page")).withStyle(ChatFormatting.GRAY)).focusable(false).onRender((matrices, label) -> {
-                label.setClickable(getEntryListWidget().getTotalPages() > 1);
-                label.setMessage(new TextComponent(String.format("%s/%s", getEntryListWidget().getPage() + 1, Math.max(getEntryListWidget().getTotalPages(), 1))));
-            }).rainbow(new Random().nextFloat() < 1.0E-4D || ClientHelperImpl.getInstance().isAprilFools.get()));
-        }
+        OverlaySearchField searchField = REIRuntimeImpl.getSearchField();
+        searchField.getBounds().setBounds(getSearchFieldArea());
+        this.widgets.add(searchField);
+        
+        EntryListWidget entryListWidget = getEntryListWidget();
+        entryListWidget.updateArea(this.bounds, searchField.getText());
+        this.widgets.add(entryListWidget);
+        searchField.setResponder(s -> entryListWidget.updateSearch(s, false));
+        entryListWidget.init(this);
+        
+        this.widgets.add(configButton = ConfigButtonWidget.create(this));
         if (ConfigObject.getInstance().isCraftableFilterEnabled()) {
-            Rectangle area = getCraftableToggleArea();
-            ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-            ItemStack icon = new ItemStack(Blocks.CRAFTING_TABLE);
-            this.widgets.add(InternalWidgets.wrapLateRenderable(InternalWidgets.concatWidgets(
-                    Widgets.createButton(area, NarratorChatListener.NO_TITLE)
-                            .focusable(false)
-                            .onClick(button -> {
-                                ConfigManager.getInstance().toggleCraftableOnly();
-                                getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
-                            })
-                            .onRender((matrices, button) -> button.setTint(ConfigManager.getInstance().isCraftableOnlyEnabled() ? 939579655 : 956235776))
-                            .containsMousePredicate((button, point) -> button.getBounds().contains(point) && isNotInExclusionZones(point.x, point.y))
-                            .tooltipLineSupplier(button -> new TranslatableComponent(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all")),
-                    Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-                        Vector4f vector = new Vector4f(area.x + 2, area.y + 2, helper.getBlitOffset() - 10, 1.0F);
-                        vector.transform(matrices.last().pose());
-                        itemRenderer.blitOffset = vector.z();
-                        itemRenderer.renderGuiItem(icon, (int) vector.x(), (int) vector.y());
-                        itemRenderer.blitOffset = 0.0F;
-                    }))
-            ));
+            this.widgets.add(CraftableFilterButtonWidget.create(this));
         }
         
-        widgets.add(draggingStack);
-    }
-    
-    private Collection<MenuEntry> provideConfigButtonMenu() {
-        ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
-        return Arrays.asList(
-                ToggleMenuEntry.of(new TranslatableComponent("text.rei.cheating"),
-                        config::isCheating,
-                        config::setCheating
-                ),
-                new EmptyMenuEntry(4),
-                new TextMenuEntry(() -> {
-                    if (!ClientHelper.getInstance().isCheating())
-                        return new TranslatableComponent("text.rei.cheating_disabled");
-                    else if (!ClientHelperImpl.getInstance().hasOperatorPermission()) {
-                        if (minecraft.gameMode.hasInfiniteItems())
-                            return new TranslatableComponent("text.rei.cheating_limited_creative_enabled");
-                        else return new TranslatableComponent("text.rei.cheating_enabled_no_perms");
-                    } else if (ClientHelperImpl.getInstance().hasPermissionToUsePackets())
-                        return new TranslatableComponent("text.rei.cheating_enabled");
-                    else
-                        return new TranslatableComponent("text.rei.cheating_limited_enabled");
-                }),
-                new SeparatorMenuEntry(),
-                ToggleMenuEntry.ofDeciding(new TranslatableComponent("text.rei.config.menu.dark_theme"),
-                        config::isUsingDarkTheme,
-                        dark -> {
-                            config.setUsingDarkTheme(dark);
-                            return false;
-                        }
-                ),
-                ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.craftable_filter"),
-                        config::isCraftableFilterEnabled,
-                        config::setCraftableFilterEnabled
-                ),
-                new SubMenuEntry(new TranslatableComponent("text.rei.config.menu.display"), Arrays.asList(
-                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.remove_recipe_book"),
-                                config::doesDisableRecipeBook,
-                                disableRecipeBook -> {
-                                    config.setDisableRecipeBook(disableRecipeBook);
-                                    Screen screen = Minecraft.getInstance().screen;
-                                    
-                                    if (screen != null) {
-                                        screen.init(minecraft, screen.width, screen.height);
-                                    }
-                                }
-                        ),
-                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.left_side_panel"),
-                                config::isLeftHandSidePanel,
-                                bool -> config.setDisplayPanelLocation(bool ? DisplayPanelLocation.LEFT : DisplayPanelLocation.RIGHT)
-                        ),
-                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.scrolling_side_panel"),
-                                config::isEntryListWidgetScrolled,
-                                config::setEntryListWidgetScrolled
-                        ),
-                        new SeparatorMenuEntry(),
-                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.caching_entry_rendering"),
-                                config::doesCacheEntryRendering,
-                                config::setDoesCacheEntryRendering
-                        ),
-                        new SeparatorMenuEntry(),
-                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.side_search_field"),
-                                () -> config.getSearchFieldLocation() != SearchFieldLocation.CENTER,
-                                bool -> config.setSearchFieldLocation(bool ? SearchFieldLocation.BOTTOM_SIDE : SearchFieldLocation.CENTER)
-                        ),
-                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.syntax_highlighting"),
-                                () -> config.getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL || config.getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL_UNDERSCORED,
-                                bool -> config.setSyntaxHighlightingMode(bool ? SyntaxHighlightingMode.COLORFUL : SyntaxHighlightingMode.PLAIN_UNDERSCORED)
-                        )
-                )),
-                new SeparatorMenuEntry(),
-                ToggleMenuEntry.ofDeciding(new TranslatableComponent("text.rei.config.menu.config"),
-                        () -> false,
-                        $ -> {
-                            ConfigManager.getInstance().openConfigScreen(REIRuntime.getInstance().getPreviousScreen());
-                            return false;
-                        })
-        );
+        this.widgets.add(draggingStack);
     }
     
     private Rectangle getSearchFieldArea() {
@@ -508,37 +210,12 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     
     private Rectangle getCenterSearchFieldArea(int widthRemoved) {
         Rectangle screenBounds = ScreenRegistry.getInstance().getScreenBounds(minecraft.screen);
-        return getBottomCenterSearchFieldArea(screenBounds, widthRemoved);
-    }
-    
-    private Rectangle getBottomCenterSearchFieldArea(Rectangle containerBounds, int widthRemoved) {
-        return new Rectangle(containerBounds.x, window.getGuiScaledHeight() - 22, containerBounds.width - widthRemoved, 18);
-    }
-    
-    private Rectangle getCraftableToggleArea() {
-        Rectangle area = getSearchFieldArea();
-        area.setLocation(area.x + area.width + 4, area.y - 1);
-        area.setSize(20, 20);
-        return area;
-    }
-    
-    private Rectangle getConfigButtonArea() {
-        if (ConfigObject.getInstance().isLowerConfigButton()) {
-            Rectangle area = getSearchFieldArea();
-            area.setLocation(area.x + area.width + (ConfigObject.getInstance().isCraftableFilterEnabled() ? 26 : 4), area.y - 1);
-            area.setSize(20, 20);
-            return area;
-        }
-        return new Rectangle(ConfigObject.getInstance().isLeftHandSidePanel() ? window.getGuiScaledWidth() - 30 : 10, 10, 20, 20);
+        return new Rectangle(screenBounds.x, window.getGuiScaledHeight() - 22, screenBounds.width - widthRemoved, 18);
     }
     
     @Override
     public Rectangle getBounds() {
         return bounds;
-    }
-    
-    public Rectangle getScreenBounds() {
-        return screenBounds;
     }
     
     @Override
@@ -559,33 +236,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
         }
         if (OverlaySearchField.isHighlighting) {
-            RenderSystem.disableDepthTest();
-            RenderSystem.colorMask(true, true, true, false);
-            if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>) {
-                AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) Minecraft.getInstance().screen;
-                int x = containerScreen.leftPos, y = containerScreen.topPos;
-                for (Slot slot : containerScreen.getMenu().slots) {
-                    if (!slot.hasItem() || !EntryListSearchManager.INSTANCE.matches(EntryStacks.of(slot.getItem()))) {
-                        matrices.pushPose();
-                        matrices.translate(0, 0, 500f);
-                        fillGradient(matrices, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0xdc202020, 0xdc202020);
-                        matrices.popPose();
-                    } else {
-                        matrices.pushPose();
-                        matrices.translate(0, 0, 200f);
-                        fillGradient(matrices, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0x345fff3b, 0x345fff3b);
-                        
-                        fillGradient(matrices, x + slot.x - 1, y + slot.y - 1, x + slot.x, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b);
-                        fillGradient(matrices, x + slot.x + 16, y + slot.y - 1, x + slot.x + 16 + 1, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b);
-                        fillGradient(matrices, x + slot.x - 1, y + slot.y - 1, x + slot.x + 16, y + slot.y, 0xff5fff3b, 0xff5fff3b);
-                        fillGradient(matrices, x + slot.x - 1, y + slot.y + 16, x + slot.x + 16, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b);
-                        
-                        matrices.popPose();
-                    }
-                }
-            }
-            RenderSystem.colorMask(true, true, true, true);
-            RenderSystem.enableDepthTest();
+            EntryHighlighter.render(matrices);
         }
         if (!hasSpace()) return;
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -635,19 +286,13 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         if (REIRuntime.getInstance().isOverlayVisible() && hasSpace()) {
             REIRuntimeImpl.getSearchField().laterRender(matrices, mouseX, mouseY, delta);
             for (Widget widget : widgets) {
-                if (widget instanceof LateRenderable && (overlayMenu == null || overlayMenu.wrappedMenu != widget))
+                if (widget instanceof LateRenderable && widget != menuHolder.widget())
                     widget.render(matrices, mouseX, mouseY, delta);
             }
-            if (overlayMenu != null) {
-                if (!overlayMenu.inBounds.test(PointHelper.ofMouse())) {
-                    closeOverlayMenu();
-                } else {
-                    if (overlayMenu.wrappedMenu.containsMouse(mouseX, mouseY)) {
-                        TOOLTIPS.clear();
-                    }
-                    overlayMenu.wrappedMenu.render(matrices, mouseX, mouseY, delta);
-                }
-            }
+            matrices.pushPose();
+            matrices.translate(0, 0, 500);
+            menuHolder.lateRender(matrices, mouseX, mouseY, delta);
+            matrices.popPose();
             if (choosePageWidget != null) {
                 setBlitOffset(500);
                 this.fillGradient(matrices, 0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight(), -1072689136, -804253680);
@@ -662,10 +307,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         }
         TOOLTIPS.clear();
         if (REIRuntime.getInstance().isOverlayVisible()) {
-            for (Runnable runnable : AFTER_RENDER) {
-                runnable.run();
-            }
-            AFTER_RENDER.clear();
+            menuHolder.afterRender();
         }
     }
     
@@ -693,10 +335,6 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     public void renderWidgets(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (!REIRuntime.getInstance().isOverlayVisible())
             return;
-        if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-            leftButton.setEnabled(getEntryListWidget().getTotalPages() > 1);
-            rightButton.setEnabled(getEntryListWidget().getTotalPages() > 1);
-        }
         for (Widget widget : widgets) {
             if (!(widget instanceof LateRenderable))
                 widget.render(matrices, mouseX, mouseY, delta);
@@ -707,21 +345,10 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
-        if (overlayMenu != null && overlayMenu.wrappedMenu.mouseScrolled(mouseX, mouseY, amount))
+        if (menuHolder.mouseScrolled(mouseX, mouseY, amount))
             return true;
-        if (isInside(PointHelper.ofMouse())) {
-            if (getEntryListWidget().mouseScrolled(mouseX, mouseY, amount)) {
-                return true;
-            }
-            if (!Screen.hasControlDown() && !ConfigObject.getInstance().isEntryListWidgetScrolled()) {
-                if (amount > 0 && leftButton.isEnabled())
-                    leftButton.onClick();
-                else if (amount < 0 && rightButton.isEnabled())
-                    rightButton.onClick();
-                else
-                    return false;
-                return true;
-            }
+        if (isInside(mouseX, mouseY) && getEntryListWidget().mouseScrolled(mouseX, mouseY, amount)) {
+            return true;
         }
         if (isNotInExclusionZones(PointHelper.getMouseX(), PointHelper.getMouseY())) {
             if (favoritesListWidget != null && favoritesListWidget.mouseScrolled(mouseX, mouseY, amount))
@@ -729,7 +356,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         }
         for (Widget widget : widgets)
             if (widget != getEntryListWidget() && (favoritesListWidget == null || widget != favoritesListWidget)
-                && (overlayMenu == null || widget != overlayMenu.wrappedMenu)
+                && widget != menuHolder.widget()
                 && widget.mouseScrolled(mouseX, mouseY, amount))
                 return true;
         return false;
@@ -852,10 +479,10 @@ public class ScreenOverlayImpl extends ScreenOverlay {
                 return true;
             }
         }
-        if (visible && overlayMenu != null) {
-            if (overlayMenu.wrappedMenu.mouseClicked(mouseX, mouseY, button)) {
-                if (overlayMenu != null) this.setFocused(overlayMenu.wrappedMenu);
-                else this.setFocused(null);
+        if (visible) {
+            Widget menuWidget = menuHolder.widget();
+            if (menuWidget != null && menuWidget.mouseClicked(mouseX, mouseY, button)) {
+                this.setFocused(menuWidget);
                 if (button == 0)
                     this.setDragging(true);
                 REIRuntimeImpl.getSearchField().setFocused(false);
@@ -873,7 +500,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
             return false;
         }
         for (GuiEventListener element : widgets) {
-            if (element != configButton && (overlayMenu == null || element != overlayMenu.wrappedMenu) && element.mouseClicked(mouseX, mouseY, button)) {
+            if (element != configButton && element != menuHolder.widget() && element.mouseClicked(mouseX, mouseY, button)) {
                 this.setFocused(element);
                 if (button == 0)
                     this.setDragging(true);
@@ -893,14 +520,14 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     @Override
-    public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
         if (!hasSpace()) return false;
         if (choosePageWidget != null) {
-            return choosePageWidget.mouseDragged(double_1, double_2, int_1, double_3, double_4);
+            return choosePageWidget.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
         }
-        return (this.getFocused() != null && this.isDragging() && int_1 == 0) && this.getFocused().mouseDragged(double_1, double_2, int_1, double_3, double_4);
+        return (this.getFocused() != null && this.isDragging() && button == 0) && this.getFocused().mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
     
     @Override
@@ -936,5 +563,9 @@ public class ScreenOverlayImpl extends ScreenOverlay {
     @Override
     public Optional<OverlayListWidget> getFavoritesList() {
         return Optional.ofNullable(getFavoritesListWidget());
+    }
+    
+    public MenuAccess menuAccess() {
+        return menuHolder;
     }
 }

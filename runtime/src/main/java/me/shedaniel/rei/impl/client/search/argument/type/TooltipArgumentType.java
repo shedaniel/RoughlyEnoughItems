@@ -46,7 +46,6 @@ import java.util.Locale;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public final class TooltipArgumentType extends ArgumentType<Unit, String> {
-    public static final TooltipArgumentType INSTANCE = new TooltipArgumentType();
     private static final TooltipContext CONTEXT = TooltipContext.of(new Point(), TooltipFlag.Default.NORMAL, true);
     public static String INVALID = "INVALID_PIECE_OF_TOOLTIP_I_DONT_THINK_PEOPLE_WILL_EXACTLY_HAVE_THIS_REI_REI_REI";
     private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xffe0ad));
@@ -80,10 +79,10 @@ public final class TooltipArgumentType extends ArgumentType<Unit, String> {
     }
     
     @Override
-    public boolean matches(String tooltip, EntryStack<?> stack, String searchText, Unit filterData) {
+    public void matches(String tooltip, EntryStack<?> stack, Unit filterData, ResultSink sink) {
         //noinspection StringEquality
-        if (tooltip == INVALID) return false;
-        return tooltip.contains(searchText);
+        if (tooltip == INVALID) return;
+        sink.testString(tooltip);
     }
     
     @Nullable
@@ -115,8 +114,5 @@ public final class TooltipArgumentType extends ArgumentType<Unit, String> {
     @Override
     public Unit prepareSearchFilter(String searchText) {
         return Unit.INSTANCE;
-    }
-    
-    private TooltipArgumentType() {
     }
 }

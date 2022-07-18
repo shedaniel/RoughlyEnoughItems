@@ -28,14 +28,11 @@ import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 public abstract class Label extends WidgetWithBounds {
     public static final int LEFT_ALIGNED = -1;

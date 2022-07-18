@@ -25,7 +25,6 @@ package me.shedaniel.rei.api.common.entry;
 
 import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.architectury.utils.EnvExecutor;
-import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRendererRegistry;
@@ -49,7 +48,10 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 

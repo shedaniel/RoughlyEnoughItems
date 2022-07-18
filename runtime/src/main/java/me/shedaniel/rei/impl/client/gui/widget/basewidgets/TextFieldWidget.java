@@ -30,7 +30,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
@@ -42,6 +41,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -51,40 +51,31 @@ import java.util.function.Predicate;
 
 @ApiStatus.Internal
 public class TextFieldWidget extends WidgetWithBounds implements TickableWidget, TextField {
-    public Function<String, String> stripInvalid;
+    public Function<String, String> stripInvalid = SharedConstants::filterText;
     protected int frame;
-    protected boolean editable;
+    protected boolean editable = true;
     protected int firstCharacterIndex;
     protected int cursorPos;
     protected int highlightPos;
-    protected int editableColor;
-    protected int notEditableColor;
-    protected TextFormatter formatter;
+    protected int editableColor = 0xe0e0e0;
+    protected int notEditableColor = 0x707070;
+    protected TextFormatter formatter = TextFormatter.DEFAULT;
     private Rectangle bounds;
-    private String text;
-    private int maxLength;
-    private boolean hasBorder;
-    private boolean focusUnlocked;
-    private boolean focused;
-    private boolean visible;
-    private boolean selecting;
+    private String text = "";
+    private int maxLength = 32;
+    private boolean hasBorder = true;
+    private boolean focusUnlocked = true;
+    private boolean focused = false;
+    private boolean visible = true;
+    private boolean selecting = false;
+    @Nullable
     private String suggestion;
+    @Nullable
     private Consumer<String> responder;
-    private Predicate<String> filter;
+    private Predicate<String> filter = s -> true;
     
-    public TextFieldWidget(Rectangle rectangle) {
-        this.text = "";
-        this.maxLength = 32;
-        this.hasBorder = true;
-        this.focusUnlocked = true;
-        this.editable = true;
-        this.editableColor = 14737632;
-        this.notEditableColor = 7368816;
-        this.visible = true;
-        this.filter = s -> true;
-        this.formatter = TextFormatter.DEFAULT;
-        this.bounds = rectangle;
-        this.stripInvalid = SharedConstants::filterText;
+    public TextFieldWidget(Rectangle bounds) {
+        this.bounds = bounds;
     }
     
     public TextFieldWidget(int x, int y, int width, int height) {
@@ -170,17 +161,17 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
         }
     }
     
-    public void onChanged(String string_1) {
+    public void onChanged(String newText) {
         if (this.responder != null) {
-            this.responder.accept(string_1);
+            this.responder.accept(newText);
         }
     }
     
-    private void erase(int int_1) {
+    private void erase(int offset) {
         if (Screen.hasControlDown()) {
-            this.eraseWords(int_1);
+            this.eraseWords(offset);
         } else {
-            this.eraseCharacters(int_1);
+            this.eraseCharacters(offset);
         }
     }
     
@@ -199,14 +190,14 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
             if (this.highlightPos != this.cursorPos) {
                 this.addText("");
             } else {
-                int i = this.getCursorPos(characterOffset);
-                int j = Math.min(i, this.cursorPos);
-                int k = Math.max(i, this.cursorPos);
-                if (j != k) {
-                    String string = new StringBuilder(this.text).delete(j, k).toString();
+                int offsetCursorPos = this.getCursorPos(characterOffset);
+                int from = Math.min(offsetCursorPos, this.cursorPos);
+                int to = Math.max(offsetCursorPos, this.cursorPos);
+                if (from != to) {
+                    String string = new StringBuilder(this.text).delete(from, to).toString();
                     if (this.filter.test(string)) {
                         this.text = string;
-                        this.moveCursorTo(j);
+                        this.moveCursorTo(from);
                     }
                 }
                 this.onChanged(this.text);
@@ -214,46 +205,46 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
         }
     }
     
-    public int getWordPosition(int int_1) {
-        return this.getWordPosition(int_1, this.getCursor());
+    public int getWordPosition(int wordOffset) {
+        return this.getWordPosition(wordOffset, this.getCursor());
     }
     
-    public int getWordPosition(int int_1, int int_2) {
-        return this.getWordPosition(int_1, int_2, true);
+    public int getWordPosition(int wordOffset, int cursorPosition) {
+        return this.getWordPosition(wordOffset, cursorPosition, true);
     }
     
     public int getWordPosition(int wordOffset, int cursorPosition, boolean skipOverSpaces) {
-        int i = cursorPosition;
-        boolean bl = wordOffset < 0;
-        int j = Math.abs(wordOffset);
+        int cursor = cursorPosition;
+        boolean backwards = wordOffset < 0;
+        int absoluteOffset = Math.abs(wordOffset);
         
-        for (int k = 0; k < j; ++k) {
-            if (!bl) {
+        for (int k = 0; k < absoluteOffset; ++k) {
+            if (!backwards) {
                 int l = this.text.length();
-                i = this.text.indexOf(32, i);
-                if (i == -1) {
-                    i = l;
+                cursor = this.text.indexOf(32, cursor);
+                if (cursor == -1) {
+                    cursor = l;
                 } else {
-                    while (skipOverSpaces && i < l && this.text.charAt(i) == ' ') {
-                        ++i;
+                    while (skipOverSpaces && cursor < l && this.text.charAt(cursor) == ' ') {
+                        ++cursor;
                     }
                 }
             } else {
-                while (skipOverSpaces && i > 0 && this.text.charAt(i - 1) == ' ') {
-                    --i;
+                while (skipOverSpaces && cursor > 0 && this.text.charAt(cursor - 1) == ' ') {
+                    --cursor;
                 }
                 
-                while (i > 0 && this.text.charAt(i - 1) != ' ') {
-                    --i;
+                while (cursor > 0 && this.text.charAt(cursor - 1) != ' ') {
+                    --cursor;
                 }
             }
         }
         
-        return i;
+        return cursor;
     }
     
-    public void moveCursor(int int_1) {
-        this.moveCursorTo(this.cursorPos + int_1);
+    public void moveCursor(int by) {
+        this.moveCursorTo(this.cursorPos + by);
     }
     
     private int getCursorPos(int i) {
@@ -279,23 +270,23 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     }
     
     @Override
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (this.isVisible() && this.isFocused()) {
             this.selecting = Screen.hasShiftDown();
-            if (Screen.isSelectAll(int_1)) {
+            if (Screen.isSelectAll(keyCode)) {
                 this.moveCursorToEnd();
                 this.setHighlightPos(0);
                 return true;
-            } else if (Screen.isCopy(int_1)) {
+            } else if (Screen.isCopy(keyCode)) {
                 minecraft.keyboardHandler.setClipboard(this.getSelectedText());
                 return true;
-            } else if (Screen.isPaste(int_1)) {
+            } else if (Screen.isPaste(keyCode)) {
                 if (this.editable) {
                     this.addText(minecraft.keyboardHandler.getClipboard());
                 }
                 
                 return true;
-            } else if (Screen.isCut(int_1)) {
+            } else if (Screen.isCut(keyCode)) {
                 minecraft.keyboardHandler.setClipboard(this.getSelectedText());
                 if (this.editable) {
                     this.addText("");
@@ -303,7 +294,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
                 
                 return true;
             } else {
-                switch (int_1) {
+                switch (keyCode) {
                     case 259:
                         if (this.editable) {
                             this.selecting = false;
@@ -318,7 +309,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
                     case 266:
                     case 267:
                     default:
-                        return int_1 != 256;
+                        return keyCode != 256;
                     case 261:
                         if (this.editable) {
                             this.selecting = false;
@@ -357,15 +348,15 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     }
     
     @Override
-    public boolean charTyped(char char_1, int int_1) {
+    public boolean charTyped(char character, int modifiers) {
         if (this.isVisible() && this.isFocused()) {
-            if (SharedConstants.isAllowedChatCharacter(char_1) && !(
+            if (SharedConstants.isAllowedChatCharacter(character) && !(
                     Screen.hasControlDown() && !Screen.hasShiftDown() && !Screen.hasAltDown() && (
-                            char_1 == 'a' || char_1 == 'c' || char_1 == 'v'
+                            character == 'a' || character == 'c' || character == 'v'
                     )
             )) {
                 if (this.editable) {
-                    this.addText(Character.toString(char_1));
+                    this.addText(Character.toString(character));
                 }
                 
                 return true;
@@ -383,17 +374,17 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     }
     
     @Override
-    public boolean mouseClicked(double double_1, double double_2, int int_1) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!this.isVisible()) {
             return false;
         } else {
-            boolean boolean_1 = double_1 >= (double) this.bounds.x && double_1 < (double) (this.bounds.x + this.bounds.width) && double_2 >= (double) this.bounds.y && double_2 < (double) (this.bounds.y + this.bounds.height);
+            boolean hovered = mouseX >= (double) this.bounds.x && mouseX < (double) (this.bounds.x + this.bounds.width) && mouseY >= (double) this.bounds.y && mouseY < (double) (this.bounds.y + this.bounds.height);
             if (this.focusUnlocked) {
-                this.setFocused(boolean_1);
+                this.setFocused(hovered);
             }
             
-            if (this.focused && boolean_1 && int_1 == 0) {
-                int int_2 = Mth.floor(double_1) - this.bounds.x;
+            if (this.focused && hovered && button == 0) {
+                int int_2 = Mth.floor(mouseX) - this.bounds.x;
                 if (this.hasBorder) {
                     int_2 -= 4;
                 }
@@ -419,7 +410,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (this.isVisible()) {
-            renderBorder(matrices);
+            this.renderBorder(matrices);
             
             int color = this.editable ? this.editableColor : this.notEditableColor;
             int int_4 = this.cursorPos - this.firstCharacterIndex;
@@ -471,7 +462,6 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
         this.font.drawShadow(matrices, this.font.plainSubstrByWidth(this.suggestion, this.getWidth()), x, y, -8355712);
     }
     
-    @SuppressWarnings("deprecation")
     protected void renderSelection(PoseStack matrices, int x1, int y1, int x2, int y2, int color) {
         int tmp;
         if (x1 < x2) {
@@ -519,10 +509,10 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     }
     
     @Override
-    public void setMaxLength(int int_1) {
-        this.maxLength = int_1;
-        if (this.text.length() > int_1) {
-            this.text = this.text.substring(0, int_1);
+    public void setMaxLength(int maxLength) {
+        this.maxLength = maxLength;
+        if (this.text.length() > maxLength) {
+            this.text = this.text.substring(0, maxLength);
             this.onChanged(this.text);
         }
     }
@@ -543,13 +533,13 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     }
     
     @Override
-    public void setHasBorder(boolean boolean_1) {
-        this.hasBorder = boolean_1;
+    public void setHasBorder(boolean hasBorder) {
+        this.hasBorder = hasBorder;
     }
     
     @Override
-    public void setEditableColor(int int_1) {
-        this.editableColor = int_1;
+    public void setEditableColor(int editableColor) {
+        this.editableColor = editableColor;
     }
     
     @Override
@@ -558,7 +548,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     }
     
     @Override
-    public boolean changeFocus(boolean boolean_1) {
+    public boolean changeFocus(boolean next) {
         if (this.visible && this.editable) {
             this.setFocused(!this.focused);
             return this.focused;
@@ -578,27 +568,27 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
         this.focused = focused;
     }
     
-    public void setIsEditable(boolean boolean_1) {
-        this.editable = boolean_1;
+    public void setIsEditable(boolean isEditable) {
+        this.editable = isEditable;
     }
     
     public int getWidth() {
         return this.hasBorder() ? this.bounds.width - 8 : this.bounds.width;
     }
     
-    public void setHighlightPos(int i) {
+    public void setHighlightPos(int highlightPos) {
         int j = this.text.length();
-        this.highlightPos = Mth.clamp(i, 0, j);
+        this.highlightPos = Mth.clamp(highlightPos, 0, j);
         if (this.font != null) {
             if (this.firstCharacterIndex > j) {
                 this.firstCharacterIndex = j;
             }
             
-            int int_3 = this.getWidth();
-            String string_1 = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex), int_3);
-            int int_4 = string_1.length() + this.firstCharacterIndex;
+            int width = this.getWidth();
+            String clippedText = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex), width);
+            int int_4 = clippedText.length() + this.firstCharacterIndex;
             if (this.highlightPos == this.firstCharacterIndex) {
-                this.firstCharacterIndex -= this.font.plainSubstrByWidth(this.text, int_3, true).length();
+                this.firstCharacterIndex -= this.font.plainSubstrByWidth(this.text, width, true).length();
             }
             
             if (this.highlightPos > int_4) {
@@ -612,8 +602,8 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
         
     }
     
-    public void setFocusUnlocked(boolean boolean_1) {
-        this.focusUnlocked = boolean_1;
+    public void setFocusUnlocked(boolean focusUnlocked) {
+        this.focusUnlocked = focusUnlocked;
     }
     
     public boolean isVisible() {

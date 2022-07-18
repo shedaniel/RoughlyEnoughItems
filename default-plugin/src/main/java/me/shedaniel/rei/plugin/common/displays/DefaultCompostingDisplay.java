@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ItemLike;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Arrays;
 import java.util.List;

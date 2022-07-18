@@ -54,6 +54,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.RecipeDisplayExporter;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.toast.ExportRecipeIdentifierToast;
@@ -70,9 +71,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
@@ -83,7 +81,6 @@ import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
-    public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
     private final Map<Rectangle, Pair<DisplaySpec, List<Widget>>> recipeBounds = Maps.newHashMap();
     private List<Widget> widgets = Lists.newArrayList();
     public int page;
@@ -199,15 +196,15 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             if (isCompactTabButtons) {
                 matrices.pushPose();
                 matrices.translate(0, 0.5, 0);
-                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_LEFT_SMALL_TEXTURE);
+                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_SMALL_TEXTURE);
                 blit(matrices, tabLeftBounds.x + 2, tabLeftBounds.y + 2, 0, 0, 6, 6, 6, 6);
-                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_RIGHT_SMALL_TEXTURE);
+                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_SMALL_TEXTURE);
                 blit(matrices, tabRightBounds.x + 2, tabRightBounds.y + 2, 0, 0, 6, 6, 6, 6);
                 matrices.popPose();
             } else {
-                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_LEFT_TEXTURE);
+                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_TEXTURE);
                 blit(matrices, tabLeftBounds.x + 4, tabLeftBounds.y + 4, 0, 0, 8, 8, 8, 8);
-                RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_RIGHT_TEXTURE);
+                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_TEXTURE);
                 blit(matrices, tabRightBounds.x + 4, tabRightBounds.y + 4, 0, 0, 8, 8, 8, 8);
             }
             Rectangle recipeBackBounds = recipeBack.getBounds();
@@ -216,11 +213,11 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             Rectangle categoryNextBounds = categoryNext.getBounds();
             matrices.pushPose();
             matrices.translate(0.5, 0.5, 0);
-            RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_LEFT_TEXTURE);
+            RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_TEXTURE);
             blit(matrices, recipeBackBounds.x + 2, recipeBackBounds.y + 2, 0, 0, 8, 8, 8, 8);
             blit(matrices, categoryBackBounds.x + 2, categoryBackBounds.y + 2, 0, 0, 8, 8, 8, 8);
             matrices.translate(-0.5, 0, 0);
-            RenderSystem.setShaderTexture(0, ScreenOverlayImpl.ARROW_RIGHT_TEXTURE);
+            RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_TEXTURE);
             blit(matrices, recipeNextBounds.x + 2, recipeNextBounds.y + 2, 0, 0, 8, 8, 8, 8);
             blit(matrices, categoryNextBounds.x + 2, categoryNextBounds.y + 2, 0, 0, 8, 8, 8, 8);
             matrices.popPose();

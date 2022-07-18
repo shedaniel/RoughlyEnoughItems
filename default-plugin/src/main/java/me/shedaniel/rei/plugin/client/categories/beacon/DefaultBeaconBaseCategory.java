@@ -26,7 +26,6 @@ package me.shedaniel.rei.plugin.client.categories.beacon;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
-import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;

@@ -29,7 +29,6 @@ import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;

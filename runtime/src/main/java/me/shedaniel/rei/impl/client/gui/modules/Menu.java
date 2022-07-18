@@ -152,8 +152,9 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
             boolean rendering = currentY + child.getEntryHeight() >= innerBounds.y && currentY <= innerBounds.getMaxY();
             boolean containsMouse = contains && mouseY >= currentY && mouseY < currentY + child.getEntryHeight();
             child.updateInformation(innerBounds.x, currentY, focused == child || containsMouse, containsMouse, rendering, getMaxEntryWidth());
-            if (rendering)
+            if (rendering) {
                 child.render(matrices, mouseX, mouseY, delta);
+            }
             currentY += child.getEntryHeight();
         }
         ScissorsHandler.INSTANCE.removeLastScissor();

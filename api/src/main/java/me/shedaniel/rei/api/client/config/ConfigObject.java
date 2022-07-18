@@ -31,7 +31,9 @@ import me.shedaniel.rei.api.client.gui.config.*;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -235,6 +237,10 @@ public interface ConfigObject {
      * @return the maximum page height for displays
      */
     int getMaxRecipesPageHeight();
+    
+    @ApiStatus.Experimental
+    @Nullable
+    ResourceLocation getInputMethodId();
     
     boolean doesDisableRecipeBook();
     

@@ -35,10 +35,10 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.config.RecipeBorderType;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collections;
 import java.util.List;
@@ -46,9 +46,6 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 public final class PanelWidget extends Panel {
-    public static final ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer.png");
-    public static final ResourceLocation CHEST_GUI_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
-    
     private static final PanelWidget TEMP = new PanelWidget(new Rectangle());
     private Rectangle bounds;
     private int color = -1;
@@ -130,7 +127,7 @@ public final class PanelWidget extends Panel {
     
     public void renderBackground(PoseStack matrices, int x, int y, int width, int height, boolean dark, float alpha, float red, float green, float blue) {
         RenderSystem.color4f(red, green, blue, alpha);
-        Minecraft.getInstance().getTextureManager().bind(dark ? CHEST_GUI_TEXTURE_DARK : CHEST_GUI_TEXTURE);
+        Minecraft.getInstance().getTextureManager().bind(dark ? InternalTextures.CHEST_GUI_TEXTURE_DARK : InternalTextures.CHEST_GUI_TEXTURE);
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
         RenderSystem.blendFunc(770, 771);

@@ -56,7 +56,7 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             if (PluginManager.areAnyReloading()) {
                 Screen screen = Minecraft.getInstance().screen;
-                Minecraft.getInstance().setScreen(new ConfigReloadingScreen(() -> Minecraft.getInstance().setScreen(screen)));
+                Minecraft.getInstance().setScreen(new ConfigReloadingScreen(Component.translatable("text.rei.config.is.reloading"), PluginManager::areAnyReloading, () -> Minecraft.getInstance().setScreen(screen)));
             } else {
                 super.render(matrices, mouseX, mouseY, delta);
             }

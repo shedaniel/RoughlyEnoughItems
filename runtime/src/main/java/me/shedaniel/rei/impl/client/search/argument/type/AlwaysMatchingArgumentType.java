@@ -33,8 +33,6 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public final class AlwaysMatchingArgumentType extends ArgumentType<Unit, Unit> {
-    public static final AlwaysMatchingArgumentType INSTANCE = new AlwaysMatchingArgumentType();
-    
     @Override
     public String getName() {
         return "always";
@@ -46,8 +44,8 @@ public final class AlwaysMatchingArgumentType extends ArgumentType<Unit, Unit> {
     }
     
     @Override
-    public boolean matches(Unit data, EntryStack<?> stack, String searchText, Unit filterData) {
-        return true;
+    public void matches(Unit data, EntryStack<?> stack, Unit filterData, ResultSink sink) {
+        sink.testTrue();
     }
     
     @Override
@@ -58,8 +56,5 @@ public final class AlwaysMatchingArgumentType extends ArgumentType<Unit, Unit> {
     @Override
     public ArgumentApplicableResult checkApplicable(String text, boolean forceGrammar) {
         return ArgumentApplicableResult.notApplicable();
-    }
-    
-    private AlwaysMatchingArgumentType() {
     }
 }

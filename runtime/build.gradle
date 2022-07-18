@@ -18,6 +18,12 @@ dependencies {
     modApi("me.shedaniel:architectury:${architectury_version}")
     compileClasspath(annotationProcessor("org.projectlombok:lombok:1.18.22"))
     compileClasspath(project(path: ":api", configuration: "namedElements"))
+    testImplementation(project(path: ":api", configuration: "namedElements"))
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+}
+
+test {
+    useJUnitPlatform()
 }
 
 remapJar {

@@ -84,4 +84,9 @@ public class SearchFilterPrepareWatcher implements HintProvider {
     public Color getColor() {
         return Color.ofTransparent(0x50de38ff);
     }
+    
+    @Override
+    public List<HintButton> getButtons() {
+        return Collections.emptyList();
+    }
 }

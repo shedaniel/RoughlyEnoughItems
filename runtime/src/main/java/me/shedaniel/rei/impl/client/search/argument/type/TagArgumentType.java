@@ -40,7 +40,6 @@ import java.util.Collection;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public final class TagArgumentType extends ArgumentType<Unit, String[]> {
-    public static final TagArgumentType INSTANCE = new TagArgumentType();
     private static final String[] EMPTY_ARRAY = new String[0];
     private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x9efff4));
     
@@ -84,13 +83,12 @@ public final class TagArgumentType extends ArgumentType<Unit, String[]> {
     }
     
     @Override
-    public boolean matches(String[] data, EntryStack<?> stack, String searchText, Unit filterData) {
+    public void matches(String[] data, EntryStack<?> stack, Unit filterData, ResultSink sink) {
         for (String tag : data) {
-            if (!tag.isEmpty() && tag.contains(searchText)) {
-                return true;
+            if (!tag.isEmpty() && sink.testString(tag)) {
+                return;
             }
         }
-        return false;
     }
     
     @Override

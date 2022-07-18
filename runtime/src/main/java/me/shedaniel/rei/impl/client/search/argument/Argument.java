@@ -34,11 +34,12 @@ import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchMode;
+import me.shedaniel.rei.api.client.search.method.CharacterUnpackingInputMethod;
+import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.search.IntRange;
-import me.shedaniel.rei.impl.client.search.argument.type.AlwaysMatchingArgumentType;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentTypesRegistry;
 import me.shedaniel.rei.impl.client.search.result.ArgumentApplicableResult;
@@ -47,7 +48,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.Unit;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -70,6 +70,7 @@ import java.util.regex.Pattern;
 @Environment(EnvType.CLIENT)
 public class Argument<T, R> {
     public static final Short2ObjectMap<Long2ObjectMap<Object>> SEARCH_CACHE = Short2ObjectMaps.synchronize(new Short2ObjectOpenHashMap<>());
+    private static final Object NO_CACHE = new Object();
     private static final AtomicReference<String> lastLanguage = new AtomicReference<>();
     private ArgumentType<T, R> argumentType;
     private String text;
@@ -104,24 +105,22 @@ public class Argument<T, R> {
         void addPart(Argument<?, ?> argument, boolean usingGrammar, Collection<IntRange> grammarRanges, int index);
     }
     
-    @ApiStatus.Internal
-    public static List<CompoundArgument> bakeArguments(String searchTerm) {
-        return bakeArguments(searchTerm, null);
+    public static List<CompoundArgument> bakeArguments(String filter) {
+        return bakeArguments(filter, null);
     }
     
-    @ApiStatus.Internal
-    public static List<CompoundArgument> bakeArguments(String searchTerm, @Nullable ProcessedSink sink) {
+    public static List<CompoundArgument> bakeArguments(String filter, @Nullable ProcessedSink sink) {
         List<CompoundArgument> compoundArguments = Lists.newArrayList();
         int tokenStartIndex = 0;
         
-        for (String token : StringUtils.splitByWholeSeparatorPreserveAllTokens(searchTerm, "|")) {
+        for (String token : StringUtils.splitByWholeSeparatorPreserveAllTokens(filter, "|")) {
             Matcher terms = SPLIT_PATTERN.matcher(token);
             CompoundArgument.Builder builder = CompoundArgument.builder();
             while (terms.find()) {
                 AlternativeArgument.Builder alternativeBuilder = AlternativeArgument.builder();
                 
                 for (ArgumentType<?, ?> type : ArgumentTypesRegistry.ARGUMENT_TYPE_LIST) {
-                    applyArgument(type, searchTerm, terms, tokenStartIndex, alternativeBuilder, true, sink);
+                    applyArgument(type, filter, terms, tokenStartIndex, alternativeBuilder, true, sink);
                     if (!alternativeBuilder.isEmpty()) {
                         break;
                     }
@@ -129,7 +128,7 @@ public class Argument<T, R> {
                 
                 if (alternativeBuilder.isEmpty()) {
                     for (ArgumentType<?, ?> type : ArgumentTypesRegistry.ARGUMENT_TYPE_LIST) {
-                        applyArgument(type, searchTerm, terms, tokenStartIndex, alternativeBuilder, false, sink);
+                        applyArgument(type, filter, terms, tokenStartIndex, alternativeBuilder, false, sink);
                     }
                 }
                 
@@ -137,7 +136,7 @@ public class Argument<T, R> {
             }
             compoundArguments.add(builder.build());
             tokenStartIndex += 1 + token.length();
-            if (sink != null && tokenStartIndex - 1 < searchTerm.length()) {
+            if (sink != null && tokenStartIndex - 1 < filter.length()) {
                 sink.addSplitter(tokenStartIndex - 1);
             }
         }
@@ -156,7 +155,7 @@ public class Argument<T, R> {
         }
     }
     
-    private static void applyArgument(ArgumentType<?, ?> type, String searchTerm, Matcher terms, int tokenStartIndex, AlternativeArgument.Builder alternativeBuilder, boolean forceGrammar, @Nullable ProcessedSink sink) {
+    private static void applyArgument(ArgumentType<?, ?> type, String filter, Matcher terms, int tokenStartIndex, AlternativeArgument.Builder alternativeBuilder, boolean forceGrammar, @Nullable ProcessedSink sink) {
         String term = MoreObjects.firstNonNull(terms.group(1), terms.group(2));
         if (type.getSearchMode() == SearchMode.NEVER) return;
         ArgumentApplicableResult result = type.checkApplicable(term, forceGrammar);
@@ -169,7 +168,7 @@ public class Argument<T, R> {
             if (sink != null) {
                 if (group == 1) {
                     sink.addQuote(terms.start() + tokenStartIndex);
-                    if (terms.end() - 1 + tokenStartIndex < searchTerm.length()) {
+                    if (terms.end() - 1 + tokenStartIndex < filter.length()) {
                         sink.addQuote(terms.end() - 1 + tokenStartIndex);
                     }
                 }
@@ -178,8 +177,7 @@ public class Argument<T, R> {
         }
     }
     
-    @ApiStatus.Internal
-    public static boolean matches(EntryStack<?> stack, List<CompoundArgument> compoundArguments) {
+    public static boolean matches(EntryStack<?> stack, List<CompoundArgument> compoundArguments, InputMethod<?> inputMethod) {
         if (compoundArguments.isEmpty()) return true;
         String newLanguage = Minecraft.getInstance().options.languageCode;
         if (!Objects.equals(lastLanguage.getAndSet(newLanguage), newLanguage)) {
@@ -189,7 +187,7 @@ public class Argument<T, R> {
         a:
         for (CompoundArgument arguments : compoundArguments) {
             for (AlternativeArgument argument : arguments) {
-                if (!matches(stack, argument)) {
+                if (!matches(stack, argument, inputMethod)) {
                     continue a;
                 }
             }
@@ -200,12 +198,14 @@ public class Argument<T, R> {
         return false;
     }
     
-    private static <T, R, Z, B> boolean matches(EntryStack<?> stack, AlternativeArgument alternativeArgument) {
+    private static <T> boolean matches(EntryStack<?> stack, AlternativeArgument alternativeArgument, InputMethod<T> inputMethod) {
         if (alternativeArgument.isEmpty()) return true;
         long hashExact = EntryStacks.hashExact(stack);
+        ResultSinkImpl<T> sink = new ResultSinkImpl<>(inputMethod);
         
         for (Argument<?, ?> argument : alternativeArgument) {
-            if (matches(argument.getArgument(), stack, hashExact, argument.getText(), argument.filterData) == argument.isRegular()) {
+            sink.filters = inputMethod.expendFilter(argument.getText());
+            if (matches(argument.getArgument(), stack, hashExact, argument.filterData, sink) == argument.isRegular()) {
                 return true;
             }
         }
@@ -222,14 +222,50 @@ public class Argument<T, R> {
         return map;
     }
     
-    private static <T, R, B> boolean matches(ArgumentType<T, B> argumentType, EntryStack<?> stack, long hashExact, String filter, R filterData) {
+    private static <T, R, B> boolean matches(ArgumentType<T, B> argumentType, EntryStack<?> stack, long hashExact, R filterData, ResultSinkImpl<?> sink) {
         Long2ObjectMap<Object> map = getSearchCache(argumentType);
-        B value = (B) map.get(hashExact);
+        Object value = map.get(hashExact);
         if (value == null) {
             value = argumentType.cacheData(stack);
-            map.put(hashExact, value);
+            map.put(hashExact, value == null ? NO_CACHE : value);
         }
-        return argumentType.matches(value, stack, filter, (T) filterData);
+        sink.matches = false;
+        argumentType.matches(value == NO_CACHE ? null : (B) value, stack, (T) filterData, sink);
+        return sink.matches;
+    }
+    
+    private static class ResultSinkImpl<T> implements ArgumentType.ResultSink {
+        private final InputMethod<T> inputMethod;
+        private boolean matches;
+        private Iterable<T> filters;
+        
+        public ResultSinkImpl(InputMethod<T> inputMethod) {
+            this.inputMethod = inputMethod;
+        }
+        
+        @Override
+        public boolean testTrue() {
+            return matches = true;
+        }
+        
+        @Override
+        public boolean testString(String text) {
+            if (matches) return true;
+            if (inputMethod instanceof CharacterUnpackingInputMethod im) {
+                for (T filter : filters) {
+                    if (InputMethodMatcher.contains(im, IntList.of(text.codePoints().toArray()), (IntList) filter)) {
+                        return matches = true;
+                    }
+                }
+            } else {
+                for (T filter : filters) {
+                    if (inputMethod.contains(text, filter)) {
+                        return matches = true;
+                    }
+                }
+            }
+            return false;
+        }
     }
     
     public static Long prepareStart = null;
