@@ -36,13 +36,13 @@ public final class ArgumentTypesRegistry {
     public static final List<ArgumentType<?, ?>> ARGUMENT_TYPE_LIST = Lists.newArrayList();
     
     static {
-        register(AlwaysMatchingArgumentType.INSTANCE);
-        register(ModArgumentType.INSTANCE);
-        register(TooltipArgumentType.INSTANCE);
-        register(TagArgumentType.INSTANCE);
-        register(IdentifierArgumentType.INSTANCE);
-        register(RegexArgumentType.INSTANCE);
-        register(TextArgumentType.INSTANCE);
+        register(new AlwaysMatchingArgumentType());
+        register(new ModArgumentType());
+        register(new TooltipArgumentType());
+        register(new TagArgumentType());
+        register(new IdentifierArgumentType());
+        register(new RegexArgumentType());
+        register(new TextArgumentType());
     }
     
     private static void register(ArgumentType<?, ?> argumentType) {

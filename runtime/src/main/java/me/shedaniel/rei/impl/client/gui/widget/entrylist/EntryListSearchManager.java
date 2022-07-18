@@ -24,10 +24,15 @@
 package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
 import com.google.common.base.Stopwatch;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.EntryPanelOrdering;
 import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -55,7 +60,16 @@ public class EntryListSearchManager {
     
     public static final EntryListSearchManager INSTANCE = new EntryListSearchManager();
     
-    private AsyncSearchManager searchManager = AsyncSearchManager.createDefault();
+    private AsyncSearchManager searchManager = new AsyncSearchManager(EntryRegistry.getInstance()::getPreFilteredList, () -> {
+        boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled();
+        LongSet workingItems = checkCraftable ? new LongOpenHashSet() : null;
+        if (checkCraftable) {
+            for (EntryStack<?> stack : Views.getInstance().findCraftableEntriesByMaterials()) {
+                workingItems.add(EntryStacks.hashExact(stack));
+            }
+        }
+        return checkCraftable ? stack -> workingItems.contains(EntryStacks.hashExact(stack)) : stack -> true;
+    }, EntryStack::normalize);
     
     public void update(String searchTerm, boolean ignoreLastSearch, Consumer<List</*EntryStack<?> | CollapsedStack*/ Object>> update) {
         Stopwatch stopwatch = Stopwatch.createStarted();

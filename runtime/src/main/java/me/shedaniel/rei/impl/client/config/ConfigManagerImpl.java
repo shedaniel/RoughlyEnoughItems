@@ -82,6 +82,7 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.TextColor;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.ApiStatus;
@@ -138,6 +139,14 @@ public class ConfigManagerImpl implements ConfigManager {
     }
     
     private static Jankson buildJankson(Jankson.Builder builder) {
+        // ResourceLocation
+        builder.registerSerializer(ResourceLocation.class, (location, marshaller) -> {
+            return new JsonPrimitive(location == null ? null : location.toString());
+        });
+        builder.registerDeserializer(String.class, ResourceLocation.class, (value, marshaller) -> {
+            return value == null ? null : new ResourceLocation(value);
+        });
+        
         // CheatingMode
         builder.registerSerializer(CheatingMode.class, (value, marshaller) -> {
             if (value == CheatingMode.WHEN_CREATIVE) {
@@ -366,12 +375,12 @@ public class ConfigManagerImpl implements ConfigManager {
                 if (Minecraft.getInstance().getConnection() != null && Minecraft.getInstance().getConnection().getRecipeManager() != null) {
                     TextListEntry feedbackEntry = ConfigEntryBuilder.create().startTextDescription(
                             Component.translatable("text.rei.feedback", Component.translatable("text.rei.feedback.link")
-                                    .withStyle(style -> style
-                                            .withColor(TextColor.fromRgb(0xff1fc3ff))
-                                            .withUnderlined(true)
-                                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://forms.gle/5tdnK5WN1wng78pV8"))
-                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("https://forms.gle/5tdnK5WN1wng78pV8")))
-                                    ))
+                                            .withStyle(style -> style
+                                                    .withColor(TextColor.fromRgb(0xff1fc3ff))
+                                                    .withUnderlined(true)
+                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://forms.gle/5tdnK5WN1wng78pV8"))
+                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("https://forms.gle/5tdnK5WN1wng78pV8")))
+                                            ))
                                     .withStyle(ChatFormatting.GRAY)
                     ).build();
                     builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.advanced")).getEntries().add(0, feedbackEntry);
@@ -389,19 +398,19 @@ public class ConfigManagerImpl implements ConfigManager {
                     ((GlobalizedClothConfigScreen) screen).listWidget.children().add(0, (AbstractConfigEntry) new EmptyEntry(4));
                     TextListEntry supportText = ConfigEntryBuilder.create().startTextDescription(
                             Component.translatable("text.rei.support.me.desc",
-                                    Component.translatable("text.rei.support.me.patreon")
-                                            .withStyle(style -> style
-                                                    .withColor(TextColor.fromRgb(0xff1fc3ff))
-                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://patreon.com/shedaniel"))
-                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("https://patreon.com/shedaniel")))
-                                            ),
-                                    Component.translatable("text.rei.support.me.bisect")
-                                            .withStyle(style -> style
-                                                    .withColor(TextColor.fromRgb(0xff1fc3ff))
-                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.bisecthosting.com/shedaniel"))
-                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("https://www.bisecthosting.com/shedaniel")))
-                                            )
-                            )
+                                            Component.translatable("text.rei.support.me.patreon")
+                                                    .withStyle(style -> style
+                                                            .withColor(TextColor.fromRgb(0xff1fc3ff))
+                                                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://patreon.com/shedaniel"))
+                                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("https://patreon.com/shedaniel")))
+                                                    ),
+                                            Component.translatable("text.rei.support.me.bisect")
+                                                    .withStyle(style -> style
+                                                            .withColor(TextColor.fromRgb(0xff1fc3ff))
+                                                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.bisecthosting.com/shedaniel"))
+                                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("https://www.bisecthosting.com/shedaniel")))
+                                                    )
+                                    )
                                     .withStyle(ChatFormatting.GRAY)
                     ).build();
                     supportText.setScreen((AbstractConfigScreen) screen);

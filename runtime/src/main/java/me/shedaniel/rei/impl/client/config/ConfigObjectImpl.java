@@ -41,9 +41,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -204,6 +206,16 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public int getMaxRecipesPageHeight() {
         return advanced.layout.maxRecipesPageHeight;
+    }
+    
+    @Override
+    @Nullable
+    public ResourceLocation getInputMethodId() {
+        return functionality.inputMethod;
+    }
+    
+    public void setInputMethodId(@Nullable ResourceLocation id) {
+        functionality.inputMethod = id;
     }
     
     @Override
@@ -600,6 +612,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public static class Functionality {
+        @ConfigEntry.Gui.Excluded @Nullable private ResourceLocation inputMethod = null;
         @Comment("Declares whether REI should remove the recipe book.") private boolean disableRecipeBook = false;
         @Comment("Declares whether mob effects should be on the left side instead of the right side.") private boolean leftSideMobEffects = false;
         @Comment("Declares whether subsets is enabled.") private boolean isSubsetsEnabled = false;

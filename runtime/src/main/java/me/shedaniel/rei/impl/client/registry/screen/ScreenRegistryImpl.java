@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.registry.screen;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.platform.Window;
 import dev.architectury.event.CompoundEventResult;
@@ -69,7 +68,7 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     private List<OverlayDecider> deciders = new CopyOnWriteArrayList<>();
     private Map<Class<?>, List<OverlayDecider>> cache = new HashMap<>();
     private ExclusionZones exclusionZones = new ExclusionZonesImpl();
-    private Class<? extends Screen> tmpScreen;
+    private final ThreadLocal<Class<? extends Screen>> tmpScreen = new ThreadLocal<>();
     
     @Override
     public ReloadStage getStage() {
@@ -91,15 +90,15 @@ public class ScreenRegistryImpl implements ScreenRegistry {
             return possibleCached;
         }
         
-        tmpScreen = screenClass;
+        tmpScreen.set(screenClass);
         List<OverlayDecider> deciders = CollectionUtils.filterToList(this.deciders, this::filterResponsible);
         cache.put(screenClass, deciders);
-        tmpScreen = null;
+        tmpScreen.remove();
         return deciders;
     }
     
     private boolean filterResponsible(OverlayDecider handler) {
-        return handler.isHandingScreen(tmpScreen);
+        return handler.isHandingScreen(tmpScreen.get());
     }
     
     @Override
@@ -158,7 +157,7 @@ public class ScreenRegistryImpl implements ScreenRegistry {
         deciders.add(decider);
         deciders.sort(Comparator.reverseOrder());
         cache.clear();
-        tmpScreen = null;
+        tmpScreen.remove();
         registerDraggableComponentProvider(DraggableComponentProviderWidget.from(context ->
                 Widgets.walk(context.getScreen().children(), DraggableComponentProviderWidget.class::isInstance)));
         registerDraggableComponentVisitor(DraggableComponentVisitorWidget.from(context ->
@@ -243,7 +242,7 @@ public class ScreenRegistryImpl implements ScreenRegistry {
         focusedStackProviders.clear();
         draggableProviders.clear();
         draggableVisitors.clear();
-        tmpScreen = null;
+        tmpScreen.remove();
         
         registerDefault();
     }
