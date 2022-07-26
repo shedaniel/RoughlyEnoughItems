@@ -27,6 +27,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,7 +43,7 @@ public interface InputMethod<T> {
     
     static List<Locale> getAllLocales() {
         return CollectionUtils.map(Minecraft.getInstance().getLanguageManager().getLanguages(), info ->
-                new Locale(info.getCode(), Component.literal(info.getName())));
+                new Locale(info.getCode(), new TextComponent(info.getName())));
     }
     
     List<Locale> getMatchingLocales();

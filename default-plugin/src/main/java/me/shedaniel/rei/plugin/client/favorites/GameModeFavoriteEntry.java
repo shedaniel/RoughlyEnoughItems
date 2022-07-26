@@ -26,6 +26,7 @@ package me.shedaniel.rei.plugin.client.favorites;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;

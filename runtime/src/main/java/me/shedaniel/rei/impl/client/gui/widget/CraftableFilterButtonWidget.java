@@ -48,7 +48,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -78,7 +79,7 @@ public class CraftableFilterButtonWidget {
                     access.openOrClose(FILTER_MENU_UUID, button.getBounds(), CraftableFilterButtonWidget::menuEntries);
                 })
                 .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y))
-                .tooltipLineSupplier(button -> Component.translatable(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all"));
+                .tooltipLineSupplier(button -> new TranslatableComponent(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all"));
         Widget overlayWidget = Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
             Vector4f vector = new Vector4f(bounds.x + 2, bounds.y + 2, helper.getBlitOffset() - 10, 1.0F);
             vector.transform(matrices.last().pose());
@@ -92,8 +93,8 @@ public class CraftableFilterButtonWidget {
     private static Collection<MenuEntry> menuEntries() {
         ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
         ArrayList<MenuEntry> entries = new ArrayList<>(List.of(
-                new SubMenuEntry(Component.translatable("text.rei.config.menu.search_field.position"), Arrays.stream(SearchFieldLocation.values())
-                        .<MenuEntry>map(location -> ToggleMenuEntry.of(Component.literal(location.toString()),
+                new SubMenuEntry(new TranslatableComponent("text.rei.config.menu.search_field.position"), Arrays.stream(SearchFieldLocation.values())
+                        .<MenuEntry>map(location -> ToggleMenuEntry.of(new TextComponent(location.toString()),
                                         () -> config.getSearchFieldLocation() == location,
                                         bool -> config.setSearchFieldLocation(location))
                                 .withActive(() -> config.getSearchFieldLocation() != location)
@@ -103,7 +104,7 @@ public class CraftableFilterButtonWidget {
         
         List<Map.Entry<ResourceLocation, InputMethod<?>>> applicableInputMethods = getApplicableInputMethods();
         if (applicableInputMethods.size() > 1) {
-            entries.add(new SubMenuEntry(Component.translatable("text.rei.config.menu.search_field.input_method"), createInputMethodEntries(applicableInputMethods)));
+            entries.add(new SubMenuEntry(new TranslatableComponent("text.rei.config.menu.search_field.input_method"), createInputMethodEntries(applicableInputMethods)));
         }
         
         return entries;
@@ -140,7 +141,7 @@ public class CraftableFilterButtonWidget {
                                         }
                                     });
                                     Screen screen = Minecraft.getInstance().screen;
-                                    Minecraft.getInstance().setScreen(new ConfigReloadingScreen(Component.translatable("text.rei.input.methods.initializing"),
+                                    Minecraft.getInstance().setScreen(new ConfigReloadingScreen(new TranslatableComponent("text.rei.input.methods.initializing"),
                                             () -> !future.isDone(), () -> {
                                         Minecraft.getInstance().setScreen(screen);
                                     }));

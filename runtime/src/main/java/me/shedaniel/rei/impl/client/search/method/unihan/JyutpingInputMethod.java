@@ -28,6 +28,7 @@ import me.shedaniel.rei.api.client.search.method.CharacterUnpackingInputMethod;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.Collections;
 import java.util.List;
@@ -66,11 +67,11 @@ public class JyutpingInputMethod extends UniHanInputMethod implements CharacterU
     
     @Override
     public Component getName() {
-        return Component.translatable("text.rei.input.methods.jyutping");
+        return new TranslatableComponent("text.rei.input.methods.jyutping");
     }
     
     @Override
     public Component getDescription() {
-        return Component.translatable("text.rei.input.methods.jyutping.description");
+        return new TranslatableComponent("text.rei.input.methods.jyutping.description");
     }
 }

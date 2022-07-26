@@ -69,13 +69,13 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
         Function<ItemStack, ListTag> enchantmentTag = stack -> {
             CompoundTag tag = stack.getTag();
             if (tag == null) return null;
-            if (!tag.contains(ItemStack.TAG_ENCH, NbtType.LIST)) {
-                if (tag.contains(EnchantedBookItem.TAG_STORED_ENCHANTMENTS, NbtType.LIST)) {
-                    return tag.getList(EnchantedBookItem.TAG_STORED_ENCHANTMENTS, NbtType.COMPOUND);
+            if (!tag.contains(ItemStack.TAG_ENCH, Tag.TAG_LIST)) {
+                if (tag.contains(EnchantedBookItem.TAG_STORED_ENCHANTMENTS, Tag.TAG_LIST)) {
+                    return tag.getList(EnchantedBookItem.TAG_STORED_ENCHANTMENTS, Tag.TAG_COMPOUND);
                 }
                 return null;
             }
-            return tag.getList(ItemStack.TAG_ENCH, NbtType.COMPOUND);
+            return tag.getList(ItemStack.TAG_ENCH, Tag.TAG_COMPOUND);
         };
         registry.register((context, stack) -> nbtHasher.hash(context, enchantmentTag.apply(stack)), Items.ENCHANTED_BOOK);
         registry.registerNbt(Items.POTION);

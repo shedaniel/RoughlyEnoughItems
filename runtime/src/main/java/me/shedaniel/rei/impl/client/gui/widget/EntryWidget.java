@@ -473,7 +473,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                     InputMethod<?> active = InputMethod.active();
                     String suggested = active.suggestInputString(name);
                     if (suggested != null) {
-                        tooltip.entries().add(1, Tooltip.entry(Component.literal(suggested).withStyle(ChatFormatting.GRAY)));
+                        tooltip.entries().add(1, Tooltip.entry(new TextComponent(suggested).withStyle(ChatFormatting.GRAY)));
                     }
                 }
             }

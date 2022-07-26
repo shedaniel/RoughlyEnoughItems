@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.client.search.method;
 
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -65,11 +66,11 @@ public enum DefaultInputMethod implements InputMethod<String> {
     
     @Override
     public Component getName() {
-        return Component.translatable("text.rei.input.methods.default");
+        return new TranslatableComponent("text.rei.input.methods.default");
     }
     
     @Override
     public Component getDescription() {
-        return Component.translatable("text.rei.input.methods.default.description");
+        return new TranslatableComponent("text.rei.input.methods.default.description");
     }
 }

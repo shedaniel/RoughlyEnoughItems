@@ -42,6 +42,8 @@ import me.shedaniel.rei.impl.client.search.method.DefaultInputMethod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,7 +57,7 @@ public class InputMethodWatcher implements HintProvider {
         ResourceLocation id = ConfigObject.getInstance().getInputMethodId();
         if (id == null) {
             String languageCode = Minecraft.getInstance().options.languageCode;
-            MutableComponent component = Component.empty();
+            MutableComponent component = new TextComponent("");
             int match = 0;
             for (InputMethod<?> method : InputMethodRegistry.getInstance().getAll().values()) {
                 if (method instanceof DefaultInputMethod) continue;
@@ -69,8 +71,8 @@ public class InputMethodWatcher implements HintProvider {
                 }
             }
             if (match > 0) {
-                return List.of(Component.translatable("text.rei.input.methods.hint"),
-                        Component.literal(" "), component);
+                return List.of(new TranslatableComponent("text.rei.input.methods.hint"),
+                        new TextComponent(" "), component);
             }
         }
         
@@ -91,12 +93,12 @@ public class InputMethodWatcher implements HintProvider {
     @Override
     public List<HintButton> getButtons() {
         return List.of(
-                new HintButton(Component.translatable("text.rei.input.methods.hint.configure"), bounds -> {
+                new HintButton(new TranslatableComponent("text.rei.input.methods.hint.configure"), bounds -> {
                     MenuAccess access = ScreenOverlayImpl.getInstance().menuAccess();
                     access.openOrClose(CraftableFilterButtonWidget.FILTER_MENU_UUID, bounds.clone(),
                             () -> CraftableFilterButtonWidget.createInputMethodEntries(CraftableFilterButtonWidget.getApplicableInputMethods()));
                 }),
-                new HintButton(Component.translatable("text.rei.input.methods.hint.ignore"), bounds -> {
+                new HintButton(new TranslatableComponent("text.rei.input.methods.hint.ignore"), bounds -> {
                     ConfigManagerImpl.getInstance().getConfig().setInputMethodId(new ResourceLocation("rei:default"));
                     ConfigManager.getInstance().saveConfig();
                 })
