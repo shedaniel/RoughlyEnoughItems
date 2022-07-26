@@ -28,7 +28,6 @@ import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.ForwardingMapEntry;
 import com.google.common.collect.Iterators;
 import dev.architectury.event.EventResult;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
@@ -40,6 +39,7 @@ import me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibility
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.registry.RecipeManagerContextImpl;
 import net.minecraft.world.item.crafting.Recipe;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -155,7 +155,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
         if (!PluginManager.areAnyReloading()) {
             if (lastAddWarning != null) {
                 if (lastAddWarning.getValue() > 0 && System.currentTimeMillis() - lastAddWarning.getValue() > 5000) {
-                    RoughlyEnoughItemsCore.LOGGER.warn("Detected runtime DisplayRegistry modification, this can be extremely dangerous!");
+                    InternalLogger.getInstance().warn("Detected runtime DisplayRegistry modification, this can be extremely dangerous!");
                 }
                 lastAddWarning.setValue(System.currentTimeMillis());
             }
@@ -179,12 +179,14 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     @Override
     public <A extends Display> void registerGlobalDisplayGenerator(DynamicDisplayGenerator<A> generator) {
         globalDisplayGenerators.add(generator);
+        InternalLogger.getInstance().debug("Added global display generator: %s", generator);
     }
     
     @Override
     public <A extends Display> void registerDisplayGenerator(CategoryIdentifier<A> categoryId, DynamicDisplayGenerator<A> generator) {
         displayGenerators.computeIfAbsent(categoryId, location -> new ArrayList<>())
                 .add(generator);
+        InternalLogger.getInstance().debug("Added display generator for category [%s]: %s", categoryId, generator);
     }
     
     @Override
@@ -201,6 +203,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     public void registerVisibilityPredicate(DisplayVisibilityPredicate predicate) {
         visibilityPredicates.add(predicate);
         visibilityPredicates.sort(Comparator.reverseOrder());
+        InternalLogger.getInstance().debug("Added display visibility predicate: %s [%.2f priority]", predicate, predicate.getPriority());
     }
     
     @Override
@@ -214,7 +217,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
                     return result.isEmpty() || result.isTrue();
                 }
             } catch (Throwable throwable) {
-                RoughlyEnoughItemsCore.LOGGER.error("Failed to check if the display is visible!", throwable);
+                InternalLogger.getInstance().error("Failed to check if the display is visible!", throwable);
             }
         }
         
@@ -234,11 +237,13 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     @Override
     public <T, D extends Display> void registerFiller(Class<T> typeClass, BiPredicate<? extends T, DisplayAdditionReasons> predicate, Function<? extends T, D> filler) {
         fillers.add(new DisplayFiller<>((o, s) -> typeClass.isInstance(o) && ((BiPredicate<Object, DisplayAdditionReasons>) predicate).test(o, s), (Function<Object, D>) filler));
+        InternalLogger.getInstance().debug("Added display filter: %s for %s", filler, typeClass.getName());
     }
     
     @Override
     public <D extends Display> void registerFiller(Predicate<?> predicate, Function<?, D> filler) {
         fillers.add(new DisplayFiller<>((o, s) -> ((Predicate<Object>) predicate).test(o), (Function<Object, D>) filler));
+        InternalLogger.getInstance().debug("Added display filter: %s", filler);
     }
     
     @Override
@@ -263,9 +268,11 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
         
         for (CategoryIdentifier<?> identifier : displays.keySet()) {
             if (CategoryRegistry.getInstance().tryGet(identifier).isEmpty()) {
-                RoughlyEnoughItemsCore.LOGGER.throwException(new IllegalStateException("Displays registered for unknown registry: " + identifier));
+                InternalLogger.getInstance().error("Found displays registered for unknown registry", new IllegalStateException(identifier.toString()));
             }
         }
+        
+        InternalLogger.getInstance().debug("Registered %d displays", displayCount.getValue());
     }
     
     @Override
@@ -307,7 +314,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
         return displaysBase.get(display);
     }
     
-    private static record DisplayFiller<D extends Display>(
+    private record DisplayFiller<D extends Display>(
             BiPredicate<Object, DisplayAdditionReasons> predicate,
             
             Function<Object, D> mappingFunction

@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
@@ -98,6 +99,7 @@ public class EntryRegistryImpl implements EntryRegistry {
         registryList = new NormalEntryRegistryList(registryList.stream().filter(((Predicate<EntryStack<?>>) EntryStack::isEmpty).negate()));
         refilter();
         REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
+        InternalLogger.getInstance().debug("Reloaded entry registry with %d entries and %d filtered entries", size(), getPreFilteredList().size());
     }
     
     @Override

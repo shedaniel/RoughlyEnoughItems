@@ -29,6 +29,7 @@ import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -53,9 +54,15 @@ public class TransferHandlerRegistryImpl implements TransferHandlerRegistry {
     }
     
     @Override
+    public void endReload() {
+        InternalLogger.getInstance().debug("Registered %d transfer handlers", handlers.size());
+    }
+    
+    @Override
     public void register(TransferHandler handler) {
         handlers.add(handler);
         handlers.sort(Comparator.reverseOrder());
+        InternalLogger.getInstance().debug("Added transfer handler: %s [%.2f priority]", handler, handler.getPriority());
     }
     
     @Override
