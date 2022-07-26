@@ -30,7 +30,6 @@ import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongMaps;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
@@ -57,6 +56,7 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
 import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
@@ -76,7 +76,7 @@ import java.util.stream.Collectors;
 public class ViewsImpl implements Views {
     public static Map<DisplayCategory<?>, List<DisplaySpec>> buildMapFor(ViewSearchBuilder builder) {
         if (PluginManager.areAnyReloading()) {
-            RoughlyEnoughItemsCore.LOGGER.info("Cancelled Views buildMap since plugins have not finished reloading.");
+            InternalLogger.getInstance().info("Cancelled Views buildMap since plugins have not finished reloading.");
             return Maps.newLinkedHashMap();
         }
         
@@ -264,9 +264,9 @@ public class ViewsImpl implements Views {
         String message = String.format("Built Recipe View in %s for %d categories, %d recipes for, %d usages for and %d live recipe generators.",
                 stopwatch.stop(), categories.size(), recipesForStacks.size(), usagesForStacks.size(), generatorsCount);
         if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
-            RoughlyEnoughItemsCore.LOGGER.info(message);
+            InternalLogger.getInstance().info(message);
         } else {
-            RoughlyEnoughItemsCore.LOGGER.trace(message);
+            InternalLogger.getInstance().trace(message);
         }
         return resultSpeced;
     }
@@ -355,7 +355,7 @@ public class ViewsImpl implements Views {
                 } catch (Throwable throwable) {
                     CrashReport report = CrashReportUtils.essential(throwable, "Error while generating recipes for an entry stack");
                     CrashReportUtils.renderer(report, entry);
-                    RoughlyEnoughItemsCore.LOGGER.throwException(new ReportedException(report));
+                    InternalLogger.getInstance().throwException(new ReportedException(report));
                     return Optional.empty();
                 }
             }
@@ -367,7 +367,7 @@ public class ViewsImpl implements Views {
                 } catch (Throwable throwable) {
                     CrashReport report = CrashReportUtils.essential(throwable, "Error while generating usages for an entry stack");
                     CrashReportUtils.renderer(report, entry);
-                    RoughlyEnoughItemsCore.LOGGER.throwException(new ReportedException(report));
+                    InternalLogger.getInstance().throwException(new ReportedException(report));
                     return Optional.empty();
                 }
             }
@@ -378,7 +378,7 @@ public class ViewsImpl implements Views {
                     return generator.generate(builder);
                 } catch (Throwable throwable) {
                     CrashReport report = CrashReportUtils.essential(throwable, "Error while generating recipes for a search");
-                    RoughlyEnoughItemsCore.LOGGER.throwException(new ReportedException(report));
+                    InternalLogger.getInstance().throwException(new ReportedException(report));
                     return Optional.empty();
                 }
             }
@@ -489,7 +489,7 @@ public class ViewsImpl implements Views {
                         display.getOutputEntries().stream().flatMap(Collection::stream).collect(Collectors.toCollection(() -> craftables));
                     }
                 } catch (Throwable t) {
-                    RoughlyEnoughItemsCore.LOGGER.warn("Error while checking if display is craftable", t);
+                    InternalLogger.getInstance().warn("Error while checking if display is craftable", t);
                 }
             }
         }

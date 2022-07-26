@@ -45,6 +45,7 @@ import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.gui.screen.AbstractDisplayViewingScreen;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -159,16 +160,14 @@ public class ScreenRegistryImpl implements ScreenRegistry {
         deciders.sort(Comparator.reverseOrder());
         cache.clear();
         tmpScreen.remove();
-        registerDraggableComponentProvider(DraggableComponentProviderWidget.from(context ->
-                Widgets.walk(context.getScreen().children(), DraggableComponentProviderWidget.class::isInstance)));
-        registerDraggableComponentVisitor(DraggableComponentVisitorWidget.from(context ->
-                Widgets.walk(context.getScreen().children(), DraggableComponentVisitorWidget.class::isInstance)));
+        InternalLogger.getInstance().debug("Added overlay decider: %s [%.2f priority]", decider, decider.getPriority());
     }
     
     @Override
     public void registerFocusedStack(FocusedStackProvider provider) {
         focusedStackProviders.add(provider);
         focusedStackProviders.sort(Comparator.reverseOrder());
+        InternalLogger.getInstance().debug("Added focused stack provider: %s [%.2f priority]", provider, provider.getPriority());
     }
     
     @Override
@@ -185,12 +184,14 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     public <T extends Screen, A> void registerDraggableComponentProvider(DraggableComponentProvider<T, A> provider) {
         draggableProviders.add((DraggableComponentProvider<Screen, Object>) provider);
         draggableProviders.sort(Comparator.reverseOrder());
+        InternalLogger.getInstance().debug("Added draggable component provider: %s [%.2f priority]", provider, provider.getPriority());
     }
     
     @Override
     public <T extends Screen> void registerDraggableComponentVisitor(DraggableComponentVisitor<T> visitor) {
         draggableVisitors.add((DraggableComponentVisitor<Screen>) visitor);
         draggableVisitors.sort(Comparator.reverseOrder());
+        InternalLogger.getInstance().debug("Added draggable component visitor: %s [%.2f priority]", visitor, visitor.getPriority());
     }
     
     @Override
@@ -230,6 +231,7 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     @Override
     public <T extends Screen> void registerClickArea(Class<? extends T> screenClass, ClickArea<T> area) {
         clickAreas.put(screenClass, area);
+        InternalLogger.getInstance().debug("Added click area provider for %s: %s", screenClass.getName(), area);
     }
     
     @Override
@@ -256,6 +258,11 @@ public class ScreenRegistryImpl implements ScreenRegistry {
         tmpScreen.remove();
         
         registerDefault();
+    }
+    
+    @Override
+    public void endReload() {
+        InternalLogger.getInstance().debug("Registered %d overlay deciders and %d exclusion zones", deciders.size(), exclusionZones.getZonesCount());
     }
     
     private void registerDefault() {
@@ -318,5 +325,9 @@ public class ScreenRegistryImpl implements ScreenRegistry {
                 return -10.0;
             }
         });
+        registerDraggableComponentProvider(DraggableComponentProviderWidget.from(context ->
+                Widgets.walk(context.getScreen().children(), DraggableComponentProviderWidget.class::isInstance)));
+        registerDraggableComponentVisitor(DraggableComponentVisitorWidget.from(context ->
+                Widgets.walk(context.getScreen().children(), DraggableComponentVisitorWidget.class::isInstance)));
     }
 }

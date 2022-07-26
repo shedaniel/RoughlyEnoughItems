@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.client.config.addon;
 import me.shedaniel.rei.api.client.config.addon.ConfigAddon;
 import me.shedaniel.rei.api.client.config.addon.ConfigAddonRegistry;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.impl.common.InternalLogger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +40,14 @@ public class ConfigAddonRegistryImpl implements ConfigAddonRegistry {
     }
     
     @Override
+    public void endReload() {
+        InternalLogger.getInstance().debug("Registered %d config addons", this.addons.size());
+    }
+    
+    @Override
     public void register(ConfigAddon addon) {
         this.addons.add(addon);
+        InternalLogger.getInstance().debug("Added config addon: %s [%s]", addon, addon.getName().getString());
     }
     
     @Override

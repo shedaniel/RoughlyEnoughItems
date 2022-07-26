@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.logging.performance.PerformanceLogger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
@@ -49,9 +50,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Closeable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
-import java.util.function.LongConsumer;
 import java.util.function.UnaryOperator;
 
 @ApiStatus.Internal
@@ -64,16 +63,14 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     private ReloadStage reloading = null;
     private List<ReloadStage> observedStages = new ArrayList<>();
     private final List<REIPluginProvider<P>> plugins = new ArrayList<>();
-    private final LongConsumer reloadDoneListener;
     private final Stopwatch reloadStopwatch = Stopwatch.createUnstarted();
     private boolean forcedMainThread;
     private final Stopwatch forceMainThreadStopwatch = Stopwatch.createUnstarted();
     
     @SafeVarargs
-    public PluginManagerImpl(Class<P> pluginClass, UnaryOperator<PluginView<P>> view, LongConsumer reloadDoneListener, Reloadable<? extends P>... reloadables) {
+    public PluginManagerImpl(Class<P> pluginClass, UnaryOperator<PluginView<P>> view, Reloadable<? extends P>... reloadables) {
         this.pluginClass = pluginClass;
         this.view = view;
-        this.reloadDoneListener = reloadDoneListener;
         for (Reloadable<? extends P> reloadable : reloadables) {
             registerReloadable(reloadable);
         }
@@ -116,7 +113,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     @Override
     public void registerPlugin(REIPluginProvider<? extends P> plugin) {
         plugins.add((REIPluginProvider<P>) plugin);
-        RoughlyEnoughItemsCore.LOGGER.info("Registered plugin provider %s for %s", plugin.getPluginProviderName(), name(pluginClass));
+        InternalLogger.getInstance().info("Registered plugin provider %s for %s", plugin.getPluginProviderName(), name(pluginClass));
     }
     
     @Override
@@ -161,7 +158,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
             this.stage = stage;
             this.sectionData = new MutablePair<>(Stopwatch.createUnstarted(), "");
             sectionData.setRight(section);
-            RoughlyEnoughItemsCore.LOGGER.debug("[" + stage + "] Reloading Section: \"%s\"", section);
+            InternalLogger.getInstance().trace("[" + stage + "] Reloading Section: \"%s\"", section);
             sectionData.getLeft().reset().start();
         }
         
@@ -169,7 +166,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         public void close() {
             sectionData.getLeft().stop();
             String section = sectionData.getRight();
-            RoughlyEnoughItemsCore.LOGGER.debug("[" + stage + "] Reloading Section: \"%s\" done in %s", section, sectionData.getLeft().toString());
+            InternalLogger.getInstance().trace("[" + stage + "] Reloading Section: \"%s\" done in %s", section, sectionData.getLeft().toString());
             sectionData.getLeft().reset();
         }
     }
@@ -193,7 +190,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
                         try {
                             forcedMainThread = true;
                             forceMainThreadStopwatch.start();
-                            RoughlyEnoughItemsCore.LOGGER.warn("Forcing plugin " + wrapper.getPluginProviderName() + " to run on the main thread for " + sectionName + "! This is extremely dangerous, and have large performance implications.");
+                            InternalLogger.getInstance().warn("Forcing plugin " + wrapper.getPluginProviderName() + " to run on the main thread for " + sectionName + "! This is extremely dangerous, and have large performance implications.");
                             if (Platform.getEnvironment() == Env.CLIENT) {
                                 EnvExecutor.runInEnv(Env.CLIENT, () -> () -> queueExecutionClient(runnable));
                             } else {
@@ -205,7 +202,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
                     }
                 });
             } catch (Throwable throwable) {
-                RoughlyEnoughItemsCore.LOGGER.error(wrapper.getPluginProviderName() + " plugin failed to " + sectionName + "!", throwable);
+                InternalLogger.getInstance().error(wrapper.getPluginProviderName() + " plugin failed to " + sectionName + "!", throwable);
             }
         }
     }
@@ -267,9 +264,9 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
             new RuntimeException("Failed to run post registration").printStackTrace();
         }
         this.reloadStopwatch.stop();
-        reloadDoneListener.accept(this.reloadStopwatch.elapsed(TimeUnit.MILLISECONDS));
+        InternalLogger.getInstance().info("Reloaded Plugin Manager [%s] with %d plugins in %s.", pluginClass.getSimpleName(), plugins.size(), reloadStopwatch);
         if (forcedMainThread) {
-            RoughlyEnoughItemsCore.LOGGER.warn("Forcing plugins to run on main thread took " + forceMainThreadStopwatch);
+            InternalLogger.getInstance().warn("Forcing plugins to run on main thread took " + forceMainThreadStopwatch);
         }
     }
     
@@ -302,7 +299,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
             // Sort Plugins
             List<PluginWrapper<P>> plugins = new ArrayList<>(getPluginWrapped().toList());
             plugins.sort(Comparator.comparingDouble(PluginWrapper<P>::getPriority).reversed());
-            RoughlyEnoughItemsCore.LOGGER.info("Reloading Plugin Manager [%s] stage [%s], registered %d plugins: %s", name(pluginClass), stage.toString(), plugins.size(), CollectionUtils.mapAndJoinToString(plugins, PluginWrapper::getPluginProviderName, ", "));
+            InternalLogger.getInstance().info("Reloading Plugin Manager [%s] stage [%s], registered %d plugins: %s", name(pluginClass), stage.toString(), plugins.size(), CollectionUtils.mapAndJoinToString(plugins, PluginWrapper::getPluginProviderName, ", "));
             Collections.reverse(plugins);
             
             // Reload

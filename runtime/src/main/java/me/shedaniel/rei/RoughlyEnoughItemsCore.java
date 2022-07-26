@@ -29,11 +29,7 @@ import me.shedaniel.architectury.registry.ReloadListeners;
 import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.architectury.utils.EnvExecutor;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.annotation.Nullable;
-import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
-import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
-import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
-import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
@@ -88,6 +84,7 @@ public class RoughlyEnoughItemsCore {
     }
     
     public static void attachCommonInternals() {
+        Internals.attachInstanceSupplier(LOGGER, "logger");
         CategoryIdentifierImpl.attach();
         Internals.attachInstance((Function<ResourceLocation, EntryType<?>>) DeferringEntryTypeProviderImpl.INSTANCE, "entryTypeDeferred");
         Internals.attachInstance(EntryStackProviderImpl.INSTANCE, Internals.EntryStackProvider.class);
@@ -96,16 +93,6 @@ public class RoughlyEnoughItemsCore {
         Internals.attachInstanceSupplier(new PluginManagerImpl<>(
                 REIPlugin.class,
                 UnaryOperator.identity(),
-                usedTime -> {
-                    RoughlyEnoughItemsCore.LOGGER.info("Reloaded Plugin Manager [%s] with %d entry types, %d item comparators, %d fluid comparators and %d fluid support providers in %dms.",
-                            REIPlugin.class.getSimpleName(),
-                            EntryTypeRegistry.getInstance().values().size(),
-                            ItemComparatorRegistry.getInstance().comparatorSize(),
-                            FluidComparatorRegistry.getInstance().comparatorSize(),
-                            FluidSupportProvider.getInstance().size(),
-                            usedTime
-                    );
-                },
                 new EntryTypeRegistryImpl(),
                 new EntrySettingsAdapterRegistryImpl(),
                 new RecipeManagerContextImpl<>(RecipeManagerContextImpl.supplier()),
@@ -116,15 +103,7 @@ public class RoughlyEnoughItemsCore {
         Internals.attachInstanceSupplier(new PluginManagerImpl<>(
                 REIServerPlugin.class,
                 view -> view.then(PluginView.getInstance()),
-                usedTime -> {
-                    RoughlyEnoughItemsCore.LOGGER.info("Reloaded Plugin Manager [%s] with %d menu infos in %dms.",
-                            REIServerPlugin.class.getSimpleName(),
-                            MenuInfoRegistry.getInstance().infoSize(),
-                            usedTime
-                    );
-                },
                 new MenuInfoRegistryImpl()), "serverPluginManager");
-        Internals.attachInstanceSupplier(LOGGER, "logger");
     }
     
     public static void _reloadPlugins(@Nullable ReloadStage stage) {

@@ -68,6 +68,7 @@ import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
 import me.shedaniel.rei.impl.client.gui.performance.entry.PerformanceEntry;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -132,7 +133,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 }
                 , (field) -> field.getType() == List.class, ConfigObjectImpl.UseFilteringScreen.class);
         saveConfig();
-        RoughlyEnoughItemsCore.LOGGER.info("Config loaded.");
+        InternalLogger.getInstance().info("Config loaded");
     }
     
     private static Jankson buildJankson(Jankson.Builder builder) {
@@ -299,6 +300,7 @@ public class ConfigManagerImpl implements ConfigManager {
             return InteractionResult.PASS;
         });
         AutoConfig.getConfigHolder(ConfigObjectImpl.class).save();
+        InternalLogger.getInstance().debug("Config saved");
     }
     
     @Override

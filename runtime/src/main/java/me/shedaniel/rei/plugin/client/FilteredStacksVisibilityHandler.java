@@ -37,6 +37,7 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.entry.filtering.*;
+import me.shedaniel.rei.impl.common.InternalLogger;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -87,7 +88,7 @@ public class FilteredStacksVisibilityHandler implements DisplayVisibilityPredica
         }).forEach(map -> {
             visible.putAll(map);
         });
-        RoughlyEnoughItemsCore.LOGGER.debug("Computed existing filtered displays with %d rules in %s", filteringRules.size(), stopwatch.stop());
+        InternalLogger.getInstance().debug("Computed existing filtered displays with %d rules in %s", filteringRules.size(), stopwatch.stop());
     }
     
     private boolean checkHiddenStacks(Display display) {
