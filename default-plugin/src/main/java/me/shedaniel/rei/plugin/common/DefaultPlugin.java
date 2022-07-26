@@ -24,11 +24,8 @@
 package me.shedaniel.rei.plugin.common;
 
 import dev.architectury.event.CompoundEventResult;
+import dev.architectury.hooks.fluid.FluidBucketHooks;
 import dev.architectury.hooks.fluid.FluidStackHooks;
-import dev.architectury.injectables.annotations.ExpectPlatform;
-import dev.architectury.injectables.annotations.PlatformOnly;
-import dev.architectury.platform.Platform;
-import dev.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
@@ -93,27 +90,13 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
             ItemStack stack = entry.getValue();
             Item item = stack.getItem();
             if (item instanceof BucketItem bucketItem) {
-                Fluid fluid = getFluidFromBucket(bucketItem);
+                Fluid fluid = FluidBucketHooks.getFluid(bucketItem);
                 if (fluid != null) {
                     return CompoundEventResult.interruptTrue(Stream.of(EntryStacks.of(fluid, FluidStackHooks.bucketAmount())));
                 }
             }
             return CompoundEventResult.pass();
         });
-        if (Platform.isForge()) {
-            registerForgeFluidSupport(support);
-        }
-    }
-    
-    @ExpectPlatform
-    @PlatformOnly(PlatformOnly.FORGE)
-    private static void registerForgeFluidSupport(FluidSupportProvider support) {
-        throw new AssertionError();
-    }
-    
-    @ExpectPlatform
-    private static Fluid getFluidFromBucket(BucketItem item) {
-        throw new AssertionError();
     }
     
     @Override

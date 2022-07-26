@@ -28,6 +28,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
@@ -38,8 +39,9 @@ import net.minecraftforge.client.ForgeHooksClient;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScreenOverlayImplImpl {
-    public static void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
+public class ScreenOverlayImplForge extends ScreenOverlayImpl {
+    @Override
+    public void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
         matrices.pushPose();
         EntryStack<?> stack = tooltip.getContextStack();
         ItemStack itemStack = stack.getType() == VanillaEntryTypes.ITEM ? stack.castValue() : ItemStack.EMPTY;

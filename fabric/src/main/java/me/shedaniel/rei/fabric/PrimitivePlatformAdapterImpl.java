@@ -25,18 +25,21 @@ package me.shedaniel.rei.fabric;
 
 import com.google.common.collect.ImmutableSet;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
+import me.shedaniel.rei.impl.init.PrimitivePlatformAdapter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.SemanticVersion;
 import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.VersionParsingException;
 
-public class RoughlyEnoughItemsInitializerImpl {
-    public static boolean isClient() {
+public class PrimitivePlatformAdapterImpl implements PrimitivePlatformAdapter {
+    @Override
+    public boolean isClient() {
         return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
     }
     
-    public static void checkMods() {
+    @Override
+    public void checkMods() {
         ImmutableSet<String> requiredModules = isClient() ?
                 ImmutableSet.<String>builder()
                         .add("fabric-api-base")
@@ -78,15 +81,18 @@ public class RoughlyEnoughItemsInitializerImpl {
         }
     }
     
-    public static boolean isDev() {
+    @Override
+    public boolean isDev() {
         return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
     
-    public static String getMinecraftVersion() {
+    @Override
+    public String getMinecraftVersion() {
         return FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion().getFriendlyString();
     }
     
-    public static int compareVersions(String version1, String version2) {
+    @Override
+    public int compareVersions(String version1, String version2) {
         Version v1, v2;
         
         try {

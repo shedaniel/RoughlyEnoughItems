@@ -26,11 +26,12 @@ package me.shedaniel.rei.fabric;
 import com.google.common.base.Suppliers;
 import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
-import me.shedaniel.rei.RoughlyEnoughItemsInitializer;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.plugins.*;
 import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.init.PluginDetector;
+import me.shedaniel.rei.impl.init.PrimitivePlatformAdapter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
@@ -49,7 +50,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class PluginDetectorImpl {
+public class PluginDetectorImpl implements PluginDetector {
     private static <P extends REIPlugin<?>> void loadPlugin(Class<? extends P> pluginClass, Consumer<? super REIPluginProvider<P>> consumer) {
         Map<String, Env> entrypoints = new LinkedHashMap<>();
         entrypoints.put("rei_server", Env.SERVER);
@@ -103,7 +104,7 @@ public class PluginDetectorImpl {
             } catch (Throwable t) {
                 Throwable throwable = t;
                 while (throwable != null) {
-                    if (throwable.getMessage() != null && throwable.getMessage().contains("environment type SERVER") && !RoughlyEnoughItemsInitializer.isClient()) {
+                    if (throwable.getMessage() != null && throwable.getMessage().contains("environment type SERVER") && !PrimitivePlatformAdapter.get().isClient()) {
                         RoughlyEnoughItemsState.LOGGER.warn("Rerached side issue when loading REI plugin by %s. Please use \"rei_server\", \"rei_client\" or \"rei_common\" instead.".formatted(container.getProvider().getMetadata().getName()));
                         continue out;
                     }
@@ -122,7 +123,8 @@ public class PluginDetectorImpl {
         return simpleName;
     }
     
-    public static void detectServerPlugins() {
+    @Override
+    public void detectServerPlugins() {
         loadPlugin(REIServerPlugin.class, ((PluginView<REIServerPlugin>) PluginManager.getServerInstance())::registerPlugin);
         try {
             PluginView.getServerInstance().registerPlugin((REIServerPlugin) Class.forName("me.shedaniel.rei.impl.common.compat.FabricFluidAPISupportPlugin").getConstructor().newInstance());
@@ -132,29 +134,33 @@ public class PluginDetectorImpl {
     }
     
     @SuppressWarnings({"RedundantCast", "rawtypes"})
-    public static void detectCommonPlugins() {
+    @Override
+    public void detectCommonPlugins() {
         loadPlugin((Class<? extends REIPlugin<?>>) (Class) REIPlugin.class, ((PluginView<REIPlugin<?>>) PluginManager.getInstance())::registerPlugin);
     }
     
     @Environment(EnvType.CLIENT)
-    public static void detectClientPlugins() {
-        loadPlugin(REIClientPlugin.class, ((PluginView<REIClientPlugin>) PluginManager.getClientInstance())::registerPlugin);
-        Supplier<Method> method = Suppliers.memoize(() -> {
-            String methodName = FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary", "net.minecraft.class_437", "method_32635", "(Ljava/util/List;Lnet/minecraft/class_5632;)V");
-            try {
-                Method declaredMethod = Screen.class.getDeclaredMethod(methodName, List.class, TooltipComponent.class);
-                if (declaredMethod != null) declaredMethod.setAccessible(true);
-                return declaredMethod;
-            } catch (NoSuchMethodException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        ClientInternals.attachInstance((BiConsumer<List<ClientTooltipComponent>, TooltipComponent>) (lines, component) -> {
-            try {
-                method.get().invoke(null, lines, component);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-        }, "clientTooltipComponentProvider");
+    @Override
+    public Supplier<Runnable> detectClientPlugins() {
+        return () -> () -> {
+            loadPlugin(REIClientPlugin.class, ((PluginView<REIClientPlugin>) PluginManager.getClientInstance())::registerPlugin);
+            Supplier<Method> method = Suppliers.memoize(() -> {
+                String methodName = FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary", "net.minecraft.class_437", "method_32635", "(Ljava/util/List;Lnet/minecraft/class_5632;)V");
+                try {
+                    Method declaredMethod = Screen.class.getDeclaredMethod(methodName, List.class, TooltipComponent.class);
+                    if (declaredMethod != null) declaredMethod.setAccessible(true);
+                    return declaredMethod;
+                } catch (NoSuchMethodException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            ClientInternals.attachInstance((BiConsumer<List<ClientTooltipComponent>, TooltipComponent>) (lines, component) -> {
+                try {
+                    method.get().invoke(null, lines, component);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            }, "clientTooltipComponentProvider");
+        };
     }
 }

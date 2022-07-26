@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.client.gui.fabric;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.ClientInternals;
-import me.shedaniel.rei.impl.client.gui.widget.QueuedTooltip;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -40,8 +40,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ScreenOverlayImplImpl {
-    public static void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
+public class ScreenOverlayImplFabric extends ScreenOverlayImpl {
+    @Override
+    public void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
         List<ClientTooltipComponent> lines = tooltip.entries().stream()
                 .flatMap(component -> {
                     if (component.isText()) {

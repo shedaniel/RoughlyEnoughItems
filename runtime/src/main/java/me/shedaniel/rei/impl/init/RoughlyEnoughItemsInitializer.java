@@ -21,10 +21,9 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei;
+package me.shedaniel.rei.impl.init;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.fabricmc.api.EnvType;
+import me.shedaniel.rei.RoughlyEnoughItemsState;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
@@ -34,15 +33,16 @@ public class RoughlyEnoughItemsInitializer {
     public static final String COMPATIBLE_MC_VERSION_HIGH = "1.19";
     
     public static void onInitialize() {
-        RoughlyEnoughItemsState.env = isClient() ? EnvType.CLIENT : EnvType.SERVER;
-        RoughlyEnoughItemsState.isDev = isDev();
-    
-        String minecraftVersion = getMinecraftVersion();
-        if (minecraftVersion.startsWith("1.") && (compareVersions(minecraftVersion, COMPATIBLE_MC_VERSION_LOW) < 0 || compareVersions(minecraftVersion, COMPATIBLE_MC_VERSION_HIGH) >= 0)) {
+        PrimitivePlatformAdapter adapter = PrimitivePlatformAdapter.get();
+        RoughlyEnoughItemsState.client = adapter.isClient();
+        RoughlyEnoughItemsState.isDev = adapter.isDev();
+        
+        String minecraftVersion = adapter.getMinecraftVersion();
+        if (minecraftVersion.startsWith("1.") && (adapter.compareVersions(minecraftVersion, COMPATIBLE_MC_VERSION_LOW) < 0 || adapter.compareVersions(minecraftVersion, COMPATIBLE_MC_VERSION_HIGH) >= 0)) {
             RoughlyEnoughItemsState.error("Your current REI version (for >=" + COMPATIBLE_MC_VERSION_LOW + " and <" + COMPATIBLE_MC_VERSION_HIGH + ") is not compatible with your current Minecraft version (" + minecraftVersion + ").");
         }
         
-        checkMods();
+        adapter.checkMods();
         
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
             initializeEntryPoint(false, "me.shedaniel.rei.RoughlyEnoughItemsCore");
@@ -66,7 +66,7 @@ public class RoughlyEnoughItemsInitializer {
             Object instance = name.getConstructor().newInstance();
             Method method = null;
             if (client) {
-                if (isClient()) {
+                if (PrimitivePlatformAdapter.get().isClient()) {
                     try {
                         method = name.getDeclaredMethod("onInitializeClient");
                     } catch (NoSuchMethodException ignored) {
@@ -87,30 +87,5 @@ public class RoughlyEnoughItemsInitializer {
         } catch (Throwable e) {
             throw new RuntimeException("Failed to initialize REI entry point: " + className, e);
         }
-    }
-    
-    @ExpectPlatform
-    public static boolean isClient() {
-        throw new AssertionError();
-    }
-    
-    @ExpectPlatform
-    public static boolean isDev() {
-        throw new AssertionError();
-    }
-    
-    @ExpectPlatform
-    public static void checkMods() {
-        throw new AssertionError();
-    }
-    
-    @ExpectPlatform
-    public static String getMinecraftVersion() {
-        throw new AssertionError();
-    }
-    
-    @ExpectPlatform
-    public static int compareVersions(String version1, String version2) {
-        throw new AssertionError();
     }
 }

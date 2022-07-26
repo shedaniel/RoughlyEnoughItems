@@ -26,8 +26,6 @@ package me.shedaniel.rei.plugin.client;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import dev.architectury.injectables.annotations.ExpectPlatform;
-import dev.architectury.injectables.annotations.PlatformOnly;
 import dev.architectury.platform.Platform;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
@@ -322,9 +320,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         }
     }
     
-    @ExpectPlatform
-    @PlatformOnly(PlatformOnly.FORGE)
-    private static void registerForgePotions(DisplayRegistry registry, BuiltinClientPlugin clientPlugin) {
+    protected void registerForgePotions(DisplayRegistry registry, BuiltinClientPlugin clientPlugin) {
         
     }
     
