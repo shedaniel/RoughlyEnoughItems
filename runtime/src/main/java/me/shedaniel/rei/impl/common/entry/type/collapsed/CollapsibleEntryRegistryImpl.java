@@ -29,6 +29,7 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
     private final List<Entry> entries = new ArrayList<>();
@@ -44,17 +46,25 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
     public <T> void group(ResourceLocation id, Component name, List<? extends EntryStack<? extends T>> stacks) {
         Objects.requireNonNull(stacks, "stacks");
         this.entries.add(new Entry(id.getNamespace(), name, new ListMatcher(stacks)));
+        InternalLogger.getInstance().debug("Added collapsible entry group [%s] %s with %d entries", id, name.getString(), stacks.size());
     }
     
     @Override
     public void group(ResourceLocation id, Component name, Predicate<? extends EntryStack<?>> predicate) {
         Objects.requireNonNull(predicate, "predicate");
         this.entries.add(new Entry(id.getNamespace(), name, (stack, hashExact) -> ((Predicate<EntryStack<?>>) predicate).test(stack)));
+        InternalLogger.getInstance().debug("Added collapsible entry group [%s] %s with dynamic predicate", id, name.getString());
     }
     
     @Override
     public void startReload() {
         this.entries.clear();
+    }
+    
+    @Override
+    public void endReload() {
+        InternalLogger.getInstance().debug("Registered %d collapsible entry groups: ", entries.size(),
+                entries.stream().map(entry -> entry.getName().getString()).collect(Collectors.joining(", ")));
     }
     
     @Override

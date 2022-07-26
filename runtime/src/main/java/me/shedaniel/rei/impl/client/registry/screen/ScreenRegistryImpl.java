@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.registry.screen;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.platform.Window;
 import dev.architectury.event.CompoundEventResult;
@@ -46,6 +45,7 @@ import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.gui.screen.AbstractDisplayViewingScreen;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -69,7 +69,7 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     private List<OverlayDecider> deciders = new CopyOnWriteArrayList<>();
     private Map<Class<?>, List<OverlayDecider>> cache = new HashMap<>();
     private ExclusionZones exclusionZones = new ExclusionZonesImpl();
-    private Class<? extends Screen> tmpScreen;
+    private final ThreadLocal<Class<? extends Screen>> tmpScreen = new ThreadLocal<>();
     
     @Override
     public ReloadStage getStage() {
@@ -91,15 +91,15 @@ public class ScreenRegistryImpl implements ScreenRegistry {
             return possibleCached;
         }
         
-        tmpScreen = screenClass;
+        tmpScreen.set(screenClass);
         List<OverlayDecider> deciders = CollectionUtils.filterToList(this.deciders, this::filterResponsible);
         cache.put(screenClass, deciders);
-        tmpScreen = null;
+        tmpScreen.remove();
         return deciders;
     }
     
     private boolean filterResponsible(OverlayDecider handler) {
-        return handler.isHandingScreen(tmpScreen);
+        return handler.isHandingScreen(tmpScreen.get());
     }
     
     @Override
@@ -158,17 +158,15 @@ public class ScreenRegistryImpl implements ScreenRegistry {
         deciders.add(decider);
         deciders.sort(Comparator.reverseOrder());
         cache.clear();
-        tmpScreen = null;
-        registerDraggableComponentProvider(DraggableComponentProviderWidget.from(context ->
-                Widgets.walk(context.getScreen().children(), DraggableComponentProviderWidget.class::isInstance)));
-        registerDraggableComponentVisitor(DraggableComponentVisitorWidget.from(context ->
-                Widgets.walk(context.getScreen().children(), DraggableComponentVisitorWidget.class::isInstance)));
+        tmpScreen.remove();
+        InternalLogger.getInstance().debug("Added overlay decider: %s [%.2f priority]", decider, decider.getPriority());
     }
     
     @Override
     public void registerFocusedStack(FocusedStackProvider provider) {
         focusedStackProviders.add(provider);
         focusedStackProviders.sort(Comparator.reverseOrder());
+        InternalLogger.getInstance().debug("Added focused stack provider: %s [%.2f priority]", provider, provider.getPriority());
     }
     
     @Override
@@ -185,12 +183,14 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     public <T extends Screen, A> void registerDraggableComponentProvider(DraggableComponentProvider<T, A> provider) {
         draggableProviders.add((DraggableComponentProvider<Screen, Object>) provider);
         draggableProviders.sort(Comparator.reverseOrder());
+        InternalLogger.getInstance().debug("Added draggable component provider: %s [%.2f priority]", provider, provider.getPriority());
     }
     
     @Override
     public <T extends Screen> void registerDraggableComponentVisitor(DraggableComponentVisitor<T> visitor) {
         draggableVisitors.add((DraggableComponentVisitor<Screen>) visitor);
         draggableVisitors.sort(Comparator.reverseOrder());
+        InternalLogger.getInstance().debug("Added draggable component visitor: %s [%.2f priority]", visitor, visitor.getPriority());
     }
     
     @Override
@@ -220,6 +220,7 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     @Override
     public <T extends Screen> void registerClickArea(Class<? extends T> screenClass, ClickArea<T> area) {
         clickAreas.put(screenClass, area);
+        InternalLogger.getInstance().debug("Added click area provider for %s: %s", screenClass.getName(), area);
     }
     
     @Override
@@ -243,9 +244,14 @@ public class ScreenRegistryImpl implements ScreenRegistry {
         focusedStackProviders.clear();
         draggableProviders.clear();
         draggableVisitors.clear();
-        tmpScreen = null;
+        tmpScreen.remove();
         
         registerDefault();
+    }
+    
+    @Override
+    public void endReload() {
+        InternalLogger.getInstance().debug("Registered %d overlay deciders and %d exclusion zones", deciders.size(), exclusionZones.getZonesCount());
     }
     
     private void registerDefault() {
@@ -307,5 +313,9 @@ public class ScreenRegistryImpl implements ScreenRegistry {
                 return -10.0;
             }
         });
+        registerDraggableComponentProvider(DraggableComponentProviderWidget.from(context ->
+                Widgets.walk(context.getScreen().children(), DraggableComponentProviderWidget.class::isInstance)));
+        registerDraggableComponentVisitor(DraggableComponentVisitorWidget.from(context ->
+                Widgets.walk(context.getScreen().children(), DraggableComponentVisitorWidget.class::isInstance)));
     }
 }

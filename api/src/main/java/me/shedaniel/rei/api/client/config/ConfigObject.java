@@ -30,7 +30,9 @@ import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -235,6 +237,10 @@ public interface ConfigObject {
      */
     int getMaxRecipesPageHeight();
     
+    @ApiStatus.Experimental
+    @Nullable
+    ResourceLocation getInputMethodId();
+    
     boolean doesDisableRecipeBook();
     
     boolean doesFixTabCloseContainer();
@@ -313,6 +319,7 @@ public interface ConfigObject {
     @ApiStatus.Experimental
     boolean doDebugSearchTimeRequired();
     
+    @Deprecated(forRemoval = true)
     boolean isSubsetsEnabled();
     
     boolean isInventoryHighlightingAllowed();

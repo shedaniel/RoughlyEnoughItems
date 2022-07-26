@@ -9,6 +9,7 @@
   "text.rei.search.field.suggestion": "Serĉi...",
   "text.rei.feedback": "Ĉu vi volas prikomenti al la programisto de REI? %s por sendi vian prikomenton!",
   "text.rei.feedback.link": "Alklaku min por iri al la Google Form",
+  "text.rei.support.me": "Subtenu min daŭre faru REI pli bonan projekton!",
   "text.rei.not.fully.initialized": "REI ankoraŭ ne plene komenciĝitis!",
   "text.rei.not.fully.initialized.tooltip": "Mankas fazoj: %s\nSe ĉi tiu ne malaperos,\nprovu serĉi subtenon kun la protokoloj!",
   "text.rei.inventory.highlighting.enabled": "Markado de Inventaro Ŝaltitas",

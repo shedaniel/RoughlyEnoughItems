@@ -112,19 +112,6 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
     }
     
     @Override
-    public void setPage(int page) {
-    }
-    
-    @Override
-    public int getPage() {
-        return 0;
-    }
-    
-    public int getTotalPages() {
-        return 1;
-    }
-    
-    @Override
     protected void updateEntries(int entrySize, boolean zoomed) {
         int width = innerBounds.width / entrySize;
         int pageHeight = innerBounds.height / entrySize;

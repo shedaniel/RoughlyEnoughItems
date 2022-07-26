@@ -4,10 +4,6 @@ architectury {
     common(forgeEnabled.toBoolean())
 }
 
-repositories {
-    maven { url "https://mod-buildcraft.com/maven" }
-}
-
 loom {
     accessWidenerPath = gradle.rootProject.project("fabric").file("src/main/resources/roughlyenoughitems.accessWidener")
 }
@@ -18,6 +14,12 @@ dependencies {
     modApi("dev.architectury:architectury:${architectury_version}")
     compileClasspath(annotationProcessor("org.projectlombok:lombok:1.18.22"))
     compileClasspath(project(path: ":api", configuration: "namedElements"))
+    testImplementation(project(path: ":api", configuration: "namedElements"))
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
+}
+
+test {
+    useJUnitPlatform()
 }
 
 remapJar {

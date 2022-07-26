@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.registry.category;
 
 import com.google.common.base.MoreObjects;
 import dev.architectury.event.EventResult;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.ButtonArea;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -36,10 +35,12 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategoryView;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class CategoryRegistryImpl implements CategoryRegistry {
@@ -55,6 +56,15 @@ public class CategoryRegistryImpl implements CategoryRegistry {
     @Override
     public void startReload() {
         this.categories.clear();
+        this.listeners.clear();
+        this.visibilityPredicates.clear();
+    }
+    
+    @Override
+    public void endReload() {
+        InternalLogger.getInstance().debug("Registered %d categories: %s", this.categories.size(),
+                this.categories.values().stream().map(configuration -> configuration.getCategory().getTitle().getString())
+                        .collect(Collectors.joining(", ")));
     }
     
     @Override
@@ -70,6 +80,8 @@ public class CategoryRegistryImpl implements CategoryRegistry {
                 listener.accept(configuration);
             }
         }
+        
+        InternalLogger.getInstance().debug("Added category [%s]: %s", category.getCategoryIdentifier(), category.getTitle().getString());
     }
     
     @Override
@@ -106,6 +118,7 @@ public class CategoryRegistryImpl implements CategoryRegistry {
     public void registerVisibilityPredicate(CategoryVisibilityPredicate predicate) {
         visibilityPredicates.add(predicate);
         visibilityPredicates.sort(Comparator.reverseOrder());
+        InternalLogger.getInstance().debug("Added category visibility predicate: %s [%.2f priority]", predicate, predicate.getPriority());
     }
     
     @Override
@@ -117,7 +130,7 @@ public class CategoryRegistryImpl implements CategoryRegistry {
                     return result.isEmpty() || result.isTrue();
                 }
             } catch (Throwable throwable) {
-                RoughlyEnoughItemsCore.LOGGER.error("Failed to check if the category is visible!", throwable);
+                InternalLogger.getInstance().error("Failed to check if the category is visible!", throwable);
             }
         }
         

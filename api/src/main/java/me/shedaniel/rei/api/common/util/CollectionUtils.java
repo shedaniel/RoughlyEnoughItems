@@ -421,4 +421,41 @@ public class CollectionUtils {
     public static Ingredient toIngredient(Iterable<ItemStack> stacks) {
         return Ingredient.of(StreamSupport.stream(stacks.spliterator(), false));
     }
+    
+    @SafeVarargs
+    public static <T> List<T> concatUnmodifiable(List<? extends T>... lists) {
+        return new ListConcatenationView<>(lists);
+    }
+    
+    /**
+     * A list which acts as view of the concatenation of a number of lists.
+     */
+    private static class ListConcatenationView<E> extends AbstractList<E> {
+        private final List<? extends E>[] lists;
+        
+        @SafeVarargs
+        public ListConcatenationView(List<? extends E>... lists) {
+            this.lists = lists;
+        }
+        
+        @Override
+        public E get(int ix) {
+            int localIx = ix;
+            for (List<? extends E> l : lists) {
+                if (localIx < 0) throw new IndexOutOfBoundsException(ix);
+                if (localIx < l.size()) return l.get(localIx);
+                localIx -= l.size();
+            }
+            return null;
+        }
+        
+        @Override
+        public int size() {
+            int size = 0;
+            for (List<? extends E> l : lists) {
+                size += l.size();
+            }
+            return size;
+        }
+    }
 }

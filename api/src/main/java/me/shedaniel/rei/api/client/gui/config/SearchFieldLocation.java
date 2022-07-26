@@ -37,6 +37,6 @@ public enum SearchFieldLocation {
     
     @Override
     public String toString() {
-        return I18n.get("config.roughlyenoughitems.layout.searchFieldLocation.%s", name().toLowerCase(Locale.ROOT));
+        return I18n.get("config.roughlyenoughitems.layout.searchFieldLocation.%s".formatted(name().toLowerCase(Locale.ROOT)));
     }
 }

@@ -24,19 +24,24 @@
 package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.rei.api.common.plugins.PluginManager;
 import net.minecraft.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
+
+import java.util.function.BooleanSupplier;
 
 @ApiStatus.Internal
 public class ConfigReloadingScreen extends Screen {
+    private final Component title;
+    private final BooleanSupplier predicate;
     private Runnable parent;
     
-    public ConfigReloadingScreen(Runnable parent) {
+    public ConfigReloadingScreen(Component title, BooleanSupplier predicate, Runnable parent) {
         super(NarratorChatListener.NO_TITLE);
+        this.title = title;
+        this.predicate = predicate;
         this.parent = parent;
     }
     
@@ -48,10 +53,11 @@ public class ConfigReloadingScreen extends Screen {
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         this.renderDirtBackground(0);
-        if (!PluginManager.areAnyReloading()) {
+        if (!predicate.getAsBoolean()) {
             parent.run();
+            return;
         }
-        drawCenteredString(matrices, this.font, I18n.get("text.rei.config.is.reloading"), this.width / 2, this.height / 2 - 50, 16777215);
+        drawCenteredString(matrices, this.font, title, this.width / 2, this.height / 2 - 50, 16777215);
         String text;
         switch ((int) (Util.getMillis() / 300L % 4L)) {
             case 0:

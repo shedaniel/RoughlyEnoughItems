@@ -24,17 +24,11 @@
 package me.shedaniel.rei.impl.client.search;
 
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
-import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
-import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
-import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.api.common.util.EntryStacks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +38,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-public class AsyncSearchManager {
+public class AsyncSearchManager implements Supplier<List<EntryStack<?>>> {
     private final Supplier<List<EntryStack<?>>> stacksProvider;
     private final Supplier<Predicate<EntryStack<?>>> additionalPredicateSupplier;
     private final UnaryOperator<EntryStack<?>> transformer;
@@ -59,19 +53,6 @@ public class AsyncSearchManager {
         this.stacksProvider = stacksProvider;
         this.additionalPredicateSupplier = additionalPredicateSupplier;
         this.transformer = transformer;
-    }
-    
-    public static AsyncSearchManager createDefault() {
-        return new AsyncSearchManager(EntryRegistry.getInstance()::getPreFilteredList, () -> {
-            boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled();
-            LongSet workingItems = checkCraftable ? new LongOpenHashSet() : null;
-            if (checkCraftable) {
-                for (EntryStack<?> stack : Views.getInstance().findCraftableEntriesByMaterials()) {
-                    workingItems.add(EntryStacks.hashExact(stack));
-                }
-            }
-            return checkCraftable ? stack -> workingItems.contains(EntryStacks.hashExact(stack)) : stack -> true;
-        }, EntryStack::normalize);
     }
     
     public void markDirty() {
@@ -101,7 +82,7 @@ public class AsyncSearchManager {
     public Future<Void> getAsync(Consumer<List<EntryStack<?>>> consumer) {
         if (future == null || future.isCancelled() || future.isDone() || future.isCompletedExceptionally()) {
             if (future != null) future.cancel(true);
-            future = CompletableFuture.supplyAsync(this::get)
+            future = CompletableFuture.supplyAsync(this)
                     .exceptionally(throwable -> {
                         throwable.printStackTrace();
                         return null;
@@ -110,6 +91,7 @@ public class AsyncSearchManager {
         return future.thenAccept(consumer);
     }
     
+    @Override
     public List<EntryStack<?>> get() {
         if (isDirty()) {
             this.additionalPredicate = additionalPredicateSupplier.get();

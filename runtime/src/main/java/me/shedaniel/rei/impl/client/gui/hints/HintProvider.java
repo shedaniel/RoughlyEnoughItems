@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.client.gui.hints;
 
 import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -32,6 +33,7 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 @Environment(EnvType.CLIENT)
 public interface HintProvider {
@@ -46,4 +48,8 @@ public interface HintProvider {
     }
     
     Color getColor();
+    
+    List<HintButton> getButtons();
+    
+    record HintButton(Component name, Consumer<Rectangle> action) {}
 }

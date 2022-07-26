@@ -24,32 +24,38 @@
 package me.shedaniel.rei.forge;
 
 import me.shedaniel.rei.RoughlyEnoughItemsState;
+import me.shedaniel.rei.impl.init.PrimitivePlatformAdapter;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 
-public class RoughlyEnoughItemsInitializerImpl {
-    public static boolean isClient() {
+public class PrimitivePlatformAdapterImpl implements PrimitivePlatformAdapter {
+    @Override
+    public boolean isClient() {
         return FMLEnvironment.dist == Dist.CLIENT;
     }
     
-    public static void checkMods() {
+    @Override
+    public void checkMods() {
         if (ModList.get().isLoaded("moreoverlays")) {
             RoughlyEnoughItemsState.error("REI is not compatible with MoreOverlays, and actually contains Builtin Inventory Highlighting, other features can be installed via different mods!");
         }
     }
     
-    public static boolean isDev() {
+    @Override
+    public boolean isDev() {
         return !FMLLoader.isProduction();
     }
     
-    public static String getMinecraftVersion() {
+    @Override
+    public String getMinecraftVersion() {
         return ModList.get().getModContainerById("minecraft").get().getModInfo().getVersion().toString();
     }
     
-    public static int compareVersions(String version1, String version2) {
+    @Override
+    public int compareVersions(String version1, String version2) {
         ComparableVersion v1 = new ComparableVersion(version1);
         ComparableVersion v2 = new ComparableVersion(version2);
         

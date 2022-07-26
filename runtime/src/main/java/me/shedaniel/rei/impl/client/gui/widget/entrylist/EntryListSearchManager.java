@@ -24,19 +24,25 @@
 package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
 import com.google.common.base.Stopwatch;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.EntryPanelOrdering;
 import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -55,7 +61,16 @@ public class EntryListSearchManager {
     
     public static final EntryListSearchManager INSTANCE = new EntryListSearchManager();
     
-    private AsyncSearchManager searchManager = AsyncSearchManager.createDefault();
+    private AsyncSearchManager searchManager = new AsyncSearchManager(EntryRegistry.getInstance()::getPreFilteredList, () -> {
+        boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled();
+        LongSet workingItems = checkCraftable ? new LongOpenHashSet() : null;
+        if (checkCraftable) {
+            for (EntryStack<?> stack : Views.getInstance().findCraftableEntriesByMaterials()) {
+                workingItems.add(EntryStacks.hashExact(stack));
+            }
+        }
+        return checkCraftable ? stack -> workingItems.contains(EntryStacks.hashExact(stack)) : stack -> true;
+    }, EntryStack::normalize);
     
     public void update(String searchTerm, boolean ignoreLastSearch, Consumer<List</*EntryStack<?> | CollapsedStack*/ Object>> update) {
         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -65,9 +80,7 @@ public class EntryListSearchManager {
             searchManager.getAsync(list -> {
                 List</*EntryStack<?> | CollapsedStack*/ Object> finalList = collapse(copyAndOrder(list));
                 
-                if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
-                    RoughlyEnoughItemsCore.LOGGER.info("Search Used: %s", stopwatch.stop().toString());
-                }
+                InternalLogger.getInstance().log(ConfigObject.getInstance().doDebugSearchTimeRequired() ? Level.INFO : Level.TRACE, "Search Used: %s", stopwatch.stop().toString());
                 
                 Minecraft.getInstance().executeBlocking(() -> {
                     update.accept(finalList);

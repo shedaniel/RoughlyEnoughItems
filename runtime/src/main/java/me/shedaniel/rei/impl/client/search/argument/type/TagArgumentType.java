@@ -41,7 +41,6 @@ import java.util.stream.Stream;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public final class TagArgumentType extends ArgumentType<Unit, String[]> {
-    public static final TagArgumentType INSTANCE = new TagArgumentType();
     private static final String[] EMPTY_ARRAY = new String[0];
     private static final Style STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0x9efff4));
     
@@ -69,17 +68,17 @@ public final class TagArgumentType extends ArgumentType<Unit, String[]> {
     @Override
     public String[] cacheData(EntryStack<?> stack) {
         Stream<TagKey<?>> tags = stack.getTagsFor();
-        return tags.map(TagArgumentType::toString).toArray(String[]::new);
+        String[] array = tags.map(TagArgumentType::toString).toArray(String[]::new);
+        return array.length == 0 ? EMPTY_ARRAY : array;
     }
     
     @Override
-    public boolean matches(String[] data, EntryStack<?> stack, String searchText, Unit filterData) {
+    public void matches(String[] data, EntryStack<?> stack, Unit filterData, ResultSink sink) {
         for (String tag : data) {
-            if (!tag.isEmpty() && tag.contains(searchText)) {
-                return true;
+            if (!tag.isEmpty() && sink.testString(tag)) {
+                return;
             }
         }
-        return false;
     }
     
     @Override
@@ -89,8 +88,5 @@ public final class TagArgumentType extends ArgumentType<Unit, String[]> {
     
     private static String toString(TagKey<?> tagKey) {
         return Objects.toString(tagKey.location());
-    }
-    
-    private TagArgumentType() {
     }
 }

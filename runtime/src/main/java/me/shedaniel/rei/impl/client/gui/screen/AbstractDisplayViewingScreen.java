@@ -350,7 +350,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return super.mouseClicked(mouseX, mouseY, button) || (getOverlay().mouseClicked(mouseX, mouseY, button) && handleFocuses());
+        return super.mouseClicked(mouseX, mouseY, button) || (getOverlay().mouseClicked(mouseX, mouseY, button) && handleFocuses(button));
     }
     
     @Override

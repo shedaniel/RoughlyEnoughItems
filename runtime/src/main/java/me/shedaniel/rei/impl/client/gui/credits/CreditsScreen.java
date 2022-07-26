@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.credits;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import dev.architectury.platform.Platform;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TextCreditsItem;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
@@ -41,6 +40,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -130,9 +130,14 @@ public class CreditsScreen extends Screen {
         addRenderableWidget(buttonDone = new Button(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> openPrevious()));
     }
     
-    @ExpectPlatform
     private static void fillTranslators(Exception[] exception, List<Tuple<String, List<TranslatorEntry>>> translators) {
-        throw new AssertionError();
+        try {
+            Class.forName("me.shedaniel.rei.impl.client.gui.credits.%s.CreditsScreenImpl".formatted(Platform.isForge() ? "forge" : "fabric"))
+                    .getDeclaredMethod("fillTranslators", Exception[].class, List.class)
+                    .invoke(null, exception, translators);
+        } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     private void openPrevious() {
