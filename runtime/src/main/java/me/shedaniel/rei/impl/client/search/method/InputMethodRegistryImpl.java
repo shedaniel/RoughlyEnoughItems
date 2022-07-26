@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class InputMethodRegistryImpl implements InputMethodRegistry {
     private final Map<ResourceLocation, InputMethod<?>> inputMethods = Maps.newHashMap();
@@ -46,6 +47,7 @@ public class InputMethodRegistryImpl implements InputMethodRegistry {
     @Override
     public void add(ResourceLocation id, InputMethod<?> inputMethod) {
         this.inputMethods.put(id, inputMethod);
+        InternalLogger.getInstance().debug("Added input method [%s]: %s", id, inputMethod.getName().getString());
     }
     
     @Override
@@ -95,6 +97,9 @@ public class InputMethodRegistryImpl implements InputMethodRegistry {
             }
         }).join();
         service.shutdown();
+        
+        InternalLogger.getInstance().debug("Registered %d input methods: ", inputMethods.size(),
+                inputMethods.values().stream().map(inputMethod -> inputMethod.getName().getString()).collect(Collectors.joining(", ")));
     }
     
     @Override

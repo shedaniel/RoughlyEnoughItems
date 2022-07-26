@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.mutable.MutableLong;
@@ -67,6 +68,7 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
     @Override
     public void register(ResourceLocation id, FavoriteEntryType<?> type) {
         this.registry.put(id, type);
+        InternalLogger.getInstance().debug("Added favorite entry type [%s]: %s", id, type);
     }
     
     @Override
@@ -97,6 +99,7 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
     @Override
     public <A extends FavoriteEntry> void registerSystemFavorites(SystemFavoriteEntryProvider<A> provider) {
         this.systemFavorites.add(Triple.of(provider, new MutableLong(-1), new ArrayList<>()));
+        InternalLogger.getInstance().debug("Added system favorites: %s", provider);
     }
     
     public List<Triple<SystemFavoriteEntryProvider<?>, MutableLong, List<FavoriteEntry>>> getSystemProviders() {
@@ -119,6 +122,8 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
             
             ConfigManager.getInstance().saveConfig();
         }
+        
+        InternalLogger.getInstance().debug("Registered %d favorite entry types", registry.size());
     }
     
     private static class SectionImpl implements FavoriteEntryType.Section {
