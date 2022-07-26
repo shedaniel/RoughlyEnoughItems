@@ -36,13 +36,13 @@ import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
@@ -88,7 +88,7 @@ public class CachedEntryListRender {
     
     public static void refresh() {
         if (ConfigObject.getInstance().doesCacheEntryRendering()) {
-            RoughlyEnoughItemsCore.LOGGER.info("Refreshing cached entry list texture...");
+            InternalLogger.getInstance().info("Refreshing cached entry list texture...");
         }
         if (cachedTextureLocation != null) {
             Minecraft.getInstance().getTextureManager().release(cachedTextureLocation);
@@ -139,7 +139,7 @@ public class CachedEntryListRender {
         int width = side * RESOLUTION;
         int height = side * RESOLUTION;
         
-        RoughlyEnoughItemsCore.LOGGER.info("Preparing cached texture with size %sx%s for %sx%s entries", width, height, side, side);
+        InternalLogger.getInstance().info("Preparing cached texture with size %sx%s for %sx%s entries", width, height, side, side);
         
         hash = new Long2LongOpenHashMap(list.size() + 10);
         Minecraft minecraft = Minecraft.getInstance();

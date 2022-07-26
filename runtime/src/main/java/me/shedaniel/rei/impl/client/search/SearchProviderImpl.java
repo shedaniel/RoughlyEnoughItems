@@ -33,6 +33,7 @@ import me.shedaniel.rei.impl.client.search.argument.Argument;
 import me.shedaniel.rei.impl.client.search.argument.CompoundArgument;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 
@@ -68,6 +69,7 @@ public class SearchProviderImpl implements SearchProvider {
                     .map(Argument::getArgument)
                     .distinct()
                     .collect(Collectors.toList()));
+            InternalLogger.getInstance().debug("Created search filter with %s using %s", filter, inputMethod.getName().getString());
         }
         
         @Override

@@ -28,7 +28,6 @@ import dev.architectury.event.EventResult;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMaps;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
@@ -37,6 +36,7 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.entry.filtering.*;
+import me.shedaniel.rei.impl.common.InternalLogger;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -87,7 +87,7 @@ public class FilteredStacksVisibilityHandler implements DisplayVisibilityPredica
         }).forEach(map -> {
             visible.putAll(map);
         });
-        RoughlyEnoughItemsCore.LOGGER.debug("Computed existing filtered displays with %d rules in %s", filteringRules.size(), stopwatch.stop());
+        InternalLogger.getInstance().debug("Computed existing filtered displays with %d rules in %s", filteringRules.size(), stopwatch.stop());
     }
     
     private boolean checkHiddenStacks(Display display) {

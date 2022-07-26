@@ -26,7 +26,9 @@ package me.shedaniel.rei.mixin.forge;
 import com.google.common.base.Stopwatch;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectMaps;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -93,6 +95,6 @@ public class MixinTagLoader<T> {
             }
         }
         
-        RoughlyEnoughItemsCore.LOGGER.info("Processed %d tags in %s for %s", tagDataMap.size(), stopwatch.stop(), resourceKey.location());
+        InternalLogger.getInstance().debug("Processed %d tags in %s for %s", tagDataMap.size(), stopwatch.stop(), resourceKey.location());
     }
 }

@@ -44,9 +44,6 @@ import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
-import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
-import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
-import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
@@ -78,6 +75,7 @@ import me.shedaniel.rei.impl.client.search.method.InputMethodRegistryImpl;
 import me.shedaniel.rei.impl.client.subsets.SubsetsRegistryImpl;
 import me.shedaniel.rei.impl.client.transfer.TransferHandlerRegistryImpl;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.types.EmptyEntryDefinition;
@@ -120,7 +118,6 @@ import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
@@ -131,7 +128,7 @@ public class RoughlyEnoughItemsCoreClient {
         Thread thread = new Thread(task, "REI-ReloadPlugins");
         thread.setDaemon(true);
         thread.setUncaughtExceptionHandler(($, exception) -> {
-            RoughlyEnoughItemsCore.LOGGER.throwException(exception);
+            InternalLogger.getInstance().throwException(exception);
         });
         return thread;
     });
@@ -210,22 +207,6 @@ public class RoughlyEnoughItemsCoreClient {
         ClientInternals.attachInstanceSupplier(new PluginManagerImpl<>(
                 REIClientPlugin.class,
                 view -> view.then(PluginView.getInstance()),
-                usedTime -> {
-                    RoughlyEnoughItemsCore.LOGGER.info("Reloaded Plugin Manager [%s] with %d entries, %d displays, %d display visibility predicates, %d categories (%s), %d exclusion zones and %d overlay deciders in %dms.",
-                            REIClientPlugin.class.getSimpleName(),
-                            EntryRegistry.getInstance().size(),
-                            DisplayRegistry.getInstance().displaySize(),
-                            DisplayRegistry.getInstance().getVisibilityPredicates().size(),
-                            CategoryRegistry.getInstance().size(),
-                            CategoryRegistry.getInstance().stream()
-                                    .map(CategoryRegistry.CategoryConfiguration::getCategory)
-                                    .map(DisplayCategory::getTitle)
-                                    .map(Component::getString).collect(Collectors.joining(", ")),
-                            ScreenRegistry.getInstance().exclusionZones().getZonesCount(),
-                            ScreenRegistry.getInstance().getDeciders().size(),
-                            usedTime
-                    );
-                },
                 new EntryRendererRegistryImpl(),
                 new ViewsImpl(),
                 new InputMethodRegistryImpl(),
@@ -341,7 +322,7 @@ public class RoughlyEnoughItemsCoreClient {
                     }
                 }
                 
-                RoughlyEnoughItemsCore.LOGGER.error("Detected missing stage: END! This is possibly due to issues during client recipe reload! REI will force a reload of the recipes now!");
+                InternalLogger.getInstance().error("Detected missing stage: END! This is possibly due to issues during client recipe reload! REI will force a reload of the recipes now!");
                 reloadPlugins(endReload, ReloadStage.END);
             }
             
@@ -474,7 +455,7 @@ public class RoughlyEnoughItemsCoreClient {
     public static void reloadPlugins(MutableLong lastReload, @Nullable ReloadStage start) {
         if (lastReload != null) {
             if (lastReload.getValue() > 0 && System.currentTimeMillis() - lastReload.getValue() <= 5000) {
-                RoughlyEnoughItemsCore.LOGGER.warn("Suppressing Reload Plugins of stage " + start);
+                InternalLogger.getInstance().warn("Suppressing Reload Plugins of stage " + start);
                 return;
             }
             lastReload.setValue(System.currentTimeMillis());
