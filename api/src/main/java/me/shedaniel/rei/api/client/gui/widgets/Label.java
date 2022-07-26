@@ -28,11 +28,14 @@ import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.TextComponent;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public abstract class Label extends WidgetWithBounds {
     public static final int LEFT_ALIGNED = -1;
@@ -152,22 +155,22 @@ public abstract class Label extends WidgetWithBounds {
     public String getTooltip() {
         Component[] lines = getTooltipLines();
         String tooltip = null;
-        if(lines != null) {
+        if (lines != null) {
             StringBuilder tooltipBuilder = new StringBuilder();
-            for (Component line:lines) {
+            for (Component line : lines) {
                 tooltipBuilder.append(line.getContents()).append("\n");
             }
             tooltip = tooltipBuilder.toString();
         }
         return tooltip;
     }
-
+    
     /**
      * @return the tooltip from the current tooltip function, null if no tooltip.
      */
     @Nullable
     public abstract Component[] getTooltipLines();
-
+    
     /**
      * Sets the tooltip function used to get the tooltip.
      *
@@ -177,20 +180,20 @@ public abstract class Label extends WidgetWithBounds {
     @Deprecated
     @ApiStatus.ScheduledForRemoval
     public void setTooltip(@Nullable Function<Label, @Nullable String> tooltip) {
-        if(tooltip != null) setTooltipFunction((label) -> {
+        if (tooltip != null) setTooltipFunction((label) -> {
             String text = tooltip.apply(label);
-            if(text != null) return Stream.of(text.split("\n")).map(TextComponent::new).toArray(Component[]::new);
+            if (text != null) return Stream.of(text.split("\n")).map(TextComponent::new).toArray(Component[]::new);
             return null;
         });
     }
-
+    
     /**
      * Sets the tooltip function used to get the tooltip.
      *
      * @param tooltip the tooltip function used to get the tooltip.
      */
     public abstract void setTooltipFunction(@Nullable Function<Label, @Nullable Component[]> tooltip);
-
+    
     /**
      * Sets the tooltip.
      *
@@ -199,7 +202,7 @@ public abstract class Label extends WidgetWithBounds {
     public void setTooltip(Component... tooltip) {
         setTooltipFunction((label) -> tooltip);
     }
-
+    
     /**
      * Sets the tooltip.
      *
@@ -221,7 +224,7 @@ public abstract class Label extends WidgetWithBounds {
     public final Label tooltipLines(String... tooltip) {
         return tooltip(tooltip);
     }
-
+    
     /**
      * Sets the tooltip.
      *
@@ -234,7 +237,7 @@ public abstract class Label extends WidgetWithBounds {
     public final Label tooltipLine(String tooltip) {
         return tooltip(tooltip);
     }
-
+    
     /**
      * Sets the tooltip.
      *
@@ -244,7 +247,7 @@ public abstract class Label extends WidgetWithBounds {
     public final Label tooltip(String... tooltip) {
         return tooltipFunction(label -> Stream.of(tooltip).map(TextComponent::new).toArray(Component[]::new));
     }
-
+    
     /**
      * Sets the tooltip.
      *
@@ -254,7 +257,7 @@ public abstract class Label extends WidgetWithBounds {
     public final Label tooltip(Component... tooltip) {
         return tooltipFunction(label -> tooltip);
     }
-
+    
     /**
      * Sets the tooltip function.
      *
@@ -268,7 +271,7 @@ public abstract class Label extends WidgetWithBounds {
         setTooltip(tooltip);
         return this;
     }
-
+    
     /**
      * Sets the tooltip function.
      *

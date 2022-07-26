@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.client.registry.screen;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.platform.Window;
 import me.shedaniel.architectury.event.CompoundEventResult;

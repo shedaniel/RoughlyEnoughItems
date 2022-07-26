@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.client.search.method.CharacterUnpackingInputMethod;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -102,12 +103,12 @@ public class PinyinInputMethod extends UniHanInputMethod implements CharacterUnp
     
     @Override
     public Component getName() {
-        return Component.translatable("text.rei.input.methods.pinyin");
+        return new TranslatableComponent("text.rei.input.methods.pinyin");
     }
     
     @Override
     public Component getDescription() {
-        return Component.translatable("text.rei.input.methods.pinyin.description");
+        return new TranslatableComponent("text.rei.input.methods.pinyin.description");
     }
     
     @Override

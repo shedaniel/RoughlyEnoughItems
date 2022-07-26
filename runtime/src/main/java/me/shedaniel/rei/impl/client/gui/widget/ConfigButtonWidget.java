@@ -48,7 +48,7 @@ import me.shedaniel.rei.impl.client.gui.modules.entries.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.Collection;
 import java.util.List;
@@ -91,37 +91,37 @@ public class ConfigButtonWidget {
     private static Collection<MenuEntry> menuEntries() {
         ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
         return List.of(
-                ToggleMenuEntry.of(Component.translatable("text.rei.cheating"),
+                ToggleMenuEntry.of(new TranslatableComponent("text.rei.cheating"),
                         config::isCheating,
                         config::setCheating
                 ),
                 new EmptyMenuEntry(4),
                 new TextMenuEntry(() -> {
                     if (!ClientHelper.getInstance().isCheating())
-                        return Component.translatable("text.rei.cheating_disabled");
+                        return new TranslatableComponent("text.rei.cheating_disabled");
                     else if (!ClientHelperImpl.getInstance().hasOperatorPermission()) {
                         if (Minecraft.getInstance().gameMode.hasInfiniteItems())
-                            return Component.translatable("text.rei.cheating_limited_creative_enabled");
-                        else return Component.translatable("text.rei.cheating_enabled_no_perms");
+                            return new TranslatableComponent("text.rei.cheating_limited_creative_enabled");
+                        else return new TranslatableComponent("text.rei.cheating_enabled_no_perms");
                     } else if (ClientHelperImpl.getInstance().hasPermissionToUsePackets())
-                        return Component.translatable("text.rei.cheating_enabled");
+                        return new TranslatableComponent("text.rei.cheating_enabled");
                     else
-                        return Component.translatable("text.rei.cheating_limited_enabled");
+                        return new TranslatableComponent("text.rei.cheating_limited_enabled");
                 }),
                 new SeparatorMenuEntry(),
-                ToggleMenuEntry.ofDeciding(Component.translatable("text.rei.config.menu.dark_theme"),
+                ToggleMenuEntry.ofDeciding(new TranslatableComponent("text.rei.config.menu.dark_theme"),
                         config::isUsingDarkTheme,
                         dark -> {
                             config.setUsingDarkTheme(dark);
                             return false;
                         }
                 ),
-                ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.craftable_filter"),
+                ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.craftable_filter"),
                         config::isCraftableFilterEnabled,
                         config::setCraftableFilterEnabled
                 ),
-                new SubMenuEntry(Component.translatable("text.rei.config.menu.display"), List.of(
-                        ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.remove_recipe_book"),
+                new SubMenuEntry(new TranslatableComponent("text.rei.config.menu.display"), List.of(
+                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.remove_recipe_book"),
                                 config::doesDisableRecipeBook,
                                 disableRecipeBook -> {
                                     config.setDisableRecipeBook(disableRecipeBook);
@@ -132,7 +132,7 @@ public class ConfigButtonWidget {
                                     }
                                 }
                         ),
-                        ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.left_side_mob_effects"),
+                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.left_side_mob_effects"),
                                 config::isLeftSideMobEffects,
                                 disableRecipeBook -> {
                                     config.setLeftSideMobEffects(disableRecipeBook);
@@ -143,27 +143,27 @@ public class ConfigButtonWidget {
                                     }
                                 }
                         ),
-                        ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.left_side_panel"),
+                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.left_side_panel"),
                                 config::isLeftHandSidePanel,
                                 bool -> config.setDisplayPanelLocation(bool ? DisplayPanelLocation.LEFT : DisplayPanelLocation.RIGHT)
                         ),
-                        ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.scrolling_side_panel"),
+                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.scrolling_side_panel"),
                                 config::isEntryListWidgetScrolled,
                                 config::setEntryListWidgetScrolled
                         ),
                         new SeparatorMenuEntry(),
-                        ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.caching_entry_rendering"),
+                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.caching_entry_rendering"),
                                 config::doesCacheEntryRendering,
                                 config::setDoesCacheEntryRendering
                         ),
                         new SeparatorMenuEntry(),
-                        ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.syntax_highlighting"),
+                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.syntax_highlighting"),
                                 () -> config.getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL || config.getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL_UNDERSCORED,
                                 bool -> config.setSyntaxHighlightingMode(bool ? SyntaxHighlightingMode.COLORFUL : SyntaxHighlightingMode.PLAIN_UNDERSCORED)
                         )
                 )),
                 new SeparatorMenuEntry(),
-                ToggleMenuEntry.ofDeciding(Component.translatable("text.rei.config.menu.config"),
+                ToggleMenuEntry.ofDeciding(new TranslatableComponent("text.rei.config.menu.config"),
                         () -> false,
                         $ -> {
                             ConfigManager.getInstance().openConfigScreen(REIRuntime.getInstance().getPreviousScreen());

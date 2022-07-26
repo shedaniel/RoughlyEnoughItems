@@ -49,7 +49,8 @@ import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
@@ -184,7 +185,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
     public void init(ScreenOverlayImpl overlay) {
         Rectangle overlayBounds = overlay.getBounds();
         this.additionalWidgets = new ArrayList<>();
-        this.leftButton = Widgets.createButton(new Rectangle(overlayBounds.x, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), Component.literal(""))
+        this.leftButton = Widgets.createButton(new Rectangle(overlayBounds.x, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TextComponent(""))
                 .onClick(button -> {
                     setPage(getPage() - 1);
                     if (getPage() < 0)
@@ -192,7 +193,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                     updateEntriesPosition();
                 })
                 .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y))
-                .tooltipLine(Component.translatable("text.rei.previous_page"))
+                .tooltipLine(new TranslatableComponent("text.rei.previous_page"))
                 .focusable(false);
         this.additionalWidgets.add(leftButton);
         this.additionalWidgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
@@ -204,12 +205,12 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             matrices.popPose();
             helper.setBlitOffset(helper.getBlitOffset() - 1);
         }));
-        this.changelogButton = Widgets.createButton(new Rectangle(overlayBounds.getMaxX() - 18 - 18, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), Component.translatable(""))
+        this.changelogButton = Widgets.createButton(new Rectangle(overlayBounds.getMaxX() - 18 - 18, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TextComponent(""))
                 .onClick(button -> {
                     ChangelogLoader.show();
                 })
                 .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y))
-                .tooltipLine(Component.translatable("text.rei.changelog.title"))
+                .tooltipLine(new TranslatableComponent("text.rei.changelog.title"))
                 .focusable(false);
         this.additionalWidgets.add(changelogButton);
         this.additionalWidgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
@@ -222,7 +223,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             matrices.popPose();
             helper.setBlitOffset(helper.getBlitOffset() - 1);
         }));
-        this.rightButton = Widgets.createButton(new Rectangle(overlayBounds.getMaxX() - 18, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), Component.literal(""))
+        this.rightButton = Widgets.createButton(new Rectangle(overlayBounds.getMaxX() - 18, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TextComponent(""))
                 .onClick(button -> {
                     setPage(getPage() + 1);
                     if (getPage() >= getTotalPages())
@@ -230,7 +231,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                     updateEntriesPosition();
                 })
                 .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y))
-                .tooltipLine(Component.translatable("text.rei.next_page"))
+                .tooltipLine(new TranslatableComponent("text.rei.next_page"))
                 .focusable(false);
         this.additionalWidgets.add(rightButton);
         this.additionalWidgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
@@ -252,9 +253,9 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                     updateEntriesPosition();
                 }, getPage(), getTotalPages());
             }
-        }).tooltip(Component.translatable("text.rei.go_back_first_page"), Component.literal(" "), Component.translatable("text.rei.shift_click_to", Component.translatable("text.rei.choose_page")).withStyle(ChatFormatting.GRAY)).focusable(false).onRender((matrices, label) -> {
+        }).tooltip(new TranslatableComponent("text.rei.go_back_first_page"), new TextComponent(" "), new TranslatableComponent("text.rei.shift_click_to", new TranslatableComponent("text.rei.choose_page")).withStyle(ChatFormatting.GRAY)).focusable(false).onRender((matrices, label) -> {
             label.setClickable(getTotalPages() > 1);
-            label.setMessage(Component.literal(String.format("%s/%s", getPage() + 1, Math.max(getTotalPages(), 1))));
+            label.setMessage(new TextComponent(String.format("%s/%s", getPage() + 1, Math.max(getTotalPages(), 1))));
         }).rainbow(new Random().nextFloat() < 1.0E-4D || ClientHelperImpl.getInstance().isAprilFools.get()));
     }
     
