@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.forge;
 
-import me.shedaniel.rei.RoughlyEnoughItemsInitializer;
+import me.shedaniel.rei.impl.init.RoughlyEnoughItemsInitializer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.data.loading.DatagenModLoader;
 import net.minecraftforge.fml.DistExecutor;

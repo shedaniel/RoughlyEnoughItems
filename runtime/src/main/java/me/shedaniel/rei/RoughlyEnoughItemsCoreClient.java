@@ -224,7 +224,7 @@ public class RoughlyEnoughItemsCoreClient {
     public void onInitializeClient() {
         IssuesDetector.detect();
         registerEvents();
-        PluginDetector.detectClientPlugins();
+        RoughlyEnoughItemsCore.getPluginDetector().detectClientPlugins().get().run();
         loadTestPlugins();
         
         Minecraft client = Minecraft.getInstance();

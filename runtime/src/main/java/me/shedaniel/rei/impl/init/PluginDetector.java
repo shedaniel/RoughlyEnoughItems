@@ -21,26 +21,16 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei;
+package me.shedaniel.rei.impl.init;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import java.util.function.Supplier;
 
-public class PluginDetector {
-    @ExpectPlatform
-    public static void detectServerPlugins() {
-        throw new AssertionError();
-    }
+public interface PluginDetector {
+    void detectServerPlugins();
     
-    @ExpectPlatform
-    public static void detectCommonPlugins() {
-        throw new AssertionError();
-    }
+    void detectCommonPlugins();
     
-    @Environment(EnvType.CLIENT)
-    @ExpectPlatform
-    public static void detectClientPlugins() {
-        throw new AssertionError();
+    default Supplier<Runnable> detectClientPlugins() {
+        return () -> () -> {};
     }
 }

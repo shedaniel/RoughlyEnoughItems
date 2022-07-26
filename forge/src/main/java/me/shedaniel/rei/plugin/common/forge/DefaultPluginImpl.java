@@ -28,6 +28,7 @@ import dev.architectury.event.CompoundEventResult;
 import dev.architectury.hooks.fluid.forge.FluidStackHooksForge;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.plugin.common.DefaultPlugin;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
@@ -38,8 +39,10 @@ import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 
 import java.util.stream.IntStream;
 
-public class DefaultPluginImpl {
-    public static void registerForgeFluidSupport(FluidSupportProvider support) {
+public class DefaultPluginImpl extends DefaultPlugin {
+    @Override
+    public void registerFluidSupport(FluidSupportProvider support) {
+        super.registerFluidSupport(support);
         support.register(stack -> {
             ItemStack itemStack = stack.getValue();
             LazyOptional<IFluidHandlerItem> handlerOptional = FluidUtil.getFluidHandler(itemStack);
@@ -56,9 +59,5 @@ public class DefaultPluginImpl {
             
             return CompoundEventResult.pass();
         });
-    }
-    
-    public static Fluid getFluidFromBucket(BucketItem item) {
-        return item.getFluid();
     }
 }
