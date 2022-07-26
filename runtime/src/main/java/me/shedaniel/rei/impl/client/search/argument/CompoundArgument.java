@@ -24,12 +24,14 @@
 package me.shedaniel.rei.impl.client.search.argument;
 
 import com.google.common.collect.ForwardingList;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@ApiStatus.Internal
 public class CompoundArgument extends ForwardingList<AlternativeArgument> {
     public static final CompoundArgument ALWAYS = new CompoundArgument(AlternativeArgument.EMPTY);
     private final AlternativeArgument[] arguments;

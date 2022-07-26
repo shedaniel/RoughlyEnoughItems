@@ -24,10 +24,8 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.blaze3d.pipeline.TextureTarget;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -38,13 +36,13 @@ import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
@@ -56,7 +54,6 @@ import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 public class CachedEntryListRender {
     public static final int RESOLUTION = 64;
@@ -91,7 +88,7 @@ public class CachedEntryListRender {
     
     public static void refresh() {
         if (ConfigObject.getInstance().doesCacheEntryRendering()) {
-            RoughlyEnoughItemsCore.LOGGER.info("Refreshing cached entry list texture...");
+            InternalLogger.getInstance().info("Refreshing cached entry list texture...");
         }
         if (cachedTextureLocation != null) {
             Minecraft.getInstance().getTextureManager().release(cachedTextureLocation);
@@ -142,11 +139,10 @@ public class CachedEntryListRender {
         int width = side * RESOLUTION;
         int height = side * RESOLUTION;
         
-        RoughlyEnoughItemsCore.LOGGER.info("Preparing cached texture with size %sx%s for %sx%s entries", width, height, side, side);
+        InternalLogger.getInstance().info("Preparing cached texture with size %sx%s for %sx%s entries", width, height, side, side);
         
         hash = new Long2LongOpenHashMap(list.size() + 10);
         Minecraft minecraft = Minecraft.getInstance();
-        Window window = minecraft.getWindow();
         TextureTarget target = new TextureTarget(width, height, true, false);
         target.bindWrite(true);
         Matrix4f projectionMatrix = Matrix4f.orthographic(0.0F, width, 0.0F, height, 1000.0F, 3000.0F);

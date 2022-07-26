@@ -24,15 +24,7 @@
 package me.shedaniel.rei.impl.common.logging;
 
 import me.shedaniel.rei.impl.common.InternalLogger;
-import org.apache.commons.io.output.NullOutputStream;
 import org.apache.logging.log4j.Level;
-
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class FilteringLogger implements InternalLogger {
     private final InternalLogger logger;

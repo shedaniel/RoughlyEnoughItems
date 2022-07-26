@@ -33,12 +33,10 @@ import java.util.function.Consumer;
 
 @ApiStatus.Internal
 public class OverlaySearchFieldSyntaxHighlighter implements Consumer<String> {
-    private final OverlaySearchField field;
     public byte[] highlighted;
     
-    public OverlaySearchFieldSyntaxHighlighter(OverlaySearchField field) {
-        this.field = field;
-        this.accept(field.getText());
+    public OverlaySearchFieldSyntaxHighlighter(String text) {
+        this.accept(text);
     }
     
     @Override

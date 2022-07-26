@@ -16,11 +16,11 @@
   "icon": "icon.png",
   "entrypoints": {
     "main": [
-      "me.shedaniel.rei.RoughlyEnoughItemsInitializer::onInitialize"
+        "me.shedaniel.rei.impl.init.RoughlyEnoughItemsInitializer::onInitialize"
     ],
     "client": [
       "me.shedaniel.rei.fabric.RoughlyEnoughItemsFabric",
-      "me.shedaniel.rei.RoughlyEnoughItemsInitializer::onInitializeClient"
+        "me.shedaniel.rei.impl.init.RoughlyEnoughItemsInitializer::onInitializeClient"
     ],
     "rei_common": [
       "me.shedaniel.rei.plugin.common.DefaultPlugin",

@@ -24,11 +24,13 @@
 package me.shedaniel.rei.impl.client.search.argument;
 
 import com.google.common.collect.ForwardingList;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@ApiStatus.Internal
 public class AlternativeArgument extends ForwardingList<Argument<?, ?>> {
     static final AlternativeArgument EMPTY = new AlternativeArgument(Collections.emptyList());
     

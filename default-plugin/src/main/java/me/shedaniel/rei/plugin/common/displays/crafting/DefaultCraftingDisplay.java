@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.plugin.common.displays.crafting;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
+import dev.architectury.platform.Platform;
 import it.unimi.dsi.fastutil.ints.IntIntImmutablePair;
 import it.unimi.dsi.fastutil.ints.IntIntPair;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -49,6 +49,7 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicDisplay implements SimpleGridMenuDisplay {
@@ -66,7 +67,13 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     private static final List<CraftingRecipeSizeProvider<?>> SIZE_PROVIDER = new ArrayList<>();
     
     static {
-        registerPlatformSizeProvider();
+        try {
+            Class.forName("me.shedaniel.rei.plugin.common.displays.crafting.%s.DefaultCraftingDisplayImpl".formatted(Platform.isForge() ? "forge" : "fabric"))
+                    .getDeclaredMethod("registerPlatformSizeProvider")
+                    .invoke(null);
+        } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     /**
@@ -104,11 +111,6 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
         }
         
         return null;
-    }
-    
-    @ExpectPlatform
-    private static void registerPlatformSizeProvider() {
-        throw new AssertionError();
     }
     
     @Override

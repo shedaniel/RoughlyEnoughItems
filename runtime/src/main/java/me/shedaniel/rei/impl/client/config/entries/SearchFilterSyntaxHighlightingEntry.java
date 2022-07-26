@@ -45,7 +45,9 @@ public class SearchFilterSyntaxHighlightingEntry extends TooltipListEntry<Syntax
     private SyntaxHighlightingMode type;
     private SyntaxHighlightingMode defaultValue;
     private Consumer<SyntaxHighlightingMode> save;
-    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, $ -> {}) {
+    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, $ -> {
+        type = SyntaxHighlightingMode.values()[(type.ordinal() + 1) % SyntaxHighlightingMode.values().length];
+    }) {
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             setMessage(Component.literal(type.toString()));

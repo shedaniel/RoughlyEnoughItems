@@ -49,7 +49,6 @@ import net.minecraft.world.level.block.ComposterBlock;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Environment(EnvType.CLIENT)
 public class DefaultCompostingCategory implements DisplayCategory<DefaultCompostingDisplay> {

@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Set;
 
 @Environment(EnvType.CLIENT)
+@Deprecated(forRemoval = true)
 public interface SubsetsRegistry extends Reloadable<REIClientPlugin> {
     static SubsetsRegistry getInstance() {
         return PluginManager.getClientInstance().get(SubsetsRegistry.class);

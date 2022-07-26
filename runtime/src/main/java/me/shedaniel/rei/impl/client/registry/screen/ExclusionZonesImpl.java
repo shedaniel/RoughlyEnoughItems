@@ -27,11 +27,11 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZonesProvider;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -142,8 +142,9 @@ public class ExclusionZonesImpl implements ExclusionZones {
             list.put(screenClass, screen -> ((ExclusionZonesProvider<T>) provider).provide((T) screen));
         }
         
+        InternalLogger.getInstance().debug("Added exclusion zones provider: %s for %s", provider, screenClass.getName());
         if (!PluginManager.areAnyReloading()) {
-            RoughlyEnoughItemsCore.LOGGER.warn("Detected ExclusionZonesImpl modification at runtime, this may cause issues, a single ExclusionZonesProvider can dynamically provide boundaries instead!", new RuntimeException());
+            InternalLogger.getInstance().warn("Detected ExclusionZonesImpl modification at runtime, this may cause issues, a single ExclusionZonesProvider can dynamically provide boundaries instead!", new RuntimeException());
         }
     }
     

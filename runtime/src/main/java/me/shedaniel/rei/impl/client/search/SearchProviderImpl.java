@@ -23,53 +23,59 @@
 
 package me.shedaniel.rei.impl.client.search;
 
+import com.google.common.base.Suppliers;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
+import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.search.argument.AlternativeArgument;
 import me.shedaniel.rei.impl.client.search.argument.Argument;
 import me.shedaniel.rei.impl.client.search.argument.CompoundArgument;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SearchProviderImpl implements SearchProvider {
     @Override
     public void startReload() {
-        
     }
     
     @Override
-    public SearchFilter createFilter(String searchTerm) {
-        return new SearchFilterImpl(Argument.bakeArguments(searchTerm), searchTerm);
+    public SearchFilter createFilter(String filter, InputMethod<?> inputMethod) {
+        return new SearchFilterImpl(filter, inputMethod);
     }
     
     public static class SearchFilterImpl implements SearchFilter {
-        private final List<CompoundArgument> arguments;
         private final String filter;
-        private final List<ArgumentType<?, ?>> argumentTypes;
+        private final InputMethod<?> inputMethod;
+        private final Supplier<List<CompoundArgument>> arguments;
+        private final Supplier<List<ArgumentType<?, ?>>> argumentTypes;
         
-        public SearchFilterImpl(List<CompoundArgument> arguments, String searchTerm) {
-            this.arguments = arguments;
-            this.filter = searchTerm;
-            this.argumentTypes = arguments.stream()
+        public SearchFilterImpl(String filter, InputMethod<?> inputMethod) {
+            this.filter = filter;
+            this.inputMethod = inputMethod;
+            this.arguments = Suppliers.memoize(() -> Argument.bakeArguments(filter));
+            this.argumentTypes = Suppliers.memoize(() -> this.arguments.get().stream()
                     .flatMap(CompoundArgument::stream)
                     .flatMap(AlternativeArgument::stream)
                     .map(Argument::getArgument)
                     .distinct()
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList()));
+            InternalLogger.getInstance().debug("Created search filter with %s using %s", filter, inputMethod.getName().getString());
         }
         
         @Override
         public boolean test(EntryStack<?> stack) {
             try {
-                return Argument.matches(stack, arguments);
+                return Argument.matches(stack, arguments.get(), inputMethod);
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Testing entry with search filter");
                 CrashReportCategory category = report.addCategory("Search entry details");
@@ -84,7 +90,7 @@ public class SearchProviderImpl implements SearchProvider {
         
         @Override
         public void prepareFilter(Collection<EntryStack<?>> stacks) {
-            Argument.prepareFilter(stacks, argumentTypes);
+            Argument.prepareFilter(stacks, argumentTypes.get());
         }
         
         @Override

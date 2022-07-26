@@ -55,7 +55,7 @@ public interface Display extends DisplaySpec {
      */
     List<EntryIngredient> getInputEntries();
     
-    @Deprecated
+    @Deprecated(forRemoval = true)
     default List<EntryIngredient> getInputEntries(MenuSerializationContext<?, ?, ?> context, MenuInfo<?, ?> info, boolean fill) {
         return getInputEntries();
     }
