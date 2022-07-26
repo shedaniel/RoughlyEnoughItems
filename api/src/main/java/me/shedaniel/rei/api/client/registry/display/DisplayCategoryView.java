@@ -44,7 +44,6 @@ import java.util.List;
  *
  * @param <T> the type of display
  */
-@ApiStatus.Experimental
 public interface DisplayCategoryView<T extends Display> {
     /**
      * Returns the recipe renderer for the display, used in composite display viewing screen.
