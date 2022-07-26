@@ -35,7 +35,6 @@ import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
-import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.impl.Internals;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.category.CategoryIdentifierImpl;
@@ -55,6 +54,7 @@ import me.shedaniel.rei.impl.common.logging.performance.PerformanceLoggerImpl;
 import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
 import me.shedaniel.rei.impl.common.registry.RecipeManagerContextImpl;
 import me.shedaniel.rei.impl.common.transfer.MenuInfoRegistryImpl;
+import me.shedaniel.rei.impl.init.PluginDetector;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
@@ -63,6 +63,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.ServiceLoader;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -75,6 +76,7 @@ public class RoughlyEnoughItemsCore {
             new Log4JLogger(LogManager.getFormatterLogger("REI"))
     )), message -> "[REI] " + message);
     public static final PerformanceLogger PERFORMANCE_LOGGER = new PerformanceLoggerImpl();
+    private static final ServiceLoader<PluginDetector> PLUGIN_DETECTOR_LOADER = ServiceLoader.load(PluginDetector.class);
     
     static {
         attachCommonInternals();
@@ -129,8 +131,9 @@ public class RoughlyEnoughItemsCore {
     }
     
     public void onInitialize() {
-        PluginDetector.detectCommonPlugins();
-        PluginDetector.detectServerPlugins();
+        PluginDetector detector = getPluginDetector();
+        detector.detectCommonPlugins();
+        detector.detectServerPlugins();
         RoughlyEnoughItemsNetwork.onInitialize();
         
         if (Platform.getEnvironment() == Env.SERVER) {
@@ -142,5 +145,9 @@ public class RoughlyEnoughItemsCore {
                 }, executor2);
             });
         }
+    }
+    
+    public static PluginDetector getPluginDetector() {
+        return PLUGIN_DETECTOR_LOADER.findFirst().orElseThrow();
     }
 }
