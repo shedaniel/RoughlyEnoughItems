@@ -28,6 +28,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.Minecraft;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
@@ -36,8 +37,9 @@ import net.minecraftforge.fml.client.gui.GuiUtils;
 
 import java.util.List;
 
-public class ScreenOverlayImplImpl {
-    public static void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
+public class ScreenOverlayImplForge extends ScreenOverlayImpl {
+    @Override
+    public void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
         matrices.pushPose();
         matrices.translate(0, 0, 500);
         EntryStack<?> stack = tooltip.getContextStack();

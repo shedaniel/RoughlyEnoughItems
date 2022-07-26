@@ -3,13 +3,10 @@ plugins {
     id("dev.architectury.loom") version("0.11.0-SNAPSHOT") apply false
     id("org.cadixdev.licenser") version("0.6.1")
     id("me.shedaniel.unified-publishing") version("0.1.+")
-    id("java")
     id("maven-publish")
 }
 
 import java.text.SimpleDateFormat
-
-archivesBaseName = "RoughlyEnoughItems"
 
 def runNumber = System.getenv("GITHUB_RUN_NUMBER") ?: "9999"
 version = rootProject.base_version + "." + runNumber + (rootProject.unstable.toBoolean() ? "-alpha" : "")
@@ -18,7 +15,10 @@ group = "me.shedaniel"
 
 subprojects {
     apply plugin: "me.shedaniel.unified-publishing"
+    apply plugin: "java"
     apply plugin: "dev.architectury.loom"
+
+    sourceCompatibility = targetCompatibility = 1.8
 
     java {
         withSourcesJar()
@@ -36,6 +36,31 @@ subprojects {
             crane("dev.architectury:crane:1.17+build.11")
         })
     }
+
+    jar {
+        from rootProject.file("LICENSE")
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+        options.release = 17
+    }
+}
+
+subprojects {
+    if (project.path == ':fabric' || project.path == ':forge') {
+        loom {
+            mods {
+                main { // to match the default mod generated for Forge
+                    sourceSet project.sourceSets.main
+                    def depProjects = [":api", ":runtime", ":default-plugin"]
+                    depProjects.each {
+                        sourceSet project(it).sourceSets.main
+                    }
+                }
+            }
+        }
+    }
 }
 
 allprojects {
@@ -43,7 +68,9 @@ allprojects {
     apply plugin: "architectury-plugin"
     apply plugin: "org.cadixdev.licenser"
 
-    sourceCompatibility = targetCompatibility = 1.8
+    architectury {
+        compileOnly()
+    }
 
     repositories {
         maven { url "https://maven.shedaniel.me" }
@@ -61,15 +88,6 @@ allprojects {
             name = "shedaniel"
             year = "2018, 2019, 2020, 2021, 2022"
         }
-    }
-
-    jar {
-        from rootProject.file("LICENSE")
-    }
-
-    tasks.withType(JavaCompile) {
-        options.encoding = "UTF-8"
-        options.release = 8
     }
 
     tasks.withType(GenerateModuleMetadata) {

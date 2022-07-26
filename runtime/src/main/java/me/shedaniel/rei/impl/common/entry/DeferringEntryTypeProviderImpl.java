@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.common.entry;
 
 import me.shedaniel.architectury.platform.Platform;
+import dev.architectury.utils.Env;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
@@ -52,7 +53,7 @@ public enum DeferringEntryTypeProviderImpl implements Function<ResourceLocation,
     public EntryType<?> apply(ResourceLocation id) {
         if (id.equals(BuiltinEntryTypes.EMPTY_ID)) {
             return typeCache.computeIfAbsent(id, this::emptyType);
-        } else if (id.equals(RENDERING_ID) && Platform.getEnv() == EnvType.CLIENT) {
+        } else if (id.equals(RENDERING_ID) && Platform.getEnvironment() == Env.CLIENT) {
             return typeCache.computeIfAbsent(id, this::renderingType);
         }
         return typeCache.computeIfAbsent(id, EntryTypeDeferred::new);

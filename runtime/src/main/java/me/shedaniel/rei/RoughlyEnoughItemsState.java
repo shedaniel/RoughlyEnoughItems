@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei;
 
-import net.fabricmc.api.EnvType;
 import net.minecraft.util.Tuple;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,7 +39,7 @@ public class RoughlyEnoughItemsState {
     
     public static final Logger LOGGER = LogManager.getFormatterLogger("REI");
     
-    public static EnvType env;
+    public static boolean client;
     public static boolean isDev;
     private static List<Tuple<String, String>> errors = new ArrayList<>();
     private static List<Tuple<String, String>> warnings = new ArrayList<>();
@@ -49,7 +48,7 @@ public class RoughlyEnoughItemsState {
     private static List<Runnable> continueCallbacks = new ArrayList<>();
     
     public static void error(String reason) {
-        if (env == EnvType.SERVER || isDev)
+        if (!client || isDev)
             throw new RuntimeException(reason);
         if (RoughlyEnoughItemsState.errorSet.add(reason + " " + null)) {
             RoughlyEnoughItemsState.errors.add(new Tuple<>(reason, null));
@@ -58,7 +57,7 @@ public class RoughlyEnoughItemsState {
     }
     
     public static void error(String reason, String link) {
-        if (env == EnvType.SERVER || isDev)
+        if (!client || isDev)
             throw new RuntimeException(reason + " " + link);
         if (RoughlyEnoughItemsState.errorSet.add(reason + " " + link)) {
             RoughlyEnoughItemsState.errors.add(new Tuple<>(reason, link));

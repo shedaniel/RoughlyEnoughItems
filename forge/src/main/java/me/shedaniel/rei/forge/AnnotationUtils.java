@@ -24,7 +24,7 @@
 package me.shedaniel.rei.forge;
 
 import com.google.common.collect.Lists;
-import me.shedaniel.rei.RoughlyEnoughItemsInitializer;
+import me.shedaniel.rei.impl.init.PrimitivePlatformAdapter;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -84,7 +84,7 @@ public class AnnotationUtils {
                     } catch (Throwable throwable) {
                         Throwable t = throwable;
                         while (t != null) {
-                            if (t.getMessage() != null && t.getMessage().contains("invalid dist DEDICATED_SERVER") && !RoughlyEnoughItemsInitializer.isClient()) {
+                            if (t.getMessage() != null && t.getMessage().contains("invalid dist DEDICATED_SERVER") && !PrimitivePlatformAdapter.get().isClient()) {
                                 LOGGER.warn("Plugin " + annotation.getMemberName() + " is attempting to load on the server, but is not compatible with the server. " +
                                             "The mod should declare the environments it is compatible with in the @" + annotationType.getClassName() + " annotation.");
                                 continue out;

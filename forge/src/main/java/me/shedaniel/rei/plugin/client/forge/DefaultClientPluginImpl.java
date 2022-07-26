@@ -26,6 +26,8 @@ package me.shedaniel.rei.plugin.client.forge;
 import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.plugin.client.BuiltinClientPlugin;
+import me.shedaniel.rei.plugin.client.DefaultClientPlugin;
+import net.minecraft.core.Holder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
@@ -41,8 +43,9 @@ import net.minecraftforge.registries.IRegistryDelegate;
 import java.util.Arrays;
 import java.util.Set;
 
-public class DefaultClientPluginImpl {
-    public static void registerForgePotions(DisplayRegistry registry, BuiltinClientPlugin clientPlugin) {
+public class DefaultClientPluginImpl extends DefaultClientPlugin {
+    @Override
+    public void registerForgePotions(DisplayRegistry registry, BuiltinClientPlugin clientPlugin) {
         for (IBrewingRecipe recipe : BrewingRecipeRegistry.getRecipes()) {
             if (recipe instanceof VanillaBrewingRecipe) {
                 registerVanillaPotions(registry, clientPlugin);

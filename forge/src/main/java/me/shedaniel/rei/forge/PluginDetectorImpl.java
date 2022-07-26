@@ -31,8 +31,10 @@ import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.plugin.client.DefaultClientPlugin;
+import me.shedaniel.rei.impl.init.PluginDetector;
+import me.shedaniel.rei.plugin.client.forge.DefaultClientPluginImpl;
 import me.shedaniel.rei.plugin.client.DefaultClientRuntimePlugin;
-import me.shedaniel.rei.plugin.common.DefaultPlugin;
+import me.shedaniel.rei.plugin.common.forge.DefaultPluginImpl;
 import me.shedaniel.rei.plugin.common.DefaultRuntimePlugin;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -44,7 +46,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class PluginDetectorImpl {
+public class PluginDetectorImpl implements PluginDetector {
     private static <P extends me.shedaniel.rei.api.common.plugins.REIPlugin<?>> REIPluginProvider<P> wrapPlugin(List<String> modId, REIPluginProvider<P> plugin) {
         return new REIPluginProvider<P>() {
             String nameSuffix = " [" + String.join(", ", modId) + "]";
@@ -66,15 +68,17 @@ public class PluginDetectorImpl {
         };
     }
     
-    public static void detectServerPlugins() {
-        PluginView.getServerInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultPlugin()));
+    @Override
+    public void detectServerPlugins() {
+        PluginView.getServerInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultPluginImpl()));
         PluginView.getServerInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultRuntimePlugin()));
         AnnotationUtils.<REIPlugin, REIServerPlugin>scanAnnotation(REIPlugin.class, REIServerPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
             ((PluginView<REIServerPlugin>) PluginManager.getServerInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
         });
     }
     
-    public static void detectCommonPlugins() {
+    @Override
+    public void detectCommonPlugins() {
         EventBuses.registerModEventBus("roughlyenoughitems", FMLJavaModLoadingContext.get().getModEventBus());
         AnnotationUtils.<REIPlugin, me.shedaniel.rei.api.common.plugins.REIPlugin<?>>scanAnnotation(REIPlugin.class, me.shedaniel.rei.api.common.plugins.REIPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
             ((PluginView) PluginManager.getInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
@@ -82,12 +86,15 @@ public class PluginDetectorImpl {
     }
     
     @OnlyIn(Dist.CLIENT)
-    public static void detectClientPlugins() {
-        PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientPlugin()));
-        PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientRuntimePlugin()));
-        AnnotationUtils.<REIPlugin, REIClientPlugin>scanAnnotation(REIPlugin.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
-            ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
-        });
-        ClientInternals.attachInstance((Supplier<List<String>>) ArrayList::new, "jeiCompatMods");
+    @Override
+    public Supplier<Runnable> detectClientPlugins() {
+        return () -> () -> {
+            PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientPluginImpl()));
+            PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientRuntimePlugin()));
+            AnnotationUtils.<REIPlugin, REIClientPlugin>scanAnnotation(REIPlugin.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
+                ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
+            });
+            ClientInternals.attachInstance((Supplier<List<String>>) ArrayList::new, "jeiCompatMods");
+        };
     }
 }

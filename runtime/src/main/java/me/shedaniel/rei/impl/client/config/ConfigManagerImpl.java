@@ -132,8 +132,8 @@ public class ConfigManagerImpl implements ConfigManager {
                             Collections.singletonList(new FilteringEntry(220, value, ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules, defaultValue, saveConsumer, list -> ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules = Lists.newArrayList(list)));
                 }
                 , (field) -> field.getType() == List.class, ConfigObjectImpl.UseFilteringScreen.class);
-        saveConfig();
         InternalLogger.getInstance().info("Config loaded");
+        saveConfig();
     }
     
     private static Jankson buildJankson(Jankson.Builder builder) {

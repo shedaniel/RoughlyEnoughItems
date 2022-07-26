@@ -27,7 +27,6 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import dev.architectury.injectables.annotations.ExpectPlatform;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -79,7 +78,7 @@ import java.util.Optional;
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
 @ApiStatus.Internal
-public class ScreenOverlayImpl extends ScreenOverlay {
+public abstract class ScreenOverlayImpl extends ScreenOverlay {
     private static final List<Tooltip> TOOLTIPS = Lists.newArrayList();
     private static EntryListWidget entryListWidget = null;
     private static FavoritesListWidget favoritesListWidget = null;
@@ -318,10 +317,7 @@ public class ScreenOverlayImpl extends ScreenOverlay {
         renderTooltipInner(minecraft.screen, matrices, tooltip, tooltip.getX(), tooltip.getY());
     }
     
-    @ExpectPlatform
-    public static void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
-        throw new AssertionError();
-    }
+    protected abstract void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY);
     
     public void addTooltip(@Nullable Tooltip tooltip) {
         if (tooltip != null)

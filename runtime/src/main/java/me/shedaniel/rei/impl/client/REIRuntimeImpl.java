@@ -29,6 +29,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.architectury.event.events.GuiEvent;
 import me.shedaniel.architectury.event.events.client.ClientTickEvent;
+import dev.architectury.platform.Platform;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
@@ -56,6 +57,7 @@ import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
@@ -151,7 +153,14 @@ public class REIRuntimeImpl implements REIRuntime {
     @Override
     public Optional<ScreenOverlay> getOverlay(boolean reset, boolean init) {
         if ((overlay == null && init) || reset) {
-            overlay = new ScreenOverlayImpl();
+            try {
+                overlay = (ScreenOverlayImpl) Class.forName(Platform.isForge() ? "me.shedaniel.rei.impl.client.gui.forge.ScreenOverlayImplForge"
+                                : "me.shedaniel.rei.impl.client.gui.fabric.ScreenOverlayImplFabric")
+                        .getDeclaredConstructor()
+                        .newInstance();
+            } catch (InstantiationException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
             overlay.init();
             getSearchField().setFocused(false);
         }

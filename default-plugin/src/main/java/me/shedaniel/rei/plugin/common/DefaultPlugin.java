@@ -95,27 +95,13 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
             ItemStack stack = entry.getValue();
             Item item = stack.getItem();
             if (item instanceof BucketItem) {
-                Fluid fluid = getFluidFromBucket((BucketItem) item);
+                Fluid fluid = FluidBucketHooks.getFluid((BucketItem) item);
                 if (fluid != null) {
                     return CompoundEventResult.interruptTrue(Stream.of(EntryStacks.of(fluid, FluidStackHooks.bucketAmount())));
                 }
             }
             return CompoundEventResult.pass();
         });
-        if (Platform.isForge()) {
-            registerForgeFluidSupport(support);
-        }
-    }
-    
-    @ExpectPlatform
-    @PlatformOnly(PlatformOnly.FORGE)
-    private static void registerForgeFluidSupport(FluidSupportProvider support) {
-        throw new AssertionError();
-    }
-    
-    @ExpectPlatform
-    private static Fluid getFluidFromBucket(BucketItem item) {
-        throw new AssertionError();
     }
     
     @Override
