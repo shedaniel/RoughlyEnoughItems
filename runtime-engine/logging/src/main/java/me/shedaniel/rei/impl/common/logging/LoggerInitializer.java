@@ -21,12 +21,23 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.favorites;
+package me.shedaniel.rei.impl.common.logging;
 
-import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
+import com.google.common.collect.ImmutableList;
+import dev.architectury.platform.Platform;
+import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.common.InternalLogger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 
-import java.util.List;
-
-public interface MutableFavoritesList extends List<FavoriteEntry> {
-    void setAll(List<FavoriteEntry> entries);
+public class LoggerInitializer {
+    private static final InternalLogger LOGGER = new TransformingLogger(new MultiLogger(ImmutableList.of(
+            new FileLogger(Platform.getGameFolder().resolve("logs/rei.log")),
+            new FilteringLogger(new FileLogger(Platform.getGameFolder().resolve("logs/rei-issues.log")), Level.WARN),
+            new Log4JLogger(LogManager.getFormatterLogger("REI"))
+    )), message -> "[REI] " + message);
+    
+    public static void onInitialize() {
+        Internals.attachInstanceSupplier(LOGGER, "logger");
+    }
 }

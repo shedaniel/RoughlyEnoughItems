@@ -45,7 +45,7 @@ public class RoughlyEnoughItemsInitializer {
         adapter.checkMods();
         
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
-            initializeEntryPoint(false, "me.shedaniel.rei.init.RoughlyEnoughItemsEngine");
+            initializeEntryPoint(false, "me.shedaniel.rei.impl.common.logging.LoggerInitializer");
             initializeEntryPoint(false, "me.shedaniel.rei.RoughlyEnoughItemsCore");
         }
     }

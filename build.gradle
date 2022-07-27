@@ -16,6 +16,7 @@ group = "me.shedaniel"
 allprojects {
     ext {
         runtimeEngines = [
+                ":runtime-engine:logging",
                 ":runtime-engine:entry-types",
                 ":runtime-engine:entry-stacks",
                 ":runtime-engine:categories",
@@ -34,7 +35,6 @@ allprojects {
                 ":api",
                 ":shared-internals",
                 ":runtime",
-                ":runtime-engine",
                 ":default-plugin",
         ] + runtimeEngines
     }
