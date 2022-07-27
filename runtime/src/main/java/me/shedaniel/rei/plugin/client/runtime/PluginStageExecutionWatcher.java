@@ -48,6 +48,12 @@ import java.util.stream.Collectors;
 public class PluginStageExecutionWatcher implements HintProvider {
     private final Map<PluginManager<?>, PluginManagerData> allStages = new HashMap<>();
     
+    public PluginStageExecutionWatcher() {
+        for (PluginManager<? extends REIPlugin<?>> instance : PluginManager.getActiveInstances()) {
+            instance.registerReloadable((Reloadable) reloadable(instance));
+        }
+    }
+    
     private static class PluginManagerData {
         private final PluginManager<?> manager;
         private final Map<ReloadStage, List<Reloadable<?>>> beganStages = new HashMap<>();
@@ -64,49 +70,7 @@ public class PluginStageExecutionWatcher implements HintProvider {
     }
     
     public <T extends REIPlugin<?>> Reloadable<? extends T> reloadable(PluginManager<?> manager) {
-        return new Reloadable<>() {
-            private PluginManagerData data() {
-                return allStages.computeIfAbsent(manager, PluginManagerData::new);
-            }
-            
-            @Override
-            public void startReload() {
-                for (ReloadStage stage : ReloadStage.values()) {
-                    startReload(stage);
-                }
-            }
-            
-            @Override
-            public void startReload(ReloadStage stage) {
-                synchronized (allStages) {
-                    if (manager == PluginManager.getInstance() && stage.ordinal() == 0) {
-                        allStages.clear();
-                    }
-                    data().beganStages.put(stage, new ArrayList<>());
-                }
-            }
-            
-            @Override
-            public void endReload() {
-                for (ReloadStage stage : ReloadStage.values()) {
-                    endReload(stage);
-                }
-            }
-            
-            @Override
-            public void endReload(ReloadStage stage) {
-                synchronized (allStages) {
-                    data().finishedStages.add(stage);
-                }
-            }
-            
-            @Override
-            public void beforeReloadable(ReloadStage stage, Reloadable<T> other) {
-                synchronized (allStages) {
-                    data().beganStages.get(stage).add(other);
-                }
-            }
-        };
+        return new Observatory<>(manager);
     }
     
     public Set<ReloadStage> notVisited() {
@@ -228,5 +192,53 @@ public class PluginStageExecutionWatcher implements HintProvider {
     @Override
     public List<HintButton> getButtons() {
         return Collections.emptyList();
+    }
+    
+    private class Observatory<T extends REIPlugin<?>> implements Reloadable<T> {
+        private final PluginManager<?> manager;
+        
+        public Observatory(PluginManager<?> manager) {this.manager = manager;}
+        
+        private PluginManagerData data() {
+            return allStages.computeIfAbsent(manager, PluginManagerData::new);
+        }
+        
+        @Override
+        public void startReload() {
+            for (ReloadStage stage : ReloadStage.values()) {
+                startReload(stage);
+            }
+        }
+        
+        @Override
+        public void startReload(ReloadStage stage) {
+            synchronized (allStages) {
+                if (manager == PluginManager.getInstance() && stage.ordinal() == 0) {
+                    allStages.clear();
+                }
+                data().beganStages.put(stage, new ArrayList<>());
+            }
+        }
+        
+        @Override
+        public void endReload() {
+            for (ReloadStage stage : ReloadStage.values()) {
+                endReload(stage);
+            }
+        }
+        
+        @Override
+        public void endReload(ReloadStage stage) {
+            synchronized (allStages) {
+                data().finishedStages.add(stage);
+            }
+        }
+        
+        @Override
+        public void beforeReloadable(ReloadStage stage, Reloadable<T> other) {
+            synchronized (allStages) {
+                data().beganStages.get(stage).add(other);
+            }
+        }
     }
 }

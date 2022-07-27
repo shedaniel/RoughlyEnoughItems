@@ -161,11 +161,7 @@ public final class InternalWidgets {
         }
     }
     
-    public static void attach() {
-        ClientInternals.attachInstance(new WidgetsProvider(), ClientInternals.WidgetsProvider.class);
-    }
-    
-    private static class WidgetsProvider implements ClientInternals.WidgetsProvider {
+    public static class WidgetsProvider implements ClientInternals.WidgetsProvider {
         @Override
         public boolean isRenderingPanel(Panel panel) {
             return PanelWidget.isRendering(panel);

@@ -58,4 +58,18 @@ public interface SearchProvider extends Reloadable<REIClientPlugin> {
      */
     @ApiStatus.Experimental
     SearchFilter createFilter(String filter, InputMethod<?> inputMethod);
+    
+    /**
+     * Clears the search cache.
+     */
+    @ApiStatus.Experimental
+    void clearCache();
+    
+    /**
+     * Returns whether the search provider has cached.
+     *
+     * @return whether the search provider has cached
+     */
+    @ApiStatus.Experimental
+    boolean hasCache();
 }

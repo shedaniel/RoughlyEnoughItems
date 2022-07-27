@@ -46,9 +46,10 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.TextFieldWidget;
-import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
-import me.shedaniel.rei.impl.client.search.argument.type.ArgumentTypesRegistry;
-import me.shedaniel.rei.impl.client.search.argument.type.TextArgumentType;
+import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.HighlightInfo;
+import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.PartHighlightInfo;
+import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.QuoteHighlightInfo;
+import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.SplitterHighlightInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
@@ -68,6 +69,7 @@ import java.util.Objects;
 import java.util.OptionalDouble;
 import java.util.function.Consumer;
 
+@SuppressWarnings("UnstableApiUsage")
 @ApiStatus.Internal
 public class OverlaySearchField extends TextFieldWidget implements TextFieldWidget.TextFormatter {
     public static boolean isHighlighting = false;
@@ -95,23 +97,22 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         boolean isPlain = ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.PLAIN || ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.PLAIN_UNDERSCORED;
         boolean hasUnderscore = ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.PLAIN_UNDERSCORED || ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL_UNDERSCORED;
         return TextTransformations.forwardWithTransformation(text, (s, charIndex, c) -> {
-            byte arg = highlighter.highlighted[charIndex + index];
+            HighlightInfo arg = highlighter.highlighted[charIndex + index];
             Style style = Style.EMPTY;
             if (isMain && ScreenOverlayImpl.getEntryListWidget().isEmpty() && !getText().isEmpty()) {
                 style = ERROR_STYLE;
             }
-            if (arg > 0) {
-                ArgumentType<?, ?> argumentType = ArgumentTypesRegistry.ARGUMENT_TYPE_LIST.get((arg - 1) / 2);
+            if (arg instanceof PartHighlightInfo part) {
                 if (!isPlain) {
-                    style = argumentType.getHighlightedStyle();
+                    style = part.style();
                 }
-                if (!(argumentType instanceof TextArgumentType) && hasUnderscore && arg % 2 == 1) {
+                if (part.style() != Style.EMPTY && hasUnderscore && part.grammar()) {
                     style = style.withUnderlined(true);
                 }
             } else if (!isPlain) {
-                if (arg == -1) {
+                if (arg == SplitterHighlightInfo.INSTANCE) {
                     style = SPLITTER_STYLE;
-                } else if (arg == -2) {
+                } else if (arg == QuoteHighlightInfo.INSTANCE) {
                     style = QUOTES_STYLE;
                 }
             }

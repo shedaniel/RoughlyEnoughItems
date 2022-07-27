@@ -23,9 +23,12 @@
 
 package me.shedaniel.rei.api.client.search;
 
+import it.unimi.dsi.fastutil.ints.IntIntPair;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.Style;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 import java.util.function.Predicate;
@@ -79,5 +82,22 @@ public interface SearchFilter extends Predicate<EntryStack<?>> {
      * @param stacks the stacks to prepare
      */
     default void prepareFilter(Collection<EntryStack<?>> stacks) {
+    }
+    
+    /**
+     * Processes the decoration of the search filter.
+     *
+     * @param sink the decoration sink
+     */
+    @ApiStatus.Experimental
+    default void processDecoration(ParseDecorationSink sink) {
+    }
+    
+    interface ParseDecorationSink {
+        void addQuote(int index);
+        
+        void addSplitter(int index);
+        
+        void addPart(IntIntPair range, Style style, boolean usingGrammar, Collection<IntIntPair> grammarRanges, int index);
     }
 }

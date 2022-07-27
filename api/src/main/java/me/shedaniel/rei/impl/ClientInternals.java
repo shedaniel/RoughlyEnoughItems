@@ -28,18 +28,17 @@ import com.mojang.serialization.DataResult;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
-import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.entry.PreFilteredEntryList;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import net.minecraft.ReportedException;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.nbt.CompoundTag;
@@ -55,19 +54,17 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 @ApiStatus.Internal
 public final class ClientInternals {
-    private static Supplier<ClientHelper> clientHelper = ClientInternals::throwNotSetup;
-    private static Supplier<WidgetsProvider> widgetsProvider = ClientInternals::throwNotSetup;
-    private static Supplier<ViewSearchBuilder> viewSearchBuilder = ClientInternals::throwNotSetup;
-    private static Supplier<PluginManager<REIClientPlugin>> clientPluginManager = ClientInternals::throwNotSetup;
-    private static Supplier<EntryRenderer<?>> emptyEntryRenderer = ClientInternals::throwNotSetup;
-    private static BiFunction<Supplier<DataResult<FavoriteEntry>>, Supplier<CompoundTag>, FavoriteEntry> delegateFavoriteEntry = (supplier, toJson) -> throwNotSetup();
+    private static final ClientHelper CLIENT_HELPER = resolveService(ClientHelper.class);
+    private static final WidgetsProvider WIDGETS_PROVIDER = resolveService(WidgetsProvider.class);
+    private static final ViewSearchBuilder VIEW_SEARCH_BUILDER = resolveService(ViewSearchBuilder.class);
+    private static final PluginManager<REIClientPlugin> CLIENT_PLUGIN_MANAGER = Internals.createPluginManager(
+            REIClientPlugin.class,
+            UnaryOperator.identity());
+    private static final DelegatingFavoriteEntryProvider DELEGATE_FAVORITE_ENTRY = resolveService(DelegatingFavoriteEntryProvider.class);
     private static Function<CompoundTag, DataResult<FavoriteEntry>> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
     private static BiConsumer<List<ClientTooltipComponent>, TooltipComponent> clientTooltipComponentProvider = (tooltip, result) -> throwNotSetup();
@@ -77,6 +74,16 @@ public final class ClientInternals {
     private static Supplier<List<String>> jeiCompatMods = ClientInternals::throwNotSetup;
     private static Supplier<Object> builtinClientPlugin = ClientInternals::throwNotSetup;
     private static Function<List<EntryIngredient>, TooltipComponent> missingTooltip = (stacks) -> throwNotSetup();
+    private static BiConsumer<ReportedException, String> crashHandler = (exception, component) -> throwNotSetup();
+    private static Supplier<PreFilteredEntryList> preFilteredEntryList = ClientInternals::throwNotSetup;
+    
+    public static <T> T resolveService(Class<T> serviceClass) {
+        return Internals.resolveService(serviceClass);
+    }
+    
+    public static <T> List<T> resolveServices(Class<T> serviceClass) {
+        return Internals.resolveServices(serviceClass);
+    }
     
     private static <T> T throwNotSetup() {
         throw new AssertionError("REI Internals have not been initialized!");
@@ -108,15 +115,15 @@ public final class ClientInternals {
     }
     
     public static ClientHelper getClientHelper() {
-        return clientHelper.get();
+        return CLIENT_HELPER;
     }
     
     public static WidgetsProvider getWidgetsProvider() {
-        return widgetsProvider.get();
+        return WIDGETS_PROVIDER;
     }
     
     public static ViewSearchBuilder createViewSearchBuilder() {
-        return viewSearchBuilder.get();
+        return VIEW_SEARCH_BUILDER;
     }
     
     public static Object getBuiltinPlugin() {
@@ -144,15 +151,11 @@ public final class ClientInternals {
     }
     
     public static FavoriteEntry delegateFavoriteEntry(Supplier<DataResult<FavoriteEntry>> supplier, Supplier<CompoundTag> toJoin) {
-        return delegateFavoriteEntry.apply(supplier, toJoin);
+        return DELEGATE_FAVORITE_ENTRY.delegate(supplier, toJoin);
     }
     
     public static DataResult<FavoriteEntry> favoriteEntryFromJson(CompoundTag tag) {
         return favoriteEntryFromJson.apply(tag);
-    }
-    
-    public static <T> EntryRenderer<T> getEmptyEntryRenderer() {
-        return emptyEntryRenderer.get().cast();
     }
     
     public static List<String> getJeiCompatMods() {
@@ -160,14 +163,21 @@ public final class ClientInternals {
     }
     
     public static PluginManager<REIClientPlugin> getPluginManager() {
-        return clientPluginManager.get();
+        return CLIENT_PLUGIN_MANAGER;
     }
     
     public static TooltipComponent createMissingTooltip(List<EntryIngredient> stacks) {
         return missingTooltip.apply(stacks);
     }
     
-    @Environment(EnvType.CLIENT)
+    public static PreFilteredEntryList getPreFilteredEntryList() {
+        return preFilteredEntryList.get();
+    }
+    
+    public static void crash(ReportedException exception, String component) {
+        crashHandler.accept(exception, component);
+    }
+    
     public interface WidgetsProvider {
         boolean isRenderingPanel(Panel panel);
         
@@ -206,5 +216,9 @@ public final class ClientInternals {
         WidgetWithBounds wrapOverflow(Rectangle bounds, WidgetWithBounds widget);
         
         WidgetWithBounds wrapPadded(int padLeft, int padRight, int padTop, int padBottom, WidgetWithBounds widget);
+    }
+    
+    public interface DelegatingFavoriteEntryProvider {
+        FavoriteEntry delegate(Supplier<DataResult<FavoriteEntry>> result, Supplier<CompoundTag> tag);
     }
 }

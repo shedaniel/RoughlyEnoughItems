@@ -49,7 +49,6 @@ import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.gui.screen.CompositeDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
-import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -61,7 +60,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
@@ -70,15 +68,16 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class ClientHelperImpl implements ClientHelper {
-    @ApiStatus.Internal
-    public final LazyLoadedValue<Boolean> isAprilFools = new LazyLoadedValue<>(() -> {
+    public final Supplier<Boolean> isAprilFools = Suppliers.memoize(() -> {
         try {
             LocalDateTime now = LocalDateTime.now();
             return now.getMonthValue() == 4 && now.getDayOfMonth() == 1;
@@ -86,7 +85,7 @@ public class ClientHelperImpl implements ClientHelper {
         }
         return false;
     });
-    private final Map<String, String> modNameCache = new HashMap<String, String>() {{
+    private final Map<String, String> modNameCache = new HashMap<>() {{
         put("minecraft", "Minecraft");
         put("c", "Global");
         put("global", "Global");
@@ -357,242 +356,5 @@ public class ClientHelperImpl implements ClientHelper {
     public void onInitializeClient() {
         ClientInternals.attachInstance(this, ClientHelper.class);
         ClientInternals.attachInstance((Supplier<ViewSearchBuilder>) ViewSearchBuilderImpl::new, "viewSearchBuilder");
-    }
-    
-    private static abstract class AbstractViewSearchBuilder implements ViewSearchBuilder {
-        public ViewSearchBuilder fillPreferredOpenedCategory() {
-            if (getPreferredOpenedCategory() == null) {
-                Screen currentScreen = Minecraft.getInstance().screen;
-                if (currentScreen instanceof DisplayScreen displayScreen) {
-                    setPreferredOpenedCategory(displayScreen.getCurrentCategoryId());
-                }
-            }
-            return this;
-        }
-        
-        @Override
-        public Stream<DisplaySpec> streamDisplays() {
-            return buildMapInternal().values().stream().flatMap(Collection::stream);
-        }
-    }
-    
-    public static final class ViewSearchBuilderImpl extends AbstractViewSearchBuilder {
-        private final Set<CategoryIdentifier<?>> filteringCategories = new HashSet<>();
-        private final Set<CategoryIdentifier<?>> categories = new HashSet<>();
-        private final List<EntryStack<?>> recipesFor = new ArrayList<>();
-        private final List<EntryStack<?>> usagesFor = new ArrayList<>();
-        @Nullable
-        private CategoryIdentifier<?> preferredOpenedCategory = null;
-        private boolean mergeDisplays = true;
-        private boolean processVisibilityHandlers = true;
-        private final Supplier<Map<DisplayCategory<?>, List<DisplaySpec>>> map = Suppliers.memoize(() -> ViewsImpl.buildMapFor(this));
-        
-        @Override
-        public ViewSearchBuilder addCategory(CategoryIdentifier<?> category) {
-            this.categories.add(category);
-            return this;
-        }
-        
-        @Override
-        public ViewSearchBuilder addCategories(Collection<CategoryIdentifier<?>> categories) {
-            this.categories.addAll(categories);
-            return this;
-        }
-        
-        @Override
-        public Set<CategoryIdentifier<?>> getCategories() {
-            return categories;
-        }
-        
-        @Override
-        public <T> ViewSearchBuilder addRecipesFor(EntryStack<T> stack) {
-            this.recipesFor.add(stack);
-            return this;
-        }
-        
-        @Override
-        public List<EntryStack<?>> getRecipesFor() {
-            return recipesFor;
-        }
-        
-        @Override
-        public <T> ViewSearchBuilder addUsagesFor(EntryStack<T> stack) {
-            this.usagesFor.add(stack);
-            return this;
-        }
-        
-        @Override
-        public List<EntryStack<?>> getUsagesFor() {
-            return usagesFor;
-        }
-        
-        @Override
-        public ViewSearchBuilder setPreferredOpenedCategory(@Nullable CategoryIdentifier<?> category) {
-            this.preferredOpenedCategory = category;
-            return this;
-        }
-        
-        @Override
-        @Nullable
-        public CategoryIdentifier<?> getPreferredOpenedCategory() {
-            return this.preferredOpenedCategory;
-        }
-        
-        @Override
-        public ViewSearchBuilder filterCategory(CategoryIdentifier<?> category) {
-            this.filteringCategories.add(category);
-            return this;
-        }
-        
-        @Override
-        public ViewSearchBuilder filterCategories(Collection<CategoryIdentifier<?>> categories) {
-            this.filteringCategories.addAll(categories);
-            return this;
-        }
-        
-        @Override
-        public Set<CategoryIdentifier<?>> getFilteringCategories() {
-            return filteringCategories;
-        }
-        
-        @Override
-        public Map<DisplayCategory<?>, List<DisplaySpec>> buildMapInternal() {
-            fillPreferredOpenedCategory();
-            return this.map.get();
-        }
-        
-        @Override
-        public boolean isMergingDisplays() {
-            return mergeDisplays;
-        }
-        
-        @Override
-        public ViewSearchBuilder mergingDisplays(boolean mergingDisplays) {
-            this.mergeDisplays = mergingDisplays;
-            return this;
-        }
-        
-        @Override
-        public boolean isProcessingVisibilityHandlers() {
-            return processVisibilityHandlers;
-        }
-        
-        @Override
-        public ViewSearchBuilder processingVisibilityHandlers(boolean processingVisibilityHandlers) {
-            this.processVisibilityHandlers = processingVisibilityHandlers;
-            return this;
-        }
-    }
-    
-    public static final class LegacyWrapperViewSearchBuilder extends AbstractViewSearchBuilder {
-        private final Map<DisplayCategory<?>, List<DisplaySpec>> map;
-        @Nullable
-        private EntryStack<?> inputNotice;
-        @Nullable
-        private EntryStack<?> outputNotice;
-        @Nullable
-        private CategoryIdentifier<?> preferredOpenedCategory = null;
-        
-        public LegacyWrapperViewSearchBuilder(Map<DisplayCategory<?>, List<DisplaySpec>> map) {
-            this.map = map;
-        }
-        
-        @Override
-        public ViewSearchBuilder addCategory(CategoryIdentifier<?> category) {
-            return this;
-        }
-        
-        @Override
-        public ViewSearchBuilder addCategories(Collection<CategoryIdentifier<?>> categories) {
-            return this;
-        }
-        
-        @Override
-        public Set<CategoryIdentifier<?>> getCategories() {
-            return Collections.emptySet();
-        }
-        
-        @Override
-        public ViewSearchBuilder filterCategory(CategoryIdentifier<?> category) {
-            return this;
-        }
-        
-        @Override
-        public ViewSearchBuilder filterCategories(Collection<CategoryIdentifier<?>> categories) {
-            return this;
-        }
-        
-        @Override
-        public Set<CategoryIdentifier<?>> getFilteringCategories() {
-            return Collections.emptySet();
-        }
-        
-        @Override
-        public <T> ViewSearchBuilder addRecipesFor(EntryStack<T> stack) {
-            return this;
-        }
-        
-        @Override
-        public List<EntryStack<?>> getRecipesFor() {
-            return inputNotice == null ? Collections.emptyList() : Collections.singletonList(outputNotice);
-        }
-        
-        @Override
-        public <T> ViewSearchBuilder addUsagesFor(EntryStack<T> stack) {
-            return this;
-        }
-        
-        @Override
-        public List<EntryStack<?>> getUsagesFor() {
-            return inputNotice == null ? Collections.emptyList() : Collections.singletonList(inputNotice);
-        }
-        
-        @Override
-        public ViewSearchBuilder setPreferredOpenedCategory(@Nullable CategoryIdentifier<?> category) {
-            this.preferredOpenedCategory = category;
-            return this;
-        }
-        
-        @Override
-        @Nullable
-        public CategoryIdentifier<?> getPreferredOpenedCategory() {
-            return this.preferredOpenedCategory;
-        }
-        
-        public <T> LegacyWrapperViewSearchBuilder addInputNotice(@Nullable EntryStack<T> stack) {
-            this.inputNotice = stack;
-            return this;
-        }
-        
-        public <T> LegacyWrapperViewSearchBuilder addOutputNotice(@Nullable EntryStack<T> stack) {
-            this.outputNotice = stack;
-            return this;
-        }
-        
-        @Override
-        public Map<DisplayCategory<?>, List<DisplaySpec>> buildMapInternal() {
-            fillPreferredOpenedCategory();
-            return this.map;
-        }
-        
-        @Override
-        public boolean isMergingDisplays() {
-            return true;
-        }
-        
-        @Override
-        public ViewSearchBuilder mergingDisplays(boolean mergingDisplays) {
-            return this;
-        }
-        
-        @Override
-        public boolean isProcessingVisibilityHandlers() {
-            return false;
-        }
-        
-        @Override
-        public ViewSearchBuilder processingVisibilityHandlers(boolean processingVisibilityHandlers) {
-            return this;
-        }
     }
 }

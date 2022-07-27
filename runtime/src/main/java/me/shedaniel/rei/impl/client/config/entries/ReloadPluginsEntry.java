@@ -29,9 +29,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
+import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.impl.client.gui.screen.ConfigReloadingScreen;
-import me.shedaniel.rei.impl.client.search.argument.Argument;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -64,7 +64,7 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
         }
     };
     private AbstractWidget reloadSearchButton = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
-        Argument.SEARCH_CACHE.clear();
+        SearchProvider.getInstance().clearCache();
     });
     private List<AbstractWidget> children = ImmutableList.of(reloadPluginsButton, reloadSearchButton);
     
@@ -99,7 +99,7 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
         this.reloadPluginsButton.setWidth(width / 2 - 2);
         this.reloadPluginsButton.x = x + entryWidth / 2 - width / 2;
         this.reloadPluginsButton.render(matrices, mouseX, mouseY, delta);
-        this.reloadSearchButton.active = this.isEditable() && !Argument.SEARCH_CACHE.isEmpty();
+        this.reloadSearchButton.active = this.isEditable() && SearchProvider.getInstance().hasCache();
         this.reloadSearchButton.y = y;
         this.reloadSearchButton.setWidth(width / 2 - 2);
         this.reloadSearchButton.x = x + entryWidth / 2 + 2;

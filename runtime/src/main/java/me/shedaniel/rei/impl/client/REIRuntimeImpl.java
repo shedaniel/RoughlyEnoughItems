@@ -42,12 +42,13 @@ import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
+import me.shedaniel.rei.impl.Internals;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
-import me.shedaniel.rei.impl.client.search.argument.Argument;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -74,7 +75,7 @@ public class REIRuntimeImpl implements REIRuntime {
     private AbstractContainerScreen<?> previousContainerScreen = null;
     private Screen previousScreen = null;
     private LinkedHashSet<DisplayScreen> lastDisplayScreen = Sets.newLinkedHashSetWithExpectedSize(10);
-    private List<HintProvider> hintProviders = new ArrayList<>();
+    private List<HintProvider> hintProviders = Internals.resolveServices(HintProvider.class);
     
     /**
      * @return the instance of screen helper
@@ -83,10 +84,6 @@ public class REIRuntimeImpl implements REIRuntime {
     @ApiStatus.Internal
     public static REIRuntimeImpl getInstance() {
         return (REIRuntimeImpl) REIRuntime.getInstance();
-    }
-    
-    public void addHintProvider(HintProvider provider) {
-        this.hintProviders.add(provider);
     }
     
     public List<HintProvider> getHintProviders() {
@@ -255,7 +252,7 @@ public class REIRuntimeImpl implements REIRuntime {
     
     @Override
     public void startReload() {
-        Argument.SEARCH_CACHE.clear();
+        SearchProvider.getInstance().clearCache();
         getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
         lastDisplayScreen.clear();
         if (!RenderSystem.isOnRenderThread()) {
@@ -272,7 +269,7 @@ public class REIRuntimeImpl implements REIRuntime {
     
     @Override
     public void endReload(ReloadStage stage) {
-        Argument.SEARCH_CACHE.clear();
+        SearchProvider.getInstance().clearCache();
         getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
     }
     

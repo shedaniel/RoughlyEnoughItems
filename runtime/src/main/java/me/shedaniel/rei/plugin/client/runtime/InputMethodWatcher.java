@@ -25,20 +25,18 @@ package me.shedaniel.rei.plugin.client.runtime;
 
 import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
-import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.client.search.method.InputMethodRegistry;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
 import me.shedaniel.rei.impl.client.gui.widget.CraftableFilterButtonWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
-import me.shedaniel.rei.impl.client.search.method.DefaultInputMethod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -49,6 +47,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class InputMethodWatcher implements HintProvider {
     @Override
@@ -59,8 +58,9 @@ public class InputMethodWatcher implements HintProvider {
             String languageCode = Minecraft.getInstance().options.languageCode;
             MutableComponent component = new TextComponent("");
             int match = 0;
-            for (InputMethod<?> method : InputMethodRegistry.getInstance().getAll().values()) {
-                if (method instanceof DefaultInputMethod) continue;
+            for (Map.Entry<ResourceLocation, InputMethod<?>> entry : InputMethodRegistry.getInstance().getAll().entrySet()) {
+                InputMethod<?> method = entry.getValue();
+                if (entry.getKey().equals(new ResourceLocation("rei:default"))) continue;
                 if (CollectionUtils.anyMatch(method.getMatchingLocales(), locale -> locale.code().equals(languageCode))) {
                     if (!component.getString().isEmpty()) {
                         component.append(", ");
@@ -99,8 +99,7 @@ public class InputMethodWatcher implements HintProvider {
                             () -> CraftableFilterButtonWidget.createInputMethodEntries(CraftableFilterButtonWidget.getApplicableInputMethods()));
                 }),
                 new HintButton(new TranslatableComponent("text.rei.input.methods.hint.ignore"), bounds -> {
-                    ConfigManagerImpl.getInstance().getConfig().setInputMethodId(new ResourceLocation("rei:default"));
-                    ConfigManager.getInstance().saveConfig();
+                    ConfigManagerInternal.getInstance().set("functionality.inputMethod", new ResourceLocation("rei:default"));
                 })
         );
     }

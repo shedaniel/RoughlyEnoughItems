@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.client.gui.widget;
 import com.mojang.math.Vector4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigManager;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -35,8 +36,7 @@ import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.client.search.method.InputMethodRegistry;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
-import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
-import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
+import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
@@ -91,12 +91,13 @@ public class CraftableFilterButtonWidget {
     }
     
     private static Collection<MenuEntry> menuEntries() {
-        ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
+        ConfigManagerInternal manager = ConfigManagerInternal.getInstance();
+        ConfigObject config = ConfigObject.getInstance();
         ArrayList<MenuEntry> entries = new ArrayList<>(List.of(
                 new SubMenuEntry(new TranslatableComponent("text.rei.config.menu.search_field.position"), Arrays.stream(SearchFieldLocation.values())
                         .<MenuEntry>map(location -> ToggleMenuEntry.of(new TextComponent(location.toString()),
                                         () -> config.getSearchFieldLocation() == location,
-                                        bool -> config.setSearchFieldLocation(location))
+                                        bool -> manager.set("appearance.layout.searchFieldLocation", location))
                                 .withActive(() -> config.getSearchFieldLocation() != location)
                         )
                         .toList())
@@ -118,7 +119,8 @@ public class CraftableFilterButtonWidget {
     }
     
     public static List<MenuEntry> createInputMethodEntries(List<Map.Entry<ResourceLocation, InputMethod<?>>> applicableInputMethods) {
-        ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
+        ConfigManagerInternal manager = ConfigManagerInternal.getInstance();
+        ConfigObject config = ConfigObject.getInstance();
         return applicableInputMethods.stream()
                 .<MenuEntry>map(pair -> ToggleMenuEntry.of(pair.getValue().getName(),
                                 () -> Objects.equals(config.getInputMethodId(), pair.getKey()),
@@ -130,14 +132,14 @@ public class CraftableFilterButtonWidget {
                                             InternalLogger.getInstance().error("Failed to dispose input method", throwable);
                                         }
                                         
-                                        ConfigManagerImpl.getInstance().getConfig().setInputMethodId(new ResourceLocation("rei:default"));
+                                        manager.set("functionality.inputMethod", new ResourceLocation("rei:default"));
                                     }).join();
                                     CompletableFuture<Void> future = pair.getValue().prepare(service).whenComplete((unused, throwable) -> {
                                         if (throwable != null) {
                                             InternalLogger.getInstance().error("Failed to prepare input method", throwable);
-                                            ConfigManagerImpl.getInstance().getConfig().setInputMethodId(new ResourceLocation("rei:default"));
+                                            manager.set("functionality.inputMethod", new ResourceLocation("rei:default"));
                                         } else {
-                                            ConfigManagerImpl.getInstance().getConfig().setInputMethodId(pair.getKey());
+                                            manager.set("functionality.inputMethod", pair.getKey());
                                         }
                                     });
                                     Screen screen = Minecraft.getInstance().screen;

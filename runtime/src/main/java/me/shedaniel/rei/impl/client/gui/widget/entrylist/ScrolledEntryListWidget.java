@@ -35,7 +35,6 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
-import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 

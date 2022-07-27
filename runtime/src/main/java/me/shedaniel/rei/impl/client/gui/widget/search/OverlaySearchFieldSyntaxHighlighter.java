@@ -23,9 +23,10 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.search;
 
-import me.shedaniel.rei.impl.client.search.IntRange;
-import me.shedaniel.rei.impl.client.search.argument.Argument;
-import me.shedaniel.rei.impl.client.search.argument.type.ArgumentTypesRegistry;
+import it.unimi.dsi.fastutil.ints.IntIntPair;
+import me.shedaniel.rei.api.client.search.SearchFilter;
+import me.shedaniel.rei.api.client.search.SearchProvider;
+import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
@@ -33,7 +34,7 @@ import java.util.function.Consumer;
 
 @ApiStatus.Internal
 public class OverlaySearchFieldSyntaxHighlighter implements Consumer<String> {
-    public byte[] highlighted;
+    public HighlightInfo[] highlighted;
     
     public OverlaySearchFieldSyntaxHighlighter(String text) {
         this.accept(text);
@@ -41,32 +42,46 @@ public class OverlaySearchFieldSyntaxHighlighter implements Consumer<String> {
     
     @Override
     public void accept(String text) {
-        this.highlighted = new byte[text.length()];
-        Argument.bakeArguments(text, new Argument.ProcessedSink() {
+        this.highlighted = new HighlightInfo[text.length()];
+        SearchProvider.getInstance().createFilter(text).processDecoration(new SearchFilter.ParseDecorationSink() {
             @Override
             public void addQuote(int index) {
-                highlighted[index] = -2;
+                highlighted[index] = QuoteHighlightInfo.INSTANCE;
             }
             
             @Override
             public void addSplitter(int index) {
-                highlighted[index] = -1;
+                highlighted[index] = SplitterHighlightInfo.INSTANCE;
             }
             
             @Override
-            public void addPart(Argument<?, ?> argument, boolean usingGrammar, Collection<IntRange> grammarRanges, int index) {
+            public void addPart(IntIntPair range, Style style, boolean usingGrammar, Collection<IntIntPair> grammarRanges, int index) {
                 if (usingGrammar) {
-                    int argIndex = ArgumentTypesRegistry.ARGUMENT_TYPE_LIST.indexOf(argument.getArgument()) * 2 + 1;
-                    for (int i = argument.start(); i < argument.end(); i++) {
-                        highlighted[i] = (byte) argIndex;
+                    PartHighlightInfo base = new PartHighlightInfo(style, false);
+                    PartHighlightInfo grammar = new PartHighlightInfo(style, true);
+                    for (int i = range.leftInt(); i < range.rightInt(); i++) {
+                        highlighted[i] = base;
                     }
-                    for (IntRange grammarRange : grammarRanges) {
-                        for (int i = grammarRange.min(); i <= grammarRange.max(); i++) {
-                            highlighted[i + index] = (byte) (argIndex + 1);
+                    for (IntIntPair grammarRange : grammarRanges) {
+                        for (int i = grammarRange.leftInt(); i <= grammarRange.rightInt(); i++) {
+                            highlighted[i + index] = grammar;
                         }
                     }
                 }
             }
         });
+    }
+    
+    public sealed interface HighlightInfo {
+    }
+    
+    public record PartHighlightInfo(Style style, boolean grammar) implements HighlightInfo {}
+    
+    public enum QuoteHighlightInfo implements HighlightInfo {
+        INSTANCE,
+    }
+    
+    public enum SplitterHighlightInfo implements HighlightInfo {
+        INSTANCE,
     }
 }

@@ -30,11 +30,10 @@ import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.init.PluginDetector;
 import me.shedaniel.rei.jeicompat.JEIExtraClientPlugin;
 import me.shedaniel.rei.jeicompat.JEIExtraPlugin;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
-import me.shedaniel.rei.plugin.client.DefaultClientPlugin;
-import me.shedaniel.rei.impl.init.PluginDetector;
 import me.shedaniel.rei.plugin.client.forge.DefaultClientPluginImpl;
 import me.shedaniel.rei.plugin.client.runtime.DefaultClientRuntimePlugin;
 import me.shedaniel.rei.plugin.common.forge.DefaultPluginImpl;
@@ -96,21 +95,21 @@ public class PluginDetectorImpl implements PluginDetector {
         return () -> () -> {
             PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientPluginImpl()));
             PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientRuntimePlugin()));
-        PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new JEIExtraClientPlugin()));
+            PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new JEIExtraClientPlugin()));
             AnnotationUtils.<REIPlugin, REIClientPlugin>scanAnnotation(REIPlugin.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
                 ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
             });
-        ClientInternals.attachInstance((Supplier<List<String>>) () -> {
-            List<String> modIds = new ArrayList<>();
-            for (REIPluginProvider<REIClientPlugin> plugin : PluginManager.getClientInstance().getPluginProviders()) {
-                if (plugin instanceof JEIPluginDetector.JEIPluginProvider) {
-                    modIds.addAll(((JEIPluginDetector.JEIPluginProvider) plugin).modIds);
+            ClientInternals.attachInstance((Supplier<List<String>>) () -> {
+                List<String> modIds = new ArrayList<>();
+                for (REIPluginProvider<REIClientPlugin> plugin : PluginManager.getClientInstance().getPluginProviders()) {
+                    if (plugin instanceof JEIPluginDetector.JEIPluginProvider) {
+                        modIds.addAll(((JEIPluginDetector.JEIPluginProvider) plugin).modIds);
                     }
                 }
-            return modIds;
-        }, "jeiCompatMods");
-        JEIPluginDetector.detect((aClass, consumer) -> AnnotationUtils.scanAnnotation((Class<Object>) aClass, c -> true,
-                (TriConsumer<List<String>, Supplier<Object>, Class<Object>>) (TriConsumer) consumer), PluginView.getClientInstance()::registerPlugin);
+                return modIds;
+            }, "jeiCompatMods");
+            JEIPluginDetector.detect((aClass, consumer) -> AnnotationUtils.scanAnnotation((Class<Object>) aClass, c -> true,
+                    (TriConsumer<List<String>, Supplier<Object>, Class<Object>>) (TriConsumer) consumer), PluginView.getClientInstance()::registerPlugin);
         };
     }
 }

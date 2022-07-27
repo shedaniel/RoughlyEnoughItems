@@ -30,7 +30,6 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackVisitorWidget;
@@ -42,15 +41,14 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
-import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
-import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
+import me.shedaniel.rei.impl.client.REIRuntimeImpl;
+import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
@@ -171,13 +169,9 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (containsChecked(mouseX, mouseY, false)) {
             if (Screen.hasControlDown()) {
-                ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
+                ConfigManagerInternal manager = ConfigManagerInternal.getInstance();
+                manager.set("advanced.accessibility.entrySize", manager.getConfig().getEntrySize() + amount * 0.075);
                 scaleIndicator.setAs(10.0D);
-                if (config.setEntrySize(config.getEntrySize() + amount * 0.075)) {
-                    ConfigManager.getInstance().saveConfig();
-                    REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
-                    return true;
-                }
             }
         }
         
@@ -266,7 +260,6 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
         updateEntries(entrySize, zoomed);
         FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
         if (favoritesListWidget != null) {
-            favoritesListWidget.getSystemRegion().updateEntriesPosition(entry -> true);
             favoritesListWidget.getRegion().updateEntriesPosition(entry -> true);
         }
     }
@@ -353,5 +346,10 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     protected abstract List<EntryListStackEntry> getEntryWidgets();
     
     public void init(ScreenOverlayImpl overlay) {
+    }
+    
+    @Override
+    public void queueReloadSearch() {
+        updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
     }
 }

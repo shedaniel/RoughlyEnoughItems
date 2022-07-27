@@ -13,6 +13,33 @@ version = rootProject.base_version + "." + runNumber + (rootProject.unstable.toB
 
 group = "me.shedaniel"
 
+allprojects {
+    ext {
+        runtimeEngines = [
+                ":runtime-engine:entry-types",
+                ":runtime-engine:entry-stacks",
+                ":runtime-engine:categories",
+                ":runtime-engine:configs",
+                ":runtime-engine:displays",
+                ":runtime-engine:filtering-entries",
+                ":runtime-engine:entries",
+                ":runtime-engine:screens",
+                ":runtime-engine:favorites",
+                ":runtime-engine:search",
+                ":runtime-engine:subsets",
+                ":runtime-engine:transfer-handlers",
+                ":runtime-engine:default-runtime-plugin",
+        ]
+        depProjects = [
+                ":api",
+                ":shared-internals",
+                ":runtime",
+                ":runtime-engine",
+                ":default-plugin",
+        ] + runtimeEngines
+    }
+}
+
 subprojects {
     apply plugin: "me.shedaniel.unified-publishing"
     apply plugin: "java"
@@ -53,7 +80,6 @@ subprojects {
             mods {
                 main { // to match the default mod generated for Forge
                     sourceSet project.sourceSets.main
-                    def depProjects = [":api", ":runtime", ":default-plugin"]
                     depProjects.each {
                         sourceSet project(it).sourceSets.main
                     }
@@ -94,14 +120,84 @@ allprojects {
     }
 }
 
-["api", "default-plugin", "runtime"].forEach {
+subprojects {
+    if (project.path in depProjects) {
+        loom {
+            if (project.path != ":api") {
+                accessWidenerPath = gradle.rootProject.project("fabric").file("src/main/resources/roughlyenoughitems.accessWidener")
+            }
+        }
+
+        architectury {
+            common(forgeEnabled.toBoolean() ? ["forge", "fabric"] : ["fabric"])
+        }
+
+        dependencies {
+            modCompileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
+            modApi("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
+            modApi("dev.architectury:architectury:${architectury_version}")
+
+            if (project.path != ":api") {
+                compileClasspath(project(path: ":api", configuration: "namedElements"))
+
+                if (project.path != ":shared-internals") {
+                    compileClasspath(project(path: ":shared-internals", configuration: "namedElements"))
+                }
+            }
+        }
+
+        remapJar {
+            classifier "raw"
+        }
+
+        task fakeJar(type: Jar, dependsOn: remapJar) {
+            from remapJar.archiveFile.map { zipTree(it) }
+            from(rootProject.file("fake/fabric.mod.json")) {
+                into ""
+            }
+            classifier null
+        }
+
+        task fakeForgeJar(type: Jar, dependsOn: remapJar) {
+            from remapJar.archiveFile.map { zipTree(it) }
+            from(rootProject.file("fake/fabric.mod.json")) {
+                into ""
+            }
+            from(rootProject.file("fake/REIPlugin.class")) {
+                into "me/shedaniel/rei/forge"
+            }
+            classifier "fake-forge"
+        }
+
+        artifacts {
+            apiElements(fakeJar)
+            runtimeElements(fakeJar)
+        }
+
+        afterEvaluate {
+            configurations.apiElements.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(tasks.remapJar) }
+            configurations.runtimeElements.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(tasks.remapJar) }
+        }
+
+        publishing {
+            publications {
+                mavenCommon(MavenPublication) {
+                    artifactId = rootProject.name + "-" + project.name
+                    from components.java
+                }
+            }
+        }
+    }
+}
+
+depProjects.forEach {
     project(":fabric").evaluationDependsOn(":$it")
 }
 
 subprojects {
     group = rootProject.group
     version = rootProject.version
-    archivesBaseName = rootProject.name
+    archivesBaseName = rootProject.name + "-" + project.name
 
     publishing {
         repositories {

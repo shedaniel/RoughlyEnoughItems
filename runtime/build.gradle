@@ -1,54 +1,9 @@
-archivesBaseName = rootProject.name + "-" + project.name
-
-architectury {
-    common(forgeEnabled.toBoolean())
-}
-
-loom {
-    accessWidenerPath = gradle.rootProject.project("fabric").file("src/main/resources/roughlyenoughitems.accessWidener")
-}
-
 dependencies {
-    modCompileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
-    modApi("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
-    modApi("dev.architectury:architectury:${architectury_version}")
     compileClasspath(annotationProcessor("org.projectlombok:lombok:1.18.22"))
-    compileClasspath(project(path: ":api", configuration: "namedElements"))
     testImplementation(project(path: ":api", configuration: "namedElements"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
 }
 
 test {
     useJUnitPlatform()
-}
-
-remapJar {
-    classifier "raw"
-}
-
-task fakeJar(type: Jar, dependsOn: remapJar) {
-    from remapJar.archiveFile.map { zipTree(it) }
-    from(rootProject.file("fake/fabric.mod.json")) {
-        into ""
-    }
-    classifier null
-}
-
-artifacts {
-    apiElements(fakeJar)
-    runtimeElements(fakeJar)
-}
-
-afterEvaluate {
-    configurations.apiElements.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(tasks.remapJar) }
-    configurations.runtimeElements.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(tasks.remapJar) }
-}
-
-publishing {
-    publications {
-        mavenCommon(MavenPublication) {
-            artifactId = rootProject.name + "-" + project.name
-            from components.java
-        }
-    }
 }

@@ -25,12 +25,13 @@ package me.shedaniel.rei.impl.client.gui.widget.favorites.history;
 
 import com.google.common.collect.Iterables;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
-import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
@@ -43,6 +44,10 @@ public class DisplayHistoryManager {
     private Map<String, DisplayEntry> entries = new LinkedHashMap<>();
     private long lastCheckTime = -1;
     
+    private List<CompoundTag> getDisplayHistory() {
+        return (List<CompoundTag>) ConfigManagerInternal.getInstance().get("basics.displayHistory");
+    }
+    
     public Collection<DisplayEntry> getEntries(DisplayHistoryWidget parent) {
         if ((lastCheckTime == -1 || Util.getMillis() - lastCheckTime > 4000) && !PluginManager.areAnyReloading()) {
             updateEntries(parent);
@@ -53,7 +58,7 @@ public class DisplayHistoryManager {
     }
     
     private void updateEntries(DisplayHistoryWidget parent) {
-        List<CompoundTag> displayHistory = ConfigManagerImpl.getInstance().getConfig().getDisplayHistory();
+        List<CompoundTag> displayHistory = getDisplayHistory();
         Map<String, DisplayEntry> copy = new LinkedHashMap<>(entries);
         entries.clear();
         for (CompoundTag tag : displayHistory) {
@@ -80,13 +85,13 @@ public class DisplayHistoryManager {
     
     public void removeEntry(DisplayEntry entry) {
         this.entries.remove(entry.getUuid().toString());
-        List<CompoundTag> displayHistory = ConfigManagerImpl.getInstance().getConfig().getDisplayHistory();
+        List<CompoundTag> displayHistory = getDisplayHistory();
         displayHistory.removeIf(tag -> tag.getString("DisplayHistoryUUID").equals(entry.getUuid().toString()));
         save();
     }
     
     public void addEntry(DisplayHistoryWidget parent, @Nullable Rectangle bounds, Display display) {
-        List<CompoundTag> displayHistory = ConfigManagerImpl.getInstance().getConfig().getDisplayHistory();
+        List<CompoundTag> displayHistory = getDisplayHistory();
         Iterator<DisplayEntry> iterator = this.entries.values().iterator();
         while (iterator.hasNext()) {
             DisplayEntry entry = iterator.next();
@@ -116,7 +121,7 @@ public class DisplayHistoryManager {
     }
     
     private void save() {
-        List<CompoundTag> displayHistory = ConfigManagerImpl.getInstance().getConfig().getDisplayHistory();
+        List<CompoundTag> displayHistory = getDisplayHistory();
         for (CompoundTag compoundTag : displayHistory) {
             String uuid = compoundTag.getString("DisplayHistoryUUID");
             DisplayEntry entry = entries.get(uuid);
@@ -137,6 +142,6 @@ public class DisplayHistoryManager {
             }
         }
         
-        ConfigManagerImpl.getInstance().saveConfig();
+        ConfigManager.getInstance().saveConfig();
     }
 }

@@ -29,6 +29,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.EntryPanelOrdering;
+import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntry;
 import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.view.Views;
@@ -36,9 +37,8 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
+import me.shedaniel.rei.impl.client.search.SearchManager;
 import me.shedaniel.rei.impl.common.InternalLogger;
-import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
-import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
@@ -61,7 +61,7 @@ public class EntryListSearchManager {
     
     public static final EntryListSearchManager INSTANCE = new EntryListSearchManager();
     
-    private AsyncSearchManager searchManager = new AsyncSearchManager(EntryRegistry.getInstance()::getPreFilteredList, () -> {
+    private SearchManager searchManager = new AsyncSearchManager(EntryRegistry.getInstance()::getPreFilteredList, () -> {
         boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled();
         LongSet workingItems = checkCraftable ? new LongOpenHashSet() : null;
         if (checkCraftable) {
@@ -104,10 +104,10 @@ public class EntryListSearchManager {
     }
     
     private List</*EntryStack<?> | CollapsedStack*/ Object> collapse(List<EntryStack<?>> stacks) {
-        CollapsibleEntryRegistryImpl collapsibleRegistry = (CollapsibleEntryRegistryImpl) CollapsibleEntryRegistry.getInstance();
-        Map<CollapsibleEntryRegistryImpl.Entry, @Nullable CollapsedStack> entries = new HashMap<>();
+        CollapsibleEntryRegistry collapsibleRegistry = CollapsibleEntryRegistry.getInstance();
+        Map<CollapsibleEntry, @Nullable CollapsedStack> entries = new HashMap<>();
         
-        for (CollapsibleEntryRegistryImpl.Entry entry : collapsibleRegistry.getEntries()) {
+        for (CollapsibleEntry entry : collapsibleRegistry) {
             entries.put(entry, null);
         }
         
@@ -117,10 +117,10 @@ public class EntryListSearchManager {
             long hashExact = EntryStacks.hashExact(stack);
             boolean matchedAny = false;
             
-            for (Map.Entry<CollapsibleEntryRegistryImpl.Entry, @Nullable CollapsedStack> mapEntry : entries.entrySet()) {
-                CollapsibleEntryRegistryImpl.Entry entry = mapEntry.getKey();
+            for (Map.Entry<CollapsibleEntry, @Nullable CollapsedStack> mapEntry : entries.entrySet()) {
+                CollapsibleEntry entry = mapEntry.getKey();
                 
-                if (entry.getMatcher().matches(stack, hashExact)) {
+                if (entry.matches(stack, hashExact)) {
                     CollapsedStack collapsed = mapEntry.getValue();
                     
                     if (collapsed == null) {

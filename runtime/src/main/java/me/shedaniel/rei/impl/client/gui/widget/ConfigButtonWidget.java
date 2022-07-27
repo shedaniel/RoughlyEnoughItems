@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.config.AppearanceTheme;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
@@ -38,8 +39,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
-import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
-import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
+import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
@@ -89,7 +89,8 @@ public class ConfigButtonWidget {
     }
     
     private static Collection<MenuEntry> menuEntries() {
-        ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
+        ConfigManagerInternal manager = ConfigManagerInternal.getInstance();
+        ConfigObject config = ConfigObject.getInstance();
         return List.of(
                 ToggleMenuEntry.of(new TranslatableComponent("text.rei.cheating"),
                         config::isCheating,
@@ -112,19 +113,19 @@ public class ConfigButtonWidget {
                 ToggleMenuEntry.ofDeciding(new TranslatableComponent("text.rei.config.menu.dark_theme"),
                         config::isUsingDarkTheme,
                         dark -> {
-                            config.setUsingDarkTheme(dark);
+                            manager.set("appearance.theme", dark ? AppearanceTheme.DARK : AppearanceTheme.LIGHT);
                             return false;
                         }
                 ),
                 ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.craftable_filter"),
                         config::isCraftableFilterEnabled,
-                        config::setCraftableFilterEnabled
+                        bool -> manager.set("appearance.layout.showCraftableOnlyButton", bool)
                 ),
                 new SubMenuEntry(new TranslatableComponent("text.rei.config.menu.display"), List.of(
                         ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.remove_recipe_book"),
                                 config::doesDisableRecipeBook,
                                 disableRecipeBook -> {
-                                    config.setDisableRecipeBook(disableRecipeBook);
+                                    manager.set("functionality.disableRecipeBook", disableRecipeBook);
                                     Screen screen = Minecraft.getInstance().screen;
                                     
                                     if (screen != null) {
@@ -135,7 +136,7 @@ public class ConfigButtonWidget {
                         ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.left_side_mob_effects"),
                                 config::isLeftSideMobEffects,
                                 disableRecipeBook -> {
-                                    config.setLeftSideMobEffects(disableRecipeBook);
+                                    manager.set("functionality.leftSideMobEffects", disableRecipeBook);
                                     Screen screen = Minecraft.getInstance().screen;
                                     
                                     if (screen != null) {
@@ -145,21 +146,21 @@ public class ConfigButtonWidget {
                         ),
                         ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.left_side_panel"),
                                 config::isLeftHandSidePanel,
-                                bool -> config.setDisplayPanelLocation(bool ? DisplayPanelLocation.LEFT : DisplayPanelLocation.RIGHT)
+                                bool -> manager.set("advanced.accessibility.displayPanelLocation", bool ? DisplayPanelLocation.LEFT : DisplayPanelLocation.RIGHT)
                         ),
                         ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.scrolling_side_panel"),
                                 config::isEntryListWidgetScrolled,
-                                config::setEntryListWidgetScrolled
+                                bool -> manager.set("appearance.scrollingEntryListWidget", bool)
                         ),
                         new SeparatorMenuEntry(),
                         ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.caching_entry_rendering"),
                                 config::doesCacheEntryRendering,
-                                config::setDoesCacheEntryRendering
+                                bool -> manager.set("advanced.miscellaneous.cachingFastEntryRendering", bool)
                         ),
                         new SeparatorMenuEntry(),
                         ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.syntax_highlighting"),
                                 () -> config.getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL || config.getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL_UNDERSCORED,
-                                bool -> config.setSyntaxHighlightingMode(bool ? SyntaxHighlightingMode.COLORFUL : SyntaxHighlightingMode.PLAIN_UNDERSCORED)
+                                bool -> manager.set("appearance.syntaxHighlightingMode", bool ? SyntaxHighlightingMode.COLORFUL : SyntaxHighlightingMode.PLAIN_UNDERSCORED)
                         )
                 )),
                 new SeparatorMenuEntry(),

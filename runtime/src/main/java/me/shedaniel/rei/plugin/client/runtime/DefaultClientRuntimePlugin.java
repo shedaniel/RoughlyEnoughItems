@@ -28,7 +28,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import dev.architectury.platform.Platform;
-import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.ClientHelper;
@@ -41,9 +40,9 @@ import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProvider
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitorWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
-import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
@@ -51,22 +50,15 @@ import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.client.search.method.InputMethodRegistry;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.plugins.PluginManager;
-import me.shedaniel.rei.api.common.plugins.REIPlugin;
-import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
-import me.shedaniel.rei.impl.client.search.method.DefaultInputMethod;
 import me.shedaniel.rei.impl.client.search.method.unihan.BomopofoInputMethod;
 import me.shedaniel.rei.impl.client.search.method.unihan.JyutpingInputMethod;
 import me.shedaniel.rei.impl.client.search.method.unihan.PinyinInputMethod;
 import me.shedaniel.rei.impl.client.search.method.unihan.UniHanManager;
-import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
-import me.shedaniel.rei.impl.common.entry.type.EntryRegistryListener;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -78,24 +70,13 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.function.Function;
 
 @Environment(EnvType.CLIENT)
 @ApiStatus.Internal
 public class DefaultClientRuntimePlugin implements REIClientPlugin {
-    private final FilteredStacksVisibilityHandler filteredStacksVisibilityHandler = new FilteredStacksVisibilityHandler();
-    
     @SuppressWarnings("rawtypes")
     public DefaultClientRuntimePlugin() {
-        PluginStageExecutionWatcher watcher = new PluginStageExecutionWatcher();
-        for (PluginManager<? extends REIPlugin<?>> instance : PluginManager.getActiveInstances()) {
-            instance.registerReloadable((Reloadable) watcher.reloadable(instance));
-        }
-        REIRuntimeImpl.getInstance().addHintProvider(watcher);
-        REIRuntimeImpl.getInstance().addHintProvider(new SearchBarHighlightWatcher());
-        REIRuntimeImpl.getInstance().addHintProvider(new SearchFilterPrepareWatcher());
-        REIRuntimeImpl.getInstance().addHintProvider(new InputMethodWatcher());
     }
     
     @Override
@@ -112,24 +93,11 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                 
                 @Override
                 @Nullable
-                public Tooltip getTooltip(Point point) {
-                    return Tooltip.create(new TextComponent("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
+                public Tooltip getTooltip(TooltipContext context) {
+                    return Tooltip.create(context.getPoint(), new TextComponent("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
                 }
             }));
         }
-        
-        ((EntryRegistryImpl) registry).listeners.add(new EntryRegistryListener() {
-            @Override
-            public void onReFilter(List<EntryStack<?>> stacks) {
-                filteredStacksVisibilityHandler.reset();
-            }
-        });
-    }
-    
-    @Override
-    public void registerDisplays(DisplayRegistry registry) {
-        filteredStacksVisibilityHandler.reset();
-        registry.registerVisibilityPredicate(filteredStacksVisibilityHandler);
     }
     
     @Override
@@ -172,7 +140,6 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
     
     @Override
     public void registerInputMethods(InputMethodRegistry registry) {
-        registry.add(DefaultInputMethod.ID, DefaultInputMethod.INSTANCE);
         UniHanManager manager = new UniHanManager(Platform.getConfigFolder().resolve("roughlyenoughitems/unihan.zip"));
         registry.add(new ResourceLocation("rei:pinyin"), new PinyinInputMethod(manager));
         registry.add(new ResourceLocation("rei:jyutping"), new JyutpingInputMethod(manager));

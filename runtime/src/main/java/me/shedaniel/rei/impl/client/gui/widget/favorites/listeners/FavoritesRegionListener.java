@@ -27,7 +27,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
-import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesEntriesManager;
+import me.shedaniel.rei.impl.client.favorites.MutableFavoritesList;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionEntryWidget;
@@ -47,20 +47,19 @@ public class FavoritesRegionListener implements RegionListener<FavoriteEntry> {
     @Override
     public void onDrop(Stream<FavoriteEntry> entries) {
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
-            FavoritesEntriesManager.INSTANCE.setEntries(entries.collect(Collectors.toList()));
+            ((MutableFavoritesList) ConfigObject.getInstance().getFavoriteEntries()).setAll(entries.collect(Collectors.toList()));
         }
     }
     
     @Override
     public void onRemove(RealRegionEntry<FavoriteEntry> entry) {
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
-            FavoritesEntriesManager.INSTANCE.remove(entry.getEntry());
+            ConfigObject.getInstance().getFavoriteEntries().remove(entry.getEntry());
         }
     }
     
     @Override
     public void onConsumed(RealRegionEntry<FavoriteEntry> entry) {
-        favoritesListWidget.setSystemRegionEntries(entry);
     }
     
     @Override
@@ -71,6 +70,5 @@ public class FavoritesRegionListener implements RegionListener<FavoriteEntry> {
     
     @Override
     public void onSetNewEntries(List<RegionEntryWidget<FavoriteEntry>> regionEntryListEntries) {
-        favoritesListWidget.setSystemRegionEntries(null);
     }
 }

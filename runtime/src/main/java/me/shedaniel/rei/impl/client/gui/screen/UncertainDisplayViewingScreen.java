@@ -40,7 +40,6 @@ import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
@@ -49,7 +48,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.ClientInternals;
-import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
@@ -148,8 +147,7 @@ public class UncertainDisplayViewingScreen extends Screen {
                     if (scroll.target() == 0 && allModsUsingJEI != null) {
                         scroll.setTo(200, 450);
                     } else if (allModsUsingJEI != null && jeiEnabled) {
-                        ConfigManagerImpl.getInstance().getConfig().setJEICompatibilityLayerEnabled(jeiEnabled);
-                        ConfigManager.getInstance().saveConfig();
+                        ConfigManagerInternal.getInstance().set("advanced.enableJeiCompatibilityLayer", jeiEnabled);
                         RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
                         RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
                         Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());

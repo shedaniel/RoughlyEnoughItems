@@ -34,8 +34,10 @@ import dev.architectury.event.events.client.ClientScreenInputEvent;
 import dev.architectury.networking.NetworkManager;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
-import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.client.config.addon.ConfigAddonRegistry;
+import me.shedaniel.rei.api.client.entry.renderer.EntryRendererRegistry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
@@ -44,44 +46,37 @@ import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
+import me.shedaniel.rei.api.client.search.SearchProvider;
+import me.shedaniel.rei.api.client.search.method.InputMethodRegistry;
+import me.shedaniel.rei.api.client.subsets.SubsetsRegistry;
+import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
-import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
-import me.shedaniel.rei.impl.client.config.addon.ConfigAddonRegistryImpl;
-import me.shedaniel.rei.impl.client.entry.renderer.EntryRendererRegistryImpl;
-import me.shedaniel.rei.impl.client.favorites.DelegatingFavoriteEntryProviderImpl;
-import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
+import me.shedaniel.rei.impl.client.gui.widget.CatchingExceptionUtils;
 import me.shedaniel.rei.impl.client.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.client.gui.widget.TooltipContextImpl;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
-import me.shedaniel.rei.impl.client.registry.category.CategoryRegistryImpl;
-import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
-import me.shedaniel.rei.impl.client.registry.screen.ScreenRegistryImpl;
-import me.shedaniel.rei.impl.client.search.SearchProviderImpl;
-import me.shedaniel.rei.impl.client.search.method.InputMethodRegistryImpl;
-import me.shedaniel.rei.impl.client.subsets.SubsetsRegistryImpl;
-import me.shedaniel.rei.impl.client.transfer.TransferHandlerRegistryImpl;
-import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import me.shedaniel.rei.impl.common.InternalLogger;
-import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
-import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
-import me.shedaniel.rei.impl.common.entry.type.types.EmptyEntryDefinition;
 import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
 import me.shedaniel.rei.impl.common.util.IssuesDetector;
-import me.shedaniel.rei.plugin.test.REITestPlugin;
+import me.shedaniel.rei.impl.init.PluginDetector;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -110,6 +105,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.List;
@@ -135,10 +131,7 @@ public class RoughlyEnoughItemsCoreClient {
     private static final List<Future<?>> RELOAD_TASKS = new CopyOnWriteArrayList<>();
     
     public static void attachClientInternals() {
-        InternalWidgets.attach();
-        EmptyEntryDefinition.EmptyRenderer emptyEntryRenderer = new EmptyEntryDefinition.EmptyRenderer();
-        ClientInternals.attachInstance((Supplier<EntryRenderer<?>>) () -> emptyEntryRenderer, "emptyEntryRenderer");
-        ClientInternals.attachInstance((BiFunction<Supplier<DataResult<FavoriteEntry>>, Supplier<CompoundTag>, FavoriteEntry>) DelegatingFavoriteEntryProviderImpl::new, "delegateFavoriteEntry");
+        CatchingExceptionUtils.attach();
         ClientInternals.attachInstance((Function<CompoundTag, DataResult<FavoriteEntry>>) (object) -> {
             String type = object.getString(FavoriteEntry.TYPE_KEY);
             ResourceLocation id = new ResourceLocation(type);
@@ -204,30 +197,29 @@ public class RoughlyEnoughItemsCoreClient {
                 return categories.stream();
             }
         }, "clickAreaHandlerResult");
-        ClientInternals.attachInstanceSupplier(new PluginManagerImpl<>(
-                REIClientPlugin.class,
-                view -> view.then(PluginView.getInstance()),
-                new EntryRendererRegistryImpl(),
-                new ViewsImpl(),
-                new InputMethodRegistryImpl(),
-                new SearchProviderImpl(),
-                new ConfigManagerImpl(),
-                new EntryRegistryImpl(),
-                new CollapsibleEntryRegistryImpl(),
-                new CategoryRegistryImpl(),
-                new DisplayRegistryImpl(),
-                new ScreenRegistryImpl(),
-                new FavoriteEntryTypeRegistryImpl(),
-                new SubsetsRegistryImpl(),
-                new TransferHandlerRegistryImpl(),
-                new REIRuntimeImpl(),
-                new ConfigAddonRegistryImpl()), "clientPluginManager");
+        ClientInternals.getPluginManager().registerReloadable(EntryRendererRegistry.class);
+        ClientInternals.getPluginManager().registerReloadable(Views.class);
+        ClientInternals.getPluginManager().registerReloadable(InputMethodRegistry.class);
+        ClientInternals.getPluginManager().registerReloadable(SearchProvider.class);
+        ClientInternals.getPluginManager().registerReloadable(ConfigManager.class);
+        ClientInternals.getPluginManager().registerReloadable(EntryRegistry.class);
+        ClientInternals.getPluginManager().registerReloadable(CollapsibleEntryRegistry.class);
+        ClientInternals.getPluginManager().registerReloadable(CategoryRegistry.class);
+        ClientInternals.getPluginManager().registerReloadable(DisplayRegistry.class);
+        ClientInternals.getPluginManager().registerReloadable(ScreenRegistry.class);
+        ClientInternals.getPluginManager().registerReloadable(FavoriteEntryType.Registry.class);
+        ClientInternals.getPluginManager().registerReloadable(SubsetsRegistry.class);
+        ClientInternals.getPluginManager().registerReloadable(TransferHandlerRegistry.class);
+        ClientInternals.getPluginManager().registerReloadable(REIRuntime.class);
+        ClientInternals.getPluginManager().registerReloadable(ConfigAddonRegistry.class);
     }
     
     public void onInitializeClient() {
         IssuesDetector.detect();
         registerEvents();
-        RoughlyEnoughItemsCore.getPluginDetector().detectClientPlugins().get().run();
+        for (PluginDetector detector : RoughlyEnoughItemsCore.PLUGIN_DETECTORS) {
+            detector.detectClientPlugins().get().run();
+        }
         loadTestPlugins();
         
         Minecraft client = Minecraft.getInstance();
@@ -271,7 +263,13 @@ public class RoughlyEnoughItemsCoreClient {
     
     private void loadTestPlugins() {
         if (System.getProperty("rei.test", "false").equals("true")) {
-            PluginView.getClientInstance().registerPlugin(new REITestPlugin());
+            try {
+                PluginView.getClientInstance().registerPlugin((REIPluginProvider<? extends REIClientPlugin>) Class.forName("me.shedaniel.rei.plugin.test.REITestPlugin")
+                        .getDeclaredConstructor()
+                        .newInstance());
+            } catch (InstantiationException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
     
@@ -312,7 +310,7 @@ public class RoughlyEnoughItemsCoreClient {
             reloadPlugins(endReload, ReloadStage.END);
         });
         ClientGuiEvent.INIT_PRE.register((screen, access) -> {
-            List<ReloadStage> stages = ((PluginManagerImpl<REIPlugin<?>>) PluginManager.getInstance()).getObservedStages();
+            List<ReloadStage> stages = ((PluginManagerImpl<REIPlugin<?>>) PluginManager.getInstance()).getReloader().getObservedStages();
             
             if (Minecraft.getInstance().level != null && Minecraft.getInstance().player != null && stages.contains(ReloadStage.START)
                 && !stages.contains(ReloadStage.END) && !PluginManager.areAnyReloading() && screen instanceof AbstractContainerScreen) {

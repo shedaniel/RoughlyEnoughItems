@@ -31,9 +31,9 @@ import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
-import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
@@ -41,31 +41,51 @@ import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Field;
-import java.util.function.Function;
+import java.util.List;
+import java.util.ServiceLoader;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public final class Internals {
-    private static Supplier<EntryStackProvider> entryStackProvider = Internals::throwNotSetup;
-    private static Supplier<EntryIngredientProvider> entryIngredientProvider = Internals::throwNotSetup;
-    private static Function<ResourceLocation, EntryType<?>> entryTypeDeferred = (object) -> throwNotSetup();
-    private static Supplier<PluginManager<REIPlugin<?>>> commonPluginManager = Internals::throwNotSetup;
-    private static Supplier<PluginManager<REIServerPlugin>> serverPluginManager = Internals::throwNotSetup;
-    private static Supplier<NbtHasherProvider> nbtHasherProvider = Internals::throwNotSetup;
-    private static Function<String, CategoryIdentifier<?>> categoryIdentifier = (object) -> throwNotSetup();
-    private static Supplier<MenuInfoRegistry> stubMenuInfoRegistry = Internals::throwNotSetup;
+    private static final EntryStackProvider ENTRY_STACK_PROVIDER = resolveService(EntryStackProvider.class);
+    private static final EntryIngredientProvider ENTRY_INGREDIENT_PROVIDER = resolveService(EntryIngredientProvider.class);
+    private static final DeferringEntryTypeProvider ENTRY_TYPE_DEFERRED = resolveService(DeferringEntryTypeProvider.class);
+    private static final PluginManagerConstructor PLUGIN_MANAGER_CONSTRUCTOR = resolveService(PluginManagerConstructor.class);
+    private static final PluginManager<REIPlugin<?>> COMMON_PLUGIN_MANAGER = createPluginManager(
+            (Class<REIPlugin<?>>) (Class<?>) REIPlugin.class,
+            UnaryOperator.identity());
+    private static final PluginManager<REIServerPlugin> SERVER_PLUGIN_MANAGER = createPluginManager(
+            REIServerPlugin.class,
+            view -> view.then(COMMON_PLUGIN_MANAGER.view()));
+    private static final NbtHasherProvider NBT_HASHER_PROVIDER = resolveService(NbtHasherProvider.class);
+    private static final CategoryIdentifierConstructor CATEGORY_IDENTIFIER_CONSTRUCTOR = resolveService(CategoryIdentifierConstructor.class);
     private static Supplier<InternalLogger> logger = Internals::throwNotSetup;
     
     private static <T> T throwNotSetup() {
         throw new AssertionError("REI Internals have not been initialized!");
     }
     
-    @ApiStatus.Internal
-    public static <T> void attachInstance(T instance, Class<T> clazz) {
-        attachInstanceSupplier(instance, clazz.getSimpleName());
+    public static <T> T resolveService(Class<T> serviceClass) {
+        ServiceLoader<T> loader = ServiceLoader.load(serviceClass);
+        List<ServiceLoader.Provider<T>> providers = loader.stream().toList();
+        if (providers.isEmpty()) {
+            throw new IllegalArgumentException("No service providers found for class " + serviceClass.getName());
+        } else if (providers.size() > 1) {
+            throw new IllegalArgumentException("Multiple service providers found for class " + serviceClass.getName() + ": " +
+                                               providers.stream().map(provider -> provider.type().getName())
+                                                       .collect(Collectors.joining(", ")));
+        } else {
+            return providers.get(0).get();
+        }
     }
     
-    @ApiStatus.Internal
+    public static <T> List<T> resolveServices(Class<T> serviceClass) {
+        ServiceLoader<T> loader = ServiceLoader.load(serviceClass);
+        return loader.stream().map(ServiceLoader.Provider::get).toList();
+    }
+    
     public static <T> void attachInstanceSupplier(T instance, String name) {
         attachInstance((Supplier<T>) () -> instance, name);
     }
@@ -86,31 +106,35 @@ public final class Internals {
     }
     
     public static EntryStackProvider getEntryStackProvider() {
-        return entryStackProvider.get();
+        return ENTRY_STACK_PROVIDER;
     }
     
     public static EntryIngredientProvider getEntryIngredientProvider() {
-        return entryIngredientProvider.get();
+        return ENTRY_INGREDIENT_PROVIDER;
     }
     
     public static EntryType<?> deferEntryType(ResourceLocation id) {
-        return entryTypeDeferred.apply(id);
+        return ENTRY_TYPE_DEFERRED.get(id);
+    }
+    
+    public static <P extends REIPlugin<?>> PluginManager<P> createPluginManager(Class<P> clazz, UnaryOperator<PluginView<P>> constructor) {
+        return PLUGIN_MANAGER_CONSTRUCTOR.create(clazz, constructor);
     }
     
     public static PluginManager<REIPlugin<?>> getPluginManager() {
-        return commonPluginManager.get();
+        return COMMON_PLUGIN_MANAGER;
     }
     
     public static PluginManager<REIServerPlugin> getServerPluginManager() {
-        return serverPluginManager.get();
+        return SERVER_PLUGIN_MANAGER;
     }
     
     public static EntryComparator<Tag> getNbtHasher(String[] ignoredKeys) {
-        return nbtHasherProvider.get().provide(ignoredKeys);
+        return NBT_HASHER_PROVIDER.provide(ignoredKeys);
     }
     
     public static <T extends Display> CategoryIdentifier<T> getCategoryIdentifier(String location) {
-        return (CategoryIdentifier<T>) categoryIdentifier.apply(location);
+        return CATEGORY_IDENTIFIER_CONSTRUCTOR.create(location);
     }
     
     public static InternalLogger getInternalLogger() {
@@ -137,7 +161,19 @@ public final class Internals {
         EntryIngredient.Builder builder(int initialCapacity);
     }
     
+    public interface PluginManagerConstructor {
+        <P extends REIPlugin<?>> PluginManager<P> create(Class<P> clazz, UnaryOperator<PluginView<P>> constructor);
+    }
+    
     public interface NbtHasherProvider {
         EntryComparator<Tag> provide(String... ignoredKeys);
+    }
+    
+    public interface DeferringEntryTypeProvider {
+        EntryType<?> get(ResourceLocation id);
+    }
+    
+    public interface CategoryIdentifierConstructor {
+        <T extends Display> CategoryIdentifier<T> create(String location);
     }
 }

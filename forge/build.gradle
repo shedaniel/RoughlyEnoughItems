@@ -66,8 +66,6 @@ loom {
     }
 }
 
-def depProjects = [":api", ":runtime", ":default-plugin"]
-
 dependencies {
     forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
     modApi("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
