@@ -30,7 +30,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
+import me.shedaniel.rei.impl.client.entry.filtering.FilteringRuleInternal;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -47,10 +47,10 @@ import java.util.function.Consumer;
 public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>>> {
     private int width;
     Consumer<List<EntryStack<?>>> saveConsumer;
-    Consumer<List<FilteringRule<?>>> rulesSaveConsumer;
+    Consumer<List<FilteringRuleInternal>> rulesSaveConsumer;
     List<EntryStack<?>> defaultValue;
     Set<EntryStack<?>> configFiltered;
-    List<FilteringRule<?>> rules;
+    List<FilteringRuleInternal> rules;
     boolean edited = false;
     final FilteringScreen filteringScreen = new FilteringScreen(this);
     final FilteringRulesScreen filteringRulesScreen = new FilteringRulesScreen(this);
@@ -60,7 +60,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>>>
     });
     private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
-    public FilteringEntry(int width, List<EntryStack<?>> configFiltered, List<FilteringRule<?>> rules, List<EntryStack<?>> defaultValue, Consumer<List<EntryStack<?>>> saveConsumer, Consumer<List<FilteringRule<?>>> rulesSaveConsumer) {
+    public FilteringEntry(int width, List<EntryStack<?>> configFiltered, List<FilteringRuleInternal> rules, List<EntryStack<?>> defaultValue, Consumer<List<EntryStack<?>>> saveConsumer, Consumer<List<FilteringRuleInternal>> rulesSaveConsumer) {
         super(NarratorChatListener.NO_TITLE, false);
         this.width = width;
         this.configFiltered = new TreeSet<>(Comparator.comparing(EntryStacks::hashExact));

@@ -23,6 +23,8 @@
 
 package me.shedaniel.rei.impl.client.config;
 
+import me.shedaniel.autoconfig.gui.registry.GuiRegistry;
+import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Jankson;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -38,4 +40,10 @@ public interface ConfigManagerInternal extends ConfigManager {
     Object get(String fieldKey);
     
     boolean set(String fieldKey, Object value);
+    
+    interface SystemSetup {
+        default void setup(Jankson.Builder builder) {}
+        
+        default void setup(GuiRegistry registry) {}
+    }
 }

@@ -23,13 +23,12 @@
 
 package me.shedaniel.rei.impl.client.config.entries;
 
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
+import me.shedaniel.rei.impl.client.entry.filtering.FilteringRuleInternal;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -52,7 +51,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> extends Screen {
+public abstract class FilteringRuleOptionsScreen<T extends FilteringRuleInternal> extends Screen {
     private final FilteringEntry entry;
     private RulesList rulesList;
     Screen parent;
@@ -124,13 +123,13 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
     }
     
     public static abstract class RuleEntry extends DynamicElementListWidget.ElementEntry<RuleEntry> {
-        private final FilteringRule<?> rule;
+        private final FilteringRule rule;
         
-        public RuleEntry(FilteringRule<?> rule) {
+        public RuleEntry(FilteringRule rule) {
             this.rule = rule;
         }
         
-        public FilteringRule<?> getRule() {
+        public FilteringRule getRule() {
             return rule;
         }
     }
@@ -138,7 +137,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
     public static class TextRuleEntry extends RuleEntry {
         private final FormattedCharSequence text;
         
-        public TextRuleEntry(FilteringRule<?> rule, FormattedCharSequence text) {
+        public TextRuleEntry(FilteringRuleInternal rule, FormattedCharSequence text) {
             super(rule);
             this.text = text;
         }
@@ -167,7 +166,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
     public static class EmptyRuleEntry extends RuleEntry {
         private final int height;
         
-        public EmptyRuleEntry(FilteringRule<?> rule, int height) {
+        public EmptyRuleEntry(FilteringRuleInternal rule, int height) {
             super(rule);
             this.height = height;
         }
@@ -195,7 +194,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
     public static class TextFieldRuleEntry extends RuleEntry {
         private final EditBox widget;
         
-        public TextFieldRuleEntry(int width, FilteringRule<?> rule, Consumer<EditBox> widgetConsumer) {
+        public TextFieldRuleEntry(int width, FilteringRuleInternal rule, Consumer<EditBox> widgetConsumer) {
             super(rule);
             this.widget = new EditBox(Minecraft.getInstance().font, 0, 0, width, 18, Component.nullToEmpty(""));
             widgetConsumer.accept(widget);
@@ -232,7 +231,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         private boolean b;
         private final Button widget;
         
-        public BooleanRuleEntry(int width, boolean b, FilteringRule<?> rule, Function<Boolean, Component> textFunction) {
+        public BooleanRuleEntry(int width, boolean b, FilteringRuleInternal rule, Function<Boolean, Component> textFunction) {
             super(rule);
             this.b = b;
             this.widget = new Button(0, 0, 100, 20, textFunction.apply(b), button -> {
@@ -276,7 +275,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         private boolean expanded;
         private Supplier<Component> name;
         
-        public SubRulesEntry(FilteringRule<?> rule, Supplier<Component> name, List<RuleEntry> rules) {
+        public SubRulesEntry(FilteringRuleInternal rule, Supplier<Component> name, List<RuleEntry> rules) {
             super(rule);
             this.rules = rules;
             this.widget = new CategoryLabelWidget();

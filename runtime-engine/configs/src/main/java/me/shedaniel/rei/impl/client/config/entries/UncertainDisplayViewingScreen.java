@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.screen;
+package me.shedaniel.rei.impl.client.config.entries;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -36,8 +36,6 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicNewSmoothScrollingEntryListWi
 import me.shedaniel.clothconfig2.impl.EasingMethod;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -148,8 +146,6 @@ public class UncertainDisplayViewingScreen extends Screen {
                         scroll.setTo(200, 450);
                     } else if (allModsUsingJEI != null && jeiEnabled) {
                         ConfigManagerInternal.getInstance().set("advanced.enableJeiCompatibilityLayer", jeiEnabled);
-                        RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
-                        RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
                         Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
                     } else {
                         callback.accept(original);

@@ -28,7 +28,6 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 
-@ApiStatus.Internal
 @ApiStatus.Experimental
 public interface FilteringContext {
     Collection<EntryStack<?>> getStacks(FilteringContextType type);

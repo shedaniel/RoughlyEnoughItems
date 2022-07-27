@@ -21,26 +21,14 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.entry.filtering;
+package me.shedaniel.rei.api.client.entry.filtering;
 
-import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Experimental
 @Environment(EnvType.CLIENT)
-public abstract class AbstractFilteringRule implements FilteringRuleInternal {
-    @Override
-    public boolean equals(Object obj) {
-        return getClass() == obj.getClass();
-    }
-    
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
-    
-    @Override
-    public boolean isManual() {
-        return this instanceof ManualFilteringRule;
-    }
+public interface FilteringRule {
+    boolean isManual();
 }

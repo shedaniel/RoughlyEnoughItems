@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.config;
 
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -51,6 +50,7 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.addon.ConfigAddonRegistry;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.CheatingMode;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
@@ -58,14 +58,11 @@ import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
+import me.shedaniel.rei.impl.Internals;
 import me.shedaniel.rei.impl.client.config.addon.ConfigAddonRegistryImpl;
 import me.shedaniel.rei.impl.client.config.entries.*;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
 import me.shedaniel.rei.impl.client.gui.performance.entry.PerformanceEntry;
 import me.shedaniel.rei.impl.common.InternalLogger;
@@ -88,7 +85,6 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static me.shedaniel.autoconfig.util.Utils.getUnsafely;
@@ -123,18 +119,9 @@ public class ConfigManagerImpl implements ConfigManagerInternal {
         guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) ->
                         Collections.singletonList(new SearchFilterSyntaxHighlightingEntry(new TranslatableComponent(i13n), getUnsafely(field, config, SyntaxHighlightingMode.COLORFUL), getUnsafely(field, defaults), type -> setUnsafely(field, config, type)))
                 , (field) -> field.getType() == SyntaxHighlightingMode.class, ConfigObjectImpl.UseSpecialSearchFilterSyntaxHighlightingScreen.class);
-        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
-                    List<EntryStack<?>> value = CollectionUtils.map(Utils.<List<EntryStackProvider<?>>>getUnsafely(field, config, new ArrayList<>()), EntryStackProvider::provide);
-                    List<EntryStack<?>> defaultValue = CollectionUtils.map(Utils.<List<EntryStackProvider<?>>>getUnsafely(field, defaults), EntryStackProvider::provide);
-                    Consumer<List<EntryStack<?>>> saveConsumer = (newValue) -> {
-                        setUnsafely(field, config, CollectionUtils.map(newValue, EntryStackProvider::ofStack));
-                    };
-                    return REIRuntime.getInstance().getPreviousContainerScreen() == null || Minecraft.getInstance().getConnection() == null || Minecraft.getInstance().getConnection().getRecipeManager() == null ?
-                            Collections.singletonList(new NoFilteringEntry(220, value, defaultValue, saveConsumer))
-                            :
-                            Collections.singletonList(new FilteringEntry(220, value, ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules, defaultValue, saveConsumer, list -> ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules = Lists.newArrayList(list)));
-                }
-                , (field) -> field.getType() == List.class, ConfigObjectImpl.UseFilteringScreen.class);
+        for (SystemSetup setup : Internals.resolveServices(SystemSetup.class)) {
+            setup.setup(guiRegistry);
+        }
         InternalLogger.getInstance().info("Config loaded");
         saveConfig();
     }
@@ -234,32 +221,6 @@ public class ConfigManagerImpl implements ConfigManagerInternal {
             }
         });
         
-        // FilteringRule
-        builder.registerSerializer(FilteringRule.class, (value, marshaller) -> {
-            try {
-                return marshaller.serialize(FilteringRule.save(value, new CompoundTag()));
-            } catch (Exception e) {
-                e.printStackTrace();
-                return JsonNull.INSTANCE;
-            }
-        });
-        builder.registerDeserializer(Tag.class, FilteringRule.class, (value, marshaller) -> {
-            try {
-                return FilteringRule.read((CompoundTag) value);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        });
-        builder.registerDeserializer(String.class, FilteringRule.class, (value, marshaller) -> {
-            try {
-                return FilteringRule.read(TagParser.parseTag(value));
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        });
-        
         // FavoriteEntry
         builder.registerSerializer(FavoriteEntry.class, (value, marshaller) -> {
             try {
@@ -282,6 +243,10 @@ public class ConfigManagerImpl implements ConfigManagerInternal {
             }
         });
         
+        for (SystemSetup setup : Internals.resolveServices(SystemSetup.class)) {
+            setup.setup(builder);
+        }
+        
         return builder.build();
     }
     
@@ -295,7 +260,7 @@ public class ConfigManagerImpl implements ConfigManagerInternal {
     
     @Override
     public void saveConfig() {
-        if (getConfig().getFilteringRules().stream().noneMatch(filteringRule -> filteringRule instanceof ManualFilteringRule)) {
+        if (getConfig().getFilteringRules().stream().noneMatch(FilteringRule::isManual)) {
             getConfig().getFilteringRules().add(new ManualFilteringRule());
         }
         AutoConfig.getConfigHolder(ConfigObjectImpl.class).registerLoadListener((configHolder, configObject) -> {
@@ -427,8 +392,8 @@ public class ConfigManagerImpl implements ConfigManagerInternal {
                     saveConfig();
                     EntryRegistry.getInstance().refilter();
                     REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
-                    if (REIRuntimeImpl.getSearchField() != null) {
-                        ScreenOverlayImpl.getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
+                    if (REIRuntime.getInstance().getSearchTextField() != null) {
+                        REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadSearch);
                     }
                 }).build();
             });

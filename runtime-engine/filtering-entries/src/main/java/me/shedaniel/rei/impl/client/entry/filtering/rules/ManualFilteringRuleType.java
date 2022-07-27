@@ -21,26 +21,38 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.entry.filtering;
+package me.shedaniel.rei.impl.client.entry.filtering.rules;
 
-import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
+import me.shedaniel.rei.impl.client.entry.filtering.FilteringRuleType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
-@Environment(EnvType.CLIENT)
-public abstract class AbstractFilteringRule implements FilteringRuleInternal {
+public class ManualFilteringRuleType implements FilteringRuleType<ManualFilteringRule> {
+    public static final ManualFilteringRuleType INSTANCE = new ManualFilteringRuleType();
+    
     @Override
-    public boolean equals(Object obj) {
-        return getClass() == obj.getClass();
+    public CompoundTag saveTo(ManualFilteringRule rule, CompoundTag tag) {
+        return tag;
     }
     
     @Override
-    public int hashCode() {
-        return getClass().hashCode();
+    public ManualFilteringRule createFromTag(CompoundTag tag) {
+        return new ManualFilteringRule();
     }
     
     @Override
-    public boolean isManual() {
-        return this instanceof ManualFilteringRule;
+    public Component getTitle() {
+        return new TranslatableComponent("rule.roughlyenoughitems.filtering.manual");
+    }
+    
+    @Override
+    public Component getSubtitle() {
+        return new TranslatableComponent("rule.roughlyenoughitems.filtering.manual.subtitle");
+    }
+    
+    @Override
+    public ManualFilteringRule createNew() {
+        throw new UnsupportedOperationException();
     }
 }

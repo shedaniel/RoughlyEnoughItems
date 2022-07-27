@@ -33,10 +33,10 @@ import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.*;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
-import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesEntriesManager;
+import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -341,7 +341,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public List<FavoriteEntry> getFavoriteEntries() {
-        return FavoritesEntriesManager.INSTANCE.asListView();
+        return ClientInternals.getFavoritesEntriesList();
     }
     
     public List<FavoriteEntry> getConfigFavoriteEntries() {
@@ -368,7 +368,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @ApiStatus.Internal
-    public List<FilteringRule<?>> getFilteringRules() {
+    public List<FilteringRule> getFilteringRules() {
         return advanced.filtering.filteringRules;
     }
     
@@ -652,7 +652,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         public static class Filtering {
             @UseFilteringScreen private List<EntryStackProvider<?>> filteredStacks = new ArrayList<>();
             public boolean shouldFilterDisplays = true;
-            @ConfigEntry.Gui.Excluded public List<FilteringRule<?>> filteringRules = new ArrayList<>();
+            @ConfigEntry.Gui.Excluded public List<FilteringRule> filteringRules = new ArrayList<>();
         }
     }
 }

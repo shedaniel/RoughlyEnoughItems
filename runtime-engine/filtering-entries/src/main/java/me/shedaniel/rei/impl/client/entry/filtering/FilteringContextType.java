@@ -23,6 +23,9 @@
 
 package me.shedaniel.rei.impl.client.entry.filtering;
 
+import org.jetbrains.annotations.ApiStatus;
+
+@ApiStatus.Experimental
 public enum FilteringContextType {
     SHOWN,
     DEFAULT,

@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.favorites.MutableFavoritesList;
 
@@ -40,25 +41,24 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class FavoritesEntriesManager {
-    public static final FavoritesEntriesManager INSTANCE = new FavoritesEntriesManager();
+public class FavoritesEntriesManager implements ClientInternals.FavoritesEntriesListProvider {
     
-    public List<FavoriteEntry> getConfigFavoriteEntries() {
+    public static List<FavoriteEntry> getConfigFavoriteEntries() {
         ConfigManagerInternal manager = ConfigManagerInternal.getInstance();
         return (List<FavoriteEntry>) manager.get("basics.favorites");
     }
     
-    public List<FavoriteEntry> getConfigHiddenFavoriteEntries() {
+    public static List<FavoriteEntry> getConfigHiddenFavoriteEntries() {
         ConfigManagerInternal manager = ConfigManagerInternal.getInstance();
         return (List<FavoriteEntry>) manager.get("basics.hiddenFavorites");
     }
     
-    private Stream<FavoriteEntry> getDefaultFavorites() {
+    private static Stream<FavoriteEntry> getDefaultFavorites() {
         return StreamSupport.stream(FavoriteEntryType.registry().sections().spliterator(), false)
                 .flatMap(section -> section.getDefaultEntries().stream());
     }
     
-    public List<FavoriteEntry> getFavorites() {
+    public static List<FavoriteEntry> getFavorites() {
         List<FavoriteEntry> defaultFavorites = getDefaultFavorites().collect(Collectors.toList());
         defaultFavorites.removeAll(getConfigHiddenFavoriteEntries());
         
@@ -69,7 +69,7 @@ public class FavoritesEntriesManager {
         return favorites;
     }
     
-    public void remove(FavoriteEntry entry) {
+    public static void remove(FavoriteEntry entry) {
         getConfigFavoriteEntries().remove(entry);
         if (getDefaultFavorites().anyMatch(e -> e.equals(entry)) && !getConfigHiddenFavoriteEntries().contains(entry)) {
             getConfigHiddenFavoriteEntries().add(entry);
@@ -79,7 +79,7 @@ public class FavoritesEntriesManager {
         REIRuntime.getInstance().getOverlay().flatMap(ScreenOverlay::getFavoritesList).ifPresent(OverlayListWidget::queueReloadSearch);
     }
     
-    public void add(FavoriteEntry entry) {
+    public static void add(FavoriteEntry entry) {
         List<FavoriteEntry> defaultFavorites = getDefaultFavorites().toList();
         
         getConfigFavoriteEntries().remove(entry);
@@ -103,7 +103,7 @@ public class FavoritesEntriesManager {
         REIRuntime.getInstance().getOverlay().flatMap(ScreenOverlay::getFavoritesList).ifPresent(OverlayListWidget::queueReloadSearch);
     }
     
-    public void setEntries(List<FavoriteEntry> entries) {
+    public static void setEntries(List<FavoriteEntry> entries) {
         List<FavoriteEntry> defaultFavorites = getDefaultFavorites().toList();
         List<FavoriteEntry> hiddenDefaultFavorites = new ArrayList<>(defaultFavorites);
         hiddenDefaultFavorites.removeAll(entries);
@@ -116,11 +116,12 @@ public class FavoritesEntriesManager {
         REIRuntime.getInstance().getOverlay().flatMap(ScreenOverlay::getFavoritesList).ifPresent(OverlayListWidget::queueReloadSearch);
     }
     
-    public List<FavoriteEntry> asListView() {
+    @Override
+    public List<FavoriteEntry> get() {
         return new ListView();
     }
     
-    private class ListView extends AbstractList<FavoriteEntry> implements MutableFavoritesList {
+    private static class ListView extends AbstractList<FavoriteEntry> implements MutableFavoritesList {
         @Override
         public FavoriteEntry get(int index) {
             return getFavorites().get(index);
@@ -133,13 +134,13 @@ public class FavoritesEntriesManager {
         
         @Override
         public void add(int index, FavoriteEntry entry) {
-            FavoritesEntriesManager.this.add(entry);
+            FavoritesEntriesManager.add(entry);
         }
         
         @Override
         public boolean remove(Object o) {
             if (o instanceof FavoriteEntry) {
-                FavoritesEntriesManager.this.remove((FavoriteEntry) o);
+                FavoritesEntriesManager.remove((FavoriteEntry) o);
                 return true;
             } else {
                 return false;
@@ -148,7 +149,7 @@ public class FavoritesEntriesManager {
         
         @Override
         public void setAll(List<FavoriteEntry> entries) {
-            FavoritesEntriesManager.this.setEntries(entries);
+            FavoritesEntriesManager.setEntries(entries);
         }
     }
 }

@@ -23,9 +23,12 @@
 
 package me.shedaniel.rei.impl.client.entry.filtering;
 
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+@ApiStatus.Experimental
 public interface FilteringCache {
     @Nullable
-    Object getCache(FilteringRule<?> rule);
+    Object getCache(FilteringRule rule);
 }

@@ -28,7 +28,6 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
-import me.shedaniel.rei.impl.client.gui.screen.UncertainDisplayViewingScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;

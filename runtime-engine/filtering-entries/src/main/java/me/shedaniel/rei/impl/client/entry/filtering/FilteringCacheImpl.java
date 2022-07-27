@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.entry.filtering;
 
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -30,15 +31,15 @@ import java.util.Map;
 import java.util.Optional;
 
 public class FilteringCacheImpl implements FilteringCache {
-    private final Map<FilteringRule<?>, Optional<?>> CACHE = new HashMap<>();
+    private final Map<FilteringRule, Optional<?>> CACHE = new HashMap<>();
     
     @Override
     @Nullable
-    public Object getCache(FilteringRule<?> rule) {
+    public Object getCache(FilteringRule rule) {
         return CACHE.getOrDefault(rule, Optional.empty()).orElse(null);
     }
     
-    public void setCache(FilteringRule<?> rule, @Nullable Object value) {
+    public void setCache(FilteringRule rule, @Nullable Object value) {
         CACHE.put(rule, Optional.ofNullable(value));
     }
 }

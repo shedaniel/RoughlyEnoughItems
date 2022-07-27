@@ -65,6 +65,7 @@ public final class ClientInternals {
             REIClientPlugin.class,
             UnaryOperator.identity());
     private static final DelegatingFavoriteEntryProvider DELEGATE_FAVORITE_ENTRY = resolveService(DelegatingFavoriteEntryProvider.class);
+    private static final FavoritesEntriesListProvider FAVORITES_ENTRIES_LIST = resolveService(FavoritesEntriesListProvider.class);
     private static Function<CompoundTag, DataResult<FavoriteEntry>> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
     private static BiConsumer<List<ClientTooltipComponent>, TooltipComponent> clientTooltipComponentProvider = (tooltip, result) -> throwNotSetup();
@@ -154,6 +155,10 @@ public final class ClientInternals {
         return DELEGATE_FAVORITE_ENTRY.delegate(supplier, toJoin);
     }
     
+    public static List<FavoriteEntry> getFavoritesEntriesList() {
+        return FAVORITES_ENTRIES_LIST.get();
+    }
+    
     public static DataResult<FavoriteEntry> favoriteEntryFromJson(CompoundTag tag) {
         return favoriteEntryFromJson.apply(tag);
     }
@@ -220,5 +225,9 @@ public final class ClientInternals {
     
     public interface DelegatingFavoriteEntryProvider {
         FavoriteEntry delegate(Supplier<DataResult<FavoriteEntry>> result, Supplier<CompoundTag> tag);
+    }
+    
+    public interface FavoritesEntriesListProvider {
+        List<FavoriteEntry> get();
     }
 }

@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Set;
 
 @Environment(EnvType.CLIENT)
-@ApiStatus.Internal
 @ApiStatus.Experimental
 public interface FilteringResult {
     static FilteringResult create() {
