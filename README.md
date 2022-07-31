@@ -1,6 +1,9 @@
 # Roughly Enough Items
-https://minecraft.curseforge.com/projects/roughly-enough-items <br>
-Roughly Enough Items is a mod to view Items and Recipes for Minecraft 1.13 - 1.18, supporting mod loaders from Forge, Rift to Fabric.
+## Downloads  
+*Curseforge* https://minecraft.curseforge.com/projects/roughly-enough-items <br>
+*Modrinth* https://modrinth.com/mod/roughly-enough-items <br>  
+-----
+Roughly Enough Items is a mod to view Items and Recipes for Minecraft 1.13 - 1.19, supporting mod loaders from Forge, Rift to Fabric.
 -----
 
 [Help translate REI on Crowdin!](https://crowdin.com/project/roughly-enough-items)
