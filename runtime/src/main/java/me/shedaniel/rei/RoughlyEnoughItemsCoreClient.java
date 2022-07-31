@@ -102,7 +102,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.apache.commons.lang3.function.TriFunction;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
@@ -303,11 +302,11 @@ public class RoughlyEnoughItemsCoreClient {
         MutableLong startReload = new MutableLong(-1);
         MutableLong endReload = new MutableLong(-1);
         PRE_UPDATE_RECIPES.register(recipeManager -> {
-            RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
-            reloadPlugins(startReload, ReloadStage.START);
+            PluginManager.reloadAll();
+            RoughlyEnoughItemsCore.reloadPlugins(startReload, ReloadStage.START);
         });
         ClientRecipeUpdateEvent.EVENT.register(recipeManager -> {
-            reloadPlugins(endReload, ReloadStage.END);
+            RoughlyEnoughItemsCore.reloadPlugins(endReload, ReloadStage.END);
         });
         ClientGuiEvent.INIT_PRE.register((screen, access) -> {
             List<ReloadStage> stages = ((PluginManagerImpl<REIPlugin<?>>) PluginManager.getInstance()).getReloader().getObservedStages();
@@ -321,7 +320,7 @@ public class RoughlyEnoughItemsCoreClient {
                 }
                 
                 InternalLogger.getInstance().error("Detected missing stage: END! This is possibly due to issues during client recipe reload! REI will force a reload of the recipes now!");
-                reloadPlugins(endReload, ReloadStage.END);
+                RoughlyEnoughItemsCore.reloadPlugins(endReload, ReloadStage.END);
             }
             
             return EventResult.pass();
@@ -449,15 +448,7 @@ public class RoughlyEnoughItemsCoreClient {
         return true;
     }
     
-    @ApiStatus.Internal
-    public static void reloadPlugins(MutableLong lastReload, @Nullable ReloadStage start) {
-        if (lastReload != null) {
-            if (lastReload.getValue() > 0 && System.currentTimeMillis() - lastReload.getValue() <= 5000) {
-                InternalLogger.getInstance().warn("Suppressing Reload Plugins of stage " + start);
-                return;
-            }
-            lastReload.setValue(System.currentTimeMillis());
-        }
+    static boolean reloadPluginsClient(@Nullable ReloadStage start) {
         if (ConfigObject.getInstance().doesRegisterRecipesInAnotherThread()) {
             Future<?>[] futures = new Future<?>[1];
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> RoughlyEnoughItemsCore._reloadPlugins(start), RELOAD_PLUGINS)
@@ -470,8 +461,9 @@ public class RoughlyEnoughItemsCoreClient {
                     });
             futures[0] = future;
             RELOAD_TASKS.add(future);
-        } else {
-            RoughlyEnoughItemsCore._reloadPlugins(start);
+            return true;
         }
+        
+        return false;
     }
 }

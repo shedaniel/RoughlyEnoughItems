@@ -62,6 +62,7 @@ public final class Internals {
     private static final NbtHasherProvider NBT_HASHER_PROVIDER = resolveService(NbtHasherProvider.class);
     private static final CategoryIdentifierConstructor CATEGORY_IDENTIFIER_CONSTRUCTOR = resolveService(CategoryIdentifierConstructor.class);
     private static Supplier<InternalLogger> logger = Internals::throwNotSetup;
+    private static Runnable reloadREI = Internals::throwNotSetup;
     
     private static <T> T throwNotSetup() {
         throw new AssertionError("REI Internals have not been initialized!");
@@ -139,6 +140,10 @@ public final class Internals {
     
     public static InternalLogger getInternalLogger() {
         return logger.get();
+    }
+    
+    public static void reloadREI() {
+        reloadREI.run();
     }
     
     public interface EntryStackProvider {

@@ -27,8 +27,6 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.impl.client.gui.screen.ConfigReloadingScreen;
@@ -50,8 +48,7 @@ import java.util.Optional;
 public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     private int width;
     private AbstractWidget reloadPluginsButton = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
-        RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
-        RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
+        PluginManager.reloadAll();
     }) {
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {

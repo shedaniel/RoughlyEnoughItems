@@ -289,48 +289,9 @@ public class ConfigManagerImpl implements ConfigManagerInternal {
         craftableOnly = !craftableOnly;
     }
     
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({"deprecation", "rawtypes", "UnstableApiUsage"})
     @Override
     public Screen getConfigScreen(Screen parent) {
-        class EmptyEntry extends AbstractConfigListEntry<Object> {
-            private final int height;
-            
-            public EmptyEntry(int height) {
-                super(new TextComponent(UUID.randomUUID().toString()), false);
-                this.height = height;
-            }
-            
-            public int getItemHeight() {
-                return this.height;
-            }
-            
-            public Object getValue() {
-                return null;
-            }
-            
-            public Optional<Object> getDefaultValue() {
-                return Optional.empty();
-            }
-            
-            public boolean isMouseInside(int mouseX, int mouseY, int x, int y, int entryWidth, int entryHeight) {
-                return false;
-            }
-            
-            public void save() {
-            }
-            
-            public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-            }
-            
-            public List<? extends GuiEventListener> children() {
-                return Collections.emptyList();
-            }
-            
-            public List<? extends NarratableEntry> narratables() {
-                return Collections.emptyList();
-            }
-        }
-        
         try {
             ConfigScreenProvider<ConfigObjectImpl> provider = (ConfigScreenProvider<ConfigObjectImpl>) AutoConfig.getConfigScreen(ConfigObjectImpl.class, parent);
             provider.setI13nFunction(manager -> "config.roughlyenoughitems");
@@ -402,6 +363,45 @@ public class ConfigManagerImpl implements ConfigManagerInternal {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    private static class EmptyEntry extends AbstractConfigListEntry<Object> {
+        private final int height;
+        
+        public EmptyEntry(int height) {
+            super(new TextComponent(UUID.randomUUID().toString()), false);
+            this.height = height;
+        }
+        
+        public int getItemHeight() {
+            return this.height;
+        }
+        
+        public Object getValue() {
+            return null;
+        }
+        
+        public Optional<Object> getDefaultValue() {
+            return Optional.empty();
+        }
+        
+        public boolean isMouseInside(int mouseX, int mouseY, int x, int y, int entryWidth, int entryHeight) {
+            return false;
+        }
+        
+        public void save() {
+        }
+        
+        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+        }
+        
+        public List<? extends GuiEventListener> children() {
+            return Collections.emptyList();
+        }
+        
+        public List<? extends NarratableEntry> narratables() {
+            return Collections.emptyList();
+        }
     }
     
     @Override

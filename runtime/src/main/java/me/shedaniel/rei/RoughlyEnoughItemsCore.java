@@ -27,7 +27,6 @@ import dev.architectury.platform.Platform;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
-import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.annotation.Nullable;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
@@ -40,6 +39,7 @@ import me.shedaniel.rei.api.common.registry.RecipeManagerContext;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.logging.performance.PerformanceLogger;
 import me.shedaniel.rei.impl.common.logging.performance.PerformanceLoggerImpl;
 import me.shedaniel.rei.impl.init.PluginDetector;
@@ -47,6 +47,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -71,6 +72,7 @@ public class RoughlyEnoughItemsCore {
         PluginManager.getInstance().registerReloadable(DisplaySerializerRegistry.class);
         PluginManager.getInstance().registerReloadable(FluidSupportProvider.class);
         PluginManager.getServerInstance().registerReloadable(MenuInfoRegistry.class);
+        Internals.attachInstanceSupplier((Runnable) () -> RoughlyEnoughItemsCore.reloadPlugins(null, null), "reloadREI");
     }
     
     public static void _reloadPlugins(@Nullable ReloadStage stage) {
@@ -95,6 +97,21 @@ public class RoughlyEnoughItemsCore {
         }
     }
     
+    public static void reloadPlugins(MutableLong lastReload, @Nullable ReloadStage start) {
+        if (lastReload != null) {
+            if (lastReload.getValue() > 0 && System.currentTimeMillis() - lastReload.getValue() <= 5000) {
+                InternalLogger.getInstance().warn("Suppressing Reload Plugins of stage " + start);
+                return;
+            }
+            lastReload.setValue(System.currentTimeMillis());
+        }
+        if (start == null) PERFORMANCE_LOGGER.clear();
+        if (Platform.getEnvironment() == Env.CLIENT) {
+            if (RoughlyEnoughItemsCoreClient.reloadPluginsClient(start)) return;
+        }
+        _reloadPlugins(start);
+    }
+    
     public void onInitialize() {
         for (PluginDetector detector : PLUGIN_DETECTORS) {
             detector.detectCommonPlugins();
@@ -105,10 +122,7 @@ public class RoughlyEnoughItemsCore {
         if (Platform.getEnvironment() == Env.SERVER) {
             MutableLong lastReload = new MutableLong(-1);
             ReloadListenerRegistry.register(PackType.SERVER_DATA, (preparationBarrier, resourceManager, profilerFiller, profilerFiller2, executor, executor2) -> {
-                return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(() -> {
-                    PERFORMANCE_LOGGER.clear();
-                    RoughlyEnoughItemsCore._reloadPlugins(null);
-                }, executor2);
+                return preparationBarrier.wait(Unit.INSTANCE).thenRunAsync(PluginManager::reloadAll, executor2);
             });
         }
     }

@@ -63,6 +63,10 @@ public interface PluginManager<P extends REIPlugin<?>> extends ParentReloadable<
         return CollectionUtils.anyMatch(getActiveInstances(), PluginManager::isReloading);
     }
     
+    static void reloadAll() {
+        Internals.reloadREI();
+    }
+    
     boolean isReloading();
     
     <T extends Reloadable<? super P>> T get(Class<T> reloadableClass);
