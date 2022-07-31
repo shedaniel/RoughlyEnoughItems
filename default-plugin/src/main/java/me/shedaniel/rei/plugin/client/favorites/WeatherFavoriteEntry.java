@@ -154,7 +154,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
     public boolean doAction(int button) {
         if (button == 0) {
             if (weather != null) {
-                Minecraft.getInstance().player.command(StringUtils.removeStart(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)), "/"));
+                CommandSender.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)), "/"));
                 Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             }
             return true;
@@ -312,7 +312,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12) {
-                Minecraft.getInstance().player.command(StringUtils.removeStart(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)), "/"));
+                CommandSender.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getWeatherCommand().replaceAll("\\{weather}", weather.name().toLowerCase(Locale.ROOT)), "/"));
                 minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 closeMenu();
                 return true;

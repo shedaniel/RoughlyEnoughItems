@@ -51,7 +51,6 @@ import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -180,7 +179,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             int finalIndex = index;
             DisplayRenderer displayRenderer;
             displayRenderers.add(displayRenderer = getCurrentCategoryView(recipeDisplay.provideInternalDisplay()).getDisplayRenderer(recipeDisplay.provideInternalDisplay()));
-            buttonList.add(Widgets.createButton(new Rectangle(bounds.x + 5, 0, displayRenderer.getWidth(), displayRenderer.getHeight()), NarratorChatListener.NO_TITLE)
+            buttonList.add(Widgets.createButton(new Rectangle(bounds.x + 5, 0, displayRenderer.getWidth(), displayRenderer.getHeight()), Component.empty())
                     .onClick(button -> {
                         selectedRecipeIndex = finalIndex;
                         CompositeDisplayViewingScreen.this.init();

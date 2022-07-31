@@ -30,7 +30,6 @@ import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TextCredi
 import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -122,11 +121,11 @@ public class CreditsScreen extends Screen {
                     }
                 }
             } else entryListWidget.creditsAddEntry(new TextCreditsItem(Component.literal(line)));
-        entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorChatListener.NO_TITLE));
+        entryListWidget.creditsAddEntry(new TextCreditsItem(Component.empty()));
         entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(Component.literal("Visit the project at GitHub."), "https://www.github.com/shedaniel/RoughlyEnoughItems", entryListWidget.getItemWidth(), false));
         entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(Component.literal("Visit the project page at CurseForge."), "https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items", entryListWidget.getItemWidth(), false));
         entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(Component.literal("Support the project via Patreon!"), "https://patreon.com/shedaniel", entryListWidget.getItemWidth(), true));
-        entryListWidget.creditsAddEntry(new TextCreditsItem(NarratorChatListener.NO_TITLE));
+        entryListWidget.creditsAddEntry(new TextCreditsItem(Component.empty()));
         addRenderableWidget(buttonDone = new Button(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> openPrevious()));
     }
     

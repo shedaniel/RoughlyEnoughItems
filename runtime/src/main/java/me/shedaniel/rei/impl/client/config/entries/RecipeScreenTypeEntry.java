@@ -30,7 +30,6 @@ import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.impl.client.gui.screen.UncertainDisplayViewingScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -47,7 +46,7 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<DisplayScreenType> {
     private DisplayScreenType type;
     private DisplayScreenType defaultValue;
     private Consumer<DisplayScreenType> save;
-    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
+    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.empty(), button -> {
         Minecraft.getInstance().setScreen(new UncertainDisplayViewingScreen(getConfigScreen(), type, false, original -> {
             Minecraft.getInstance().setScreen(getConfigScreen());
             type = original ? DisplayScreenType.ORIGINAL : DisplayScreenType.COMPOSITE;

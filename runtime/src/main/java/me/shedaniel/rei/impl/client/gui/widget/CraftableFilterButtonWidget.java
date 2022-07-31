@@ -45,7 +45,6 @@ import me.shedaniel.rei.impl.client.gui.modules.entries.ToggleMenuEntry;
 import me.shedaniel.rei.impl.client.gui.screen.ConfigReloadingScreen;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
@@ -66,7 +65,7 @@ public class CraftableFilterButtonWidget {
         MenuAccess access = overlay.menuAccess();
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         ItemStack icon = new ItemStack(Blocks.CRAFTING_TABLE);
-        Button filterButton = Widgets.createButton(bounds, NarratorChatListener.NO_TITLE)
+        Button filterButton = Widgets.createButton(bounds, Component.empty())
                 .focusable(false)
                 .onClick(button -> {
                     ConfigManager.getInstance().toggleCraftableOnly();

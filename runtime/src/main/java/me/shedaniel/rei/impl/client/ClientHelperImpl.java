@@ -70,6 +70,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Supplier;
@@ -184,27 +185,27 @@ public class ClientHelperImpl implements ClientHelper {
     }
     
     @Override
-    public boolean tryCheatingEntry(EntryStack<?> e) {
-        if (e.getType() != VanillaEntryTypes.ITEM)
+    public boolean tryCheatingEntry(EntryStack<?> stack) {
+        if (stack.getType() != VanillaEntryTypes.ITEM)
             return false;
-        EntryStack<ItemStack> entry = (EntryStack<ItemStack>) e;
+        EntryStack<ItemStack> entry = (EntryStack<ItemStack>) stack;
         if (Minecraft.getInstance().player == null) return false;
         if (Minecraft.getInstance().player.getInventory() == null) return false;
         ItemStack cheatedStack = entry.getValue().copy();
         if (ConfigObject.getInstance().isGrabbingItems() && Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
             AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
-            EntryStack<ItemStack> stack = entry.copy();
-            if (!menu.getCarried().isEmpty() && EntryStacks.equalsExact(EntryStacks.of(menu.getCarried()), stack)) {
-                stack.getValue().setCount(Mth.clamp(stack.getValue().getCount() + menu.getCarried().getCount(), 1, stack.getValue().getMaxStackSize()));
+            EntryStack<ItemStack> copy = entry.copy();
+            if (!menu.getCarried().isEmpty() && EntryStacks.equalsExact(EntryStacks.of(menu.getCarried()), copy)) {
+                copy.getValue().setCount(Mth.clamp(copy.getValue().getCount() + menu.getCarried().getCount(), 1, copy.getValue().getMaxStackSize()));
             } else if (!menu.getCarried().isEmpty()) {
                 return false;
             }
-            menu.setCarried(stack.getValue().copy());
+            menu.setCarried(copy.getValue().copy());
             return true;
         } else if (ClientHelperImpl.getInstance().canUsePackets()) {
             AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
-            EntryStack<ItemStack> stack = entry.copy();
-            if (!menu.getCarried().isEmpty() && !EntryStacks.equalsExact(EntryStacks.of(menu.getCarried()), stack)) {
+            EntryStack<ItemStack> copy = entry.copy();
+            if (!menu.getCarried().isEmpty() && !EntryStacks.equalsExact(EntryStacks.of(menu.getCarried()), copy)) {
                 return false;
             }
             try {
@@ -225,7 +226,13 @@ public class ClientHelperImpl implements ClientHelper {
                 madeUpCommand = og.replaceAll("\\{player_name}", Minecraft.getInstance().player.getScoreboardName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
                 Minecraft.getInstance().player.displayClientMessage(Component.translatable("text.rei.too_long_nbt"), false);
             }
-            Minecraft.getInstance().player.command(StringUtils.removeStart(madeUpCommand, "/"));
+            try {
+                Class.forName("me.shedaniel.rei.impl.client.%s.CommandSenderImpl".formatted(Platform.isForge() ? "forge" : "fabric"))
+                        .getDeclaredMethod("sendCommand", String.class)
+                        .invoke(null, StringUtils.removeStart(madeUpCommand, "/"));
+            } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
             return true;
         }
     }

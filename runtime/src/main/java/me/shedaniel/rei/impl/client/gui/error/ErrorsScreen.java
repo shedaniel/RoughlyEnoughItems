@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.gui.error;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.impl.client.gui.error.ErrorsEntryListWidget.TextEntry;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
@@ -78,7 +77,7 @@ public class ErrorsScreen extends Screen {
                 listWidget._addEntry(((Function<Integer, ErrorsEntryListWidget.Entry>) component).apply(listWidget.getItemWidth()));
             }
         }
-        listWidget._addEntry(new TextEntry(NarratorChatListener.NO_TITLE, listWidget.getItemWidth()));
+        listWidget._addEntry(new TextEntry(Component.empty(), listWidget.getItemWidth()));
         if (quitable) {
             addRenderableWidget(doneButton = new Button(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> Minecraft.getInstance().setScreen(parent)));
         } else {

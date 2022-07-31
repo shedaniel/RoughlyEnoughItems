@@ -47,7 +47,6 @@ import me.shedaniel.rei.impl.client.gui.widget.DefaultDisplayChoosePageWidget;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -242,7 +241,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             matrices.popPose();
             helper.setBlitOffset(helper.getBlitOffset() - 1);
         }));
-        this.additionalWidgets.add(Widgets.createClickableLabel(new Point(overlayBounds.x + ((overlayBounds.width - 18) / 2), overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), NarratorChatListener.NO_TITLE, label -> {
+        this.additionalWidgets.add(Widgets.createClickableLabel(new Point(overlayBounds.x + ((overlayBounds.width - 18) / 2), overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), Component.empty(), label -> {
             if (!Screen.hasShiftDown()) {
                 setPage(0);
                 updateEntriesPosition();

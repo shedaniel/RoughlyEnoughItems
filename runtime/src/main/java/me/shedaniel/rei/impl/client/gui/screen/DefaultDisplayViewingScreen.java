@@ -62,7 +62,6 @@ import me.shedaniel.rei.impl.client.gui.widget.basewidgets.PanelWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -229,7 +228,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                         page = getCurrentTotalPages() - 1;
                     DefaultDisplayViewingScreen.this.init();
                 }).tooltipLine(Component.translatable("text.rei.previous_page")));
-        this.widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 21), NarratorChatListener.NO_TITLE, label -> {
+        this.widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 21), Component.empty(), label -> {
             if (!Screen.hasShiftDown()) {
                 page = 0;
                 DefaultDisplayViewingScreen.this.init();

@@ -29,7 +29,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -51,7 +50,7 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>
     private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public NoFilteringEntry(int width, List<EntryStack<?>> configFiltered, List<EntryStack<?>> defaultValue, Consumer<List<EntryStack<?>>> saveConsumer) {
-        super(NarratorChatListener.NO_TITLE, false);
+        super(Component.empty(), false);
         this.width = width;
         this.configFiltered = configFiltered;
         this.defaultValue = defaultValue;

@@ -29,7 +29,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -45,7 +44,7 @@ public class SearchFilterSyntaxHighlightingEntry extends TooltipListEntry<Syntax
     private SyntaxHighlightingMode type;
     private SyntaxHighlightingMode defaultValue;
     private Consumer<SyntaxHighlightingMode> save;
-    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, $ -> {
+    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.empty(), $ -> {
         type = SyntaxHighlightingMode.values()[(type.ordinal() + 1) % SyntaxHighlightingMode.values().length];
     }) {
         @Override

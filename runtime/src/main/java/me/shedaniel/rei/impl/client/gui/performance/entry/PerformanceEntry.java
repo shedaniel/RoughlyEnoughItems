@@ -29,7 +29,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.impl.client.gui.performance.PerformanceScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -44,13 +43,13 @@ import java.util.Optional;
 @ApiStatus.Internal
 public class PerformanceEntry extends AbstractConfigListEntry<Unit> {
     private int width;
-    private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
+    private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.empty(), button -> {
         Minecraft.getInstance().setScreen(new PerformanceScreen(Minecraft.getInstance().screen));
     });
     private List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public PerformanceEntry(int width) {
-        super(NarratorChatListener.NO_TITLE, false);
+        super(Component.empty(), false);
         this.width = width;
         buttonWidget.setMessage(Component.translatable("text.rei.performance"));
     }

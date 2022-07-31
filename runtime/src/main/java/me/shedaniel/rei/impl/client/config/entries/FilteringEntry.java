@@ -32,7 +32,6 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -61,7 +60,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>>>
     private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public FilteringEntry(int width, List<EntryStack<?>> configFiltered, List<FilteringRule<?>> rules, List<EntryStack<?>> defaultValue, Consumer<List<EntryStack<?>>> saveConsumer, Consumer<List<FilteringRule<?>>> rulesSaveConsumer) {
-        super(NarratorChatListener.NO_TITLE, false);
+        super(Component.empty(), false);
         this.width = width;
         this.configFiltered = new TreeSet<>(Comparator.comparing(EntryStacks::hashExact));
         this.configFiltered.addAll(configFiltered);

@@ -1,10 +1,10 @@
 # Compiled nonsense that does not belong in *source* control
-*/build
+**/build
 /build
 /bin
-*/bin
+**/bin
 /.gradle
-*/.gradle
+**/.gradle
 /minecraft
 */minecraft
 /out

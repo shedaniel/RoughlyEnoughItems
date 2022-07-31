@@ -145,7 +145,8 @@ public class PluginDetectorImpl implements PluginDetector {
         return () -> () -> {
             loadPlugin(REIClientPlugin.class, ((PluginView<REIClientPlugin>) PluginManager.getClientInstance())::registerPlugin);
             Supplier<Method> method = Suppliers.memoize(() -> {
-                String methodName = FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary", "net.minecraft.class_437", "method_32635", "(Ljava/util/List;Lnet/minecraft/class_5632;)V");
+                String methodName = FabricLoader.getInstance().isDevelopmentEnvironment() ? FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary", "net.minecraft.class_437", "method_32635", "(Ljava/util/List;Lnet/minecraft/class_5632;)V")
+                        : "method_32635";
                 try {
                     Method declaredMethod = Screen.class.getDeclaredMethod(methodName, List.class, TooltipComponent.class);
                     if (declaredMethod != null) declaredMethod.setAccessible(true);

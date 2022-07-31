@@ -53,7 +53,6 @@ import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -82,7 +81,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     protected Rectangle bounds;
     
     protected AbstractDisplayViewingScreen(Map<DisplayCategory<?>, List<DisplaySpec>> categoryMap, @Nullable CategoryIdentifier<?> category, int tabsPerPage) {
-        super(NarratorChatListener.NO_TITLE);
+        super(Component.empty());
         this.categoryMap = categoryMap;
         this.categories = Lists.newArrayList(categoryMap.keySet());
         this.tabsPerPage = tabsPerPage;

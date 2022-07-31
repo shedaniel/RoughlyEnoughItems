@@ -33,7 +33,6 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.impl.client.gui.screen.ConfigReloadingScreen;
 import me.shedaniel.rei.impl.client.search.argument.Argument;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -49,7 +48,7 @@ import java.util.Optional;
 @ApiStatus.Internal
 public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     private int width;
-    private AbstractWidget reloadPluginsButton = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
+    private AbstractWidget reloadPluginsButton = new Button(0, 0, 0, 20, Component.empty(), button -> {
         RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
         RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
     }) {
@@ -63,13 +62,13 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
             }
         }
     };
-    private AbstractWidget reloadSearchButton = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
+    private AbstractWidget reloadSearchButton = new Button(0, 0, 0, 20, Component.empty(), button -> {
         Argument.SEARCH_CACHE.clear();
     });
     private List<AbstractWidget> children = ImmutableList.of(reloadPluginsButton, reloadSearchButton);
     
     public ReloadPluginsEntry(int width) {
-        super(NarratorChatListener.NO_TITLE, false);
+        super(Component.empty(), false);
         this.width = width;
         reloadPluginsButton.setMessage(Component.translatable("text.rei.reload_config"));
         reloadSearchButton.setMessage(Component.translatable("text.rei.reload_search"));

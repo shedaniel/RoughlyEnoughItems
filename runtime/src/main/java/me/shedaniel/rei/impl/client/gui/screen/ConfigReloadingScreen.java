@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
@@ -39,7 +38,7 @@ public class ConfigReloadingScreen extends Screen {
     private Runnable parent;
     
     public ConfigReloadingScreen(Component title, BooleanSupplier predicate, Runnable parent) {
-        super(NarratorChatListener.NO_TITLE);
+        super(Component.empty());
         this.title = title;
         this.predicate = predicate;
         this.parent = parent;

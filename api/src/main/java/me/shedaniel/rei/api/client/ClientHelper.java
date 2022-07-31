@@ -32,7 +32,6 @@ import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -108,7 +107,7 @@ public interface ClientHelper {
     default Component getFormattedModFromItem(Item item) {
         String mod = getModFromItem(item);
         if (mod.isEmpty())
-            return NarratorChatListener.NO_TITLE;
+            return Component.empty();
         return Component.literal(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
     }
     
@@ -121,7 +120,7 @@ public interface ClientHelper {
     default Component getFormattedModFromIdentifier(ResourceLocation identifier) {
         String mod = getModFromIdentifier(identifier);
         if (mod.isEmpty())
-            return NarratorChatListener.NO_TITLE;
+            return Component.empty();
         return Component.literal(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
     }
     
@@ -134,7 +133,7 @@ public interface ClientHelper {
     default Component getFormattedModFromModId(String modId) {
         String mod = getModFromModId(modId);
         if (mod.isEmpty())
-            return NarratorChatListener.NO_TITLE;
+            return Component.empty();
         return Component.literal(mod).withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC);
     }
     

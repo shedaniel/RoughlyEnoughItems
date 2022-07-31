@@ -30,7 +30,6 @@ import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.impl.client.config.addon.ConfigAddonsScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -45,13 +44,13 @@ import java.util.Optional;
 @ApiStatus.Internal
 public class ConfigAddonsEntry extends AbstractConfigListEntry<Unit> {
     private int width;
-    private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
+    private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.empty(), button -> {
         Minecraft.getInstance().setScreen(new ConfigAddonsScreen(Minecraft.getInstance().screen));
     });
     private List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public ConfigAddonsEntry(int width) {
-        super(NarratorChatListener.NO_TITLE, false);
+        super(Component.empty(), false);
         this.width = width;
         this.buttonWidget.setMessage(REIRuntime.getInstance().getPreviousContainerScreen() != null && Minecraft.getInstance().getConnection() != null
                                      && Minecraft.getInstance().getConnection().getRecipeManager() != null ? Component.translatable("text.rei.addons")

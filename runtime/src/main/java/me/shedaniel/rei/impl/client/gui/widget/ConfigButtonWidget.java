@@ -46,7 +46,6 @@ import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.client.gui.modules.entries.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -60,7 +59,7 @@ public class ConfigButtonWidget {
     public static Widget create(ScreenOverlayImpl overlay) {
         Rectangle bounds = getConfigButtonBounds();
         MenuAccess access = overlay.menuAccess();
-        Button configButton = Widgets.createButton(bounds, NarratorChatListener.NO_TITLE)
+        Button configButton = Widgets.createButton(bounds, Component.empty())
                 .onClick(button -> {
                     if (Screen.hasShiftDown() || Screen.hasControlDown()) {
                         ClientHelper.getInstance().setCheating(!ClientHelper.getInstance().isCheating());

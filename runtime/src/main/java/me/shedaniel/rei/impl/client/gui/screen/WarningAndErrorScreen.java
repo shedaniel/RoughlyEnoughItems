@@ -31,7 +31,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -62,7 +61,7 @@ public class WarningAndErrorScreen extends Screen {
     private Consumer<Screen> onContinue;
     
     public WarningAndErrorScreen(String action, List<Tuple<String, String>> warnings, List<Tuple<String, String>> errors, Consumer<Screen> onContinue) {
-        super(NarratorChatListener.NO_TITLE);
+        super(Component.empty());
         this.action = action;
         this.warnings = warnings;
         this.errors = errors;

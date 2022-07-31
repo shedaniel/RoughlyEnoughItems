@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.config.entries;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
@@ -42,7 +41,7 @@ public class TitleTextEntry extends AbstractConfigListEntry<Unit> {
     private Component text;
     
     public TitleTextEntry(Component text) {
-        super(NarratorChatListener.NO_TITLE, false);
+        super(Component.empty(), false);
         this.text = text;
     }
     

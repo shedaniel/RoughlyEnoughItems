@@ -48,7 +48,6 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -129,7 +128,7 @@ public class UncertainDisplayViewingScreen extends Screen {
     public void init() {
         this.children().clear();
         this.widgets.clear();
-        this._children().add(button = Widgets.createButton(new Rectangle(width / 2 - 100, height - 40, 200, 20), NarratorChatListener.NO_TITLE)
+        this._children().add(button = Widgets.createButton(new Rectangle(width / 2 - 100, height - 40, 200, 20), Component.empty())
                 .onRender((matrices, button) -> {
                     button.setEnabled(isSet);
                     if (scroll.target() != 0 && allModsUsingJEI != null) {
