@@ -23,7 +23,23 @@
 
 package me.shedaniel.rei.api.client.gui.widgets;
 
-public interface TextField {
+import com.mojang.blaze3d.vertex.PoseStack;
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
+import me.shedaniel.clothconfig2.api.TickableWidget;
+import net.minecraft.network.chat.Style;
+import net.minecraft.util.FormattedCharSequence;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import static me.shedaniel.rei.api.client.gui.widgets.Widget.mouse;
+
+public interface TextField extends TickableWidget {
+    void setFormatter(TextFormatter formatter);
+    
+    void setSuggestionRenderer(SuggestionRenderer renderer);
+    
     String getText();
     
     void setText(String text);
@@ -57,4 +73,37 @@ public interface TextField {
     boolean isFocused();
     
     void setFocused(boolean focused);
+    
+    void setResponder(Consumer<String> responder);
+    
+    void setFocusedResponder(BooleanConsumer responder);
+    
+    void setTextTransformer(Function<String, String> textTransformer);
+    
+    @Nullable
+    String getSuggestion();
+    
+    void setSuggestion(@Nullable String suggestion);
+    
+    void setBorderColorProvider(BorderColorProvider borderColorProvider);
+    
+    WidgetWithBounds asWidget();
+    
+    interface TextFormatter {
+        TextFormatter DEFAULT = (text, index) -> {
+            return FormattedCharSequence.forward(text, Style.EMPTY);
+        };
+        
+        FormattedCharSequence format(String text, int index);
+    }
+    
+    interface SuggestionRenderer {
+        void renderSuggestion(PoseStack matrices, int x, int y, int color);
+    }
+    
+    interface BorderColorProvider {
+        BorderColorProvider DEFAULT = textField -> textField.asWidget().containsMouse(mouse()) || textField.isFocused() ? 0xffffffff : 0xffa0a0a0;
+        
+        int getBorderColor(TextField textField);
+    }
 }

@@ -59,7 +59,6 @@ import me.shedaniel.rei.impl.client.gui.RecipeDisplayExporter;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.toast.ExportRecipeIdentifierToast;
 import me.shedaniel.rei.impl.client.gui.widget.*;
-import me.shedaniel.rei.impl.client.gui.widget.basewidgets.PanelWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -263,7 +262,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     if (widget.getId() + categoryPages * tabsPerPage == selectedCategoryIndex)
                         return false;
-                    ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, categories.get(widget.getId() + categoryPages * tabsPerPage).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+                    ClientHelperImpl.getInstance().openView(categoryMap, categories.get(widget.getId() + categoryPages * tabsPerPage).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
                     return true;
                 }));
                 tab.setRenderer(categories.get(tabIndex), categories.get(tabIndex).getIcon(), categories.get(tabIndex).getTitle(), tab.getId() + categoryPages * tabsPerPage == selectedCategoryIndex);
@@ -271,7 +270,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         }
         initDisplays();
         widgets = CollectionUtils.map(widgets, widget -> Widgets.withTranslate(widget, 0, 0, 10));
-        widgets.add(Widgets.withTranslate(new PanelWidget(bounds), 0, 0, 5));
+        widgets.add(Widgets.withTranslate(Widgets.createCategoryBase(bounds), 0, 0, 5));
         widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
             fill(matrices, bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, darkStripesColor.value().getColor());
             fill(matrices, bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 31, darkStripesColor.value().getColor());
@@ -310,7 +309,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             this.recipeBounds.put(displayBounds, Pair.of(display, setupDisplay));
             this.widgets.add(new DisplayCompositeWidget(display, setupDisplay, displayBounds));
             if (plusButtonArea.isPresent()) {
-                this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, plusButtonArea.get().get(displayBounds), new TextComponent(plusButtonArea.get().getButtonText()), displaySupplier, display::provideInternalDisplayIds, setupDisplay, getCurrentCategory()));
+                this.widgets.add(AutoCraftingButtonWidget.create(displayBounds, plusButtonArea.get().get(displayBounds), new TextComponent(plusButtonArea.get().getButtonText()), displaySupplier, display::provideInternalDisplayIds, setupDisplay, getCurrentCategory()));
             }
         }
     }
@@ -561,7 +560,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         public WorkstationSlotWidget(int x, int y, EntryIngredient widgets) {
             super(new Point(x, y));
             entries(widgets);
-            noBackground();
+            disableBackground();
         }
         
         @Override

@@ -134,7 +134,9 @@ public interface REIRuntime extends Reloadable<REIClientPlugin> {
      * @return the text field used for searching, or {@code null} if none
      */
     @Nullable
-    TextField getSearchTextField();
+    default TextField getSearchTextField() {
+        return getOverlay().map(ScreenOverlay::getSearchField).orElse(null);
+    }
     
     /**
      * Queues a tooltip to be displayed.

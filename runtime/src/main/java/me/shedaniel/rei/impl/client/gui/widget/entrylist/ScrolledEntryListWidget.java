@@ -32,8 +32,9 @@ import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.gui.widgets.BatchedSlots;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
@@ -66,7 +67,7 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
         int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / (float) entrySize()));
         int nextIndex = skip * innerBounds.width / entrySize();
         this.blockedCount = 0;
-        BatchedEntryRendererManager helper = new BatchedEntryRendererManager();
+        BatchedSlots slots = Widgets.createBatchedSlots();
         Int2ObjectMap<CollapsedStack> indexedCollapsedStack = getCollapsedStackIndexed();
         
         int i = nextIndex;
@@ -80,18 +81,18 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
             if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height)) {
                 /*EntryStack<?> | List<EntryStack<?>>*/
                 Object stack = stacks.get(i++);
-                entry.clearStacks();
+                entry.clearEntries();
                 
                 if (stack instanceof EntryStack<?> entryStack) {
                     if (!entryStack.isEmpty()) {
                         entry.entry(entryStack);
-                        helper.add(entry);
+                        slots.add(entry);
                     }
                 } else {
                     List<EntryStack<?>> ingredient = (List<EntryStack<?>>) stack;
                     if (!ingredient.isEmpty()) {
                         entry.entries(ingredient);
-                        helper.addSlow(entry);
+                        slots.addUnbatched(entry);
                     }
                 }
                 
@@ -106,7 +107,8 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
             }
         }
         
-        helper.render(debugger.debugTime, debugger.size, debugger.time, matrices, mouseX, mouseY, delta);
+        if (debugger.debugTime) slots.addDebugger(debugger.size, debugger.time);
+        slots.render(matrices, mouseX, mouseY, delta);
         
         scrolling.updatePosition(delta);
         ScissorsHandler.INSTANCE.removeLastScissor();
@@ -126,7 +128,7 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
         for (int i = 0; i < slotsToPrepare; i++) {
             int xPos = currentX * entrySize + innerBounds.x;
             int yPos = currentY * entrySize + innerBounds.y;
-            entries.add((EntryListStackEntry) new EntryListStackEntry(this, xPos, yPos, entrySize, zoomed).noBackground());
+            entries.add((EntryListStackEntry) new EntryListStackEntry(this, xPos, yPos, entrySize, zoomed).disableBackground());
             currentX++;
             if (currentX >= width) {
                 currentX = 0;

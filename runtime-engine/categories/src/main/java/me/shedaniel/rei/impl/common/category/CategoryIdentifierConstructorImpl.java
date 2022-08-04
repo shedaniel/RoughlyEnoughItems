@@ -25,13 +25,13 @@ package me.shedaniel.rei.impl.common.category;
 
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.common.provider.CategoryIdentifierConstructor;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CategoryIdentifierConstructorImpl implements Internals.CategoryIdentifierConstructor {
+public class CategoryIdentifierConstructorImpl implements CategoryIdentifierConstructor {
     private static final Map<String, CategoryIdentifier<?>> CACHE = new ConcurrentHashMap<>();
     
     @Override

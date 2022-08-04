@@ -27,6 +27,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRuleInternal;
+import me.shedaniel.rei.impl.client.entry.filtering.FilteringRuleType;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRuleType;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.client.Minecraft;
@@ -184,7 +185,7 @@ public class FilteringRulesScreen extends Screen {
         
         public DefaultRuleEntry(FilteringRuleInternal rule, FilteringEntry entry, BiFunction<FilteringEntry, Screen, Screen> screenFunction) {
             super(rule);
-            this.screenFunction = (screenFunction == null ? rule.getType().createEntryScreen().orElse(null) : screenFunction);
+            this.screenFunction = (screenFunction == null ? ((FilteringRuleType<FilteringRuleInternal>) rule.getType()).createEntryScreen(rule).orElse(null) : screenFunction);
             configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
                 entry.edited = true;
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(entry, Minecraft.getInstance().screen));

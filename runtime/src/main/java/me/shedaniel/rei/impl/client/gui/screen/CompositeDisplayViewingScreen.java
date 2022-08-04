@@ -47,8 +47,8 @@ import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
+import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingButtonWidget;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
-import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.Minecraft;
@@ -175,7 +175,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         this.widgets.addAll(setupDisplay);
         Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getPlusButtonArea();
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
-            this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), new TextComponent(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category));
+            this.widgets.add(AutoCraftingButtonWidget.create(recipeBounds, supplier.get().get(recipeBounds), new TextComponent(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category));
         
         int index = 0;
         for (DisplaySpec recipeDisplay : categoryMap.get(category)) {
@@ -203,7 +203,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     if (widget.selected)
                         return false;
-                    ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, tabCategory.getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+                    ClientHelperImpl.getInstance().openView(categoryMap, tabCategory.getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
                     return true;
                 }));
                 tab.setRenderer(tabCategory, tabCategory.getIcon(), tabCategory.getTitle(), j == selectedCategoryIndex);
@@ -325,7 +325,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             else if (amount > 0) selectedCategoryIndex--;
             if (selectedCategoryIndex < 0) selectedCategoryIndex = categories.size() - 1;
             else if (selectedCategoryIndex >= categories.size()) selectedCategoryIndex = 0;
-            ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, categories.get(selectedCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+            ClientHelperImpl.getInstance().openView(categoryMap, categories.get(selectedCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
             return true;
         }
         if (bounds.contains(PointHelper.ofMouse())) {

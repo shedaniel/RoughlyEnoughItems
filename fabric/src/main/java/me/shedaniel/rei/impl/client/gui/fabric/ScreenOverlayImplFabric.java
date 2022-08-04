@@ -25,9 +25,9 @@ package me.shedaniel.rei.impl.client.gui.fabric;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.widget.QueuedTooltip;
+import me.shedaniel.rei.impl.client.gui.widget.TooltipImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -51,7 +51,7 @@ public class ScreenOverlayImplFabric extends ScreenOverlayImpl {
                         Stream<FormattedCharSequence> sequenceStream = texts.isEmpty() ? Stream.of(component.getAsText().getVisualOrderText())
                                 : texts.stream().map(Language.getInstance()::getVisualOrder);
                         return sequenceStream.map(ClientTooltipComponent::create);
-                    } else if (((QueuedTooltip.TooltipEntryImpl) component).isClientComponent()) {
+                    } else if (((TooltipImpl.TooltipEntryImpl) component).isClientComponent()) {
                         return Stream.of(component.getAsComponent());
                     } else {
                         return Stream.empty();

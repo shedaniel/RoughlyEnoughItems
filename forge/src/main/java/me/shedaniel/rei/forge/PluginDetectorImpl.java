@@ -29,7 +29,7 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import me.shedaniel.rei.impl.init.PluginDetector;
 import me.shedaniel.rei.jeicompat.JEIExtraClientPlugin;
 import me.shedaniel.rei.jeicompat.JEIExtraPlugin;

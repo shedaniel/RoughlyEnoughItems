@@ -44,7 +44,7 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import me.shedaniel.rei.plugin.autocrafting.recipebook.DefaultRecipeBookHandler;
 import me.shedaniel.rei.plugin.client.categories.*;
 import me.shedaniel.rei.plugin.client.categories.anvil.DefaultAnvilCategory;

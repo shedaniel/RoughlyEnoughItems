@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -33,7 +32,6 @@ import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
@@ -44,45 +42,29 @@ import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
-import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
-import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
-import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
-import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.FormattingUtils;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
-import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("UnstableApiUsage")
 public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     @ApiStatus.Internal
     public static long stackDisplayOffset = 0;
@@ -102,11 +84,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public ResourceLocation tagMatch;
     public boolean removeTagMatch = true;
     
-    private long lastCheckTime = -1;
-    private long lastCheckedTime = -1;
-    private Display display;
-    private Supplier<DisplayTooltipComponent> displayTooltipComponent;
-    
     public EntryWidget(Point point) {
         this(new Rectangle(point.x - 1, point.y - 1, 18, 18));
     }
@@ -114,22 +91,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public EntryWidget(Rectangle bounds) {
         this.bounds = bounds;
         this.entryStacks = Collections.emptyList();
-    }
-    
-    @Override
-    public EntryWidget unmarkInputOrOutput() {
-        noticeMark = 0;
-        return this;
-    }
-    
-    public EntryWidget markIsInput() {
-        noticeMark = 1;
-        return this;
-    }
-    
-    public EntryWidget markIsOutput() {
-        noticeMark = 2;
-        return this;
     }
     
     @Override
@@ -144,7 +105,8 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     @Override
     public void setInteractable(boolean interactable) {
-        interactable(interactable);
+        this.interactable = interactable;
+        this.interactableFavorites = interactableFavorites && interactable;
     }
     
     @Override
@@ -154,42 +116,12 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     @Override
     public void setInteractableFavorites(boolean interactableFavorites) {
-        interactableFavorites(interactableFavorites);
+        this.interactableFavorites = interactableFavorites && interactable;
     }
     
     @Override
     public boolean isInteractableFavorites() {
         return interactableFavorites;
-    }
-    
-    public EntryWidget disableInteractions() {
-        return interactable(false);
-    }
-    
-    @Override
-    public EntryWidget interactable(boolean b) {
-        interactable = b;
-        interactableFavorites = interactableFavorites && interactable;
-        return this;
-    }
-    
-    public EntryWidget disableFavoritesInteractions() {
-        return interactableFavorites(false);
-    }
-    
-    @Override
-    public EntryWidget interactableFavorites(boolean b) {
-        interactableFavorites = b && interactable;
-        return this;
-    }
-    
-    public EntryWidget noHighlight() {
-        return highlight(false);
-    }
-    
-    public EntryWidget highlight(boolean b) {
-        highlight = b;
-        return this;
     }
     
     @Override
@@ -199,21 +131,12 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     @Override
     public void setHighlightEnabled(boolean highlights) {
-        highlight(highlights);
-    }
-    
-    public EntryWidget noTooltips() {
-        return tooltips(false);
-    }
-    
-    public EntryWidget tooltips(boolean b) {
-        tooltips = b;
-        return this;
+        this.highlight = highlights;
     }
     
     @Override
     public void setTooltipsEnabled(boolean tooltipsEnabled) {
-        tooltips(tooltipsEnabled);
+        this.tooltips = tooltipsEnabled;
     }
     
     @Override
@@ -221,18 +144,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         return tooltips;
     }
     
-    public EntryWidget noBackground() {
-        return background(false);
-    }
-    
-    public EntryWidget background(boolean b) {
-        background = b;
-        return this;
-    }
-    
     @Override
     public void setBackgroundEnabled(boolean backgroundEnabled) {
-        background(backgroundEnabled);
+        this.background = backgroundEnabled;
     }
     
     @Override
@@ -240,14 +154,10 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         return background;
     }
     
-    public EntryWidget clearStacks() {
-        entryStacks = Collections.emptyList();
-        return this;
-    }
-    
     @Override
     public Slot clearEntries() {
-        return clearStacks();
+        this.entryStacks = Collections.emptyList();
+        return this;
     }
     
     @Override
@@ -306,89 +216,27 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         return new Rectangle(bounds.x + 1, bounds.y + 1, bounds.width - 2, bounds.height - 2);
     }
     
-    @Nullable
-    private TransferHandler _getTransferHandler() {
-        lastCheckTime = Util.getMillis();
-        
-        if (PluginManager.areAnyReloading()) {
-            return null;
-        }
-        
-        try {
-            for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
-                for (Display display : displays) {
-                    if (ViewsImpl.isRecipesFor(getEntries(), display)) {
-                        AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
-                        if (result.successful) {
-                            this.display = display;
-                            this.displayTooltipComponent = Suppliers.memoize(() -> new DisplayTooltipComponent(display));
-                            return result.successfulHandler;
-                        }
-                    }
-                }
-            }
-        } catch (ConcurrentModificationException ignored) {
-            display = null;
-            displayTooltipComponent = null;
-            lastCheckTime = -1;
-        }
-        
-        return null;
-    }
-    
-    private TransferHandler getTransferHandler(boolean query) {
-        if (PluginManager.areAnyReloading()) {
-            return null;
-        }
-        
-        if (display != null) {
-            if (ViewsImpl.isRecipesFor(getEntries(), display)) {
-                AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
-                if (result.successful) {
-                    return result.successfulHandler;
-                }
-            }
-            
-            display = null;
-            displayTooltipComponent = null;
-            lastCheckTime = -1;
-        }
-        
-        if (lastCheckTime != -1 && Util.getMillis() - lastCheckTime < 2000) {
-            return null;
-        }
-        
-        return query ? _getTransferHandler() : null;
-    }
-    
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         drawBackground(matrices, mouseX, mouseY, delta);
         drawCurrentEntry(matrices, mouseX, mouseY, delta);
         
         boolean highlighted = containsMouse(mouseX, mouseY);
-        if (hasTooltips() && highlighted) {
+        if (isTooltipsEnabled() && highlighted) {
             queueTooltip(matrices, mouseX, mouseY, delta);
         }
-        if (hasHighlight() && highlighted) {
+        if (isHighlightEnabled() && highlighted) {
             drawHighlighted(matrices, mouseX, mouseY, delta);
         }
         drawExtra(matrices, mouseX, mouseY, delta);
-    }
-    
-    public final boolean hasTooltips() {
-        return isTooltipsEnabled();
-    }
-    
-    public final boolean hasHighlight() {
-        return isHighlightEnabled();
     }
     
     private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
             .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
             .asFloat();
     
-    protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    @Override
+    public void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (background) {
             darkBackgroundAlpha.update(delta);
             RenderSystem.enableBlend();
@@ -413,40 +261,19 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        Tooltip tooltip = getCurrentTooltip(TooltipContext.ofMouse().getPoint());
+        Tooltip tooltip = getCurrentTooltip(TooltipContext.ofMouse());
         if (tooltip != null) {
             tooltip.queue();
         }
     }
     
-    protected void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {}
+    @Override
+    public void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {}
     
     @Override
     @Nullable
-    public Tooltip getCurrentTooltip(Point point) {
-        Tooltip tooltip = getCurrentEntry().getTooltip(TooltipContext.of(point));
-        
-        if (tooltip != null && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
-            boolean exists = getTransferHandler(false) != null;
-            
-            if (!exists) {
-                if (lastCheckedTime == -1 || Util.getMillis() - lastCheckedTime > 400) {
-                    lastCheckedTime = Util.getMillis();
-                }
-                
-                if (Util.getMillis() - lastCheckedTime > 200) {
-                    lastCheckedTime = -1;
-                    exists = getTransferHandler(true) != null;
-                }
-            } else {
-                lastCheckedTime = -1;
-            }
-            
-            if (exists) {
-                tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
-                tooltip.add((ClientTooltipComponent) displayTooltipComponent.get());
-            }
-        }
+    public Tooltip getCurrentTooltip(TooltipContext context) {
+        Tooltip tooltip = getCurrentEntry().getTooltip(context);
         
         if (tooltip != null) {
             if (interactableFavorites && ConfigObject.getInstance().doDisplayFavoritesTooltip() && !ConfigObject.getInstance().getFavoriteKeyCode().isUnknown()) {
@@ -486,7 +313,8 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
             .asFloat();
     
-    protected void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    @Override
+    public void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
         darkHighlightedAlpha.update(delta);
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
@@ -504,11 +332,12 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     protected boolean wasClicked() {
-        boolean b = this.wasClicked;
+        boolean wasClicked = this.wasClicked;
         this.wasClicked = false;
-        return b;
+        return wasClicked;
     }
     
+    @Override
     public void tooltipProcessor(UnaryOperator<Tooltip> operator) {
         if (tooltipProcessors == null) {
             tooltipProcessors = Collections.singleton(operator);
@@ -529,7 +358,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (REIRuntimeImpl.isWithinRecipeViewingScreen && entryStacks.size() > 1 && containsMouse(mouseX, mouseY)) {
+        if (minecraft.screen instanceof DisplayScreen && entryStacks.size() > 1 && containsMouse(mouseX, mouseY)) {
             if (amount < 0) {
                 EntryWidget.stackDisplayOffset = ((System.currentTimeMillis() + stackDisplayOffset) / 1000 - 1) * 1000;
                 return true;
@@ -564,35 +393,8 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                     } else {
                         ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     }
-                    ConfigManager.getInstance().saveConfig();
-                    FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                    if (favoritesListWidget != null)
-                        favoritesListWidget.updateSearch();
                     return true;
                 }
-            }
-        }
-        
-        if (!(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
-            try {
-                TransferHandler handler = getTransferHandler(true);
-                
-                if (handler != null) {
-                    AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
-                    TransferHandler.Context context = TransferHandler.Context.create(true, Screen.hasShiftDown() || button == 1, containerScreen, display);
-                    TransferHandler.Result transferResult = handler.handle(context);
-                    
-                    if (transferResult.isBlocking()) {
-                        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                        if (transferResult.isReturningToScreen() && Minecraft.getInstance().screen != containerScreen) {
-                            Minecraft.getInstance().setScreen(containerScreen);
-                            REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
-                        }
-                        return true;
-                    }
-                }
-            } catch (Throwable e) {
-                e.printStackTrace();
             }
         }
         
@@ -646,10 +448,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                     } else {
                         ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     }
-                    ConfigManager.getInstance().saveConfig();
-                    FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                    if (favoritesListWidget != null)
-                        favoritesListWidget.updateSearch();
                     return true;
                 }
             }

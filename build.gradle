@@ -29,7 +29,15 @@ allprojects {
                 ":runtime-engine:search",
                 ":runtime-engine:subsets",
                 ":runtime-engine:transfer-handlers",
+                ":runtime-engine:menu-info",
+                ":runtime-engine:plugins",
+                ":runtime-engine:views",
                 ":runtime-engine:default-runtime-plugin",
+                ":runtime-engine:initialization",
+                ":runtime-frontend:widgets",
+                ":runtime-frontend:filtering",
+                ":runtime-frontend:display",
+                ":runtime-frontend:overlay",
         ]
         depProjects = [
                 ":api",

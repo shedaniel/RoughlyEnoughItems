@@ -30,9 +30,9 @@ import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.favorites.MutableFavoritesList;
+import me.shedaniel.rei.impl.client.provider.FavoritesEntriesListProvider;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class FavoritesEntriesManager implements ClientInternals.FavoritesEntriesListProvider {
+public class FavoritesEntriesManager implements FavoritesEntriesListProvider {
     
     public static List<FavoriteEntry> getConfigFavoriteEntries() {
         ConfigManagerInternal manager = ConfigManagerInternal.getInstance();

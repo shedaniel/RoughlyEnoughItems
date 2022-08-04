@@ -23,7 +23,10 @@
 
 package me.shedaniel.rei.api.client.overlay;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.widgets.TextField;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -43,4 +46,8 @@ public abstract class ScreenOverlay extends WidgetWithBounds {
     public abstract OverlayListWidget getEntryList();
     
     public abstract Optional<OverlayListWidget> getFavoritesList();
+    
+    public abstract TextField getSearchField();
+    
+    public abstract void renderTooltip(PoseStack matrices, Tooltip tooltip);
 }

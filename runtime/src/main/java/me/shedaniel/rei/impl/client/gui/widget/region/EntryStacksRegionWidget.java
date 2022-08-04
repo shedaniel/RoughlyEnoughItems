@@ -38,12 +38,13 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
 import me.shedaniel.rei.api.client.gui.drag.*;
+import me.shedaniel.rei.api.client.gui.widgets.BatchedSlots;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
@@ -126,8 +127,9 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         Stream<RegionEntryWidget<T>> entryStream = this.entriesList.stream()
                 .filter(entry -> entry.getBounds().getMaxY() >= this.bounds.getY() && entry.getBounds().y <= this.bounds.getMaxY());
         
-        new BatchedEntryRendererManager(entryStream.collect(Collectors.toList()))
-                .render(poses, mouseX, mouseY, delta);
+        BatchedSlots slots = Widgets.createBatchedSlots();
+        entryStream.collect(Collectors.toCollection(() -> slots));
+        slots.render(poses, mouseX, mouseY, delta);
         
         updatePosition(delta);
         scrolling.renderScrollBar(0, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);

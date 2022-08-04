@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProvider;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitor;
+import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
@@ -49,11 +50,10 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
 import me.shedaniel.rei.impl.client.gui.dragging.CurrentDraggingStack;
-import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
-import me.shedaniel.rei.impl.client.gui.modules.MenuHolder;
+import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
+import me.shedaniel.rei.impl.client.gui.menu.MenuAccessImpl;
 import me.shedaniel.rei.impl.client.gui.widget.*;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.PaginatedEntryListWidget;
@@ -64,9 +64,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -82,6 +79,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     private static final List<Tooltip> TOOLTIPS = Lists.newArrayList();
     private static EntryListWidget entryListWidget = null;
     private static FavoritesListWidget favoritesListWidget = null;
+    private static OverlaySearchField searchField = null;
     private final List<Widget> widgets = Lists.newLinkedList();
     public boolean shouldReload = false;
     public boolean shouldReloadSearch = false;
@@ -91,7 +89,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     private CurrentDraggingStack draggingStack = new CurrentDraggingStack();
     @Nullable
     public DefaultDisplayChoosePageWidget choosePageWidget;
-    private MenuHolder menuHolder = new MenuHolder();
+    private MenuAccessImpl menuAccess = new MenuAccessImpl();
     
     public static EntryListWidget getEntryListWidget() {
         boolean widgetScrolled = ConfigObject.getInstance().isEntryListWidgetScrolled();
@@ -108,7 +106,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         
         ScreenOverlayImpl overlay = ScreenOverlayImpl.getInstance();
         Rectangle overlayBounds = overlay.bounds;
-        entryListWidget.updateArea(Objects.requireNonNullElse(overlayBounds, new Rectangle()), REIRuntimeImpl.getSearchField() == null ? "" : REIRuntimeImpl.getSearchField().getText());
+        entryListWidget.updateArea(Objects.requireNonNullElse(overlayBounds, new Rectangle()), overlay.getSearchField().getText());
         entryListWidget.updateEntriesPosition();
         
         return entryListWidget;
@@ -124,8 +122,8 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public void tick() {
-        if (REIRuntimeImpl.getSearchField() != null) {
-            REIRuntimeImpl.getSearchField().tick();
+        if (searchField != null) {
+            getSearchField().tick();
             if (Minecraft.getInstance().player != null && !PluginManager.areAnyReloading() && Minecraft.getInstance().player.tickCount % 5 == 0) {
                 CraftableFilter.INSTANCE.tick();
             }
@@ -169,9 +167,9 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             this.widgets.add(favoritesListWidget);
         }
         
-        OverlaySearchField searchField = REIRuntimeImpl.getSearchField();
-        searchField.getBounds().setBounds(getSearchFieldArea());
-        this.widgets.add(searchField);
+        TextField searchField = getSearchField();
+        searchField.asWidget().getBounds().setBounds(getSearchFieldArea());
+        this.widgets.add(searchField.asWidget());
         
         EntryListWidget entryListWidget = getEntryListWidget();
         entryListWidget.updateArea(this.bounds, searchField.getText());
@@ -221,7 +219,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (shouldReload || !calculateOverlayBounds().equals(bounds)) {
             init();
-            getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
+            getEntryListWidget().updateSearch(REIRuntime.getInstance().getSearchTextField().getText(), true);
         } else {
             for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(minecraft.screen)) {
                 if (decider != null && decider.shouldRecalculateArea(ConfigObject.getInstance().getDisplayPanelLocation(), bounds)) {
@@ -232,7 +230,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         }
         if (shouldReloadSearch || (ConfigManager.getInstance().isCraftableOnlyEnabled() && CraftableFilter.INSTANCE.wasDirty())) {
             shouldReloadSearch = false;
-            getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
+            getEntryListWidget().updateSearch(getSearchField().getText(), true);
         }
         if (OverlaySearchField.isHighlighting) {
             EntryHighlighter.render(matrices);
@@ -283,14 +281,14 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     
     public void lateRender(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (REIRuntime.getInstance().isOverlayVisible() && hasSpace()) {
-            REIRuntimeImpl.getSearchField().laterRender(matrices, mouseX, mouseY, delta);
+            getSearchField().laterRender(matrices, mouseX, mouseY, delta);
             for (Widget widget : widgets) {
-                if (widget instanceof LateRenderable && widget != menuHolder.widget())
+                if (widget instanceof LateRenderable && widget != menuAccess.widget())
                     widget.render(matrices, mouseX, mouseY, delta);
             }
             matrices.pushPose();
             matrices.translate(0, 0, 500);
-            menuHolder.lateRender(matrices, mouseX, mouseY, delta);
+            menuAccess.lateRender(matrices, mouseX, mouseY, delta);
             matrices.popPose();
             if (choosePageWidget != null) {
                 setBlitOffset(500);
@@ -306,10 +304,11 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         }
         TOOLTIPS.clear();
         if (REIRuntime.getInstance().isOverlayVisible()) {
-            menuHolder.afterRender();
+            menuAccess.afterRender();
         }
     }
     
+    @Override
     public void renderTooltip(PoseStack matrices, Tooltip tooltip) {
         renderTooltipInner(minecraft.screen, matrices, tooltip, tooltip.getX(), tooltip.getY());
     }
@@ -338,7 +337,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
-        if (menuHolder.mouseScrolled(mouseX, mouseY, amount))
+        if (menuAccess.mouseScrolled(mouseX, mouseY, amount))
             return true;
         if (isInside(mouseX, mouseY) && getEntryListWidget().mouseScrolled(mouseX, mouseY, amount)) {
             return true;
@@ -349,7 +348,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         }
         for (Widget widget : widgets)
             if (widget != getEntryListWidget() && (favoritesListWidget == null || widget != favoritesListWidget)
-                && widget != menuHolder.widget()
+                && widget != menuAccess.widget()
                 && widget.mouseScrolled(mouseX, mouseY, amount))
                 return true;
         return false;
@@ -365,10 +364,10 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             }
             if (choosePageWidget != null)
                 return choosePageWidget.keyPressed(keyCode, scanCode, modifiers);
-            if (REIRuntimeImpl.getSearchField().keyPressed(keyCode, scanCode, modifiers))
+            if (getSearchField().keyPressed(keyCode, scanCode, modifiers))
                 return true;
             for (GuiEventListener listener : widgets)
-                if (listener != REIRuntimeImpl.getSearchField() && listener.keyPressed(keyCode, scanCode, modifiers))
+                if (listener != getSearchField() && listener.keyPressed(keyCode, scanCode, modifiers))
                     return true;
         }
         if (ConfigObject.getInstance().getHideKeybind().matchesKey(keyCode, scanCode)) {
@@ -391,10 +390,10 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
         if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesKey(keyCode, scanCode)) {
-            REIRuntimeImpl.getSearchField().setFocused(true);
-            setFocused(REIRuntimeImpl.getSearchField());
-            REIRuntimeImpl.getSearchField().keybindFocusTime = System.currentTimeMillis();
-            REIRuntimeImpl.getSearchField().keybindFocusKey = keyCode;
+            getSearchField().setFocused(true);
+            setFocused(getSearchField());
+            getSearchField().keybindFocusTime = System.currentTimeMillis();
+            getSearchField().keybindFocusKey = keyCode;
             return true;
         }
         return false;
@@ -405,10 +404,10 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (!hasSpace()) return false;
         if (REIRuntime.getInstance().isOverlayVisible()) {
             if (choosePageWidget == null) {
-                if (REIRuntimeImpl.getSearchField().keyReleased(keyCode, scanCode, modifiers))
+                if (getSearchField().keyReleased(keyCode, scanCode, modifiers))
                     return true;
                 for (GuiEventListener listener : widgets)
-                    if (listener != REIRuntimeImpl.getSearchField() && listener == getFocused() && listener.keyPressed(keyCode, scanCode, modifiers))
+                    if (listener != getSearchField() && listener == getFocused() && listener.keyPressed(keyCode, scanCode, modifiers))
                         return true;
             }
         }
@@ -423,10 +422,10 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (choosePageWidget != null) {
             return choosePageWidget.charTyped(character, modifiers);
         }
-        if (REIRuntimeImpl.getSearchField().charTyped(character, modifiers))
+        if (getSearchField().charTyped(character, modifiers))
             return true;
         for (GuiEventListener listener : widgets)
-            if (listener != REIRuntimeImpl.getSearchField() && listener.charTyped(character, modifiers))
+            if (listener != getSearchField() && listener.charTyped(character, modifiers))
                 return true;
         return false;
     }
@@ -473,12 +472,12 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             }
         }
         if (visible) {
-            Widget menuWidget = menuHolder.widget();
+            Widget menuWidget = menuAccess.widget();
             if (menuWidget != null && menuWidget.mouseClicked(mouseX, mouseY, button)) {
                 this.setFocused(menuWidget);
                 if (button == 0)
                     this.setDragging(true);
-                REIRuntimeImpl.getSearchField().setFocused(false);
+                getSearchField().setFocused(false);
                 return true;
             }
         }
@@ -493,20 +492,20 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             return false;
         }
         for (GuiEventListener element : widgets) {
-            if (element != configButton && element != menuHolder.widget() && element.mouseClicked(mouseX, mouseY, button)) {
+            if (element != configButton && element != menuAccess.widget() && element.mouseClicked(mouseX, mouseY, button)) {
                 this.setFocused(element);
                 if (button == 0)
                     this.setDragging(true);
                 if (!(element instanceof OverlaySearchField))
-                    REIRuntimeImpl.getSearchField().setFocused(false);
+                    getSearchField().setFocused(false);
                 return true;
             }
         }
         if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesMouse(button)) {
-            REIRuntimeImpl.getSearchField().setFocused(true);
-            setFocused(REIRuntimeImpl.getSearchField());
-            REIRuntimeImpl.getSearchField().keybindFocusTime = -1;
-            REIRuntimeImpl.getSearchField().keybindFocusKey = -1;
+            getSearchField().setFocused(true);
+            setFocused(getSearchField().asWidget());
+            getSearchField().keybindFocusTime = -1;
+            getSearchField().keybindFocusKey = -1;
             return true;
         }
         return false;
@@ -559,6 +558,15 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public MenuAccess menuAccess() {
-        return menuHolder;
+        return menuAccess;
+    }
+    
+    @Override
+    public OverlaySearchField getSearchField() {
+        if (searchField == null) {
+            searchField = new OverlaySearchField(0, 0, 0, 0);
+        }
+    
+        return searchField;
     }
 }

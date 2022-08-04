@@ -29,8 +29,6 @@ import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMaps;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import me.shedaniel.rei.api.client.config.ConfigObject;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringCache;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextType;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
@@ -39,39 +37,35 @@ import me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibility
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.entry.filtering.*;
+import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
 import me.shedaniel.rei.impl.client.entry.type.EntryRegistryListener;
 import me.shedaniel.rei.impl.common.InternalLogger;
 
 import java.util.List;
 import java.util.function.Predicate;
 
-public class FilteredStacksVisibilityHandler implements REIClientPlugin, EntryRegistryListener, DisplayVisibilityPredicate {
+public class FilteredStacksVisibilityHandler implements REIClientPlugin, EntryRegistryListener {
     private static boolean checkHiddenStacks;
     private static Reference2BooleanMap<Display> visible = Reference2BooleanMaps.synchronize(new Reference2BooleanOpenHashMap<>());
-    private static List<FilteringRule<?>> filteringRules;
+    private static List<FilteringRule> filteringRules;
     private static FilteringCacheImpl cache;
     private static final Predicate<Display> displayPredicate = FilteredStacksVisibilityHandler::checkHiddenStacks;
-    
-    @Override
-    public EventResult handleDisplay(DisplayCategory<?> category, Display display) {
-        if (checkHiddenStacks) {
-            return visible.computeIfAbsent(display, displayPredicate) ? EventResult.pass() : EventResult.interruptFalse();
-        }
-        
-        return EventResult.pass();
-    }
     
     public static void reset() {
         checkHiddenStacks = ConfigObject.getInstance().shouldFilterDisplays();
         visible = Reference2BooleanMaps.synchronize(new Reference2BooleanOpenHashMap<>());
         
         if (checkHiddenStacks) {
-            filteringRules = ((ConfigObjectImpl) ConfigObject.getInstance()).getFilteringRules();
+            filteringRules = CollectionUtils.concatUnmodifiable(
+                    List.of(new ManualFilteringRule()),
+                    (List<FilteringRule>) ConfigManagerInternal.getInstance().get("advanced.filtering.filteringRules")
+            );
             cache = new FilteringCacheImpl();
             for (int i = filteringRules.size() - 1; i >= 0; i--) {
-                FilteringRule<?> rule = filteringRules.get(i);
+                FilteringRuleInternal rule = (FilteringRuleInternal) filteringRules.get(i);
                 cache.setCache(rule, rule.prepareCache(false));
             }
             
@@ -111,10 +105,10 @@ public class FilteredStacksVisibilityHandler implements REIClientPlugin, EntryRe
         return true;
     }
     
-    private static boolean isEntryIngredientAllHidden(EntryIngredient ingredient, FilteringCache cache, List<FilteringRule<?>> rules) {
+    private static boolean isEntryIngredientAllHidden(EntryIngredient ingredient, FilteringCache cache, List<FilteringRule> rules) {
         FilteringContextImpl context = new FilteringContextImpl(false, ingredient);
         for (int i = rules.size() - 1; i >= 0; i--) {
-            FilteringRule<?> rule = rules.get(i);
+            FilteringRuleInternal rule = (FilteringRuleInternal) rules.get(i);
             context.handleResult(rule.processFilteredStacks(context, cache, false));
         }
         return context.stacks.get(FilteringContextType.SHOWN).isEmpty() && context.stacks.get(FilteringContextType.DEFAULT).isEmpty();
@@ -128,11 +122,17 @@ public class FilteredStacksVisibilityHandler implements REIClientPlugin, EntryRe
     @Override
     public void registerDisplays(DisplayRegistry registry) {
         reset();
-        registry.registerVisibilityPredicate(this);
+        registry.registerVisibilityPredicate(new DisplayPredicate());
     }
     
-    @Override
-    public double getPriority() {
-        return 0;
+    private class DisplayPredicate implements DisplayVisibilityPredicate {
+        @Override
+        public EventResult handleDisplay(DisplayCategory<?> category, Display display) {
+            if (checkHiddenStacks) {
+                return visible.computeIfAbsent(display, displayPredicate) ? EventResult.pass() : EventResult.interruptFalse();
+            }
+            
+            return EventResult.pass();
+        }
     }
 }

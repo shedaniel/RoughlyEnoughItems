@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.client.gui.widgets;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -30,13 +31,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 public abstract class Slot extends WidgetWithBounds {
     public static final byte UN_MARKED = 0;
     public static final byte INPUT = 1;
     public static final byte OUTPUT = 2;
     
-    public Slot unmarkInputOrOutput() {
+    public final Slot unmarkInputOrOutput() {
         setNoticeMark(UN_MARKED);
         return this;
     }
@@ -59,7 +61,7 @@ public abstract class Slot extends WidgetWithBounds {
     
     public abstract boolean isInteractable();
     
-    public Slot interactable(boolean interactable) {
+    public final Slot interactable(boolean interactable) {
         setInteractable(interactable);
         return this;
     }
@@ -76,7 +78,7 @@ public abstract class Slot extends WidgetWithBounds {
     
     public abstract boolean isInteractableFavorites();
     
-    public Slot interactableFavorites(boolean interactableFavorites) {
+    public final Slot interactableFavorites(boolean interactableFavorites) {
         setInteractableFavorites(interactableFavorites);
         return this;
     }
@@ -140,8 +142,22 @@ public abstract class Slot extends WidgetWithBounds {
     
     public abstract Rectangle getInnerBounds();
     
+    public abstract void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta);
+    
     @Nullable
+    @Deprecated(forRemoval = true)
     public Tooltip getCurrentTooltip(Point point) {
+        return getCurrentTooltip(TooltipContext.of(point));
+    }
+    
+    public abstract void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta);
+    
+    @Nullable
+    public Tooltip getCurrentTooltip(TooltipContext context) {
         return null;
     }
+    
+    public abstract void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta);
+    
+    public abstract void tooltipProcessor(UnaryOperator<Tooltip> operator);
 }

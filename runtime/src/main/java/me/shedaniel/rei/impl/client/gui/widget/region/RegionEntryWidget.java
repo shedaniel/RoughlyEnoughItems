@@ -34,8 +34,8 @@ import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
-import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
+import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
+import me.shedaniel.rei.impl.client.gui.menu.MenuEntry;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 

@@ -38,13 +38,12 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
-import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.common.Internals;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
@@ -71,7 +70,6 @@ public class REIRuntimeImpl implements REIRuntime {
     @ApiStatus.Internal
     public static boolean isWithinRecipeViewingScreen = false;
     private ScreenOverlayImpl overlay;
-    private OverlaySearchField searchField;
     private AbstractContainerScreen<?> previousContainerScreen = null;
     private Screen previousScreen = null;
     private LinkedHashSet<DisplayScreen> lastDisplayScreen = Sets.newLinkedHashSetWithExpectedSize(10);
@@ -102,16 +100,6 @@ public class REIRuntimeImpl implements REIRuntime {
         if (overlay != null) {
             overlay.clearTooltips();
         }
-    }
-    
-    @Override
-    @Nullable
-    public TextField getSearchTextField() {
-        if (searchField == null) {
-            searchField = new OverlaySearchField(0, 0, 0, 0);
-        }
-        
-        return searchField;
     }
     
     @Nullable
@@ -159,7 +147,7 @@ public class REIRuntimeImpl implements REIRuntime {
                 throw new RuntimeException(e);
             }
             overlay.init();
-            getSearchField().setFocused(false);
+            overlay.getSearchField().setFocused(false);
         }
         
         return Optional.ofNullable(overlay);

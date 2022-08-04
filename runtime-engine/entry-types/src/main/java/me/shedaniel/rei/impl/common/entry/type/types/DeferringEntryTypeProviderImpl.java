@@ -30,7 +30,7 @@ import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.common.provider.DeferringEntryTypeProvider;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -42,7 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public class DeferringEntryTypeProviderImpl implements Internals.DeferringEntryTypeProvider {
+public class DeferringEntryTypeProviderImpl implements DeferringEntryTypeProvider {
     private static final ResourceLocation RENDERING_ID = new ResourceLocation("rendering");
     private final Map<ResourceLocation, EntryType<?>> typeCache = new ConcurrentHashMap<>();
     private final Supplier<EntryType<Unit>> empty = Suppliers.memoize(() -> emptyType(BuiltinEntryTypes.EMPTY_ID));

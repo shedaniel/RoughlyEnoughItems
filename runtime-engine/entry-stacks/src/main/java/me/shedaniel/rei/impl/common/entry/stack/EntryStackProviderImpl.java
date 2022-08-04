@@ -26,14 +26,14 @@ package me.shedaniel.rei.impl.common.entry.stack;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.common.provider.EntryStackProvider;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Objects;
 
 @ApiStatus.Internal
-public class EntryStackProviderImpl implements Internals.EntryStackProvider {
+public class EntryStackProviderImpl implements EntryStackProvider {
     @Override
     public EntryStack<Unit> empty() {
         return EmptyEntryStack.EMPTY;

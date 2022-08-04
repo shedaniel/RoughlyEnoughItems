@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.config.entries;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
-import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRuleInternal;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRuleType;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRuleType;
@@ -153,7 +152,7 @@ public class FilteringAddRuleScreen extends Screen {
         
         public DefaultRuleEntry(Screen parent, FilteringEntry entry, FilteringRuleInternal rule, BiFunction<FilteringEntry, Screen, Screen> screenFunction) {
             super(rule);
-            this.screenFunction = (screenFunction == null ? rule.getType().createEntryScreen().orElse(null) : screenFunction);
+            this.screenFunction = (screenFunction == null ? ((FilteringRuleType<FilteringRuleInternal>) rule.getType()).createEntryScreen(rule).orElse(null) : screenFunction);
             addButton = new Button(0, 0, 20, 20, Component.nullToEmpty(" + "), button -> {
                 entry.edited = true;
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(entry, parent));

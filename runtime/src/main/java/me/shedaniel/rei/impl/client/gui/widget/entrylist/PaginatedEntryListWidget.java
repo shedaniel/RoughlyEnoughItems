@@ -31,6 +31,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
+import me.shedaniel.rei.api.client.gui.widgets.BatchedSlots;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -41,7 +42,6 @@ import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.changelog.ChangelogLoader;
-import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.DefaultDisplayChoosePageWidget;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
@@ -95,20 +95,22 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             }
         }
         
-        BatchedEntryRendererManager manager = new BatchedEntryRendererManager();
-        if (manager.isFastEntryRendering()) {
+        BatchedSlots slots = Widgets.createBatchedSlots();
+        if (slots.isBatched()) {
             for (EntryListStackEntry entry : entries) {
                 CollapsedStack collapsedStack = entry.getCollapsedStack();
                 if (collapsedStack != null && !collapsedStack.isExpanded()) {
-                    manager.addSlow(entry);
+                    slots.addUnbatched(entry);
                 } else {
-                    manager.add(entry);
+                    slots.add(entry);
                 }
             }
         } else {
-            manager.addAllSlow(entries);
+            slots.addAllUnbatched(entries);
         }
-        manager.render(debugger.debugTime, debugger.size, debugger.time, matrices, mouseX, mouseY, delta);
+        
+        if (debugger.debugTime) slots.addDebugger(debugger.size, debugger.time);
+        slots.render(matrices, mouseX, mouseY, delta);
         
         for (Widget widget : additionalWidgets) {
             widget.render(matrices, mouseX, mouseY, delta);
@@ -130,7 +132,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                 int slotX = currentX * entrySize + innerBounds.x;
                 int slotY = currentY * entrySize + innerBounds.y;
                 if (notSteppingOnExclusionZones(slotX - 1, slotY - 1, entrySize, entrySize)) {
-                    entries.add((EntryListStackEntry) new EntryListStackEntry(this, slotX, slotY, entrySize, zoomed).noBackground());
+                    entries.add((EntryListStackEntry) new EntryListStackEntry(this, slotX, slotY, entrySize, zoomed).disableBackground());
                 }
             }
         }
@@ -142,7 +144,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             /*EntryStack<?> | List<EntryStack<?>>*/
             Object stack = subList.get(i);
             EntryListStackEntry entry = entries.get(i + Math.max(0, -page * entries.size()));
-            entry.clearStacks();
+            entry.clearEntries();
             
             if (stack instanceof EntryStack<?> entryStack) {
                 entry.entry(entryStack);

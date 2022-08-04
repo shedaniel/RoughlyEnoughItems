@@ -23,21 +23,48 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
+import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.client.view.ViewsImpl;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ConcurrentModificationException;
+import java.util.List;
+import java.util.function.Supplier;
 
 public abstract class DisplayedEntryWidget extends EntryWidget {
+    private long lastCheckTime = -1;
+    private long lastCheckedTime = -1;
+    private Display display;
+    private Supplier<DisplayTooltipComponent> displayTooltipComponent;
+    
     public int backupY;
     
     protected DisplayedEntryWidget(Point point, int entrySize) {
@@ -47,7 +74,7 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
     }
     
     @Override
-    protected void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (!getCurrentEntry().isEmpty())
             super.drawHighlighted(matrices, mouseX, mouseY, delta);
     }
@@ -79,6 +106,29 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
                     entry.<ItemStack>castValue().setCount(!all ? 1 : entry.<ItemStack>castValue().getMaxStackSize());
                 }
                 return ClientHelper.getInstance().tryCheatingEntry(entry);
+            }
+        }
+        
+        if (!(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
+            try {
+                TransferHandler handler = getTransferHandler(true);
+                
+                if (handler != null) {
+                    AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
+                    TransferHandler.Context context = TransferHandler.Context.create(true, Screen.hasShiftDown() || button == 1, containerScreen, display);
+                    TransferHandler.Result transferResult = handler.handle(context);
+                    
+                    if (transferResult.isBlocking()) {
+                        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                        if (transferResult.isReturningToScreen() && Minecraft.getInstance().screen != containerScreen) {
+                            Minecraft.getInstance().setScreen(containerScreen);
+                            REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
+                        }
+                        return true;
+                    }
+                }
+            } catch (Throwable e) {
+                e.printStackTrace();
             }
         }
         
@@ -125,5 +175,89 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
         }
         
         return super.keyPressedIgnoreContains(keyCode, scanCode, modifiers);
+    }
+    
+    @Override
+    public @Nullable Tooltip getCurrentTooltip(TooltipContext context) {
+        Tooltip tooltip = super.getCurrentTooltip(context);
+        
+        if (tooltip != null && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+            boolean exists = getTransferHandler(false) != null;
+            
+            if (!exists) {
+                if (lastCheckedTime == -1 || Util.getMillis() - lastCheckedTime > 400) {
+                    lastCheckedTime = Util.getMillis();
+                }
+                
+                if (Util.getMillis() - lastCheckedTime > 200) {
+                    lastCheckedTime = -1;
+                    exists = getTransferHandler(true) != null;
+                }
+            } else {
+                lastCheckedTime = -1;
+            }
+            
+            if (exists) {
+                tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
+                tooltip.add((ClientTooltipComponent) displayTooltipComponent.get());
+            }
+        }
+        
+        return tooltip;
+    }
+    
+    @Nullable
+    private TransferHandler _getTransferHandler() {
+        lastCheckTime = Util.getMillis();
+        
+        if (PluginManager.areAnyReloading()) {
+            return null;
+        }
+        
+        try {
+            for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
+                for (Display display : displays) {
+                    if (ViewsImpl.isRecipesFor(getEntries(), display)) {
+                        AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
+                        if (result.successful) {
+                            this.display = display;
+                            this.displayTooltipComponent = Suppliers.memoize(() -> new DisplayTooltipComponent(display));
+                            return result.successfulHandler;
+                        }
+                    }
+                }
+            }
+        } catch (ConcurrentModificationException ignored) {
+            display = null;
+            displayTooltipComponent = null;
+            lastCheckTime = -1;
+        }
+        
+        return null;
+    }
+    
+    private TransferHandler getTransferHandler(boolean query) {
+        if (PluginManager.areAnyReloading()) {
+            return null;
+        }
+        
+        if (display != null) {
+            if (ViewsImpl.isRecipesFor(getEntries(), display)) {
+                AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
+                if (result.successful) {
+                    return result.successfulHandler;
+                }
+            }
+            
+            display = null;
+            displayTooltipComponent = null;
+            lastCheckTime = -1;
+        }
+        
+        if (lastCheckTime != -1 && Util.getMillis() - lastCheckTime < 2000) {
+            return null;
+        }
+        
+        return query ? _getTransferHandler() : null;
     }
 }

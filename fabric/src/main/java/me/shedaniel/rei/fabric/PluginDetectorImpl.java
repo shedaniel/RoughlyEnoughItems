@@ -29,7 +29,7 @@ import dev.architectury.utils.Env;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.plugins.*;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import me.shedaniel.rei.impl.init.PluginDetector;
 import me.shedaniel.rei.impl.init.PrimitivePlatformAdapter;
 import net.fabricmc.api.EnvType;

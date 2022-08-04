@@ -25,7 +25,7 @@ package me.shedaniel.rei.plugin.client;
 
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;

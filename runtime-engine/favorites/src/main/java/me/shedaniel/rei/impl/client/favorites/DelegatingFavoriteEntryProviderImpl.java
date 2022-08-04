@@ -27,7 +27,7 @@ import com.mojang.serialization.DataResult;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.Renderer;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.provider.DelegatingFavoriteEntryProvider;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 
@@ -37,7 +37,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-public class DelegatingFavoriteEntryProviderImpl implements ClientInternals.DelegatingFavoriteEntryProvider {
+public class DelegatingFavoriteEntryProviderImpl implements DelegatingFavoriteEntryProvider {
     @Override
     public FavoriteEntry delegate(Supplier<DataResult<FavoriteEntry>> result, Supplier<CompoundTag> tag) {
         return new DelegatedFavoriteEntry(result, tag);

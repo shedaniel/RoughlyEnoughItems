@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api.common.registry;
 
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.common.Internals;
 
 import java.util.List;
 

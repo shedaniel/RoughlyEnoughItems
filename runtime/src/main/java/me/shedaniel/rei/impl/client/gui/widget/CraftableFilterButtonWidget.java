@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.math.Vector4f;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
@@ -32,16 +33,18 @@ import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.client.search.method.InputMethodRegistry;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
-import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
-import me.shedaniel.rei.impl.client.gui.modules.entries.SubMenuEntry;
-import me.shedaniel.rei.impl.client.gui.modules.entries.ToggleMenuEntry;
+import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
+import me.shedaniel.rei.impl.client.gui.menu.MenuEntry;
+import me.shedaniel.rei.impl.client.gui.menu.entries.SubMenuEntry;
+import me.shedaniel.rei.impl.client.gui.menu.entries.ToggleMenuEntry;
 import me.shedaniel.rei.impl.client.gui.screen.ConfigReloadingScreen;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.client.Minecraft;
@@ -71,7 +74,7 @@ public class CraftableFilterButtonWidget {
                 .focusable(false)
                 .onClick(button -> {
                     ConfigManager.getInstance().toggleCraftableOnly();
-                    ScreenOverlayImpl.getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
+                    REIRuntime.getInstance().getOverlay().map(ScreenOverlay::getEntryList).ifPresent(OverlayListWidget::queueReloadSearch);
                 })
                 .onRender((matrices, button) -> {
                     button.setTint(ConfigManager.getInstance().isCraftableOnlyEnabled() ? 0x3800d907 : 0x38ff0000);

@@ -36,7 +36,7 @@ import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.*;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -365,11 +365,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public boolean shouldFilterDisplays() {
         return advanced.filtering.shouldFilterDisplays;
-    }
-    
-    @ApiStatus.Internal
-    public List<FilteringRule> getFilteringRules() {
-        return advanced.filtering.filteringRules;
     }
     
     @Override

@@ -72,5 +72,4 @@ public class CopyRecipeIdentifierToast implements Toast {
     public enum Type {
         THIS_IS_SURE_A_TYPE
     }
-    
 }

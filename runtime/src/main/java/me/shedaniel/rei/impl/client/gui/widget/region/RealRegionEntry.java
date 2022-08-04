@@ -42,7 +42,7 @@ public class RealRegionEntry<T extends RegionEntry<T>> {
     public RealRegionEntry(EntryStacksRegionWidget<T> region, T entry, int entrySize) {
         this.region = region;
         this.entry = entry;
-        this.widget = (RegionEntryWidget<T>) new RegionEntryWidget<>(this, 0, 0, entrySize).noBackground();
+        this.widget = (RegionEntryWidget<T>) new RegionEntryWidget<>(this, 0, 0, entrySize).disableBackground();
     }
     
     public void remove() {

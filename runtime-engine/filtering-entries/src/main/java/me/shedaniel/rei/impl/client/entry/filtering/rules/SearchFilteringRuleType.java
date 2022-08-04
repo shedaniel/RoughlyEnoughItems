@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.client.entry.filtering.rules;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.gui.widgets.BatchedSlots;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
@@ -35,7 +36,6 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.config.entries.FilteringEntry;
 import me.shedaniel.rei.impl.client.config.entries.FilteringRuleOptionsScreen;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringRuleType;
-import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -56,8 +56,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
 @Environment(EnvType.CLIENT)
 public class SearchFilteringRuleType implements FilteringRuleType<SearchFilteringRule> {
@@ -93,8 +91,8 @@ public class SearchFilteringRuleType implements FilteringRuleType<SearchFilterin
     }
     
     @Override
-    public Optional<BiFunction<FilteringEntry, Screen, Screen>> createEntryScreen() {
-        return Optional.of((entry, screen) -> new FilteringRuleOptionsScreen<SearchFilteringRule>(entry, this, screen) {
+    public Optional<BiFunction<FilteringEntry, Screen, Screen>> createEntryScreen(SearchFilteringRule rule) {
+        return Optional.of((entry, screen) -> new FilteringRuleOptionsScreen<SearchFilteringRule>(entry, rule, screen) {
             TextFieldRuleEntry entry = null;
             BooleanRuleEntry show = null;
             List<Slot> entryStacks = new ArrayList<>();
@@ -146,19 +144,18 @@ public class SearchFilteringRuleType implements FilteringRuleType<SearchFilterin
         
         @Override
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-            BatchedEntryRendererManager manager = new BatchedEntryRendererManager();
-            int entrySize = EntryListWidget.entrySize();
-            int width = entryWidth / entrySize;
+            BatchedSlots slots = Widgets.createBatchedSlots();
+            int width = entryWidth / 18;
             int i = 0;
             for (Slot stack : entryStacks.get()) {
-                stack.getBounds().setLocation(x + (i % width) * entrySize, y + (i / width) * entrySize);
+                stack.getBounds().setLocation(x + (i % width) * 18, y + (i / width) * 18);
                 if (stack.getBounds().getMaxY() >= 0 && stack.getBounds().getY() <= Minecraft.getInstance().getWindow().getGuiScaledHeight()) {
-                    manager.add(stack);
+                    slots.add(stack);
                 }
                 i++;
             }
-            manager.render(matrices, mouseX, mouseY, delta);
-            totalHeight = (i / width + 1) * entrySize;
+            slots.render(matrices, mouseX, mouseY, delta);
+            totalHeight = (i / width + 1) * 18;
         }
         
         @Override

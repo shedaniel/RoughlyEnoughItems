@@ -25,8 +25,12 @@ package me.shedaniel.rei.impl.client.config;
 
 import me.shedaniel.autoconfig.gui.registry.GuiRegistry;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Jankson;
+import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import org.jetbrains.annotations.ApiStatus;
+
+import java.util.Collection;
+import java.util.Collections;
 
 @ApiStatus.Internal
 public interface ConfigManagerInternal extends ConfigManager {
@@ -45,5 +49,9 @@ public interface ConfigManagerInternal extends ConfigManager {
         default void setup(Jankson.Builder builder) {}
         
         default void setup(GuiRegistry registry) {}
+        
+        default Collection<? extends AbstractConfigListEntry<?>> collectAdvanced() {
+            return Collections.emptyList();
+        }
     }
 }

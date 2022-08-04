@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.util;
 
 import me.shedaniel.rei.api.client.gui.Renderer;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;

@@ -35,16 +35,12 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
-import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
-import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -64,15 +60,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
-
 @ApiStatus.Internal
 public class FilteringScreen extends Screen {
     protected List<EntryStack<?>> selected = Lists.newArrayList();
     protected final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
         public int getMaxScrollHeight() {
-            return Mth.ceil(entryStacks.size() / (innerBounds.width / (float) EntryListWidget.entrySize())) * EntryListWidget.entrySize() + 28;
+            return Mth.ceil(entryStacks.size() / (innerBounds.width / 18.0F)) * 18 + 28;
         }
         
         @Override
@@ -98,7 +92,7 @@ public class FilteringScreen extends Screen {
     
     private List<PointPair> points = new ArrayList<>();
     
-    private OverlaySearchField searchField;
+    private TextField searchField;
     private Button selectAllButton;
     private Button selectNoneButton;
     private Button hideButton;
@@ -111,7 +105,7 @@ public class FilteringScreen extends Screen {
     public FilteringScreen(FilteringEntry filteringEntry) {
         super(new TranslatableComponent("config.roughlyenoughitems.filteringScreen"));
         this.filteringEntry = filteringEntry;
-        this.searchField = new OverlaySearchField(0, 0, 0, 0);
+        this.searchField = Widgets.createTextField(new Rectangle());
         {
             Component selectAllText = new TranslatableComponent("config.roughlyenoughitems.filteredEntries.selectAll");
             this.selectAllButton = new Button(0, 0, Minecraft.getInstance().font.width(selectAllText) + 10, 20, selectAllText, button -> {
@@ -161,12 +155,11 @@ public class FilteringScreen extends Screen {
                 this.parent = null;
             });
         }
-        this.searchField.isMain = false;
     }
     
     private static Rectangle updateInnerBounds(Rectangle bounds) {
-        int width = Math.max(Mth.floor((bounds.width - 2 - 6) / (float) EntryListWidget.entrySize()), 1);
-        return new Rectangle((int) (bounds.getCenterX() - width * EntryListWidget.entrySize() / 2f), bounds.y + 5, width * EntryListWidget.entrySize(), bounds.height);
+        int width = Math.max(Mth.floor((bounds.width - 2 - 6) / 18.0F), 1);
+        return new Rectangle((int) (bounds.getCenterX() - width * 18 / 2f), bounds.y + 5, width * 18, bounds.height);
     }
     
     public Rectangle getBounds() {
@@ -183,7 +176,7 @@ public class FilteringScreen extends Screen {
         this.selectNoneButton.x = 4 + selectAllButton.getWidth();
         this.selectNoneButton.y = bounds.getMaxY() - 22;
         int searchFieldWidth = Math.max(bounds.width - (selectNoneButton.x + selectNoneButton.getWidth() + hideButton.getWidth() + showButton.getWidth() + 12), 100);
-        this.searchField.getBounds().setBounds(selectNoneButton.x + selectNoneButton.getWidth() + 4, bounds.getMaxY() - 21, searchFieldWidth, 18);
+        this.searchField.asWidget().getBounds().setBounds(selectNoneButton.x + selectNoneButton.getWidth() + 4, bounds.getMaxY() - 21, searchFieldWidth, 18);
         this.hideButton.x = bounds.getMaxX() - hideButton.getWidth() - showButton.getWidth() - 4;
         this.hideButton.y = bounds.getMaxY() - 22;
         this.showButton.x = bounds.getMaxX() - showButton.getWidth() - 2;
@@ -219,27 +212,27 @@ public class FilteringScreen extends Screen {
             return;
         ScissorsHandler.INSTANCE.scissor(bounds);
         for (FilteringListEntry entry : entries)
-            entry.clearStacks();
-        int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / (float) EntryListWidget.entrySize()));
-        int nextIndex = skip * innerBounds.width / EntryListWidget.entrySize();
+            entry.slot.clearEntries();
+        int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / 18.0F));
+        int nextIndex = skip * innerBounds.width / 18;
         int i = nextIndex;
-        BatchedEntryRendererManager manager = new BatchedEntryRendererManager();
+        BatchedSlots slots = Widgets.createBatchedSlots();
         for (; i < entryStacks.size(); i++) {
             EntryStack<?> stack = entryStacks.get(i);
             FilteringListEntry entry = entries.get(nextIndex);
             entry.getBounds().y = entry.backupY - scrolling.scrollAmountInt();
             if (entry.getBounds().y > bounds.getMaxY())
                 break;
-            entry.entry(stack);
-            manager.add(entry);
+            entry.slot.entry(stack);
+            slots.add(entry.slot);
             nextIndex++;
         }
-        manager.render(matrices, mouseX, mouseY, delta);
+        slots.render(matrices, mouseX, mouseY, delta);
         updatePosition(delta);
         scrolling.renderScrollBar(0, 1.0F, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8F : 1F);
         matrices.pushPose();
         matrices.translate(0, 0, 300);
-        this.searchField.laterRender(matrices, mouseX, mouseY, delta);
+        this.searchField.asWidget().render(matrices, mouseX, mouseY, delta);
         this.selectAllButton.render(matrices, mouseX, mouseY, delta);
         this.selectNoneButton.render(matrices, mouseX, mouseY, delta);
         this.hideButton.render(matrices, mouseX, mouseY, delta);
@@ -267,7 +260,7 @@ public class FilteringScreen extends Screen {
         this.backButton.render(matrices, mouseX, mouseY, delta);
         
         if (tooltip != null) {
-            ((ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().get()).renderTooltip(matrices, tooltip);
+            REIRuntime.getInstance().getOverlay().get().renderTooltip(matrices, tooltip);
         }
         
         this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
@@ -331,18 +324,17 @@ public class FilteringScreen extends Screen {
     }
     
     public void updateEntriesPosition() {
-        int entrySize = EntryListWidget.entrySize();
         this.innerBounds = updateInnerBounds(getBounds());
-        int width = innerBounds.width / entrySize;
-        int pageHeight = innerBounds.height / entrySize;
+        int width = innerBounds.width / 18;
+        int pageHeight = innerBounds.height / 18;
         int slotsToPrepare = Math.max(entryStacks.size() * 3, width * pageHeight * 3);
         int currentX = 0;
         int currentY = 0;
         List<FilteringListEntry> entries = Lists.newArrayList();
         for (int i = 0; i < slotsToPrepare; i++) {
-            int xPos = currentX * entrySize + innerBounds.x;
-            int yPos = currentY * entrySize + innerBounds.y;
-            entries.add(new FilteringListEntry(xPos, yPos, entrySize));
+            int xPos = currentX * 18 + innerBounds.x;
+            int yPos = currentY * 18 + innerBounds.y;
+            entries.add(new FilteringListEntry(xPos, yPos));
             currentX++;
             if (currentX >= width) {
                 currentX = 0;
@@ -351,7 +343,7 @@ public class FilteringScreen extends Screen {
         }
         this.entries = entries;
         this.elements = Lists.newArrayList(entries);
-        this.elements.add(searchField);
+        this.elements.add(searchField.asWidget());
     }
     
     @Override
@@ -365,7 +357,7 @@ public class FilteringScreen extends Screen {
             return true;
         
         if (getBounds().contains(mouseX, mouseY)) {
-            if (searchField.mouseClicked(mouseX, mouseY, button)) {
+            if (searchField.asWidget().mouseClicked(mouseX, mouseY, button)) {
                 this.points.clear();
                 return true;
             } else if (selectAllButton.mouseClicked(mouseX, mouseY, button)) {
@@ -450,32 +442,36 @@ public class FilteringScreen extends Screen {
         return true;
     }
     
-    private class FilteringListEntry extends EntryWidget {
+    private class FilteringListEntry extends DelegateWidget {
+        private final Slot slot;
         private int backupY;
         private boolean filtered = false;
         private boolean dirty = true;
         
-        private FilteringListEntry(int x, int y, int entrySize) {
-            super(new Point(x, y));
+        private FilteringListEntry(int x, int y) {
+            super(Widgets.createSlot(new Point(x, y))
+                    .noFavoritesInteractable()
+                    .noInteractable()
+                    .disableBackground()
+                    .disableTooltips()
+                    .disableHighlight());
+            this.slot = (Slot) widget;
             this.backupY = y;
-            getBounds().width = getBounds().height = entrySize;
-            interactableFavorites(false);
-            interactable(false);
-            noHighlight();
         }
         
         @Override
-        public boolean containsMouse(double mouseX, double mouseY) {
-            return super.containsMouse(mouseX, mouseY) && FilteringScreen.this.getBounds().contains(mouseX, mouseY);
-        }
-        
-        @Override
-        protected void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            if (isSelected()) {
-                Rectangle bounds = getBounds();
-                RenderSystem.disableDepthTest();
-                fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0x896b70fa, 0x896b70fa);
-                RenderSystem.enableDepthTest();
+        public void render(PoseStack poseStack, int mouseX, int mouseY, float delta) {
+            drawBackground(poseStack, mouseX, mouseY, delta);
+            super.render(poseStack, mouseX, mouseY, delta);
+            drawExtra(poseStack, mouseX, mouseY, delta);
+            
+            if (searchField.asWidget().containsMouse(mouseX, mouseY))
+                return;
+            if (containsMouse(mouseX, mouseY)) {
+                Tooltip tooltip = slot.getCurrentTooltip(new Point(mouseX, mouseY));
+                if (tooltip != null) {
+                    FilteringScreen.this.tooltip = tooltip;
+                }
             }
         }
         
@@ -485,29 +481,27 @@ public class FilteringScreen extends Screen {
         
         public boolean isFiltered() {
             if (dirty) {
-                filtered = filteringEntry.configFiltered.contains(getCurrentEntry());
+                filtered = filteringEntry.configFiltered.contains(slot.getCurrentEntry());
                 dirty = false;
             }
             return filtered;
         }
         
-        @Override
-        protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        private void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {
+            if (isSelected()) {
+                Rectangle bounds = getBounds();
+                RenderSystem.disableDepthTest();
+                fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0x896b70fa, 0x896b70fa);
+                RenderSystem.enableDepthTest();
+            }
+        }
+        
+        private void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
             if (isFiltered()) {
                 Rectangle bounds = getBounds();
                 RenderSystem.disableDepthTest();
                 fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0xffff0000, 0xffff0000);
                 RenderSystem.enableDepthTest();
-            }
-        }
-        
-        @Override
-        protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            if (searchField.containsMouse(mouseX, mouseY))
-                return;
-            Tooltip tooltip = getCurrentTooltip(new Point(mouseX, mouseY));
-            if (tooltip != null) {
-                FilteringScreen.this.tooltip = tooltip;
             }
         }
     }

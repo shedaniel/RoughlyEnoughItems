@@ -29,12 +29,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.gui.widgets.Button;
-import me.shedaniel.rei.api.client.gui.widgets.Panel;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.widget.basewidgets.TextFieldWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
@@ -53,7 +49,7 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
     private Rectangle bounds, grabBounds, dragBounds;
     private List<Widget> widgets;
     private IntConsumer callback;
-    private TextFieldWidget textFieldWidget;
+    private TextField textFieldWidget;
     private Panel base1, base2;
     private Button btnDone;
     
@@ -97,7 +93,7 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
         this.dragBounds = new Rectangle(midPoint.x - 50, midPoint.y - 20, 100, 70);
         base1.getBounds().setLocation(bounds.x + bounds.width - 50, bounds.y + bounds.height - 6);
         base2.getBounds().setBounds(bounds);
-        textFieldWidget.getBounds().setLocation(bounds.x + 7, bounds.y + 16);
+        textFieldWidget.asWidget().getBounds().setLocation(bounds.x + 7, bounds.y + 16);
         btnDone.getBounds().setLocation(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3);
     }
     
@@ -128,9 +124,9 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
         });
         String endString = String.format(" /%d", maxPage);
         int width = font.width(endString);
-        this.widgets.add(textFieldWidget = new TextFieldWidget(bounds.x + 7, bounds.y + 16, bounds.width - width - 12, 18));
+        this.widgets.add((textFieldWidget = Widgets.createTextField(new Rectangle(bounds.x + 7, bounds.y + 16, bounds.width - width - 12, 18))).asWidget());
         textFieldWidget.setMaxLength(10000);
-        textFieldWidget.stripInvalid = s -> {
+        textFieldWidget.setTextTransformer(s -> {
             StringBuilder stringBuilder_1 = new StringBuilder();
             char[] var2 = s.toCharArray();
             int var3 = var2.length;
@@ -141,7 +137,7 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
             }
             
             return stringBuilder_1.toString();
-        };
+        });
         textFieldWidget.setText(String.valueOf(currentPage + 1));
         widgets.add(btnDone = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20), new TranslatableComponent("gui.done"))
                 .onClick(button -> {

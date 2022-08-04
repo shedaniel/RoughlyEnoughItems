@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl.client.gui.credits;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
-import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
+import me.shedaniel.rei.impl.client.util.TextTransformations;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;

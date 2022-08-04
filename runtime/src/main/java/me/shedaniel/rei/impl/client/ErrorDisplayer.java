@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client;
 
 import me.shedaniel.rei.RoughlyEnoughItemsState;
-import me.shedaniel.rei.impl.client.gui.screen.WarningAndErrorScreen;
+import me.shedaniel.rei.impl.client.gui.screen.error.WarningAndErrorScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 

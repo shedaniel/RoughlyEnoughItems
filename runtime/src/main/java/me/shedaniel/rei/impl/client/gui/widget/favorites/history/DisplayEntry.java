@@ -232,7 +232,7 @@ public class DisplayEntry extends WidgetWithBounds {
             }
             
             ClientHelperImpl.getInstance()
-                    .openDisplayViewingScreen(Map.of(CategoryRegistry.getInstance().get(display.getCategoryIdentifier()).getCategory(), List.of(display)),
+                    .openView(Map.of(CategoryRegistry.getInstance().get(display.getCategoryIdentifier()).getCategory(), List.of(display)),
                             null, List.of(), List.of());
             Widgets.produceClickSound();
             return true;

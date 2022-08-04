@@ -151,7 +151,7 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
             super(point, entrySize);
             this.entry = entry;
             entry(ClientEntryStacks.of(entry.getRenderer(true)));
-            noBackground();
+            disableBackground();
         }
         
         public void moveTo(boolean animated, int xPos, int yPos) {

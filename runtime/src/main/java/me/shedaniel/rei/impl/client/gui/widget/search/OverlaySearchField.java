@@ -38,18 +38,16 @@ import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
-import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
-import me.shedaniel.rei.impl.client.gui.widget.basewidgets.TextFieldWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.HighlightInfo;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.PartHighlightInfo;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.QuoteHighlightInfo;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.SplitterHighlightInfo;
+import me.shedaniel.rei.impl.client.util.TextTransformations;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
@@ -71,13 +69,14 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("UnstableApiUsage")
 @ApiStatus.Internal
-public class OverlaySearchField extends TextFieldWidget implements TextFieldWidget.TextFormatter {
+public class OverlaySearchField extends DelegateWidget implements DelegateTextField, TextField.TextFormatter, TextField.SuggestionRenderer, TextField.BorderColorProvider {
     public static boolean isHighlighting = false;
     private static final Style SPLITTER_STYLE = Style.EMPTY.withColor(ChatFormatting.GRAY);
     private static final Style QUOTES_STYLE = Style.EMPTY.withColor(ChatFormatting.GOLD);
     private static final Style ERROR_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xff5555));
+    private final TextField textField;
     private boolean previouslyClicking = false;
-    private final OverlaySearchFieldSyntaxHighlighter highlighter = new OverlaySearchFieldSyntaxHighlighter(getText());
+    private final OverlaySearchFieldSyntaxHighlighter highlighter;
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
     public boolean isMain = true;
@@ -86,20 +85,35 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     private final NumberAnimator<Double> progress = ValueAnimator.ofDouble();
     
     public OverlaySearchField(int x, int y, int width, int height) {
-        super(x, y, width, height);
-        setMaxLength(10000);
-        setFormatter(this);
-        super.setResponder(highlighter);
+        super(Widgets.noOp());
+        this.textField = Widgets.createTextField(new Rectangle(x, y, width, height));
+        this.textField.setMaxLength(10000);
+        this.textField.setFormatter(this);
+        this.textField.setSuggestionRenderer(this);
+        this.textField.setFocusedResponder(this::focused);
+        this.textField.setBorderColorProvider(this);
+        this.highlighter = new OverlaySearchFieldSyntaxHighlighter(textField.getText());
+        this.textField.setResponder(highlighter);
     }
     
     @Override
-    public FormattedCharSequence format(TextFieldWidget widget, String text, int index) {
+    protected Widget delegate() {
+        return this.textField.asWidget();
+    }
+    
+    @Override
+    public TextField delegateTextField() {
+        return this.textField;
+    }
+    
+    @Override
+    public FormattedCharSequence format(String text, int index) {
         boolean isPlain = ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.PLAIN || ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.PLAIN_UNDERSCORED;
         boolean hasUnderscore = ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.PLAIN_UNDERSCORED || ConfigObject.getInstance().getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL_UNDERSCORED;
         return TextTransformations.forwardWithTransformation(text, (s, charIndex, c) -> {
             HighlightInfo arg = highlighter.highlighted[charIndex + index];
             Style style = Style.EMPTY;
-            if (isMain && ScreenOverlayImpl.getEntryListWidget().isEmpty() && !getText().isEmpty()) {
+            if (isMain && ScreenOverlayImpl.getEntryListWidget().isEmpty() && !textField.getText().isEmpty()) {
                 style = ERROR_STYLE;
             }
             if (arg instanceof PartHighlightInfo part) {
@@ -117,23 +131,16 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                 }
             }
             
-            if (containsMouse(PointHelper.ofMouse()) || isFocused()) {
+            if (containsMouse(PointHelper.ofMouse()) || textField.isFocused()) {
                 return style;
             }
             return style.withColor(TextColor.fromRgb(Color.ofOpaque(style.getColor() == null ? -1 : style.getColor().getValue()).brighter(0.75).getColor()));
         });
     }
     
-    @Override
-    public void setResponder(Consumer<String> responder) {
-        super.setResponder(highlighter.andThen(responder));
-    }
-    
-    @Override
-    public void setFocused(boolean focused) {
-        if (isFocused() != focused && isMain)
-            addToHistory(getText());
-        super.setFocused(focused);
+    public void focused(boolean focused) {
+        if (textField.isFocused() != focused && isMain)
+            addToHistory(textField.getText());
     }
     
     @ApiStatus.Internal
@@ -150,7 +157,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         progress.update(delta);
         RenderSystem.disableDepthTest();
         if (isMain) drawHint(matrices, mouseX, mouseY);
-        setSuggestion(!isFocused() && getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
+        textField.setSuggestion(!textField.isFocused() && textField.getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
         super.render(matrices, mouseX, mouseY, delta);
         RenderSystem.enableDepthTest();
     }
@@ -255,34 +262,28 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     }
     
     @Override
-    protected void renderSuggestion(PoseStack matrices, int x, int y) {
+    public void renderSuggestion(PoseStack matrices, int x, int y, int color) {
         matrices.pushPose();
         matrices.translate(0, 0, 400);
-        int color;
-        if (containsMouse(PointHelper.ofMouse()) || isFocused()) {
+        if (containsMouse(PointHelper.ofMouse()) || textField.isFocused()) {
             color = 0xddeaeaea;
         } else {
             color = -6250336;
         }
-        this.font.drawShadow(matrices, this.font.plainSubstrByWidth(this.getSuggestion(), this.getWidth()), x, y, color);
+        this.font.drawShadow(matrices, this.font.plainSubstrByWidth(textField.getSuggestion(), textField.asWidget().getBounds().getWidth()), x, y, color);
         matrices.popPose();
     }
     
     @Override
-    public void renderBorder(PoseStack matrices) {
+    public int getBorderColor(TextField textField) {
         isHighlighting = isHighlighting && ConfigObject.getInstance().isInventoryHighlightingAllowed();
-        int borderColor;
         if (isMain && isHighlighting) {
-            borderColor = 0xfff2ff0c;
-        } else if (isMain && ScreenOverlayImpl.getEntryListWidget().isEmpty() && !getText().isEmpty()) {
-            borderColor = 0xffff5555;
+            return 0xfff2ff0c;
+        } else if (isMain && ScreenOverlayImpl.getEntryListWidget().isEmpty() && !textField.getText().isEmpty()) {
+            return 0xffff5555;
         } else {
-            super.renderBorder(matrices);
-            return;
+            return TextField.BorderColorProvider.DEFAULT.getBorderColor(textField);
         }
-        fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, 0xff000000);
-        fill(matrices, this.getBounds().x, this.getBounds().y, this.getBounds().x + this.getBounds().width, this.getBounds().y + this.getBounds().height, borderColor);
-        fill(matrices, this.getBounds().x + 1, this.getBounds().y + 1, this.getBounds().x + this.getBounds().width - 1, this.getBounds().y + this.getBounds().height - 1, 0xff000000);
     }
     
     public int getManhattanDistance(Point point1, Point point2) {
@@ -294,8 +295,8 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         boolean contains = containsMouse(mouseX, mouseY);
-        if (isVisible() && contains && button == 1)
-            setText("");
+        if (contains && button == 1)
+            textField.setText("");
         if (contains && button == 0 && isMain && ConfigObject.getInstance().isInventoryHighlightingAllowed())
             if (lastClickedDetails == null)
                 lastClickedDetails = new Tuple<>(System.currentTimeMillis(), new Point(mouseX, mouseY));
@@ -313,27 +314,27 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (this.isVisible() && this.isFocused() && isMain)
+        if (textField.isFocused() && isMain)
             if (keyCode == 257 || keyCode == 335) {
-                addToHistory(getText());
+                addToHistory(textField.getText());
                 setFocused(false);
                 return true;
             } else if (keyCode == 265) {
-                int i = history.indexOf(getText()) - 1;
-                if (i < -1 && getText().isEmpty())
+                int i = history.indexOf(textField.getText()) - 1;
+                if (i < -1 && textField.getText().isEmpty())
                     i = history.size() - 1;
                 else if (i < -1) {
-                    addToHistory(getText());
+                    addToHistory(textField.getText());
                     i = history.size() - 2;
                 }
                 if (i >= 0) {
-                    setText(history.get(i));
+                    textField.setText(history.get(i));
                     return true;
                 }
             } else if (keyCode == 264) {
-                int i = history.indexOf(getText()) + 1;
+                int i = history.indexOf(textField.getText()) + 1;
                 if (i > 0) {
-                    setText(i < history.size() ? history.get(i) : "");
+                    textField.setText(i < history.size() ? history.get(i) : "");
                     return true;
                 }
             }
@@ -342,7 +343,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (this.isVisible() && this.isFocused() && isMain && keybindFocusKey != -1) {
+        if (textField.isFocused() && isMain && keybindFocusKey != -1) {
             keybindFocusTime = -1;
             keybindFocusKey = -1;
             return true;
@@ -367,5 +368,18 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        if (!isMain) {
+            laterRender(matrices, mouseX, mouseY, delta);
+        }
+    }
+    
+    @Override
+    public void setResponder(Consumer<String> responder) {
+        textField.setResponder(highlighter.andThen(responder));
+    }
+    
+    @Override
+    public WidgetWithBounds asWidget() {
+        return this;
     }
 }

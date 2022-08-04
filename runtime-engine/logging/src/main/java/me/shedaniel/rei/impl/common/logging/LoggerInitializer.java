@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl.common.logging;
 
 import com.google.common.collect.ImmutableList;
 import dev.architectury.platform.Platform;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.common.Internals;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;

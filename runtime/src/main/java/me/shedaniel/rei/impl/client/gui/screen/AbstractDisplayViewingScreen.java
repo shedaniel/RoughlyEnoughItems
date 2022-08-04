@@ -153,7 +153,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         currentCategoryIndex--;
         if (currentCategoryIndex < 0)
             currentCategoryIndex = categories.size() - 1;
-        ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+        ClientHelperImpl.getInstance().openView(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
     }
     
     @Override
@@ -162,7 +162,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         currentCategoryIndex++;
         if (currentCategoryIndex >= categories.size())
             currentCategoryIndex = 0;
-        ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+        ClientHelperImpl.getInstance().openView(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
     }
     
     protected void transformIngredientNotice(List<Widget> setupDisplay, List<EntryStack<?>> noticeStacks) {
@@ -181,7 +181,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                 for (EntryStack<?> noticeStack : noticeStacks) {
                     EntryStack<?> stack = CollectionUtils.findFirstOrNullEqualsExact(widget.getEntries(), noticeStack);
                     if (stack != null) {
-                        widget.clearStacks();
+                        widget.clearEntries();
                         widget.entry(stack);
                         break;
                     }
@@ -195,7 +195,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             if (widget.getEntries().size() > 1) {
                 Collection<EntryStack<?>> refiltered = EntryRegistry.getInstance().refilterNew(false, widget.getEntries());
                 if (!refiltered.isEmpty()) {
-                    widget.clearStacks();
+                    widget.clearEntries();
                     widget.entries(refiltered);
                 }
             }

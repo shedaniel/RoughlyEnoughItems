@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.common.entry.comparison;
 import com.google.common.base.Predicates;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.common.provider.NbtHasherProvider;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -35,7 +35,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class NbtHasherProviderImpl implements Internals.NbtHasherProvider {
+public class NbtHasherProviderImpl implements NbtHasherProvider {
     private final EntryComparator<Tag> defaultHasher = _provide();
     
     @Override

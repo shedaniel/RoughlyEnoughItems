@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.common.entry;
 import com.google.common.collect.Iterators;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.common.provider.EntryIngredientProvider;
 import net.minecraft.nbt.ListTag;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -37,7 +37,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.StreamSupport;
 
 @ApiStatus.Internal
-public class EntryIngredientImpl implements Internals.EntryIngredientProvider {
+public class EntryIngredientImpl implements EntryIngredientProvider {
     @Override
     public EntryIngredient empty() {
         return EmptyEntryIngredient.EMPTY;

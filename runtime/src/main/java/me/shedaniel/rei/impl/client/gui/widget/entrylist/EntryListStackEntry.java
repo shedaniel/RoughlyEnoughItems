@@ -58,7 +58,7 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
         super(new Point(x, y), entrySize);
         this.parent = parent;
         if (zoomed) {
-            noHighlight();
+            disableHighlight();
             size = ValueAnimator.ofDouble(1f)
                     .withConvention(() -> {
                         double mouseX = PointHelper.getMouseFloatingX();
@@ -72,7 +72,7 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
     }
     
     @Override
-    protected void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (size != null) {
             size.update(delta);
             int centerX = getBounds().getCenterX();
@@ -100,7 +100,7 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
     }
     
     @Override
-    protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
         Rectangle bounds = getBounds();
         
         if (collapsedStack != null) {

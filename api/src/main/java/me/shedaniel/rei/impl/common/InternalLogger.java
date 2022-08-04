@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.common;
 
-import me.shedaniel.rei.impl.Internals;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.ApiStatus;
 

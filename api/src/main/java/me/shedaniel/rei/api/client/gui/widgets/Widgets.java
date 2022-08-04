@@ -31,7 +31,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import me.shedaniel.rei.api.client.gui.Renderer;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -325,6 +325,15 @@ public final class Widgets {
     @ApiStatus.Experimental
     public static WidgetWithBounds padded(int padLeft, int padRight, int padTop, int padBottom, WidgetWithBounds widget) {
         return ClientInternals.getWidgetsProvider().wrapPadded(padLeft, padRight, padTop, padBottom, widget);
+    }
+    
+    public static TextField createTextField(Rectangle bounds) {
+        return ClientInternals.getWidgetsProvider().createTextField(bounds);
+    }
+    
+    @ApiStatus.Experimental
+    public static BatchedSlots createBatchedSlots() {
+        return ClientInternals.getWidgetsProvider().createBatchedSlots();
     }
     
     public static Widget delegate(Supplier<Widget> supplier) {

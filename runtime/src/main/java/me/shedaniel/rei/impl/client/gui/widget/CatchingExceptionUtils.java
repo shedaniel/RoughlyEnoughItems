@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import me.shedaniel.rei.impl.client.gui.error.ErrorsEntryListWidget;
 import me.shedaniel.rei.impl.client.gui.error.ErrorsScreen;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;

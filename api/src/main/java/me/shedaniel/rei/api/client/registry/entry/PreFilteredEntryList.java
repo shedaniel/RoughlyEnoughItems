@@ -26,8 +26,7 @@ package me.shedaniel.rei.api.client.registry.entry;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.registry.Reloadable;
-import me.shedaniel.rei.impl.ClientInternals;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
