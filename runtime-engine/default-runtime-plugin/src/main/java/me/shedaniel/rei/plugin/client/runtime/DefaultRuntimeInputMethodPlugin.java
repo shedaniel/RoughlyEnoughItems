@@ -21,47 +21,25 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.common.category;
+package me.shedaniel.rei.plugin.client.runtime;
 
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.display.Display;
+import dev.architectury.platform.Platform;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.search.method.InputMethodRegistry;
+import me.shedaniel.rei.impl.client.search.method.unihan.BomopofoInputMethod;
+import me.shedaniel.rei.impl.client.search.method.unihan.JyutpingInputMethod;
+import me.shedaniel.rei.impl.client.search.method.unihan.PinyinInputMethod;
+import me.shedaniel.rei.impl.client.search.method.unihan.UniHanManager;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Objects;
-
 @ApiStatus.Internal
-final class CategoryIdentifierImpl<D extends Display> implements CategoryIdentifier<D> {
-    private final ResourceLocation location;
-    private final int hashCode;
-    
-    CategoryIdentifierImpl(ResourceLocation location) {
-        this.location = Objects.requireNonNull(location);
-        this.hashCode = location.hashCode();
-    }
-    
+public class DefaultRuntimeInputMethodPlugin implements REIClientPlugin {
     @Override
-    public ResourceLocation getIdentifier() {
-        return location;
-    }
-    
-    @Override
-    public int hashCode() {
-        return hashCode;
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof CategoryIdentifier<?> that)) return false;
-        if (obj instanceof CategoryIdentifierImpl<?> thatImpl) {
-            return hashCode == obj.hashCode() && location.equals(thatImpl.location);
-        }
-        
-        return location.equals(that.getIdentifier());
-    }
-    
-    @Override
-    public String toString() {
-        return location.toString();
+    public void registerInputMethods(InputMethodRegistry registry) {
+        UniHanManager manager = new UniHanManager(Platform.getConfigFolder().resolve("roughlyenoughitems/unihan.zip"));
+        registry.add(new ResourceLocation("rei:pinyin"), new PinyinInputMethod(manager));
+        registry.add(new ResourceLocation("rei:jyutping"), new JyutpingInputMethod(manager));
+        registry.add(new ResourceLocation("rei:bomopofo"), new BomopofoInputMethod(manager));
     }
 }

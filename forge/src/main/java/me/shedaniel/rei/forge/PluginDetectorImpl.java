@@ -34,8 +34,10 @@ import me.shedaniel.rei.impl.init.PluginDetector;
 import me.shedaniel.rei.jeicompat.JEIExtraClientPlugin;
 import me.shedaniel.rei.jeicompat.JEIExtraPlugin;
 import me.shedaniel.rei.jeicompat.JEIPluginDetector;
+import me.shedaniel.rei.plugin.autocrafting.DefaultClientTransferCategoryPlugin;
 import me.shedaniel.rei.plugin.client.forge.DefaultClientPluginImpl;
 import me.shedaniel.rei.plugin.client.runtime.DefaultClientRuntimePlugin;
+import me.shedaniel.rei.plugin.client.runtime.DefaultRuntimeInputMethodPlugin;
 import me.shedaniel.rei.plugin.common.forge.DefaultPluginImpl;
 import me.shedaniel.rei.plugin.common.runtime.DefaultRuntimePlugin;
 import net.minecraftforge.api.distmarker.Dist;
@@ -95,6 +97,8 @@ public class PluginDetectorImpl implements PluginDetector {
         return () -> () -> {
             PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientPluginImpl()));
             PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientRuntimePlugin()));
+            PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultRuntimeInputMethodPlugin()));
+            PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientTransferCategoryPlugin()));
             PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new JEIExtraClientPlugin()));
             AnnotationUtils.<REIPlugin, REIClientPlugin>scanAnnotation(REIPlugin.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
                 ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));

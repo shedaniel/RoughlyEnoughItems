@@ -27,6 +27,9 @@ import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 public interface DelegateTextField extends TextField {
     TextField delegateTextField();
     
@@ -59,6 +62,16 @@ public interface DelegateTextField extends TextField {
     @Override
     default void setSuggestionRenderer(SuggestionRenderer renderer) {
         delegateTextField().setSuggestionRenderer(renderer);
+    }
+    
+    @Override
+    default void setTextTransformer(Function<String, String> textTransformer) {
+        delegateTextField().setTextTransformer(textTransformer);
+    }
+    
+    @Override
+    default void setResponder(Consumer<String> responder) {
+        delegateTextField().setResponder(responder);
     }
     
     @Override

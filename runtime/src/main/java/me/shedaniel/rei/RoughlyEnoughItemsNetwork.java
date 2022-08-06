@@ -26,34 +26,39 @@ package me.shedaniel.rei;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.transformers.SplitPacketTransformer;
 import io.netty.buffer.Unpooled;
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.impl.common.transfer.InputSlotCrafter;
+import me.shedaniel.rei.impl.common.Internals;
+import me.shedaniel.rei.impl.common.networking.NetworkModule;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.Container;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RoughlyEnoughItemsNetwork {
+    private static final Map<Object, NetworkModule> MODULES = new HashMap<>();
     public static final ResourceLocation DELETE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "delete_item");
     public static final ResourceLocation CREATE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "create_item");
     public static final ResourceLocation CREATE_ITEMS_HOTBAR_PACKET = new ResourceLocation("roughlyenoughitems", "create_item_hotbar");
     public static final ResourceLocation CREATE_ITEMS_GRAB_PACKET = new ResourceLocation("roughlyenoughitems", "create_item_grab");
     public static final ResourceLocation CREATE_ITEMS_MESSAGE_PACKET = new ResourceLocation("roughlyenoughitems", "ci_msg");
-    public static final ResourceLocation MOVE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "move_items");
     public static final ResourceLocation NOT_ENOUGH_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "og_not_enough");
     
+    public static boolean canUse(Object key) {
+        return MODULES.containsKey(key) && MODULES.get(key).canUse();
+    }
+    
     public static void onInitialize() {
+        for (NetworkModule module : Internals.resolveServices(NetworkModule.class)) {
+            MODULES.put(module.getKey(), module);
+        }
+        
         NetworkManager.registerReceiver(NetworkManager.c2s(), DELETE_ITEMS_PACKET, Collections.singletonList(new SplitPacketTransformer()), (buf, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
             if (player.getServer().getProfilePermissions(player.getGameProfile()) < player.getServer().getOperatorUserPermissionLevel()) {
@@ -113,39 +118,6 @@ public class RoughlyEnoughItemsNetwork {
                 NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.copy()).writeUtf(player.getScoreboardName(), 32767));
             } else {
                 player.displayClientMessage(new TranslatableComponent("text.rei.failed_cheat_items"), false);
-            }
-        });
-        NetworkManager.registerReceiver(NetworkManager.c2s(), MOVE_ITEMS_PACKET, Collections.singletonList(new SplitPacketTransformer()), (packetByteBuf, context) -> {
-            ServerPlayer player = (ServerPlayer) context.getPlayer();
-            CategoryIdentifier<Display> category = CategoryIdentifier.of(packetByteBuf.readResourceLocation());
-            AbstractContainerMenu container = player.containerMenu;
-            InventoryMenu playerContainer = player.inventoryMenu;
-            try {
-                boolean shift = packetByteBuf.readBoolean();
-                try {
-                    InputSlotCrafter<AbstractContainerMenu, Container, Display> crafter = InputSlotCrafter.start(category, container, player, packetByteBuf.readAnySizeNbt(), shift);
-                } catch (InputSlotCrafter.NotEnoughMaterialsException e) {
-                    if (!(container instanceof RecipeBookMenu)) {
-                        return;
-                    }
-                    // TODO Implement Ghost Recipes
-                    /*FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-                    buf.writeInt(input.size());
-                    for (List<ItemStack> stacks : input) {
-                        buf.writeInt(stacks.size());
-                        for (ItemStack stack : stacks) {
-                            buf.writeItem(stack);
-                        }
-                    }
-                    NetworkManager.sendToPlayer(player, NOT_ENOUGH_ITEMS_PACKET, buf);*/
-                } catch (IllegalStateException e) {
-                    player.sendMessage(new TranslatableComponent(e.getMessage()).withStyle(ChatFormatting.RED), Util.NIL_UUID);
-                } catch (Exception e) {
-                    player.sendMessage(new TranslatableComponent("error.rei.internal.error", e.getMessage()).withStyle(ChatFormatting.RED), Util.NIL_UUID);
-                    e.printStackTrace();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         });
     }

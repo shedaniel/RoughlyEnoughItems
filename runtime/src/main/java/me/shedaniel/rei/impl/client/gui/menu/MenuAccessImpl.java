@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
@@ -108,7 +109,7 @@ public class MenuAccessImpl implements MenuAccess {
                 close();
             } else {
                 if (menu.wrappedMenu.containsMouse(mouseX, mouseY)) {
-                    ScreenOverlayImpl.getInstance().clearTooltips();
+                    REIRuntime.getInstance().clearTooltips();
                 }
                 menu.wrappedMenu.render(matrices, mouseX, mouseY, delta);
             }

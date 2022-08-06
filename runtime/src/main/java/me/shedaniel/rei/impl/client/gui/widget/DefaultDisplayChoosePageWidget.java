@@ -54,16 +54,10 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
     private Button btnDone;
     
     public DefaultDisplayChoosePageWidget(IntConsumer callback, int currentPage, int maxPage) {
-        super(getPointFromConfig());
         this.callback = callback;
         this.currentPage = currentPage;
         this.maxPage = maxPage;
         initWidgets(getMidPoint());
-    }
-    
-    private static Point getPointFromConfig() {
-        Window window = Minecraft.getInstance().getWindow();
-        return new Point(window.getGuiScaledWidth() * .5, window.getGuiScaledHeight() * .5);
     }
     
     @Override
@@ -127,16 +121,13 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
         this.widgets.add((textFieldWidget = Widgets.createTextField(new Rectangle(bounds.x + 7, bounds.y + 16, bounds.width - width - 12, 18))).asWidget());
         textFieldWidget.setMaxLength(10000);
         textFieldWidget.setTextTransformer(s -> {
-            StringBuilder stringBuilder_1 = new StringBuilder();
-            char[] var2 = s.toCharArray();
-            int var3 = var2.length;
-            
-            for (char char_1 : var2) {
-                if (Character.isDigit(char_1))
-                    stringBuilder_1.append(char_1);
+            StringBuilder builder = new StringBuilder();
+            for (char ch : s.toCharArray()) {
+                if (Character.isDigit(ch))
+                    builder.append(ch);
             }
             
-            return stringBuilder_1.toString();
+            return builder.toString();
         });
         textFieldWidget.setText(String.valueOf(currentPage + 1));
         widgets.add(btnDone = Widgets.createButton(new Rectangle(bounds.x + bounds.width - 45, bounds.y + bounds.height + 3, 40, 20), new TranslatableComponent("gui.done"))
@@ -158,32 +149,32 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
     }
     
     @Override
-    public void render(PoseStack matrices, int i, int i1, float v) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         matrices.pushPose();
         matrices.translate(0, 0, 800);
         for (Widget widget : widgets) {
-            widget.render(matrices, i, i1, v);
+            widget.render(matrices, mouseX, mouseY, delta);
         }
         matrices.popPose();
     }
     
     @Override
-    public boolean charTyped(char char_1, int int_1) {
+    public boolean charTyped(char character, int modifiers) {
         for (Widget widget : widgets)
-            if (widget.charTyped(char_1, int_1))
+            if (widget.charTyped(character, modifiers))
                 return true;
         return false;
     }
     
     @Override
-    public boolean keyPressed(int int_1, int int_2, int int_3) {
-        if (int_1 == 335 || int_1 == 257) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == 335 || keyCode == 257) {
             callback.accept(Mth.clamp(getIntFromString(textFieldWidget.getText()).orElse(0) - 1, 0, maxPage - 1));
             ScreenOverlayImpl.getInstance().choosePageWidget = null;
             return true;
         }
         for (Widget widget : widgets)
-            if (widget.keyPressed(int_1, int_2, int_3))
+            if (widget.keyPressed(keyCode, scanCode, modifiers))
                 return true;
         return false;
     }
@@ -199,5 +190,4 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
     @Override
     public void onMouseReleaseMidPoint(Point midPoint) {
     }
-    
 }

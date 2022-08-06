@@ -21,47 +21,28 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.common.category;
+package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.display.Display;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.ApiStatus;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.util.Objects;
-
-@ApiStatus.Internal
-final class CategoryIdentifierImpl<D extends Display> implements CategoryIdentifier<D> {
-    private final ResourceLocation location;
-    private final int hashCode;
+public class EntryListEntries {
+    public static final EntryListEntries INSTANCE = new EntryListEntries();
+    private List</*EntryStack<?> | CollapsedStack*/ Object> collapsedStacks = new ArrayList<>();
     
-    CategoryIdentifierImpl(ResourceLocation location) {
-        this.location = Objects.requireNonNull(location);
-        this.hashCode = location.hashCode();
+    public void updateSearch(String searchTerm, boolean ignoreLastSearch, EntriesCallback callback) {
+        EntryListSearchManager.INSTANCE.update(searchTerm, ignoreLastSearch, stacks -> {
+            collapsedStacks = stacks;
+            callback.updateStacks();
+        });
     }
     
-    @Override
-    public ResourceLocation getIdentifier() {
-        return location;
+    public List</*EntryStack<?> | CollapsedStack*/ Object> getCollapsedStacks() {
+        return collapsedStacks;
     }
     
-    @Override
-    public int hashCode() {
-        return hashCode;
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof CategoryIdentifier<?> that)) return false;
-        if (obj instanceof CategoryIdentifierImpl<?> thatImpl) {
-            return hashCode == obj.hashCode() && location.equals(thatImpl.location);
-        }
-        
-        return location.equals(that.getIdentifier());
-    }
-    
-    @Override
-    public String toString() {
-        return location.toString();
+    @FunctionalInterface
+    public interface EntriesCallback {
+        void updateStacks();
     }
 }

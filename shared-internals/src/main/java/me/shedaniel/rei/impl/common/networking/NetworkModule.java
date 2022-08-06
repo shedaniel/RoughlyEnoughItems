@@ -21,47 +21,23 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.common.category;
+package me.shedaniel.rei.impl.common.networking;
 
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.display.Display;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Objects;
-
 @ApiStatus.Internal
-final class CategoryIdentifierImpl<D extends Display> implements CategoryIdentifier<D> {
-    private final ResourceLocation location;
-    private final int hashCode;
+public interface NetworkModule {
+    Object DELETE = new Object();
+    Object CREATE = new Object();
+    Object CREATE_HOTBAR = new Object();
+    Object CREATE_GRAB = new Object();
+    Object CREATE_MSG = new Object();
+    Object NOT_ENOUGH_ITEMS = new Object();
+    Object TRANSFER = new Object();
     
-    CategoryIdentifierImpl(ResourceLocation location) {
-        this.location = Objects.requireNonNull(location);
-        this.hashCode = location.hashCode();
-    }
+    Object getKey();
     
-    @Override
-    public ResourceLocation getIdentifier() {
-        return location;
-    }
+    boolean canUse();
     
-    @Override
-    public int hashCode() {
-        return hashCode;
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof CategoryIdentifier<?> that)) return false;
-        if (obj instanceof CategoryIdentifierImpl<?> thatImpl) {
-            return hashCode == obj.hashCode() && location.equals(thatImpl.location);
-        }
-        
-        return location.equals(that.getIdentifier());
-    }
-    
-    @Override
-    public String toString() {
-        return location.toString();
-    }
+    void onInitialize();
 }

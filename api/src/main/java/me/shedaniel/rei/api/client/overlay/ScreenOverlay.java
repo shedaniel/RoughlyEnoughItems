@@ -35,19 +35,72 @@ import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public abstract class ScreenOverlay extends WidgetWithBounds {
+    /**
+     * Queues reload of the overlay.
+     */
     public abstract void queueReloadOverlay();
     
+    /**
+     * Queues reload of the search result.
+     */
     public abstract void queueReloadSearch();
     
+    /**
+     * Returns whether the overlay is queued to be reloaded.
+     *
+     * @return whether the overlay is queued to be reloaded
+     */
+    public abstract boolean isOverlayReloadQueued();
+    
+    /**
+     * Returns whether the search result is queued to be reloaded.
+     *
+     * @return whether the search result is queued to be reloaded
+     */
+    public abstract boolean isSearchReloadQueued();
+    
+    /**
+     * Returns the current dragging context.
+     *
+     * @return the current dragging context
+     */
     public abstract DraggingContext<?> getDraggingContext();
     
+    /**
+     * Returns whether a specified point is within the bounds of the overlay.
+     *
+     * @param mouseX the x coordinate of the mouse
+     * @param mouseY the y coordinate of the mouse
+     * @return whether the point is within the bounds of the overlay
+     */
     public abstract boolean isNotInExclusionZones(double mouseX, double mouseY);
     
+    /**
+     * Returns the entry list of the overlay.
+     *
+     * @return the entry list of the overlay
+     */
     public abstract OverlayListWidget getEntryList();
     
+    /**
+     * Returns the favorites list of the overlay.
+     *
+     * @return the favorites list of the overlay, or {@code null} if favorites are not enabled
+     */
     public abstract Optional<OverlayListWidget> getFavoritesList();
     
+    /**
+     * Returns the search field of the overlay.
+     *
+     * @return the search field of the overlay
+     */
     public abstract TextField getSearchField();
     
+    /**
+     * Renders a tooltip.
+     *
+     * @param matrices the matrices transform
+     * @param tooltip  the tooltip
+     */
     public abstract void renderTooltip(PoseStack matrices, Tooltip tooltip);
 }

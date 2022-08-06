@@ -33,10 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class CollapsingEntryListWidget extends EntryListWidget {
-    private List</*EntryStack<?> | CollapsedStack*/ Object> collapsedStacks = new ArrayList<>();
     private Int2ObjectMap<CollapsedStack> collapsedStackIndexed = new Int2ObjectOpenHashMap<>();
-    protected int updatedCount;
-    protected int lastUpdatedCount;
     
     public abstract List</*EntryStack<?> | List<EntryStack<?>>*/ Object> getStacks();
     
@@ -44,17 +41,6 @@ public abstract class CollapsingEntryListWidget extends EntryListWidget {
     
     protected final Int2ObjectMap<CollapsedStack> getCollapsedStackIndexed() {
         return collapsedStackIndexed;
-    }
-    
-    @Override
-    public boolean isEmpty() {
-        return collapsedStacks.isEmpty();
-    }
-    
-    @Override
-    protected void setCollapsedStacks(List</*EntryStack<?> | CollapsedStack*/ Object> stacks) {
-        this.collapsedStacks = stacks;
-        updateStacks();
     }
     
     @Override
@@ -68,6 +54,8 @@ public abstract class CollapsingEntryListWidget extends EntryListWidget {
     
     private void updateStacks() {
         lastUpdatedCount = updatedCount;
+        
+        List</*EntryStack<?> | CollapsedStack*/ Object> collapsedStacks = EntryListEntries.INSTANCE.getCollapsedStacks();
         
         List</*EntryStack<?> | List<EntryStack<?>>*/ Object> stacks = new ArrayList<>((int) (collapsedStacks.size() * 1.5));
         Map</*EntryStack<?> | List<EntryStack<?>>*/ Object, CollapsedStack> collapsedStackMap = new Reference2ObjectOpenHashMap<>();

@@ -21,47 +21,31 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.common.category;
+package me.shedaniel.rei.impl.client.gui;
 
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.display.Display;
-import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.ApiStatus;
+import com.google.common.collect.Lists;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Objects;
 
-@ApiStatus.Internal
-final class CategoryIdentifierImpl<D extends Display> implements CategoryIdentifier<D> {
-    private final ResourceLocation location;
-    private final int hashCode;
+public class TooltipQueue {
+    private static final List<Tooltip> TOOLTIPS = Lists.newArrayList();
     
-    CategoryIdentifierImpl(ResourceLocation location) {
-        this.location = Objects.requireNonNull(location);
-        this.hashCode = location.hashCode();
+    public static void addTooltip(@Nullable Tooltip tooltip) {
+        if (tooltip != null)
+            TOOLTIPS.add(tooltip);
     }
     
-    @Override
-    public ResourceLocation getIdentifier() {
-        return location;
+    public static void clearTooltips() {
+        TOOLTIPS.clear();
     }
     
-    @Override
-    public int hashCode() {
-        return hashCode;
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof CategoryIdentifier<?> that)) return false;
-        if (obj instanceof CategoryIdentifierImpl<?> thatImpl) {
-            return hashCode == obj.hashCode() && location.equals(thatImpl.location);
-        }
-        
-        return location.equals(that.getIdentifier());
-    }
-    
-    @Override
-    public String toString() {
-        return location.toString();
+    @Nullable
+    public static Tooltip get() {
+        return TOOLTIPS.stream().filter(Objects::nonNull)
+                .reduce((tooltip, tooltip2) -> tooltip2)
+                .orElse(null);
     }
 }

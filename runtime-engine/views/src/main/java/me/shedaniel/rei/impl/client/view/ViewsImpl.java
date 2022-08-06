@@ -53,9 +53,9 @@ import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.impl.client.view.craftable.CraftableFilter;
 import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
+import me.shedaniel.rei.impl.client.view.craftable.CraftableFilter;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.CrashReport;
@@ -87,13 +87,13 @@ public class ViewsImpl implements Views {
         BUILDER.set(builder);
         
         try {
-            return _buildMapFor(builder);
+            return ((ViewsImpl) Views.getInstance())._buildMapFor(builder);
         } finally {
             BUILDER.remove();
         }
     }
     
-    private static Map<DisplayCategory<?>, List<DisplaySpec>> _buildMapFor(ViewSearchBuilder builder) {
+    private Map<DisplayCategory<?>, List<DisplaySpec>> _buildMapFor(ViewSearchBuilder builder) {
         if (PluginManager.areAnyReloading()) {
             InternalLogger.getInstance().info("Cancelled Views buildMap since plugins have not finished reloading.");
             return Maps.newLinkedHashMap();
@@ -290,11 +290,13 @@ public class ViewsImpl implements Views {
         return resultSpeced;
     }
     
-    public static boolean isRecipesFor(List<EntryStack<?>> stacks, Display display) {
+    @Override
+    public boolean isRecipesFor(List<EntryStack<?>> stacks, Display display) {
         return checkUsages(stacks, display, display.getOutputEntries());
     }
     
-    public static boolean isUsagesFor(List<EntryStack<?>> stacks, Display display) {
+    @Override
+    public boolean isUsagesFor(List<EntryStack<?>> stacks, Display display) {
         return checkUsages(stacks, display, display.getInputEntries());
     }
     

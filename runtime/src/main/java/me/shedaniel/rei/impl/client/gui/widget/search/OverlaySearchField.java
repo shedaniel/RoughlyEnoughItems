@@ -43,6 +43,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
+import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListEntries;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.HighlightInfo;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.PartHighlightInfo;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.QuoteHighlightInfo;
@@ -113,7 +114,7 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
         return TextTransformations.forwardWithTransformation(text, (s, charIndex, c) -> {
             HighlightInfo arg = highlighter.highlighted[charIndex + index];
             Style style = Style.EMPTY;
-            if (isMain && ScreenOverlayImpl.getEntryListWidget().isEmpty() && !textField.getText().isEmpty()) {
+            if (isMain && EntryListEntries.INSTANCE.isEmpty() && !textField.getText().isEmpty()) {
                 style = ERROR_STYLE;
             }
             if (arg instanceof PartHighlightInfo part) {
@@ -235,7 +236,7 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
             if (new Rectangle(x + 3, y + 3 + font.lineHeight * i, lineWidth, font.lineHeight).contains(mouseX, mouseY)) {
                 Tooltip tooltip = pair.getFirst().provideTooltip(new Point(mouseX, mouseY));
                 if (tooltip != null) {
-                    ScreenOverlayImpl.getInstance().clearTooltips();
+                    REIRuntime.getInstance().clearTooltips();
                     ScreenOverlayImpl.getInstance().renderTooltip(poses, tooltip);
                 }
             }
@@ -279,7 +280,7 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
         isHighlighting = isHighlighting && ConfigObject.getInstance().isInventoryHighlightingAllowed();
         if (isMain && isHighlighting) {
             return 0xfff2ff0c;
-        } else if (isMain && ScreenOverlayImpl.getEntryListWidget().isEmpty() && !textField.getText().isEmpty()) {
+        } else if (isMain && EntryListEntries.INSTANCE.isEmpty() && !textField.getText().isEmpty()) {
             return 0xffff5555;
         } else {
             return TextField.BorderColorProvider.DEFAULT.getBorderColor(textField);
@@ -375,7 +376,7 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
     
     @Override
     public void setResponder(Consumer<String> responder) {
-        textField.setResponder(highlighter.andThen(responder));
+        DelegateTextField.super.setResponder(highlighter.andThen(responder));
     }
     
     @Override

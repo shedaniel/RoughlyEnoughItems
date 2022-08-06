@@ -21,47 +21,19 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.common.category;
+package me.shedaniel.rei.plugin.autocrafting;
 
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.display.Display;
-import net.minecraft.resources.ResourceLocation;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Objects;
-
+@Environment(EnvType.CLIENT)
 @ApiStatus.Internal
-final class CategoryIdentifierImpl<D extends Display> implements CategoryIdentifier<D> {
-    private final ResourceLocation location;
-    private final int hashCode;
-    
-    CategoryIdentifierImpl(ResourceLocation location) {
-        this.location = Objects.requireNonNull(location);
-        this.hashCode = location.hashCode();
-    }
-    
+public class DefaultClientTransferCategoryPlugin implements REIClientPlugin {
     @Override
-    public ResourceLocation getIdentifier() {
-        return location;
-    }
-    
-    @Override
-    public int hashCode() {
-        return hashCode;
-    }
-    
-    @Override
-    public boolean equals(Object obj) {
-        if (!(obj instanceof CategoryIdentifier<?> that)) return false;
-        if (obj instanceof CategoryIdentifierImpl<?> thatImpl) {
-            return hashCode == obj.hashCode() && location.equals(thatImpl.location);
-        }
-        
-        return location.equals(that.getIdentifier());
-    }
-    
-    @Override
-    public String toString() {
-        return location.toString();
+    public void registerTransferHandlers(TransferHandlerRegistry registry) {
+        registry.register(new DefaultCategoryHandler());
     }
 }

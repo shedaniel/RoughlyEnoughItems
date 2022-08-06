@@ -71,6 +71,8 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     private static final int SIZE = 18;
     protected final RegionRenderingDebugger debugger = new RegionRenderingDebugger();
     protected Rectangle bounds, innerBounds;
+    protected int updatedCount;
+    protected int lastUpdatedCount;
     public final NumberAnimator<Double> scaleIndicator = ValueAnimator.ofDouble(0.0D)
             .withConvention(() -> 0.0D, 8000);
     
@@ -266,13 +268,9 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     
     protected abstract void updateEntries(int entrySize, boolean zoomed);
     
-    public abstract boolean isEmpty();
-    
-    protected abstract void setCollapsedStacks(List</*EntryStack<?> | CollapsedStack*/ Object> stacks);
-    
     public void updateSearch(String searchTerm, boolean ignoreLastSearch) {
-        EntryListSearchManager.INSTANCE.update(searchTerm, ignoreLastSearch, stacks -> {
-            setCollapsedStacks(stacks);
+        EntryListEntries.INSTANCE.updateSearch(searchTerm, ignoreLastSearch, () -> {
+            updatedCount++;
             updateEntriesPosition();
         });
         debugger.debugTime = ConfigObject.getInstance().doDebugRenderTimeRequired();

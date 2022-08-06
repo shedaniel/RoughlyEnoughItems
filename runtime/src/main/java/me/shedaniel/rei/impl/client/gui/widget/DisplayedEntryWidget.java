@@ -36,12 +36,12 @@ import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
+import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
@@ -217,7 +217,7 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
         try {
             for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
                 for (Display display : displays) {
-                    if (ViewsImpl.isRecipesFor(getEntries(), display)) {
+                    if (Views.getInstance().isRecipesFor(getEntries(), display)) {
                         AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
                         if (result.successful) {
                             this.display = display;
@@ -242,7 +242,7 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
         }
         
         if (display != null) {
-            if (ViewsImpl.isRecipesFor(getEntries(), display)) {
+            if (Views.getInstance().isRecipesFor(getEntries(), display)) {
                 AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
                 if (result.successful) {
                     return result.successfulHandler;

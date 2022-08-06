@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.client.view;
 
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
@@ -31,6 +32,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface Views extends Reloadable<REIClientPlugin> {
     /**
@@ -44,6 +46,12 @@ public interface Views extends Reloadable<REIClientPlugin> {
     @ApiStatus.Internal
     @ApiStatus.Experimental
     ViewSearchBuilder getContext();
+    
+    @ApiStatus.Experimental
+    boolean isRecipesFor(List<EntryStack<?>> stacks, Display display);
+    
+    @ApiStatus.Experimental
+    boolean isUsagesFor(List<EntryStack<?>> stacks, Display display);
     
     /**
      * Returns all craftable items from materials.

@@ -55,5 +55,8 @@ public interface OverlayListWidget {
      */
     boolean containsMouse(Point point);
     
+    /**
+     * Queues reload of the search result.
+     */
     void queueReloadSearch();
 }

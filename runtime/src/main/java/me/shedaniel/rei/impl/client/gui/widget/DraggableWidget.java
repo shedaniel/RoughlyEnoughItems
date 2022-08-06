@@ -34,7 +34,6 @@ import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.Internal
 public abstract class DraggableWidget extends WidgetWithBounds {
-    
     public boolean dragged = false;
     private Point midPoint, startPoint;
     private int relateX, relateY;
@@ -60,9 +59,9 @@ public abstract class DraggableWidget extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseDragged(double double_1, double double_2, int int_1, double double_3, double double_4) {
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         Point mouse = PointHelper.ofMouse();
-        if (int_1 == 0) {
+        if (button == 0) {
             if (!dragged) {
                 if (getGrabBounds().contains(mouse)) {
                     startPoint = new Point(midPoint.x, midPoint.y);
@@ -78,7 +77,7 @@ public abstract class DraggableWidget extends WidgetWithBounds {
             return true;
         }
         for (GuiEventListener listener : children())
-            if (listener.mouseDragged(double_1, double_2, int_1, double_3, double_4))
+            if (listener.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
                 return true;
         return false;
     }
@@ -86,15 +85,15 @@ public abstract class DraggableWidget extends WidgetWithBounds {
     public abstract Point processMidPoint(Point midPoint, Point mouse, Point startPoint, Window window, int relateX, int relateY);
     
     @Override
-    public boolean mouseReleased(double double_1, double double_2, int int_1) {
-        if (int_1 == 0)
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (button == 0)
             if (dragged) {
                 dragged = false;
                 onMouseReleaseMidPoint(getMidPoint());
                 return true;
             }
         for (GuiEventListener listener : children())
-            if (listener.mouseReleased(double_1, double_2, int_1))
+            if (listener.mouseReleased(mouseX, mouseY, button))
                 return true;
         return false;
     }

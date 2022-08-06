@@ -28,7 +28,9 @@
     ], 
     "rei_client": [
       "me.shedaniel.rei.plugin.client.DefaultClientPlugin",
-      "me.shedaniel.rei.plugin.client.runtime.DefaultClientRuntimePlugin"
+      "me.shedaniel.rei.plugin.client.runtime.DefaultClientRuntimePlugin",
+      "me.shedaniel.rei.plugin.client.runtime.DefaultRuntimeInputMethodPlugin",
+      "me.shedaniel.rei.plugin.autocrafting.DefaultClientTransferCategoryPlugin"
     ]
   },
   "accessWidener": "roughlyenoughitems.accessWidener",

@@ -26,6 +26,9 @@ package me.shedaniel.rei.impl.client.view.craftable;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongMaps;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
+import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigManager;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
@@ -36,27 +39,17 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Optional;
+
 public class CraftableFilter {
     public static final CraftableFilter INSTANCE = new CraftableFilter();
-    private boolean dirty = false;
     private Long2LongMap invStacks = new Long2LongOpenHashMap();
     private Long2LongMap containerStacks = new Long2LongOpenHashMap();
     
-    public void markDirty() {
-        dirty = true;
-    }
-    
-    public boolean wasDirty() {
-        if (dirty) {
-            dirty = false;
-            return true;
-        }
-        
-        return false;
-    }
-    
     public void tick() {
-        if (dirty) return;
+        Optional<ScreenOverlay> overlay = REIRuntime.getInstance().getOverlay();
+        if (overlay.isEmpty() || overlay.get().isSearchReloadQueued()) return;
+        if (!ConfigManager.getInstance().isCraftableOnlyEnabled()) return;
         Long2LongMap currentStacks;
         try {
             currentStacks = getInventoryItemsTypes();
@@ -66,9 +59,9 @@ public class CraftableFilter {
         }
         if (!currentStacks.equals(this.invStacks)) {
             invStacks = currentStacks;
-            markDirty();
+            overlay.ifPresent(ScreenOverlay::queueReloadSearch);
+            return;
         }
-        if (dirty) return;
         
         try {
             currentStacks = getContainerItemsTypes();
@@ -78,7 +71,7 @@ public class CraftableFilter {
         }
         if (!currentStacks.equals(this.containerStacks)) {
             containerStacks = currentStacks;
-            markDirty();
+            overlay.ifPresent(ScreenOverlay::queueReloadSearch);
         }
     }
     

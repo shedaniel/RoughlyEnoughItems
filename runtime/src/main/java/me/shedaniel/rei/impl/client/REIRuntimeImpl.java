@@ -43,11 +43,12 @@ import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
-import me.shedaniel.rei.impl.common.Internals;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.TooltipQueue;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
+import me.shedaniel.rei.impl.common.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -58,7 +59,10 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
 
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
@@ -91,14 +95,14 @@ public class REIRuntimeImpl implements REIRuntime {
     @Override
     public void queueTooltip(@Nullable Tooltip tooltip) {
         if (overlay != null && tooltip != null) {
-            overlay.addTooltip(tooltip);
+            TooltipQueue.addTooltip(tooltip);
         }
     }
     
     @Override
     public void clearTooltips() {
         if (overlay != null) {
-            overlay.clearTooltips();
+            TooltipQueue.clearTooltips();
         }
     }
     
@@ -269,6 +273,7 @@ public class REIRuntimeImpl implements REIRuntime {
         });
         ClientTickEvent.CLIENT_POST.register(minecraft -> {
             if (isOverlayVisible() && REIRuntime.getInstance().getOverlay().isPresent()) {
+                REIRuntime.getInstance().getSearchTextField().tick();
                 ScreenOverlayImpl.getInstance().tick();
             }
         });
