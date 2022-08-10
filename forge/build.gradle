@@ -219,7 +219,7 @@ unifiedPublishing {
     project {
         displayName = "[Forge $rootProject.supported_version] v$project.version"
         releaseType = "beta"
-        gameVersions = ["1.19", "1.19.1"]
+        gameVersions = ["1.19", "1.19.1", "1.19.2"]
         gameLoaders = ["forge"]
         changelog = rootProject.releaseChangelog
 
@@ -258,8 +258,8 @@ unifiedPublishing {
     }
     project {
         displayName = "[Forge $rootProject.supported_version] v$project.version"
-        releaseType = "beta"
-        gameVersions = ["1.19", "1.19.1"]
+        releaseType = "release"
+        gameVersions = ["1.19", "1.19.1", "1.19.2"]
         gameLoaders = ["forge"]
         changelog = rootProject.releaseChangelog
 
