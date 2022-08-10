@@ -13,14 +13,6 @@ description = '''
 To allow players to view items and recipes.
 '''
 
-[[mods]]
-modId = "jei"
-version = "11.9999"
-displayName = "Roughly Enough Items (JEI Stub)"
-description = '''
-To allow players to view items and recipes.
-'''
-
 [[dependencies.roughlyenoughitems]]
 modId = "architectury"
 mandatory = true
