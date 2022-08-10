@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.fabric;
 
+import me.shedaniel.rei.impl.client.ErrorDisplayer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 
@@ -31,10 +32,11 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
-public class ErrorDisplayerImpl {
+public class ErrorDisplayerImpl implements ErrorDisplayer.ErrorGuiInitializer {
     public static List<Consumer<Screen>> consumerList = new ArrayList<>();
     
-    public static void registerGuiInit(UnaryOperator<Screen> consumer) {
+    @Override
+    public void registerGuiInit(UnaryOperator<Screen> consumer) {
         consumerList.add(screen -> {
             if (screen != Minecraft.getInstance().screen) return;
             Screen screen1 = consumer.apply(screen);

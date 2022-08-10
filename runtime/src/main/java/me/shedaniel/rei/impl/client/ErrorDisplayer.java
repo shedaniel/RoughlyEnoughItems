@@ -23,13 +23,12 @@
 
 package me.shedaniel.rei.impl.client;
 
-import dev.architectury.platform.Platform;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.impl.client.gui.screen.WarningAndErrorScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.ServiceLoader;
 import java.util.function.UnaryOperator;
 
 public class ErrorDisplayer {
@@ -56,12 +55,11 @@ public class ErrorDisplayer {
     }
     
     public static void registerGuiInit(UnaryOperator<Screen> consumer) {
-        try {
-            Class.forName("me.shedaniel.rei.impl.client.%s.ErrorDisplayerImpl".formatted(Platform.isForge() ? "forge" : "fabric"))
-                    .getDeclaredMethod("registerGuiInit", UnaryOperator.class)
-                    .invoke(null, consumer);
-        } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
+        ErrorGuiInitializer initializer = ServiceLoader.load(ErrorGuiInitializer.class).findFirst().orElseThrow();
+        initializer.registerGuiInit(consumer);
+    }
+    
+    public interface ErrorGuiInitializer {
+        void registerGuiInit(UnaryOperator<Screen> consumer);
     }
 }
