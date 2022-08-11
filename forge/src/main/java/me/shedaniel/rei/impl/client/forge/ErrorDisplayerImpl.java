@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.forge;
 
+import me.shedaniel.rei.impl.client.ErrorDisplayer;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -31,14 +32,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
-public class ErrorDisplayerImpl {
+public class ErrorDisplayerImpl implements ErrorDisplayer.ErrorGuiInitializer {
     private static final List<UnaryOperator<Screen>> CONSUMERS = new ArrayList<>();
     
     static {
         MinecraftForge.EVENT_BUS.addListener(ErrorDisplayerImpl::onGuiOpen);
     }
     
-    public static void registerGuiInit(UnaryOperator<Screen> consumer) {
+    @Override
+    public void registerGuiInit(UnaryOperator<Screen> consumer) {
         CONSUMERS.add(consumer);
     }
     
