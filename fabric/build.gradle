@@ -35,6 +35,8 @@ dependencies {
     }
     //modRuntime("com.terraformersmc:modmenu:${modmenu_version}") { transitive false }
     modApi("me.shedaniel:architectury-fabric:${architectury_version}")
+    modApi("me.shedaniel:error-notifier-fabric:1.0.9")
+    include("me.shedaniel:error-notifier-fabric:1.0.9")
 
     depProjects.forEach {
         common(project(path: it, configuration: "namedElements")) { transitive false }
