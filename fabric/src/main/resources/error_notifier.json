@@ -1,0 +1,26 @@
+{
+    "schemaVersion": 1,
+    "checks": [
+        {
+            "type": "depends",
+            "modId": "fabric",
+            "modName": "Fabric API",
+            "versions": "*",
+            "url": "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all/"
+        },
+        {
+            "type": "depends",
+            "modId": "architectury",
+            "modName": "Architectury API",
+            "versions": ">=5.0.0 <7.0.0",
+            "url": "https://www.curseforge.com/minecraft/mc-mods/architectury-api/files/all"
+        },
+        {
+            "type": "depends",
+            "modId": "cloth-config2",
+            "modName": "Cloth Config",
+            "versions": "*",
+            "url": "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all"
+        }
+    ]
+}
