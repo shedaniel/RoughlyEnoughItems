@@ -23,8 +23,6 @@
 
 package me.shedaniel.rei.fabric;
 
-import com.google.common.collect.ImmutableSet;
-import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.impl.init.PrimitivePlatformAdapter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
@@ -40,45 +38,6 @@ public class PrimitivePlatformAdapterImpl implements PrimitivePlatformAdapter {
     
     @Override
     public void checkMods() {
-        ImmutableSet<String> requiredModules = isClient() ?
-                ImmutableSet.<String>builder()
-                        .add("fabric-api-base")
-                        .add("fabric-resource-loader-v0")
-                        .add("fabric-networking-v0")
-                        .add("fabric-lifecycle-events-v1")
-                        .add("fabric-rendering-fluids-v1")
-                        .build() :
-                ImmutableSet.<String>builder()
-                        .add("fabric-api-base")
-                        .add("fabric-resource-loader-v0")
-                        .add("fabric-networking-v0")
-                        .add("fabric-lifecycle-events-v1")
-                        .build();
-        for (String module : requiredModules) {
-            boolean moduleLoaded = FabricLoader.getInstance().isModLoaded(module);
-            if (!moduleLoaded) {
-                RoughlyEnoughItemsState.error("Fabric API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all");
-                break;
-            }
-        }
-        if (!FabricLoader.getInstance().isModLoaded("architectury")) {
-            RoughlyEnoughItemsState.error("Architectury API is not installed!", "https://www.curseforge.com/minecraft/mc-mods/architectury-api/files/all");
-        } else {
-            Version version = FabricLoader.getInstance().getModContainer("architectury").get().getMetadata().getVersion();
-            
-            try {
-                if (version instanceof SemanticVersion && SemanticVersion.parse("4.5.75").compareTo((SemanticVersion) version) > 0) {
-                    RoughlyEnoughItemsState.error("Architectury API is too old, please update!", "https://www.curseforge.com/minecraft/mc-mods/architectury-api/files/all");
-                }
-            } catch (VersionParsingException e) {
-                e.printStackTrace();
-            }
-        }
-        if (isClient()) {
-            if (!FabricLoader.getInstance().isModLoaded("cloth-config2")) {
-                RoughlyEnoughItemsState.error("Cloth Config is not installed!", "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all");
-            }
-        }
     }
     
     @Override
