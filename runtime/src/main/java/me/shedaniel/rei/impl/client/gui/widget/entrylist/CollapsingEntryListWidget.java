@@ -48,8 +48,8 @@ public abstract class CollapsingEntryListWidget extends EntryListWidget {
     }
     
     @Override
-    public List</*EntryStack<?> | CollapsedStack*/ Object> getCollapsedStacks() {
-        return collapsedStacks;
+    public boolean isEmpty() {
+        return collapsedStacks.isEmpty();
     }
     
     @Override
@@ -97,7 +97,7 @@ public abstract class CollapsingEntryListWidget extends EntryListWidget {
             
             if (collapsedStack != null) {
                 collapsedStackIndexed.put(index, collapsedStack);
-    
+                
                 if (collapsedStack.isExpanded()) {
                     int size = collapsedStack.getIngredient().size();
                     for (int i = 1; i < size; i++) {
