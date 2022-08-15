@@ -149,7 +149,12 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                 entry.entries((List<EntryStack<?>>) stack);
             }
             
-            entry.collapsed(indexedCollapsedStack.get(i + skip));
+            CollapsedStack collapsedStack = indexedCollapsedStack.get(i + skip);
+            if (collapsedStack != null && collapsedStack.getIngredient().size() > 1) {
+                entry.collapsed(collapsedStack);
+            } else {
+                entry.collapsed(null);
+            }
         }
         this.entries = entries;
     }
