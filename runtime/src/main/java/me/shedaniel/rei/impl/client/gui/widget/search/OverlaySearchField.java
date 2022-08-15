@@ -97,7 +97,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         return TextTransformations.forwardWithTransformation(text, (s, charIndex, c) -> {
             byte arg = highlighter.highlighted[charIndex + index];
             Style style = Style.EMPTY;
-            if (isMain && ScreenOverlayImpl.getEntryListWidget().getCollapsedStacks().isEmpty() && !getText().isEmpty()) {
+            if (isMain && ScreenOverlayImpl.getEntryListWidget().isEmpty() && !getText().isEmpty()) {
                 style = ERROR_STYLE;
             }
             if (arg > 0) {
@@ -273,7 +273,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         int borderColor;
         if (isMain && isHighlighting) {
             borderColor = 0xfff2ff0c;
-        } else if (isMain && ScreenOverlayImpl.getEntryListWidget().getCollapsedStacks().isEmpty() && !getText().isEmpty()) {
+        } else if (isMain && ScreenOverlayImpl.getEntryListWidget().isEmpty() && !getText().isEmpty()) {
             borderColor = 0xffff5555;
         } else {
             super.renderBorder(matrices);

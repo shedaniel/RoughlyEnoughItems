@@ -273,7 +273,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     
     protected abstract void updateEntries(int entrySize, boolean zoomed);
     
-    public abstract List</*EntryStack<?> | CollapsedStack*/ Object> getCollapsedStacks();
+    public abstract boolean isEmpty();
     
     protected abstract void setCollapsedStacks(List</*EntryStack<?> | CollapsedStack*/ Object> stacks);
     

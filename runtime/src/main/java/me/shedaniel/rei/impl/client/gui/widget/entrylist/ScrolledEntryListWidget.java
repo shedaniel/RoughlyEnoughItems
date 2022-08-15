@@ -96,7 +96,12 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
                     }
                 }
                 
-                entry.collapsed(indexedCollapsedStack.get(i - 1));
+                CollapsedStack collapsedStack = indexedCollapsedStack.get(i - 1);
+                if (collapsedStack != null && collapsedStack.getIngredient().size() > 1) {
+                    entry.collapsed(collapsedStack);
+                } else {
+                    entry.collapsed(null);
+                }
             } else {
                 blockedCount++;
             }
