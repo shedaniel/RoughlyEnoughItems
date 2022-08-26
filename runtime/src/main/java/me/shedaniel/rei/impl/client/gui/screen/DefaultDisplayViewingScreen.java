@@ -500,14 +500,11 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        REIRuntimeImpl.isWithinRecipeViewingScreen = true;
         for (GuiEventListener listener : children()) {
             if (listener.mouseScrolled(mouseX, mouseY, amount)) {
-                REIRuntimeImpl.isWithinRecipeViewingScreen = false;
                 return true;
             }
         }
-        REIRuntimeImpl.isWithinRecipeViewingScreen = false;
         if (getBounds().contains(PointHelper.ofMouse())) {
             if (amount > 0 && recipeBack.isEnabled())
                 recipeBack.onClick();

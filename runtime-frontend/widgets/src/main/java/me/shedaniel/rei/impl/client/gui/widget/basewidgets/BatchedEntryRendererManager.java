@@ -115,7 +115,7 @@ final class BatchedEntryRendererManager extends BatchedSlots implements Forwardi
                 for (int i = 0; i < extraData.length; i++) {
                     extraData[i] = entries.get(i * 2 + 1);
                 }
-                renderBatched(debugTime, size, time, matrices, mouseX, mouseY, delta, groupingsAsList(), extraData);
+                renderBatched(debugTime, size, time, matrices, mouseX, mouseY, delta, groupingAsList(entries), extraData);
             }
         }
         if (!toRender.isEmpty()) {

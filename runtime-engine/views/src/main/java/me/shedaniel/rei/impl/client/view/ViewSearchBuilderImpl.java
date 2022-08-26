@@ -28,8 +28,6 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.client.view.AbstractViewSearchBuilder;
-import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import org.jetbrains.annotations.Nullable;
 

@@ -51,12 +51,17 @@ import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class PreFilteredEntryListImpl implements EntryRegistryListener, PreFilteredEntryList {
-    private final EntryRegistry registry = EntryRegistry.getInstance();
     private final MutableLong lastRefilterWarning = new MutableLong(-1);
+    private EntryRegistry registry;
     private List<EntryStack<?>> preFilteredList = Lists.newCopyOnWriteArrayList();
     
     public PreFilteredEntryListImpl() {
         ClientInternals.attachInstanceSupplier(this, "preFilteredEntryList");
+    }
+    
+    @Override
+    public void attachRegistry(EntryRegistry registry) {
+        this.registry = registry;
     }
     
     private static <T> Predicate<T> not(Predicate<? super T> target) {

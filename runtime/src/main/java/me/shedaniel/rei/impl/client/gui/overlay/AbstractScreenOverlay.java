@@ -43,6 +43,7 @@ import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.impl.client.gui.TooltipQueue;
 import me.shedaniel.rei.impl.client.gui.dragging.CurrentDraggingStack;
 import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
 import me.shedaniel.rei.impl.client.gui.menu.MenuAccessImpl;
@@ -159,6 +160,11 @@ public abstract class AbstractScreenOverlay extends ScreenOverlay {
             matrices.translate(0, 0, 500);
             menuAccess.lateRender(matrices, mouseX, mouseY, delta);
             matrices.popPose();
+        }
+        
+        Tooltip tooltip = TooltipQueue.get();
+        if (tooltip != null) {
+            renderTooltip(matrices, tooltip);
         }
         
         REIRuntime.getInstance().clearTooltips();

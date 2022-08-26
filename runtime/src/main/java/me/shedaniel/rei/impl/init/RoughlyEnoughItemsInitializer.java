@@ -55,7 +55,6 @@ public class RoughlyEnoughItemsInitializer {
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
             initializeEntryPoint(true, "me.shedaniel.rei.impl.client.init.CoreClientInitialization");
             initializeEntryPoint(true, "me.shedaniel.rei.RoughlyEnoughItemsCoreClient");
-            initializeEntryPoint(true, "me.shedaniel.rei.REIModMenuEntryPoint");
             initializeEntryPoint(true, "me.shedaniel.rei.impl.client.REIRuntimeImpl");
         }
         

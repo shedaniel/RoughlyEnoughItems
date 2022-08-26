@@ -21,30 +21,17 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.entry.type;
+package me.shedaniel.rei.impl.client.gui.tooltip;
 
-import it.unimi.dsi.fastutil.longs.LongList;
-import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
-import me.shedaniel.rei.api.common.entry.EntryStack;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.impl.client.provider.MissingStacksTooltipProvider;
+import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
 import java.util.List;
-import java.util.function.Predicate;
 
-@ApiStatus.Internal
-public interface EntryRegistryListener {
-    default void attachRegistry(EntryRegistry registry) {}
-    
-    default void addEntryAfter(@Nullable EntryStack<?> afterEntry, EntryStack<?> stack, long stackHashExact) {}
-    
-    default void addEntriesAfter(@Nullable EntryStack<?> afterEntry, List<EntryStack<?>> stacks, @Nullable LongList hashes) {}
-    
-    default void removeEntry(EntryStack<?> stack, long hashExact) {}
-    
-    default void removeEntries(List<EntryStack<?>> stacks, @Nullable LongList hashes) {}
-    
-    default void removeEntriesIf(Predicate<EntryStack<?>> predicate) {}
-    
-    default void onReFilter(List<EntryStack<?>> stacks) {}
+public class MissingStacksTooltipProviderImpl implements MissingStacksTooltipProvider {
+    @Override
+    public TooltipComponent provide(List<EntryIngredient> stacks) {
+        return new MissingStacksTooltip(stacks);
+    }
 }

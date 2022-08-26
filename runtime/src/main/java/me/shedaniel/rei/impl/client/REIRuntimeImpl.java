@@ -43,6 +43,7 @@ import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.TooltipQueue;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
@@ -70,15 +71,11 @@ import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class REIRuntimeImpl implements REIRuntime {
-    private static final ResourceLocation DISPLAY_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/display.png");
-    private static final ResourceLocation DISPLAY_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/display_dark.png");
-    @ApiStatus.Internal
-    public static boolean isWithinRecipeViewingScreen = false;
+    private final LinkedHashSet<DisplayScreen> lastDisplayScreen = Sets.newLinkedHashSetWithExpectedSize(10);
+    private final List<HintProvider> hintProviders = Internals.resolveServices(HintProvider.class);
     private ScreenOverlayImpl overlay;
     private AbstractContainerScreen<?> previousContainerScreen = null;
     private Screen previousScreen = null;
-    private LinkedHashSet<DisplayScreen> lastDisplayScreen = Sets.newLinkedHashSetWithExpectedSize(10);
-    private List<HintProvider> hintProviders = Internals.resolveServices(HintProvider.class);
     
     /**
      * @return the instance of screen helper
@@ -194,7 +191,7 @@ public class REIRuntimeImpl implements REIRuntime {
     
     @Override
     public ResourceLocation getDefaultDisplayTexture(boolean darkTheme) {
-        return darkTheme ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
+        return darkTheme ? InternalTextures.DISPLAY_TEXTURE_DARK : InternalTextures.DISPLAY_TEXTURE;
     }
     
     @Override

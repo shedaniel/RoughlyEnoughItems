@@ -21,7 +21,18 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.tooltip;
+package me.shedaniel.rei.impl.common.plugins;
 
-public class MissingStacksTooltipProvider {
+import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.plugins.PluginView;
+import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import me.shedaniel.rei.impl.common.provider.PluginManagerConstructor;
+
+import java.util.function.UnaryOperator;
+
+public class PluginManagerConstructorImpl implements PluginManagerConstructor {
+    @Override
+    public <P extends REIPlugin<?>> PluginManager<P> create(Class<P> clazz, UnaryOperator<PluginView<P>> constructor) {
+        return new PluginManagerImpl<>(clazz, constructor);
+    }
 }

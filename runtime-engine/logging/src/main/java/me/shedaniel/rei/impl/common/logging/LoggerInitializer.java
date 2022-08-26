@@ -37,7 +37,7 @@ public class LoggerInitializer {
             new Log4JLogger(LogManager.getFormatterLogger("REI"))
     )), message -> "[REI] " + message);
     
-    public static void onInitialize() {
+    public void onInitialize() {
         Internals.attachInstanceSupplier(LOGGER, "logger");
     }
 }

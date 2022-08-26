@@ -62,7 +62,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     @Override
     public void registerReloadable(Reloadable<? extends P> reloadable) {
         this.reloadables.add((Reloadable<P>) reloadable);
-        InternalLogger.getInstance().info("Registered reloadable into plugin manager []: " + reloadable.getClass().getName(), pluginClass.getSimpleName());
+        InternalLogger.getInstance().info("Registered reloadable into plugin manager [%s]: " + reloadable.getClass().getName(), pluginClass.getSimpleName());
     }
     
     @Override

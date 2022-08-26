@@ -309,14 +309,11 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 scrollBarAlphaFutureTime = System.currentTimeMillis();
             return true;
         }
-        REIRuntimeImpl.isWithinRecipeViewingScreen = true;
         for (GuiEventListener listener : children()) {
             if (listener.mouseScrolled(mouseX, mouseY, amount)) {
-                REIRuntimeImpl.isWithinRecipeViewingScreen = false;
                 return true;
             }
         }
-        REIRuntimeImpl.isWithinRecipeViewingScreen = false;
         int tabSize = ConfigObject.getInstance().isUsingCompactTabs() ? 24 : 28;
         if (mouseX >= bounds.x && mouseX <= bounds.getMaxX() && mouseY >= bounds.y - tabSize && mouseY < bounds.y) {
             if (amount < 0) selectedCategoryIndex++;

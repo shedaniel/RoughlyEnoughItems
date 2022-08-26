@@ -71,7 +71,7 @@ public class CoreInitialization {
         manager.registerReloadable(FluidSupportProvider.class);
         PluginManager<REIServerPlugin> serverManager = PluginManager.getServerInstance();
         serverManager.registerReloadable(MenuInfoRegistry.class);
-        Internals.attachInstanceSupplier((Runnable) () -> reloadPlugins(null, null), "reloadREI");
+        Internals.attachInstance((Runnable) () -> reloadPlugins(null, null), "reloadREI");
     }
     
     public static void _reloadPlugins(@Nullable ReloadStage stage) {

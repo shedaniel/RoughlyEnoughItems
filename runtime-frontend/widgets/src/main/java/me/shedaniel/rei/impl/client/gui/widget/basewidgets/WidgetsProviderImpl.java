@@ -29,6 +29,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
+import me.shedaniel.rei.impl.client.provider.WidgetsProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
@@ -39,7 +40,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class WidgetsProvider implements me.shedaniel.rei.impl.client.provider.WidgetsProvider {
+public class WidgetsProviderImpl implements WidgetsProvider {
     @Override
     public boolean isRenderingPanel(Panel panel) {
         return PanelWidget.isRendering(panel);

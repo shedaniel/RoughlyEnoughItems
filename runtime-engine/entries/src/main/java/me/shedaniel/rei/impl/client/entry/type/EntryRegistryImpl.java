@@ -67,6 +67,9 @@ public class EntryRegistryImpl implements EntryRegistry {
         registryList = new NormalEntryRegistryList();
         entriesHash = new LongOpenHashSet();
         listeners.addAll(Internals.resolveServices(EntryRegistryListener.class));
+        for (EntryRegistryListener listener : listeners) {
+            listener.attachRegistry(this);
+        }
     }
     
     @Override
