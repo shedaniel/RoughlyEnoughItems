@@ -318,7 +318,7 @@ public abstract class AbstractScreenOverlay extends ScreenOverlay {
         if (!hasSpace()) return false;
         if (REIRuntime.getInstance().isOverlayVisible()) {
             for (GuiEventListener listener : widgets)
-                if (listener == getFocused() && listener.keyPressed(keyCode, scanCode, modifiers))
+                if (listener == getFocused() && listener.keyReleased(keyCode, scanCode, modifiers))
                     return true;
         }
         return false;
