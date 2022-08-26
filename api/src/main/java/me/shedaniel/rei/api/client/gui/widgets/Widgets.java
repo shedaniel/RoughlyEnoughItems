@@ -260,11 +260,7 @@ public final class Widgets {
     
     
     public static Panel createSlotBase(Rectangle rectangle) {
-        return ClientInternals.getWidgetsProvider().createPanelWidget(rectangle).yTextureOffset(-66).rendering(Widgets::shouldSlotBaseRender);
-    }
-    
-    private static boolean shouldSlotBaseRender(Panel panel) {
-        return true;
+        return ClientInternals.getWidgetsProvider().createPanelWidget(rectangle).yTextureOffset(-66);
     }
     
     public static Panel createSlotBase(Rectangle rectangle, int color) {

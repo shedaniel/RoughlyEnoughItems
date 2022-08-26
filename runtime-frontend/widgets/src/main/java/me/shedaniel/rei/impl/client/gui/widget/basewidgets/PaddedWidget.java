@@ -30,7 +30,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 final class PaddedWidget extends DelegateWidgetWithTranslate {
     private final int padLeft, padRight, padTop, padBottom;
     
-    public PaddedWidget(int padLeft, int padRight, int padTop, int padBottom, WidgetWithBounds widget) {
+    PaddedWidget(int padLeft, int padRight, int padTop, int padBottom, WidgetWithBounds widget) {
         super(widget, Matrix4f::new);
         this.padLeft = padLeft;
         this.padRight = padRight;

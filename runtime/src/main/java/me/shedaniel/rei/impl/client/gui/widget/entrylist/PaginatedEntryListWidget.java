@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -31,10 +32,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
-import me.shedaniel.rei.api.client.gui.widgets.BatchedSlots;
-import me.shedaniel.rei.api.client.gui.widgets.Button;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -43,19 +41,13 @@ import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.changelog.ChangelogLoader;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
-import me.shedaniel.rei.impl.client.gui.widget.DefaultDisplayChoosePageWidget;
-import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
@@ -86,10 +78,10 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                 }
                 
                 if (entry.our == null) {
-                    CachedEntryListRender.Sprite sprite = CachedEntryListRender.get(entry.getCurrentEntry());
+                    CachedEntryListRender.Sprite sprite = CachedEntryListRender.get(entry.slot.getCurrentEntry());
                     if (sprite != null) {
                         CachingEntryRenderer renderer = new CachingEntryRenderer(sprite, this::getBlitOffset);
-                        entry.our = ClientEntryStacks.setRenderer(entry.getCurrentEntry().copy().cast(), stack -> renderer);
+                        entry.our = ClientEntryStacks.setRenderer(entry.slot.getCurrentEntry().copy().cast(), stack -> renderer);
                     }
                 }
             }
@@ -100,13 +92,27 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             for (EntryListStackEntry entry : entries) {
                 CollapsedStack collapsedStack = entry.getCollapsedStack();
                 if (collapsedStack != null && !collapsedStack.isExpanded()) {
-                    slots.addUnbatched(entry);
+                    slots.addUnbatched(entry.slot);
                 } else {
-                    slots.add(entry);
+                    slots.add(entry.slot);
                 }
             }
         } else {
-            slots.addAllUnbatched(entries);
+            slots.addAllUnbatched(new AbstractCollection<>() {
+                @Override
+                public Iterator<Slot> iterator() {
+                    return Iterators.transform(entries.iterator(), entry -> entry.slot);
+                }
+                
+                @Override
+                public int size() {
+                    return entries.size();
+                }
+            });
+        }
+        
+        for (EntryListStackEntry entry : entries) {
+            entry.extra.render(matrices, mouseX, mouseY, delta);
         }
         
         if (debugger.debugTime) slots.addDebugger(debugger.size, debugger.time);
@@ -132,7 +138,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                 int slotX = currentX * entrySize + innerBounds.x;
                 int slotY = currentY * entrySize + innerBounds.y;
                 if (notSteppingOnExclusionZones(slotX - 1, slotY - 1, entrySize, entrySize)) {
-                    entries.add((EntryListStackEntry) new EntryListStackEntry(this, slotX, slotY, entrySize, zoomed).disableBackground());
+                    entries.add(EntryListStackEntry.createSlot(this, slotX, slotY, entrySize, zoomed));
                 }
             }
         }
@@ -144,13 +150,16 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             /*EntryStack<?> | List<EntryStack<?>>*/
             Object stack = subList.get(i);
             EntryListStackEntry entry = entries.get(i + Math.max(0, -page * entries.size()));
-            entry.clearEntries();
+            Slot slot = entry.slot;
+            slot.clearEntries();
             
             if (stack instanceof EntryStack<?> entryStack) {
-                entry.entry(entryStack);
+                slot.entry(entryStack);
             } else {
-                entry.entries((List<EntryStack<?>>) stack);
+                slot.entries((List<EntryStack<?>>) stack);
             }
+            
+            entry.updateEntries();
             
             CollapsedStack collapsedStack = indexedCollapsedStack.get(i + skip);
             if (collapsedStack != null && collapsedStack.getIngredient().size() > 1) {
@@ -174,12 +183,22 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
     
     @Override
     public Stream<EntryStack<?>> getEntries() {
-        return entries.stream().map(EntryWidget::getCurrentEntry);
+        return entries.stream().map(entry -> entry.slot.getCurrentEntry());
     }
     
     @Override
-    protected List<EntryListStackEntry> getEntryWidgets() {
-        return entries;
+    protected List<Slot> getSlots() {
+        return new AbstractList<>() {
+            @Override
+            public int size() {
+                return entries.size();
+            }
+            
+            @Override
+            public Slot get(int index) {
+                return entries.get(index).slot;
+            }
+        };
     }
     
     @Override
@@ -250,16 +269,9 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             helper.setBlitOffset(helper.getBlitOffset() - 1);
         }));
         this.additionalWidgets.add(Widgets.createClickableLabel(new Point(overlayBounds.x + ((overlayBounds.width - 18) / 2), overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), NarratorChatListener.NO_TITLE, label -> {
-            if (!Screen.hasShiftDown()) {
-                setPage(0);
-                updateEntriesPosition();
-            } else {
-                ScreenOverlayImpl.getInstance().choosePageWidget = new DefaultDisplayChoosePageWidget(page -> {
-                    setPage(page);
-                    updateEntriesPosition();
-                }, getPage(), getTotalPages());
-            }
-        }).tooltip(new TranslatableComponent("text.rei.go_back_first_page"), new TextComponent(" "), new TranslatableComponent("text.rei.shift_click_to", new TranslatableComponent("text.rei.choose_page")).withStyle(ChatFormatting.GRAY)).focusable(false).onRender((matrices, label) -> {
+            setPage(0);
+            updateEntriesPosition();
+        }).tooltip(new TranslatableComponent("text.rei.go_back_first_page")).focusable(false).onRender((matrices, label) -> {
             label.setClickable(getTotalPages() > 1);
             label.setMessage(new TextComponent(String.format("%s/%s", getPage() + 1, Math.max(getTotalPages(), 1))));
         }).rainbow(new Random().nextFloat() < 1.0E-4D || ClientHelperImpl.getInstance().isAprilFools.get()));

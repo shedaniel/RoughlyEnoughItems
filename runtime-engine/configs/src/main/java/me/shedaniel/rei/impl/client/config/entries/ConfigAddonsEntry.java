@@ -44,11 +44,11 @@ import java.util.Optional;
 
 @ApiStatus.Internal
 public class ConfigAddonsEntry extends AbstractConfigListEntry<Unit> {
-    private int width;
-    private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
+    private final int width;
+    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
         Minecraft.getInstance().setScreen(new ConfigAddonsScreen(Minecraft.getInstance().screen));
     });
-    private List<AbstractWidget> children = ImmutableList.of(buttonWidget);
+    private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public ConfigAddonsEntry(int width) {
         super(NarratorChatListener.NO_TITLE, false);

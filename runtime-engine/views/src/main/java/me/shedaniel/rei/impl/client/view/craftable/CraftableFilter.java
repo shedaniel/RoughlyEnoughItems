@@ -32,6 +32,8 @@ import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.impl.client.provider.OverlayTicker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -41,12 +43,16 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
 
-public class CraftableFilter {
-    public static final CraftableFilter INSTANCE = new CraftableFilter();
-    private Long2LongMap invStacks = new Long2LongOpenHashMap();
-    private Long2LongMap containerStacks = new Long2LongOpenHashMap();
+public class CraftableFilter implements OverlayTicker {
+    private static Long2LongMap invStacks = new Long2LongOpenHashMap();
+    private static Long2LongMap containerStacks = new Long2LongOpenHashMap();
     
+    @Override
     public void tick() {
+        if (Minecraft.getInstance().player == null || PluginManager.areAnyReloading() || Minecraft.getInstance().player.tickCount % 5 != 0) {
+            return;
+        }
+        
         Optional<ScreenOverlay> overlay = REIRuntime.getInstance().getOverlay();
         if (overlay.isEmpty() || overlay.get().isSearchReloadQueued()) return;
         if (!ConfigManager.getInstance().isCraftableOnlyEnabled()) return;
@@ -57,7 +63,7 @@ public class CraftableFilter {
             throwable.printStackTrace();
             currentStacks = Long2LongMaps.EMPTY_MAP;
         }
-        if (!currentStacks.equals(this.invStacks)) {
+        if (!currentStacks.equals(CraftableFilter.invStacks)) {
             invStacks = currentStacks;
             overlay.ifPresent(ScreenOverlay::queueReloadSearch);
             return;
@@ -69,18 +75,18 @@ public class CraftableFilter {
             throwable.printStackTrace();
             currentStacks = Long2LongMaps.EMPTY_MAP;
         }
-        if (!currentStacks.equals(this.containerStacks)) {
+        if (!currentStacks.equals(CraftableFilter.containerStacks)) {
             containerStacks = currentStacks;
             overlay.ifPresent(ScreenOverlay::queueReloadSearch);
         }
     }
     
-    public Long2LongMap getInvStacks() {
+    public static Long2LongMap getInvStacks() {
         return invStacks;
     }
     
     @ApiStatus.Internal
-    public Long2LongMap getInventoryItemsTypes() {
+    public static Long2LongMap getInventoryItemsTypes() {
         EntryDefinition<ItemStack> definition;
         try {
             definition = VanillaEntryTypes.ITEM.getDefinition();
@@ -99,7 +105,7 @@ public class CraftableFilter {
     }
     
     @ApiStatus.Internal
-    public Long2LongMap getContainerItemsTypes() {
+    public static Long2LongMap getContainerItemsTypes() {
         EntryDefinition<ItemStack> definition;
         try {
             definition = VanillaEntryTypes.ITEM.getDefinition();

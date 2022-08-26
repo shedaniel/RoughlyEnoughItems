@@ -131,6 +131,10 @@ public class PluginReloaderImpl<P extends REIPlugin<?>> {
     }
     
     public void pre(PluginManager<P> manager, Class<P> pluginClass, List<PluginManagerImpl.PluginWrapper<P>> plugins, ReloadStage stage) {
+        if (stage == ReloadStage.START && manager == PluginManager.getActiveInstances().get(0)) {
+            PERFORMANCE_LOGGER.clear();
+        }
+        
         this.forcedMainThread = false;
         this.forceMainThreadStopwatch.reset();
         this.reloadStopwatch.reset().start();

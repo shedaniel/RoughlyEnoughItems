@@ -76,12 +76,12 @@ public class UncertainDisplayViewingScreen extends Screen {
     private boolean original;
     private double frame = 0;
     private double target = 0;
-    private BooleanConsumer callback;
+    private final BooleanConsumer callback;
     private Button button;
-    private Screen parent;
+    private final Screen parent;
     private Widget slider;
-    private boolean showTips;
-    public NumberAnimator<Double> scroll = ValueAnimator.ofDouble();
+    private final boolean showTips;
+    public final NumberAnimator<Double> scroll = ValueAnimator.ofDouble();
     private List<String> allModsUsingJEI = null;
     private boolean jeiEnabled = false;
     

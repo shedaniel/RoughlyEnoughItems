@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class CreditsScreen extends Screen {
-    private Screen parent;
+    private final Screen parent;
     private AbstractButton buttonDone;
     private CreditsEntryListWidget entryListWidget;
     

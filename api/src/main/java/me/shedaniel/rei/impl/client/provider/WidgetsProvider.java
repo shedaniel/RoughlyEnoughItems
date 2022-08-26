@@ -33,10 +33,12 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.function.Supplier;
 
+@ApiStatus.Internal
 public interface WidgetsProvider {
     boolean isRenderingPanel(Panel panel);
     

@@ -30,10 +30,10 @@ import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.impl.client.gui.InternalCursorState;
 
 @SuppressWarnings("UnstableApiUsage")
 final class OverflowWidget extends DelegateWidgetWithTranslate {
@@ -43,7 +43,7 @@ final class OverflowWidget extends DelegateWidgetWithTranslate {
     private final ValueAnimator<FloatingPoint> velocity;
     private boolean dragging;
     
-    public OverflowWidget(Rectangle bounds, WidgetWithBounds widget) {
+    OverflowWidget(Rectangle bounds, WidgetWithBounds widget) {
         super(widget, Matrix4f::new);
         this.bounds = bounds;
         this.scale = ValueAnimator.ofFloat()
@@ -78,7 +78,7 @@ final class OverflowWidget extends DelegateWidgetWithTranslate {
                             widgetBounds.height - getBounds().height * scale.value(), delta, .0001) - (widgetBounds.height - getBounds().height / 2 * scale.value())
             ));
         }
-        if (!RoughlyEnoughItemsCoreClient.isLeftMousePressed) {
+        if (!InternalCursorState.isLeftMousePressed) {
             this.translate.setAs(new FloatingPoint(this.translate.value().x + this.velocity.value().x, this.translate.value().y + this.velocity.value().y));
         }
         this.velocity.update(delta);

@@ -60,8 +60,18 @@ public interface DelegateTextField extends TextField {
     }
     
     @Override
+    default TextFormatter getFormatter() {
+        return delegateTextField().getFormatter();
+    }
+    
+    @Override
     default void setSuggestionRenderer(SuggestionRenderer renderer) {
         delegateTextField().setSuggestionRenderer(renderer);
+    }
+    
+    @Override
+    default SuggestionRenderer getSuggestionRenderer() {
+        return delegateTextField().getSuggestionRenderer();
     }
     
     @Override

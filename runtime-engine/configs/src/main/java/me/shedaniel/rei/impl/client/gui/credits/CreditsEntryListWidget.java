@@ -97,7 +97,7 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
     }
     
     public static class TextCreditsItem extends CreditsItem {
-        private Component text;
+        private final Component text;
         
         public TextCreditsItem(Component text) {
             this.text = text;
@@ -120,9 +120,9 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
     }
     
     public static class TranslationCreditsItem extends CreditsItem {
-        private Component language;
-        private List<FormattedCharSequence> translators;
-        private int maxWidth;
+        private final Component language;
+        private final List<FormattedCharSequence> translators;
+        private final int maxWidth;
         
         public TranslationCreditsItem(Component language, Component translators, int width, int maxWidth) {
             this.language = language;
@@ -152,11 +152,11 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
     }
     
     public static class LinkItem extends CreditsItem {
-        private Component text;
-        private List<FormattedCharSequence> textSplit;
-        private String link;
+        private final Component text;
+        private final List<FormattedCharSequence> textSplit;
+        private final String link;
         private boolean contains;
-        private boolean rainbow;
+        private final boolean rainbow;
         
         public LinkItem(Component text, String link, int width, boolean rainbow) {
             this.text = text;

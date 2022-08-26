@@ -48,7 +48,6 @@ import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingButtonWidget;
-import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.Minecraft;
@@ -139,7 +138,9 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             widgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, 2 + w * 16, 2 + h * 16)));
             int index = 0;
             for (EntryIngredient workingStation : workstations) {
-                widgets.add(new DefaultDisplayViewingScreen.WorkstationSlotWidget(xx, yy, workingStation));
+                widgets.add(Widgets.createSlot(new Point(xx, yy))
+                        .entries(workingStation)
+                        .noBackground());
                 index++;
                 xx += 16;
                 if (index >= ww) {
@@ -169,9 +170,6 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         transformFiltering(setupDisplay);
         transformIngredientNotice(setupDisplay, ingredientStackToNotice);
         transformResultNotice(setupDisplay, resultStackToNotice);
-        for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
-            widget.removeTagMatch = true;
-        }
         this.widgets.addAll(setupDisplay);
         Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getPlusButtonArea();
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)

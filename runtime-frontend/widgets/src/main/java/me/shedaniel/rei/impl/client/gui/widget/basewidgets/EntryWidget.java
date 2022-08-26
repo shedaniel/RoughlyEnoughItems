@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.widget;
+package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -42,6 +42,7 @@ import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -54,37 +55,49 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("UnstableApiUsage")
-public class EntryWidget extends Slot implements DraggableStackProviderWidget {
-    @ApiStatus.Internal
-    public static long stackDisplayOffset = 0;
+final class EntryWidget extends Slot implements DraggableStackProviderWidget {
+    private static long stackDisplayOffset = 0;
     
+    private final NumberAnimator<Float> darkHighlightedAlpha = ValueAnimator.ofFloat()
+            .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime());
+    private final Rectangle bounds;
     @ApiStatus.Internal
-    private byte noticeMark = 0;
-    protected boolean highlight = true;
-    protected boolean tooltips = true;
-    protected boolean background = true;
-    protected boolean interactable = true;
-    protected boolean interactableFavorites = true;
-    protected boolean wasClicked = false;
-    private Rectangle bounds;
+    private byte noticeMark = Slot.UN_MARKED;
+    private long cyclingInterval = 1000L;
+    private Predicate<Slot> highlight = slot -> true;
+    private Predicate<Slot> tooltips = slot -> true;
+    private Predicate<Slot> background = slot -> true;
+    private Predicate<Slot> interactable = slot -> true;
+    private Predicate<Slot> interactableFavorites = slot -> true;
+    private Function<EntryStack<?>, @Nullable FavoriteEntry> favoriteEntryFunction = stack -> {
+        FavoriteEntry entry = FavoriteEntry.fromEntryStack(stack.normalize());
+        return entry.isInvalid() ? null : entry;
+    };
+    private BiPredicate<Slot, Point> containsPointFunction = (slot, point) -> {
+        Rectangle bounds = slot.getBounds();
+        return point.x >= bounds.x + 1 && point.y >= bounds.y + 1 && point.x <= bounds.getMaxX() - 1 && point.y <= bounds.getMaxY() - 1;
+    };
+    private boolean wasClicked = false;
     private List<EntryStack<?>> entryStacks;
     @Nullable
     private Set<UnaryOperator<Tooltip>> tooltipProcessors;
-    public ResourceLocation tagMatch;
-    public boolean removeTagMatch = true;
+    @Nullable
+    private Set<ActionPredicate> actions;
     
-    public EntryWidget(Point point) {
+    EntryWidget(Point point) {
         this(new Rectangle(point.x - 1, point.y - 1, 18, 18));
     }
     
@@ -105,53 +118,81 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     @Override
     public void setInteractable(boolean interactable) {
-        this.interactable = interactable;
-        this.interactableFavorites = interactableFavorites && interactable;
+        this.interactable = slot -> interactable;
+        this.interactableFavorites = this.interactableFavorites.and(slot -> interactable);
     }
     
     @Override
     public boolean isInteractable() {
-        return this.interactable;
+        return this.interactable.test(this);
     }
     
     @Override
     public void setInteractableFavorites(boolean interactableFavorites) {
-        this.interactableFavorites = interactableFavorites && interactable;
+        this.interactableFavorites = this.interactable.and(slot -> interactableFavorites);
     }
     
     @Override
     public boolean isInteractableFavorites() {
-        return interactableFavorites;
+        return interactableFavorites.test(this);
     }
     
     @Override
     public boolean isHighlightEnabled() {
-        return highlight;
+        return highlight.test(this);
     }
     
     @Override
-    public void setHighlightEnabled(boolean highlights) {
+    public void setHighlightEnabled(Predicate<Slot> highlights) {
         this.highlight = highlights;
     }
     
     @Override
-    public void setTooltipsEnabled(boolean tooltipsEnabled) {
+    public Slot highlightEnabled(Predicate<Slot> highlight) {
+        this.highlight = this.highlight.and(highlight);
+        return this;
+    }
+    
+    @Override
+    public void setTooltipsEnabled(Predicate<Slot> tooltipsEnabled) {
         this.tooltips = tooltipsEnabled;
     }
     
     @Override
-    public boolean isTooltipsEnabled() {
-        return tooltips;
+    public Slot tooltipsEnabled(Predicate<Slot> tooltipsEnabled) {
+        this.tooltips = this.tooltips.and(tooltipsEnabled);
+        return this;
     }
     
     @Override
-    public void setBackgroundEnabled(boolean backgroundEnabled) {
+    public boolean isTooltipsEnabled() {
+        return tooltips.test(this);
+    }
+    
+    @Override
+    public void setBackgroundEnabled(Predicate<Slot> backgroundEnabled) {
         this.background = backgroundEnabled;
     }
     
     @Override
+    public Slot backgroundEnabled(Predicate<Slot> backgroundEnabled) {
+        this.background = this.background.and(backgroundEnabled);
+        return this;
+    }
+    
+    @Override
     public boolean isBackgroundEnabled() {
-        return background;
+        return background.test(this);
+    }
+    
+    @Override
+    public void setCyclingInterval(long cyclingInterval) {
+        this.cyclingInterval = cyclingInterval;
+    }
+    
+    @Override
+    public long getCyclingInterval() {
+        return cyclingInterval;
     }
     
     @Override
@@ -171,7 +212,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             }
             entryStacks.add(stack);
         }
-        if (removeTagMatch) tagMatch = null;
         return this;
     }
     
@@ -182,7 +222,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 entryStacks = new ArrayList<>(entryStacks);
             }
             entryStacks.addAll(stacks);
-            if (removeTagMatch) tagMatch = null;
         }
         return this;
     }
@@ -194,11 +233,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             return EntryStack.empty();
         if (size == 1)
             return entryStacks.get(0);
-        return entryStacks.get(Mth.floor(((System.currentTimeMillis() + stackDisplayOffset) / getCyclingInterval() % (double) size)));
-    }
-    
-    protected long getCyclingInterval() {
-        return 1000;
+        return entryStacks.get(Mth.floor(((System.currentTimeMillis() + stackDisplayOffset) / cyclingInterval % (double) size)));
     }
     
     @Override
@@ -221,11 +256,11 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         drawBackground(matrices, mouseX, mouseY, delta);
         drawCurrentEntry(matrices, mouseX, mouseY, delta);
         
-        boolean highlighted = containsMouse(mouseX, mouseY);
-        if (isTooltipsEnabled() && highlighted) {
+        boolean hovered = containsMouse(mouseX, mouseY);
+        if (isTooltipsEnabled() && hovered) {
             queueTooltip(matrices, mouseX, mouseY, delta);
         }
-        if (isHighlightEnabled() && highlighted) {
+        if (isHighlightEnabled() && hovered) {
             drawHighlighted(matrices, mouseX, mouseY, delta);
         }
         drawExtra(matrices, mouseX, mouseY, delta);
@@ -237,30 +272,34 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     @Override
     public void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (background) {
-            darkBackgroundAlpha.update(delta);
-            RenderSystem.enableBlend();
-            RenderSystem.blendFuncSeparate(770, 771, 1, 0);
-            RenderSystem.blendFunc(770, 771);
-            RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
-            if (darkBackgroundAlpha.value() > 0.0F) {
-                RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE_DARK);
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value());
-                blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
+        if (isBackgroundEnabled()) {
+            if (bounds.width == 16 && bounds.height == 16) {
+                darkBackgroundAlpha.update(delta);
+                RenderSystem.enableBlend();
+                RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+                RenderSystem.blendFunc(770, 771);
+                RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
+                if (darkBackgroundAlpha.value() > 0.0F) {
+                    RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE_DARK);
+                    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value());
+                    blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
+                    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                }
+            } else {
+                Widgets.createSlotBase(bounds).render(matrices, mouseX, mouseY, delta);
             }
         }
     }
     
-    protected void drawCurrentEntry(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    private void drawCurrentEntry(PoseStack matrices, int mouseX, int mouseY, float delta) {
         EntryStack<?> entry = getCurrentEntry();
         entry.setZ(100);
         entry.render(matrices, getInnerBounds(), mouseX, mouseY, delta);
     }
     
-    protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    private void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
         Tooltip tooltip = getCurrentTooltip(TooltipContext.ofMouse());
         if (tooltip != null) {
             tooltip.queue();
@@ -276,14 +315,15 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         Tooltip tooltip = getCurrentEntry().getTooltip(context);
         
         if (tooltip != null) {
-            if (interactableFavorites && ConfigObject.getInstance().doDisplayFavoritesTooltip() && !ConfigObject.getInstance().getFavoriteKeyCode().isUnknown()) {
+            if (isInteractableFavorites() && ConfigObject.getInstance().doDisplayFavoritesTooltip() && !ConfigObject.getInstance().getFavoriteKeyCode().isUnknown()) {
                 String name = ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString();
-                if (reverseFavoritesAction())
+                if (isFavorites()) {
                     tooltip.addAllTexts(Stream.of(I18n.get("text.rei.remove_favorites_tooltip", name).split("\n"))
                             .map(TextComponent::new).collect(Collectors.toList()));
-                else
+                } else {
                     tooltip.addAllTexts(Stream.of(I18n.get("text.rei.favorites_tooltip", name).split("\n"))
                             .map(TextComponent::new).collect(Collectors.toList()));
+                }
             }
             
             if (tooltipProcessors != null) {
@@ -309,10 +349,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         return tooltip;
     }
     
-    private final NumberAnimator<Float> darkHighlightedAlpha = ValueAnimator.ofFloat()
-            .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
-            .asFloat();
-    
     @Override
     public void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
         darkHighlightedAlpha.update(delta);
@@ -331,7 +367,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         return Collections.emptyList();
     }
     
-    protected boolean wasClicked() {
+    private boolean wasClicked() {
         boolean wasClicked = this.wasClicked;
         this.wasClicked = false;
         return wasClicked;
@@ -341,18 +377,42 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public void tooltipProcessor(UnaryOperator<Tooltip> operator) {
         if (tooltipProcessors == null) {
             tooltipProcessors = Collections.singleton(operator);
-        } else {
+        } else if (!tooltipProcessors.contains(operator)) {
             if (!(tooltipProcessors instanceof LinkedHashSet)) {
                 tooltipProcessors = new LinkedHashSet<>(tooltipProcessors);
             }
+            tooltipProcessors.add(operator);
+        } else if (tooltipProcessors.size() == 1) {
+            tooltipProcessors = Collections.singleton(operator);
+        } else {
+            tooltipProcessors.remove(operator);
             tooltipProcessors.add(operator);
         }
     }
     
     @Override
+    public void action(ActionPredicate predicate) {
+        if (actions == null) {
+            actions = Collections.singleton(predicate);
+        } else if (!actions.contains(predicate)) {
+            if (!(actions instanceof LinkedHashSet)) {
+                actions = new LinkedHashSet<>(actions);
+            }
+            actions.add(predicate);
+        } else if (actions.size() == 1) {
+            actions = Collections.singleton(predicate);
+        } else {
+            actions.remove(predicate);
+            actions.add(predicate);
+        }
+    }
+    
+    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (containsMouse(mouseX, mouseY))
+        if (containsMouse(mouseX, mouseY)) {
             this.wasClicked = true;
+        }
+        
         return super.mouseClicked(mouseX, mouseY, button);
     }
     
@@ -372,23 +432,29 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (!interactable)
+        if (!isInteractable())
             return false;
         if (wasClicked() && containsMouse(mouseX, mouseY)) {
-            if (doAction(mouseX, mouseY, button)) {
-                return true;
-            }
+            return doAction(mouseX, mouseY, button);
         }
         return false;
     }
     
-    protected boolean doAction(double mouseX, double mouseY, int button) {
-        if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && !getCurrentEntry().isEmpty()) {
+    private boolean doAction(double mouseX, double mouseY, int button) {
+        if (actions != null) {
+            for (ActionPredicate action : actions) {
+                if (action.doMouse(this, mouseX, mouseY, button)) {
+                    return true;
+                }
+            }
+        }
+        
+        if (isInteractableFavorites() && ConfigObject.getInstance().isFavoritesEnabled() && !getCurrentEntry().isEmpty()) {
             ModifierKeyCode keyCode = ConfigObject.getInstance().getFavoriteKeyCode();
             if (keyCode.matchesMouse(button)) {
                 FavoriteEntry favoriteEntry = asFavoriteEntry();
                 if (favoriteEntry != null) {
-                    if (reverseFavoritesAction()) {
+                    if (isFavorites()) {
                         ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
                     } else {
                         ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
@@ -406,25 +472,39 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         return false;
     }
     
+    @Override
+    public void setFavoriteEntryFunction(Function<EntryStack<?>, FavoriteEntry> function) {
+        this.favoriteEntryFunction = function;
+    }
+    
+    @Override
+    public Function<EntryStack<?>, FavoriteEntry> getFavoriteEntryFunction() {
+        return favoriteEntryFunction;
+    }
+    
+    @Override
+    public void setContainsPointFunction(BiPredicate<Slot, Point> containsPointFunction) {
+        this.containsPointFunction = containsPointFunction;
+    }
+    
+    @Override
+    public void appendContainsPointFunction(BiPredicate<Slot, Point> function) {
+        containsPointFunction = containsPointFunction.and(function);
+    }
+    
     @ApiStatus.Internal
     @Nullable
-    protected FavoriteEntry asFavoriteEntry() {
-        FavoriteEntry entry = FavoriteEntry.fromEntryStack(getCurrentEntry().normalize());
-        return entry.isInvalid() ? null : entry;
+    private FavoriteEntry asFavoriteEntry() {
+        return favoriteEntryFunction.apply(getCurrentEntry());
     }
     
-    @ApiStatus.Internal
-    public boolean cancelDeleteItems(EntryStack<?> stack) {
-        return false;
-    }
-    
-    protected boolean reverseFavoritesAction() {
-        return false;
+    private boolean isFavorites() {
+        return noticeMark == Slot.FAVORITE;
     }
     
     @Override
     public boolean containsMouse(double mouseX, double mouseY) {
-        return mouseX >= bounds.x + 1 && mouseY >= bounds.y + 1 && mouseX <= bounds.getMaxX() - 1 && mouseY <= bounds.getMaxY() - 1;
+        return containsPointFunction.test(this, new Point(mouseX, mouseY));
     }
     
     @Override
@@ -437,13 +517,21 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     public boolean keyPressedIgnoreContains(int keyCode, int scanCode, int modifiers) {
-        if (!interactable) return false;
+        if (!isInteractable()) return false;
         
-        if (interactableFavorites && ConfigObject.getInstance().isFavoritesEnabled() && !getCurrentEntry().isEmpty()) {
+        if (actions != null) {
+            for (ActionPredicate action : actions) {
+                if (action.doKey(this, keyCode, scanCode, modifiers)) {
+                    return true;
+                }
+            }
+        }
+        
+        if (isInteractableFavorites() && ConfigObject.getInstance().isFavoritesEnabled() && !getCurrentEntry().isEmpty()) {
             if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
                 FavoriteEntry favoriteEntry = asFavoriteEntry();
                 if (favoriteEntry != null) {
-                    if (reverseFavoritesAction()) {
+                    if (isFavorites()) {
                         ConfigObject.getInstance().getFavoriteEntries().remove(favoriteEntry);
                     } else {
                         ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
@@ -452,10 +540,12 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 }
             }
         }
+        
         if (ConfigObject.getInstance().getRecipeKeybind().matchesKey(keyCode, scanCode))
             return ViewSearchBuilder.builder().addRecipesFor(getCurrentEntry()).open();
         else if (ConfigObject.getInstance().getUsageKeybind().matchesKey(keyCode, scanCode))
             return ViewSearchBuilder.builder().addUsagesFor(getCurrentEntry()).open();
+        
         return false;
     }
     
@@ -464,7 +554,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
         if (!getCurrentEntry().isEmpty() && containsMouse(mouseX, mouseY)) {
             return new DraggableStack() {
-                EntryStack<?> stack = getCurrentEntry().copy()
+                final EntryStack<?> stack = getCurrentEntry().copy()
                         .removeSetting(EntryStack.Settings.RENDERER)
                         .removeSetting(EntryStack.Settings.FLUID_RENDER_RATIO);
                 

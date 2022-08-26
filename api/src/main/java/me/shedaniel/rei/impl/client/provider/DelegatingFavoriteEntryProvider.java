@@ -26,9 +26,12 @@ package me.shedaniel.rei.impl.client.provider;
 import com.mojang.serialization.DataResult;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import net.minecraft.nbt.CompoundTag;
+import org.jetbrains.annotations.ApiStatus;
+import org.spongepowered.asm.mixin.injection.Inject;
 
 import java.util.function.Supplier;
 
+@ApiStatus.Internal
 public interface DelegatingFavoriteEntryProvider {
     FavoriteEntry delegate(Supplier<DataResult<FavoriteEntry>> result, Supplier<CompoundTag> tag);
 }

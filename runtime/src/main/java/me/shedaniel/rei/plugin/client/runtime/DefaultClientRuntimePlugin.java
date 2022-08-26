@@ -86,7 +86,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                 @Override
                 @Nullable
                 public Tooltip getTooltip(TooltipContext context) {
-                    return Tooltip.create(context.getPoint(), new TextComponent("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
+                    return Tooltip.create(context, new TextComponent("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
                 }
             }));
         }

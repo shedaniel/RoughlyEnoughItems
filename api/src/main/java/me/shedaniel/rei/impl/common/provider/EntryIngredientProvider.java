@@ -25,7 +25,9 @@ package me.shedaniel.rei.impl.common.provider;
 
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 public interface EntryIngredientProvider {
     EntryIngredient empty();
     

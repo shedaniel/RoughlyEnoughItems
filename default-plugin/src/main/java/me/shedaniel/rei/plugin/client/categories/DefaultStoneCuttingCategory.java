@@ -65,7 +65,7 @@ public class DefaultStoneCuttingCategory implements DisplayCategory<DefaultStone
         widgets.add(Widgets.createResultSlotBackground(new Point(startPoint.x + 61, startPoint.y + 5)));
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 61, startPoint.y + 5))
                 .entries(display.getOutputEntries().get(0))
-                .disableBackground()
+                .noBackground()
                 .markOutput());
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 4, startPoint.y + 5))
                 .entries(display.getInputEntries().get(0)).markInput());

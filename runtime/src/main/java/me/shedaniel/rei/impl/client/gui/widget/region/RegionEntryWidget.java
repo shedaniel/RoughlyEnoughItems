@@ -31,6 +31,8 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
@@ -45,29 +47,25 @@ import java.util.function.Supplier;
 public class RegionEntryWidget<T extends RegionEntry<T>> extends DisplayedEntryWidget {
     private final RealRegionEntry<T> entry;
     
-    RegionEntryWidget(RealRegionEntry<T> entry, int x, int y, int entrySize) {
-        super(new Point(x, y), entrySize);
+    RegionEntryWidget(RealRegionEntry<T> entry, Slot slot, int entrySize) {
+        super(slot);
         this.entry = entry;
-        this.clearEntries().entry(entry.getEntry().toStack());
+        slot.size(entrySize);
+        slot.entry(entry.getEntry().toStack());
+        slot.setFavoriteEntryFunction(stack -> asFavoriteEntry());
+        slot.setNoticeMark(Slot.FAVORITE);
+        slot.noBackground();
     }
     
-    @Override
+    public static <T extends RegionEntry<T>> RegionEntryWidget<T> createSlot(RealRegionEntry<T> entry, int x, int y, int entrySize) {
+        return new RegionEntryWidget<>(entry, Widgets.createSlot(new Point(x, y)), entrySize);
+    }
+    
     protected FavoriteEntry asFavoriteEntry() {
         return entry.region.listener.asFavorite(entry);
     }
     
-    @Override
-    public boolean containsMouse(double mouseX, double mouseY) {
-        return super.containsMouse(mouseX, mouseY) && entry.region.containsMouse(mouseX, mouseY);
-    }
-    
-    @Override
-    protected boolean reverseFavoritesAction() {
-        return true;
-    }
-    
-    @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void renderExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {
         Optional<ScreenOverlay> overlayOptional = REIRuntime.getInstance().getOverlay();
         Optional<Supplier<Collection<FavoriteMenuEntry>>> menuEntries = entry.getEntry().getMenuEntries();
         FloatingPoint value = entry.pos.value();
@@ -77,12 +75,9 @@ public class RegionEntryWidget<T extends RegionEntry<T>> extends DisplayedEntryW
             MenuAccess access = overlay.menuAccess();
             UUID uuid = entry.getEntry().getUuid();
             
-            access.openOrClose(uuid, getBounds(), () ->
+            access.openOrClose(uuid, slot.getBounds(), () ->
                     CollectionUtils.map(menuEntries.get().get(), entry -> convertMenu(overlay, entry)));
         }
-        Vector4f vector4f = new Vector4f(mouseX, mouseY, 0, 1.0F);
-        vector4f.transform(matrices.last().pose());
-        super.render(matrices, (int) vector4f.x(), (int) vector4f.y(), delta);
     }
     
     private MenuEntry convertMenu(ScreenOverlayImpl overlay, FavoriteMenuEntry entry) {
@@ -126,8 +121,8 @@ public class RegionEntryWidget<T extends RegionEntry<T>> extends DisplayedEntryW
     }
     
     @Override
-    protected boolean doAction(double mouseX, double mouseY, int button) {
-        return entry.getEntry().doAction(button) || super.doAction(mouseX, mouseY, button);
+    public boolean doMouse(Slot slot, double mouseX, double mouseY, int button) {
+        return entry.getEntry().doAction(button) || super.doMouse(slot, mouseX, mouseY, button);
     }
     
     public RealRegionEntry<T> getEntry() {

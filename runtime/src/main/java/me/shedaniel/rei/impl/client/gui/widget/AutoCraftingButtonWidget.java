@@ -31,9 +31,11 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.toast.CopyRecipeIdentifierToast;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
+import me.shedaniel.rei.impl.client.provider.AutoCraftingEvaluator;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -50,24 +52,31 @@ public class AutoCraftingButtonWidget {
         Button autoCraftingButton = Widgets.createButton(rectangle, text)
                 .focusable(false)
                 .onClick(button -> {
-                    AutoCraftingEvaluator.evaluateAutoCrafting(true, Screen.hasShiftDown(), displaySupplier.get(), idsSupplier);
+                    ClientInternals.getAutoCraftingEvaluator(displaySupplier.get())
+                            .actuallyCraft()
+                            .stacked(Screen.hasShiftDown())
+                            .get();
                 });
         return new DelegateWidget(autoCraftingButton) {
             @Override
             public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-                AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, displaySupplier.get(), idsSupplier);
+                AutoCraftingEvaluator.Result result = ClientInternals.getAutoCraftingEvaluator(displaySupplier.get())
+                        .buildRenderer()
+                        .buildTooltipRenderer(autoCraftingButton.isFocused() || containsMouse(mouseX, mouseY))
+                        .ids(idsSupplier == null ? null : idsSupplier.get())
+                        .get();
                 
-                autoCraftingButton.setEnabled(result.successful);
-                autoCraftingButton.setTint(result.tint);
+                autoCraftingButton.setEnabled(result.isSuccessful());
+                autoCraftingButton.setTint(result.getTint());
                 
-                if (result.hasApplicable) {
+                if (result.isApplicable()) {
                     autoCraftingButton.setText(text);
                 } else {
                     autoCraftingButton.setText(new TextComponent("!"));
                 }
                 
-                if (result.hasApplicable && (containsMouse(mouseX, mouseY) || autoCraftingButton.isFocused()) && result.renderer != null) {
-                    result.renderer.render(poses, mouseX, mouseY, delta, setupDisplay, displayBounds, displaySupplier.get());
+                if (result.isApplicable() && (containsMouse(mouseX, mouseY) || autoCraftingButton.isFocused()) && result.getRenderer() != null) {
+                    result.getRenderer().render(poses, mouseX, mouseY, delta, setupDisplay, displayBounds, displaySupplier.get());
                 }
                 
                 this.widget.render(poses, mouseX, mouseY, delta);
@@ -80,9 +89,9 @@ public class AutoCraftingButtonWidget {
                 }
             }
             
-            private void tryTooltip(AutoCraftingEvaluator.AutoCraftingResult result, Point point) {
-                if (result.tooltipRenderer != null) {
-                    result.tooltipRenderer.accept(point, Tooltip::queue);
+            private void tryTooltip(AutoCraftingEvaluator.Result result, Point point) {
+                if (result.getTooltipRenderer() != null) {
+                    result.getTooltipRenderer().accept(point, Tooltip::queue);
                 }
             }
             

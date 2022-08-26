@@ -34,10 +34,10 @@ import me.shedaniel.rei.api.client.util.MatrixUtils;
 
 import java.util.function.Supplier;
 
-final class DelegateWidgetWithTranslate extends DelegateWidget {
+class DelegateWidgetWithTranslate extends DelegateWidget {
     private final Supplier<Matrix4f> translate;
     
-    public DelegateWidgetWithTranslate(WidgetWithBounds widget, Supplier<Matrix4f> translate) {
+    DelegateWidgetWithTranslate(WidgetWithBounds widget, Supplier<Matrix4f> translate) {
         super(widget);
         this.translate = translate;
     }

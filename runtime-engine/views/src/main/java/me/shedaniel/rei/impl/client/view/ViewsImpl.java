@@ -53,7 +53,8 @@ import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
+import me.shedaniel.rei.impl.client.ClientInternals;
+import me.shedaniel.rei.impl.client.provider.AutoCraftingEvaluator;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
 import me.shedaniel.rei.impl.client.view.craftable.CraftableFilter;
 import me.shedaniel.rei.impl.common.InternalLogger;
@@ -319,11 +320,11 @@ public class ViewsImpl implements Views {
         Set<Display> applicableDisplays = new LinkedHashSet<>();
         
         for (Display display : displays) {
-            AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
+            AutoCraftingEvaluator.Result result = ClientInternals.getAutoCraftingEvaluator(display).get();
             
-            if (result.successful) {
+            if (result.isSuccessful()) {
                 successfulDisplays.add(display);
-            } else if (result.hasApplicable) {
+            } else if (result.isApplicable()) {
                 applicableDisplays.add(display);
             }
         }
@@ -451,7 +452,7 @@ public class ViewsImpl implements Views {
                     int slotsCraftable = 0;
                     boolean containsNonEmpty = false;
                     List<EntryIngredient> requiredInput = display.getRequiredEntries();
-                    Long2LongMap invCount = new Long2LongOpenHashMap(info == null ? CraftableFilter.INSTANCE.getInvStacks() : Long2LongMaps.EMPTY_MAP);
+                    Long2LongMap invCount = new Long2LongOpenHashMap(info == null ? CraftableFilter.getInvStacks() : Long2LongMaps.EMPTY_MAP);
                     for (SlotAccessor inputSlot : inputSlots) {
                         ItemStack stack = inputSlot.getItemStack();
                         

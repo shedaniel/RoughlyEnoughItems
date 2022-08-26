@@ -26,9 +26,11 @@ package me.shedaniel.rei.impl.common.provider;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.PluginView;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.UnaryOperator;
 
+@ApiStatus.Internal
 public interface PluginManagerConstructor {
     <P extends REIPlugin<?>> PluginManager<P> create(Class<P> clazz, UnaryOperator<PluginView<P>> constructor);
 }

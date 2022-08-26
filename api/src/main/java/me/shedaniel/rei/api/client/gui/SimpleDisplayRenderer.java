@@ -66,9 +66,9 @@ public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHold
     protected Slot createSlot(EntryIngredient ingredient) {
         return Widgets.createSlot(new Point(0, 0))
                 .entries(CollectionUtils.filterToList(ingredient, stack -> !stack.isEmpty()))
-                .disableBackground()
-                .disableHighlight()
-                .disableTooltips();
+                .noBackground()
+                .noHighlight()
+                .noTooltips();
     }
     
     public static List<EntryIngredient> simplify(List<EntryIngredient> original) {
@@ -123,10 +123,10 @@ public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHold
         int xx = bounds.x + 4, yy = bounds.y + 2;
         int j = 0;
         int itemsPerLine = getItemsPerLine();
-        for (Slot entryWidget : inputWidgets) {
-            entryWidget.setZ(getZ() + 50);
-            entryWidget.getBounds().setLocation(xx, yy);
-            entryWidget.render(matrices, mouseX, mouseY, delta);
+        for (Slot slot : inputWidgets) {
+            slot.setZ(getZ() + 50);
+            slot.getBounds().setLocation(xx, yy);
+            slot.render(matrices, mouseX, mouseY, delta);
             xx += 18;
             j++;
             if (j >= getItemsPerLine() - 2) {

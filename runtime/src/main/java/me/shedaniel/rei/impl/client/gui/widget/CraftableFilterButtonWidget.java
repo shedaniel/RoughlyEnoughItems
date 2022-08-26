@@ -29,10 +29,7 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
-import me.shedaniel.rei.api.client.gui.widgets.Button;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
@@ -155,7 +152,7 @@ public class CraftableFilterButtonWidget {
                                     });
                                 })
                         .withActive(() -> !Objects.equals(config.getInputMethodId(), pair.getKey()))
-                        .withTooltip(() -> Tooltip.create(Widget.mouse(), pair.getValue().getDescription()))
+                        .withTooltip(() -> Tooltip.create(TooltipContext.ofMouse(), pair.getValue().getDescription()))
                 )
                 .toList();
     }

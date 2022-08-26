@@ -56,16 +56,15 @@ import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.RecipeDisplayExporter;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.toast.ExportRecipeIdentifierToast;
-import me.shedaniel.rei.impl.client.gui.widget.*;
+import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingButtonWidget;
+import me.shedaniel.rei.impl.client.gui.widget.DisplayCompositeWidget;
+import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -232,19 +231,12 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                     DefaultDisplayViewingScreen.this.init();
                 }).tooltipLine(new TranslatableComponent("text.rei.previous_page")));
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 21), NarratorChatListener.NO_TITLE, label -> {
-            if (!Screen.hasShiftDown()) {
-                page = 0;
-                DefaultDisplayViewingScreen.this.init();
-            } else {
-                ScreenOverlayImpl.getInstance().choosePageWidget = new DefaultDisplayChoosePageWidget(page -> {
-                    DefaultDisplayViewingScreen.this.page = page;
-                    DefaultDisplayViewingScreen.this.init();
-                }, page, getCurrentTotalPages());
-            }
+            page = 0;
+            DefaultDisplayViewingScreen.this.init();
         }).onRender((matrices, label) -> {
             label.setMessage(new ImmutableTextComponent(String.format("%d/%d", page + 1, getCurrentTotalPages())));
             label.setClickable(getCurrentTotalPages() > 1);
-        }).tooltipFunction(label -> label.isClickable() ? new Component[]{new TranslatableComponent("text.rei.go_back_first_page"), new TextComponent(" "), new TranslatableComponent("text.rei.shift_click_to", new TranslatableComponent("text.rei.choose_page")).withStyle(ChatFormatting.GRAY)} : null));
+        }).tooltipFunction(label -> label.isClickable() ? new Component[]{new TranslatableComponent("text.rei.go_back_first_page")} : null));
         this.widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), ImmutableTextComponent.EMPTY)
                 .onClick(button -> {
                     page++;
@@ -303,9 +295,6 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             transformFiltering(setupDisplay);
             transformIngredientNotice(setupDisplay, ingredientStackToNotice);
             transformResultNotice(setupDisplay, resultStackToNotice);
-            for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
-                widget.removeTagMatch = true;
-            }
             this.recipeBounds.put(displayBounds, Pair.of(display, setupDisplay));
             this.widgets.add(new DisplayCompositeWidget(display, setupDisplay, displayBounds));
             if (plusButtonArea.isPresent()) {
@@ -328,7 +317,9 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             int index = 0;
             xx += (innerWidth - 1) * 16;
             for (EntryIngredient workingStation : workstations) {
-                widgets.add(new WorkstationSlotWidget(xx, yy, workingStation));
+                widgets.add(Widgets.createSlot(new Point(xx, yy))
+                        .entries(workingStation)
+                        .noBackground());
                 index++;
                 yy += 16;
                 if (index >= hh) {
@@ -494,9 +485,6 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                             transformFiltering(setupDisplay);
                             transformIngredientNotice(setupDisplay, ingredientStackToNotice);
                             transformResultNotice(setupDisplay, resultStackToNotice);
-                            for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets(), EntryWidget.class::isInstance)) {
-                                widget.removeTagMatch = true;
-                            }
                             
                             RecipeDisplayExporter.exportRecipeDisplay(displayBounds, spec, setupDisplay, false);
                         }
@@ -553,19 +541,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             }
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
-    }
-    
-    public static class WorkstationSlotWidget extends EntryWidget {
-        public WorkstationSlotWidget(int x, int y, EntryIngredient widgets) {
-            super(new Point(x, y));
-            entries(widgets);
-            disableBackground();
-        }
         
-        @Override
-        public boolean containsMouse(double mouseX, double mouseY) {
-            return getInnerBounds().contains(mouseX, mouseY);
-        }
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 }

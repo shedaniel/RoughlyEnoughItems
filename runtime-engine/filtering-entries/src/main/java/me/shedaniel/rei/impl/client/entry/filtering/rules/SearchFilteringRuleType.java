@@ -108,7 +108,7 @@ public class SearchFilteringRuleType implements FilteringRuleType<SearchFilterin
                         entryStacks = EntryRegistry.getInstance().getEntryStacks().parallel()
                                 .filter(filter)
                                 .map(EntryStack::normalize)
-                                .map(stack -> Widgets.createSlot(new Rectangle(0, 0, 18, 18)).disableBackground().entry(stack))
+                                .map(stack -> Widgets.createSlot(new Rectangle(0, 0, 18, 18)).noBackground().entry(stack))
                                 .collect(Collectors.toList());
                     });
                     if (entry != null) widget.setValue(entry.getWidget().getValue());

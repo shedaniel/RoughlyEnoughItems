@@ -24,15 +24,14 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.google.common.base.Suppliers;
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.ItemCheatingMode;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
@@ -41,25 +40,27 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
-import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.client.ClientInternals;
+import me.shedaniel.rei.impl.client.provider.AutoCraftingEvaluator;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
-public abstract class DisplayedEntryWidget extends EntryWidget {
+public abstract class DisplayedEntryWidget extends GuiComponent implements UnaryOperator<Tooltip>, Slot.ActionPredicate {
+    public final Slot slot;
     private long lastCheckTime = -1;
     private long lastCheckedTime = -1;
     private Display display;
@@ -67,30 +68,19 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
     
     public int backupY;
     
-    protected DisplayedEntryWidget(Point point, int entrySize) {
-        super(point);
-        this.backupY = point.y;
-        getBounds().width = getBounds().height = entrySize;
+    protected DisplayedEntryWidget(Slot slot) {
+        this.slot = slot;
+        slot.tooltipProcessor(this);
+        slot.noHighlightIfEmpty();
+        slot.tooltipsEnabled(s -> !ClientHelper.getInstance().isCheating() || Minecraft.getInstance().screen instanceof DisplayScreen || Minecraft.getInstance().player.containerMenu.getCarried().isEmpty());
+        slot.action(this);
+        this.backupY = slot.getBounds().y;
     }
     
     @Override
-    public void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (!getCurrentEntry().isEmpty())
-            super.drawHighlighted(matrices, mouseX, mouseY, delta);
-    }
-    
-    @Override
-    public void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && !minecraft.player.containerMenu.getCarried().isEmpty()) {
-            return;
-        }
-        super.queueTooltip(matrices, mouseX, mouseY, delta);
-    }
-    
-    @Override
-    protected boolean doAction(double mouseX, double mouseY, int button) {
+    public boolean doMouse(Slot slot, double mouseX, double mouseY, int button) {
         if (ClientHelper.getInstance().isCheating() && !Screen.hasControlDown() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
-            EntryStack<?> entry = getCurrentEntry().copy();
+            EntryStack<?> entry = slot.getCurrentEntry().copy();
             if (!entry.isEmpty()) {
                 if (entry.getType() != VanillaEntryTypes.ITEM) {
                     EntryStack<ItemStack> cheatsAs = entry.cheatsAs();
@@ -119,7 +109,7 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
                     TransferHandler.Result transferResult = handler.handle(context);
                     
                     if (transferResult.isBlocking()) {
-                        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                        Widgets.produceClickSound();
                         if (transferResult.isReturningToScreen() && Minecraft.getInstance().screen != containerScreen) {
                             Minecraft.getInstance().setScreen(containerScreen);
                             REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
@@ -132,30 +122,13 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
             }
         }
         
-        return super.doAction(mouseX, mouseY, button);
+        return false;
     }
     
     @Override
-    public boolean cancelDeleteItems(EntryStack<?> stack) {
-        if (!interactable || !ConfigObject.getInstance().isGrabbingItems())
-            return super.cancelDeleteItems(stack);
-        if (ClientHelper.getInstance().isCheating() && !Screen.hasControlDown() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
-            EntryStack<?> entry = getCurrentEntry().copy();
-            if (!entry.isEmpty()) {
-                if (entry.getType() != VanillaEntryTypes.ITEM) {
-                    EntryStack<ItemStack> cheatsAs = entry.cheatsAs();
-                    entry = cheatsAs.isEmpty() ? entry : cheatsAs;
-                }
-                return EntryStacks.equalsExact(entry, stack);
-            }
-        }
-        return super.cancelDeleteItems(stack);
-    }
-    
-    @Override
-    public boolean keyPressedIgnoreContains(int keyCode, int scanCode, int modifiers) {
+    public boolean doKey(Slot slot, int keyCode, int scanCode, int modifiers) {
         if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
-            EntryStack<?> entry = getCurrentEntry().copy();
+            EntryStack<?> entry = slot.getCurrentEntry().copy();
             if (!entry.isEmpty()) {
                 if (entry.getType() != VanillaEntryTypes.ITEM) {
                     EntryStack<ItemStack> cheatsAs = entry.cheatsAs();
@@ -174,14 +147,12 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
             }
         }
         
-        return super.keyPressedIgnoreContains(keyCode, scanCode, modifiers);
+        return false;
     }
     
     @Override
-    public @Nullable Tooltip getCurrentTooltip(TooltipContext context) {
-        Tooltip tooltip = super.getCurrentTooltip(context);
-        
-        if (tooltip != null && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+    public Tooltip apply(Tooltip tooltip) {
+        if (!(Minecraft.getInstance().screen instanceof DisplayScreen)) {
             boolean exists = getTransferHandler(false) != null;
             
             if (!exists) {
@@ -217,12 +188,13 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
         try {
             for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
                 for (Display display : displays) {
-                    if (Views.getInstance().isRecipesFor(getEntries(), display)) {
-                        AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
-                        if (result.successful) {
+                    if (Views.getInstance().isRecipesFor(slot.getEntries(), display)) {
+                        AutoCraftingEvaluator.Result result = ClientInternals.getAutoCraftingEvaluator(display).get();
+                        
+                        if (result.isSuccessful()) {
                             this.display = display;
                             this.displayTooltipComponent = Suppliers.memoize(() -> new DisplayTooltipComponent(display));
-                            return result.successfulHandler;
+                            return result.getSuccessfulHandler();
                         }
                     }
                 }
@@ -242,10 +214,11 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
         }
         
         if (display != null) {
-            if (Views.getInstance().isRecipesFor(getEntries(), display)) {
-                AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
-                if (result.successful) {
-                    return result.successfulHandler;
+            if (Views.getInstance().isRecipesFor(slot.getEntries(), display)) {
+                AutoCraftingEvaluator.Result result = ClientInternals.getAutoCraftingEvaluator(display).get();
+                
+                if (result.isSuccessful()) {
+                    return result.getSuccessfulHandler();
                 }
             }
             

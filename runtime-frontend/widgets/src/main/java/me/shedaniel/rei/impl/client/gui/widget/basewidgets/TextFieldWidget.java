@@ -47,19 +47,19 @@ import java.util.function.Predicate;
 
 @ApiStatus.Internal
 final class TextFieldWidget extends WidgetWithBounds implements TextField {
-    protected Function<String, String> textTransformer = SharedConstants::filterText;
-    protected int frame;
-    protected boolean editable = true;
-    protected int firstCharacterIndex;
-    protected int cursorPos;
-    protected int highlightPos;
-    protected int editableColor = 0xe0e0e0;
-    protected int notEditableColor = 0x707070;
-    protected TextFormatter formatter = TextFormatter.DEFAULT;
-    protected SuggestionRenderer suggestionRenderer = (matrices, x, y, color) ->
+    private final Rectangle bounds;
+    private Function<String, String> textTransformer = SharedConstants::filterText;
+    private int frame;
+    private boolean editable = true;
+    private int firstCharacterIndex;
+    private int cursorPos;
+    private int highlightPos;
+    private int editableColor = 0xe0e0e0;
+    private int notEditableColor = 0x707070;
+    private TextFormatter formatter = TextFormatter.DEFAULT;
+    private SuggestionRenderer suggestionRenderer = (matrices, x, y, color) ->
             this.font.drawShadow(matrices, this.font.plainSubstrByWidth(this.suggestion, this.getWidth()), x, y, color);
-    protected BorderColorProvider borderColorProvider = BorderColorProvider.DEFAULT;
-    private Rectangle bounds;
+    private BorderColorProvider borderColorProvider = BorderColorProvider.DEFAULT;
     private String text = "";
     private int maxLength = 32;
     private boolean hasBorder = true;
@@ -72,7 +72,7 @@ final class TextFieldWidget extends WidgetWithBounds implements TextField {
     private BooleanConsumer focusedResponder = bool -> {};
     private Predicate<String> filter = s -> true;
     
-    public TextFieldWidget(Rectangle bounds) {
+    TextFieldWidget(Rectangle bounds) {
         this.bounds = bounds;
     }
     
@@ -121,8 +121,18 @@ final class TextFieldWidget extends WidgetWithBounds implements TextField {
     }
     
     @Override
+    public TextFormatter getFormatter() {
+        return formatter;
+    }
+    
+    @Override
     public void setSuggestionRenderer(SuggestionRenderer suggestionRenderer) {
         this.suggestionRenderer = suggestionRenderer;
+    }
+    
+    @Override
+    public SuggestionRenderer getSuggestionRenderer() {
+        return suggestionRenderer;
     }
     
     @Override
@@ -472,11 +482,11 @@ final class TextFieldWidget extends WidgetWithBounds implements TextField {
         }
     }
     
-    protected void renderSuggestion(PoseStack matrices, int x, int y) {
+    private void renderSuggestion(PoseStack matrices, int x, int y) {
         this.suggestionRenderer.renderSuggestion(matrices, x, y, -8355712);
     }
     
-    protected void renderSelection(PoseStack matrices, int x1, int y1, int x2, int y2, int color) {
+    private void renderSelection(PoseStack matrices, int x1, int y1, int x2, int y2, int color) {
         int tmp;
         if (x1 < x2) {
             tmp = x1;

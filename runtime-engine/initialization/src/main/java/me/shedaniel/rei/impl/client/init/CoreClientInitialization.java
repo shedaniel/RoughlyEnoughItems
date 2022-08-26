@@ -82,7 +82,6 @@ public class CoreClientInitialization {
         MutableLong startReload = new MutableLong(-1);
         MutableLong endReload = new MutableLong(-1);
         PRE_UPDATE_RECIPES.register(recipeManager -> {
-            PluginReloaderImpl.PERFORMANCE_LOGGER.clear();
             CoreInitialization.reloadPlugins(startReload, ReloadStage.START);
         });
         ClientRecipeUpdateEvent.EVENT.register(recipeManager -> {

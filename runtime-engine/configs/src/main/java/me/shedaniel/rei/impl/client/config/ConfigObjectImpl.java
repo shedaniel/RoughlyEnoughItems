@@ -54,6 +54,7 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("FieldMayBeFinal")
 @ApiStatus.Internal
 @Config(name = "roughlyenoughitems/config")
 @Environment(EnvType.CLIENT)

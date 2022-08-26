@@ -33,12 +33,10 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.PreFilteredEntryList;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
-import me.shedaniel.rei.impl.client.provider.DelegatingFavoriteEntryProvider;
-import me.shedaniel.rei.impl.client.provider.FavoritesEntriesListProvider;
-import me.shedaniel.rei.impl.client.provider.MissingStacksTooltipProvider;
-import me.shedaniel.rei.impl.client.provider.WidgetsProvider;
+import me.shedaniel.rei.impl.client.provider.*;
 import me.shedaniel.rei.impl.common.Internals;
 import net.minecraft.ReportedException;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -64,6 +62,8 @@ public final class ClientInternals {
             UnaryOperator.identity());
     private static final DelegatingFavoriteEntryProvider DELEGATE_FAVORITE_ENTRY = resolveService(DelegatingFavoriteEntryProvider.class);
     private static final FavoritesEntriesListProvider FAVORITES_ENTRIES_LIST = resolveService(FavoritesEntriesListProvider.class);
+    private static final List<OverlayTicker> OVERLAY_TICKERS = resolveServices(OverlayTicker.class);
+    private static final AutoCraftingEvaluator AUTO_CRAFTING_EVALUATOR = resolveService(AutoCraftingEvaluator.class);
     private static Function<CompoundTag, DataResult<FavoriteEntry>> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
     private static BiConsumer<List<ClientTooltipComponent>, TooltipComponent> clientTooltipComponentProvider = (tooltip, result) -> throwNotSetup();
@@ -155,6 +155,14 @@ public final class ClientInternals {
     
     public static List<FavoriteEntry> getFavoritesEntriesList() {
         return FAVORITES_ENTRIES_LIST.get();
+    }
+    
+    public static List<OverlayTicker> getOverlayTickers() {
+        return OVERLAY_TICKERS;
+    }
+    
+    public static AutoCraftingEvaluator.Builder getAutoCraftingEvaluator(Display display) {
+        return AUTO_CRAFTING_EVALUATOR.builder(display);
     }
     
     public static DataResult<FavoriteEntry> favoriteEntryFromJson(CompoundTag tag) {

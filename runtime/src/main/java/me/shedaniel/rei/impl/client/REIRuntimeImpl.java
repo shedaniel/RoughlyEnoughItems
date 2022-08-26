@@ -48,6 +48,7 @@ import me.shedaniel.rei.impl.client.gui.TooltipQueue;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
+import me.shedaniel.rei.impl.client.provider.OverlayTicker;
 import me.shedaniel.rei.impl.common.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -274,7 +275,9 @@ public class REIRuntimeImpl implements REIRuntime {
         ClientTickEvent.CLIENT_POST.register(minecraft -> {
             if (isOverlayVisible() && REIRuntime.getInstance().getOverlay().isPresent()) {
                 REIRuntime.getInstance().getSearchTextField().tick();
-                ScreenOverlayImpl.getInstance().tick();
+                for (OverlayTicker ticker : ClientInternals.getOverlayTickers()) {
+                    ticker.tick();
+                }
             }
         });
     }

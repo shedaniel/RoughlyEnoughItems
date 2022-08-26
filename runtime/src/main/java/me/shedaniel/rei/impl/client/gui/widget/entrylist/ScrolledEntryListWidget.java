@@ -33,12 +33,13 @@ import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.BatchedSlots;
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -73,7 +74,8 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
         int i = nextIndex;
         for (int cont = nextIndex; cont < entries.size(); cont++) {
             EntryListStackEntry entry = entries.get(cont);
-            Rectangle entryBounds = entry.getBounds();
+            Slot slot = entry.slot;
+            Rectangle entryBounds = slot.getBounds();
             
             entryBounds.y = entry.backupY - scrolling.scrollAmountInt();
             if (entryBounds.y > this.bounds.getMaxY()) break;
@@ -81,20 +83,22 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
             if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height)) {
                 /*EntryStack<?> | List<EntryStack<?>>*/
                 Object stack = stacks.get(i++);
-                entry.clearEntries();
+                slot.clearEntries();
                 
                 if (stack instanceof EntryStack<?> entryStack) {
                     if (!entryStack.isEmpty()) {
-                        entry.entry(entryStack);
-                        slots.add(entry);
+                        slot.entry(entryStack);
+                        slots.add(slot);
                     }
                 } else {
                     List<EntryStack<?>> ingredient = (List<EntryStack<?>>) stack;
                     if (!ingredient.isEmpty()) {
-                        entry.entries(ingredient);
-                        slots.addUnbatched(entry);
+                        slot.entries(ingredient);
+                        slots.addUnbatched(slot);
                     }
                 }
+                
+                entry.updateEntries();
                 
                 CollapsedStack collapsedStack = indexedCollapsedStack.get(i - 1);
                 if (collapsedStack != null && collapsedStack.getIngredient().size() > 1) {
@@ -102,6 +106,8 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
                 } else {
                     entry.collapsed(null);
                 }
+                
+                entry.extra.render(matrices, mouseX, mouseY, delta);
             } else {
                 blockedCount++;
             }
@@ -128,7 +134,7 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
         for (int i = 0; i < slotsToPrepare; i++) {
             int xPos = currentX * entrySize + innerBounds.x;
             int yPos = currentY * entrySize + innerBounds.y;
-            entries.add((EntryListStackEntry) new EntryListStackEntry(this, xPos, yPos, entrySize, zoomed).disableBackground());
+            entries.add(EntryListStackEntry.createSlot(this, xPos, yPos, entrySize, zoomed));
             currentX++;
             if (currentX >= width) {
                 currentX = 0;
@@ -179,13 +185,23 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
         int nextIndex = skip * innerBounds.width / entrySize();
         return (Stream<EntryStack<?>>) (Stream<? extends EntryStack<?>>) entries.stream()
                 .skip(nextIndex)
-                .filter(entry -> entry.getBounds().y <= this.bounds.getMaxY())
-                .map(EntryWidget::getCurrentEntry)
+                .filter(entry -> entry.slot.getBounds().y <= this.bounds.getMaxY())
+                .map(entry -> entry.slot.getCurrentEntry())
                 .filter(Predicates.not(EntryStack::isEmpty));
     }
     
     @Override
-    protected List<EntryListStackEntry> getEntryWidgets() {
-        return entries;
+    protected List<Slot> getSlots() {
+        return new AbstractList<>() {
+            @Override
+            public int size() {
+                return entries.size();
+            }
+        
+            @Override
+            public Slot get(int index) {
+                return entries.get(index).slot;
+            }
+        };
     }
 }

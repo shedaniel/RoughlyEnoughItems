@@ -29,11 +29,12 @@ import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -47,6 +48,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.AbstractList;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -65,7 +67,7 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
         this.panel = panel;
         this.entries = entries;
         int entrySize = entrySize();
-        this.widgets = CollectionUtils.map(this.entries, entry -> new SectionFavoriteWidget(new Point(0, 0), entrySize, entry));
+        this.widgets = CollectionUtils.map(this.entries, entry -> new SectionFavoriteWidget(Widgets.createSlot(new Point(0, 0)), entrySize, entry));
         
         for (SectionFavoriteWidget widget : this.widgets) {
             widget.size.setTo(entrySize * 100, 300);
@@ -89,18 +91,29 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
         updateEntriesPosition(entry -> true);
         for (SectionFavoriteWidget widget : widgets) {
             widget.update(delta);
+            Slot slot = widget.slot;
             
-            if (widget.getBounds().getMaxY() > lastY && widget.getBounds().getY() <= lastY + rowHeight) {
-                if (widget.getCurrentEntry().isEmpty())
+            if (slot.getBounds().getMaxY() > lastY && slot.getBounds().getY() <= lastY + rowHeight) {
+                if (slot.getCurrentEntry().isEmpty())
                     continue;
-                widget.render(matrices, mouseX, mouseY, delta);
+                slot.render(matrices, mouseX, mouseY, delta);
             }
         }
     }
     
     @Override
     public List<? extends GuiEventListener> children() {
-        return widgets;
+        return new AbstractList<GuiEventListener>() {
+            @Override
+            public GuiEventListener get(int index) {
+                return widgets.get(index).slot;
+            }
+            
+            @Override
+            public int size() {
+                return widgets.size();
+            }
+        };
     }
     
     @Override
@@ -121,10 +134,10 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
     @Nullable
     public DraggableStack getHoveredStack(double mouseX, double mouseY) {
         for (SectionFavoriteWidget widget : widgets) {
-            if (widget.containsMouse(mouseX, mouseY + panel.getScrolledAmount())) {
+            if (widget.slot.containsMouse(mouseX, mouseY + panel.getScrolledAmount())) {
                 RealRegionEntry<FavoriteEntry> entry = new RealRegionEntry<>(panel.getParent().getRegion(), widget.entry.copy(), entrySize());
                 entry.size.setAs(entrySize() * 100);
-                return new RegionDraggableStack<>(entry, widget);
+                return new RegionDraggableStack<>(entry, widget.slot);
             }
         }
         
@@ -134,7 +147,7 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
     @Nullable
     public EntryStack<?> getFocusedStack(Point mouse) {
         for (SectionFavoriteWidget widget : widgets) {
-            if (widget.containsMouse(mouse)) {
+            if (widget.slot.containsMouse(mouse)) {
                 return ClientEntryStacks.of(widget.entry.getRenderer(false)).copy();
             }
         }
@@ -143,15 +156,17 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
     }
     
     private class SectionFavoriteWidget extends DisplayedEntryWidget {
-        private ValueAnimator<FloatingPoint> pos = ValueAnimator.ofFloatingPoint();
-        private NumberAnimator<Double> size = ValueAnimator.ofDouble();
-        private FavoriteEntry entry;
+        private final ValueAnimator<FloatingPoint> pos = ValueAnimator.ofFloatingPoint();
+        private final NumberAnimator<Double> size = ValueAnimator.ofDouble();
+        private final FavoriteEntry entry;
         
-        protected SectionFavoriteWidget(Point point, int entrySize, FavoriteEntry entry) {
-            super(point, entrySize);
+        protected SectionFavoriteWidget(Slot slot, int entrySize, FavoriteEntry entry) {
+            super(slot);
             this.entry = entry;
-            entry(ClientEntryStacks.of(entry.getRenderer(true)));
-            disableBackground();
+            slot.size(entrySize);
+            slot.entry(ClientEntryStacks.of(entry.getRenderer(true)));
+            slot.appendContainsPointFunction((s, point) -> panel.getInnerBounds().contains(point));
+            slot.noBackground();
         }
         
         public void moveTo(boolean animated, int xPos, int yPos) {
@@ -161,22 +176,17 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
         public void update(float delta) {
             this.pos.update(delta);
             this.size.update(delta);
-            this.getBounds().width = this.getBounds().height = (int) Math.round(this.size.doubleValue() / 100);
+            slot.getBounds().width = slot.getBounds().height = (int) Math.round(this.size.doubleValue() / 100);
             double offsetSize = (entrySize() - this.size.doubleValue() / 100) / 2;
-            this.getBounds().x = (int) Math.round(pos.value().x + offsetSize);
-            this.getBounds().y = (int) Math.round(pos.value().y + offsetSize) + lastY;
+            slot.getBounds().x = (int) Math.round(pos.value().x + offsetSize);
+            slot.getBounds().y = (int) Math.round(pos.value().y + offsetSize) + lastY;
         }
         
         @Override
-        @Nullable
-        public Tooltip getCurrentTooltip(Point point) {
-            point = PointHelper.ofMouse();
-            if (!panel.getInnerBounds().contains(point)) return null;
-            Tooltip tooltip = super.getCurrentTooltip(point);
-            if (tooltip != null) {
-                tooltip.add(ImmutableTextComponent.EMPTY);
-                tooltip.add(new TranslatableComponent("tooltip.rei.drag_to_add_favorites"));
-            }
+        public Tooltip apply(Tooltip tooltip) {
+            tooltip = super.apply(tooltip);
+            tooltip.add(ImmutableTextComponent.EMPTY);
+            tooltip.add(new TranslatableComponent("tooltip.rei.drag_to_add_favorites"));
             return tooltip;
         }
     }

@@ -51,6 +51,7 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientInternals;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
+import me.shedaniel.rei.impl.client.gui.InternalCursorState;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.CatchingExceptionUtils;
 import me.shedaniel.rei.impl.client.gui.widget.TooltipImpl;
@@ -94,8 +95,6 @@ import java.util.stream.Stream;
 
 @Environment(EnvType.CLIENT)
 public class RoughlyEnoughItemsCoreClient {
-    public static boolean isLeftMousePressed = false;
-    
     public static void attachClientInternals() {
         CatchingExceptionUtils.attach();
         ClientInternals.attachInstance((Function<CompoundTag, DataResult<FavoriteEntry>>) (object) -> {
@@ -260,7 +259,8 @@ public class RoughlyEnoughItemsCoreClient {
             }
         });
         ClientScreenInputEvent.MOUSE_CLICKED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
-            isLeftMousePressed = true;
+            if (button == 0) InternalCursorState.isLeftMousePressed = true;
+            if (button == 1) InternalCursorState.isRightMousePressed = true;
             if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             resetFocused(screen);
@@ -274,7 +274,8 @@ public class RoughlyEnoughItemsCoreClient {
             return EventResult.pass();
         });
         ClientScreenInputEvent.MOUSE_RELEASED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
-            isLeftMousePressed = false;
+            if (button == 0) InternalCursorState.isLeftMousePressed = false;
+            if (button == 1) InternalCursorState.isRightMousePressed = false;
             if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             resetFocused(screen);

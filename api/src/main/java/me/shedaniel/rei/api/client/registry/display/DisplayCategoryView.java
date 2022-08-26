@@ -66,7 +66,7 @@ public interface DisplayCategoryView<T extends Display> {
      * for how the tooltip is resolved.
      * <p>
      * It is recommended to mark these slots for I/O using {@link Slot#markInput()} and {@link Slot#markOutput()},
-     * and the background of the slots may be disabled using {@link Slot#disableBackground()}.
+     * and the background of the slots may be disabled using {@link Slot#noBackground()}.
      * <p>
      * Arbitrary text may be added to the widgets list with {@link Widgets#createLabel(Point, Component)},
      * you may configure the horizontal alignment of the text using {@link Label#centered()},

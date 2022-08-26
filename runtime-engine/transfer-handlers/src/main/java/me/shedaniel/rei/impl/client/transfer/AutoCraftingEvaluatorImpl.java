@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.widget;
+package me.shedaniel.rei.impl.client.transfer;
 
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRenderer;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.client.provider.AutoCraftingEvaluator;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -41,6 +42,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,23 +50,101 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
-public class AutoCraftingEvaluator {
-    public static class AutoCraftingResult {
+public class AutoCraftingEvaluatorImpl implements AutoCraftingEvaluator {
+    @Override
+    public Builder builder(Display display) {
+        return new Builder() {
+            private boolean actuallyCraft = false;
+            private boolean stacked = false;
+            @Nullable
+            private Collection<ResourceLocation> ids = display.provideInternalDisplayIds();
+            private boolean buildRenderer = false;
+            private boolean buildTooltipRenderer = false;
+            
+            @Override
+            public Builder actuallyCraft() {
+                this.actuallyCraft = true;
+                return this;
+            }
+            
+            @Override
+            public Builder stacked() {
+                this.stacked = true;
+                return this;
+            }
+            
+            @Override
+            public Builder ids(@Nullable Collection<ResourceLocation> ids) {
+                this.ids = ids;
+                return this;
+            }
+            
+            @Override
+            public Builder buildRenderer() {
+                this.buildRenderer = true;
+                return this;
+            }
+            
+            @Override
+            public Builder buildTooltipRenderer() {
+                this.buildTooltipRenderer = true;
+                return this;
+            }
+            
+            @Override
+            public Result get() {
+                return evaluateAutoCrafting(actuallyCraft, stacked, display, buildRenderer, buildTooltipRenderer, ids);
+            }
+        };
+    }
+    
+    public static class AutoCraftingResult implements AutoCraftingEvaluator.Result {
         public int tint = 0;
         public boolean successful = false;
         public TransferHandler successfulHandler;
         public boolean hasApplicable = false;
         public TransferHandlerRenderer renderer;
         public BiConsumer<Point, Consumer<Tooltip>> tooltipRenderer;
+        
+        @Override
+        public int getTint() {
+            return tint;
+        }
+        
+        @Override
+        public boolean isSuccessful() {
+            return successful;
+        }
+        
+        @Override
+        public TransferHandler getSuccessfulHandler() {
+            return successfulHandler;
+        }
+        
+        @Override
+        public boolean isApplicable() {
+            return hasApplicable;
+        }
+        
+        @Override
+        public TransferHandlerRenderer getRenderer() {
+            return renderer;
+        }
+        
+        @Override
+        public BiConsumer<Point, Consumer<Tooltip>> getTooltipRenderer() {
+            return tooltipRenderer;
+        }
     }
     
-    public static AutoCraftingResult evaluateAutoCrafting(boolean actuallyCrafting, boolean stackedCrafting, Display display, Supplier<Collection<ResourceLocation>> idsSupplier) {
+    public static AutoCraftingResult evaluateAutoCrafting(boolean actuallyCrafting, boolean stackedCrafting, Display display,
+            boolean buildRenderer, boolean buildTooltipRenderer,
+            @Nullable Collection<ResourceLocation> ids) {
         AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
         AutoCraftingResult result = new AutoCraftingResult();
         final List<Tooltip.Entry> errorTooltip = new ArrayList<>();
-        result.tooltipRenderer = (pos, sink) -> {
+        result.tooltipRenderer = !buildTooltipRenderer ? null : (pos, sink) -> {
             List<Tooltip.Entry> str = new ArrayList<>(errorTooltip);
             
             if (ConfigObject.getInstance().isFavoritesEnabled()) {
@@ -72,17 +152,14 @@ public class AutoCraftingEvaluator {
                 str.add(Tooltip.entry(new TranslatableComponent("text.rei.save.recipes", new TextComponent(ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString().toUpperCase(Locale.ROOT)).withStyle(ChatFormatting.BOLD)).withStyle(ChatFormatting.GRAY)));
             }
             
-            if (Minecraft.getInstance().options.advancedItemTooltips && idsSupplier != null) {
-                Collection<ResourceLocation> locations = idsSupplier.get();
-                if (!locations.isEmpty()) {
-                    str.add(Tooltip.entry(new TextComponent(" ")));
-                    for (ResourceLocation location : locations) {
-                        String t = I18n.get("text.rei.recipe_id", "", location.toString());
-                        if (t.startsWith("\n")) {
-                            t = t.substring("\n".length());
-                        }
-                        str.add(Tooltip.entry(new TextComponent(t).withStyle(ChatFormatting.GRAY)));
+            if (Minecraft.getInstance().options.advancedItemTooltips && ids != null && !ids.isEmpty()) {
+                str.add(Tooltip.entry(new TextComponent(" ")));
+                for (ResourceLocation location : ids) {
+                    String t = I18n.get("text.rei.recipe_id", "", location.toString());
+                    if (t.startsWith("\n")) {
+                        t = t.substring("\n".length());
                     }
+                    str.add(Tooltip.entry(new TextComponent(t).withStyle(ChatFormatting.GRAY)));
                 }
             }
             
@@ -115,12 +192,14 @@ public class AutoCraftingEvaluator {
                     result.hasApplicable = true;
                     result.tint = transferResult.getColor();
                     
-                    TransferHandlerRenderer transferHandlerRenderer = transferResult.getRenderer(transferHandler, context);
-                    if (transferHandlerRenderer != null) {
-                        result.renderer = transferHandlerRenderer;
+                    if (buildRenderer) {
+                        TransferHandlerRenderer transferHandlerRenderer = transferResult.getRenderer(transferHandler, context);
+                        if (transferHandlerRenderer != null) {
+                            result.renderer = transferHandlerRenderer;
+                        }
                     }
                     
-                    if (transferResult.getTooltipRenderer() != null) {
+                    if (buildTooltipRenderer && transferResult.getTooltipRenderer() != null) {
                         BiConsumer<Point, TransferHandler.Result.TooltipSink> tooltipRenderer = transferResult.getTooltipRenderer();
                         result.tooltipRenderer = (point, tooltipConsumer) -> tooltipRenderer.accept(point, tooltipConsumer::accept);
                     }
@@ -143,6 +222,8 @@ public class AutoCraftingEvaluator {
                 e.printStackTrace();
             }
         }
+        
+        if (!buildTooltipRenderer) return result;
         
         if (!result.hasApplicable) {
             errorTooltip.clear();

@@ -39,7 +39,7 @@ import java.util.Optional;
 
 @ApiStatus.Internal
 public class TitleTextEntry extends AbstractConfigListEntry<Unit> {
-    private Component text;
+    private final Component text;
     
     public TitleTextEntry(Component text) {
         super(NarratorChatListener.NO_TITLE, false);

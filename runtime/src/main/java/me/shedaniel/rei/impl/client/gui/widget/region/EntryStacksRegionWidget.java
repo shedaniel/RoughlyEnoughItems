@@ -38,14 +38,10 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
 import me.shedaniel.rei.api.client.gui.drag.*;
-import me.shedaniel.rei.api.client.gui.widgets.BatchedSlots;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
@@ -124,11 +120,15 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         
         ScissorsHandler.INSTANCE.scissor(bounds);
         
-        Stream<RegionEntryWidget<T>> entryStream = this.entriesList.stream()
-                .filter(entry -> entry.getBounds().getMaxY() >= this.bounds.getY() && entry.getBounds().y <= this.bounds.getMaxY());
+        Iterable<RegionEntryWidget<T>> entryIterable = Iterables.filter(entriesList,
+                entry -> entry.slot.getBounds().getMaxY() >= this.bounds.getY() && entry.slot.getBounds().y <= this.bounds.getMaxY());
         
         BatchedSlots slots = Widgets.createBatchedSlots();
-        entryStream.collect(Collectors.toCollection(() -> slots));
+        for (RegionEntryWidget<T> entry : entryIterable) {
+            entry.renderExtra(poses, mouseX, mouseY, delta);
+            slots.add(entry.slot);
+        }
+        
         slots.render(poses, mouseX, mouseY, delta);
         
         updatePosition(delta);
@@ -183,7 +183,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
         if (innerBounds.contains(mouseX, mouseY)) {
             for (RealRegionEntry<T> entry : entries.values()) {
-                if (entry.getWidget().containsMouse(mouseX, mouseY) && listener.canBeDragged(entry)) {
+                if (entry.getSlot().containsMouse(mouseX, mouseY) && listener.canBeDragged(entry)) {
                     return new RegionDraggableStack<>(entry, null);
                 }
             }
@@ -195,8 +195,8 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         Point mouse = mouse();
         if (innerBounds.contains(mouse)) {
             for (RealRegionEntry<T> entry : entries.values()) {
-                if (entry.getWidget().containsMouse(mouse)) {
-                    return entry.getWidget().getCurrentEntry().copy();
+                if (entry.getSlot().containsMouse(mouse)) {
+                    return entry.getSlot().getCurrentEntry().copy();
                 }
             }
         }
@@ -205,8 +205,9 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     
     public Stream<EntryStack<?>> getEntries() {
         return (Stream<EntryStack<?>>) (Stream<? extends EntryStack<?>>) entriesList.stream()
+                .map(entry -> entry.slot)
                 .filter(entry -> entry.getBounds().getMaxY() >= this.bounds.getY() && entry.getBounds().y <= this.bounds.getMaxY())
-                .map(EntryWidget::getCurrentEntry)
+                .map(Slot::getCurrentEntry)
                 .filter(entry -> !entry.isEmpty());
     }
     
@@ -307,8 +308,8 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     public void applyNewEntriesList() {
         this.entriesList = Stream.concat(entries.values().stream().map(RealRegionEntry::getWidget), removedEntries.values().stream().map(RealRegionEntry::getWidget)).collect(Collectors.toList());
         this.children = Stream.<Stream<Widget>>of(
-                entries.values().stream().map(RealRegionEntry::getWidget),
-                removedEntries.values().stream().map(RealRegionEntry::getWidget)
+                entries.values().stream().map(RealRegionEntry::getSlot),
+                removedEntries.values().stream().map(RealRegionEntry::getSlot)
         ).flatMap(Function.identity()).collect(Collectors.toList());
     }
     

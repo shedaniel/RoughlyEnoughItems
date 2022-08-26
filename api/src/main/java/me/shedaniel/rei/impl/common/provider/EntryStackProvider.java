@@ -26,7 +26,9 @@ package me.shedaniel.rei.impl.common.provider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import net.minecraft.util.Unit;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 public interface EntryStackProvider {
     EntryStack<Unit> empty();
     

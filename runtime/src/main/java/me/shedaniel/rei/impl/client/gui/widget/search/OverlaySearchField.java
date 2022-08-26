@@ -43,7 +43,6 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
-import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListEntries;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.HighlightInfo;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.PartHighlightInfo;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.QuoteHighlightInfo;
@@ -114,7 +113,7 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
         return TextTransformations.forwardWithTransformation(text, (s, charIndex, c) -> {
             HighlightInfo arg = highlighter.highlighted[charIndex + index];
             Style style = Style.EMPTY;
-            if (isMain && EntryListEntries.INSTANCE.isEmpty() && !textField.getText().isEmpty()) {
+            if (isMain && ScreenOverlayImpl.getEntryListWidget().getEntries().findAny().isEmpty() && !textField.getText().isEmpty()) {
                 style = ERROR_STYLE;
             }
             if (arg instanceof PartHighlightInfo part) {
@@ -152,15 +151,6 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
                 history.remove(0);
             history.add(text);
         }
-    }
-    
-    public void laterRender(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        progress.update(delta);
-        RenderSystem.disableDepthTest();
-        if (isMain) drawHint(matrices, mouseX, mouseY);
-        textField.setSuggestion(!textField.isFocused() && textField.getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
-        super.render(matrices, mouseX, mouseY, delta);
-        RenderSystem.enableDepthTest();
     }
     
     private void drawHint(PoseStack poses, int mouseX, int mouseY) {
@@ -280,7 +270,7 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
         isHighlighting = isHighlighting && ConfigObject.getInstance().isInventoryHighlightingAllowed();
         if (isMain && isHighlighting) {
             return 0xfff2ff0c;
-        } else if (isMain && EntryListEntries.INSTANCE.isEmpty() && !textField.getText().isEmpty()) {
+        } else if (isMain && ScreenOverlayImpl.getEntryListWidget().getEntries().findAny().isEmpty() && !textField.getText().isEmpty()) {
             return 0xffff5555;
         } else {
             return TextField.BorderColorProvider.DEFAULT.getBorderColor(textField);
@@ -369,9 +359,12 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (!isMain) {
-            laterRender(matrices, mouseX, mouseY, delta);
-        }
+        progress.update(delta);
+        RenderSystem.disableDepthTest();
+        if (isMain) drawHint(matrices, mouseX, mouseY);
+        textField.setSuggestion(!textField.isFocused() && textField.getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
+        super.render(matrices, mouseX, mouseY, delta);
+        RenderSystem.enableDepthTest();
     }
     
     @Override

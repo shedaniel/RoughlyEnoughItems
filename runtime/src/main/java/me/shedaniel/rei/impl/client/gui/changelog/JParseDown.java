@@ -64,10 +64,13 @@ public class JParseDown {
         }
     }
     
-    public abstract static class Component {
+    public static class Component {
         public String markup = null;
         public boolean hidden = false;
         public HashSet<Class<?>> nonNestables = new HashSet<>();
+        
+        protected Component() {
+        }
     }
     
     public interface BlockType<B extends Block> {
@@ -366,11 +369,11 @@ public class JParseDown {
         public String markerTypeRegex;
         
         public LinkedList<String> lines = new LinkedList<>();
-    
+        
         public BlockList() {
             autoBreak = true;
         }
-    
+        
         public static Block startBlock(JParseDown parseDown, Line line, Block block) {
             boolean ordered;
             String pattern;
@@ -404,9 +407,9 @@ public class JParseDown {
                 b.pattern = pattern;
                 b.ordered = ordered;
                 b.marker = marker;
-                b.markerType = !ordered ?
-                        markerWithoutWhitespace :
-                        markerWithoutWhitespace.substring(markerWithoutWhitespace.length() - 1, markerWithoutWhitespace.length());
+                b.markerType = ordered ?
+                        markerWithoutWhitespace.substring(markerWithoutWhitespace.length() - 1) :
+                        markerWithoutWhitespace;
                 b.markerTypeRegex = Pattern.quote(b.markerType);
                 
                 b.lines.add(body);
@@ -476,9 +479,8 @@ public class JParseDown {
         
         @Override
         public Block completeBlock() {
-            if (loose) {
-                if (!lines.getLast().isEmpty())
-                    lines.add("");
+            if (loose && !lines.getLast().isEmpty()) {
+                lines.add("");
             }
             return this;
         }
@@ -573,7 +575,7 @@ public class JParseDown {
         public BlockHorizontalRule() {
             autoBreak = true;
         }
-    
+        
         @Override
         public Collection<Inline> inline(JParseDown parseDown) {
             return Collections.singletonList(new InlineHorizontalRule());
@@ -613,7 +615,7 @@ public class JParseDown {
         public static Block startBlock(JParseDown parseDown, Line line, Block block) {
             Matcher m;
             if (line.text.indexOf(']') >= 0 && (m = Pattern.compile("^\\[(.+?)\\]:[ ]*+<?(\\S+?)>?(?:[ ]+[\"\\'(](.+)[\"\\')])?[ ]*+$").matcher(line.text)).find()) {
-                String id = m.group(1).toLowerCase();
+                String id = m.group(1).toLowerCase(Locale.ROOT);
                 ReferenceData data = new ReferenceData(parseDown.convertUrl(m.group(2)), m.group(3));
                 parseDown.referenceDefinitions.put(id, data);
                 return new BlockReference(id, data);
@@ -634,11 +636,11 @@ public class JParseDown {
         }
     }
     
-    public abstract static class Inline extends Component {
+    public static class Inline extends Component {
         public int extent;
         public int position = -1;
         
-        public Inline() {
+        protected Inline() {
         }
         
         public Inline setExtent(String s) {
@@ -834,7 +836,7 @@ public class JParseDown {
             InlineLink link = (InlineLink) InlineLink.inline(parseDown, text, context);
             if (link == null)
                 return null;
-    
+            
             return new InlineImage(link.url, link.text).setExtent(link.extent + 1);
         }
         

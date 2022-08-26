@@ -149,7 +149,7 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
                             @Override
                             @Nullable
                             public Tooltip getTooltip(TooltipContext context) {
-                                return Tooltip.create(context.getPoint(), new TextComponent(holder.unwrapKey().map(key -> key.location().toString()).orElse("null")));
+                                return Tooltip.create(context, new TextComponent(holder.unwrapKey().map(key -> key.location().toString()).orElse("null")));
                             }
                         });
                     }

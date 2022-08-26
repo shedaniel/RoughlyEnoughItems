@@ -55,9 +55,9 @@ public class ReferenceTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
         this.overflowBounds = overflowBounds;
         this.bounds = new Rectangle(0, 0, 24, 23);
         this.slot = Widgets.createSlot(new Rectangle(0, 0, 18, 18))
-                .disableBackground()
-                .disableHighlight()
-                .disableTooltips()
+                .noBackground()
+                .noHighlight()
+                .noTooltips()
                 .entries(EntryIngredients.ofTag(node.getReference(), mapper));
         this.children = Collections.singletonList(this.slot);
     }

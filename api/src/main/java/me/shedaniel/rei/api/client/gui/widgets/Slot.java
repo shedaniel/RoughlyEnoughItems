@@ -26,17 +26,22 @@ package me.shedaniel.rei.api.client.gui.widgets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.function.UnaryOperator;
+import java.util.function.*;
 
 public abstract class Slot extends WidgetWithBounds {
     public static final byte UN_MARKED = 0;
     public static final byte INPUT = 1;
     public static final byte OUTPUT = 2;
+    @ApiStatus.Experimental
+    public static final byte FAVORITE = 4;
     
     public final Slot unmarkInputOrOutput() {
         setNoticeMark(UN_MARKED);
@@ -51,6 +56,14 @@ public abstract class Slot extends WidgetWithBounds {
     public final Slot markOutput() {
         setNoticeMark(OUTPUT);
         return this;
+    }
+    
+    public final void size(float size) {
+        this.getBounds().setSize(size, size);
+    }
+    
+    public final void size(float width, float height) {
+        this.getBounds().setSize(width, height);
     }
     
     public abstract void setNoticeMark(byte mark);
@@ -70,6 +83,7 @@ public abstract class Slot extends WidgetWithBounds {
         return interactable(false);
     }
     
+    @Deprecated(forRemoval = true)
     public final Slot notInteractable() {
         return interactable(false);
     }
@@ -87,11 +101,16 @@ public abstract class Slot extends WidgetWithBounds {
         return interactableFavorites(false);
     }
     
+    @Deprecated(forRemoval = true)
     public final Slot notFavoritesInteractable() {
         return interactableFavorites(false);
     }
     
-    public abstract void setHighlightEnabled(boolean highlights);
+    public final void setHighlightEnabled(boolean highlights) {
+        setHighlightEnabled(slot -> highlights);
+    }
+    
+    public abstract void setHighlightEnabled(Predicate<Slot> highlights);
     
     public abstract boolean isHighlightEnabled();
     
@@ -100,11 +119,27 @@ public abstract class Slot extends WidgetWithBounds {
         return this;
     }
     
+    public abstract Slot highlightEnabled(Predicate<Slot> highlight);
+    
+    public final Slot noHighlight() {
+        return highlightEnabled(false);
+    }
+    
+    public final Slot noHighlightIfEmpty() {
+        setHighlightEnabled(slot -> !slot.isEmpty());
+        return this;
+    }
+    
+    @Deprecated(forRemoval = true)
     public final Slot disableHighlight() {
         return highlightEnabled(false);
     }
     
-    public abstract void setTooltipsEnabled(boolean tooltipsEnabled);
+    public void setTooltipsEnabled(boolean tooltipsEnabled) {
+        setTooltipsEnabled(slot -> tooltipsEnabled);
+    }
+    
+    public abstract void setTooltipsEnabled(Predicate<Slot> tooltipsEnabled);
     
     public abstract boolean isTooltipsEnabled();
     
@@ -113,11 +148,22 @@ public abstract class Slot extends WidgetWithBounds {
         return this;
     }
     
+    public abstract Slot tooltipsEnabled(Predicate<Slot> tooltipsEnabled);
+    
+    public final Slot noTooltips() {
+        return tooltipsEnabled(false);
+    }
+    
+    @Deprecated(forRemoval = true)
     public final Slot disableTooltips() {
         return tooltipsEnabled(false);
     }
     
-    public abstract void setBackgroundEnabled(boolean backgroundEnabled);
+    public void setBackgroundEnabled(boolean backgroundEnabled) {
+        setBackgroundEnabled(slot -> backgroundEnabled);
+    }
+    
+    public abstract void setBackgroundEnabled(Predicate<Slot> backgroundEnabled);
     
     public abstract boolean isBackgroundEnabled();
     
@@ -126,8 +172,24 @@ public abstract class Slot extends WidgetWithBounds {
         return this;
     }
     
+    public abstract Slot backgroundEnabled(Predicate<Slot> backgroundEnabled);
+    
+    public final Slot noBackground() {
+        return backgroundEnabled(false);
+    }
+    
+    @Deprecated(forRemoval = true)
     public final Slot disableBackground() {
         return backgroundEnabled(false);
+    }
+    
+    public abstract void setCyclingInterval(long cyclingInterval);
+    
+    public abstract long getCyclingInterval();
+    
+    public final Slot cyclingInterval(long cyclingInterval) {
+        setCyclingInterval(cyclingInterval);
+        return this;
     }
     
     public abstract Slot clearEntries();
@@ -139,6 +201,10 @@ public abstract class Slot extends WidgetWithBounds {
     public abstract EntryStack<?> getCurrentEntry();
     
     public abstract List<EntryStack<?>> getEntries();
+    
+    public final boolean isEmpty() {
+        return getEntries().isEmpty();
+    }
     
     public abstract Rectangle getInnerBounds();
     
@@ -160,4 +226,24 @@ public abstract class Slot extends WidgetWithBounds {
     public abstract void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta);
     
     public abstract void tooltipProcessor(UnaryOperator<Tooltip> operator);
+    
+    public abstract void action(ActionPredicate predicate);
+    
+    @ApiStatus.Experimental
+    public abstract void setFavoriteEntryFunction(Function<EntryStack<?>, FavoriteEntry> function);
+    
+    @ApiStatus.Experimental
+    public abstract Function<EntryStack<?>, FavoriteEntry> getFavoriteEntryFunction();
+    
+    @ApiStatus.Experimental
+    public abstract void setContainsPointFunction(BiPredicate<Slot, Point> function);
+    
+    @ApiStatus.Experimental
+    public abstract void appendContainsPointFunction(BiPredicate<Slot, Point> function);
+    
+    public interface ActionPredicate {
+        boolean doMouse(Slot slot, double mouseX, double mouseY, int button);
+        
+        boolean doKey(Slot slot, int keyCode, int scanCode, int modifiers);
+    }
 }

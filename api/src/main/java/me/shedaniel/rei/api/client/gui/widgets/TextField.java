@@ -38,7 +38,11 @@ import static me.shedaniel.rei.api.client.gui.widgets.Widget.mouse;
 public interface TextField extends TickableWidget {
     void setFormatter(TextFormatter formatter);
     
+    TextFormatter getFormatter();
+    
     void setSuggestionRenderer(SuggestionRenderer renderer);
+    
+    SuggestionRenderer getSuggestionRenderer();
     
     String getText();
     

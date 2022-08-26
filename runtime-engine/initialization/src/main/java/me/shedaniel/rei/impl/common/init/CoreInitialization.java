@@ -38,9 +38,9 @@ import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.registry.RecipeManagerContext;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
-import me.shedaniel.rei.impl.common.Internals;
 import me.shedaniel.rei.impl.client.init.CoreClientInitialization;
 import me.shedaniel.rei.impl.common.InternalLogger;
+import me.shedaniel.rei.impl.common.Internals;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
 import org.apache.commons.lang3.mutable.MutableLong;
@@ -104,7 +104,6 @@ public class CoreInitialization {
             }
             lastReload.setValue(System.currentTimeMillis());
         }
-        if (start == null) PluginReloaderImpl.PERFORMANCE_LOGGER.clear();
         if (Platform.getEnvironment() == Env.CLIENT) {
             if (CoreClientInitialization.reloadPluginsClient(start)) return;
         }

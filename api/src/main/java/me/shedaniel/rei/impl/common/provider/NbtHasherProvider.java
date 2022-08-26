@@ -25,7 +25,9 @@ package me.shedaniel.rei.impl.common.provider;
 
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import net.minecraft.nbt.Tag;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 public interface NbtHasherProvider {
     EntryComparator<Tag> provide(String... ignoredKeys);
 }

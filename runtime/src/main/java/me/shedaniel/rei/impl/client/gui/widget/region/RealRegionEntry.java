@@ -28,6 +28,7 @@ import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
 
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
@@ -42,7 +43,7 @@ public class RealRegionEntry<T extends RegionEntry<T>> {
     public RealRegionEntry(EntryStacksRegionWidget<T> region, T entry, int entrySize) {
         this.region = region;
         this.entry = entry;
-        this.widget = (RegionEntryWidget<T>) new RegionEntryWidget<>(this, 0, 0, entrySize).disableBackground();
+        this.widget = RegionEntryWidget.createSlot(this, 0, 0, entrySize);
     }
     
     public void remove() {
@@ -56,14 +57,18 @@ public class RealRegionEntry<T extends RegionEntry<T>> {
     public void update(double delta) {
         this.pos.update(delta);
         this.size.update(delta);
-        this.getWidget().getBounds().width = this.getWidget().getBounds().height = (int) Math.round(this.size.doubleValue() / 100);
+        this.getSlot().getBounds().width = this.getSlot().getBounds().height = (int) Math.round(this.size.doubleValue() / 100);
         double offsetSize = (entrySize() - this.size.doubleValue() / 100) / 2;
-        this.getWidget().getBounds().x = (int) Math.round(pos.value().x + offsetSize);
-        this.getWidget().getBounds().y = (int) Math.round(pos.value().y + offsetSize) - (int) region.getScrollAmount();
+        this.getSlot().getBounds().x = (int) Math.round(pos.value().x + offsetSize);
+        this.getSlot().getBounds().y = (int) Math.round(pos.value().y + offsetSize) - (int) region.getScrollAmount();
     }
     
     public RegionEntryWidget<T> getWidget() {
         return widget;
+    }
+    
+    public Slot getSlot() {
+        return widget.slot;
     }
     
     public boolean isHidden() {

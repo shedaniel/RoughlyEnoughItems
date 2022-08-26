@@ -23,12 +23,9 @@
 
 package me.shedaniel.rei.impl.client.provider;
 
-import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.List;
-
 @ApiStatus.Internal
-public interface FavoritesEntriesListProvider {
-    List<FavoriteEntry> get();
+public interface OverlayTicker {
+    void tick();
 }

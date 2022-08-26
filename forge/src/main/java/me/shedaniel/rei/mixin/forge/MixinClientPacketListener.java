@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.mixin.forge;
 
-import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
+import me.shedaniel.rei.impl.client.init.CoreClientInitialization;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -40,6 +40,6 @@ public class MixinClientPacketListener {
     
     @Inject(method = "handleUpdateRecipes", at = @At("HEAD"))
     private void handleUpdateRecipes(ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket, CallbackInfo ci) {
-        RoughlyEnoughItemsCoreClient.PRE_UPDATE_RECIPES.invoker().update(recipeManager);
+        CoreClientInitialization.PRE_UPDATE_RECIPES.invoker().update(recipeManager);
     }
 }

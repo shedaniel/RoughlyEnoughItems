@@ -25,7 +25,9 @@ package me.shedaniel.rei.impl.common.provider;
 
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 public interface CategoryIdentifierConstructor {
     <T extends Display> CategoryIdentifier<T> create(String location);
 }

@@ -52,7 +52,7 @@ public interface TooltipContext {
     }
     
     static TooltipContext ofMouse() {
-        return TooltipContext.of(PointHelper.ofMouse());
+        return TooltipContext.of(Widget.mouse());
     }
     
     TooltipFlag getFlag();

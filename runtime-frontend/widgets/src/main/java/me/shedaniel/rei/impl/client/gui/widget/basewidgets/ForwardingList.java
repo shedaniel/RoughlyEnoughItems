@@ -105,16 +105,6 @@ interface ForwardingList<E> extends List<E> {
     }
     
     @Override
-    default boolean equals(Object o) {
-        return delegate().equals(o);
-    }
-    
-    @Override
-    default int hashCode() {
-        return delegate().hashCode();
-    }
-    
-    @Override
     default E get(int index) {
         return delegate().get(index);
     }

@@ -25,9 +25,11 @@ package me.shedaniel.rei.impl.client.provider;
 
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 
+@ApiStatus.Internal
 public interface MissingStacksTooltipProvider {
     TooltipComponent provide(List<EntryIngredient> stacks);
 }

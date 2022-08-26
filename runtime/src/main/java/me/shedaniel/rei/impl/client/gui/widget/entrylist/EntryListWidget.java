@@ -50,7 +50,6 @@ import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionRenderingDebugger;
 import net.minecraft.client.Minecraft;
@@ -200,9 +199,9 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
                 EntryStack<ItemStack> cheatsAs = stack.cheatsAs();
                 stack = cheatsAs.isEmpty() ? stack : cheatsAs;
             }
-            for (Widget child : children()) {
-                if (child.containsMouse(mouseX, mouseY) && child instanceof EntryWidget widget) {
-                    if (widget.cancelDeleteItems(stack)) {
+            for (Slot slot : getSlots()) {
+                if (slot.containsMouse(mouseX, mouseY)) {
+                    if (cancelDeleteItems(slot, stack)) {
                         return;
                     }
                 }
@@ -229,7 +228,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (containsChecked(mouse(), false))
-            for (Widget widget : getEntryWidgets())
+            for (Widget widget : getSlots())
                 if (widget.keyPressed(keyCode, scanCode, modifiers))
                     return true;
         return false;
@@ -282,7 +281,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     
     @Override
     public List<? extends Widget> children() {
-        return getEntryWidgets();
+        return getSlots();
     }
     
     @Override
@@ -306,9 +305,9 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
                 }
                 boolean canDelete = true;
                 
-                for (Widget child : children()) {
-                    if (child.containsMouse(mouseX, mouseY) && child instanceof EntryWidget widget) {
-                        if (widget.cancelDeleteItems(stack)) {
+                for (Slot slot : getSlots()) {
+                    if (slot.containsMouse(mouseX, mouseY)) {
+                        if (cancelDeleteItems(slot, stack)) {
                             canDelete = false;
                             break;
                         }
@@ -327,11 +326,27 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
         return false;
     }
     
+    private boolean cancelDeleteItems(Slot slot, EntryStack<?> stack) {
+        if (!slot.isInteractable() || !ConfigObject.getInstance().isGrabbingItems())
+            return false;
+        if (ClientHelper.getInstance().isCheating() && !Screen.hasControlDown() && !(Minecraft.getInstance().screen instanceof DisplayScreen)) {
+            EntryStack<?> entry = slot.getCurrentEntry().copy();
+            if (!entry.isEmpty()) {
+                if (entry.getType() != VanillaEntryTypes.ITEM) {
+                    EntryStack<ItemStack> cheatsAs = entry.cheatsAs();
+                    entry = cheatsAs.isEmpty() ? entry : cheatsAs;
+                }
+                return EntryStacks.equalsExact(entry, stack);
+            }
+        }
+        return false;
+    }
+    
     @Override
     public EntryStack<?> getFocusedStack() {
         Point mouse = mouse();
         if (containsChecked(mouse, false)) {
-            for (Slot entry : getEntryWidgets()) {
+            for (Slot entry : getSlots()) {
                 EntryStack<?> currentEntry = entry.getCurrentEntry();
                 if (!currentEntry.isEmpty() && entry.containsMouse(mouse)) {
                     return currentEntry.copy();
@@ -341,7 +356,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
         return EntryStack.empty();
     }
     
-    protected abstract List<EntryListStackEntry> getEntryWidgets();
+    protected abstract List<Slot> getSlots();
     
     public void init(ScreenOverlayImpl overlay) {
     }

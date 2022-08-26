@@ -37,7 +37,8 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
+import me.shedaniel.rei.impl.client.ClientInternals;
+import me.shedaniel.rei.impl.client.provider.AutoCraftingEvaluator;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
@@ -48,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@SuppressWarnings("UnstableApiUsage")
 public class DisplayEntry extends WidgetWithBounds {
     private final LazyResettable<List<Widget>> widgets = new LazyResettable<>(this::setupWidgets);
     private final DisplayHistoryWidget parent;
@@ -171,22 +173,25 @@ public class DisplayEntry extends WidgetWithBounds {
             Vector4f mouse = new Vector4f((float) mouseX, (float) mouseY, 0, 1);
             mouse.transform(poses.last().pose());
             
-            AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, display::provideInternalDisplayIds);
+            AutoCraftingEvaluator.Result result = ClientInternals.getAutoCraftingEvaluator(display)
+                    .buildRenderer()
+                    .buildTooltipRenderer()
+                    .get();
             
-            plusButton.setEnabled(result.successful);
-            plusButton.setTint(result.tint);
+            plusButton.setEnabled(result.isSuccessful());
+            plusButton.setTint(result.getTint());
             plusButton.getBounds().setBounds(new Rectangle(bounds.getMaxX() - 14, bounds.getMaxY() - 14, 10, 10));
             
-            if (result.hasApplicable) {
+            if (result.isApplicable()) {
                 plusButton.setText(new TextComponent("+"));
                 plusButton.render(poses, Math.round(mouse.x()), Math.round(mouse.y()), delta);
                 poses.popPose();
                 
-                if (plusButton.containsMouse(Math.round(mouse.x()), Math.round(mouse.y()))) {
-                    result.tooltipRenderer.accept(new Point(mouseX, mouseY), Tooltip::queue);
+                if (plusButton.containsMouse(Math.round(mouse.x()), Math.round(mouse.y())) && result.getTooltipRenderer() != null) {
+                    result.getTooltipRenderer().accept(new Point(mouseX, mouseY), Tooltip::queue);
                 }
                 
-                if (result.renderer != null) {
+                if (result.getRenderer() != null) {
                     poses.pushPose();
                     if (!stable || !target.equals(bounds)) {
                         poses.translate(0, 0, 600);
@@ -194,7 +199,7 @@ public class DisplayEntry extends WidgetWithBounds {
                     poses.translate(xOffset(), yOffset(), 0);
                     poses.scale(xScale(), yScale(), 1.0F);
                     
-                    result.renderer.render(poses, mouseX, mouseY, delta, widgets.get(), getBounds(), display);
+                    result.getRenderer().render(poses, mouseX, mouseY, delta, widgets.get(), getBounds(), display);
                     poses.popPose();
                 }
             } else {
@@ -226,7 +231,10 @@ public class DisplayEntry extends WidgetWithBounds {
             }
             
             if (button == 0 && plusButton.containsMouse(mouseX + xOffset, mouseY)) {
-                AutoCraftingEvaluator.evaluateAutoCrafting(true, Screen.hasShiftDown(), display, display::provideInternalDisplayIds);
+                ClientInternals.getAutoCraftingEvaluator(display)
+                        .actuallyCraft()
+                        .stacked(Screen.hasShiftDown())
+                        .get();
                 Widgets.produceClickSound();
                 return true;
             }

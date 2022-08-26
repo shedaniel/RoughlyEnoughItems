@@ -50,10 +50,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 final class BatchedEntryRendererManager extends BatchedSlots implements ForwardingList<Slot> {
-    private boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
-    private Int2ObjectMap<List<Object>> grouping = new Int2ObjectOpenHashMap<>();
-    private List<Slot> toRender = new ArrayList<>();
-    private List<Slot> delegateList = new DelegatedSlotList();
+    private final boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
+    private final Int2ObjectMap<List<Object>> grouping = new Int2ObjectOpenHashMap<>();
+    private final List<Slot> toRender = new ArrayList<>();
+    private final List<Slot> delegateList = new DelegatedSlotList();
     private int size;
     public boolean debug;
     public MutableInt debugSize = new MutableInt();
@@ -125,7 +125,7 @@ final class BatchedEntryRendererManager extends BatchedSlots implements Forwardi
     
     public List<Slot> groupingsAsList() {
         return CollectionUtils.concatUnmodifiable((Iterable<List<Slot>>) () -> new AbstractIterator<>() {
-            Iterator<List<Object>> groups = grouping.values().iterator();
+            final Iterator<List<Object>> groups = grouping.values().iterator();
             
             @Nullable
             @Override

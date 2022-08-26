@@ -73,15 +73,17 @@ public class JParseDownToMinecraft {
                 } else if (inline instanceof JParseDown.InlineHorizontalRule) {
                     builder.add(ErrorsEntryListWidget.HorizontalRuleEntry::new);
                 } else if (inline instanceof JParseDown.InlineImage) {
-                    InputStream stream = builder.getClass().getClassLoader().getResourceAsStream(((JParseDown.InlineImage) inline).src);
-                    if (stream != null) {
-                        try {
-                            DynamicTexture texture = new DynamicTexture(NativeImage.read(stream));
-                            ResourceLocation id = Minecraft.getInstance().getTextureManager().register("rei_md_image_", texture);
-                            builder.add(width -> new ErrorsEntryListWidget.ImageEntry(width, texture, id));
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                    try (InputStream stream = builder.getClass().getClassLoader().getResourceAsStream(((JParseDown.InlineImage) inline).src)) {
+                        if (stream != null) {
+                            try {
+                                DynamicTexture texture = new DynamicTexture(NativeImage.read(stream));
+                                ResourceLocation id = Minecraft.getInstance().getTextureManager().register("rei_md_image_", texture);
+                                builder.add(width -> new ErrorsEntryListWidget.ImageEntry(width, texture, id));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
+                    } catch (IOException e) {
                     }
                 }
             }

@@ -88,7 +88,7 @@ public class DefaultFuelCategory implements DisplayCategory<DefaultFuelDisplay> 
     
     @Override
     public DisplayRenderer getDisplayRenderer(DefaultFuelDisplay display) {
-        Slot slot = Widgets.createSlot(new Point(0, 0)).entries(display.getInputEntries().get(0)).disableBackground().disableHighlight();
+        Slot slot = Widgets.createSlot(new Point(0, 0)).entries(display.getInputEntries().get(0)).noBackground().noHighlight();
         String burnItems = DECIMAL_FORMAT.format(display.getFuelTime() / 200d);
         return new DisplayRenderer() {
             private TranslatableComponent text = new TranslatableComponent("category.rei.fuel.time_short.items", burnItems);

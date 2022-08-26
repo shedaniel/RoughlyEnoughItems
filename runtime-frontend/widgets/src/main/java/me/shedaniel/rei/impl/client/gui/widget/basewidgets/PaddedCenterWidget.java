@@ -30,7 +30,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 final class PaddedCenterWidget extends DelegateWidgetWithTranslate {
     private final Rectangle bounds;
     
-    public PaddedCenterWidget(Rectangle bounds, WidgetWithBounds widget) {
+    PaddedCenterWidget(Rectangle bounds, WidgetWithBounds widget) {
         super(widget, Matrix4f::new);
         this.bounds = bounds;
     }

@@ -29,7 +29,6 @@ import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingRectangle;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.gui.drag.DraggableBoundsProvider;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
@@ -38,6 +37,7 @@ import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProvider;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitor;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.impl.client.gui.InternalCursorState;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -101,7 +101,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
                 hash = shapeBounds.hash;
             }
             
-            if (!RoughlyEnoughItemsCoreClient.isLeftMousePressed) {
+            if (!InternalCursorState.isLeftMousePressed) {
                 drop();
             }
         }

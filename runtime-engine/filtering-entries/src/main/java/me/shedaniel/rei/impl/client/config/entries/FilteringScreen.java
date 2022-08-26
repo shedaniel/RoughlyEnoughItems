@@ -452,9 +452,9 @@ public class FilteringScreen extends Screen {
             super(Widgets.createSlot(new Point(x, y))
                     .noFavoritesInteractable()
                     .noInteractable()
-                    .disableBackground()
-                    .disableTooltips()
-                    .disableHighlight());
+                    .noBackground()
+                    .noTooltips()
+                    .noHighlight());
             this.slot = (Slot) widget;
             this.backupY = y;
         }
