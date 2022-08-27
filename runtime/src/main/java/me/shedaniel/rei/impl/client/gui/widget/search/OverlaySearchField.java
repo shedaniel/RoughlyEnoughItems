@@ -161,7 +161,7 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
             clicking = mouseDown;
         }
         
-        List<HintProvider> hintProviders = REIRuntimeImpl.getInstance().getHintProviders();
+        List<HintProvider> hintProviders = HintProvider.PROVIDERS;
         List<Pair<HintProvider, Component>> hints = CollectionUtils.flatMap(hintProviders, provider ->
                 CollectionUtils.map(provider.provide(), component -> new Pair<>(provider, component)));
         if (hints.isEmpty()) return;

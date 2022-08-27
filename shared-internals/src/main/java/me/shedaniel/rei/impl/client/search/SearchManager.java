@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.search;
 
-import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 
 import java.util.List;

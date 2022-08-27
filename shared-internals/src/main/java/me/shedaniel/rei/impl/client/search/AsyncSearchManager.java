@@ -55,14 +55,17 @@ public class AsyncSearchManager implements SearchManager {
         this.transformer = transformer;
     }
     
+    @Override
     public void markDirty() {
         this.dirty = true;
     }
     
+    @Override
     public void markFilterDirty() {
         this.filterDirty = true;
     }
     
+    @Override
     public void updateFilter(String filter) {
         if (this.filter == null || !this.filter.getFilter().equals(filter)) {
             this.filter = SearchProvider.getInstance().createFilter(filter);
@@ -71,14 +74,17 @@ public class AsyncSearchManager implements SearchManager {
         }
     }
     
+    @Override
     public boolean isDirty() {
         return last == null || dirty;
     }
     
+    @Override
     public boolean isFilterDirty() {
         return filterDirty;
     }
     
+    @Override
     public Future<Void> getAsync(Consumer<List<EntryStack<?>>> consumer) {
         if (future == null || future.isCancelled() || future.isDone() || future.isCompletedExceptionally()) {
             if (future != null) future.cancel(true);
@@ -142,6 +148,7 @@ public class AsyncSearchManager implements SearchManager {
         return last;
     }
     
+    @Override
     public boolean matches(EntryStack<?> stack) {
         return filter.test(stack);
     }

@@ -174,6 +174,9 @@ public interface Tooltip {
     
     Tooltip withContextStack(EntryStack<?> stack);
     
+    /**
+     * Queues this tooltip to be displayed.
+     */
     default void queue() {
         EnvExecutor.runInEnv(Env.CLIENT, () -> () -> REIRuntime.getInstance().queueTooltip(this));
     }

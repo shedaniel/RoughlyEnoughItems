@@ -49,7 +49,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-final class BatchedEntryRendererManager extends BatchedSlots implements ForwardingList<Slot> {
+final class BatchedSlotsImpl extends BatchedSlots implements ForwardingList<Slot> {
     private final boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
     private final Int2ObjectMap<List<Object>> grouping = new Int2ObjectOpenHashMap<>();
     private final List<Slot> toRender = new ArrayList<>();
@@ -59,14 +59,8 @@ final class BatchedEntryRendererManager extends BatchedSlots implements Forwardi
     public MutableInt debugSize = new MutableInt();
     public MutableLong debugTime = new MutableLong();
     
-    public BatchedEntryRendererManager() {
-    }
-    
-    public BatchedEntryRendererManager(Collection<? extends Slot> widgets) {
-        addAll(widgets);
-    }
-    
-    public boolean isFastEntryRendering() {
+    @Override
+    public boolean isBatched() {
         return fastEntryRendering;
     }
     
@@ -79,11 +73,6 @@ final class BatchedEntryRendererManager extends BatchedSlots implements Forwardi
     public void addAllUnbatched(Collection<? extends Slot> slots) {
         this.toRender.addAll(slots);
         this.size += slots.size();
-    }
-    
-    @Override
-    public boolean isBatched() {
-        return isFastEntryRendering();
     }
     
     @Override

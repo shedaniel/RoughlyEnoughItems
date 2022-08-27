@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProvider;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitor;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipQueue;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
@@ -43,7 +44,6 @@ import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.client.gui.TooltipQueue;
 import me.shedaniel.rei.impl.client.gui.dragging.CurrentDraggingStack;
 import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
 import me.shedaniel.rei.impl.client.gui.menu.MenuAccessImpl;
@@ -162,12 +162,12 @@ public abstract class AbstractScreenOverlay extends ScreenOverlay {
             matrices.popPose();
         }
         
-        Tooltip tooltip = TooltipQueue.get();
+        Tooltip tooltip = TooltipQueue.getInstance().get();
         if (tooltip != null) {
             renderTooltip(matrices, tooltip);
         }
         
-        REIRuntime.getInstance().clearTooltips();
+        TooltipQueue.getInstance().clear();
         if (REIRuntime.getInstance().isOverlayVisible()) {
             menuAccess.afterRender();
         }

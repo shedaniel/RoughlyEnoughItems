@@ -31,6 +31,7 @@ import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Label;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -57,9 +58,9 @@ final class LabelWidget extends Label {
     private boolean hasShadow = true;
     private boolean focusable = true;
     private ValueProvider<Color> color = ValueAnimator.ofColor()
-            .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : -1), 50);
+            .withConvention(() -> Color.ofTransparent(ConfigObject.getInstance().isUsingDarkTheme() ? 0xFFBBBBBB : -1), 50);
     private ValueProvider<Color> hoveredColor = ValueAnimator.ofColor()
-            .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? -1 : 0xFF66FFCC), 50);
+            .withConvention(() -> Color.ofTransparent(ConfigObject.getInstance().isUsingDarkTheme() ? -1 : 0xFF66FFCC), 50);
     private final ValueProvider<Color> finalColor = ValueAnimator.ofColor()
             .withConvention(() -> {
                 if (!hovered) {
@@ -169,7 +170,7 @@ final class LabelWidget extends Label {
     @Override
     public Label color(int lightModeColor, int darkModeColor) {
         this.color = ValueAnimator.ofColor()
-                .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? darkModeColor : lightModeColor), ValueAnimator.typicalTransitionTime());
+                .withConvention(() -> Color.ofTransparent(ConfigObject.getInstance().isUsingDarkTheme() ? darkModeColor : lightModeColor), ValueAnimator.typicalTransitionTime());
         this.color.completeImmediately();
         this.finalColor.completeImmediately();
         return this;

@@ -132,7 +132,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         slots.render(poses, mouseX, mouseY, delta);
         
         updatePosition(delta);
-        scrolling.renderScrollBar(0, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+        scrolling.renderScrollBar(0, 1, ConfigObject.getInstance().isUsingDarkTheme() ? 0.8f : 1f);
         ScissorsHandler.INSTANCE.removeLastScissor();
     }
     

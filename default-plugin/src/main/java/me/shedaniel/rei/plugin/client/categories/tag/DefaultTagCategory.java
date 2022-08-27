@@ -31,6 +31,7 @@ import me.shedaniel.math.FloatingRectangle;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
@@ -143,7 +144,7 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
                                 Font font = instance.font;
                                 String text = "?";
                                 int width = font.width(text);
-                                font.draw(matrices, text, bounds.getCenterX() - width / 2f + 0.2f, bounds.getCenterY() - font.lineHeight / 2f + 1f, REIRuntime.getInstance().isDarkThemeEnabled() ? -4473925 : -12566464);
+                                font.draw(matrices, text, bounds.getCenterX() - width / 2f + 0.2f, bounds.getCenterY() - font.lineHeight / 2f + 1f, ConfigObject.getInstance().isUsingDarkTheme() ? -4473925 : -12566464);
                             }
                             
                             @Override

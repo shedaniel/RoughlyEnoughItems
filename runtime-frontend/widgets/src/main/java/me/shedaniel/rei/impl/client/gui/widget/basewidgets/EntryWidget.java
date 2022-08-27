@@ -72,7 +72,7 @@ final class EntryWidget extends Slot implements DraggableStackProviderWidget {
     private static long stackDisplayOffset = 0;
     
     private final NumberAnimator<Float> darkHighlightedAlpha = ValueAnimator.ofFloat()
-            .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime());
+            .withConvention(() -> ConfigObject.getInstance().isUsingDarkTheme() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime());
     private final Rectangle bounds;
     @ApiStatus.Internal
     private byte noticeMark = Slot.UN_MARKED;
@@ -267,7 +267,7 @@ final class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
-            .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
+            .withConvention(() -> ConfigObject.getInstance().isUsingDarkTheme() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
             .asFloat();
     
     @Override

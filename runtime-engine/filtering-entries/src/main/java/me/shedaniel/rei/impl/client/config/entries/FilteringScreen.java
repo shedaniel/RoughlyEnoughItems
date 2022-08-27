@@ -35,6 +35,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
@@ -229,7 +230,7 @@ public class FilteringScreen extends Screen {
         }
         slots.render(matrices, mouseX, mouseY, delta);
         updatePosition(delta);
-        scrolling.renderScrollBar(0, 1.0F, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8F : 1F);
+        scrolling.renderScrollBar(0, 1.0F, ConfigObject.getInstance().isUsingDarkTheme() ? 0.8F : 1F);
         matrices.pushPose();
         matrices.translate(0, 0, 300);
         this.searchField.asWidget().render(matrices, mouseX, mouseY, delta);

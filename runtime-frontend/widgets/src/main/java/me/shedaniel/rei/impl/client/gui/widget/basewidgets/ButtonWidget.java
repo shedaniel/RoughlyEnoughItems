@@ -32,6 +32,7 @@ import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import net.minecraft.client.gui.GuiComponent;
@@ -78,7 +79,7 @@ final class ButtonWidget extends Button {
         this.bounds = Objects.requireNonNull(rectangle);
         this.text = Objects.requireNonNull(text);
         this.darkBackground = ValueAnimator.ofColor()
-                .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFFFFFFF : 0x00FFFFFF), ValueAnimator.typicalTransitionTime());
+                .withConvention(() -> Color.ofTransparent(ConfigObject.getInstance().isUsingDarkTheme() ? 0xFFFFFFFF : 0x00FFFFFF), ValueAnimator.typicalTransitionTime());
         this.alpha = ValueProvider.constant(1.0);
     }
     
@@ -303,7 +304,7 @@ final class ButtonWidget extends Button {
     }
     
     protected void renderBackground(PoseStack matrices, int x, int y, int width, int height, int textureOffset) {
-        renderBackground(matrices, x, y, width, height, textureOffset, REIRuntime.getInstance().isDarkThemeEnabled(), Color.ofTransparent(0xFFFFFFFF));
+        renderBackground(matrices, x, y, width, height, textureOffset, ConfigObject.getInstance().isUsingDarkTheme(), Color.ofTransparent(0xFFFFFFFF));
     }
     
     protected void renderBackground(PoseStack matrices, int x, int y, int width, int height, int textureOffset, boolean dark, Color color) {

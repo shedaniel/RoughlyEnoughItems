@@ -52,7 +52,7 @@ final class PanelWidget extends Panel {
     private int yTextureOffset = RecipeBorderType.DEFAULT.getYOffset();
     private Predicate<Panel> rendering = Predicates.alwaysTrue();
     private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
-            .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
+            .withConvention(() -> ConfigObject.getInstance().isUsingDarkTheme() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
             .asFloat();
     
     public static boolean isRendering(Panel panel) {

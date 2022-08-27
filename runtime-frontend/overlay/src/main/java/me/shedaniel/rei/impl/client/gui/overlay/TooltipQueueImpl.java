@@ -21,30 +21,36 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui;
+package me.shedaniel.rei.impl.client.gui.overlay;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipQueue;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
 
-public class TooltipQueue {
-    private static final List<Tooltip> TOOLTIPS = Lists.newArrayList();
+@ApiStatus.Internal
+public final class TooltipQueueImpl implements TooltipQueue {
+    private final List<Tooltip> tooltips = Lists.newArrayList();
     
-    public static void addTooltip(@Nullable Tooltip tooltip) {
+    @Override
+    public void queue(@Nullable Tooltip tooltip) {
         if (tooltip != null)
-            TOOLTIPS.add(tooltip);
+            tooltips.add(tooltip);
     }
     
-    public static void clearTooltips() {
-        TOOLTIPS.clear();
+    @Override
+    public void clear() {
+        tooltips.clear();
     }
     
+    @Override
     @Nullable
-    public static Tooltip get() {
-        return TOOLTIPS.stream().filter(Objects::nonNull)
+    public Tooltip get() {
+        return tooltips.stream().filter(Objects::nonNull)
                 .reduce((tooltip, tooltip2) -> tooltip2)
                 .orElse(null);
     }

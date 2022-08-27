@@ -38,7 +38,6 @@ import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
@@ -175,7 +174,7 @@ public class ConfigButtonWidget {
     
     private static Rectangle getConfigButtonBounds() {
         if (ConfigObject.getInstance().isLowerConfigButton()) {
-            Rectangle area = REIRuntimeImpl.getSearchField().getBounds().clone();
+            Rectangle area = REIRuntime.getInstance().getSearchTextField().asWidget().getBounds().clone();
             area.setLocation(area.x + area.width + (ConfigObject.getInstance().isCraftableFilterEnabled() ? 26 : 4), area.y - 1);
             area.setSize(20, 20);
             return area;

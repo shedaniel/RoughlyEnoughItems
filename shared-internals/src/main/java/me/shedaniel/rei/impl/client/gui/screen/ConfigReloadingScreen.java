@@ -33,10 +33,10 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.function.BooleanSupplier;
 
 @ApiStatus.Internal
-public class ConfigReloadingScreen extends Screen {
+public final class ConfigReloadingScreen extends Screen {
     private final Component title;
     private final BooleanSupplier predicate;
-    private Runnable parent;
+    private final Runnable parent;
     
     public ConfigReloadingScreen(Component title, BooleanSupplier predicate, Runnable parent) {
         super(NarratorChatListener.NO_TITLE);

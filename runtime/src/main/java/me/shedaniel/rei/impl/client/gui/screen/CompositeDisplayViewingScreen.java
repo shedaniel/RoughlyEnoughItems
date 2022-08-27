@@ -45,7 +45,7 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
+import me.shedaniel.rei.impl.client.gui.DisplayScreenStack;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingButtonWidget;
 import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
@@ -273,8 +273,8 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             init();
             return true;
         } else if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesMouse(button)) {
-            if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+            if (DisplayScreenStack.hasLastDisplayScreen()) {
+                minecraft.setScreen(DisplayScreenStack.getLastDisplayScreen());
             } else {
                 minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
             }
@@ -390,7 +390,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 Optional.ofNullable(displayRenderers.get(i).getTooltip(TooltipContext.of(new Point(mouseX, mouseY)))).ifPresent(Tooltip::queue);
             }
         }
-        scrolling.renderScrollBar(0, scrollBarAlpha, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+        scrolling.renderScrollBar(0, scrollBarAlpha, ConfigObject.getInstance().isUsingDarkTheme() ? 0.8f : 1f);
         ScissorsHandler.INSTANCE.removeLastScissor();
         matrices.popPose();
     }
@@ -451,8 +451,8 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             return true;
         }
         if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesKey(keyCode, scanCode)) {
-            if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+            if (DisplayScreenStack.hasLastDisplayScreen()) {
+                minecraft.setScreen(DisplayScreenStack.getLastDisplayScreen());
             } else {
                 minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
             }

@@ -29,6 +29,7 @@ import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Arrow;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.util.Mth;
@@ -41,7 +42,7 @@ final class ArrowWidget extends Arrow {
     private Rectangle bounds;
     private double animationDuration = -1;
     private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
-            .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
+            .withConvention(() -> ConfigObject.getInstance().isUsingDarkTheme() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
             .asFloat();
     
     public ArrowWidget(Rectangle bounds) {

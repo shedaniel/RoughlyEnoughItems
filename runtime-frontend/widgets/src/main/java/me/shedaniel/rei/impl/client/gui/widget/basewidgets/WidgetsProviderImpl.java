@@ -162,6 +162,6 @@ public class WidgetsProviderImpl implements WidgetsProvider {
     
     @Override
     public BatchedSlots createBatchedSlots() {
-        return new BatchedEntryRendererManager();
+        return new BatchedSlotsImpl();
     }
 }

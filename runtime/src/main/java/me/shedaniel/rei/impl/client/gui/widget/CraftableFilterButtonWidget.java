@@ -35,7 +35,6 @@ import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.client.search.method.InputMethodRegistry;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
@@ -158,7 +157,7 @@ public class CraftableFilterButtonWidget {
     }
     
     private static Rectangle getCraftableFilterBounds() {
-        Rectangle area = REIRuntimeImpl.getSearchField().getBounds().clone();
+        Rectangle area = REIRuntime.getInstance().getSearchTextField().asWidget().getBounds().clone();
         area.setLocation(area.x + area.width + 4, area.y - 1);
         area.setSize(20, 20);
         return area;

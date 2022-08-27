@@ -53,7 +53,7 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
+import me.shedaniel.rei.impl.client.gui.DisplayScreenStack;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.RecipeDisplayExporter;
 import me.shedaniel.rei.impl.client.gui.toast.ExportRecipeIdentifierToast;
@@ -128,8 +128,8 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             return true;
         }
         if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesKey(keyCode, scanCode)) {
-            if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+            if (DisplayScreenStack.hasLastDisplayScreen()) {
+                minecraft.setScreen(DisplayScreenStack.getLastDisplayScreen());
             } else {
                 minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
             }
@@ -368,7 +368,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     }
     
     private final ValueAnimator<Color> darkStripesColor = ValueAnimator.ofColor()
-            .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFF404040 : 0xFF9E9E9E), ValueAnimator.typicalTransitionTime());
+            .withConvention(() -> Color.ofTransparent(ConfigObject.getInstance().isUsingDarkTheme() ? 0xFF404040 : 0xFF9E9E9E), ValueAnimator.typicalTransitionTime());
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
@@ -531,8 +531,8 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 recipeBack.onClick();
             return recipeBack.isEnabled();
         } else if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesMouse(button)) {
-            if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+            if (DisplayScreenStack.hasLastDisplayScreen()) {
+                minecraft.setScreen(DisplayScreenStack.getLastDisplayScreen());
             } else {
                 minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
             }

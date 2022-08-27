@@ -61,7 +61,7 @@ public class EntryListSearchManager {
     
     public static final EntryListSearchManager INSTANCE = new EntryListSearchManager();
     
-    private SearchManager searchManager = new AsyncSearchManager(EntryRegistry.getInstance()::getPreFilteredList, () -> {
+    private final SearchManager searchManager = new AsyncSearchManager(EntryRegistry.getInstance()::getPreFilteredList, () -> {
         boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled();
         LongSet workingItems = checkCraftable ? new LongOpenHashSet() : null;
         if (checkCraftable) {

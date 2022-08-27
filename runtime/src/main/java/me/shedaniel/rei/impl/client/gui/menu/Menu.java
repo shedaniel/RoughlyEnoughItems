@@ -30,7 +30,7 @@ import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.impl.client.gui.menu.entries.SubMenuEntry;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
@@ -134,7 +134,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         Rectangle bounds = getBounds();
         Rectangle innerBounds = getInnerBounds();
-        fill(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), containsMouse(mouseX, mouseY) ? (REIRuntime.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
+        fill(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), containsMouse(mouseX, mouseY) ? (ConfigObject.getInstance().isUsingDarkTheme() ? -17587 : -1) : -6250336);
         fill(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), -16777216);
         boolean contains = innerBounds.contains(mouseX, mouseY);
         MenuEntry focused = getFocused() instanceof MenuEntry menuEntry ? menuEntry : null;
@@ -159,7 +159,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
         }
         ScissorsHandler.INSTANCE.removeLastScissor();
         setFocused(focused);
-        scrolling.renderScrollBar(0, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+        scrolling.renderScrollBar(0, 1, ConfigObject.getInstance().isUsingDarkTheme() ? 0.8f : 1f);
         scrolling.updatePosition(delta);
     }
     

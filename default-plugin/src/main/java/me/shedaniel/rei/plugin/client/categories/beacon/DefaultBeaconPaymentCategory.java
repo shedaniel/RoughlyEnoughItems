@@ -30,6 +30,7 @@ import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
@@ -167,7 +168,7 @@ public class DefaultBeaconPaymentCategory implements DisplayCategory<DefaultBeac
                 }
             }
             try (CloseableScissors scissors = scissor(matrices, scrolling.getBounds())) {
-                scrolling.renderScrollBar(0xff000000, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+                scrolling.renderScrollBar(0xff000000, 1, ConfigObject.getInstance().isUsingDarkTheme() ? 0.8f : 1f);
             }
         }
         

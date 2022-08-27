@@ -24,10 +24,12 @@
 package me.shedaniel.rei.api.client;
 
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipQueue;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
@@ -60,12 +62,17 @@ public interface REIRuntime extends Reloadable<REIClientPlugin> {
      *
      * @return whether the overlay is visible
      */
-    boolean isOverlayVisible();
+    default boolean isOverlayVisible() {
+        return ConfigObject.getInstance().isOverlayVisible();
+    }
     
     /**
      * Toggles the visibility of the overlay.
      */
-    void toggleOverlayVisible();
+    default void toggleOverlayVisible() {
+        ConfigObject.getInstance().setOverlayVisible(!ConfigObject.getInstance().isOverlayVisible());
+        ConfigManager.getInstance().saveConfig();
+    }
     
     /**
      * Returns the screen overlay of REI, if available and constructed.
@@ -126,7 +133,9 @@ public interface REIRuntime extends Reloadable<REIClientPlugin> {
      * @return whether dark mode is enabled
      * @see ConfigObject#isUsingDarkTheme()
      */
-    boolean isDarkThemeEnabled();
+    default boolean isDarkThemeEnabled() {
+        return ConfigObject.getInstance().isUsingDarkTheme();
+    }
     
     /**
      * Returns the text field used for searching, if constructed.
@@ -144,7 +153,11 @@ public interface REIRuntime extends Reloadable<REIClientPlugin> {
      * @param tooltip the tooltip to display, or {@code null}
      * @see Tooltip#queue()
      */
-    void queueTooltip(@Nullable Tooltip tooltip);
+    default void queueTooltip(@Nullable Tooltip tooltip) {
+        if (getOverlay(false, false).isEmpty()) {
+            TooltipQueue.getInstance().queue(tooltip);
+        }
+    }
     
     /**
      * Clear all queued tooltips.
@@ -153,7 +166,11 @@ public interface REIRuntime extends Reloadable<REIClientPlugin> {
      * @since 8.3
      */
     @ApiStatus.Experimental
-    void clearTooltips();
+    default void clearTooltips() {
+        if (getOverlay(false, false).isEmpty()) {
+            TooltipQueue.getInstance().clear();
+        }
+    }
     
     /**
      * Returns the texture location of the default display background.
@@ -162,7 +179,9 @@ public interface REIRuntime extends Reloadable<REIClientPlugin> {
      *
      * @return the texture location of the default display background
      */
-    ResourceLocation getDefaultDisplayTexture();
+    default ResourceLocation getDefaultDisplayTexture() {
+        return getDefaultDisplayTexture(isDarkThemeEnabled());
+    }
     
     /**
      * Returns the texture location of the default display background.

@@ -47,7 +47,6 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
@@ -363,6 +362,6 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     
     @Override
     public void queueReloadSearch() {
-        updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
+        updateSearch(REIRuntime.getInstance().getSearchTextField().getText(), true);
     }
 }

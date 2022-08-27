@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.client.gui.widgets;
 
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 
 import java.util.function.Predicate;
 
@@ -56,7 +57,7 @@ public abstract class Panel extends WidgetWithBounds {
     }
     
     public final Panel color(int lightColor, int darkColor) {
-        return color(REIRuntime.getInstance().isDarkThemeEnabled() ? darkColor : lightColor);
+        return color(ConfigObject.getInstance().isUsingDarkTheme() ? darkColor : lightColor);
     }
     
     public abstract Predicate<Panel> getRendering();

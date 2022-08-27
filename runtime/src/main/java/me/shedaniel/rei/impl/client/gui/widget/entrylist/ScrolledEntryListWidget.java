@@ -32,6 +32,7 @@ import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.BatchedSlots;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -119,7 +120,7 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
         scrolling.updatePosition(delta);
         ScissorsHandler.INSTANCE.removeLastScissor();
         if (scrolling.getMaxScroll() > 0) {
-            scrolling.renderScrollBar(0, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+            scrolling.renderScrollBar(0, 1, ConfigObject.getInstance().isUsingDarkTheme() ? 0.8f : 1f);
         }
     }
     

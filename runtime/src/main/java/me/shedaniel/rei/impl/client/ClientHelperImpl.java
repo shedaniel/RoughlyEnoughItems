@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.impl.client.gui.DisplayScreenStack;
 import me.shedaniel.rei.impl.client.gui.screen.CompositeDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.display.DisplaySpec;
@@ -96,7 +97,7 @@ public class ClientHelperImpl extends ClientNetworkHelperImpl implements ClientM
             }
         }
         if (Minecraft.getInstance().screen instanceof DisplayScreen displayScreen) {
-            REIRuntimeImpl.getInstance().storeDisplayScreen(displayScreen);
+            DisplayScreenStack.storeDisplayScreen(displayScreen);
         }
         Minecraft.getInstance().setScreen(screen);
         return true;
