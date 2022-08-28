@@ -26,13 +26,23 @@ package me.shedaniel.rei.plugin.client;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.platform.Platform;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.client.gui.AbstractRenderer;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProviderWidget;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitorWidget;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
@@ -40,6 +50,7 @@ import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
+import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
@@ -55,6 +66,7 @@ import me.shedaniel.rei.plugin.client.categories.crafting.DefaultCraftingCategor
 import me.shedaniel.rei.plugin.client.categories.tag.DefaultTagCategory;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultPotionEffectExclusionZones;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultRecipeBookExclusionZones;
+import me.shedaniel.rei.plugin.client.favorites.EntryStackFavoriteEntry;
 import me.shedaniel.rei.plugin.client.favorites.GameModeFavoriteEntry;
 import me.shedaniel.rei.plugin.client.favorites.TimeFavoriteEntry;
 import me.shedaniel.rei.plugin.client.favorites.WeatherFavoriteEntry;
@@ -77,6 +89,7 @@ import net.minecraft.client.gui.screens.inventory.*;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -97,7 +110,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -134,6 +149,24 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             if (!state.isEmpty() && state.isSource()) {
                 registry.addEntry(EntryStacks.of(fluid));
             }
+        }
+        
+        if (LocalDateTime.now().getMonthValue() == 4 && LocalDateTime.now().getDayOfMonth() == 1) {
+            registry.addEntry(ClientEntryStacks.of(new AbstractRenderer() {
+                private final ResourceLocation id = new ResourceLocation("roughlyenoughitems", "textures/gui/kirb.png");
+                
+                @Override
+                public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                    RenderSystem.setShaderTexture(0, id);
+                    innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), 0, 1, 0, 1);
+                }
+                
+                @Override
+                @Nullable
+                public Tooltip getTooltip(TooltipContext context) {
+                    return Tooltip.create(context, new TextComponent("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
+                }
+            }));
         }
     }
     
@@ -324,7 +357,6 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     }
     
     protected void registerForgePotions(DisplayRegistry registry, BuiltinClientPlugin clientPlugin) {
-        
     }
     
     @Override
@@ -341,6 +373,17 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.registerContainerClickArea(new Rectangle(78, 32, 28, 23), FurnaceScreen.class, SMELTING);
         registry.registerContainerClickArea(new Rectangle(78, 32, 28, 23), SmokerScreen.class, SMOKING);
         registry.registerContainerClickArea(new Rectangle(78, 32, 28, 23), BlastFurnaceScreen.class, BLASTING);
+        
+        registry.registerDraggableComponentProvider(DraggableComponentProviderWidget.from(context -> {
+            if (!ScreenRegistry.getInstance().shouldDisplay(context.getScreen()) || !REIRuntime.getInstance().isOverlayVisible())
+                return Collections.emptyList();
+            return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableComponentProviderWidget.class::isInstance);
+        }));
+        registry.registerDraggableComponentVisitor(DraggableComponentVisitorWidget.from(context -> {
+            if (!ScreenRegistry.getInstance().shouldDisplay(context.getScreen()) || !REIRuntime.getInstance().isOverlayVisible())
+                return Collections.emptyList();
+            return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableComponentVisitorWidget.class::isInstance);
+        }));
     }
     
     @Override
@@ -350,6 +393,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerFavorites(FavoriteEntryType.Registry registry) {
+        registry.register(FavoriteEntryType.ENTRY_STACK, EntryStackFavoriteEntry.Type.INSTANCE);
         registry.register(GameModeFavoriteEntry.ID, GameModeFavoriteEntry.Type.INSTANCE);
         registry.getOrCrateSection(new TranslatableComponent(GameModeFavoriteEntry.TRANSLATION_KEY))
                 .add(Stream.concat(

@@ -21,8 +21,9 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.widget.search;
+package me.shedaniel.rei.impl.client.gui.overlay.widgets.search;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import org.jetbrains.annotations.Nullable;
@@ -167,6 +168,11 @@ public interface DelegateTextField extends TextField {
     @Override
     default void setFocused(boolean focused) {
         delegateTextField().setFocused(focused);
+    }
+    
+    @Override
+    default void setFocusedFromKey(boolean focused, InputConstants.Key key) {
+        delegateTextField().setFocusedFromKey(focused, key);
     }
     
     @Override

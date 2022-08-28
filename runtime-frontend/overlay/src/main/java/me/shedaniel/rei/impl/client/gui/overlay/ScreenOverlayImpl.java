@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.overlay;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
@@ -33,6 +34,7 @@ import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.impl.client.ClientInternals;
@@ -61,16 +63,20 @@ public final class ScreenOverlayImpl extends AbstractScreenOverlay {
     private TextField searchField = null;
     
     public static EntryListWidget getEntryListWidget() {
-        return getInstance().getEntryList();
+        return getInstanceInternal().getEntryList();
     }
     
     @Nullable
     public static FavoritesListWidget getFavoritesListWidget() {
-        return getInstance().getFavoritesListNullable();
+        return getInstanceInternal().getFavoritesListNullable();
     }
     
-    public static ScreenOverlayImpl getInstance() {
-        return (ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().get();
+    private static ScreenOverlayImpl getInstanceInternal() {
+        return (ScreenOverlayImpl) ScreenOverlay.getInstance().orElseThrow();
+    }
+    
+    public ScreenOverlayImpl() {
+        this.init();
     }
     
     @Override
@@ -149,10 +155,8 @@ public final class ScreenOverlayImpl extends AbstractScreenOverlay {
         if (!hasSpace()) return false;
         if (!REIRuntime.getInstance().isOverlayVisible()) return false;
         if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesKey(keyCode, scanCode)) {
-            getSearchField().setFocused(true);
+            getSearchField().setFocusedFromKey(true, InputConstants.getKey(keyCode, scanCode));
             setFocused(getSearchField().asWidget());
-            getSearchField().keybindFocusTime = System.currentTimeMillis();
-            getSearchField().keybindFocusKey = keyCode;
             return true;
         }
         return false;
@@ -164,10 +168,8 @@ public final class ScreenOverlayImpl extends AbstractScreenOverlay {
         boolean visible = REIRuntime.getInstance().isOverlayVisible();
         if (!hasSpace() || !visible) return false;
         if (ConfigObject.getInstance().getFocusSearchFieldKeybind().matchesMouse(button)) {
-            getSearchField().setFocused(true);
+            getSearchField().setFocusedFromKey(true, InputConstants.Type.MOUSE.getOrCreate(button));
             setFocused(getSearchField().asWidget());
-            getSearchField().keybindFocusTime = -1;
-            getSearchField().keybindFocusKey = -1;
             return true;
         }
         return false;

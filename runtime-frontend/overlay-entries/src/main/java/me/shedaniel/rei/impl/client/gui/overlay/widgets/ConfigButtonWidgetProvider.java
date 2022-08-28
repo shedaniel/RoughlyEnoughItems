@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.config.AppearanceTheme;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
@@ -43,8 +44,7 @@ import me.shedaniel.rei.api.common.networking.NetworkingHelper;
 import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
-import me.shedaniel.rei.impl.client.gui.menu.MenuEntry;
-import me.shedaniel.rei.impl.client.gui.menu.entries.*;
+import me.shedaniel.rei.impl.client.gui.overlay.menu.entries.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -56,7 +56,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
-public class ConfigButtonWidget implements OverlayWidgetProvider {
+public class ConfigButtonWidgetProvider implements OverlayWidgetProvider {
     private static final UUID CONFIG_MENU_UUID = UUID.fromString("4357bc36-0a4e-47d2-8e07-ddc220df4a0f");
     
     @Override
@@ -81,7 +81,7 @@ public class ConfigButtonWidget implements OverlayWidgetProvider {
                         button.removeTint();
                     }
                     
-                    access.openOrClose(CONFIG_MENU_UUID, button.getBounds(), ConfigButtonWidget::menuEntries);
+                    access.openOrClose(CONFIG_MENU_UUID, button.getBounds(), ConfigButtonWidgetProvider::menuEntries);
                 })
                 .focusable(false)
                 .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y));
@@ -94,7 +94,7 @@ public class ConfigButtonWidget implements OverlayWidgetProvider {
         return lateRenderable.apply(Widgets.concat(configButton, overlayWidget));
     }
     
-    private static Collection<MenuEntry> menuEntries() {
+    private static Collection<FavoriteMenuEntry> menuEntries() {
         ConfigManagerInternal manager = ConfigManagerInternal.getInstance();
         ConfigObject config = ConfigObject.getInstance();
         return List.of(

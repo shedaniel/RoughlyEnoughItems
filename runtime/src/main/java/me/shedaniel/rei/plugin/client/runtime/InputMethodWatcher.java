@@ -32,7 +32,6 @@ import me.shedaniel.rei.api.client.search.method.InputMethodRegistry;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
 import me.shedaniel.rei.impl.client.gui.widget.CraftableFilterButtonWidget;
@@ -48,8 +47,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class InputMethodWatcher implements HintProvider {
+    public static final UUID MENU_UUID = UUID.fromString("b93cc166-d06f-4c5f-9bf0-334d18b4adaf");
+    
     @Override
     public List<Component> provide() {
         if (PluginManager.areAnyReloading() || OverlaySearchField.isHighlighting) return Collections.emptyList();
@@ -91,11 +93,10 @@ public class InputMethodWatcher implements HintProvider {
     }
     
     @Override
-    public List<HintButton> getButtons() {
+    public List<HintButton> getButtons(MenuAccess access) {
         return List.of(
                 new HintButton(new TranslatableComponent("text.rei.input.methods.hint.configure"), bounds -> {
-                    MenuAccess access = ScreenOverlayImpl.getInstance().menuAccess();
-                    access.openOrClose(CraftableFilterButtonWidget.FILTER_MENU_UUID, bounds.clone(),
+                    access.openOrClose(MENU_UUID, bounds.clone(),
                             () -> CraftableFilterButtonWidget.createInputMethodEntries(CraftableFilterButtonWidget.getApplicableInputMethods()));
                 }),
                 new HintButton(new TranslatableComponent("text.rei.input.methods.hint.ignore"), bounds -> {

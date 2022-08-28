@@ -37,7 +37,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
-import static me.shedaniel.rei.impl.client.gui.overlay.InternalOverlayBounds.entrySize;
+import static me.shedaniel.rei.impl.client.util.InternalEntryBounds.entrySize;
 
 public class CollapsedEntriesTooltip implements ClientTooltipComponent, TooltipComponent {
     private static final int MAX_WIDTH = 140;

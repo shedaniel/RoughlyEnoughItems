@@ -27,16 +27,10 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.impl.client.util.InternalEntryBounds;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.Mth;
 
 public class InternalOverlayBounds {
-    private static final int SIZE = 18;
-    
-    public static int entrySize() {
-        return Mth.ceil(SIZE * ConfigObject.getInstance().getEntrySize());
-    }
-    
     static Rectangle calculateOverlayBounds() {
         Rectangle bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation(), Minecraft.getInstance().screen);
         
@@ -44,7 +38,7 @@ public class InternalOverlayBounds {
         if (ConfigObject.getInstance().getDisplayPanelLocation() == DisplayPanelLocation.RIGHT)
             bounds.x += widthReduction;
         bounds.width -= widthReduction;
-        int maxWidth = (int) Math.ceil(entrySize() * ConfigObject.getInstance().getHorizontalEntriesBoundariesColumns() + entrySize() * 0.75);
+        int maxWidth = (int) Math.ceil(InternalEntryBounds.entrySize() * ConfigObject.getInstance().getHorizontalEntriesBoundariesColumns() + InternalEntryBounds.entrySize() * 0.75);
         if (bounds.width > maxWidth) {
             if (ConfigObject.getInstance().getDisplayPanelLocation() == DisplayPanelLocation.RIGHT)
                 bounds.x += bounds.width - maxWidth;

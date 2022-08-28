@@ -27,6 +27,7 @@ import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
+import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -54,7 +55,7 @@ public class SearchBarHighlightWatcher implements HintProvider {
     }
     
     @Override
-    public List<HintButton> getButtons() {
+    public List<HintButton> getButtons(MenuAccess access) {
         return Collections.emptyList();
     }
 }

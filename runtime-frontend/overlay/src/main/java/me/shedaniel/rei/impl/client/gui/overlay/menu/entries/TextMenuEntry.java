@@ -21,30 +21,40 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.menu.entries;
+package me.shedaniel.rei.impl.client.gui.overlay.menu.entries;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.rei.impl.client.gui.menu.AbstractMenuEntry;
+import me.shedaniel.rei.impl.client.gui.overlay.menu.AbstractMenuEntry;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.network.chat.Component;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
-public class EmptyMenuEntry extends AbstractMenuEntry {
-    public int height;
+public class TextMenuEntry extends AbstractMenuEntry {
+    public final Supplier<Component> text;
+    public Component lastText;
+    public int lastTextWidth;
     
-    public EmptyMenuEntry(int height) {
-        this.height = height;
+    public TextMenuEntry(Supplier<Component> text) {
+        this.text = text;
+        this.lastText = text.get();
+        this.lastTextWidth = Math.max(0, font.width(lastText));
+    }
+    
+    private int getTextWidth() {
+        return lastTextWidth;
     }
     
     @Override
     public int getEntryWidth() {
-        return 0;
+        return getTextWidth() + 4;
     }
     
     @Override
     public int getEntryHeight() {
-        return height;
+        return 12;
     }
     
     @Override
@@ -54,5 +64,7 @@ public class EmptyMenuEntry extends AbstractMenuEntry {
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        font.draw(matrices, lastText = text.get(), getX() + 2, getY() + 2, 8947848);
+        this.lastTextWidth = Math.max(0, font.width(lastText));
     }
 }

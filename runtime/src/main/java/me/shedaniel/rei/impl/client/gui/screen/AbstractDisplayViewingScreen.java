@@ -48,7 +48,6 @@ import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
@@ -73,6 +72,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
+
+import static me.shedaniel.rei.impl.client.util.InternalEntryBounds.entrySize;
 
 public abstract class AbstractDisplayViewingScreen extends Screen implements DisplayScreen {
     protected final Map<DisplayCategory<?>, List<DisplaySpec>> categoryMap;
@@ -273,7 +274,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             
             @Override
             public int getHeight() {
-                int entrySize = EntryListWidget.entrySize();
+                int entrySize = entrySize();
                 int w = Math.max(1, MAX_WIDTH / entrySize);
                 int height = Math.min(6, Mth.ceil(widget.getEntries().size() / (float) w)) * entrySize + 2;
                 height += 12;
@@ -283,7 +284,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             
             @Override
             public int getWidth(Font font) {
-                int entrySize = EntryListWidget.entrySize();
+                int entrySize = entrySize();
                 int w = Math.max(1, MAX_WIDTH / entrySize);
                 int size = widget.getEntries().size();
                 int width = Math.min(size, w) * entrySize;
@@ -294,7 +295,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             
             @Override
             public void renderImage(Font font, int x, int y, PoseStack poses, ItemRenderer renderer, int z) {
-                int entrySize = EntryListWidget.entrySize();
+                int entrySize = entrySize();
                 int w = Math.max(1, MAX_WIDTH / entrySize);
                 int i = 0;
                 poses.pushPose();
@@ -322,7 +323,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                         x, y + 2, -1, true, pose, buffers, false, 0, 15728880);
                 
                 if (tagMatch != null) {
-                    int entrySize = EntryListWidget.entrySize();
+                    int entrySize = entrySize();
                     int w = Math.max(1, MAX_WIDTH / entrySize);
                     font.drawInBatch(new TranslatableComponent("text.rei.tag_accept", tagMatch.toString())
                                     .withStyle(ChatFormatting.GRAY),
@@ -336,7 +337,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     }
     
     protected static ScreenOverlay getOverlay() {
-        return REIRuntime.getInstance().getOverlay().orElseThrow(() -> new IllegalStateException("Overlay not initialized!"));
+        return REIRuntime.getInstance().getOverlay().orElseThrow();
     }
     
     private boolean handleFocuses(int button) {

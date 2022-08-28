@@ -29,6 +29,7 @@ import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,5 +152,11 @@ public class AsyncSearchManager implements SearchManager {
     @Override
     public boolean matches(EntryStack<?> stack) {
         return filter.test(stack);
+    }
+    
+    @Override
+    @Nullable
+    public SearchFilter getSearchFilter() {
+        return filter;
     }
 }

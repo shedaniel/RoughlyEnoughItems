@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.widget.search;
+package me.shedaniel.rei.impl.client.gui.overlay.widgets.search;
 
 import it.unimi.dsi.fastutil.ints.IntIntPair;
 import me.shedaniel.rei.api.client.search.SearchFilter;

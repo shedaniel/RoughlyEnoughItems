@@ -21,9 +21,11 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.menu;
+package me.shedaniel.rei.impl.client.gui.overlay.menu;
 
-public abstract class AbstractMenuEntry extends MenuEntry {
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
+
+public abstract class AbstractMenuEntry extends FavoriteMenuEntry {
     private int x, y, width;
     private boolean selected, containsMouse, rendering;
     

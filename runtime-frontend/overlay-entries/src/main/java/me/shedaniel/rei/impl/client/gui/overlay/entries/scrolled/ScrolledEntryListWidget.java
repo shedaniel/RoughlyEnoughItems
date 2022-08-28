@@ -48,7 +48,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static me.shedaniel.rei.impl.client.gui.overlay.InternalOverlayBounds.entrySize;
+import static me.shedaniel.rei.impl.client.util.InternalEntryBounds.entrySize;
 
 public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
     private List</*EntryStack<?> | EntryIngredient*/ Object> stacks = new ArrayList<>();

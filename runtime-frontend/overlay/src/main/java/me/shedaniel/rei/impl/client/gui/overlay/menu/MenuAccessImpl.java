@@ -21,22 +21,27 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.menu;
+package me.shedaniel.rei.impl.client.gui.overlay.menu;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.impl.client.gui.overlay.ScreenOverlayImpl;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
+import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class MenuAccessImpl implements MenuAccess {
     public final List<Runnable> afterRenders = Lists.newArrayList();
@@ -72,18 +77,34 @@ public class MenuAccessImpl implements MenuAccess {
     }
     
     @Override
-    public void open(UUID uuid, Menu menu) {
-        open(uuid, menu, point -> false, point -> true);
+    public void open(UUID uuid, Rectangle selfBounds, Supplier<Collection<FavoriteMenuEntry>> menuSupplier) {
+        open(uuid, selfBounds, menuSupplier, point -> false, point -> true);
     }
     
     @Override
-    public void open(UUID uuid, Menu menu, Predicate<Point> or, Predicate<Point> and) {
+    public void open(UUID uuid, Rectangle selfBounds, Supplier<Collection<FavoriteMenuEntry>> menuSupplier, Predicate<Point> or, Predicate<Point> and) {
+        Menu menu = new Menu(selfBounds, menuSupplier.get(), false);
         this.menu = new OverlayMenu(uuid, menu, Widgets.withTranslate(menu, 0, 0, 400), or, and);
     }
     
     @Override
+    public void openOrClose(UUID uuid, Rectangle selfBounds, Supplier<Collection<FavoriteMenuEntry>> menuSupplier) {
+        boolean isOpened = isOpened(uuid);
+        if (isOpened || !isAnyOpened()) {
+            boolean inBounds = (isValidPoint(PointHelper.ofMouse()) && selfBounds.contains(PointHelper.ofMouse())) || isInBounds(uuid);
+            if (isOpened != inBounds) {
+                if (inBounds) {
+                    open(uuid, selfBounds.clone(), menuSupplier, selfBounds::contains, point -> true);
+                } else {
+                    close();
+                }
+            }
+        }
+    }
+    
+    @Override
     public boolean isValidPoint(Point point) {
-        return ScreenOverlayImpl.getInstance().isNotInExclusionZones(point.x, point.y);
+        return ScreenOverlay.getInstance().orElseThrow().isNotInExclusionZones(point.x, point.y);
     }
     
     @Override

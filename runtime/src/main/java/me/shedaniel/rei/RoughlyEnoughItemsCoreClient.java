@@ -43,7 +43,6 @@ import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
-import me.shedaniel.rei.api.client.registry.screen.OverlayDecider;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -54,8 +53,8 @@ import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.InternalCursorState;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.CatchingExceptionUtils;
-import me.shedaniel.rei.impl.client.gui.widget.TooltipImpl;
 import me.shedaniel.rei.impl.client.gui.widget.TooltipContextImpl;
+import me.shedaniel.rei.impl.client.gui.widget.TooltipImpl;
 import me.shedaniel.rei.impl.common.util.IssuesDetector;
 import me.shedaniel.rei.impl.init.PluginDetector;
 import net.fabricmc.api.EnvType;
@@ -74,7 +73,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -85,7 +83,6 @@ import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.BooleanSupplier;
@@ -108,10 +105,8 @@ public class RoughlyEnoughItemsCoreClient {
         ClientInternals.attachInstance((TriFunction<Point, @Nullable TooltipFlag, Boolean, TooltipContext>) TooltipContextImpl::new, "tooltipContextProvider");
         ClientInternals.attachInstance((Function<Object, Tooltip.Entry>) TooltipImpl.TooltipEntryImpl::new, "tooltipEntryProvider");
         ClientInternals.attachInstance((Function<@Nullable Boolean, ClickArea.Result>) successful -> new ClickArea.Result() {
-            private List<CategoryIdentifier<?>> categories = Lists.newArrayList();
-            private BooleanSupplier execute = () -> {
-                return false;
-            };
+            private final List<CategoryIdentifier<?>> categories = Lists.newArrayList();
+            private BooleanSupplier execute = () -> false;
             private Supplier<Component @Nullable []> tooltip = () -> {
                 if (categories != null && !categories.isEmpty()) {
                     Component collect = CollectionUtils.mapAndJoinToComponent(categories,
@@ -213,27 +208,11 @@ public class RoughlyEnoughItemsCoreClient {
     }
     
     public static boolean shouldReturn(Screen screen) {
-        if (REIRuntime.getInstance().getOverlay().isEmpty()) return true;
-        if (screen == null) return true;
-        if (screen != Minecraft.getInstance().screen) return true;
-        return _shouldReturn(screen);
+        return !ScreenRegistry.getInstance().shouldDisplay(screen);
     }
     
     private static ScreenOverlay getOverlay() {
-        return REIRuntime.getInstance().getOverlay().orElseThrow(() -> new IllegalStateException("Overlay not initialized!"));
-    }
-    
-    private static boolean _shouldReturn(Screen screen) {
-        try {
-            for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(screen)) {
-                InteractionResult result = decider.shouldScreenBeOverlaid(screen);
-                if (result != InteractionResult.PASS) {
-                    return result == InteractionResult.FAIL || REIRuntime.getInstance().getPreviousScreen() == null;
-                }
-            }
-        } catch (ConcurrentModificationException ignored) {
-        }
-        return true;
+        return REIRuntime.getInstance().getOverlay().orElseThrow();
     }
     
     private void registerEvents() {

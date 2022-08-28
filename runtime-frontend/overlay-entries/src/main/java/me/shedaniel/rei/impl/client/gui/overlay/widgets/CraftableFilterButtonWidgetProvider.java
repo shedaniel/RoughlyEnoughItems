@@ -28,6 +28,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
@@ -37,9 +38,8 @@ import me.shedaniel.rei.api.client.search.method.InputMethodRegistry;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
-import me.shedaniel.rei.impl.client.gui.menu.MenuEntry;
-import me.shedaniel.rei.impl.client.gui.menu.entries.SubMenuEntry;
-import me.shedaniel.rei.impl.client.gui.menu.entries.ToggleMenuEntry;
+import me.shedaniel.rei.impl.client.gui.overlay.menu.entries.SubMenuEntry;
+import me.shedaniel.rei.impl.client.gui.overlay.menu.entries.ToggleMenuEntry;
 import me.shedaniel.rei.impl.client.gui.screen.ConfigReloadingScreen;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.client.Minecraft;
@@ -59,7 +59,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
-public class CraftableFilterButtonWidget implements OverlayWidgetProvider {
+public class CraftableFilterButtonWidgetProvider implements OverlayWidgetProvider {
     public static final UUID FILTER_MENU_UUID = UUID.fromString("2839e998-1679-4f9e-a257-37411d16f1e6");
     
     @Override
@@ -84,7 +84,7 @@ public class CraftableFilterButtonWidget implements OverlayWidgetProvider {
                 .onRender((matrices, button) -> {
                     button.setTint(ConfigManager.getInstance().isCraftableOnlyEnabled() ? 0x3800d907 : 0x38ff0000);
                     
-                    access.openOrClose(FILTER_MENU_UUID, button.getBounds(), CraftableFilterButtonWidget::menuEntries);
+                    access.openOrClose(FILTER_MENU_UUID, button.getBounds(), CraftableFilterButtonWidgetProvider::menuEntries);
                 })
                 .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y))
                 .tooltipLineSupplier(button -> new TranslatableComponent(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all"));
@@ -98,12 +98,12 @@ public class CraftableFilterButtonWidget implements OverlayWidgetProvider {
         return lateRenderable.apply(Widgets.concat(filterButton, overlayWidget));
     }
     
-    private static Collection<MenuEntry> menuEntries() {
+    private static Collection<FavoriteMenuEntry> menuEntries() {
         ConfigManagerInternal manager = ConfigManagerInternal.getInstance();
         ConfigObject config = ConfigObject.getInstance();
-        ArrayList<MenuEntry> entries = new ArrayList<>(List.of(
+        ArrayList<FavoriteMenuEntry> entries = new ArrayList<>(List.of(
                 new SubMenuEntry(new TranslatableComponent("text.rei.config.menu.search_field.position"), Arrays.stream(SearchFieldLocation.values())
-                        .<MenuEntry>map(location -> ToggleMenuEntry.of(new TextComponent(location.toString()),
+                        .<FavoriteMenuEntry>map(location -> ToggleMenuEntry.of(new TextComponent(location.toString()),
                                         () -> config.getSearchFieldLocation() == location,
                                         bool -> manager.set("appearance.layout.searchFieldLocation", location))
                                 .withActive(() -> config.getSearchFieldLocation() != location)
@@ -126,11 +126,11 @@ public class CraftableFilterButtonWidget implements OverlayWidgetProvider {
                 .toList();
     }
     
-    public static List<MenuEntry> createInputMethodEntries(List<Map.Entry<ResourceLocation, InputMethod<?>>> applicableInputMethods) {
+    public static List<FavoriteMenuEntry> createInputMethodEntries(List<Map.Entry<ResourceLocation, InputMethod<?>>> applicableInputMethods) {
         ConfigManagerInternal manager = ConfigManagerInternal.getInstance();
         ConfigObject config = ConfigObject.getInstance();
         return applicableInputMethods.stream()
-                .<MenuEntry>map(pair -> ToggleMenuEntry.of(pair.getValue().getName(),
+                .<FavoriteMenuEntry>map(pair -> ToggleMenuEntry.of(pair.getValue().getName(),
                                 () -> Objects.equals(config.getInputMethodId(), pair.getKey()),
                                 bool -> {
                                     ExecutorService service = Executors.newSingleThreadExecutor();

@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.dragging;
+package me.shedaniel.rei.impl.client.gui.overlay.dragging;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;

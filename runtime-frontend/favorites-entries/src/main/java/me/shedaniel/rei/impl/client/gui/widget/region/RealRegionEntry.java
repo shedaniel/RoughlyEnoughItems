@@ -30,7 +30,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 
-import static me.shedaniel.rei.impl.client.gui.overlay.InternalOverlayBounds.entrySize;
+import static me.shedaniel.rei.impl.client.util.InternalEntryBounds.entrySize;
 
 @SuppressWarnings("UnstableApiUsage")
 public class RealRegionEntry<T extends RegionEntry<T>> {

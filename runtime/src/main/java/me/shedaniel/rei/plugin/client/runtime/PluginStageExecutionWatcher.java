@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
+import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.apache.commons.lang3.StringUtils;
@@ -190,7 +191,7 @@ public class PluginStageExecutionWatcher implements HintProvider {
     }
     
     @Override
-    public List<HintButton> getButtons() {
+    public List<HintButton> getButtons(MenuAccess access) {
         return Collections.emptyList();
     }
     

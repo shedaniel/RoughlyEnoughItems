@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.client.gui.widgets;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import me.shedaniel.clothconfig2.api.TickableWidget;
@@ -77,6 +78,8 @@ public interface TextField extends TickableWidget {
     boolean isFocused();
     
     void setFocused(boolean focused);
+    
+    void setFocusedFromKey(boolean focused, InputConstants.Key key);
     
     void setResponder(Consumer<String> responder);
     

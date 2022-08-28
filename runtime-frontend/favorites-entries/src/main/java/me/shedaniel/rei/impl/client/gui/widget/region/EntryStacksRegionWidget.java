@@ -56,7 +56,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static me.shedaniel.rei.impl.client.gui.overlay.InternalOverlayBounds.entrySize;
+import static me.shedaniel.rei.impl.client.util.InternalEntryBounds.entrySize;
 
 public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWithBounds implements DraggableStackProviderWidget, DraggableStackVisitorWidget {
     public final RegionListener<T> listener;

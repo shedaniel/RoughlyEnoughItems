@@ -49,7 +49,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static me.shedaniel.rei.impl.client.gui.overlay.InternalOverlayBounds.entrySize;
+import static me.shedaniel.rei.impl.client.util.InternalEntryBounds.entrySize;
 
 @SuppressWarnings("UnstableApiUsage")
 public class EntryListStackEntry extends DisplayedEntryWidget {

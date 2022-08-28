@@ -53,12 +53,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
+import static me.shedaniel.rei.impl.client.util.InternalEntryBounds.entrySize;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class REIRuntimeImpl implements REIRuntime {
-    private ScreenOverlayImpl overlay;
+    private ScreenOverlay overlay;
     private AbstractContainerScreen<?> previousContainerScreen = null;
     private Screen previousScreen = null;
     
@@ -74,8 +74,7 @@ public class REIRuntimeImpl implements REIRuntime {
     @Override
     public Optional<ScreenOverlay> getOverlay(boolean reset, boolean init) {
         if ((overlay == null && init) || reset) {
-            overlay = new ScreenOverlayImpl();
-            overlay.init();
+            overlay = ClientInternals.getNewOverlay();
             overlay.getSearchField().setFocused(false);
         }
         

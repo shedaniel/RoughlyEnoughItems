@@ -33,14 +33,13 @@ import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
-import me.shedaniel.rei.impl.client.gui.menu.MenuEntry;
 import me.shedaniel.rei.impl.client.gui.overlay.AbstractScreenOverlay;
 import me.shedaniel.rei.impl.client.gui.overlay.widgets.DisplayedEntryWidget;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -75,49 +74,8 @@ public class RegionEntryWidget<T extends RegionEntry<T>> extends DisplayedEntryW
             MenuAccess access = overlay.menuAccess();
             UUID uuid = entry.getEntry().getUuid();
             
-            access.openOrClose(uuid, slot.getBounds(), () ->
-                    CollectionUtils.map(menuEntries.get().get(), entry -> convertMenu(overlay, entry)));
+            access.openOrClose(uuid, slot.getBounds(), menuEntries.get());
         }
-    }
-    
-    private MenuEntry convertMenu(AbstractScreenOverlay overlay, FavoriteMenuEntry entry) {
-        return new MenuEntry() {
-            @Override
-            public List<? extends GuiEventListener> children() {
-                return Collections.singletonList(entry);
-            }
-            
-            @Override
-            public void render(PoseStack poseStack, int i, int j, float f) {
-                entry.render(poseStack, i, j, f);
-            }
-            
-            @Override
-            public int getEntryWidth() {
-                return entry.getEntryWidth();
-            }
-            
-            @Override
-            public int getEntryHeight() {
-                return entry.getEntryHeight();
-            }
-            
-            @Override
-            public void updateInformation(int xPos, int yPos, boolean selected, boolean containsMouse, boolean rendering, int width) {
-                entry.closeMenu = overlay.menuAccess()::close;
-                entry.updateInformation(xPos, yPos, selected, containsMouse, rendering, width);
-            }
-            
-            @Override
-            public int getZ() {
-                return entry.getZ();
-            }
-            
-            @Override
-            public void setZ(int z) {
-                entry.setZ(z);
-            }
-        };
     }
     
     @Override

@@ -23,75 +23,23 @@
 
 package me.shedaniel.rei.plugin.client.runtime;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.Lifecycle;
-import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
-import me.shedaniel.rei.api.client.ClientHelper;
-import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
-import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
-import me.shedaniel.rei.api.client.gui.AbstractRenderer;
-import me.shedaniel.rei.api.client.gui.Renderer;
-import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProviderWidget;
-import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitorWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
-import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
-import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.api.client.util.ClientEntryStacks;
-import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.function.Function;
 
 @Environment(EnvType.CLIENT)
 @ApiStatus.Internal
 public class DefaultClientRuntimePlugin implements REIClientPlugin {
-    @SuppressWarnings("rawtypes")
-    public DefaultClientRuntimePlugin() {
-    }
-    
-    @Override
-    public void registerEntries(EntryRegistry registry) {
-        if (LocalDateTime.now().getMonthValue() == 4 && LocalDateTime.now().getDayOfMonth() == 1) {
-            registry.addEntry(ClientEntryStacks.of(new AbstractRenderer() {
-                private ResourceLocation id = new ResourceLocation("roughlyenoughitems", "textures/gui/kirb.png");
-                
-                @Override
-                public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                    RenderSystem.setShaderTexture(0, id);
-                    innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), 0, 1, 0, 1);
-                }
-                
-                @Override
-                @Nullable
-                public Tooltip getTooltip(TooltipContext context) {
-                    return Tooltip.create(context, new TextComponent("Kirby"), ClientHelper.getInstance().getFormattedModFromModId("Dream Land"));
-                }
-            }));
-        }
-    }
-    
     @Override
     public void registerScreens(ScreenRegistry registry) {
         ExclusionZones zones = registry.exclusionZones();
@@ -110,103 +58,5 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
             }
             return Collections.emptyList();
         });
-        registry.registerDraggableComponentProvider(DraggableComponentProviderWidget.from(context -> {
-            if (RoughlyEnoughItemsCoreClient.shouldReturn(context.getScreen()) || !REIRuntime.getInstance().isOverlayVisible()) return Collections.emptyList();
-            return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableComponentProviderWidget.class::isInstance);
-        }));
-        registry.registerDraggableComponentVisitor(DraggableComponentVisitorWidget.from(context -> {
-            if (RoughlyEnoughItemsCoreClient.shouldReturn(context.getScreen()) || !REIRuntime.getInstance().isOverlayVisible()) return Collections.emptyList();
-            return Widgets.walk(REIRuntime.getInstance().getOverlay().get().children(), DraggableComponentVisitorWidget.class::isInstance);
-        }));
-    }
-    
-    @Override
-    public void registerFavorites(FavoriteEntryType.Registry registry) {
-        registry.register(EntryStackFavoriteType.INSTANCE.id, EntryStackFavoriteType.INSTANCE);
-    }
-    
-    private enum EntryStackFavoriteType implements FavoriteEntryType<EntryStackFavoriteEntry> {
-        INSTANCE(FavoriteEntryType.ENTRY_STACK);
-        
-        private final String key = "data";
-        private ResourceLocation id;
-        
-        EntryStackFavoriteType(ResourceLocation id) {
-            this.id = id;
-        }
-        
-        @Override
-        public DataResult<EntryStackFavoriteEntry> read(CompoundTag object) {
-            EntryStack<?> stack;
-            try {
-                stack = EntryStack.read(object.getCompound(key));
-            } catch (Throwable throwable) {
-                return DataResult.error(throwable.getMessage());
-            }
-            return DataResult.success(new EntryStackFavoriteEntry(stack), Lifecycle.stable());
-        }
-        
-        @Override
-        public DataResult<EntryStackFavoriteEntry> fromArgs(Object... args) {
-            if (args.length == 0) return DataResult.error("Cannot create EntryStackFavoriteEntry from empty args!");
-            if (!(args[0] instanceof EntryStack<?> stack))
-                return DataResult.error("Creation of EntryStackFavoriteEntry from args expected EntryStack as the first argument!");
-            if (!stack.supportSaving())
-                return DataResult.error("Creation of EntryStackFavoriteEntry from an unserializable stack!");
-            return DataResult.success(new EntryStackFavoriteEntry(stack), Lifecycle.stable());
-        }
-        
-        @Override
-        public CompoundTag save(EntryStackFavoriteEntry entry, CompoundTag tag) {
-            tag.put(key, entry.stack.saveStack());
-            return tag;
-        }
-    }
-    
-    private static class EntryStackFavoriteEntry extends FavoriteEntry {
-        private static final Function<EntryStack<?>, String> CANCEL_FLUID_AMOUNT = s -> null;
-        private final EntryStack<?> stack;
-        private final long hash;
-        
-        public EntryStackFavoriteEntry(EntryStack<?> stack) {
-            this.stack = stack.normalize();
-            this.hash = EntryStacks.hashExact(this.stack);
-        }
-        
-        @Override
-        public boolean isInvalid() {
-            return this.stack.isEmpty();
-        }
-        
-        @Override
-        public Renderer getRenderer(boolean showcase) {
-            return this.stack;
-        }
-        
-        @Override
-        public boolean doAction(int button) {
-            return false;
-        }
-        
-        @Override
-        public long hashIgnoreAmount() {
-            return hash;
-        }
-        
-        @Override
-        public FavoriteEntry copy() {
-            return new EntryStackFavoriteEntry(stack.normalize());
-        }
-        
-        @Override
-        public ResourceLocation getType() {
-            return EntryStackFavoriteType.INSTANCE.id;
-        }
-        
-        @Override
-        public boolean isSame(FavoriteEntry other) {
-            if (!(other instanceof EntryStackFavoriteEntry that)) return false;
-            return EntryStacks.equalsExact(stack, that.stack);
-        }
     }
 }

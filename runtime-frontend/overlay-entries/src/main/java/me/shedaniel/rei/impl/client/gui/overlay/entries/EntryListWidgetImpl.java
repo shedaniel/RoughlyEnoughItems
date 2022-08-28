@@ -24,8 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.overlay.entries;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
-import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
@@ -54,7 +52,6 @@ import me.shedaniel.rei.impl.client.gui.overlay.widgets.ScaleIndicatorWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
@@ -64,7 +61,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static me.shedaniel.rei.impl.client.gui.overlay.InternalOverlayBounds.entrySize;
+import static me.shedaniel.rei.impl.client.util.InternalEntryBounds.entrySize;
 
 @ApiStatus.Internal
 public abstract class EntryListWidgetImpl extends WidgetWithBounds implements EntryListWidget, DraggableStackVisitorWidget {
@@ -75,28 +72,8 @@ public abstract class EntryListWidgetImpl extends WidgetWithBounds implements En
     private final ScaleIndicatorWidget scaleIndicator = new ScaleIndicatorWidget();
     
     public static boolean notSteppingOnExclusionZones(int left, int top, int width, int height) {
-        Minecraft instance = Minecraft.getInstance();
-        for (OverlayDecider decider : ScreenRegistry.getInstance().getDeciders(instance.screen)) {
-            InteractionResult fit = canItemSlotWidgetFit(left, top, width, height, decider);
-            if (fit != InteractionResult.PASS)
-                return fit == InteractionResult.SUCCESS;
-        }
-        return true;
-    }
-    
-    private static InteractionResult canItemSlotWidgetFit(int left, int top, int width, int height, OverlayDecider decider) {
-        InteractionResult fit;
-        fit = decider.isInZone(left, top);
-        if (fit != InteractionResult.PASS)
-            return fit;
-        fit = decider.isInZone(left + width, top);
-        if (fit != InteractionResult.PASS)
-            return fit;
-        fit = decider.isInZone(left, top + height);
-        if (fit != InteractionResult.PASS)
-            return fit;
-        fit = decider.isInZone(left + width, top + height);
-        return fit;
+        ScreenOverlay overlay = ScreenOverlay.getInstance().get();
+        return overlay.isNotInExclusionZones(new Rectangle(left, top, width, height));
     }
     
     private boolean containsChecked(Point point, boolean inner) {

@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
@@ -592,6 +593,11 @@ final class TextFieldWidget extends WidgetWithBounds implements TextField {
             this.frame = 0;
         this.focused = focused;
         this.focusedResponder.accept(focused);
+    }
+    
+    @Override
+    public void setFocusedFromKey(boolean focused, InputConstants.Key key) {
+        setFocused(focused);
     }
     
     @Override

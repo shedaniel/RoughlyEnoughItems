@@ -24,6 +24,8 @@
 package me.shedaniel.rei.api.client.overlay;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -38,6 +40,10 @@ import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public abstract class ScreenOverlay extends WidgetWithBounds {
+    public static Optional<ScreenOverlay> getInstance() {
+        return REIRuntime.getInstance().getOverlay();
+    }
+    
     /**
      * Queues reload of the overlay.
      */
@@ -77,6 +83,19 @@ public abstract class ScreenOverlay extends WidgetWithBounds {
      * @return whether the point is within the bounds of the overlay
      */
     public abstract boolean isNotInExclusionZones(double mouseX, double mouseY);
+    
+    /**
+     * Returns whether a specified bounds is within the bounds of the overlay.
+     *
+     * @param bounds the bounds to test
+     * @return whether the bounds is within the bounds of the overlay
+     */
+    public boolean isNotInExclusionZones(Rectangle bounds) {
+        return isNotInExclusionZones(bounds.x, bounds.y) &&
+               isNotInExclusionZones(bounds.getMaxX(), bounds.y) &&
+               isNotInExclusionZones(bounds.x, bounds.getMaxY()) &&
+               isNotInExclusionZones(bounds.getMaxX(), bounds.getMaxY());
+    }
     
     /**
      * Returns the entry list of the overlay.

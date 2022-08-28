@@ -21,10 +21,10 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.menu.entries;
+package me.shedaniel.rei.impl.client.gui.overlay.menu.entries;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.rei.impl.client.gui.menu.AbstractMenuEntry;
+import me.shedaniel.rei.impl.client.gui.overlay.menu.AbstractMenuEntry;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 
 import java.util.Collections;

@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client;
 
+import com.google.common.base.Suppliers;
 import com.mojang.serialization.DataResult;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.ClientHelper;
@@ -30,6 +31,7 @@ import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipQueue;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.PreFilteredEntryList;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
@@ -66,6 +68,7 @@ public final class ClientInternals {
     private static final AutoCraftingEvaluator AUTO_CRAFTING_EVALUATOR = resolveService(AutoCraftingEvaluator.class);
     private static final TooltipQueue TOOLTIP_QUEUE = resolveService(TooltipQueue.class);
     private static final TooltipRenderer TOOLTIP_RENDERER = resolveService(TooltipRenderer.class);
+    private static final OverlayProvider SCREEN_OVERLAY_PROVIDER = resolveService(OverlayProvider.class);
     private static Function<CompoundTag, DataResult<FavoriteEntry>> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
     private static BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
@@ -140,6 +143,10 @@ public final class ClientInternals {
     
     public static TooltipRenderer getTooltipRenderer() {
         return TOOLTIP_RENDERER;
+    }
+    
+    public static ScreenOverlay getNewOverlay() {
+        return SCREEN_OVERLAY_PROVIDER.provide();
     }
     
     public static TooltipContext createTooltipContext(Point point, @Nullable TooltipFlag flag, boolean isSearch) {

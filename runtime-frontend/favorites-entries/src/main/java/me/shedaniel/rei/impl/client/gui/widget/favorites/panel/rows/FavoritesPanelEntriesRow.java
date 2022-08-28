@@ -35,6 +35,7 @@ import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -52,8 +53,7 @@ import java.util.AbstractList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static me.shedaniel.rei.impl.client.gui.overlay.InternalOverlayBounds.entrySize;
-import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.notSteppingOnExclusionZones;
+import static me.shedaniel.rei.impl.client.util.InternalEntryBounds.entrySize;
 
 @SuppressWarnings("UnstableApiUsage")
 public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
@@ -210,7 +210,7 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
                     currentY++;
                 }
                 
-                if (notSteppingOnExclusionZones(xPos, yPos + lastY - panel.getScrolledAmountInt(), entrySize, entrySize)) {
+                if (ScreenOverlay.getInstance().get().isNotInExclusionZones(new Rectangle(xPos, yPos + lastY - panel.getScrolledAmountInt(), entrySize, entrySize))) {
                     widget.moveTo(animated.test(widget), xPos, yPos);
                     break;
                 } else {

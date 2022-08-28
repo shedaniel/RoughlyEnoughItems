@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.widget.search;
+package me.shedaniel.rei.impl.client.gui.overlay.widgets.search;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -43,10 +43,11 @@ import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
-import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.HighlightInfo;
-import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.PartHighlightInfo;
-import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.QuoteHighlightInfo;
-import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.SplitterHighlightInfo;
+import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
+import me.shedaniel.rei.impl.client.gui.overlay.widgets.search.OverlaySearchFieldSyntaxHighlighter.HighlightInfo;
+import me.shedaniel.rei.impl.client.gui.overlay.widgets.search.OverlaySearchFieldSyntaxHighlighter.PartHighlightInfo;
+import me.shedaniel.rei.impl.client.gui.overlay.widgets.search.OverlaySearchFieldSyntaxHighlighter.QuoteHighlightInfo;
+import me.shedaniel.rei.impl.client.gui.overlay.widgets.search.OverlaySearchFieldSyntaxHighlighter.SplitterHighlightInfo;
 import me.shedaniel.rei.impl.client.util.TextTransformations;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -77,6 +78,7 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
     private static final Style QUOTES_STYLE = Style.EMPTY.withColor(ChatFormatting.GOLD);
     private static final Style ERROR_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xff5555));
     private final TextField textField;
+    private final MenuAccess access;
     private boolean previouslyClicking = false;
     private final OverlaySearchFieldSyntaxHighlighter highlighter;
     public long keybindFocusTime = -1;
@@ -86,10 +88,11 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
     private List<String> history = Lists.newArrayListWithCapacity(100);
     private final NumberAnimator<Double> progress = ValueAnimator.ofDouble();
     
-    public OverlaySearchField(int x, int y, int width, int height) {
+    public OverlaySearchField(MenuAccess access) {
         super(Widgets.noOp());
-        this.textField = Widgets.createTextField(new Rectangle(x, y, width, height));
-        this.textField.setMaxLength(10000);
+        this.access = access;
+        this.textField = Widgets.createTextField(new Rectangle());
+        this.textField.setMaxLength(1000);
         this.textField.setFormatter(this);
         this.textField.setSuggestionRenderer(this);
         this.textField.setFocusedResponder(this::focused);
@@ -173,7 +176,7 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
         OptionalDouble progress = hintProviders.stream().map(HintProvider::getProgress).filter(Objects::nonNull).mapToDouble(Double::doubleValue)
                 .average();
         List<HintProvider.HintButton> buttons = hints.stream().map(Pair::getFirst).distinct()
-                .map(HintProvider::getButtons)
+                .map(provider -> provider.getButtons(access))
                 .flatMap(List::stream)
                 .toList();
         boolean hasProgress = progress.isPresent();
@@ -352,6 +355,18 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
             return true;
         }
         return super.charTyped(character, modifiers);
+    }
+    
+    @Override
+    public void setFocusedFromKey(boolean focused, InputConstants.Key key) {
+        DelegateTextField.super.setFocusedFromKey(focused, key);
+        if (focused && key.getType() == InputConstants.Type.KEYSYM) {
+            keybindFocusTime = System.currentTimeMillis();
+            keybindFocusKey = key.getValue();
+        } else {
+            keybindFocusTime = -1;
+            keybindFocusKey = -1;
+        }
     }
     
     @Override

@@ -27,6 +27,7 @@ import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
 import me.shedaniel.rei.impl.common.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -52,7 +53,7 @@ public interface HintProvider {
     
     Color getColor();
     
-    List<HintButton> getButtons();
+    List<HintButton> getButtons(MenuAccess access);
     
     record HintButton(Component name, Consumer<Rectangle> action) {}
 }

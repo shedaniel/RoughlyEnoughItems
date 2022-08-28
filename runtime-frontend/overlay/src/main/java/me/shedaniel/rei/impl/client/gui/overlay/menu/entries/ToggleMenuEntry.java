@@ -21,7 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.menu.entries;
+package me.shedaniel.rei.impl.client.gui.overlay.menu.entries;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -32,7 +32,7 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
-import me.shedaniel.rei.impl.client.gui.menu.AbstractMenuEntry;
+import me.shedaniel.rei.impl.client.gui.overlay.menu.AbstractMenuEntry;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -117,7 +117,7 @@ public class ToggleMenuEntry extends AbstractMenuEntry {
                 ScissorsHandler.INSTANCE.clearScissors();
                 matrices.pushPose();
                 matrices.translate(0, 0, -400);
-                REIRuntime.getInstance().getOverlay().get().renderTooltip(matrices, tooltip);
+                REIRuntime.getInstance().getOverlay().orElseThrow().renderTooltip(matrices, tooltip);
                 matrices.popPose();
                 for (Rectangle area : areas) {
                     ScissorsHandler.INSTANCE.scissor(area);

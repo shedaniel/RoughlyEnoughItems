@@ -29,6 +29,7 @@ import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
+import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
 import me.shedaniel.rei.impl.client.search.argument.Argument;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
@@ -85,7 +86,7 @@ public class SearchFilterPrepareWatcher implements HintProvider {
     }
     
     @Override
-    public List<HintButton> getButtons() {
+    public List<HintButton> getButtons(MenuAccess access) {
         return Collections.emptyList();
     }
 }
