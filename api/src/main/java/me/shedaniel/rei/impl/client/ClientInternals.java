@@ -40,7 +40,6 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.impl.client.provider.*;
 import me.shedaniel.rei.impl.common.Internals;
 import net.minecraft.ReportedException;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.TooltipFlag;
@@ -66,9 +65,9 @@ public final class ClientInternals {
     private static final List<OverlayTicker> OVERLAY_TICKERS = resolveServices(OverlayTicker.class);
     private static final AutoCraftingEvaluator AUTO_CRAFTING_EVALUATOR = resolveService(AutoCraftingEvaluator.class);
     private static final TooltipQueue TOOLTIP_QUEUE = resolveService(TooltipQueue.class);
+    private static final TooltipRenderer TOOLTIP_RENDERER = resolveService(TooltipRenderer.class);
     private static Function<CompoundTag, DataResult<FavoriteEntry>> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
-    private static BiConsumer<List<ClientTooltipComponent>, TooltipComponent> clientTooltipComponentProvider = (tooltip, result) -> throwNotSetup();
     private static BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
     private static TriFunction<Point, @Nullable TooltipFlag, Boolean, TooltipContext> tooltipContextProvider = (point, texts, search) -> throwNotSetup();
     private static Function<Object, Tooltip.Entry> tooltipEntryProvider = (component) -> throwNotSetup();
@@ -135,12 +134,12 @@ public final class ClientInternals {
         return clickAreaHandlerResult.apply(applicable);
     }
     
-    public static void getClientTooltipComponent(List<ClientTooltipComponent> tooltip, TooltipComponent component) {
-        clientTooltipComponentProvider.accept(tooltip, component);
-    }
-    
     public static Tooltip createTooltip(@Nullable Point point, Collection<Tooltip.Entry> texts) {
         return tooltipProvider.apply(point, texts);
+    }
+    
+    public static TooltipRenderer getTooltipRenderer() {
+        return TOOLTIP_RENDERER;
     }
     
     public static TooltipContext createTooltipContext(Point point, @Nullable TooltipFlag flag, boolean isSearch) {

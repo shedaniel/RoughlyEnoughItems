@@ -48,7 +48,6 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
@@ -61,6 +60,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.function.Function;
 
@@ -73,7 +73,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
     
     @Override
     public void registerEntries(EntryRegistry registry) {
-        if (ClientHelperImpl.getInstance().isAprilFools.get()) {
+        if (LocalDateTime.now().getMonthValue() == 4 && LocalDateTime.now().getDayOfMonth() == 1) {
             registry.addEntry(ClientEntryStacks.of(new AbstractRenderer() {
                 private ResourceLocation id = new ResourceLocation("roughlyenoughitems", "textures/gui/kirb.png");
                 

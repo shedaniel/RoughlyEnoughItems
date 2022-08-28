@@ -38,8 +38,7 @@ allprojects {
                 ":runtime-frontend:filtering",
                 ":runtime-frontend:display",
                 ":runtime-frontend:overlay",
-                ":runtime-frontend:paginated-entries",
-                ":runtime-frontend:scrolled-entries",
+                ":runtime-frontend:overlay-entries",
                 ":runtime-frontend:favorites-entries",
         ]
         depProjects = [

@@ -211,6 +211,12 @@ public class ViewsImpl implements Views {
             generateLiveDisplays(displayRegistry, wrapForError(generator), builder, displayConsumer);
         }
         
+        for (Display display : builder.getAdditionalDisplays()) {
+            if (!processingVisibilityHandlers || displayRegistry.isDisplayVisible(display)) {
+                displayConsumer.accept(display);
+            }
+        }
+        
         Map<DisplayCategory<?>, List<DisplaySpec>> resultSpeced = (Map<DisplayCategory<?>, List<DisplaySpec>>) (Map) new LinkedHashMap<>(result);
         // optimize displays
         if (builder.isMergingDisplays() && ConfigObject.getInstance().doMergeDisplayUnderOne()) {

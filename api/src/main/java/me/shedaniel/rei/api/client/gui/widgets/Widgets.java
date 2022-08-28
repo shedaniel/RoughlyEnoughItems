@@ -333,7 +333,7 @@ public final class Widgets {
     }
     
     public static Widget delegate(Supplier<Widget> supplier) {
-        return new DelegateWidget(Widgets.noOp()) {
+        return new DelegateWidget() {
             @Override
             protected Widget delegate() {
                 return supplier.get();
@@ -342,7 +342,7 @@ public final class Widgets {
     }
     
     public static WidgetWithBounds delegateWithBounds(Supplier<WidgetWithBounds> supplier) {
-        return new DelegateWidgetWithBounds(Widgets.noOp(), Rectangle::new) {
+        return new DelegateWidgetWithBounds() {
             @Override
             protected WidgetWithBounds delegate() {
                 return supplier.get();

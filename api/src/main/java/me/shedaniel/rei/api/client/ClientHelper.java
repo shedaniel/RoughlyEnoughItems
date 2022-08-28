@@ -28,6 +28,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.networking.NetworkingHelper;
 import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.client.ClientInternals;
 import net.fabricmc.api.EnvType;
@@ -206,5 +207,7 @@ public interface ClientHelper {
      *
      * @return whether the client can use move items packets
      */
-    boolean canUseMovePackets();
+    default boolean canUseMovePackets() {
+        return NetworkingHelper.getInstance().client().canUseMovePackets();
+    }
 }

@@ -39,9 +39,9 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.client.gui.widgets.*;
+import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.HighlightInfo;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHighlighter.PartHighlightInfo;
@@ -50,6 +50,7 @@ import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchFieldSyntaxHi
 import me.shedaniel.rei.impl.client.util.TextTransformations;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -59,6 +60,7 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.ApiStatus;
 import org.lwjgl.glfw.GLFW;
 
@@ -113,7 +115,7 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
         return TextTransformations.forwardWithTransformation(text, (s, charIndex, c) -> {
             HighlightInfo arg = highlighter.highlighted[charIndex + index];
             Style style = Style.EMPTY;
-            if (isMain && ScreenOverlayImpl.getEntryListWidget().getEntries().findAny().isEmpty() && !textField.getText().isEmpty()) {
+            if (isMain && REIRuntime.getInstance().getOverlay().get().getEntryList().getEntries().findAny().isEmpty() && !textField.getText().isEmpty()) {
                 style = ERROR_STYLE;
             }
             if (arg instanceof PartHighlightInfo part) {
@@ -227,7 +229,7 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
                 Tooltip tooltip = pair.getFirst().provideTooltip(new Point(mouseX, mouseY));
                 if (tooltip != null) {
                     REIRuntime.getInstance().clearTooltips();
-                    ScreenOverlayImpl.getInstance().renderTooltip(poses, tooltip);
+                    REIRuntime.getInstance().getOverlay().get().renderTooltip(poses, tooltip);
                 }
             }
         }
@@ -270,7 +272,7 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
         isHighlighting = isHighlighting && ConfigObject.getInstance().isInventoryHighlightingAllowed();
         if (isMain && isHighlighting) {
             return 0xfff2ff0c;
-        } else if (isMain && ScreenOverlayImpl.getEntryListWidget().getEntries().findAny().isEmpty() && !textField.getText().isEmpty()) {
+        } else if (isMain && REIRuntime.getInstance().getOverlay().get().getEntryList().getEntries().findAny().isEmpty() && !textField.getText().isEmpty()) {
             return 0xffff5555;
         } else {
             return TextField.BorderColorProvider.DEFAULT.getBorderColor(textField);
@@ -365,6 +367,9 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
         textField.setSuggestion(!textField.isFocused() && textField.getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
         super.render(matrices, mouseX, mouseY, delta);
         RenderSystem.enableDepthTest();
+        if (isMain && isHighlighting) {
+            this.renderEntryHighlighting(matrices);
+        }
     }
     
     @Override
@@ -375,5 +380,36 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
     @Override
     public WidgetWithBounds asWidget() {
         return this;
+    }
+    
+    public static void renderEntryHighlighting(PoseStack matrices) {
+        RenderSystem.disableDepthTest();
+        RenderSystem.colorMask(true, true, true, false);
+        SearchFilter filter = REIRuntime.getInstance().getOverlay().get().getCurrentSearchFilter();
+        if (filter == null) return;
+        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> containerScreen) {
+            int x = containerScreen.leftPos, y = containerScreen.topPos;
+            for (Slot slot : containerScreen.getMenu().slots) {
+                if (!slot.hasItem() || !filter.test(EntryStacks.of(slot.getItem()))) {
+                    matrices.pushPose();
+                    matrices.translate(0, 0, 500f);
+                    fillGradient(matrices, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0xdc202020, 0xdc202020, 0);
+                    matrices.popPose();
+                } else {
+                    matrices.pushPose();
+                    matrices.translate(0, 0, 200f);
+                    fillGradient(matrices, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0x345fff3b, 0x345fff3b, 0);
+                    
+                    fillGradient(matrices, x + slot.x - 1, y + slot.y - 1, x + slot.x, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b, 0);
+                    fillGradient(matrices, x + slot.x + 16, y + slot.y - 1, x + slot.x + 16 + 1, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b, 0);
+                    fillGradient(matrices, x + slot.x - 1, y + slot.y - 1, x + slot.x + 16, y + slot.y, 0xff5fff3b, 0xff5fff3b, 0);
+                    fillGradient(matrices, x + slot.x - 1, y + slot.y + 16, x + slot.x + 16, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b, 0);
+                    
+                    matrices.popPose();
+                }
+            }
+        }
+        RenderSystem.colorMask(true, true, true, true);
+        RenderSystem.enableDepthTest();
     }
 }

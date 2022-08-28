@@ -27,6 +27,7 @@ import com.google.common.base.Suppliers;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +40,7 @@ public final class ViewSearchBuilderImpl extends AbstractViewSearchBuilder {
     private final Set<CategoryIdentifier<?>> categories = new HashSet<>();
     private final List<EntryStack<?>> recipesFor = new ArrayList<>();
     private final List<EntryStack<?>> usagesFor = new ArrayList<>();
+    private final List<Display> additionalDisplays = new ArrayList<>();
     @Nullable
     private CategoryIdentifier<?> preferredOpenedCategory = null;
     private boolean mergeDisplays = true;
@@ -139,5 +141,16 @@ public final class ViewSearchBuilderImpl extends AbstractViewSearchBuilder {
     public ViewSearchBuilder processingVisibilityHandlers(boolean processingVisibilityHandlers) {
         this.processVisibilityHandlers = processingVisibilityHandlers;
         return this;
+    }
+    
+    @Override
+    public ViewSearchBuilder addDisplays(Collection<Display> displays) {
+        this.additionalDisplays.addAll(displays);
+        return this;
+    }
+    
+    @Override
+    public List<Display> getAdditionalDisplays() {
+        return Collections.unmodifiableList(additionalDisplays);
     }
 }

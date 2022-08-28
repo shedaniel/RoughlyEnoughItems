@@ -180,19 +180,16 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
                     }
                 })
                 .tooltipLine(new TranslatableComponent("text.rei.tag.copy.clipboard")));
-        widgets.add(Widgets.withTranslate(new DelegateWidget(Widgets.noOp()) {
-            @Override
-            protected Widget delegate() {
-                ResourceLocation expandTexture = !expanded[0] ? new ResourceLocation("roughlyenoughitems", "textures/gui/expand.png")
-                        : new ResourceLocation("roughlyenoughitems", "textures/gui/shrink.png");
-                return Widgets.concat(
-                        Widgets.createTexturedWidget(expandTexture,
-                                new Rectangle(recipeBounds.x + 5 + 2, recipeBounds.y + 6 + 2, 13 - 4, 13 - 4), 0, 0, 9, 9),
-                        Widgets.createTexturedWidget(new ResourceLocation("roughlyenoughitems", "textures/gui/clipboard.png"),
-                                new Rectangle(recipeBounds.x + 5 + 2, recipeBounds.getMaxY() - 6 - 13 + 2, 13 - 4, 13 - 4), 0, 0, 9, 9)
-                );
-            }
-        }, 0, 0, 10));
+        widgets.add(Widgets.withTranslate(Widgets.delegate(() -> {
+            ResourceLocation expandTexture = !expanded[0] ? new ResourceLocation("roughlyenoughitems", "textures/gui/expand.png")
+                    : new ResourceLocation("roughlyenoughitems", "textures/gui/shrink.png");
+            return Widgets.concat(
+                    Widgets.createTexturedWidget(expandTexture,
+                            new Rectangle(recipeBounds.x + 5 + 2, recipeBounds.y + 6 + 2, 13 - 4, 13 - 4), 0, 0, 9, 9),
+                    Widgets.createTexturedWidget(new ResourceLocation("roughlyenoughitems", "textures/gui/clipboard.png"),
+                            new Rectangle(recipeBounds.x + 5 + 2, recipeBounds.getMaxY() - 6 - 13 + 2, 13 - 4, 13 - 4), 0, 0, 9, 9)
+            );
+        }), 0, 0, 10));
         
         Matrix4f translateMatrix = Matrix4f.createTranslateMatrix(0, 0, 200);
         Matrix4f identity = new Matrix4f();

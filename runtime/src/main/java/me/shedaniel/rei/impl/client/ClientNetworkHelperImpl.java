@@ -68,7 +68,7 @@ public abstract class ClientNetworkHelperImpl implements ClientHelper {
         return NetworkManager.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_HOTBAR_PACKET);
     }
     
-    public boolean canDeleteItems() {
+    public boolean canUseDeletePackets() {
         return hasPermissionToUsePackets() || Minecraft.getInstance().gameMode.hasInfiniteItems();
     }
     

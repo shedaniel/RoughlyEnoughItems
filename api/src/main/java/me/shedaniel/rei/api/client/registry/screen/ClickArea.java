@@ -44,6 +44,20 @@ public interface ClickArea<T extends Screen> {
     
     @ApiStatus.NonExtendable
     interface ClickAreaContext<T extends Screen> {
+        static <T extends Screen> ClickAreaContext<T> of(T screen, Point mouse) {
+            return new ClickAreaContext<>() {
+                @Override
+                public T getScreen() {
+                    return screen;
+                }
+                
+                @Override
+                public Point getMousePosition() {
+                    return mouse;
+                }
+            };
+        }
+        
         T getScreen();
         
         Point getMousePosition();

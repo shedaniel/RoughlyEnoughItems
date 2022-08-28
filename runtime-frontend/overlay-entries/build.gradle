@@ -1,0 +1,3 @@
+dependencies {
+    compileClasspath(project(path: ":runtime-frontend:overlay", configuration: "namedElements"))
+}

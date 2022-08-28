@@ -23,7 +23,9 @@
 
 package me.shedaniel.rei.impl.client.search;
 
+import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.Future;
@@ -44,4 +46,7 @@ public interface SearchManager extends Supplier<List<EntryStack<?>>> {
     Future<Void> getAsync(Consumer<List<EntryStack<?>>> consumer);
     
     boolean matches(EntryStack<?> stack);
+    
+    @Nullable
+    SearchFilter getSearchFilter();
 }

@@ -220,6 +220,21 @@ public interface ViewSearchBuilder {
     ViewSearchBuilder processingVisibilityHandlers(boolean processingVisibilityHandlers);
     
     /**
+     * Force-all displays to the view search builder.
+     *
+     * @param displays the displays to add
+     * @return the {@link ViewSearchBuilder} for chaining
+     */
+    ViewSearchBuilder addDisplays(Collection<Display> displays);
+    
+    /**
+     * Returns the collection of additional displays to show.
+     *
+     * @return the collection of additional displays to show.
+     */
+    Collection<Display> getAdditionalDisplays();
+    
+    /**
      * Opens the view after the search is complete.
      *
      * @return whether the view was opened

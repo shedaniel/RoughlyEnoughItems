@@ -28,8 +28,11 @@ import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.client.search.SearchFilter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -95,6 +98,15 @@ public abstract class ScreenOverlay extends WidgetWithBounds {
      * @return the search field of the overlay
      */
     public abstract TextField getSearchField();
+    
+    /**
+     * Returns the current search filter.
+     *
+     * @return the current search filter
+     */
+    @ApiStatus.Experimental
+    @Nullable
+    public abstract SearchFilter getCurrentSearchFilter();
     
     /**
      * Renders a tooltip.

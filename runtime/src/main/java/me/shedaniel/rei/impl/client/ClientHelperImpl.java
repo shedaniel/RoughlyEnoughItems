@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client;
 
-import com.google.common.base.Suppliers;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -44,23 +43,12 @@ import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class ClientHelperImpl extends ClientNetworkHelperImpl implements ClientModNameHelperImpl {
-    public final Supplier<Boolean> isAprilFools = Suppliers.memoize(() -> {
-        try {
-            LocalDateTime now = LocalDateTime.now();
-            return now.getMonthValue() == 4 && now.getDayOfMonth() == 1;
-        } catch (Throwable ignored) {
-        }
-        return false;
-    });
-    
     /**
      * @return the instance of {@link ClientHelperImpl}
      * @see ClientHelper#getInstance()
