@@ -34,9 +34,8 @@ import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProvider
 import me.shedaniel.rei.api.client.gui.widgets.DelegateWidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
@@ -77,10 +76,7 @@ public class DisplayCompositeWidget extends DelegateWidgetWithBounds implements 
         
         if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(mouse())) {
             if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
-                FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                
-                if (favoritesListWidget != null) {
-                    favoritesListWidget.displayHistory.addDisplay(getBounds().clone(), display.provideInternalDisplay());
+                if (ScreenOverlay.getInstance().get().submitDisplayHistory(display.provideInternalDisplay(), getBounds().clone())) {
                     return true;
                 }
             }
@@ -97,10 +93,7 @@ public class DisplayCompositeWidget extends DelegateWidgetWithBounds implements 
         
         if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(mouseX, mouseY)) {
             if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
-                FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                
-                if (favoritesListWidget != null) {
-                    favoritesListWidget.displayHistory.addDisplay(getBounds().clone(), display.provideInternalDisplay());
+                if (ScreenOverlay.getInstance().get().submitDisplayHistory(display.provideInternalDisplay(), getBounds().clone())) {
                     return true;
                 }
             }

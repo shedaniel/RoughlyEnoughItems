@@ -26,6 +26,9 @@ package me.shedaniel.rei.impl.client.gui.overlay.entries;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
+import me.shedaniel.rei.api.common.display.Display;
+
+import javax.annotation.Nullable;
 
 public interface FavoritesListWidget extends OverlayListWidget {
     void initBounds();
@@ -33,4 +36,6 @@ public interface FavoritesListWidget extends OverlayListWidget {
     Widget asWidget();
     
     Rectangle getFavoritesBounds();
+    
+    void submitDisplayHistory(Display display, @Nullable Rectangle fromBounds);
 }

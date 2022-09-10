@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.search.SearchFilter;
+import me.shedaniel.rei.api.common.display.Display;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
@@ -134,4 +135,14 @@ public abstract class ScreenOverlay extends WidgetWithBounds {
      * @param tooltip  the tooltip
      */
     public abstract void renderTooltip(PoseStack matrices, Tooltip tooltip);
+    
+    /**
+     * Returns whether slot highlighting is on for the current search filter.
+     *
+     * @return whether slot highlighting is on for the current search filter.
+     */
+    public abstract boolean isHighlighting();
+    
+    @ApiStatus.Experimental
+    public abstract boolean submitDisplayHistory(Display display, @Nullable Rectangle fromBounds);
 }

@@ -26,9 +26,9 @@ package me.shedaniel.rei.plugin.client.runtime;
 import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
-import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
@@ -39,7 +39,7 @@ import java.util.List;
 public class SearchBarHighlightWatcher implements HintProvider {
     @Override
     public List<Component> provide() {
-        return OverlaySearchField.isHighlighting ? Collections.singletonList(new TranslatableComponent("text.rei.inventory.highlighting.enabled")) :
+        return ScreenOverlay.getInstance().get().isHighlighting() ? Collections.singletonList(new TranslatableComponent("text.rei.inventory.highlighting.enabled")) :
                 Collections.emptyList();
     }
     

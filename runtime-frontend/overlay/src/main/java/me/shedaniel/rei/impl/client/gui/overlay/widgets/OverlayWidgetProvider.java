@@ -26,12 +26,19 @@ package me.shedaniel.rei.impl.client.gui.overlay.widgets;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
 
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BooleanSupplier;
 import java.util.function.UnaryOperator;
 
 public interface OverlayWidgetProvider {
-    List<Widget> provide(ScreenOverlay overlay, MenuAccess access, Consumer<TextField> textFieldSink, UnaryOperator<Widget> lateRenderable);
+    List<OverlayWidgetProvider> PROVIDERS = ClientInternals.resolveServices(OverlayWidgetProvider.class);
+    
+    List<Widget> provide(ScreenOverlay overlay, MenuAccess access, TextFieldSink textFieldSink, UnaryOperator<Widget> lateRenderable);
+    
+    interface TextFieldSink {
+        void accept(TextField textField, BooleanSupplier isHighlighted);
+    }
 }

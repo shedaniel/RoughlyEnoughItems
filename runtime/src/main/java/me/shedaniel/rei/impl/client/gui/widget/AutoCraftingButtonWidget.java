@@ -29,12 +29,11 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.*;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.client.ClientInternals;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.toast.CopyRecipeIdentifierToast;
-import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.provider.AutoCraftingEvaluator;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
@@ -105,10 +104,7 @@ public class AutoCraftingButtonWidget {
                     return true;
                 } else if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse())) {
                     if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
-                        FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                        
-                        if (favoritesListWidget != null) {
-                            favoritesListWidget.displayHistory.addDisplay(displayBounds.clone(), displaySupplier.get());
+                        if (ScreenOverlay.getInstance().get().submitDisplayHistory(displaySupplier.get(), displayBounds.clone())) {
                             return true;
                         }
                     }
@@ -127,10 +123,7 @@ public class AutoCraftingButtonWidget {
                     return true;
                 } else if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(PointHelper.ofMouse())) {
                     if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
-                        FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                        
-                        if (favoritesListWidget != null) {
-                            favoritesListWidget.displayHistory.addDisplay(displayBounds.clone(), displaySupplier.get());
+                        if (ScreenOverlay.getInstance().get().submitDisplayHistory(displaySupplier.get(), displayBounds.clone())) {
                             return true;
                         }
                     }

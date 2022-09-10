@@ -24,56 +24,36 @@
 package me.shedaniel.rei.impl.client.gui.overlay;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.platform.Window;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
-import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.widgets.DelegateWidget;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
-import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
-import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
-import me.shedaniel.rei.impl.client.ClientInternals;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.client.gui.overlay.entries.EntryListProvider;
 import me.shedaniel.rei.impl.client.gui.overlay.entries.EntryListWidget;
 import me.shedaniel.rei.impl.client.gui.overlay.entries.FavoritesListProvider;
 import me.shedaniel.rei.impl.client.gui.overlay.entries.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.overlay.widgets.OverlayWidgetProvider;
 import me.shedaniel.rei.impl.common.InternalLogger;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 
 @ApiStatus.Internal
 public final class ScreenOverlayImpl extends AbstractScreenOverlay {
-    private static final List<EntryListProvider> ENTRY_LIST_PROVIDERS = ClientInternals.resolveServices(EntryListProvider.class);
-    private static final List<FavoritesListProvider> FAVORITES_LIST_PROVIDERS = ClientInternals.resolveServices(FavoritesListProvider.class);
-    private static final List<OverlayWidgetProvider> OVERLAY_WIDGET_PROVIDERS = ClientInternals.resolveServices(OverlayWidgetProvider.class);
     private EntryListWidget entryListWidget = null;
     private FavoritesListWidget favoritesListWidget = null;
     private TextField searchField = null;
-    
-    public static EntryListWidget getEntryListWidget() {
-        return getInstanceInternal().getEntryList();
-    }
-    
-    @Nullable
-    public static FavoritesListWidget getFavoritesListWidget() {
-        return getInstanceInternal().getFavoritesListNullable();
-    }
-    
-    private static ScreenOverlayImpl getInstanceInternal() {
-        return (ScreenOverlayImpl) ScreenOverlay.getInstance().orElseThrow();
-    }
+    private BooleanSupplier isHighlighted = null;
     
     public ScreenOverlayImpl() {
         this.init();
@@ -84,27 +64,29 @@ public final class ScreenOverlayImpl extends AbstractScreenOverlay {
         super.init();
         
         this.searchField = null;
+        this.isHighlighted = null;
         
-        FavoritesListWidget favoritesListWidget = getFavoritesListWidget();
+        FavoritesListWidget favoritesListWidget = getFavoritesListNullable();
         
         if (favoritesListWidget != null) {
             this.children().add(favoritesListWidget.asWidget());
         }
         
-        EntryListWidget entryListWidget = getEntryListWidget();
+        EntryListWidget entryListWidget = getEntryList();
         entryListWidget.initBounds(this.getBounds());
         entryListWidget.initSearch(searchField.getText(), true);
         this.children().add(entryListWidget.asWidget());
         searchField.setResponder(s -> entryListWidget.initSearch(s, false));
         entryListWidget.init(this);
         
-        for (OverlayWidgetProvider provider : OVERLAY_WIDGET_PROVIDERS) {
-            provider.provide(this, menuAccess(), textField -> this.searchField = textField,
-                    LateRenderableWidget::new);
+        for (OverlayWidgetProvider provider : OverlayWidgetProvider.PROVIDERS) {
+            provider.provide(this, menuAccess(), (textField, isHighlighted) -> {
+                this.searchField = textField;
+                this.isHighlighted = isHighlighted;
+            }, LateRenderableWidget::new);
         }
         
         if (this.searchField != null) {
-            this.searchField.asWidget().getBounds().setBounds(getSearchFieldArea());
             this.children().add(this.searchField.asWidget());
         } else {
             InternalLogger.getInstance().warn("Search Field is not found! This might cause problems!");
@@ -117,36 +99,9 @@ public final class ScreenOverlayImpl extends AbstractScreenOverlay {
         }
     }
     
-    private Rectangle getSearchFieldArea() {
-        int widthRemoved = 1;
-        if (ConfigObject.getInstance().isCraftableFilterEnabled()) widthRemoved += 22;
-        if (ConfigObject.getInstance().isLowerConfigButton()) widthRemoved += 22;
-        SearchFieldLocation searchFieldLocation = REIRuntime.getInstance().getContextualSearchFieldLocation();
-        return switch (searchFieldLocation) {
-            case TOP_SIDE -> getTopSideSearchFieldArea(widthRemoved);
-            case BOTTOM_SIDE -> getBottomSideSearchFieldArea(widthRemoved);
-            case CENTER -> getCenterSearchFieldArea(widthRemoved);
-        };
-    }
-    
-    private Rectangle getTopSideSearchFieldArea(int widthRemoved) {
-        return new Rectangle(getBounds().x + 2, 4, getBounds().width - 6 - widthRemoved, 18);
-    }
-    
-    private Rectangle getBottomSideSearchFieldArea(int widthRemoved) {
-        Window window = Minecraft.getInstance().getWindow();
-        return new Rectangle(getBounds().x + 2, window.getGuiScaledHeight() - 22, getBounds().width - 6 - widthRemoved, 18);
-    }
-    
-    private Rectangle getCenterSearchFieldArea(int widthRemoved) {
-        Window window = Minecraft.getInstance().getWindow();
-        Rectangle screenBounds = ScreenRegistry.getInstance().getScreenBounds(minecraft.screen);
-        return new Rectangle(screenBounds.x, window.getGuiScaledHeight() - 22, screenBounds.width - widthRemoved, 18);
-    }
-    
     @Override
     protected void updateSearch() {
-        getEntryListWidget().initSearch(getSearchField().getText(), true);
+        getEntryList().initSearch(getSearchField().getText(), true);
     }
     
     @Override
@@ -184,7 +139,7 @@ public final class ScreenOverlayImpl extends AbstractScreenOverlay {
     @Override
     public EntryListWidget getEntryList() {
         EntryListWidget current = null;
-        for (EntryListProvider provider : ENTRY_LIST_PROVIDERS) {
+        for (EntryListProvider provider : EntryListProvider.PROVIDERS) {
             current = provider.getEntryList();
             if (current != null) break;
         }
@@ -205,7 +160,7 @@ public final class ScreenOverlayImpl extends AbstractScreenOverlay {
     private FavoritesListWidget getFavoritesListNullable() {
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
             FavoritesListWidget current = null;
-            for (FavoritesListProvider provider : FAVORITES_LIST_PROVIDERS) {
+            for (FavoritesListProvider provider : FavoritesListProvider.PROVIDERS) {
                 current = provider.getFavoritesList();
                 if (current != null) break;
             }
@@ -229,5 +184,22 @@ public final class ScreenOverlayImpl extends AbstractScreenOverlay {
     @Nullable
     public SearchFilter getCurrentSearchFilter() {
         return getEntryList().getSearchFilter();
+    }
+    
+    @Override
+    public boolean isHighlighting() {
+        return this.isHighlighted != null && this.isHighlighted.getAsBoolean();
+    }
+    
+    @Override
+    public boolean submitDisplayHistory(Display display, @Nullable Rectangle fromBounds) {
+        FavoritesListWidget favoritesListWidget = getFavoritesListNullable();
+        
+        if (favoritesListWidget != null) {
+            favoritesListWidget.submitDisplayHistory(display, fromBounds);
+            return true;
+        } else {
+            return false;
+        }
     }
 }

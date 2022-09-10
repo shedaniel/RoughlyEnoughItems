@@ -251,4 +251,9 @@ public class FavoritesListWidgetImpl extends WidgetWithBounds implements Favorit
     public Rectangle getFavoritesBounds() {
         return favoritesBounds;
     }
+    
+    @Override
+    public void submitDisplayHistory(Display display, @Nullable Rectangle fromBounds) {
+        displayHistory.addDisplay(fromBounds, display);
+    }
 }

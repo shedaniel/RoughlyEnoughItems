@@ -57,18 +57,18 @@ public abstract class Widget extends AbstractContainerEventHandler implements ne
      * The font for rendering text
      */
     protected final Font font = minecraft.font;
-    private static final Stack<Point> mouseStack = new Stack<>();
+    private static final Stack<Point> MOUSE_STACK = new Stack<>();
     
     public static Point mouse() {
-        return mouseStack.empty() ? PointHelper.ofMouse() : mouseStack.peek();
+        return MOUSE_STACK.empty() ? PointHelper.ofMouse() : MOUSE_STACK.peek();
     }
     
     public static Point pushMouse(Point mouse) {
-        return mouseStack.push(mouse);
+        return MOUSE_STACK.push(mouse);
     }
     
     public static Point popMouse() {
-        return mouseStack.pop();
+        return MOUSE_STACK.pop();
     }
     
     public static Point translateMouse(PoseStack poses) {

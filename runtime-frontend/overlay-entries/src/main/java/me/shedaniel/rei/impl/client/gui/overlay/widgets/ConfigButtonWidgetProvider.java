@@ -36,7 +36,6 @@ import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
-import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
@@ -53,14 +52,13 @@ import net.minecraft.network.chat.TranslatableComponent;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 public class ConfigButtonWidgetProvider implements OverlayWidgetProvider {
     private static final UUID CONFIG_MENU_UUID = UUID.fromString("4357bc36-0a4e-47d2-8e07-ddc220df4a0f");
     
     @Override
-    public List<Widget> provide(ScreenOverlay overlay, MenuAccess access, Consumer<TextField> textFieldSink, UnaryOperator<Widget> lateRenderable) {
+    public List<Widget> provide(ScreenOverlay overlay, MenuAccess access, TextFieldSink textFieldSink, UnaryOperator<Widget> lateRenderable) {
         return List.of(create(overlay, access, lateRenderable));
     }
     

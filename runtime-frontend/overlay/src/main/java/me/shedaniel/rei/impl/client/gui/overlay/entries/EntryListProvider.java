@@ -23,11 +23,16 @@
 
 package me.shedaniel.rei.impl.client.gui.overlay.entries;
 
+import me.shedaniel.rei.impl.client.ClientInternals;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 @ApiStatus.Internal
 public interface EntryListProvider {
+    List<EntryListProvider> PROVIDERS = ClientInternals.resolveServices(EntryListProvider.class);
+    
     @Nullable
     EntryListWidget getEntryList();
 }

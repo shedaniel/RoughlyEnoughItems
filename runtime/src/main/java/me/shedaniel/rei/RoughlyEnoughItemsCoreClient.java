@@ -104,11 +104,11 @@ public class RoughlyEnoughItemsCoreClient {
         ClientInternals.attachInstance((BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip>) TooltipImpl::impl, "tooltipProvider");
         ClientInternals.attachInstance((TriFunction<Point, @Nullable TooltipFlag, Boolean, TooltipContext>) TooltipContextImpl::new, "tooltipContextProvider");
         ClientInternals.attachInstance((Function<Object, Tooltip.Entry>) TooltipImpl.TooltipEntryImpl::new, "tooltipEntryProvider");
-        ClientInternals.attachInstance((Function<@Nullable Boolean, ClickArea.Result>) successful -> new ClickArea.Result() {
+        ClientInternals.attachInstance((Function<Boolean, ClickArea.Result>) successful -> new ClickArea.Result() {
             private final List<CategoryIdentifier<?>> categories = Lists.newArrayList();
             private BooleanSupplier execute = () -> false;
             private Supplier<Component @Nullable []> tooltip = () -> {
-                if (categories != null && !categories.isEmpty()) {
+                if (!categories.isEmpty()) {
                     Component collect = CollectionUtils.mapAndJoinToComponent(categories,
                             identifier -> CategoryRegistry.getInstance().tryGet(identifier)
                                     .map(config -> config.getCategory().getTitle())

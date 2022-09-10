@@ -30,40 +30,34 @@ import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
-import me.shedaniel.rei.api.client.gui.widgets.*;
+import me.shedaniel.rei.api.client.gui.widgets.Button;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
-import me.shedaniel.rei.api.client.search.method.InputMethod;
-import me.shedaniel.rei.api.client.search.method.InputMethodRegistry;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
+import me.shedaniel.rei.impl.client.gui.overlay.menu.entries.SeparatorMenuEntry;
 import me.shedaniel.rei.impl.client.gui.overlay.menu.entries.SubMenuEntry;
 import me.shedaniel.rei.impl.client.gui.overlay.menu.entries.ToggleMenuEntry;
-import me.shedaniel.rei.impl.client.gui.screen.ConfigReloadingScreen;
-import me.shedaniel.rei.impl.common.InternalLogger;
+import me.shedaniel.rei.impl.client.gui.overlay.menu.provider.OverlayMenuEntryProvider;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 public class CraftableFilterButtonWidgetProvider implements OverlayWidgetProvider {
     public static final UUID FILTER_MENU_UUID = UUID.fromString("2839e998-1679-4f9e-a257-37411d16f1e6");
     
     @Override
-    public List<Widget> provide(ScreenOverlay overlay, MenuAccess access, Consumer<TextField> textFieldSink, UnaryOperator<Widget> lateRenderable) {
+    public List<Widget> provide(ScreenOverlay overlay, MenuAccess access, TextFieldSink textFieldSink, UnaryOperator<Widget> lateRenderable) {
         if (ConfigObject.getInstance().isCraftableFilterEnabled()) {
             return List.of(create(overlay, access, lateRenderable));
         } else {
@@ -111,58 +105,31 @@ public class CraftableFilterButtonWidgetProvider implements OverlayWidgetProvide
                         .toList())
         ));
         
-        List<Map.Entry<ResourceLocation, InputMethod<?>>> applicableInputMethods = getApplicableInputMethods();
-        if (applicableInputMethods.size() > 1) {
-            entries.add(new SubMenuEntry(new TranslatableComponent("text.rei.config.menu.search_field.input_method"), createInputMethodEntries(applicableInputMethods)));
+        List<List<FavoriteMenuEntry>> additionalEntries = new ArrayList<>();
+        
+        for (OverlayMenuEntryProvider provider : OverlayMenuEntryProvider.PROVIDERS) {
+            List<FavoriteMenuEntry> provided = provider.provide(OverlayMenuEntryProvider.Type.CRAFTABLE_FILTER);
+            
+            if (provided != null && !provided.isEmpty()) {
+                additionalEntries.add(provided);
+            }
+        }
+        
+        for (List<FavoriteMenuEntry> additionalEntryList : additionalEntries) {
+            if (additionalEntryList.size() > 1) {
+                entries.add(new SeparatorMenuEntry());
+                entries.addAll(additionalEntryList);
+            }
+        }
+        
+        List<FavoriteMenuEntry> singleEntries = CollectionUtils.flatMap(CollectionUtils.filterToList(additionalEntries, list -> list.size() == 1), list -> list);
+        
+        if (!singleEntries.isEmpty()) {
+            entries.add(new SeparatorMenuEntry());
+            entries.addAll(singleEntries);
         }
         
         return entries;
-    }
-    
-    public static List<Map.Entry<ResourceLocation, InputMethod<?>>> getApplicableInputMethods() {
-        String languageCode = Minecraft.getInstance().options.languageCode;
-        return InputMethodRegistry.getInstance().getAll().entrySet().stream()
-                .filter(entry -> CollectionUtils.anyMatch(entry.getValue().getMatchingLocales(), locale -> locale.code().equals(languageCode)))
-                .toList();
-    }
-    
-    public static List<FavoriteMenuEntry> createInputMethodEntries(List<Map.Entry<ResourceLocation, InputMethod<?>>> applicableInputMethods) {
-        ConfigManagerInternal manager = ConfigManagerInternal.getInstance();
-        ConfigObject config = ConfigObject.getInstance();
-        return applicableInputMethods.stream()
-                .<FavoriteMenuEntry>map(pair -> ToggleMenuEntry.of(pair.getValue().getName(),
-                                () -> Objects.equals(config.getInputMethodId(), pair.getKey()),
-                                bool -> {
-                                    ExecutorService service = Executors.newSingleThreadExecutor();
-                                    InputMethod<?> active = InputMethod.active();
-                                    active.dispose(service).whenComplete((unused, throwable) -> {
-                                        if (throwable != null) {
-                                            InternalLogger.getInstance().error("Failed to dispose input method", throwable);
-                                        }
-                                        
-                                        manager.set("functionality.inputMethod", new ResourceLocation("rei:default"));
-                                    }).join();
-                                    CompletableFuture<Void> future = pair.getValue().prepare(service).whenComplete((unused, throwable) -> {
-                                        if (throwable != null) {
-                                            InternalLogger.getInstance().error("Failed to prepare input method", throwable);
-                                            manager.set("functionality.inputMethod", new ResourceLocation("rei:default"));
-                                        } else {
-                                            manager.set("functionality.inputMethod", pair.getKey());
-                                        }
-                                    });
-                                    Screen screen = Minecraft.getInstance().screen;
-                                    Minecraft.getInstance().setScreen(new ConfigReloadingScreen(new TranslatableComponent("text.rei.input.methods.initializing"),
-                                            () -> !future.isDone(), () -> {
-                                        Minecraft.getInstance().setScreen(screen);
-                                    }));
-                                    future.whenComplete((unused, throwable) -> {
-                                        service.shutdown();
-                                    });
-                                })
-                        .withActive(() -> !Objects.equals(config.getInputMethodId(), pair.getKey()))
-                        .withTooltip(() -> Tooltip.create(TooltipContext.ofMouse(), pair.getValue().getDescription()))
-                )
-                .toList();
     }
     
     private static Rectangle getCraftableFilterBounds() {

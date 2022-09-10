@@ -73,10 +73,10 @@ import java.util.function.Consumer;
 @SuppressWarnings("UnstableApiUsage")
 @ApiStatus.Internal
 public class OverlaySearchField extends DelegateWidget implements DelegateTextField, TextField.TextFormatter, TextField.SuggestionRenderer, TextField.BorderColorProvider {
-    public static boolean isHighlighting = false;
     private static final Style SPLITTER_STYLE = Style.EMPTY.withColor(ChatFormatting.GRAY);
     private static final Style QUOTES_STYLE = Style.EMPTY.withColor(ChatFormatting.GOLD);
     private static final Style ERROR_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xff5555));
+    private boolean isHighlighting = false;
     private final TextField textField;
     private final MenuAccess access;
     private boolean previouslyClicking = false;
@@ -383,7 +383,7 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
         super.render(matrices, mouseX, mouseY, delta);
         RenderSystem.enableDepthTest();
         if (isMain && isHighlighting) {
-            this.renderEntryHighlighting(matrices);
+            renderEntryHighlighting(matrices);
         }
     }
     
@@ -426,5 +426,9 @@ public class OverlaySearchField extends DelegateWidget implements DelegateTextFi
         }
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.enableDepthTest();
+    }
+    
+    public boolean isHighlighting() {
+        return isHighlighting;
     }
 }
