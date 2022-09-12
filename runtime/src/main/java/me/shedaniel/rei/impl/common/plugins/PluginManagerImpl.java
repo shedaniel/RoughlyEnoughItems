@@ -269,9 +269,21 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     }
     
     private static String name(Class<?> clazz) {
-        String simpleName = clazz.getSimpleName();
-        if (simpleName.isEmpty()) return clazz.getName();
-        return simpleName;
+        for (Class<?> anInterface : clazz.getInterfaces()) {
+            if (!anInterface.getName().startsWith("me.shedaniel.rei.impl")) {
+                return _name(anInterface);
+            }
+        }
+        
+        return _name(clazz);
+    }
+    
+    private static String _name(Class<?> clazz) {
+        String name = clazz.getName();
+        if (name.contains(".")) {
+            name = name.substring(name.lastIndexOf(".") + 1);
+        }
+        return name.replace('$', '.');
     }
     
     @Override

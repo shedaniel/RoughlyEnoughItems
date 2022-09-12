@@ -25,13 +25,15 @@ package me.shedaniel.rei.impl.client.forge;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class CommandSenderImpl {
-    public static void sendCommand(String command) {
+public interface CommandSenderImpl {
+    @DontObfuscate
+    static void sendCommand(String command) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
         Method method = null;

@@ -30,7 +30,8 @@ import java.lang.reflect.InvocationTargetException;
 class CommandSender {
     static void sendCommand(String command) {
         try {
-            Class.forName("me.shedaniel.rei.impl.client.%s.CommandSenderImpl".formatted(Platform.isForge() ? "forge" : "fabric"))
+            String s = "me.shedaniel.rei.impl.client.%s.CommandSenderImpl";
+            Class.forName(s.contains("%s") ? s.formatted(Platform.isForge() ? "forge" : "fabric") : s)
                     .getDeclaredMethod("sendCommand", String.class).invoke(null, command);
         } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
             throw new RuntimeException(e);

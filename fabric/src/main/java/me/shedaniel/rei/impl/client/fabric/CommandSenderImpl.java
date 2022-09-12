@@ -27,12 +27,14 @@ import dev.architectury.platform.Platform;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.obfuscate.DontObfuscate;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class CommandSenderImpl {
-    public static void sendCommand(String command) {
+public interface CommandSenderImpl {
+    @DontObfuscate
+    static void sendCommand(String command) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return;
         String methodName = "method_44099";

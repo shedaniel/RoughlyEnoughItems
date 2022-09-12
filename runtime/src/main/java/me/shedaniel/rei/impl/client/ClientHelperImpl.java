@@ -227,7 +227,8 @@ public class ClientHelperImpl implements ClientHelper {
                 Minecraft.getInstance().player.displayClientMessage(Component.translatable("text.rei.too_long_nbt"), false);
             }
             try {
-                Class.forName("me.shedaniel.rei.impl.client.%s.CommandSenderImpl".formatted(Platform.isForge() ? "forge" : "fabric"))
+                String s = "me.shedaniel.rei.impl.client.%s.CommandSenderImpl";
+                Class.forName(s.contains("%s") ? s.formatted(Platform.isForge() ? "forge" : "fabric") : s)
                         .getDeclaredMethod("sendCommand", String.class)
                         .invoke(null, StringUtils.removeStart(madeUpCommand, "/"));
             } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {

@@ -53,6 +53,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -84,7 +85,18 @@ public final class ClientInternals {
     
     @ApiStatus.Internal
     public static <T> void attachInstance(T instance, Class<T> clazz) {
-        attachInstanceSupplier(instance, clazz.getSimpleName());
+        try {
+            for (Field field : ClientInternals.class.getDeclaredFields()) {
+                if (field.getGenericType() instanceof ParameterizedType && ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0] == clazz) {
+                    field.setAccessible(true);
+                    field.set(null, (Supplier<T>) () -> instance);
+                    return;
+                }
+            }
+            throw new RuntimeException("Failed to attach " + instance + " with field type: " + clazz);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
     
     @ApiStatus.Internal
