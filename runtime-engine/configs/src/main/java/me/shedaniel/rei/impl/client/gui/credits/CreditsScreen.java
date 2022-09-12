@@ -36,7 +36,6 @@ import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -135,7 +134,8 @@ public class CreditsScreen extends Screen {
     
     private static void fillTranslators(Exception[] exception, List<Tuple<String, List<TranslatorEntry>>> translators) {
         try {
-            Class.forName("me.shedaniel.rei.impl.client.gui.credits.%s.CreditsScreenImpl".formatted(Platform.isForge() ? "forge" : "fabric"))
+            String s = "me.shedaniel.rei.impl.client.gui.credits.%s.CreditsScreenImpl";
+            Class.forName(s.contains("%s") ? s.formatted(Platform.isForge() ? "forge" : "fabric") : s)
                     .getDeclaredMethod("fillTranslators", Exception[].class, List.class)
                     .invoke(null, exception, translators);
         } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {

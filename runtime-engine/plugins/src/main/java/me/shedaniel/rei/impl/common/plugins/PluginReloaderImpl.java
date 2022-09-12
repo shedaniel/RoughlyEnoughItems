@@ -283,9 +283,21 @@ public class PluginReloaderImpl<P extends REIPlugin<?>> {
     }
     
     static String name(Class<?> clazz) {
-        String simpleName = clazz.getSimpleName();
-        if (simpleName.isEmpty()) return clazz.getName();
-        return simpleName;
+        for (Class<?> anInterface : clazz.getInterfaces()) {
+            if (!anInterface.getName().startsWith("me.shedaniel.rei.impl")) {
+                return _name(anInterface);
+            }
+        }
+        
+        return _name(clazz);
+    }
+    
+    static String _name(Class<?> clazz) {
+        String name = clazz.getName();
+        if (name.contains(".")) {
+            name = name.substring(name.lastIndexOf(".") + 1);
+        }
+        return name.replace('$', '.');
     }
     
     public List<ReloadStage> getObservedStages() {

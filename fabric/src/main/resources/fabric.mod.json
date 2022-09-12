@@ -30,7 +30,8 @@
       "me.shedaniel.rei.plugin.client.DefaultClientPlugin",
       "me.shedaniel.rei.plugin.client.runtime.DefaultClientRuntimePlugin",
       "me.shedaniel.rei.plugin.client.runtime.DefaultRuntimeInputMethodPlugin",
-      "me.shedaniel.rei.plugin.autocrafting.DefaultClientTransferCategoryPlugin"
+      "me.shedaniel.rei.plugin.autocrafting.DefaultClientTransferCategoryPlugin",
+      "me.shedaniel.rei.impl.client.gui.widget.plugin.FavoritesEntriesBuiltinPlugin"
     ]
   },
   "accessWidener": "roughlyenoughitems.accessWidener",

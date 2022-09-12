@@ -51,7 +51,6 @@ import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientInternals;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.InternalCursorState;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.CatchingExceptionUtils;
 import me.shedaniel.rei.impl.client.gui.widget.TooltipContextImpl;
 import me.shedaniel.rei.impl.client.gui.widget.TooltipImpl;
@@ -292,7 +291,7 @@ public class RoughlyEnoughItemsCoreClient {
             if (!(screen instanceof DisplayScreen)) {
                 getOverlay().render(matrices, mouseX, mouseY, delta);
             }
-            ((ScreenOverlayImpl) getOverlay()).lateRender(matrices, mouseX, mouseY, delta);
+            getOverlay().lateRender(matrices, mouseX, mouseY, delta);
             resetFocused(screen);
         });
         ClientScreenInputEvent.MOUSE_DRAGGED_PRE.register((minecraftClient, screen, mouseX1, mouseY1, button, mouseX2, mouseY2) -> {

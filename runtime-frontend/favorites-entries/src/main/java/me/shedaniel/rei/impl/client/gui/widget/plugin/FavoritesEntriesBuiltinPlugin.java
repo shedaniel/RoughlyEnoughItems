@@ -21,30 +21,32 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.client.runtime;
+package me.shedaniel.rei.impl.client.gui.widget.plugin;
 
-import me.shedaniel.rei.api.client.gui.widgets.Panel;
+import me.shedaniel.rei.api.client.overlay.OverlayListWidget;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
-import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import org.jetbrains.annotations.ApiStatus;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidgetImpl;
+import net.minecraft.client.gui.screens.Screen;
 
 import java.util.Collections;
+import java.util.List;
 
-@Environment(EnvType.CLIENT)
-@ApiStatus.Internal
-public class DefaultClientRuntimePlugin implements REIClientPlugin {
+public class FavoritesEntriesBuiltinPlugin implements REIClientPlugin {
     @Override
     public void registerScreens(ScreenRegistry registry) {
         ExclusionZones zones = registry.exclusionZones();
-        zones.register(DefaultDisplayViewingScreen.class, screen -> {
-            Panel widget = screen.getWorkingStationsBaseWidget();
-            if (widget == null)
-                return Collections.emptyList();
-            return Collections.singletonList(widget.getBounds().clone());
+        zones.register(Screen.class, screen -> {
+            if (ScreenOverlay.getInstance().isEmpty()) return List.of();
+            OverlayListWidget widget = ScreenOverlay.getInstance().get().getFavoritesList().orElse(null);
+            if (widget instanceof FavoritesListWidgetImpl impl) {
+                if (impl.togglePanelButton.isVisible()) {
+                    return Collections.singletonList(impl.togglePanelButton.bounds);
+                }
+            }
+            return Collections.emptyList();
         });
     }
 }

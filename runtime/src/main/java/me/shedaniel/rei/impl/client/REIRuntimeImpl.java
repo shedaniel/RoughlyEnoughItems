@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client;
 
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.ClientGuiEvent;
 import dev.architectury.event.events.client.ClientTickEvent;
@@ -39,8 +38,6 @@ import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.impl.client.gui.DisplayScreenStack;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.provider.OverlayTicker;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -166,11 +163,6 @@ public class REIRuntimeImpl implements REIRuntime {
         SearchProvider.getInstance().clearCache();
         getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
         DisplayScreenStack.clear();
-        if (!RenderSystem.isOnRenderThread()) {
-            RenderSystem.recordRenderCall(CachedEntryListRender::refresh);
-        } else {
-            CachedEntryListRender.refresh();
-        }
     }
     
     @Override

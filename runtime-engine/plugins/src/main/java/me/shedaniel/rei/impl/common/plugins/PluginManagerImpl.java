@@ -41,6 +41,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.UnaryOperator;
 
+import static me.shedaniel.rei.impl.common.plugins.PluginReloaderImpl.name;
+
 @ApiStatus.Internal
 public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<P>, PluginView<P> {
     private final List<Reloadable<P>> reloadables = new ArrayList<>();
@@ -97,7 +99,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     @Override
     public void registerPlugin(REIPluginProvider<? extends P> plugin) {
         plugins.add((REIPluginProvider<P>) plugin);
-        InternalLogger.getInstance().info("Registered plugin provider %s for %s", plugin.getPluginProviderName(), PluginReloaderImpl.name(pluginClass));
+        InternalLogger.getInstance().info("Registered plugin provider %s for %s", plugin.getPluginProviderName(), name(pluginClass));
     }
     
     @Override

@@ -41,6 +41,3 @@ include "runtime-frontend:favorites-entries"
 include "runtime"
 include "fabric"
 include "forge"
-
-include "jei-compatibility-layer"
-include "jei-internals-workaround"

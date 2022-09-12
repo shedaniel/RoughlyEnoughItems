@@ -56,12 +56,6 @@ loom {
     }
 
     forge {
-        localMods {
-            jeiInternalsWorkaround {
-                add(project(":jei-internals-workaround").sourceSets.main)
-            }
-        }
-
         mixinConfig "rei.mixins.json"
     }
 }
@@ -70,10 +64,6 @@ dependencies {
     forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
     modApi("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
     modApi("dev.architectury:architectury-forge:${architectury_version}")
-
-    common(project(path: ":jei-compatibility-layer", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":jei-compatibility-layer", configuration: "namedElements")) { transitive false }
-    runtimeClasspath(project(path: ":jei-internals-workaround", configuration: "namedElements")) { transitive false }
 
     depProjects.forEach {
         common(project(path: it, configuration: "namedElements")) { transitive false }

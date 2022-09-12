@@ -66,7 +66,7 @@ public class FavoritesListWidgetImpl extends WidgetWithBounds implements Favorit
     public Rectangle fullBounds;
     public Rectangle excludedBounds;
     public Rectangle favoritesBounds;
-    private EntryStacksRegionWidget<FavoriteEntry> region = new EntryStacksRegionWidget<>(new FavoritesRegionListener(this));
+    private final EntryStacksRegionWidget<FavoriteEntry> region = new EntryStacksRegionWidget<>(new FavoritesRegionListener(this));
     
     public final FavoritesPanel favoritePanel = new FavoritesPanel(this, region);
     public final TrashWidget trash = new TrashWidget(this);

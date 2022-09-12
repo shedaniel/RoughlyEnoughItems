@@ -25,9 +25,11 @@ package me.shedaniel.rei.plugin.common.displays.crafting.forge;
 
 import me.shedaniel.rei.plugin.common.displays.crafting.CraftingRecipeSizeProvider;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
+import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraftforge.common.crafting.IShapedRecipe;
 
 public class DefaultCraftingDisplayImpl {
+    @DontObfuscate
     public static void registerPlatformSizeProvider() {
         DefaultCraftingDisplay.registerSizeProvider(recipe -> {
             if (recipe instanceof IShapedRecipe) {

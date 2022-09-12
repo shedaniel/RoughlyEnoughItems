@@ -1,3 +1,16 @@
+//file:noinspection UnnecessaryQualifiedReference
+buildscript {
+    repositories {
+        maven { url "https://maven.architectury.dev/" }
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.guardsquare:proguard-gradle:7.2.1"
+        classpath "dev.architectury:architectury-transformer:5.2.68"
+    }
+}
+
 plugins {
     id("architectury-plugin") version("3.4-SNAPSHOT")
     id("dev.architectury.loom") version("0.12.0-SNAPSHOT") apply false
@@ -198,6 +211,10 @@ subprojects {
             }
         }
     }
+
+    sourcesJar {
+        duplicatesStrategy DuplicatesStrategy.WARN
+    }
 }
 
 depProjects.forEach {
@@ -263,4 +280,147 @@ task releaseOnCf {
     if (subprojects.any { it.name == "fabric" }) {
         dependsOn project("fabric").tasks.getByName("publishUnified")
     }
+}
+
+def randomString(len) {
+    def AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    def rnd = new java.security.SecureRandom()
+    return (0..len).toList().collect { AB.charAt(rnd.nextInt(AB.length())) }.join("")
+}
+
+rootProject.file(".gradle/proguard-dictionary.txt").delete()
+rootProject.file(".gradle/proguard-dictionary.txt").write((0..1000).toList().collect { randomString(10) }.join("\n"))
+
+["fabric", "forge"].each { loader ->
+    project(":$loader") {
+        afterEvaluate {
+            def proguardJarOut = file(tasks.getByName("shadowJar").archiveFile.get().getAsFile().absolutePath.replace(".jar", "-min.jar"))
+
+            task proguardJar(type: proguard.gradle.ProGuardTask, dependsOn: ["shadowJar"]) {
+                doFirst {
+                    if (proguardJarOut.exists()) {
+                        proguardJarOut.delete()
+                    }
+                }
+
+                verbose()
+                injars tasks.getByName("shadowJar").archiveFile.get().getAsFile()
+                outjars proguardJarOut
+                libraryjars files(configurations.compileClasspath)
+                libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+                dontshrink()
+                keep "class me.shedaniel.rei.api.** { *; }"
+                keep "class me.shedaniel.rei.plugin.** { *; }"
+                keepclassmembers "class * { void onInitialize(); void onInitializeClient(); }"
+                keepclassmembers "class * { @net.minecraft.obfuscate.DontObfuscate <fields>; @net.minecraft.obfuscate.DontObfuscate <methods>; }"
+                keepclassmembers "class me.shedaniel.rei.impl.*Internals { <fields>; }"
+                keepclassmembers "class me.shedaniel.rei.impl.client.config.ConfigObjectImpl* { <fields>; }"
+                dontwarn "me.shedaniel.rei.impl.init.RoughlyEnoughItemsInitializer"
+                dontwarn "me.shedaniel.rei.plugin.client.DefaultClientPlugin"
+                obfuscationdictionary rootProject.file(".gradle/proguard-dictionary.txt")
+                classobfuscationdictionary rootProject.file(".gradle/proguard-dictionary.txt")
+                repackageclasses "me.shedaniel.rei.impl.${randomString(10)}"
+                keep "class me.shedaniel.rei.mixin.$loader.** { *; }"
+                keepattributes "Signature,SourceFile,LineNumberTable,Exceptions,InnerClasses,*Annotation*"
+                printmapping file(".gradle/proguard-mapping.txt")
+                optimizationpasses 5
+                optimizations "**"
+                allowaccessmodification()
+
+                doLast {
+                    try (def access = dev.architectury.transformer.input.OpenedFileAccess.ofJar(proguardJarOut.toPath())) {
+                        dev.architectury.transformer.Transform.runTransformers(
+                                new dev.architectury.transformer.transformers.base.edit.SimpleTransformerContext(args -> { throw new IllegalStateException(); },
+                                        true, false, true),
+                                dev.architectury.transformer.transformers.ClasspathProvider.of(files(configurations.compileClasspath).collect { it.toPath() }),
+                                proguardJarOut.name,
+                                access, transformers(loader))
+                    }
+                }
+            }
+
+            tasks.prepareRemapJar {
+                inputFile.set proguardJarOut
+                dependsOn proguardJar
+            }
+
+            tasks.remapJar {
+                input.set proguardJarOut
+                dependsOn proguardJar
+            }
+        }
+    }
+}
+
+def transformers(loader) {
+    def map = new HashMap<String, String>();
+    file(".gradle/proguard-mapping.txt").eachLine {
+        if (!it.startsWith(" ")) {
+            map[it.split(" -> ")[0]] = it.split(" -> ")[1].split(":")[0]
+        }
+    }
+    return [new dev.architectury.transformer.transformers.base.ClassEditTransformer() {
+        @Override
+        dev.architectury.transformer.shadowed.impl.org.objectweb.asm.tree.ClassNode doEdit(String name, dev.architectury.transformer.shadowed.impl.org.objectweb.asm.tree.ClassNode node) {
+            if (dev.architectury.transformer.Transform.trimSlashes(name).startsWith("me/shedaniel/rei/impl")) {
+                if (node.invisibleAnnotations == null || !node.invisibleAnnotations.any { it.desc == "Lorg/jetbrains/annotations/ApiStatus\$Internal;" }) {
+                    if (node.invisibleAnnotations == null) node.invisibleAnnotations = new ArrayList<>()
+                    node.invisibleAnnotations.add(new dev.architectury.transformer.shadowed.impl.org.objectweb.asm.tree.AnnotationNode("Lorg/jetbrains/annotations/ApiStatus\$Internal;"))
+                }
+            }
+
+            node.methods.forEach { method ->
+                method.instructions.forEach { insn ->
+                    if (insn.opcode == dev.architectury.transformer.shadowed.impl.org.objectweb.asm.Opcodes.LDC
+                            && insn instanceof dev.architectury.transformer.shadowed.impl.org.objectweb.asm.tree.LdcInsnNode
+                            && insn.cst instanceof String) {
+                        if (insn.cst.contains("%s")) {
+                            def replaced = insn.cst.replace("%s", loader)
+
+                            if (map.containsKey(replaced)) {
+                                insn.cst = map[replaced]
+                            }
+                        } else {
+                            insn.cst = map.getOrDefault(insn.cst, insn.cst)
+                        }
+                    }
+                }
+            }
+
+            return node
+        }
+    }, new dev.architectury.transformer.transformers.base.AssetEditTransformer() {
+        @Override
+        void doEdit(dev.architectury.transformer.transformers.base.edit.TransformerContext context, dev.architectury.transformer.input.FileAccess output) throws Exception {
+            def renames = []
+            output.handle((java.util.function.Consumer<String>) { String name ->
+                def trimmed = dev.architectury.transformer.Transform.trimSlashes(name)
+                if (trimmed.startsWith("META-INF/services/")) {
+                    output.modifyFile(trimmed) { bytes ->
+                        new String(bytes).split("\n").collect { map[it] ?: it }.join("\n").bytes
+                    }
+
+                    def remapped = map[trimmed.substring("META-INF/services/".length())]
+                    if (remapped != null) {
+                        renames << [trimmed, "META-INF/services/$remapped"]
+                    }
+                }
+            })
+            renames.each {
+                output.addFile(it[1], output.getFile(it[0]))
+                output.deleteFile(it[0])
+            }
+
+            output.modifyFile("fabric.mod.json") { bytes ->
+                new String(bytes).split("\n").collect {
+                    map.forEach { k, v ->
+                        it = it.replace("\"$k\"", "\"$v\"")
+                        it = it.replace("\"$k::onInitialize\"", "\"$v::onInitialize\"")
+                        it = it.replace("\"$k::onInitializeClient\"", "\"$v::onInitializeClient\"")
+                    }
+                    it
+                }.join("\n").bytes
+            }
+        }
+    }]
 }

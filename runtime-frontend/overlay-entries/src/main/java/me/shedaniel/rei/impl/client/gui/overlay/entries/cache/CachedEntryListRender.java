@@ -41,6 +41,9 @@ import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.registry.ReloadStage;
+import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.client.Minecraft;
@@ -65,6 +68,24 @@ public class CachedEntryListRender {
                     .setTextureState(new RenderStateShard.TextureStateShard(cachedTextureLocation, false, false))
                     .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionTexShader))
                     .createCompositeState(false)));
+    
+    static {
+        PluginManager.getInstance().registerReloadable(new Reloadable<>() {
+            @Override
+            public void startReload() {
+                startReload(null);
+            }
+            
+            @Override
+            public void startReload(ReloadStage stage) {
+                if (!RenderSystem.isOnRenderThread()) {
+                    RenderSystem.recordRenderCall(CachedEntryListRender::refresh);
+                } else {
+                    CachedEntryListRender.refresh();
+                }
+            }
+        });
+    }
     
     public static class Sprite {
         public final float u0;

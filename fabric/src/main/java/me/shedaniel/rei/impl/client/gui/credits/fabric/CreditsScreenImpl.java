@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.CustomValue;
+import net.minecraft.obfuscate.DontObfuscate;
 import net.minecraft.util.Tuple;
 
 import java.util.Comparator;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CreditsScreenImpl {
+    @DontObfuscate
     public static void fillTranslators(Exception[] exception, List<Tuple<String, List<CreditsScreen.TranslatorEntry>>> translators) {
         FabricLoader.getInstance().getModContainer("roughlyenoughitems").ifPresent(rei -> {
             try {

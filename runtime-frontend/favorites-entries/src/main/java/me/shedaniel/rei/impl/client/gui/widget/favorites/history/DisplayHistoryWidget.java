@@ -40,10 +40,10 @@ import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProviderWidget;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitorWidget;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.impl.client.gui.widget.DisplayCompositeWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidgetImpl;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -297,7 +297,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
                         DisplayHistoryManager.INSTANCE.removeEntry(entry);
                         scroll.setAs(scroll.target() - getBounds().getWidth());
                         scroll.setTo(scroll.target() + getBounds().getWidth(), 800);
-                        DisplayCompositeWidget.DisplayDraggableComponent component = new DisplayCompositeWidget.DisplayDraggableComponent(Widgets.concat(entry.getWidgets()), entry.getDisplay(),
+                        DisplayDraggableComponent component = new DisplayDraggableComponent(Widgets.concat(entry.getWidgets()), entry.getDisplay(),
                                 entry.getBounds().clone(),
                                 new Rectangle(0, 0, entry.getSize().width, entry.getSize().height));
                         DraggingContext.getInstance().renderToVoid(component);
@@ -330,7 +330,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
                         DisplayHistoryManager.INSTANCE.removeEntry(entry);
                         scroll.setAs(scroll.target() - getBounds().getWidth());
                         scroll.setTo(scroll.target() + getBounds().getWidth(), 800);
-                        DisplayCompositeWidget.DisplayDraggableComponent component = new DisplayCompositeWidget.DisplayDraggableComponent(Widgets.concat(entry.getWidgets()), entry.getDisplay(),
+                        DisplayDraggableComponent component = new DisplayDraggableComponent(Widgets.concat(entry.getWidgets()), entry.getDisplay(),
                                 entry.getBounds().clone(),
                                 new Rectangle(0, 0, entry.getSize().width, entry.getSize().height));
                         DraggingContext.getInstance().renderToVoid(component);
@@ -380,7 +380,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
                         }
                     }
                     
-                    return (DraggableComponent<Object>) (DraggableComponent<?>) new DisplayCompositeWidget.DisplayDraggableComponent(Widgets.concat(entry.getWidgets()), entry.getDisplay(),
+                    return (DraggableComponent<Object>) (DraggableComponent<?>) new DisplayDraggableComponent(Widgets.concat(entry.getWidgets()), entry.getDisplay(),
                             entry.getBounds().clone(),
                             new Rectangle(0, 0, entry.getSize().width, entry.getSize().height)) {
                         @Override
@@ -403,5 +403,56 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
         }
         
         return null;
+    }
+    
+    public static class DisplayDraggableComponent implements DraggableComponent<Display> {
+        private final Widget widget;
+        private final Display display;
+        private final Rectangle originBounds;
+        private final Rectangle bounds;
+        
+        public DisplayDraggableComponent(Widget widget, Display display, Rectangle originBounds, Rectangle bounds) {
+            this.widget = widget;
+            this.display = display;
+            this.originBounds = originBounds;
+            this.bounds = bounds;
+        }
+        
+        @Override
+        public int getWidth() {
+            return bounds.width;
+        }
+        
+        @Override
+        public int getHeight() {
+            return bounds.height;
+        }
+        
+        @Override
+        public Display get() {
+            return display;
+        }
+        
+        @Override
+        public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+            matrices.pushPose();
+            matrices.translate(bounds.getX(), bounds.getY(), 0);
+            matrices.scale(bounds.width / (float) this.bounds.getWidth(), bounds.height / (float) this.bounds.getHeight(), 1);
+            matrices.translate(-this.bounds.getX(), -this.bounds.getY(), 0);
+            widget.render(matrices, -1000, -1000, delta);
+            matrices.popPose();
+        }
+        
+        @Override
+        public void release(DraggedAcceptorResult result) {
+            if (result == DraggedAcceptorResult.PASS) {
+                DraggingContext.getInstance().renderBack(this, DraggingContext.getInstance().getCurrentBounds(), () -> originBounds);
+            }
+        }
+        
+        @Override
+        public Rectangle getOriginBounds(Point mouse) {
+            return originBounds.clone();
+        }
     }
 }

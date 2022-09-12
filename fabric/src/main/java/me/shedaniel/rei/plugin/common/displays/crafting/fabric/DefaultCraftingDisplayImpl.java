@@ -23,7 +23,10 @@
 
 package me.shedaniel.rei.plugin.common.displays.crafting.fabric;
 
+import net.minecraft.obfuscate.DontObfuscate;
+
 public class DefaultCraftingDisplayImpl {
+    @DontObfuscate
     public static void registerPlatformSizeProvider() {
     }
 }

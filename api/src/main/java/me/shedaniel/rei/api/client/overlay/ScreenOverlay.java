@@ -143,6 +143,23 @@ public abstract class ScreenOverlay extends WidgetWithBounds {
      */
     public abstract boolean isHighlighting();
     
+    /**
+     * Submits a display to the overlay history.
+     *
+     * @param display    the display to submit
+     * @param fromBounds the bounds of the display
+     * @return whether the display was submitted
+     */
     @ApiStatus.Experimental
     public abstract boolean submitDisplayHistory(Display display, @Nullable Rectangle fromBounds);
+    
+    /**
+     * Renders the late widgets.
+     *
+     * @param matrices the matrices transform
+     * @param mouseX   the x-coordinate of the mouse
+     * @param mouseY   the y-coordinate of the mouse
+     * @param delta    the tick delta
+     */
+    public abstract void lateRender(PoseStack matrices, int mouseX, int mouseY, float delta);
 }
