@@ -426,6 +426,12 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     @ApiStatus.Experimental
+    public boolean isPatchingAsyncThreadCrash() {
+        return advanced.search.patchAsyncThreadCrash;
+    }
+    
+    @Override
+    @ApiStatus.Experimental
     public boolean doDebugSearchTimeRequired() {
         return advanced.search.debugSearchTimeRequired;
     }
@@ -671,6 +677,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares whether REI should search async.") private boolean asyncSearch = true;
             @Comment("Declares how many entries should be grouped one async search.") @ConfigEntry.BoundedDiscrete(min = 25, max = 400)
             private int asyncSearchPartitionSize = 100;
+            private boolean patchAsyncThreadCrash = true;
             @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
             private SearchMode tooltipSearch = SearchMode.ALWAYS;
             @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
