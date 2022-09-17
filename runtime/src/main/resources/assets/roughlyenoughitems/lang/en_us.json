@@ -249,6 +249,7 @@
   "config.roughlyenoughitems.accessibility.entrySize": "Entry Size:",
   "config.roughlyenoughitems.search.asyncSearch": "Async Search:",
   "config.roughlyenoughitems.search.asyncSearchPartitionSize": "Async Search Partition Size:",
+  "config.roughlyenoughitems.search.patchAsyncThreadCrash": "Patch Async Thread Crash:",
   "config.roughlyenoughitems.accessibility.useCompactTabs": "Compact Tabs:",
   "config.roughlyenoughitems.accessibility.useCompactTabButtons": "Compact Tab Arrow Buttons:",
   "config.roughlyenoughitems.theme": "Appearance Theme:",

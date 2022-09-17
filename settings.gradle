@@ -14,6 +14,3 @@ include "default-plugin"
 include "runtime"
 include "fabric"
 include "forge"
-
-include "jei-compatibility-layer"
-include "jei-internals-workaround"

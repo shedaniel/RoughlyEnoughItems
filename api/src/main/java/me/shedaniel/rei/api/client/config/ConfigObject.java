@@ -317,6 +317,9 @@ public interface ConfigObject {
     int getAsyncSearchPartitionSize();
     
     @ApiStatus.Experimental
+    boolean isPatchingAsyncThreadCrash();
+    
+    @ApiStatus.Experimental
     boolean doDebugSearchTimeRequired();
     
     @Deprecated(forRemoval = true)
