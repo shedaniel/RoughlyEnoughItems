@@ -1,3 +1,5 @@
+import net.fabricmc.loom.task.RemapJarTask
+
 archivesBaseName = rootProject.name + "-" + project.name
 
 dependencies {
@@ -22,13 +24,16 @@ task fakeJar(type: Jar, dependsOn: remapJar) {
     classifier null
 }
 
-task fakeForgeJar(type: Jar, dependsOn: remapJar) {
-    from remapJar.archiveFile.map { zipTree(it) }
-    from(rootProject.file("fake/fabric.mod.json")) {
-        into ""
+task fakeForgeJar(type: Jar, dependsOn: jar) {
+    from jar.archiveFile.map { zipTree(it) }
+    from(rootProject.file("fake/mods.toml")) {
+        into "META-INF"
     }
-    from(rootProject.file("fake/REIPlugin.class")) {
-        into "me/shedaniel/rei/forge"
+    ["REIPlugin", "REIPluginClient", "REIPluginCommon", "REIPluginDedicatedServer",
+     "REIPluginLoader", "REIPluginLoaderClient", "REIPluginLoaderCommon", "REIPluginLoaderDedicatedServer"].each {
+        from(rootProject.file("fake/$it.class")) {
+            into "me/shedaniel/rei/forge"
+        }
     }
     classifier "fake-forge"
 }
