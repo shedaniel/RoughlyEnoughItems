@@ -38,6 +38,8 @@ import me.shedaniel.rei.plugin.common.runtime.DefaultRuntimePlugin;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -45,7 +47,7 @@ import java.util.function.Supplier;
 public class PluginDetectorImpl implements PluginDetector {
     private static <P extends me.shedaniel.rei.api.common.plugins.REIPlugin<?>> REIPluginProvider<P> wrapPlugin(List<String> modId, REIPluginProvider<P> plugin) {
         return new REIPluginProvider<P>() {
-            String nameSuffix = " [" + String.join(", ", modId) + "]";
+            final String nameSuffix = " [" + String.join(", ", modId) + "]";
             
             @Override
             public Collection<P> provide() {
@@ -64,13 +66,17 @@ public class PluginDetectorImpl implements PluginDetector {
         };
     }
     
-    private static final Supplier<List<Map.Entry<REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>>, List<String>>>> loaderProvided = Suppliers.memoize(() -> {
-        List<Map.Entry<REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>>, List<String>>> list = new ArrayList<>();
-        AnnotationUtils.<REIPluginLoader, REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>>>scanAnnotation(REIPluginLoader.class, REIPluginProvider.class::isAssignableFrom, (modId, provider, clazz) -> {
+    private static final Supplier<List<Map.Entry<REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>>, List<String>>>> loaderProvided =
+            Suppliers.memoize(() -> getPluginsLoader(REIPluginLoader.class));
+    
+    @NotNull
+    private static <T, P extends me.shedaniel.rei.api.common.plugins.REIPlugin<?>> List<Map.Entry<REIPluginProvider<P>, List<String>>> getPluginsLoader(Class<T> annotation) {
+        List<Map.Entry<REIPluginProvider<P>, List<String>>> list = new ArrayList<>();
+        AnnotationUtils.<T, REIPluginProvider<P>>scanAnnotation(annotation, REIPluginProvider.class::isAssignableFrom, (modId, provider, clazz) -> {
             list.add(new AbstractMap.SimpleEntry<>(provider.get(), modId));
         });
         return list;
-    });
+    }
     
     @Override
     public void detectServerPlugins() {
@@ -79,6 +85,11 @@ public class PluginDetectorImpl implements PluginDetector {
         AnnotationUtils.<REIPlugin, REIServerPlugin>scanAnnotation(REIPlugin.class, REIServerPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
             ((PluginView<REIServerPlugin>) PluginManager.getServerInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
         });
+        if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
+            AnnotationUtils.<REIPluginDedicatedServer, REIServerPlugin>scanAnnotation(REIPluginDedicatedServer.class, REIServerPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
+                ((PluginView<REIServerPlugin>) PluginManager.getServerInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
+            });
+        }
         for (Map.Entry<REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>>, List<String>> entry : loaderProvided.get()) {
             REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>> provider = entry.getKey();
             Collection<me.shedaniel.rei.api.common.plugins.REIPlugin<?>> objects = provider.provide();
@@ -89,6 +100,11 @@ public class PluginDetectorImpl implements PluginDetector {
                 }
             }
         }
+        if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
+            for (Map.Entry<REIPluginProvider<REIServerPlugin>, List<String>> entry : PluginDetectorImpl.<REIPluginLoaderDedicatedServer, REIServerPlugin>getPluginsLoader(REIPluginLoaderDedicatedServer.class)) {
+                ((PluginView<REIServerPlugin>) PluginManager.getServerInstance()).registerPlugin(wrapPlugin(entry.getValue(), entry.getKey()));
+            }
+        }
     }
     
     @Override
@@ -97,6 +113,12 @@ public class PluginDetectorImpl implements PluginDetector {
         AnnotationUtils.<REIPlugin, me.shedaniel.rei.api.common.plugins.REIPlugin<?>>scanAnnotation(REIPlugin.class, me.shedaniel.rei.api.common.plugins.REIPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
             ((PluginView) PluginManager.getInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
         });
+        AnnotationUtils.<REIPluginCommon, me.shedaniel.rei.api.common.plugins.REIPlugin<?>>scanAnnotation(REIPluginCommon.class, me.shedaniel.rei.api.common.plugins.REIPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
+            ((PluginView) PluginManager.getInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
+        });
+        for (Map.Entry<REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>>, List<String>> entry : PluginDetectorImpl.getPluginsLoader(REIPluginLoaderCommon.class)) {
+            ((PluginView) PluginManager.getInstance()).registerPlugin(wrapPlugin(entry.getValue(), entry.getKey()));
+        }
     }
     
     @OnlyIn(Dist.CLIENT)
@@ -108,6 +130,9 @@ public class PluginDetectorImpl implements PluginDetector {
             AnnotationUtils.<REIPlugin, REIClientPlugin>scanAnnotation(REIPlugin.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
                 ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
             });
+            AnnotationUtils.<REIPluginClient, REIClientPlugin>scanAnnotation(REIPluginClient.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {
+                ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(modId, plugin.get()));
+            });
             for (Map.Entry<REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>>, List<String>> entry : loaderProvided.get()) {
                 REIPluginProvider<me.shedaniel.rei.api.common.plugins.REIPlugin<?>> provider = entry.getKey();
                 Collection<me.shedaniel.rei.api.common.plugins.REIPlugin<?>> objects = provider.provide();
@@ -117,15 +142,9 @@ public class PluginDetectorImpl implements PluginDetector {
                     }
                 }
             }
-//        ClientInternals.attachInstance((Supplier<List<String>>) () -> {
-//            List<String> modIds = new ArrayList<>();
-//            for (REIPluginProvider<REIClientPlugin> plugin : PluginManager.getClientInstance().getPluginProviders()) {
-//                if (plugin instanceof JEIPluginDetector.JEIPluginProvider) {
-//                    modIds.addAll(((JEIPluginDetector.JEIPluginProvider) plugin).modIds);
-//                }
-//            }
-//            return modIds;
-//        }, "jeiCompatMods");
+            for (Map.Entry<REIPluginProvider<REIClientPlugin>, List<String>> entry : PluginDetectorImpl.<REIPluginLoaderClient, REIClientPlugin>getPluginsLoader(REIPluginLoaderClient.class)) {
+                ((PluginView<REIClientPlugin>) PluginManager.getClientInstance()).registerPlugin(wrapPlugin(entry.getValue(), entry.getKey()));
+            }
         };
     }
 }
