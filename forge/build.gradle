@@ -185,19 +185,29 @@ components.java {
 
 publishing {
     publications {
-        mavenFabric(MavenPublication) {
+        mavenForge(MavenPublication) {
             artifactId = rootProject.name + "-" + project.name
             from components.java
         }
         ["api", "default-plugin"].forEach { projectName ->
-            create(projectName + "Fabric", MavenPublication.class) { publication ->
+            def remapSrg = tasks.create("remapSrgJarFor$projectName", net.fabricmc.loom.task.RemapJarTask) {
+                inputFile = project(":" + projectName).tasks.jar.archiveFile
+                classifier "srg-remapped-$projectName"
+                targetNamespace = "srg"
+            }
+            def remapSrgSourcesJar = tasks.create("remapSrgSourcesFor$projectName", net.fabricmc.loom.task.RemapSourcesJarTask) {
+                inputFile = project(":" + projectName).tasks.sourcesJar.archiveFile
+                classifier "srg-remapped-$projectName-sources"
+                targetNamespace = "srg"
+            }
+            create(projectName + "Forge", MavenPublication.class) { publication ->
                 publication.artifactId = rootProject.name + "-" + projectName + "-forge"
                 project.afterEvaluate {
                     def project = project(":" + projectName)
-                    publication.artifact(project.fakeForgeJar) { classifier null }
-                    def remapSourcesJarTask = project.remapSourcesJar
-                    publication.artifact(remapSourcesJarTask) {
-                        builtBy remapSourcesJarTask
+                    remapSrg.inputFile = project.fakeForgeJar.archiveFile
+                    publication.artifact(remapSrg) { classifier null }
+                    publication.artifact(remapSrgSourcesJar) {
+                        builtBy remapSrgSourcesJar
                         classifier "sources"
                     }
                 }
@@ -232,7 +242,7 @@ unifiedPublishing {
                 token = project.hasProperty("danielshe_curse_api_key") ? project.property("danielshe_curse_api_key") : System.getenv("danielshe_curse_api_key")
                 id = "310111"
                 gameVersions.addAll "Java 17"
-                
+
                 relations {
                     depends "roughly-enough-items-hacks"
                 }
