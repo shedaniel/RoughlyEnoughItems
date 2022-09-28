@@ -43,6 +43,10 @@ public class MixinInputConstants {
     
     @Unique
     private static boolean isPatchingAsyncThreadCrash() {
-        return ConfigObject.getInstance().isPatchingAsyncThreadCrash();
+        try {
+            return ConfigObject.getInstance().isPatchingAsyncThreadCrash();
+        } catch (Throwable throwable) {
+            return false;
+        }
     }
 }
