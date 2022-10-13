@@ -172,7 +172,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     @Override
     public boolean mouseDragged(double mouseX1, double mouseY1, int button, double mouseX2, double mouseY2) {
-        return entry != null && entry.dragging;
+        return button == 0 && entry != null && entry.dragging;
     }
     
     private boolean drop() {
