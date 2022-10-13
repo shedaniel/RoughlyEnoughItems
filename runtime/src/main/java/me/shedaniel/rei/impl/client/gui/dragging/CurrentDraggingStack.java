@@ -154,6 +154,9 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button != 0) {
+            return false;
+        }
         drop();
         DraggableComponent<?> hoveredStack = provider.getHovered(this, mouseX, mouseY);
         if (hoveredStack != null) {
