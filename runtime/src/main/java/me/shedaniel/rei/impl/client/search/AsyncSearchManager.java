@@ -119,7 +119,7 @@ public class AsyncSearchManager implements Supplier<List<EntryStack<?>>> {
                         }));
                     }
                     try {
-                        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(10, TimeUnit.SECONDS);
+                        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(30, TimeUnit.SECONDS);
                     } catch (InterruptedException | ExecutionException | TimeoutException e) {
                         e.printStackTrace();
                     }

@@ -104,7 +104,7 @@ public class FilteringContextImpl implements FilteringContext {
                 this.stacks.get(FilteringContextType.HIDDEN).removeAll(shownStacks);
             }));
             try {
-                CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(20, TimeUnit.SECONDS);
+                CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(5, TimeUnit.MINUTES);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 e.printStackTrace();
             }
