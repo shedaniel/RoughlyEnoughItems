@@ -176,8 +176,6 @@
   "text.rei.changelog.error.missingChangelogFile": "更新日誌檔案遺失",
   "text.rei.changelog.error.failedToReadChangelogFile": "讀取更新日誌檔案失敗！",
   "text.rei.collapsed.entry": "已摺疊: %s",
-  "text.rei.collapsed.entry.hint.expand": "按一下展開所有 %s （%d 條目）",
-  "text.rei.collapsed.entry.hint.collapse": "按一下摺疊所有 %s （%d 條目）",
   "favorite.section.gamemode": "遊戲模式",
   "favorite.section.weather": "天氣",
   "favorite.section.time": "時間",
