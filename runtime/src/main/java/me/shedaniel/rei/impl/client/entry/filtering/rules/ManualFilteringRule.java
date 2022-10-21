@@ -75,7 +75,7 @@ public class ManualFilteringRule extends AbstractFilteringRule<ManualFilteringRu
                 }));
             }
             try {
-                CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(10, TimeUnit.SECONDS);
+                CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(5, TimeUnit.MINUTES);
             } catch (InterruptedException | ExecutionException | TimeoutException e) {
                 e.printStackTrace();
             }
