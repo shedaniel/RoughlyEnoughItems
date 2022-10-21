@@ -49,9 +49,7 @@ import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
-import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
-import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
+import me.shedaniel.rei.impl.client.gui.DisplayScreenStack;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -386,8 +384,8 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         if (super.keyPressed(keyCode, scanCode, modifiers) || (getOverlay().keyPressed(keyCode, scanCode, modifiers) && handleFocuses()))
             return true;
         if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesKey(keyCode, scanCode)) {
-            if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+            if (DisplayScreenStack.hasLastDisplayScreen()) {
+                minecraft.setScreen(DisplayScreenStack.getLastDisplayScreen());
             } else {
                 minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
             }

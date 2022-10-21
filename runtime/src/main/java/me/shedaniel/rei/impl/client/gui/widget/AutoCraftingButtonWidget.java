@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -43,7 +44,9 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class AutoCraftingButtonWidget {
     public static Widget create(Rectangle displayBounds, Rectangle rectangle, Component text,
@@ -57,13 +60,20 @@ public class AutoCraftingButtonWidget {
                             .get();
                 });
         return new DelegateWidget(autoCraftingButton) {
+            final Supplier<AutoCraftingEvaluator.Result>[] result = Stream.of(true, false).map(
+                    bool -> Suppliers.memoizeWithExpiration(
+                            () -> ClientInternals.getAutoCraftingEvaluator(displaySupplier.get())
+                                    .buildRenderer()
+                                    .buildTooltipRenderer(bool)
+                                    .ids(idsSupplier == null ? null : idsSupplier.get())
+                                    .get(),
+                            1000, TimeUnit.MILLISECONDS
+                    )
+            ).toArray(Supplier[]::new);
+            
             @Override
             public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-                AutoCraftingEvaluator.Result result = ClientInternals.getAutoCraftingEvaluator(displaySupplier.get())
-                        .buildRenderer()
-                        .buildTooltipRenderer(autoCraftingButton.isFocused() || containsMouse(mouseX, mouseY))
-                        .ids(idsSupplier == null ? null : idsSupplier.get())
-                        .get();
+                AutoCraftingEvaluator.Result result = this.result[(autoCraftingButton.isFocused() || containsMouse(mouseX, mouseY)) ? 1 : 0].get();
                 
                 autoCraftingButton.setEnabled(result.isSuccessful());
                 autoCraftingButton.setTint(result.getTint());
