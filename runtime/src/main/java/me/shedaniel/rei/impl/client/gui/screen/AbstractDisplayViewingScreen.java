@@ -31,6 +31,7 @@ import com.mojang.math.Matrix4f;
 import dev.architectury.fluid.FluidStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -48,10 +49,12 @@ import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
+import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -369,7 +372,21 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        return super.keyPressed(keyCode, scanCode, modifiers) || (getOverlay().keyPressed(keyCode, scanCode, modifiers) && handleFocuses());
+        if (super.keyPressed(keyCode, scanCode, modifiers) || (getOverlay().keyPressed(keyCode, scanCode, modifiers) && handleFocuses()))
+            return true;
+        if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesKey(keyCode, scanCode)) {
+            if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
+                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+            } else {
+                minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
+            }
+            return true;
+        }
+        if (this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
+            Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
+            return true;
+        }
+        return false;
     }
     
     @Override
