@@ -21,23 +21,7 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.common.networking;
+package me.shedaniel.rei.api.common.networking;
 
-import org.jetbrains.annotations.ApiStatus;
-
-@ApiStatus.Internal
-public interface NetworkModule {
-    Object DELETE = new Object();
-    Object CREATE = new Object();
-    Object CREATE_HOTBAR = new Object();
-    Object CREATE_GRAB = new Object();
-    Object CREATE_MSG = new Object();
-    Object NOT_ENOUGH_ITEMS = new Object();
-    Object TRANSFER = new Object();
-    
-    Object getKey();
-    
-    boolean canUse();
-    
-    void onInitialize();
+public interface NetworkModuleKey<T> {
 }

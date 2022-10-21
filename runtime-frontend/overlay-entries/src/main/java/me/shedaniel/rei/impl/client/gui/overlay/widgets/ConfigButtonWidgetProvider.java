@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
+import me.shedaniel.rei.api.common.networking.NetworkModule;
 import me.shedaniel.rei.api.common.networking.NetworkingHelper;
 import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
@@ -52,17 +53,16 @@ import net.minecraft.network.chat.TranslatableComponent;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.UnaryOperator;
 
 public class ConfigButtonWidgetProvider implements OverlayWidgetProvider {
     private static final UUID CONFIG_MENU_UUID = UUID.fromString("4357bc36-0a4e-47d2-8e07-ddc220df4a0f");
     
     @Override
-    public List<Widget> provide(ScreenOverlay overlay, MenuAccess access, TextFieldSink textFieldSink, UnaryOperator<Widget> lateRenderable) {
-        return List.of(create(overlay, access, lateRenderable));
+    public void provide(ScreenOverlay overlay, MenuAccess access, WidgetSink sink) {
+        sink.acceptLateRendered(create(overlay, access));
     }
     
-    public static Widget create(ScreenOverlay overlay, MenuAccess access, UnaryOperator<Widget> lateRenderable) {
+    public static Widget create(ScreenOverlay overlay, MenuAccess access) {
         Rectangle bounds = getConfigButtonBounds();
         Button configButton = Widgets.createButton(bounds, NarratorChatListener.NO_TITLE)
                 .onClick(button -> {
@@ -74,7 +74,7 @@ public class ConfigButtonWidgetProvider implements OverlayWidgetProvider {
                 })
                 .onRender((matrices, button) -> {
                     if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && NetworkingHelper.getInstance().client().hasOperatorPermission()) {
-                        button.setTint(NetworkingHelper.getInstance().client().hasPermissionToUsePackets() ? 721354752 : 1476440063);
+                        button.setTint(NetworkingHelper.getInstance().canUse(NetworkModule.CHEAT_GIVE) ? 721354752 : 1476440063);
                     } else {
                         button.removeTint();
                     }
@@ -89,7 +89,7 @@ public class ConfigButtonWidgetProvider implements OverlayWidgetProvider {
             helper.blit(matrices, bounds.x + 3, bounds.y + 3, 0, 0, 14, 14);
             helper.setBlitOffset(helper.getBlitOffset() - 1);
         });
-        return lateRenderable.apply(Widgets.concat(configButton, overlayWidget));
+        return Widgets.concat(configButton, overlayWidget);
     }
     
     private static Collection<FavoriteMenuEntry> menuEntries() {
@@ -108,7 +108,7 @@ public class ConfigButtonWidgetProvider implements OverlayWidgetProvider {
                         if (Minecraft.getInstance().gameMode.hasInfiniteItems())
                             return new TranslatableComponent("text.rei.cheating_limited_creative_enabled");
                         else return new TranslatableComponent("text.rei.cheating_enabled_no_perms");
-                    } else if (NetworkingHelper.getInstance().client().hasPermissionToUsePackets())
+                    } else if (NetworkingHelper.getInstance().canUse(NetworkModule.CHEAT_GIVE))
                         return new TranslatableComponent("text.rei.cheating_enabled");
                     else
                         return new TranslatableComponent("text.rei.cheating_limited_enabled");

@@ -21,27 +21,34 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.overlay.widgets;
+package me.shedaniel.rei.api.common.networking;
 
-import me.shedaniel.rei.api.client.gui.widgets.TextField;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
-import me.shedaniel.rei.impl.client.ClientInternals;
-import me.shedaniel.rei.impl.client.gui.menu.MenuAccess;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Unit;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
-import java.util.function.BooleanSupplier;
+import java.util.Map;
 
-public interface OverlayWidgetProvider {
-    List<OverlayWidgetProvider> PROVIDERS = ClientInternals.resolveServices(OverlayWidgetProvider.class);
+@ApiStatus.Experimental
+public interface NetworkModule<T> {
+    NetworkModuleKey<Unit> DELETE_ITEM = new NetworkModuleKey<>() {};
+    NetworkModuleKey<ItemStack> CHEAT_GIVE = new NetworkModuleKey<>() {};
+    NetworkModuleKey<Map.Entry<ItemStack, Integer>> CHEAT_HOTBAR = new NetworkModuleKey<>() {};
+    NetworkModuleKey<ItemStack> CHEAT_GRAB = new NetworkModuleKey<>() {};
+    NetworkModuleKey<Map.Entry<ItemStack, String>> CHEAT_STATUS_REPLY = new NetworkModuleKey<>() {};
+    NetworkModuleKey<List<List<ItemStack>>> NOT_ENOUGH_ITEMS = new NetworkModuleKey<>() {};
+    NetworkModuleKey<TransferData> TRANSFER = new NetworkModuleKey<>() {};
     
-    void provide(ScreenOverlay overlay, MenuAccess access, WidgetSink sink);
+    NetworkModuleKey<T> getKey();
     
-    interface WidgetSink {
-        void accept(Widget widget);
-        
-        void acceptLateRendered(Widget widget);
-        
-        void acceptTextField(TextField textField, BooleanSupplier isHighlighted);
-    }
+    boolean canUse(Object target);
+    
+    void onInitialize();
+    
+    void send(Object target, T data);
+    
+    record TransferData(CategoryIdentifier<?> categoryIdentifier, boolean stacked, CompoundTag displayTag) {}
 }

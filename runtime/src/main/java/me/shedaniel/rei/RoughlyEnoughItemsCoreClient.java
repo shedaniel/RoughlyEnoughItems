@@ -28,7 +28,6 @@ import com.mojang.serialization.DataResult;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.ClientGuiEvent;
 import dev.architectury.event.events.client.ClientScreenInputEvent;
-import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
@@ -46,7 +45,6 @@ import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientInternals;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
@@ -63,21 +61,12 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.CraftingScreen;
-import net.minecraft.client.gui.screens.recipebook.GhostRecipe;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingMenu;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.crafting.Ingredient;
 import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.Nullable;
 
@@ -164,44 +153,6 @@ public class RoughlyEnoughItemsCoreClient {
         for (PluginDetector detector : RoughlyEnoughItemsCore.PLUGIN_DETECTORS) {
             detector.detectClientPlugins().get().run();
         }
-        
-        Minecraft client = Minecraft.getInstance();
-        NetworkManager.registerReceiver(NetworkManager.s2c(), RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, (buf, context) -> {
-            ItemStack stack = buf.readItem();
-            String player = buf.readUtf(32767);
-            if (client.player != null) {
-                client.player.displayClientMessage(new TextComponent(I18n.get("text.rei.cheat_items").replaceAll("\\{item_name}", EntryStacks.of(stack.copy()).asFormattedText().getString()).replaceAll("\\{item_count}", stack.copy().getCount() + "").replaceAll("\\{player_name}", player)), false);
-            }
-        });
-        NetworkManager.registerReceiver(NetworkManager.s2c(), RoughlyEnoughItemsNetwork.NOT_ENOUGH_ITEMS_PACKET, (buf, context) -> {
-            Screen currentScreen = Minecraft.getInstance().screen;
-            if (currentScreen instanceof CraftingScreen craftingScreen) {
-                RecipeBookComponent recipeBookGui = craftingScreen.getRecipeBookComponent();
-                GhostRecipe ghostSlots = recipeBookGui.ghostRecipe;
-                ghostSlots.clear();
-                
-                List<List<ItemStack>> input = Lists.newArrayList();
-                int mapSize = buf.readInt();
-                for (int i = 0; i < mapSize; i++) {
-                    List<ItemStack> list = Lists.newArrayList();
-                    int count = buf.readInt();
-                    for (int j = 0; j < count; j++) {
-                        list.add(buf.readItem());
-                    }
-                    input.add(list);
-                }
-                
-                ghostSlots.addIngredient(Ingredient.of(Items.STONE), 381203812, 12738291);
-                CraftingMenu container = craftingScreen.getMenu();
-                for (int i = 0; i < input.size(); i++) {
-                    List<ItemStack> stacks = input.get(i);
-                    if (!stacks.isEmpty()) {
-                        Slot slot = container.getSlot(i + container.getResultSlotIndex() + 1);
-                        ghostSlots.addIngredient(Ingredient.of(stacks.toArray(new ItemStack[0])), slot.x, slot.y);
-                    }
-                }
-            }
-        });
         
         Platform.getMod("roughlyenoughitems").registerConfigurationScreen(ConfigManager.getInstance()::getConfigScreen);
     }

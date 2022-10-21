@@ -51,21 +51,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.*;
-import java.util.function.UnaryOperator;
 
 public class CraftableFilterButtonWidgetProvider implements OverlayWidgetProvider {
     public static final UUID FILTER_MENU_UUID = UUID.fromString("2839e998-1679-4f9e-a257-37411d16f1e6");
     
     @Override
-    public List<Widget> provide(ScreenOverlay overlay, MenuAccess access, TextFieldSink textFieldSink, UnaryOperator<Widget> lateRenderable) {
+    public void provide(ScreenOverlay overlay, MenuAccess access, WidgetSink sink) {
         if (ConfigObject.getInstance().isCraftableFilterEnabled()) {
-            return List.of(create(overlay, access, lateRenderable));
-        } else {
-            return List.of();
+            sink.acceptLateRendered(create(overlay, access));
         }
     }
     
-    private static Widget create(ScreenOverlay overlay, MenuAccess access, UnaryOperator<Widget> lateRenderable) {
+    private static Widget create(ScreenOverlay overlay, MenuAccess access) {
         Rectangle bounds = getCraftableFilterBounds();
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         ItemStack icon = new ItemStack(Blocks.CRAFTING_TABLE);
@@ -89,7 +86,7 @@ public class CraftableFilterButtonWidgetProvider implements OverlayWidgetProvide
             itemRenderer.renderGuiItem(icon, (int) vector.x(), (int) vector.y());
             itemRenderer.blitOffset = 0.0F;
         });
-        return lateRenderable.apply(Widgets.concat(filterButton, overlayWidget));
+        return Widgets.concat(filterButton, overlayWidget);
     }
     
     private static Collection<FavoriteMenuEntry> menuEntries() {

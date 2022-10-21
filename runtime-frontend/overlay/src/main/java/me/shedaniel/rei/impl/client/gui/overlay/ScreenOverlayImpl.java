@@ -55,10 +55,6 @@ public final class ScreenOverlayImpl extends AbstractScreenOverlay {
     private TextField searchField = null;
     private BooleanSupplier isHighlighted = null;
     
-    public ScreenOverlayImpl() {
-        this.init();
-    }
-    
     @Override
     public void init() {
         super.init();
@@ -74,22 +70,36 @@ public final class ScreenOverlayImpl extends AbstractScreenOverlay {
         
         EntryListWidget entryListWidget = getEntryList();
         entryListWidget.initBounds(this.getBounds());
-        entryListWidget.initSearch(searchField.getText(), true);
         this.children().add(entryListWidget.asWidget());
-        searchField.setResponder(s -> entryListWidget.initSearch(s, false));
         entryListWidget.init(this);
         
         for (OverlayWidgetProvider provider : OverlayWidgetProvider.PROVIDERS) {
-            provider.provide(this, menuAccess(), (textField, isHighlighted) -> {
-                this.searchField = textField;
-                this.isHighlighted = isHighlighted;
-            }, LateRenderableWidget::new);
+            provider.provide(this, menuAccess(), new OverlayWidgetProvider.WidgetSink() {
+                @Override
+                public void accept(Widget widget) {
+                    ScreenOverlayImpl.this.children().add(widget);
+                }
+                
+                @Override
+                public void acceptLateRendered(Widget widget) {
+                    accept(new LateRenderableWidget(widget));
+                }
+                
+                @Override
+                public void acceptTextField(TextField textField, BooleanSupplier isHighlighted) {
+                    ScreenOverlayImpl.this.searchField = textField;
+                    ScreenOverlayImpl.this.isHighlighted = isHighlighted;
+                }
+            });
         }
         
         if (this.searchField != null) {
-            this.children().add(this.searchField.asWidget());
+            this.children().add(new LateRenderableWidget(this.searchField.asWidget()));
+            this.searchField.setResponder(s -> entryListWidget.initSearch(s, false));
+            entryListWidget.initSearch(searchField.getText(), true);
         } else {
             InternalLogger.getInstance().warn("Search Field is not found! This might cause problems!");
+            entryListWidget.initSearch("", true);
         }
     }
     
@@ -143,7 +153,7 @@ public final class ScreenOverlayImpl extends AbstractScreenOverlay {
             current = provider.getEntryList();
             if (current != null) break;
         }
-        if (current != null) throw new IllegalStateException("No Entry List available!");
+        if (current == null) throw new IllegalStateException("No Entry List available!");
         if (current != entryListWidget) {
             entryListWidget = current;
             current.initBounds(Objects.requireNonNullElse(getBounds(), new Rectangle()));

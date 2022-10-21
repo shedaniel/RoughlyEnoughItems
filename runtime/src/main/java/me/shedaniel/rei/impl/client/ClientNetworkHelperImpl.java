@@ -23,55 +23,27 @@
 
 package me.shedaniel.rei.impl.client;
 
-import dev.architectury.networking.NetworkManager;
-import io.netty.buffer.Unpooled;
-import me.shedaniel.rei.RoughlyEnoughItemsNetwork;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.networking.NetworkModule;
+import me.shedaniel.rei.api.common.networking.NetworkModuleKey;
+import me.shedaniel.rei.api.common.networking.NetworkingHelper;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.impl.common.networking.NetworkModule;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Unit;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.AbstractMap;
+
 public abstract class ClientNetworkHelperImpl implements ClientHelper {
-    public boolean hasPermissionToUsePackets() {
-        try {
-            Minecraft.getInstance().getConnection().getSuggestionsProvider().hasPermission(0);
-            return hasOperatorPermission() && canUsePackets();
-        } catch (NullPointerException e) {
-            return true;
-        }
-    }
-    
-    public boolean hasOperatorPermission() {
-        try {
-            return Minecraft.getInstance().getConnection().getSuggestionsProvider().hasPermission(1);
-        } catch (NullPointerException e) {
-            return true;
-        }
-    }
-    
-    public boolean canUsePackets() {
-        return NetworkManager.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET) && NetworkManager.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET) && NetworkManager.canServerReceive(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET);
-    }
-    
-    public boolean canUseHotbarPackets() {
-        return NetworkManager.canServerReceive(RoughlyEnoughItemsNetwork.CREATE_ITEMS_HOTBAR_PACKET);
-    }
-    
-    public boolean canUseDeletePackets() {
-        return hasPermissionToUsePackets() || Minecraft.getInstance().gameMode.hasInfiniteItems();
-    }
-    
     @Override
     public void sendDeletePacket() {
         if (Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen inventoryScreen) {
@@ -79,7 +51,7 @@ public abstract class ClientNetworkHelperImpl implements ClientHelper {
             inventoryScreen.isQuickCrafting = false;
             return;
         }
-        NetworkManager.sendToServer(RoughlyEnoughItemsNetwork.DELETE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()));
+        NetworkingHelper.getInstance().sendToServer(NetworkModule.DELETE_ITEM, Unit.INSTANCE);
         if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> containerScreen) {
             containerScreen.isQuickCrafting = false;
         }
@@ -103,14 +75,18 @@ public abstract class ClientNetworkHelperImpl implements ClientHelper {
             }
             menu.setCarried(stack.getValue().copy());
             return true;
-        } else if (ClientHelperImpl.getInstance().canUsePackets()) {
+        } else if (NetworkingHelper.getInstance().canUse(NetworkModule.CHEAT_GIVE)
+                   || NetworkingHelper.getInstance().canUse(NetworkModule.CHEAT_GRAB)) {
             AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
             EntryStack<ItemStack> stack = entry.copy();
             if (!menu.getCarried().isEmpty() && !EntryStacks.equalsExact(EntryStacks.of(menu.getCarried()), stack)) {
                 return false;
             }
             try {
-                NetworkManager.sendToServer(ConfigObject.getInstance().isGrabbingItems() ? RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET : RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(cheatedStack));
+                NetworkModuleKey<ItemStack> key = ConfigObject.getInstance().isGrabbingItems()
+                                                  && NetworkingHelper.getInstance().canUse(NetworkModule.CHEAT_GRAB)
+                        ? NetworkModule.CHEAT_GRAB : NetworkModule.CHEAT_GIVE;
+                NetworkingHelper.getInstance().sendToServer(key, cheatedStack);
                 return true;
             } catch (Exception exception) {
                 return false;
@@ -148,23 +124,18 @@ public abstract class ClientNetworkHelperImpl implements ClientHelper {
                 return true;
             }
         }
-        if (ClientHelperImpl.getInstance().canUseHotbarPackets()) {
+        if (NetworkingHelper.getInstance().canUse(NetworkModule.CHEAT_HOTBAR)) {
             AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
             EntryStack<ItemStack> stack = entry.copy();
             if (!menu.getCarried().isEmpty()) {
                 return false;
             }
             try {
-                NetworkManager.sendToServer(RoughlyEnoughItemsNetwork.CREATE_ITEMS_HOTBAR_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.getValue().copy()).writeVarInt(hotbarSlotId));
+                NetworkingHelper.getInstance().sendToServer(NetworkModule.CHEAT_HOTBAR, new AbstractMap.SimpleEntry<>(stack.getValue().copy(), hotbarSlotId));
                 return true;
             } catch (Exception exception) {
                 return false;
             }
         } else return false;
-    }
-    
-    @Override
-    public boolean canUseMovePackets() {
-        return RoughlyEnoughItemsNetwork.canUse(NetworkModule.TRANSFER);
     }
 }

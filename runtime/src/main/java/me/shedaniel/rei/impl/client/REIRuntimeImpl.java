@@ -48,6 +48,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
 import static me.shedaniel.rei.impl.client.util.InternalEntryBounds.entrySize;
@@ -72,6 +73,11 @@ public class REIRuntimeImpl implements REIRuntime {
     public Optional<ScreenOverlay> getOverlay(boolean reset, boolean init) {
         if ((overlay == null && init) || reset) {
             overlay = ClientInternals.getNewOverlay();
+            try {
+                overlay.getClass().getMethod("init").invoke(overlay);
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                throw new RuntimeException(e);
+            }
             overlay.getSearchField().setFocused(false);
         }
         

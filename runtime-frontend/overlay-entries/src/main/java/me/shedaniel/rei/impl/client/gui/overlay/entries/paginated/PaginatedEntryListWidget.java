@@ -240,7 +240,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                 .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y))
                 .tooltipLine(new TranslatableComponent("text.rei.changelog.title"))
                 .focusable(false);*/
-        this.additionalWidgets.add(changelogButton);
+        // this.additionalWidgets.add(changelogButton);
         /*this.additionalWidgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
             helper.setBlitOffset(helper.getBlitOffset() + 1);
             RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);

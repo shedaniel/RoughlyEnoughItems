@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.settings.EntrySettingsAdapterRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
+import me.shedaniel.rei.api.common.networking.NetworkingHelper;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
@@ -70,6 +71,7 @@ public class CoreInitialization {
         manager.registerReloadable(DisplaySerializerRegistry.class);
         manager.registerReloadable(FluidSupportProvider.class);
         PluginManager<REIServerPlugin> serverManager = PluginManager.getServerInstance();
+        serverManager.registerReloadable(NetworkingHelper.class);
         serverManager.registerReloadable(MenuInfoRegistry.class);
         Internals.attachInstance((Runnable) () -> reloadPlugins(null, null), "reloadREI");
     }

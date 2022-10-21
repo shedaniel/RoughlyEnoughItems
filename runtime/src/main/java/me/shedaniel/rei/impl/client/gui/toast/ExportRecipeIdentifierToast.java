@@ -25,19 +25,17 @@ package me.shedaniel.rei.impl.client.gui.toast;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
 public class ExportRecipeIdentifierToast implements Toast {
-    
-    protected static final ResourceLocation TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/toasts.png");
-    private String title;
-    private String subtitle;
+    private final String title;
+    private final String subtitle;
     private long startTime;
     
     public ExportRecipeIdentifierToast(String title, @Nullable String subtitleNullable) {
@@ -51,7 +49,7 @@ public class ExportRecipeIdentifierToast implements Toast {
     
     @Override
     public Visibility render(PoseStack matrices, ToastComponent toastManager, long var2) {
-        RenderSystem.setShaderTexture(0, TEXTURE);
+        RenderSystem.setShaderTexture(0, InternalTextures.TOASTS);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         toastManager.blit(matrices, 0, 0, 0, 0, 160, 32);
         if (this.subtitle == null) {

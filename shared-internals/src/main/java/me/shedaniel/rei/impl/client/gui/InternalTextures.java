@@ -34,4 +34,5 @@ public class InternalTextures {
     public static final ResourceLocation CHEST_GUI_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/recipecontainer_dark.png");
     public static final ResourceLocation DISPLAY_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/display.png");
     public static final ResourceLocation DISPLAY_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/display_dark.png");
+    public static final ResourceLocation TOASTS = new ResourceLocation("roughlyenoughitems", "textures/gui/toasts.png");
 }

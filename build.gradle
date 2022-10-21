@@ -47,6 +47,7 @@ allprojects {
                 ":runtime-engine:views",
                 ":runtime-engine:default-runtime-plugin",
                 ":runtime-engine:initialization",
+                ":runtime-engine:networking",
                 ":runtime-frontend:widgets",
                 ":runtime-frontend:filtering",
                 ":runtime-frontend:display",

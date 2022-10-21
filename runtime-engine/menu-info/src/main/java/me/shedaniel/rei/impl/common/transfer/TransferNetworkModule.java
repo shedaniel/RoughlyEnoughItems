@@ -25,11 +25,14 @@ package me.shedaniel.rei.impl.common.transfer;
 
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.transformers.SplitPacketTransformer;
+import io.netty.buffer.Unpooled;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.impl.common.networking.NetworkModule;
+import me.shedaniel.rei.api.common.networking.NetworkModule;
+import me.shedaniel.rei.api.common.networking.NetworkModuleKey;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -39,22 +42,22 @@ import net.minecraft.world.inventory.RecipeBookMenu;
 
 import java.util.Collections;
 
-public class REITransferNetwork implements NetworkModule {
-    public static final ResourceLocation MOVE_ITEMS_PACKET = new ResourceLocation("roughlyenoughitems", "move_items");
+public class TransferNetworkModule implements NetworkModule<NetworkModule.TransferData> {
+    public static final ResourceLocation ID = new ResourceLocation("roughlyenoughitems", "move_items");
     
     @Override
-    public Object getKey() {
+    public NetworkModuleKey<NetworkModule.TransferData> getKey() {
         return NetworkModule.TRANSFER;
     }
     
     @Override
-    public boolean canUse() {
-        return NetworkManager.canServerReceive(REITransferNetwork.MOVE_ITEMS_PACKET);
+    public boolean canUse(Object target) {
+        return NetworkManager.canServerReceive(TransferNetworkModule.ID);
     }
     
     @Override
     public void onInitialize() {
-        NetworkManager.registerReceiver(NetworkManager.c2s(), MOVE_ITEMS_PACKET, Collections.singletonList(new SplitPacketTransformer()), (packetByteBuf, context) -> {
+        NetworkManager.registerReceiver(NetworkManager.c2s(), ID, Collections.singletonList(new SplitPacketTransformer()), (packetByteBuf, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
             CategoryIdentifier<Display> category = CategoryIdentifier.of(packetByteBuf.readResourceLocation());
             AbstractContainerMenu container = player.containerMenu;
@@ -87,5 +90,15 @@ public class REITransferNetwork implements NetworkModule {
                 e.printStackTrace();
             }
         });
+    }
+    
+    @Override
+    public void send(Object target, TransferData data) {
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        buf.writeResourceLocation(data.categoryIdentifier().getIdentifier());
+        buf.writeBoolean(data.stacked());
+        
+        buf.writeNbt(data.displayTag());
+        NetworkManager.sendToServer(TransferNetworkModule.ID, buf);
     }
 }

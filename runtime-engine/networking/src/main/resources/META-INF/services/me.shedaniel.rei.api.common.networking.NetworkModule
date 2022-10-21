@@ -1,0 +1,6 @@
+me.shedaniel.rei.impl.client.networking.modules.CheatItemStatusNetworkModule
+me.shedaniel.rei.impl.client.networking.modules.NotEnoughItemsNetworkModule
+me.shedaniel.rei.impl.common.networking.modules.CheatItemGiveNetworkModule
+me.shedaniel.rei.impl.common.networking.modules.CheatItemGrabNetworkModule
+me.shedaniel.rei.impl.common.networking.modules.CheatItemHotbarNetworkModule
+me.shedaniel.rei.impl.common.networking.modules.DeleteItemNetworkModule

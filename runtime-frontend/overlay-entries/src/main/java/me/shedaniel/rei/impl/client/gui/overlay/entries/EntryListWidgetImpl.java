@@ -44,6 +44,7 @@ import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
+import me.shedaniel.rei.api.common.networking.NetworkModule;
 import me.shedaniel.rei.api.common.networking.NetworkingHelper;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
@@ -165,7 +166,7 @@ public abstract class EntryListWidgetImpl extends WidgetWithBounds implements En
         
         debugger.render(matrices, bounds.x, bounds.y, delta);
         
-        if (containsChecked(mouseX, mouseY, false) && ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && !minecraft.player.containerMenu.getCarried().isEmpty() && NetworkingHelper.getInstance().client().canUseDeletePackets()) {
+        if (containsChecked(mouseX, mouseY, false) && ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && !minecraft.player.containerMenu.getCarried().isEmpty() && (NetworkingHelper.getInstance().has(NetworkModule.DELETE_ITEM) || Minecraft.getInstance().gameMode.hasInfiniteItems())) {
             EntryStack<?> stack = EntryStacks.of(minecraft.player.containerMenu.getCarried().copy());
             if (stack.getType() != VanillaEntryTypes.ITEM) {
                 EntryStack<ItemStack> cheatsAs = stack.cheatsAs();
@@ -245,7 +246,7 @@ public abstract class EntryListWidgetImpl extends WidgetWithBounds implements En
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (containsChecked(mouseX, mouseY, false)) {
             LocalPlayer player = minecraft.player;
-            if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && player != null && player.containerMenu != null && !player.containerMenu.getCarried().isEmpty() && NetworkingHelper.getInstance().client().canUseDeletePackets()) {
+            if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && player != null && player.containerMenu != null && !player.containerMenu.getCarried().isEmpty() && (NetworkingHelper.getInstance().has(NetworkModule.DELETE_ITEM) || Minecraft.getInstance().gameMode.hasInfiniteItems())) {
                 EntryStack<?> stack = EntryStacks.of(minecraft.player.containerMenu.getCarried().copy());
                 if (stack.getType() != VanillaEntryTypes.ITEM) {
                     EntryStack<ItemStack> cheatsAs = stack.cheatsAs();

@@ -26,31 +26,38 @@ package me.shedaniel.rei.api.common.networking;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.registry.Reloadable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.server.level.ServerPlayer;
+
+import java.util.Objects;
 
 public interface NetworkingHelper extends Reloadable<REIServerPlugin> {
     static NetworkingHelper getInstance() {
         return PluginManager.getServerInstance().get(NetworkingHelper.class);
     }
     
+    <T> boolean has(NetworkModuleKey<T> moduleKey);
+    
+    <T> boolean canUse(NetworkModuleKey<T> moduleKey);
+    
+    <T> boolean canPlayerUse(ServerPlayer player, NetworkModuleKey<T> moduleKey);
+    
+    <T> void send(Object target, NetworkModuleKey<T> moduleKey, T data);
+    
+    default <T> void sendToServer(NetworkModuleKey<T> moduleKey, T data) {
+        send(null, moduleKey, data);
+    }
+    
+    default <T> void sendToPlayer(ServerPlayer player, NetworkModuleKey<T> moduleKey, T data) {
+        send(Objects.requireNonNull(player, "player"), moduleKey, data);
+    }
+    
+    @Environment(EnvType.CLIENT)
     Client client();
     
+    @Environment(EnvType.CLIENT)
     interface Client {
-        boolean hasPermissionToUsePackets();
-        
         boolean hasOperatorPermission();
-    
-        /**
-         * Returns whether the client can use delete items packets.
-         *
-         * @return whether the client can use delete items packets
-         */
-        boolean canUseDeletePackets();
-    
-        /**
-         * Returns whether the client can use move items packets.
-         *
-         * @return whether the client can use move items packets
-         */
-        boolean canUseMovePackets();
     }
 }

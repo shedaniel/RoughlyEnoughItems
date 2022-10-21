@@ -23,17 +23,16 @@
 
 package me.shedaniel.rei.plugin.autocrafting;
 
-import dev.architectury.networking.NetworkManager;
-import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.InputIngredient;
+import me.shedaniel.rei.api.common.networking.NetworkModule;
+import me.shedaniel.rei.api.common.networking.NetworkingHelper;
 import me.shedaniel.rei.api.common.transfer.RecipeFinder;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
@@ -41,13 +40,11 @@ import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.api.common.transfer.info.MenuTransferException;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
-import me.shedaniel.rei.impl.common.transfer.REITransferNetwork;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -96,7 +93,7 @@ public class DefaultCategoryHandler implements TransferHandler {
                     })
                     .tooltipMissing(CollectionUtils.map(missing, ingredient -> EntryIngredients.ofItemStacks(ingredient.get())));
         }
-        if (!ClientHelper.getInstance().canUseMovePackets()) {
+        if (!NetworkingHelper.getInstance().canUse(NetworkModule.TRANSFER)) {
             return Result.createFailed(new TranslatableComponent("error.rei.not.on.server"));
         }
         if (!context.isActuallyCrafting()) {
@@ -107,12 +104,10 @@ public class DefaultCategoryHandler implements TransferHandler {
         if (containerScreen instanceof RecipeUpdateListener listener) {
             listener.getRecipeBookComponent().ghostRecipe.clear();
         }
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        buf.writeResourceLocation(display.getCategoryIdentifier().getIdentifier());
-        buf.writeBoolean(context.isStackedCrafting());
-        
-        buf.writeNbt(menuInfo.save(menuInfoContext, display));
-        NetworkManager.sendToServer(REITransferNetwork.MOVE_ITEMS_PACKET, buf);
+        NetworkingHelper.getInstance().sendToServer(NetworkModule.TRANSFER,
+                new NetworkModule.TransferData(display.getCategoryIdentifier(),
+                        context.isStackedCrafting(),
+                        menuInfo.save(menuInfoContext, display)));
         return Result.createSuccessful();
     }
     

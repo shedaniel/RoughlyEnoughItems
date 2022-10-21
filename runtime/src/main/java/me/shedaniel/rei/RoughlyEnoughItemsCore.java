@@ -47,6 +47,5 @@ public class RoughlyEnoughItemsCore {
             detector.detectCommonPlugins();
             detector.detectServerPlugins();
         }
-        RoughlyEnoughItemsNetwork.onInitialize();
     }
 }
