@@ -123,16 +123,8 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         for (GuiEventListener element : children())
             if (element.keyPressed(keyCode, scanCode, modifiers))
                 return true;
-        if (keyCode == 256 || this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
+        if (keyCode == 256) {
             Minecraft.getInstance().setScreen(REIRuntime.getInstance().getPreviousScreen());
-            return true;
-        }
-        if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesKey(keyCode, scanCode)) {
-            if (DisplayScreenStack.hasLastDisplayScreen()) {
-                minecraft.setScreen(DisplayScreenStack.getLastDisplayScreen());
-            } else {
-                minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
-            }
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);

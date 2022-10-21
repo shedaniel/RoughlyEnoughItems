@@ -25,7 +25,7 @@ jobs:
       - name: Upload Mod
         uses: gradle/gradle-build-action@v2
         with:
-          arguments: build publish forge:publishUnified fabric:publishUnified jei-internals-workaround:publishUnified --stacktrace
+          arguments: build publish fabric:publishUnified forge:publishUnified --stacktrace
         env:
           danielshe_curse_api_key: ${{ secrets.CF_API_KEY }}
           modrinth_key: ${{ secrets.MODRINTH_KEY }}

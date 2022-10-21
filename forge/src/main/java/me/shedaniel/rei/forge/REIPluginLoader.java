@@ -33,6 +33,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Deprecated(forRemoval = true)
-public @interface REIPlugin {
+public @interface REIPluginLoader {
     Dist[] value() default {Dist.CLIENT, Dist.DEDICATED_SERVER};
 }

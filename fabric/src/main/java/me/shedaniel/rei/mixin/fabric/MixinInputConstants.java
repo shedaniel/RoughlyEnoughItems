@@ -21,18 +21,32 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.forge;
+package me.shedaniel.rei.mixin.fabric;
 
-import net.minecraftforge.api.distmarker.Dist;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderSystem;
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@Deprecated(forRemoval = true)
-public @interface REIPlugin {
-    Dist[] value() default {Dist.CLIENT, Dist.DEDICATED_SERVER};
+@Mixin(InputConstants.class)
+public class MixinInputConstants {
+    @Inject(method = "isKeyDown", at = @At("HEAD"), cancellable = true)
+    private static void isKeyDown(long windowId, int key, CallbackInfoReturnable<Boolean> cir) {
+        if (isPatchingAsyncThreadCrash() && !RenderSystem.isOnRenderThread()) {
+            cir.setReturnValue(false);
+        }
+    }
+    
+    @Unique
+    private static boolean isPatchingAsyncThreadCrash() {
+        try {
+            return ConfigObject.getInstance().isPatchingAsyncThreadCrash();
+        } catch (Throwable throwable) {
+            return false;
+        }
+    }
 }

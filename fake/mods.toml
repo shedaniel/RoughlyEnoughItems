@@ -1,0 +1,10 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+logoFile = "icon.png"
+authors = "shedaniel"
+license = "MIT"
+
+[[mods]]
+modId = "rei_fake"
+version = "ABC"
+displayName = "THIS SHOULDN'T SHOW UP"
