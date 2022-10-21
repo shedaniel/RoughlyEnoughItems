@@ -1,0 +1,7 @@
+dependencies {
+    depProjects.forEach {
+        if (it.startsWith(":runtime-engine:")) {
+            compileClasspath(project(path: it, configuration: "namedElements")) { transitive false }
+        }
+    }
+}

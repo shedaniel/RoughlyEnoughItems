@@ -31,6 +31,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
@@ -65,7 +66,7 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     @Nullable
     private Predicate<TabWidget> onClick;
     private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
-            .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
+            .withConvention(() -> ConfigObject.getInstance().isUsingDarkTheme() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
             .asFloat();
     
     private TabWidget(int id, Rectangle bounds, int u, int v, @Nullable Predicate<TabWidget> onClick) {

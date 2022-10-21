@@ -74,12 +74,12 @@ public class DefaultBrewingCategory implements DisplayCategory<DefaultBrewingDis
             int width = Mth.ceil(System.currentTimeMillis() / 250d % 18d);
             helper.blit(matrices, startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
         }));
-        widgets.add(Widgets.createSlot(new Point(startPoint.x + 1, startPoint.y + 1)).entry(EntryStacks.of(Items.BLAZE_POWDER)).disableBackground().markInput());
-        widgets.add(Widgets.createSlot(new Point(startPoint.x + 40, startPoint.y + 1)).entries(display.getInputEntries().get(0)).disableBackground().markInput());
-        widgets.add(Widgets.createSlot(new Point(startPoint.x + 63, startPoint.y + 1)).entries(display.getInputEntries().get(1)).disableBackground().markInput());
-        widgets.add(Widgets.createSlot(new Point(startPoint.x + 40, startPoint.y + 35)).entries(display.getOutput(0)).disableBackground().markOutput());
-        widgets.add(Widgets.createSlot(new Point(startPoint.x + 63, startPoint.y + 42)).entries(display.getOutput(1)).disableBackground().markOutput());
-        widgets.add(Widgets.createSlot(new Point(startPoint.x + 86, startPoint.y + 35)).entries(display.getOutput(2)).disableBackground().markOutput());
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 1, startPoint.y + 1)).entry(EntryStacks.of(Items.BLAZE_POWDER)).noBackground().markInput());
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 40, startPoint.y + 1)).entries(display.getInputEntries().get(0)).noBackground().markInput());
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 63, startPoint.y + 1)).entries(display.getInputEntries().get(1)).noBackground().markInput());
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 40, startPoint.y + 35)).entries(display.getOutput(0)).noBackground().markOutput());
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 63, startPoint.y + 42)).entries(display.getOutput(1)).noBackground().markOutput());
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 86, startPoint.y + 35)).entries(display.getOutput(2)).noBackground().markOutput());
         return widgets;
     }
 }

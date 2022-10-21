@@ -49,9 +49,7 @@ import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
-import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
-import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
+import me.shedaniel.rei.impl.client.gui.DisplayScreenStack;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -67,6 +65,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -76,6 +75,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
+
+import static me.shedaniel.rei.impl.client.util.InternalEntryBounds.entrySize;
 
 public abstract class AbstractDisplayViewingScreen extends Screen implements DisplayScreen {
     protected final Map<DisplayCategory<?>, List<DisplaySpec>> categoryMap;
@@ -156,7 +157,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         currentCategoryIndex--;
         if (currentCategoryIndex < 0)
             currentCategoryIndex = categories.size() - 1;
-        ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+        ClientHelperImpl.getInstance().openView(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
     }
     
     @Override
@@ -165,7 +166,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         currentCategoryIndex++;
         if (currentCategoryIndex >= categories.size())
             currentCategoryIndex = 0;
-        ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+        ClientHelperImpl.getInstance().openView(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
     }
     
     protected void transformIngredientNotice(List<Widget> setupDisplay, List<EntryStack<?>> noticeStacks) {
@@ -179,13 +180,13 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     private static void transformNotice(int marker, List<? extends GuiEventListener> setupDisplay, List<EntryStack<?>> noticeStacks) {
         if (noticeStacks.isEmpty())
             return;
-        for (EntryWidget widget : Widgets.<EntryWidget>walk(setupDisplay, EntryWidget.class::isInstance)) {
-            if (widget.getNoticeMark() == marker && widget.getEntries().size() > 1) {
+        for (Slot slot : Widgets.<Slot>walk(setupDisplay, Slot.class::isInstance)) {
+            if (slot.getNoticeMark() == marker && slot.getEntries().size() > 1) {
                 for (EntryStack<?> noticeStack : noticeStacks) {
-                    EntryStack<?> stack = CollectionUtils.findFirstOrNullEqualsExact(widget.getEntries(), noticeStack);
+                    EntryStack<?> stack = CollectionUtils.findFirstOrNullEqualsExact(slot.getEntries(), noticeStack);
                     if (stack != null) {
-                        widget.clearStacks();
-                        widget.entry(stack);
+                        slot.clearEntries();
+                        slot.entry(stack);
                         break;
                     }
                 }
@@ -194,12 +195,12 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     }
     
     protected void transformFiltering(List<? extends GuiEventListener> setupDisplay) {
-        for (EntryWidget widget : Widgets.<EntryWidget>walk(setupDisplay, EntryWidget.class::isInstance)) {
-            if (widget.getEntries().size() > 1) {
-                Collection<EntryStack<?>> refiltered = EntryRegistry.getInstance().refilterNew(false, widget.getEntries());
+        for (Slot slot : Widgets.<Slot>walk(setupDisplay, Slot.class::isInstance)) {
+            if (slot.getEntries().size() > 1) {
+                Collection<EntryStack<?>> refiltered = EntryRegistry.getInstance().refilterNew(false, slot.getEntries());
                 if (!refiltered.isEmpty()) {
-                    widget.clearStacks();
-                    widget.entries(refiltered);
+                    slot.clearEntries();
+                    slot.entries(refiltered);
                 }
             }
         }
@@ -207,11 +208,14 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     
     protected void setupTags(List<Widget> widgets) {
         outer:
-        for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
-            if (widget.getNoticeMark() != EntryWidget.INPUT) continue;
-            addCyclingTooltip(widget);
-            widget.removeTagMatch = false;
-            if (widget.getEntries().size() <= 1) continue;
+        for (Slot widget : Widgets.<Slot>walk(widgets, Slot.class::isInstance)) {
+            if (widget.getNoticeMark() != Slot.INPUT) continue;
+            
+            if (widget.getEntries().size() <= 1) {
+                addCyclingTooltip(widget, null);
+                continue;
+            }
+            
             EntryType<?> type = null;
             for (EntryStack<?> entry : widget.getEntries()) {
                 if (type == null) {
@@ -236,14 +240,16 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             TagKey<?> firstOrNull = CollectionUtils.findFirstOrNull(collection::iterator,
                     key -> CollectionUtils.allMatch(objects, holder -> ((Holder<Object>) holder).is((TagKey<Object>) key)));
             if (firstOrNull != null) {
-                widget.tagMatch = firstOrNull.location();
+                addCyclingTooltip(widget, firstOrNull.location());
+            } else {
+                addCyclingTooltip(widget, null);
             }
         }
     }
     
     private static final int MAX_WIDTH = 200;
     
-    private void addCyclingTooltip(EntryWidget widget) {
+    private void addCyclingTooltip(Slot widget, @Nullable ResourceLocation tagMatch) {
         class TooltipProcessor implements UnaryOperator<Tooltip>, TooltipComponent, ClientTooltipComponent {
             @Override
             public Tooltip apply(Tooltip tooltip) {
@@ -271,28 +277,28 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             
             @Override
             public int getHeight() {
-                int entrySize = EntryListWidget.entrySize();
+                int entrySize = entrySize();
                 int w = Math.max(1, MAX_WIDTH / entrySize);
                 int height = Math.min(6, Mth.ceil(widget.getEntries().size() / (float) w)) * entrySize + 2;
                 height += 12;
-                if (widget.tagMatch != null) height += 12;
+                if (tagMatch != null) height += 12;
                 return height;
             }
             
             @Override
             public int getWidth(Font font) {
-                int entrySize = EntryListWidget.entrySize();
+                int entrySize = entrySize();
                 int w = Math.max(1, MAX_WIDTH / entrySize);
                 int size = widget.getEntries().size();
                 int width = Math.min(size, w) * entrySize;
                 width = Math.max(width, font.width(new TranslatableComponent("text.rei.accepts")));
-                if (widget.tagMatch != null) width = Math.max(width, font.width(new TranslatableComponent("text.rei.tag_accept", widget.tagMatch.toString())));
+                if (tagMatch != null) width = Math.max(width, font.width(new TranslatableComponent("text.rei.tag_accept", tagMatch.toString())));
                 return width;
             }
             
             @Override
             public void renderImage(Font font, int x, int y, PoseStack poses, ItemRenderer renderer, int z) {
-                int entrySize = EntryListWidget.entrySize();
+                int entrySize = entrySize();
                 int w = Math.max(1, MAX_WIDTH / entrySize);
                 int i = 0;
                 poses.pushPose();
@@ -319,10 +325,10 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                 font.drawInBatch(new TranslatableComponent("text.rei.accepts").withStyle(ChatFormatting.GRAY),
                         x, y + 2, -1, true, pose, buffers, false, 0, 15728880);
                 
-                if (widget.tagMatch != null) {
-                    int entrySize = EntryListWidget.entrySize();
+                if (tagMatch != null) {
+                    int entrySize = entrySize();
                     int w = Math.max(1, MAX_WIDTH / entrySize);
-                    font.drawInBatch(new TranslatableComponent("text.rei.tag_accept", widget.tagMatch.toString())
+                    font.drawInBatch(new TranslatableComponent("text.rei.tag_accept", tagMatch.toString())
                                     .withStyle(ChatFormatting.GRAY),
                             x, y + 16 + Math.min(6, Mth.ceil(widget.getEntries().size() / (float) w)) * entrySize,
                             -1, true, pose, buffers, false, 0, 15728880);
@@ -334,7 +340,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     }
     
     protected static ScreenOverlay getOverlay() {
-        return REIRuntime.getInstance().getOverlay().orElseThrow(() -> new IllegalStateException("Overlay not initialized!"));
+        return REIRuntime.getInstance().getOverlay().orElseThrow();
     }
     
     private boolean handleFocuses(int button) {
@@ -378,8 +384,8 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         if (super.keyPressed(keyCode, scanCode, modifiers) || (getOverlay().keyPressed(keyCode, scanCode, modifiers) && handleFocuses()))
             return true;
         if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesKey(keyCode, scanCode)) {
-            if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+            if (DisplayScreenStack.hasLastDisplayScreen()) {
+                minecraft.setScreen(DisplayScreenStack.getLastDisplayScreen());
             } else {
                 minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
             }

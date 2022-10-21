@@ -25,11 +25,13 @@ package me.shedaniel.rei.api.common.plugins;
 
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
-import me.shedaniel.rei.impl.ClientInternals;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.client.ClientInternals;
+import me.shedaniel.rei.impl.common.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
+
+import java.util.List;
 
 @ApiStatus.Internal
 public interface PluginView<P extends REIPlugin<?>> {
@@ -70,10 +72,17 @@ public interface PluginView<P extends REIPlugin<?>> {
             public void post(ReloadStage stage) {
                 PluginView.this.post(stage);
             }
+            
+            @Override
+            public List<ReloadStage> getObservedStages() {
+                return PluginView.this.getObservedStages();
+            }
         };
     }
     
     void pre(ReloadStage stage);
     
     void post(ReloadStage stage);
+    
+    List<ReloadStage> getObservedStages();
 }

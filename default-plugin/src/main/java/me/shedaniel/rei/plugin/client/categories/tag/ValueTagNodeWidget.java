@@ -66,7 +66,7 @@ public class ValueTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
             int y = i / width;
             Slot slot = Widgets.createSlot(new Rectangle(x * 16 + 5, y * 16 + 5, 18, 18))
                     .entry(mapper.apply(holder))
-                    .disableBackground();
+                    .noBackground();
             this.widgets.add(slot);
             i++;
         }

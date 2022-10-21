@@ -24,11 +24,14 @@
 package me.shedaniel.rei.api.client;
 
 import me.shedaniel.rei.api.client.config.ConfigManager;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.networking.NetworkModule;
+import me.shedaniel.rei.api.common.networking.NetworkingHelper;
 import me.shedaniel.rei.api.common.util.FormattingUtils;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -56,7 +59,9 @@ public interface ClientHelper {
      *
      * @return whether cheating is enabled
      */
-    boolean isCheating();
+    default boolean isCheating() {
+        return ConfigObject.getInstance().isCheating();
+    }
     
     /**
      * Sets current cheating mode
@@ -64,7 +69,10 @@ public interface ClientHelper {
      *
      * @param cheating the new cheating mode
      */
-    void setCheating(boolean cheating);
+    default void setCheating(boolean cheating) {
+        ConfigObject.getInstance().setCheating(cheating);
+        ConfigManager.getInstance().saveConfig();
+    }
     
     /**
      * Tries to cheat stack using either packets or commands.
@@ -200,5 +208,8 @@ public interface ClientHelper {
      *
      * @return whether the client can use move items packets
      */
-    boolean canUseMovePackets();
+    @Deprecated(forRemoval = true)
+    default boolean canUseMovePackets() {
+        return NetworkingHelper.getInstance().canUse(NetworkModule.TRANSFER);
+    }
 }

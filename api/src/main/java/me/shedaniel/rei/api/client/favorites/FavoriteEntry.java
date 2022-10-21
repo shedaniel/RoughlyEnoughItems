@@ -29,7 +29,7 @@ import me.shedaniel.rei.api.client.entry.region.RegionEntry;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;

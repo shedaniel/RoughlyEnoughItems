@@ -31,7 +31,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -218,6 +218,21 @@ public interface ViewSearchBuilder {
      * @see me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibilityPredicate
      */
     ViewSearchBuilder processingVisibilityHandlers(boolean processingVisibilityHandlers);
+    
+    /**
+     * Force-all displays to the view search builder.
+     *
+     * @param displays the displays to add
+     * @return the {@link ViewSearchBuilder} for chaining
+     */
+    ViewSearchBuilder addDisplays(Collection<Display> displays);
+    
+    /**
+     * Returns the collection of additional displays to show.
+     *
+     * @return the collection of additional displays to show.
+     */
+    Collection<Display> getAdditionalDisplays();
     
     /**
      * Opens the view after the search is complete.

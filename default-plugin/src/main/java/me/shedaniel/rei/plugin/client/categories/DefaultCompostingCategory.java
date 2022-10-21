@@ -109,7 +109,7 @@ public class DefaultCompostingCategory implements DisplayCategory<DefaultCompost
             }
         widgets.add(Widgets.createArrow(new Point(startingPoint.x - 1 - 5, startingPoint.y + 7 - 5)));
         widgets.add(Widgets.createResultSlotBackground(new Point(startingPoint.x + 33 - 5, startingPoint.y + 8 - 5)));
-        widgets.add(Widgets.createSlot(new Point(startingPoint.x + 33 - 5, startingPoint.y + 8 - 5)).entries(display.getOutputEntries().get(0)).disableBackground().markOutput());
+        widgets.add(Widgets.createSlot(new Point(startingPoint.x + 33 - 5, startingPoint.y + 8 - 5)).entries(display.getOutputEntries().get(0)).noBackground().markOutput());
         return widgets;
     }
     

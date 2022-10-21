@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api.common.entry.comparison;
 
 import dev.architectury.fluid.FluidStack;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.common.Internals;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;

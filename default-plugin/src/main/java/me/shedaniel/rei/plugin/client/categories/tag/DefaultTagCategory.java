@@ -31,6 +31,7 @@ import me.shedaniel.math.FloatingRectangle;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
@@ -143,13 +144,13 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
                                 Font font = instance.font;
                                 String text = "?";
                                 int width = font.width(text);
-                                font.draw(matrices, text, bounds.getCenterX() - width / 2f + 0.2f, bounds.getCenterY() - font.lineHeight / 2f + 1f, REIRuntime.getInstance().isDarkThemeEnabled() ? -4473925 : -12566464);
+                                font.draw(matrices, text, bounds.getCenterX() - width / 2f + 0.2f, bounds.getCenterY() - font.lineHeight / 2f + 1f, ConfigObject.getInstance().isUsingDarkTheme() ? -4473925 : -12566464);
                             }
                             
                             @Override
                             @Nullable
                             public Tooltip getTooltip(TooltipContext context) {
-                                return Tooltip.create(context.getPoint(), new TextComponent(holder.unwrapKey().map(key -> key.location().toString()).orElse("null")));
+                                return Tooltip.create(context, new TextComponent(holder.unwrapKey().map(key -> key.location().toString()).orElse("null")));
                             }
                         });
                     }
@@ -179,19 +180,16 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
                     }
                 })
                 .tooltipLine(new TranslatableComponent("text.rei.tag.copy.clipboard")));
-        widgets.add(Widgets.withTranslate(new DelegateWidget(Widgets.noOp()) {
-            @Override
-            protected Widget delegate() {
-                ResourceLocation expandTexture = !expanded[0] ? new ResourceLocation("roughlyenoughitems", "textures/gui/expand.png")
-                        : new ResourceLocation("roughlyenoughitems", "textures/gui/shrink.png");
-                return Widgets.concat(
-                        Widgets.createTexturedWidget(expandTexture,
-                                new Rectangle(recipeBounds.x + 5 + 2, recipeBounds.y + 6 + 2, 13 - 4, 13 - 4), 0, 0, 9, 9),
-                        Widgets.createTexturedWidget(new ResourceLocation("roughlyenoughitems", "textures/gui/clipboard.png"),
-                                new Rectangle(recipeBounds.x + 5 + 2, recipeBounds.getMaxY() - 6 - 13 + 2, 13 - 4, 13 - 4), 0, 0, 9, 9)
-                );
-            }
-        }, 0, 0, 10));
+        widgets.add(Widgets.withTranslate(Widgets.delegate(() -> {
+            ResourceLocation expandTexture = !expanded[0] ? new ResourceLocation("roughlyenoughitems", "textures/gui/expand.png")
+                    : new ResourceLocation("roughlyenoughitems", "textures/gui/shrink.png");
+            return Widgets.concat(
+                    Widgets.createTexturedWidget(expandTexture,
+                            new Rectangle(recipeBounds.x + 5 + 2, recipeBounds.y + 6 + 2, 13 - 4, 13 - 4), 0, 0, 9, 9),
+                    Widgets.createTexturedWidget(new ResourceLocation("roughlyenoughitems", "textures/gui/clipboard.png"),
+                            new Rectangle(recipeBounds.x + 5 + 2, recipeBounds.getMaxY() - 6 - 13 + 2, 13 - 4, 13 - 4), 0, 0, 9, 9)
+            );
+        }), 0, 0, 10));
         
         Matrix4f translateMatrix = Matrix4f.createTranslateMatrix(0, 0, 200);
         Matrix4f identity = new Matrix4f();

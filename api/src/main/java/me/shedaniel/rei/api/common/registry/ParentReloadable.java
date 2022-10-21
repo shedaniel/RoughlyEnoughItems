@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.common.registry;
 
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
+import me.shedaniel.rei.impl.common.Internals;
 
 import java.util.List;
 
@@ -31,6 +32,10 @@ public interface ParentReloadable<P extends REIPlugin<?>> extends Reloadable<P> 
     List<Reloadable<P>> getReloadables();
     
     void registerReloadable(Reloadable<? extends P> reloadable);
+    
+    default <R extends Reloadable<? extends P>> void registerReloadable(Class<R> reloadableClass) {
+        registerReloadable(Internals.resolveService(reloadableClass));
+    }
     
     @Override
     default void startReload() {

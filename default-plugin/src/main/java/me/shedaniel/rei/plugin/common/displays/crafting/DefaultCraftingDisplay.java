@@ -68,7 +68,8 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     
     static {
         try {
-            Class.forName("me.shedaniel.rei.plugin.common.displays.crafting.%s.DefaultCraftingDisplayImpl".formatted(Platform.isForge() ? "forge" : "fabric"))
+            String s = "me.shedaniel.rei.plugin.common.displays.crafting.%s.DefaultCraftingDisplayImpl";
+            Class.forName(s.contains("%s") ? s.formatted(Platform.isForge() ? "forge" : "fabric") : s)
                     .getDeclaredMethod("registerPlatformSizeProvider")
                     .invoke(null);
         } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {

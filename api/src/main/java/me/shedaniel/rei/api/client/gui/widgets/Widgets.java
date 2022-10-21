@@ -31,7 +31,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import me.shedaniel.rei.api.client.gui.Renderer;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -260,11 +260,7 @@ public final class Widgets {
     
     
     public static Panel createSlotBase(Rectangle rectangle) {
-        return ClientInternals.getWidgetsProvider().createPanelWidget(rectangle).yTextureOffset(-66).rendering(Widgets::shouldSlotBaseRender);
-    }
-    
-    private static boolean shouldSlotBaseRender(Panel panel) {
-        return true;
+        return ClientInternals.getWidgetsProvider().createPanelWidget(rectangle).yTextureOffset(-66);
     }
     
     public static Panel createSlotBase(Rectangle rectangle, int color) {
@@ -327,8 +323,17 @@ public final class Widgets {
         return ClientInternals.getWidgetsProvider().wrapPadded(padLeft, padRight, padTop, padBottom, widget);
     }
     
+    public static TextField createTextField(Rectangle bounds) {
+        return ClientInternals.getWidgetsProvider().createTextField(bounds);
+    }
+    
+    @ApiStatus.Experimental
+    public static BatchedSlots createBatchedSlots() {
+        return ClientInternals.getWidgetsProvider().createBatchedSlots();
+    }
+    
     public static Widget delegate(Supplier<Widget> supplier) {
-        return new DelegateWidget(Widgets.noOp()) {
+        return new DelegateWidget() {
             @Override
             protected Widget delegate() {
                 return supplier.get();
@@ -337,7 +342,7 @@ public final class Widgets {
     }
     
     public static WidgetWithBounds delegateWithBounds(Supplier<WidgetWithBounds> supplier) {
-        return new DelegateWidgetWithBounds(Widgets.noOp(), Rectangle::new) {
+        return new DelegateWidgetWithBounds() {
             @Override
             protected WidgetWithBounds delegate() {
                 return supplier.get();

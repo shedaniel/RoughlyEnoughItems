@@ -25,7 +25,7 @@ package me.shedaniel.rei.api.client.registry.screen;
 
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
@@ -44,6 +44,20 @@ public interface ClickArea<T extends Screen> {
     
     @ApiStatus.NonExtendable
     interface ClickAreaContext<T extends Screen> {
+        static <T extends Screen> ClickAreaContext<T> of(T screen, Point mouse) {
+            return new ClickAreaContext<>() {
+                @Override
+                public T getScreen() {
+                    return screen;
+                }
+                
+                @Override
+                public Point getMousePosition() {
+                    return mouse;
+                }
+            };
+        }
+        
         T getScreen();
         
         Point getMousePosition();

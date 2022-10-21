@@ -83,7 +83,9 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
      * @return the unmodifiable list of filtered entry stacks,
      * only available <b>after</b> plugins reload.
      */
-    List<EntryStack<?>> getPreFilteredList();
+    default List<EntryStack<?>> getPreFilteredList() {
+        return PreFilteredEntryList.getInstance().getList();
+    }
     
     /**
      * Applies the filtering rules to the entry list, is rather computational expensive.
@@ -154,7 +156,9 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
     
     // TODO Re-evaluate the need for this
     @ApiStatus.Internal
-    Collection<EntryStack<?>> refilterNew(boolean warn, Collection<EntryStack<?>> entries);
+    default Collection<EntryStack<?>> refilterNew(boolean warn, Collection<EntryStack<?>> entries) {
+        return PreFilteredEntryList.getInstance().refilterNew(warn, entries);
+    }
     
     /**
      * Checks if a stack is already registered.

@@ -28,8 +28,8 @@ import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.registry.ParentReloadable;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.ClientInternals;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.client.ClientInternals;
+import me.shedaniel.rei.impl.common.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
@@ -61,6 +61,10 @@ public interface PluginManager<P extends REIPlugin<?>> extends ParentReloadable<
     
     static boolean areAnyReloading() {
         return CollectionUtils.anyMatch(getActiveInstances(), PluginManager::isReloading);
+    }
+    
+    static void reloadAll() {
+        Internals.reloadREI();
     }
     
     boolean isReloading();

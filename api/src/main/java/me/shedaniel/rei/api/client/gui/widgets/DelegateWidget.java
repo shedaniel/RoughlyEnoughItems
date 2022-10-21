@@ -39,6 +39,10 @@ public class DelegateWidget extends WidgetWithBounds {
         this.widget = widget;
     }
     
+    public DelegateWidget() {
+        this(Widgets.noOp());
+    }
+    
     protected Widget delegate() {
         return widget;
     }

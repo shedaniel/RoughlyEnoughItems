@@ -53,20 +53,18 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
+import me.shedaniel.rei.impl.client.gui.DisplayScreenStack;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.RecipeDisplayExporter;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.toast.ExportRecipeIdentifierToast;
-import me.shedaniel.rei.impl.client.gui.widget.*;
-import me.shedaniel.rei.impl.client.gui.widget.basewidgets.PanelWidget;
+import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingButtonWidget;
+import me.shedaniel.rei.impl.client.gui.widget.DisplayCompositeWidget;
+import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ConfirmScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -225,19 +223,12 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                     DefaultDisplayViewingScreen.this.init();
                 }).tooltipLine(new TranslatableComponent("text.rei.previous_page")));
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 21), NarratorChatListener.NO_TITLE, label -> {
-            if (!Screen.hasShiftDown()) {
-                page = 0;
-                DefaultDisplayViewingScreen.this.init();
-            } else {
-                ScreenOverlayImpl.getInstance().choosePageWidget = new DefaultDisplayChoosePageWidget(page -> {
-                    DefaultDisplayViewingScreen.this.page = page;
-                    DefaultDisplayViewingScreen.this.init();
-                }, page, getCurrentTotalPages());
-            }
+            page = 0;
+            DefaultDisplayViewingScreen.this.init();
         }).onRender((matrices, label) -> {
             label.setMessage(new ImmutableTextComponent(String.format("%d/%d", page + 1, getCurrentTotalPages())));
             label.setClickable(getCurrentTotalPages() > 1);
-        }).tooltipFunction(label -> label.isClickable() ? new Component[]{new TranslatableComponent("text.rei.go_back_first_page"), new TextComponent(" "), new TranslatableComponent("text.rei.shift_click_to", new TranslatableComponent("text.rei.choose_page")).withStyle(ChatFormatting.GRAY)} : null));
+        }).tooltipFunction(label -> label.isClickable() ? new Component[]{new TranslatableComponent("text.rei.go_back_first_page")} : null));
         this.widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), ImmutableTextComponent.EMPTY)
                 .onClick(button -> {
                     page++;
@@ -255,7 +246,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     if (widget.getId() + categoryPages * tabsPerPage == selectedCategoryIndex)
                         return false;
-                    ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, categories.get(widget.getId() + categoryPages * tabsPerPage).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+                    ClientHelperImpl.getInstance().openView(categoryMap, categories.get(widget.getId() + categoryPages * tabsPerPage).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
                     return true;
                 }));
                 tab.setRenderer(categories.get(tabIndex), categories.get(tabIndex).getIcon(), categories.get(tabIndex).getTitle(), tab.getId() + categoryPages * tabsPerPage == selectedCategoryIndex);
@@ -263,7 +254,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         }
         initDisplays();
         widgets = CollectionUtils.map(widgets, widget -> Widgets.withTranslate(widget, 0, 0, 10));
-        widgets.add(Widgets.withTranslate(new PanelWidget(bounds), 0, 0, 5));
+        widgets.add(Widgets.withTranslate(Widgets.createCategoryBase(bounds), 0, 0, 5));
         widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
             fill(matrices, bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, darkStripesColor.value().getColor());
             fill(matrices, bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 31, darkStripesColor.value().getColor());
@@ -296,13 +287,10 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             transformFiltering(setupDisplay);
             transformIngredientNotice(setupDisplay, ingredientStackToNotice);
             transformResultNotice(setupDisplay, resultStackToNotice);
-            for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
-                widget.removeTagMatch = true;
-            }
             this.recipeBounds.put(displayBounds, Pair.of(display, setupDisplay));
             this.widgets.add(new DisplayCompositeWidget(display, setupDisplay, displayBounds));
             if (plusButtonArea.isPresent()) {
-                this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, plusButtonArea.get().get(displayBounds), new TextComponent(plusButtonArea.get().getButtonText()), displaySupplier, display::provideInternalDisplayIds, setupDisplay, getCurrentCategory()));
+                this.widgets.add(AutoCraftingButtonWidget.create(displayBounds, plusButtonArea.get().get(displayBounds), new TextComponent(plusButtonArea.get().getButtonText()), displaySupplier, display::provideInternalDisplayIds, setupDisplay, getCurrentCategory()));
             }
         }
     }
@@ -321,7 +309,9 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             int index = 0;
             xx += (innerWidth - 1) * 16;
             for (EntryIngredient workingStation : workstations) {
-                widgets.add(new WorkstationSlotWidget(xx, yy, workingStation));
+                widgets.add(Widgets.createSlot(new Point(xx, yy))
+                        .entries(workingStation)
+                        .noBackground());
                 index++;
                 yy += 16;
                 if (index >= hh) {
@@ -370,7 +360,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     }
     
     private final ValueAnimator<Color> darkStripesColor = ValueAnimator.ofColor()
-            .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFF404040 : 0xFF9E9E9E), ValueAnimator.typicalTransitionTime());
+            .withConvention(() -> Color.ofTransparent(ConfigObject.getInstance().isUsingDarkTheme() ? 0xFF404040 : 0xFF9E9E9E), ValueAnimator.typicalTransitionTime());
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
@@ -487,9 +477,6 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                             transformFiltering(setupDisplay);
                             transformIngredientNotice(setupDisplay, ingredientStackToNotice);
                             transformResultNotice(setupDisplay, resultStackToNotice);
-                            for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets(), EntryWidget.class::isInstance)) {
-                                widget.removeTagMatch = true;
-                            }
                             
                             RecipeDisplayExporter.exportRecipeDisplay(displayBounds, spec, setupDisplay, false);
                         }
@@ -505,14 +492,11 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        REIRuntimeImpl.isWithinRecipeViewingScreen = true;
         for (GuiEventListener listener : children()) {
             if (listener.mouseScrolled(mouseX, mouseY, amount)) {
-                REIRuntimeImpl.isWithinRecipeViewingScreen = false;
                 return true;
             }
         }
-        REIRuntimeImpl.isWithinRecipeViewingScreen = false;
         if (getBounds().contains(PointHelper.ofMouse())) {
             if (amount > 0 && recipeBack.isEnabled())
                 recipeBack.onClick();
@@ -539,26 +523,14 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 recipeBack.onClick();
             return recipeBack.isEnabled();
         } else if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesMouse(button)) {
-            if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+            if (DisplayScreenStack.hasLastDisplayScreen()) {
+                minecraft.setScreen(DisplayScreenStack.getLastDisplayScreen());
             } else {
                 minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
             }
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
-    }
-    
-    public static class WorkstationSlotWidget extends EntryWidget {
-        public WorkstationSlotWidget(int x, int y, EntryIngredient widgets) {
-            super(new Point(x, y));
-            entries(widgets);
-            noBackground();
-        }
         
-        @Override
-        public boolean containsMouse(double mouseX, double mouseY) {
-            return getInnerBounds().contains(mouseX, mouseY);
-        }
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 }

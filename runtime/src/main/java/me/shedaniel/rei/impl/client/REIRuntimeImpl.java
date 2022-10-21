@@ -23,31 +23,22 @@
 
 package me.shedaniel.rei.impl.client;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.client.ClientGuiEvent;
 import dev.architectury.event.events.client.ClientTickEvent;
-import dev.architectury.platform.Platform;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
-import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
-import me.shedaniel.rei.api.client.gui.widgets.TextField;
-import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
+import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
-import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
-import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
-import me.shedaniel.rei.impl.client.search.argument.Argument;
+import me.shedaniel.rei.impl.client.gui.DisplayScreenStack;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
+import me.shedaniel.rei.impl.client.provider.OverlayTicker;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -58,23 +49,16 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.Optional;
 
-import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
+import static me.shedaniel.rei.impl.client.util.InternalEntryBounds.entrySize;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class REIRuntimeImpl implements REIRuntime {
-    private static final ResourceLocation DISPLAY_TEXTURE = new ResourceLocation("roughlyenoughitems", "textures/gui/display.png");
-    private static final ResourceLocation DISPLAY_TEXTURE_DARK = new ResourceLocation("roughlyenoughitems", "textures/gui/display_dark.png");
-    @ApiStatus.Internal
-    public static boolean isWithinRecipeViewingScreen = false;
-    private ScreenOverlayImpl overlay;
-    private OverlaySearchField searchField;
+    private ScreenOverlay overlay;
     private AbstractContainerScreen<?> previousContainerScreen = null;
     private Screen previousScreen = null;
-    private LinkedHashSet<DisplayScreen> lastDisplayScreen = Sets.newLinkedHashSetWithExpectedSize(10);
-    private List<HintProvider> hintProviders = new ArrayList<>();
     
     /**
      * @return the instance of screen helper
@@ -85,84 +69,16 @@ public class REIRuntimeImpl implements REIRuntime {
         return (REIRuntimeImpl) REIRuntime.getInstance();
     }
     
-    public void addHintProvider(HintProvider provider) {
-        this.hintProviders.add(provider);
-    }
-    
-    public List<HintProvider> getHintProviders() {
-        return Collections.unmodifiableList(hintProviders);
-    }
-    
-    @Override
-    public void queueTooltip(@Nullable Tooltip tooltip) {
-        if (overlay != null && tooltip != null) {
-            overlay.addTooltip(tooltip);
-        }
-    }
-    
-    @Override
-    public void clearTooltips() {
-        if (overlay != null) {
-            overlay.clearTooltips();
-        }
-    }
-    
-    @Override
-    @Nullable
-    public TextField getSearchTextField() {
-        if (searchField == null) {
-            searchField = new OverlaySearchField(0, 0, 0, 0);
-        }
-        
-        return searchField;
-    }
-    
-    @Nullable
-    public static OverlaySearchField getSearchField() {
-        return (OverlaySearchField) getInstance().getSearchTextField();
-    }
-    
-    public void storeDisplayScreen(DisplayScreen screen) {
-        while (lastDisplayScreen.size() >= 10)
-            lastDisplayScreen.remove(Iterables.get(lastDisplayScreen, 0));
-        lastDisplayScreen.add(screen);
-    }
-    
-    public boolean hasLastDisplayScreen() {
-        return !lastDisplayScreen.isEmpty();
-    }
-    
-    public Screen getLastDisplayScreen() {
-        DisplayScreen screen = Iterables.getLast(lastDisplayScreen);
-        lastDisplayScreen.remove(screen);
-        screen.recalculateCategoryPage();
-        return (Screen) screen;
-    }
-    
-    @Override
-    public boolean isOverlayVisible() {
-        return ConfigObject.getInstance().isOverlayVisible();
-    }
-    
-    @Override
-    public void toggleOverlayVisible() {
-        ConfigObject.getInstance().setOverlayVisible(!ConfigObject.getInstance().isOverlayVisible());
-        ConfigManager.getInstance().saveConfig();
-    }
-    
     @Override
     public Optional<ScreenOverlay> getOverlay(boolean reset, boolean init) {
         if ((overlay == null && init) || reset) {
+            overlay = ClientInternals.getNewOverlay();
             try {
-                overlay = (ScreenOverlayImpl) Class.forName(Platform.isForge() ? "me.shedaniel.rei.impl.client.gui.forge.ScreenOverlayImplForge"
-                                : "me.shedaniel.rei.impl.client.gui.fabric.ScreenOverlayImplFabric")
-                        .getDeclaredConstructor()
-                        .newInstance();
-            } catch (InstantiationException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                overlay.getClass().getMethod("init").invoke(overlay);
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
-            overlay.init();
-            getSearchField().setFocused(false);
+            overlay.getSearchField().setFocused(false);
         }
         
         return Optional.ofNullable(overlay);
@@ -193,18 +109,8 @@ public class REIRuntimeImpl implements REIRuntime {
     }
     
     @Override
-    public boolean isDarkThemeEnabled() {
-        return ConfigObject.getInstance().isUsingDarkTheme();
-    }
-    
-    @Override
-    public ResourceLocation getDefaultDisplayTexture() {
-        return getDefaultDisplayTexture(isDarkThemeEnabled());
-    }
-    
-    @Override
     public ResourceLocation getDefaultDisplayTexture(boolean darkTheme) {
-        return darkTheme ? DISPLAY_TEXTURE_DARK : DISPLAY_TEXTURE;
+        return darkTheme ? InternalTextures.DISPLAY_TEXTURE_DARK : InternalTextures.DISPLAY_TEXTURE;
     }
     
     @Override
@@ -255,24 +161,19 @@ public class REIRuntimeImpl implements REIRuntime {
     
     @Override
     public void startReload() {
-        Argument.SEARCH_CACHE.clear();
-        getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
-        lastDisplayScreen.clear();
-        if (!RenderSystem.isOnRenderThread()) {
-            RenderSystem.recordRenderCall(CachedEntryListRender::refresh);
-        } else {
-            CachedEntryListRender.refresh();
-        }
+        startReload(null);
     }
     
     @Override
     public void startReload(ReloadStage stage) {
-        startReload();
+        SearchProvider.getInstance().clearCache();
+        getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
+        DisplayScreenStack.clear();
     }
     
     @Override
     public void endReload(ReloadStage stage) {
-        Argument.SEARCH_CACHE.clear();
+        SearchProvider.getInstance().clearCache();
         getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
     }
     
@@ -284,7 +185,10 @@ public class REIRuntimeImpl implements REIRuntime {
         });
         ClientTickEvent.CLIENT_POST.register(minecraft -> {
             if (isOverlayVisible() && REIRuntime.getInstance().getOverlay().isPresent()) {
-                ScreenOverlayImpl.getInstance().tick();
+                REIRuntime.getInstance().getSearchTextField().tick();
+                for (OverlayTicker ticker : ClientInternals.getOverlayTickers()) {
+                    ticker.tick();
+                }
             }
         });
     }

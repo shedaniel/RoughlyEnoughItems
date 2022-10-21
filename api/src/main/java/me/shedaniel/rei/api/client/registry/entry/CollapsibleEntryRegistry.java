@@ -44,7 +44,7 @@ import java.util.function.Predicate;
  * and collect tags together.
  */
 @ApiStatus.Experimental
-public interface CollapsibleEntryRegistry extends Reloadable<REIClientPlugin> {
+public interface CollapsibleEntryRegistry extends Reloadable<REIClientPlugin>, List<CollapsibleEntry> {
     /**
      * @return the {@link CollapsibleEntryRegistry} instance
      */

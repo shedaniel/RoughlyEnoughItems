@@ -45,15 +45,16 @@ public class RoughlyEnoughItemsInitializer {
         adapter.checkMods();
         
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
+            initializeEntryPoint(false, "me.shedaniel.rei.impl.common.logging.LoggerInitializer");
+            initializeEntryPoint(false, "me.shedaniel.rei.impl.common.init.CoreInitialization");
             initializeEntryPoint(false, "me.shedaniel.rei.RoughlyEnoughItemsCore");
         }
     }
     
     public static void onInitializeClient() {
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
+            initializeEntryPoint(true, "me.shedaniel.rei.impl.client.init.CoreClientInitialization");
             initializeEntryPoint(true, "me.shedaniel.rei.RoughlyEnoughItemsCoreClient");
-            initializeEntryPoint(true, "me.shedaniel.rei.REIModMenuEntryPoint");
-            initializeEntryPoint(true, "me.shedaniel.rei.impl.client.ClientHelperImpl");
             initializeEntryPoint(true, "me.shedaniel.rei.impl.client.REIRuntimeImpl");
         }
         

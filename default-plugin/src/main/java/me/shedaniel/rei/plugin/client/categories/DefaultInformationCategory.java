@@ -32,6 +32,7 @@ import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
@@ -198,7 +199,7 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
                 int currentY = -scrolling.scrollAmountInt() + innerBounds.y;
                 for (FormattedCharSequence text : texts) {
                     if (text != null && currentY + font.lineHeight >= innerBounds.y && currentY <= innerBounds.getMaxY()) {
-                        font.draw(matrices, text, innerBounds.x + 2, currentY + 2, REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF090909);
+                        font.draw(matrices, text, innerBounds.x + 2, currentY + 2, ConfigObject.getInstance().isUsingDarkTheme() ? 0xFFBBBBBB : 0xFF090909);
                     }
                     currentY += text == null ? 4 : font.lineHeight;
                 }

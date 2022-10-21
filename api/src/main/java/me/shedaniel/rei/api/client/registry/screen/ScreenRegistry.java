@@ -25,6 +25,7 @@ package me.shedaniel.rei.api.client.registry.screen;
 
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProvider;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
@@ -49,14 +50,12 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -287,6 +286,22 @@ public interface ScreenRegistry extends Reloadable<REIClientPlugin> {
             return true;
         }
         
+        return false;
+    }
+    
+    default boolean shouldDisplay(Screen screen) {
+        if (REIRuntime.getInstance().getOverlay().isEmpty()) return false;
+        if (screen == null) return false;
+        if (screen != Minecraft.getInstance().screen) return false;
+        try {
+            for (OverlayDecider decider : getDeciders(screen)) {
+                InteractionResult result = decider.shouldScreenBeOverlaid(screen);
+                if (result != InteractionResult.PASS) {
+                    return result != InteractionResult.FAIL && REIRuntime.getInstance().getPreviousScreen() != null;
+                }
+            }
+        } catch (ConcurrentModificationException ignored) {
+        }
         return false;
     }
 }

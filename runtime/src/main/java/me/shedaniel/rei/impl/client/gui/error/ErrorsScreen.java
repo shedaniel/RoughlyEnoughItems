@@ -27,7 +27,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.impl.client.gui.error.ErrorsEntryListWidget.TextEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
-import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -40,11 +39,10 @@ import java.util.function.Function;
 
 @ApiStatus.Internal
 public class ErrorsScreen extends Screen {
-    private List<Object> components;
-    private AbstractButton doneButton;
+    private final List<Object> components;
+    private final Screen parent;
+    private final boolean quitable;
     private ErrorsEntryListWidget listWidget;
-    private Screen parent;
-    private boolean quitable;
     
     public ErrorsScreen(Component title, List<Object> components, Screen parent, boolean quitable) {
         super(title);
@@ -81,9 +79,9 @@ public class ErrorsScreen extends Screen {
         }
         listWidget._addEntry(new TextEntry(NarratorChatListener.NO_TITLE, listWidget.getItemWidth()));
         if (quitable) {
-            addRenderableWidget(doneButton = new Button(width / 2 - 100, height - 26, 200, 20, new TranslatableComponent("gui.done"), button -> Minecraft.getInstance().setScreen(parent)));
+            addRenderableWidget(new Button(width / 2 - 100, height - 26, 200, 20, new TranslatableComponent("gui.done"), button -> Minecraft.getInstance().setScreen(parent)));
         } else {
-            addRenderableWidget(doneButton = new Button(width / 2 - 100, height - 26, 200, 20, new TranslatableComponent("menu.quit"), button -> exit()));
+            addRenderableWidget(new Button(width / 2 - 100, height - 26, 200, 20, new TranslatableComponent("menu.quit"), button -> exit()));
         }
     }
     

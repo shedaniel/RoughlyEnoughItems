@@ -29,7 +29,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
@@ -46,7 +46,7 @@ import org.jetbrains.annotations.Nullable;
 @Environment(EnvType.CLIENT)
 public interface EntryRenderer<T> extends EntryRendererProvider<T> {
     static <T> EntryRenderer<T> empty() {
-        return ClientInternals.getEmptyEntryRenderer();
+        return (EntryRenderer<T>) BuiltinEntryTypes.EMPTY.getDefinition().getRenderer();
     }
     
     @Environment(EnvType.CLIENT)

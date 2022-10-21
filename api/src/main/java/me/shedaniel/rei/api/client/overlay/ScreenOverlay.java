@@ -23,24 +23,143 @@
 
 package me.shedaniel.rei.api.client.overlay;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.widgets.TextField;
+import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.client.search.SearchFilter;
+import me.shedaniel.rei.api.common.display.Display;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public abstract class ScreenOverlay extends WidgetWithBounds {
+    public static Optional<ScreenOverlay> getInstance() {
+        return REIRuntime.getInstance().getOverlay();
+    }
+    
+    /**
+     * Queues reload of the overlay.
+     */
     public abstract void queueReloadOverlay();
     
+    /**
+     * Queues reload of the search result.
+     */
     public abstract void queueReloadSearch();
     
+    /**
+     * Returns whether the overlay is queued to be reloaded.
+     *
+     * @return whether the overlay is queued to be reloaded
+     */
+    public abstract boolean isOverlayReloadQueued();
+    
+    /**
+     * Returns whether the search result is queued to be reloaded.
+     *
+     * @return whether the search result is queued to be reloaded
+     */
+    public abstract boolean isSearchReloadQueued();
+    
+    /**
+     * Returns the current dragging context.
+     *
+     * @return the current dragging context
+     */
     public abstract DraggingContext<?> getDraggingContext();
     
+    /**
+     * Returns whether a specified point is within the bounds of the overlay.
+     *
+     * @param mouseX the x coordinate of the mouse
+     * @param mouseY the y coordinate of the mouse
+     * @return whether the point is within the bounds of the overlay
+     */
     public abstract boolean isNotInExclusionZones(double mouseX, double mouseY);
     
+    /**
+     * Returns whether a specified bounds is within the bounds of the overlay.
+     *
+     * @param bounds the bounds to test
+     * @return whether the bounds is within the bounds of the overlay
+     */
+    public boolean isNotInExclusionZones(Rectangle bounds) {
+        return isNotInExclusionZones(bounds.x, bounds.y) &&
+               isNotInExclusionZones(bounds.getMaxX(), bounds.y) &&
+               isNotInExclusionZones(bounds.x, bounds.getMaxY()) &&
+               isNotInExclusionZones(bounds.getMaxX(), bounds.getMaxY());
+    }
+    
+    /**
+     * Returns the entry list of the overlay.
+     *
+     * @return the entry list of the overlay
+     */
     public abstract OverlayListWidget getEntryList();
     
+    /**
+     * Returns the favorites list of the overlay.
+     *
+     * @return the favorites list of the overlay, or {@code null} if favorites are not enabled
+     */
     public abstract Optional<OverlayListWidget> getFavoritesList();
+    
+    /**
+     * Returns the search field of the overlay.
+     *
+     * @return the search field of the overlay
+     */
+    public abstract TextField getSearchField();
+    
+    /**
+     * Returns the current search filter.
+     *
+     * @return the current search filter
+     */
+    @ApiStatus.Experimental
+    @Nullable
+    public abstract SearchFilter getCurrentSearchFilter();
+    
+    /**
+     * Renders a tooltip.
+     *
+     * @param matrices the matrices transform
+     * @param tooltip  the tooltip
+     */
+    public abstract void renderTooltip(PoseStack matrices, Tooltip tooltip);
+    
+    /**
+     * Returns whether slot highlighting is on for the current search filter.
+     *
+     * @return whether slot highlighting is on for the current search filter.
+     */
+    public abstract boolean isHighlighting();
+    
+    /**
+     * Submits a display to the overlay history.
+     *
+     * @param display    the display to submit
+     * @param fromBounds the bounds of the display
+     * @return whether the display was submitted
+     */
+    @ApiStatus.Experimental
+    public abstract boolean submitDisplayHistory(Display display, @Nullable Rectangle fromBounds);
+    
+    /**
+     * Renders the late widgets.
+     *
+     * @param matrices the matrices transform
+     * @param mouseX   the x-coordinate of the mouse
+     * @param mouseY   the y-coordinate of the mouse
+     * @param delta    the tick delta
+     */
+    public abstract void lateRender(PoseStack matrices, int mouseX, int mouseY, float delta);
 }

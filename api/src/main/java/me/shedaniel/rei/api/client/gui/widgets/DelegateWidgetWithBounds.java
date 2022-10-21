@@ -36,6 +36,18 @@ public class DelegateWidgetWithBounds extends DelegateWidget {
         this.bounds = bounds;
     }
     
+    public DelegateWidgetWithBounds(Supplier<Rectangle> bounds) {
+        this(Widgets.noOp(), bounds);
+    }
+    
+    public DelegateWidgetWithBounds(Rectangle bounds) {
+        this(Widgets.noOp(), () -> bounds);
+    }
+    
+    public DelegateWidgetWithBounds() {
+        this(new Rectangle());
+    }
+    
     @Override
     public Rectangle getBounds() {
         return bounds.get();

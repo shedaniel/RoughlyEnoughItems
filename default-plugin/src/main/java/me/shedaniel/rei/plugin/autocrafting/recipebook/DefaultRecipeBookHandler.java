@@ -23,15 +23,15 @@
 
 package me.shedaniel.rei.plugin.autocrafting.recipebook;
 
-import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
+import me.shedaniel.rei.api.common.networking.NetworkModule;
+import me.shedaniel.rei.api.common.networking.NetworkingHelper;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultCookingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.inventory.CraftingMenu;
@@ -43,7 +43,7 @@ import net.minecraft.world.item.crafting.Recipe;
 public class DefaultRecipeBookHandler implements TransferHandler {
     @Override
     public Result handle(Context context) {
-        if (context.getDisplay() instanceof SimpleGridMenuDisplay && ClientHelper.getInstance().canUseMovePackets())
+        if (context.getDisplay() instanceof SimpleGridMenuDisplay && NetworkingHelper.getInstance().canUse(NetworkModule.TRANSFER))
             return Result.createNotApplicable();
         Display display = context.getDisplay();
         if (!(context.getMenu() instanceof RecipeBookMenu<?> container))

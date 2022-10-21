@@ -1,0 +1,3 @@
+dependencies {
+    compileClasspath(project(path: ":runtime-engine:entries", configuration: "namedElements"))
+}

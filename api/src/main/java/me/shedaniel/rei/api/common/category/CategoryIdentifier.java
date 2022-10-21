@@ -25,7 +25,7 @@ package me.shedaniel.rei.api.common.category;
 
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.util.Identifiable;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.common.Internals;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;

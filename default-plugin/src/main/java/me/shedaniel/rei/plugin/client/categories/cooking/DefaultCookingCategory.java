@@ -72,7 +72,7 @@ public class DefaultCookingCategory implements DisplayCategory<DefaultCookingDis
                 .animationDurationTicks(cookingTime));
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 61, startPoint.y + 9))
                 .entries(display.getOutputEntries().get(0))
-                .disableBackground()
+                .noBackground()
                 .markOutput());
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 1, startPoint.y + 1))
                 .entries(display.getInputEntries().get(0))

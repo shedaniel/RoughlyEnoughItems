@@ -45,10 +45,9 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
+import me.shedaniel.rei.impl.client.gui.DisplayScreenStack;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
-import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
-import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
+import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingButtonWidget;
 import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.Minecraft;
@@ -139,7 +138,9 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             widgets.add(Widgets.createSlotBase(new Rectangle(xx - 1, yy - 1, 2 + w * 16, 2 + h * 16)));
             int index = 0;
             for (EntryIngredient workingStation : workstations) {
-                widgets.add(new DefaultDisplayViewingScreen.WorkstationSlotWidget(xx, yy, workingStation));
+                widgets.add(Widgets.createSlot(new Point(xx, yy))
+                        .entries(workingStation)
+                        .noBackground());
                 index++;
                 xx += 16;
                 if (index >= ww) {
@@ -169,13 +170,10 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         transformFiltering(setupDisplay);
         transformIngredientNotice(setupDisplay, ingredientStackToNotice);
         transformResultNotice(setupDisplay, resultStackToNotice);
-        for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
-            widget.removeTagMatch = true;
-        }
         this.widgets.addAll(setupDisplay);
         Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getPlusButtonArea();
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
-            this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), new TextComponent(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category));
+            this.widgets.add(AutoCraftingButtonWidget.create(recipeBounds, supplier.get().get(recipeBounds), new TextComponent(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category));
         
         int index = 0;
         for (DisplaySpec recipeDisplay : categoryMap.get(category)) {
@@ -203,7 +201,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     if (widget.selected)
                         return false;
-                    ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, tabCategory.getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+                    ClientHelperImpl.getInstance().openView(categoryMap, tabCategory.getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
                     return true;
                 }));
                 tab.setRenderer(tabCategory, tabCategory.getIcon(), tabCategory.getTitle(), j == selectedCategoryIndex);
@@ -275,8 +273,8 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             init();
             return true;
         } else if (ConfigObject.getInstance().getPreviousScreenKeybind().matchesMouse(button)) {
-            if (REIRuntimeImpl.getInstance().hasLastDisplayScreen()) {
-                minecraft.setScreen(REIRuntimeImpl.getInstance().getLastDisplayScreen());
+            if (DisplayScreenStack.hasLastDisplayScreen()) {
+                minecraft.setScreen(DisplayScreenStack.getLastDisplayScreen());
             } else {
                 minecraft.setScreen(REIRuntime.getInstance().getPreviousScreen());
             }
@@ -311,21 +309,18 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 scrollBarAlphaFutureTime = System.currentTimeMillis();
             return true;
         }
-        REIRuntimeImpl.isWithinRecipeViewingScreen = true;
         for (GuiEventListener listener : children()) {
             if (listener.mouseScrolled(mouseX, mouseY, amount)) {
-                REIRuntimeImpl.isWithinRecipeViewingScreen = false;
                 return true;
             }
         }
-        REIRuntimeImpl.isWithinRecipeViewingScreen = false;
         int tabSize = ConfigObject.getInstance().isUsingCompactTabs() ? 24 : 28;
         if (mouseX >= bounds.x && mouseX <= bounds.getMaxX() && mouseY >= bounds.y - tabSize && mouseY < bounds.y) {
             if (amount < 0) selectedCategoryIndex++;
             else if (amount > 0) selectedCategoryIndex--;
             if (selectedCategoryIndex < 0) selectedCategoryIndex = categories.size() - 1;
             else if (selectedCategoryIndex >= categories.size()) selectedCategoryIndex = 0;
-            ClientHelperImpl.getInstance().openDisplayViewingScreen(categoryMap, categories.get(selectedCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+            ClientHelperImpl.getInstance().openView(categoryMap, categories.get(selectedCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
             return true;
         }
         if (bounds.contains(PointHelper.ofMouse())) {
@@ -395,7 +390,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 Optional.ofNullable(displayRenderers.get(i).getTooltip(TooltipContext.of(new Point(mouseX, mouseY)))).ifPresent(Tooltip::queue);
             }
         }
-        scrolling.renderScrollBar(0, scrollBarAlpha, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+        scrolling.renderScrollBar(0, scrollBarAlpha, ConfigObject.getInstance().isUsingDarkTheme() ? 0.8f : 1f);
         ScissorsHandler.INSTANCE.removeLastScissor();
         matrices.popPose();
     }

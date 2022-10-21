@@ -26,6 +26,7 @@ package me.shedaniel.rei.api.client.gui.widgets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
@@ -331,7 +332,7 @@ public abstract class Label extends WidgetWithBounds {
     public abstract void setColor(int color);
     
     public Label color(int lightModeColor, int darkModeColor) {
-        return color(REIRuntime.getInstance().isDarkThemeEnabled() ? darkModeColor : lightModeColor);
+        return color(ConfigObject.getInstance().isUsingDarkTheme() ? darkModeColor : lightModeColor);
     }
     
     public final Label color(int color) {
@@ -344,7 +345,7 @@ public abstract class Label extends WidgetWithBounds {
     public abstract void setHoveredColor(int hoveredColor);
     
     public final Label hoveredColor(int lightModeColor, int darkModeColor) {
-        return hoveredColor(REIRuntime.getInstance().isDarkThemeEnabled() ? darkModeColor : lightModeColor);
+        return hoveredColor(ConfigObject.getInstance().isUsingDarkTheme() ? darkModeColor : lightModeColor);
     }
     
     public final Label hoveredColor(int color) {

@@ -30,6 +30,7 @@ import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
@@ -87,7 +88,7 @@ public class DefaultBeaconBaseCategory implements DisplayCategory<DefaultBeaconB
         widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 8, bounds.y + 3)).entry(EntryStacks.of(Blocks.BEACON)));
         Rectangle rectangle = new Rectangle(bounds.getCenterX() - (bounds.width / 2) - 1, bounds.y + 23, bounds.width + 2, bounds.height - 28);
         widgets.add(Widgets.createSlotBase(rectangle));
-        widgets.add(new ScrollableSlotsWidget(rectangle, CollectionUtils.map(display.getEntries(), t -> Widgets.createSlot(new Point(0, 0)).disableBackground().entry(t))));
+        widgets.add(new ScrollableSlotsWidget(rectangle, CollectionUtils.map(display.getEntries(), t -> Widgets.createSlot(new Point(0, 0)).noBackground().entry(t))));
         return widgets;
     }
     
@@ -167,7 +168,7 @@ public class DefaultBeaconBaseCategory implements DisplayCategory<DefaultBeaconB
                 }
             }
             try (CloseableScissors scissors = scissor(matrices, scrolling.getBounds())) {
-                scrolling.renderScrollBar(0xff000000, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+                scrolling.renderScrollBar(0xff000000, 1, ConfigObject.getInstance().isUsingDarkTheme() ? 0.8f : 1f);
             }
         }
         

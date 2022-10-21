@@ -64,7 +64,7 @@ public class DefaultPathingCategory implements DisplayCategory<DefaultPathingDis
         widgets.add(Widgets.createArrow(new Point(startPoint.x + 27, startPoint.y + 4)));
         widgets.add(Widgets.createResultSlotBackground(new Point(startPoint.x + 61, startPoint.y + 5)));
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 4, startPoint.y + 5)).entries(display.getIn()).markInput());
-        widgets.add(Widgets.createSlot(new Point(startPoint.x + 61, startPoint.y + 5)).entries(display.getOut()).disableBackground().markOutput());
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 61, startPoint.y + 5)).entries(display.getOut()).noBackground().markOutput());
         return widgets;
     }
     

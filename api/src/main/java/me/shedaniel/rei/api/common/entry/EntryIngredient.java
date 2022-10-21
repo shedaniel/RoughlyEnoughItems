@@ -24,7 +24,7 @@
 package me.shedaniel.rei.api.common.entry;
 
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.common.Internals;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import org.jetbrains.annotations.ApiStatus;

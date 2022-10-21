@@ -1,3 +1,16 @@
+//file:noinspection UnnecessaryQualifiedReference
+buildscript {
+    repositories {
+        maven { url "https://maven.architectury.dev/" }
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.guardsquare:proguard-gradle:7.2.1"
+        classpath "dev.architectury:architectury-transformer:5.2.68"
+    }
+}
+
 plugins {
     id("architectury-plugin") version("3.4-SNAPSHOT")
     id("dev.architectury.loom") version("0.12.0-SNAPSHOT") apply false
@@ -12,6 +25,44 @@ def runNumber = System.getenv("GITHUB_RUN_NUMBER") ?: "9999"
 version = rootProject.base_version + "." + runNumber + (rootProject.unstable.toBoolean() ? "-alpha" : "")
 
 group = "me.shedaniel"
+
+allprojects {
+    ext {
+        runtimeEngines = [
+                ":runtime-engine:logging",
+                ":runtime-engine:entry-types",
+                ":runtime-engine:entry-stacks",
+                ":runtime-engine:categories",
+                ":runtime-engine:configs",
+                ":runtime-engine:displays",
+                ":runtime-engine:filtering-entries",
+                ":runtime-engine:entries",
+                ":runtime-engine:screens",
+                ":runtime-engine:favorites",
+                ":runtime-engine:search",
+                ":runtime-engine:subsets",
+                ":runtime-engine:transfer-handlers",
+                ":runtime-engine:menu-info",
+                ":runtime-engine:plugins",
+                ":runtime-engine:views",
+                ":runtime-engine:default-runtime-plugin",
+                ":runtime-engine:initialization",
+                ":runtime-engine:networking",
+                ":runtime-frontend:widgets",
+                ":runtime-frontend:filtering",
+                ":runtime-frontend:display",
+                ":runtime-frontend:overlay",
+                ":runtime-frontend:overlay-entries",
+                ":runtime-frontend:favorites-entries",
+        ]
+        depProjects = [
+                ":api",
+                ":shared-internals",
+                ":runtime",
+                ":default-plugin",
+        ] + runtimeEngines
+    }
+}
 
 subprojects {
     apply plugin: "me.shedaniel.unified-publishing"
@@ -53,7 +104,6 @@ subprojects {
             mods {
                 main { // to match the default mod generated for Forge
                     sourceSet project.sourceSets.main
-                    def depProjects = [":api", ":runtime", ":default-plugin"]
                     depProjects.each {
                         sourceSet project(it).sourceSets.main
                     }
@@ -94,14 +144,88 @@ allprojects {
     }
 }
 
-["api", "default-plugin", "runtime"].forEach {
+subprojects {
+    if (project.path in depProjects) {
+        loom {
+            if (project.path != ":api") {
+                accessWidenerPath = gradle.rootProject.project("fabric").file("src/main/resources/roughlyenoughitems.accessWidener")
+            }
+        }
+
+        architectury {
+            common(forgeEnabled.toBoolean() ? ["forge", "fabric"] : ["fabric"])
+        }
+
+        dependencies {
+            modCompileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
+            modApi("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
+            modApi("dev.architectury:architectury:${architectury_version}")
+
+            if (project.path != ":api") {
+                compileClasspath(project(path: ":api", configuration: "namedElements"))
+
+                if (project.path != ":shared-internals") {
+                    compileClasspath(project(path: ":shared-internals", configuration: "namedElements"))
+                }
+            }
+        }
+
+        remapJar {
+            classifier "raw"
+        }
+
+        task fakeJar(type: Jar, dependsOn: remapJar) {
+            from remapJar.archiveFile.map { zipTree(it) }
+            from(rootProject.file("fake/fabric.mod.json")) {
+                into ""
+            }
+            classifier null
+        }
+
+        task fakeForgeJar(type: Jar, dependsOn: remapJar) {
+            from remapJar.archiveFile.map { zipTree(it) }
+            from(rootProject.file("fake/fabric.mod.json")) {
+                into ""
+            }
+            from(rootProject.file("fake/REIPlugin.class")) {
+                into "me/shedaniel/rei/forge"
+            }
+            classifier "fake-forge"
+        }
+
+        artifacts {
+            apiElements(fakeJar)
+            runtimeElements(fakeJar)
+        }
+
+        afterEvaluate {
+            configurations.apiElements.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(tasks.remapJar) }
+            configurations.runtimeElements.artifacts.removeIf { it.buildDependencies.getDependencies(null).contains(tasks.remapJar) }
+        }
+
+        publishing {
+            publications {
+                mavenCommon(MavenPublication) {
+                    artifactId = rootProject.name + "-" + project.name
+                    from components.java
+                }
+            }
+        }
+    }
+
+    sourcesJar {
+        duplicatesStrategy DuplicatesStrategy.WARN
+    }
+}
+
+depProjects.forEach {
     project(":fabric").evaluationDependsOn(":$it")
 }
 
 subprojects {
     group = rootProject.group
     version = rootProject.version
-    archivesBaseName = rootProject.name
+    archivesBaseName = rootProject.name + "-" + project.name
 
     publishing {
         repositories {
@@ -157,4 +281,147 @@ task releaseOnCf {
     if (subprojects.any { it.name == "fabric" }) {
         dependsOn project("fabric").tasks.getByName("publishUnified")
     }
+}
+
+def randomString(len) {
+    def AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    def rnd = new java.security.SecureRandom()
+    return (0..len).toList().collect { AB.charAt(rnd.nextInt(AB.length())) }.join("")
+}
+
+rootProject.file(".gradle/proguard-dictionary.txt").delete()
+rootProject.file(".gradle/proguard-dictionary.txt").write((0..1000).toList().collect { randomString(10) }.join("\n"))
+
+["fabric", "forge"].each { loader ->
+    project(":$loader") {
+        afterEvaluate {
+            def proguardJarOut = file(tasks.getByName("shadowJar").archiveFile.get().getAsFile().absolutePath.replace(".jar", "-min.jar"))
+
+            task proguardJar(type: proguard.gradle.ProGuardTask, dependsOn: ["shadowJar"]) {
+                doFirst {
+                    if (proguardJarOut.exists()) {
+                        proguardJarOut.delete()
+                    }
+                }
+
+                verbose()
+                injars tasks.getByName("shadowJar").archiveFile.get().getAsFile()
+                outjars proguardJarOut
+                libraryjars files(configurations.compileClasspath)
+                libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+                dontshrink()
+                keep "class me.shedaniel.rei.api.** { *; }"
+                keep "class me.shedaniel.rei.plugin.** { *; }"
+                keepclassmembers "class * { void onInitialize(); void onInitializeClient(); }"
+                keepclassmembers "class * { @net.minecraft.obfuscate.DontObfuscate <fields>; @net.minecraft.obfuscate.DontObfuscate <methods>; }"
+                keepclassmembers "class me.shedaniel.rei.impl.*Internals { <fields>; }"
+                keepclassmembers "class me.shedaniel.rei.impl.client.config.ConfigObjectImpl* { <fields>; }"
+                dontwarn "me.shedaniel.rei.impl.init.RoughlyEnoughItemsInitializer"
+                dontwarn "me.shedaniel.rei.plugin.client.DefaultClientPlugin"
+                obfuscationdictionary rootProject.file(".gradle/proguard-dictionary.txt")
+                classobfuscationdictionary rootProject.file(".gradle/proguard-dictionary.txt")
+                repackageclasses "me.shedaniel.rei.impl.${randomString(10)}"
+                keep "class me.shedaniel.rei.mixin.$loader.** { *; }"
+                keepattributes "Signature,SourceFile,LineNumberTable,Exceptions,InnerClasses,*Annotation*"
+                printmapping file(".gradle/proguard-mapping.txt")
+                optimizationpasses 5
+                optimizations "**"
+                allowaccessmodification()
+
+                doLast {
+                    try (def access = dev.architectury.transformer.input.OpenedFileAccess.ofJar(proguardJarOut.toPath())) {
+                        dev.architectury.transformer.Transform.runTransformers(
+                                new dev.architectury.transformer.transformers.base.edit.SimpleTransformerContext(args -> { throw new IllegalStateException(); },
+                                        true, false, true),
+                                dev.architectury.transformer.transformers.ClasspathProvider.of(files(configurations.compileClasspath).collect { it.toPath() }),
+                                proguardJarOut.name,
+                                access, transformers(loader))
+                    }
+                }
+            }
+
+            tasks.prepareRemapJar {
+                inputFile.set proguardJarOut
+                dependsOn proguardJar
+            }
+
+            tasks.remapJar {
+                input.set proguardJarOut
+                dependsOn proguardJar
+            }
+        }
+    }
+}
+
+def transformers(loader) {
+    def map = new HashMap<String, String>();
+    file(".gradle/proguard-mapping.txt").eachLine {
+        if (!it.startsWith(" ")) {
+            map[it.split(" -> ")[0]] = it.split(" -> ")[1].split(":")[0]
+        }
+    }
+    return [new dev.architectury.transformer.transformers.base.ClassEditTransformer() {
+        @Override
+        dev.architectury.transformer.shadowed.impl.org.objectweb.asm.tree.ClassNode doEdit(String name, dev.architectury.transformer.shadowed.impl.org.objectweb.asm.tree.ClassNode node) {
+            if (dev.architectury.transformer.Transform.trimSlashes(name).startsWith("me/shedaniel/rei/impl")) {
+                if (node.invisibleAnnotations == null || !node.invisibleAnnotations.any { it.desc == "Lorg/jetbrains/annotations/ApiStatus\$Internal;" }) {
+                    if (node.invisibleAnnotations == null) node.invisibleAnnotations = new ArrayList<>()
+                    node.invisibleAnnotations.add(new dev.architectury.transformer.shadowed.impl.org.objectweb.asm.tree.AnnotationNode("Lorg/jetbrains/annotations/ApiStatus\$Internal;"))
+                }
+            }
+
+            node.methods.forEach { method ->
+                method.instructions.forEach { insn ->
+                    if (insn.opcode == dev.architectury.transformer.shadowed.impl.org.objectweb.asm.Opcodes.LDC
+                            && insn instanceof dev.architectury.transformer.shadowed.impl.org.objectweb.asm.tree.LdcInsnNode
+                            && insn.cst instanceof String) {
+                        if (insn.cst.contains("%s")) {
+                            def replaced = insn.cst.replace("%s", loader)
+
+                            if (map.containsKey(replaced)) {
+                                insn.cst = map[replaced]
+                            }
+                        } else {
+                            insn.cst = map.getOrDefault(insn.cst, insn.cst)
+                        }
+                    }
+                }
+            }
+
+            return node
+        }
+    }, new dev.architectury.transformer.transformers.base.AssetEditTransformer() {
+        @Override
+        void doEdit(dev.architectury.transformer.transformers.base.edit.TransformerContext context, dev.architectury.transformer.input.FileAccess output) throws Exception {
+            def renames = []
+            output.handle((java.util.function.Consumer<String>) { String name ->
+                def trimmed = dev.architectury.transformer.Transform.trimSlashes(name)
+                if (trimmed.startsWith("META-INF/services/")) {
+                    output.modifyFile(trimmed) { bytes ->
+                        new String(bytes).split("\n").collect { map[it] ?: it }.join("\n").bytes
+                    }
+
+                    def remapped = map[trimmed.substring("META-INF/services/".length())]
+                    if (remapped != null) {
+                        renames << [trimmed, "META-INF/services/$remapped"]
+                    }
+                }
+            })
+            renames.each {
+                output.addFile(it[1], output.getFile(it[0]))
+                output.deleteFile(it[0])
+            }
+
+            output.modifyFile("fabric.mod.json") { bytes ->
+                new String(bytes).split("\n").collect {
+                    map.forEach { k, v ->
+                        it = it.replace("\"$k\"", "\"$v\"")
+                        it = it.replace("\"$k::onInitialize\"", "\"$v::onInitialize\"")
+                        it = it.replace("\"$k::onInitializeClient\"", "\"$v::onInitializeClient\"")
+                    }
+                    it
+                }.join("\n").bytes
+            }
+        }
+    }]
 }

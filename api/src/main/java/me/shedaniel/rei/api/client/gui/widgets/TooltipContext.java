@@ -25,7 +25,7 @@ package me.shedaniel.rei.api.client.gui.widgets;
 
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.item.TooltipFlag;
@@ -52,7 +52,7 @@ public interface TooltipContext {
     }
     
     static TooltipContext ofMouse() {
-        return TooltipContext.of(PointHelper.ofMouse());
+        return TooltipContext.of(Widget.mouse());
     }
     
     TooltipFlag getFlag();

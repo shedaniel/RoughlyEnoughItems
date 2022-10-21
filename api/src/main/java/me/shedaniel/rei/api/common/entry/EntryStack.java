@@ -37,7 +37,7 @@ import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.util.TextRepresentable;
-import me.shedaniel.rei.impl.Internals;
+import me.shedaniel.rei.impl.common.Internals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;

@@ -80,7 +80,7 @@ public interface FavoriteEntryType<T extends FavoriteEntry> {
         default void add(FavoriteEntry... entries) {
             add(false, entries);
         }
-    
+        
         @ApiStatus.Experimental
         void add(boolean defaultFavorited, FavoriteEntry... entries);
         

@@ -29,7 +29,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.client.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
@@ -66,8 +66,16 @@ public interface Tooltip {
         return create(point, Arrays.asList(texts));
     }
     
+    static Tooltip create(@Nullable TooltipContext context, Collection<Component> texts) {
+        return from(context, CollectionUtils.map(texts, Tooltip::entry));
+    }
+    
+    static Tooltip create(@Nullable TooltipContext context, Component... texts) {
+        return create(context, Arrays.asList(texts));
+    }
+    
     static Tooltip create(Collection<Component> texts) {
-        return create(null, texts);
+        return create((TooltipContext) null, texts);
     }
     
     static Tooltip create(Component... texts) {
@@ -82,8 +90,16 @@ public interface Tooltip {
         return from(point, Arrays.asList(entries));
     }
     
+    static Tooltip from(@Nullable TooltipContext context, Collection<Entry> entries) {
+        return ClientInternals.createTooltip(context == null ? null : context.getPoint(), entries);
+    }
+    
+    static Tooltip from(@Nullable TooltipContext context, Entry... entries) {
+        return from(context, Arrays.asList(entries));
+    }
+    
     static Tooltip from(Collection<Entry> entries) {
-        return from(null, entries);
+        return from((TooltipContext) null, entries);
     }
     
     static Tooltip from(Entry... entries) {
@@ -158,6 +174,9 @@ public interface Tooltip {
     
     Tooltip withContextStack(EntryStack<?> stack);
     
+    /**
+     * Queues this tooltip to be displayed.
+     */
     default void queue() {
         EnvExecutor.runInEnv(Env.CLIENT, () -> () -> REIRuntime.getInstance().queueTooltip(this));
     }
