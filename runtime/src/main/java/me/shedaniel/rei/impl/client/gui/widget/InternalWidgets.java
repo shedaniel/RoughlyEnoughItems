@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Point;
@@ -52,6 +53,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
@@ -66,9 +68,14 @@ public final class InternalWidgets {
                     AutoCraftingEvaluator.evaluateAutoCrafting(true, Screen.hasShiftDown(), displaySupplier.get(), idsSupplier);
                 });
         return new DelegateWidget(autoCraftingButton) {
+            final Supplier<AutoCraftingEvaluator.AutoCraftingResult> result = Suppliers.memoizeWithExpiration(
+                    () -> AutoCraftingEvaluator.evaluateAutoCrafting(false, false, displaySupplier.get(), idsSupplier),
+                    1000, TimeUnit.MILLISECONDS
+            );
+            
             @Override
             public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-                AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, displaySupplier.get(), idsSupplier);
+                AutoCraftingEvaluator.AutoCraftingResult result = this.result.get();
                 
                 autoCraftingButton.setEnabled(result.successful);
                 autoCraftingButton.setTint(result.tint);
