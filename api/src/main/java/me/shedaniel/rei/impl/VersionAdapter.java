@@ -23,7 +23,10 @@
 
 package me.shedaniel.rei.impl;
 
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.EntryIngredients;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -58,6 +61,17 @@ public interface VersionAdapter {
             return (VersionAdapter) Class.forName("me.shedaniel.rei.impl.init.versions.Version1_19Adapter").getDeclaredConstructor().newInstance();
         } catch (Throwable throwable) {
             throw new RuntimeException(throwable);
+        }
+    }
+    
+    @Environment(EnvType.CLIENT)
+    default void registerDefaultItems(EntryRegistry registry) {
+        for (Item item : Registry.ITEM) {
+            try {
+                registry.addEntries(EntryIngredients.ofItemStacks(registry.appendStacksForItem(item)));
+            } catch (Exception ignored) {
+                registry.addEntry(EntryStacks.of(item));
+            }
         }
     }
     

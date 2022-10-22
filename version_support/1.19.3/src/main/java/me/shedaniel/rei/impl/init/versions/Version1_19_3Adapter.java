@@ -23,7 +23,11 @@
 
 package me.shedaniel.rei.impl.init.versions;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.VersionAdapter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -34,15 +38,54 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
 public class Version1_19_3Adapter implements VersionAdapter {
+    @Override
+    @Environment(EnvType.CLIENT)
+    public void registerDefaultItems(EntryRegistry registry) {
+        FeatureFlagSet features = Minecraft.getInstance().player.getLevel().enabledFeatures();
+        Multimap<Item, EntryStack<ItemStack>> items = ArrayListMultimap.create();
+        
+        for (CreativeModeTab tab : CreativeModeTabs.TABS) {
+            if (tab != CreativeModeTabs.TAB_HOTBAR && tab != CreativeModeTabs.TAB_INVENTORY) {
+                try {
+                    for (ItemStack stack : tab.getDisplayItems(features)) {
+                        try {
+                            items.put(stack.getItem(), EntryStacks.of(stack));
+                        } catch (Exception ignore) {
+                        }
+                    }
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            }
+        }
+        
+        for (Item item : Registry.ITEM) {
+            Collection<EntryStack<ItemStack>> stacks = items.get(item);
+            if (stacks.isEmpty()) {
+                try {
+                    registry.addEntry(EntryStacks.of(item.getDefaultInstance()));
+                } catch (Exception ignore) {
+                    registry.addEntry(EntryStacks.of(item));
+                }
+            } else {
+                registry.addEntries(stacks);
+            }
+        }
+    }
+    
     @Override
     @Environment(EnvType.CLIENT)
     public List<ItemStack> appendStacksForItem(Item item, Comparator<ItemStack> comparator) {

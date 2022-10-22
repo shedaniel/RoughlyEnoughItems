@@ -44,6 +44,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.VersionAdapter;
 import me.shedaniel.rei.plugin.autocrafting.recipebook.DefaultRecipeBookHandler;
 import me.shedaniel.rei.plugin.client.categories.*;
 import me.shedaniel.rei.plugin.client.categories.anvil.DefaultAnvilCategory;
@@ -119,13 +120,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerEntries(EntryRegistry registry) {
-        for (Item item : Registry.ITEM) {
-            try {
-                registry.addEntries(EntryIngredients.ofItemStacks(registry.appendStacksForItem(item)));
-            } catch (Exception ignored) {
-                registry.addEntry(EntryStacks.of(item));
-            }
-        }
+        VersionAdapter.INSTANCE.registerDefaultItems(registry);
         for (Fluid fluid : Registry.FLUID) {
             FluidState state = fluid.defaultFluidState();
             if (!state.isEmpty() && state.isSource()) {
