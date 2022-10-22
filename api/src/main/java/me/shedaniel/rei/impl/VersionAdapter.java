@@ -33,11 +33,13 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+@ApiStatus.Internal
 public interface VersionAdapter {
     VersionAdapter INSTANCE = load();
     
