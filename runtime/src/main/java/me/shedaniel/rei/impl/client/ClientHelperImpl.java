@@ -47,6 +47,7 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.impl.VersionAdapter;
 import me.shedaniel.rei.impl.client.gui.screen.CompositeDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
@@ -70,7 +71,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Supplier;
@@ -226,13 +226,7 @@ public class ClientHelperImpl implements ClientHelper {
                 madeUpCommand = og.replaceAll("\\{player_name}", Minecraft.getInstance().player.getScoreboardName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
                 Minecraft.getInstance().player.displayClientMessage(Component.translatable("text.rei.too_long_nbt"), false);
             }
-            try {
-                Class.forName("me.shedaniel.rei.impl.client.%s.CommandSenderImpl".formatted(Platform.isForge() ? "forge" : "fabric"))
-                        .getDeclaredMethod("sendCommand", String.class)
-                        .invoke(null, StringUtils.removeStart(madeUpCommand, "/"));
-            } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
+            VersionAdapter.INSTANCE.sendCommand(StringUtils.removeStart(madeUpCommand, "/"));
             return true;
         }
     }

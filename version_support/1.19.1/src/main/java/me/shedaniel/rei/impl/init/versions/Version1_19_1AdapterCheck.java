@@ -21,19 +21,14 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.plugin.client.favorites;
+package me.shedaniel.rei.impl.init.versions;
 
-import dev.architectury.platform.Platform;
+import net.minecraft.client.multiplayer.chat.report.ChatReportBuilder;
 
-import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 
-class CommandSender {
-    static void sendCommand(String command) {
-        try {
-            Class.forName("me.shedaniel.rei.impl.client.%s.CommandSenderImpl".formatted(Platform.isForge() ? "forge" : "fabric"))
-                    .getDeclaredMethod("sendCommand", String.class).invoke(null, command);
-        } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
+public class Version1_19_1AdapterCheck {
+    static {
+        Objects.requireNonNull(ChatReportBuilder.class);
     }
 }

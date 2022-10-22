@@ -28,6 +28,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix3f;
 import com.mojang.math.Matrix4f;
+import me.shedaniel.rei.impl.VersionAdapter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -191,7 +192,7 @@ public class SpriteRenderer {
                 throw new RuntimeException("Invalid Sprite!");
             }
             
-            next(sprite.getName());
+            next(VersionAdapter.INSTANCE.spriteName(sprite));
         }
         
         public void next(ResourceLocation texture) {
@@ -212,8 +213,8 @@ public class SpriteRenderer {
                 this.normal = this.matrices.last().normal();
             }
             
-            float sX = sprite.getWidth();
-            float sY = sprite.getHeight();
+            float sX = VersionAdapter.INSTANCE.spriteWidth(sprite);
+            float sY = VersionAdapter.INSTANCE.spriteHeight(sprite);
             
             RenderSystem.setShaderTexture(0, texture);
             

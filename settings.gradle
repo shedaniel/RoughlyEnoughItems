@@ -14,3 +14,11 @@ include "default-plugin"
 include "runtime"
 include "fabric"
 include "forge"
+
+gradle.ext.versions_targeted = "1.19:1.19:true,1.19.1:1.19.1:true,22w42a:1.19.3:false"
+gradle.ext.versions_targeted_list = []
+
+gradle.ext.versions_targeted.split(",").each {
+    gradle.ext.versions_targeted_list = gradle.ext.versions_targeted_list + [":version_support:${it.split(":")[1]}".toString()]
+    include "version_support:${it.split(":")[1]}"
+}

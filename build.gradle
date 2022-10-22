@@ -29,7 +29,15 @@ subprojects {
     }
 
     dependencies {
-        minecraft("com.mojang:minecraft:${rootProject.minecraft_version}")
+        if (project.path in gradle.ext.versions_targeted_list) {
+            gradle.ext.versions_targeted.split(",").each {
+                if (":version_support:${it.split(":")[1]}" == project.path) {
+                    minecraft("com.mojang:minecraft:${it.split(":")[0]}")
+                }
+            }
+        } else {
+            minecraft("com.mojang:minecraft:${rootProject.minecraft_version}")
+        }
         mappings(loom.layered {
             officialMojangMappings()
             parchment("org.parchmentmc.data:parchment-1.17.1:2021.10.10@zip")
@@ -57,6 +65,24 @@ subprojects {
                     depProjects.each {
                         sourceSet project(it).sourceSets.main
                     }
+                    gradle.ext.versions_targeted.split(",").each { splitTarget ->
+                        if (splitTarget.split(":")[2] != "true" && project.path == ":forge") {
+                            return
+                        }
+                        if (splitTarget.split(":")[0] == gradle.rootProject.minecraft_version) {
+                            sourceSet project(":version_support:${splitTarget.split(":")[1]}").sourceSets.main
+                            afterEvaluate {
+                                project.dependencies {
+                                    common(project.dependencies.project(path: ":version_support:${splitTarget.split(":")[1]}", configuration: "namedElements")) { transitive false }
+                                }
+                            }
+                        }
+                        afterEvaluate {
+                            project.dependencies {
+                                shadowCommon(project.dependencies.project(path: ":version_support:${splitTarget.split(":")[1]}", configuration: "transformProduction${project.path == ":forge" ? "Forge" : "Fabric"}")) { transitive false }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -76,6 +102,7 @@ allprojects {
         maven { url "https://maven.shedaniel.me" }
         maven { url "https://maven.parchmentmc.org" }
         maven { url "https://maven.terraformersmc.com/releases" }
+        mavenLocal()
     }
 
     license {
@@ -96,6 +123,32 @@ allprojects {
 
 ["api", "default-plugin", "runtime"].forEach {
     project(":fabric").evaluationDependsOn(":$it")
+}
+
+subprojects {
+    if (project.path in gradle.ext.versions_targeted_list) {
+        loom {
+            accessWidenerPath = gradle.rootProject.project("fabric").file("src/main/resources/roughlyenoughitems.accessWidener")
+        }
+
+        architectury {
+            def forge = forgeEnabled.toBoolean()
+            if (forge) {
+                gradle.ext.versions_targeted.split(",").each {
+                    if (":version_support:${it.split(":")[1]}" == project.path) {
+                        forge = it.split(":")[2].toBoolean()
+                    }
+                }
+            }
+            common(forge ? ["forge", "fabric"] : ["fabric"])
+        }
+
+        dependencies {
+            modCompileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
+            compileClasspath(project(path: ":api", configuration: "namedElements"))
+            compileClasspath(project(path: ":runtime", configuration: "namedElements"))
+        }
+    }
 }
 
 subprojects {
