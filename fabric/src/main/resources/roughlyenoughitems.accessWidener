@@ -22,7 +22,6 @@ accessible    field  net/minecraft/world/item/alchemy/PotionBrewing$Mix         
 accessible    field  net/minecraft/world/item/alchemy/PotionBrewing$Mix                        to                      Ljava/lang/Object;
 accessible    field  net/minecraft/world/item/crafting/UpgradeRecipe                           addition                Lnet/minecraft/world/item/crafting/Ingredient;
 accessible    field  net/minecraft/world/item/crafting/UpgradeRecipe                           base                    Lnet/minecraft/world/item/crafting/Ingredient;
-accessible    field  net/minecraft/world/item/CreativeModeTab                                  langId                  Ljava/lang/String;
 accessible    method net/minecraft/client/gui/GuiComponent                                     innerBlit               (Lcom/mojang/math/Matrix4f;IIIIIFFFF)V
 accessible    method net/minecraft/client/gui/screens/Screen                                   addWidget               (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
 accessible    method net/minecraft/client/gui/screens/Screen                                   init                    ()V
