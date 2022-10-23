@@ -23,19 +23,18 @@
 
 package me.shedaniel.rei.impl.client.entry.filtering;
 
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +44,6 @@ import java.util.concurrent.TimeoutException;
 public class FilteringContextImpl implements FilteringContext {
     private final boolean async;
     public final Map<FilteringContextType, Set<HashedEntryStackWrapper>> stacks;
-    private final Map<FilteringContextType, Collection<EntryStack<?>>> cachedStacks;
     
     public FilteringContextImpl(Collection<EntryStack<?>> allStacks) {
         this(true, allStacks);
@@ -54,40 +52,55 @@ public class FilteringContextImpl implements FilteringContext {
     public FilteringContextImpl(boolean async, Collection<EntryStack<?>> allStacks) {
         this.async = async;
         this.stacks = Maps.newHashMap();
-        this.cachedStacks = Maps.newHashMap();
         for (FilteringContextType type : FilteringContextType.values()) {
             this.stacks.computeIfAbsent(type, t -> Sets.newHashSet());
         }
         this.stacks.get(FilteringContextType.DEFAULT).addAll(async ? CollectionUtils.mapParallel(allStacks, HashedEntryStackWrapper::new)
                 : CollectionUtils.map(allStacks, HashedEntryStackWrapper::new));
-        fillCache();
     }
     
     public FilteringContextImpl(Map<FilteringContextType, Set<HashedEntryStackWrapper>> stacks) {
         this.async = false;
         this.stacks = stacks;
-        this.cachedStacks = Maps.newHashMap();
         for (FilteringContextType type : FilteringContextType.values()) {
             this.stacks.computeIfAbsent(type, t -> Sets.newHashSet());
-        }
-        fillCache();
-    }
-    
-    private void fillCache() {
-        this.cachedStacks.clear();
-        for (FilteringContextType type : FilteringContextType.values()) {
-            this.cachedStacks.put(type, CollectionUtils.map(stacks.get(type), HashedEntryStackWrapper::unwrap));
         }
     }
     
     @Override
-    public Collection<EntryStack<?>> getStacks(FilteringContextType type) {
-        return cachedStacks.get(type);
+    public Collection<EntryStack<?>> getHiddenStacks() {
+        return getPublicFacing(FilteringContextType.HIDDEN);
     }
     
-    public void handleResult(FilteringResult result) {
-        Collection<HashedEntryStackWrapper> hiddenStacks = result.getHiddenStacks();
-        Collection<HashedEntryStackWrapper> shownStacks = result.getShownStacks();
+    @Override
+    public Collection<EntryStack<?>> getShownStacks() {
+        return getPublicFacing(FilteringContextType.SHOWN);
+    }
+    
+    @Override
+    public Collection<EntryStack<?>> getUnsetStacks() {
+        return getPublicFacing(FilteringContextType.DEFAULT);
+    }
+    
+    private Collection<EntryStack<?>> getPublicFacing(FilteringContextType type) {
+        Set<HashedEntryStackWrapper> wrappers = this.stacks.get(type);
+        if (wrappers == null || wrappers.isEmpty()) return List.of();
+        return new AbstractSet<>() {
+            @Override
+            public Iterator<EntryStack<?>> iterator() {
+                return Iterators.transform(wrappers.iterator(), HashedEntryStackWrapper::unwrap);
+            }
+            
+            @Override
+            public int size() {
+                return wrappers.size();
+            }
+        };
+    }
+    
+    public void handleResult(FilteringResultImpl result) {
+        Collection<HashedEntryStackWrapper> hiddenStacks = result.hiddenStacks;
+        Collection<HashedEntryStackWrapper> shownStacks = result.shownStacks;
         
         if (async) {
             List<CompletableFuture<Void>> completableFutures = Lists.newArrayList();
@@ -116,7 +129,5 @@ public class FilteringContextImpl implements FilteringContext {
             this.stacks.get(FilteringContextType.HIDDEN).addAll(hiddenStacks);
             this.stacks.get(FilteringContextType.HIDDEN).removeAll(shownStacks);
         }
-        
-        fillCache();
     }
 }
