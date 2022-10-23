@@ -102,7 +102,6 @@ allprojects {
         maven { url "https://maven.shedaniel.me" }
         maven { url "https://maven.parchmentmc.org" }
         maven { url "https://maven.terraformersmc.com/releases" }
-        mavenLocal()
     }
 
     license {

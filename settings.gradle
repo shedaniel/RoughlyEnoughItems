@@ -13,7 +13,7 @@ include "api"
 include "default-plugin"
 include "runtime"
 include "fabric"
-include "forge"
+//include "forge"
 
 gradle.ext.versions_targeted = "1.19:1.19:true,1.19.1:1.19.1:true,22w42a:1.19.3:false"
 gradle.ext.versions_targeted_list = []
