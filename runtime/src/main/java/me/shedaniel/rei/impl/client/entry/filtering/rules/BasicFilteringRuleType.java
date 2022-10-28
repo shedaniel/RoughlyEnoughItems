@@ -21,24 +21,42 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.entry.filtering;
+package me.shedaniel.rei.impl.client.entry.filtering.rules;
 
-import org.jetbrains.annotations.Nullable;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-public class FilteringCacheImpl implements FilteringCache {
-    private final Map<FilteringRule<?>, Optional<?>> CACHE = new HashMap<>();
+public enum BasicFilteringRuleType implements FilteringRuleType<BasicFilteringRuleImpl> {
+    INSTANCE;
     
     @Override
-    @Nullable
-    public Object getCache(FilteringRule<?> rule) {
-        return CACHE.getOrDefault(rule, Optional.empty()).orElse(null);
+    public CompoundTag saveTo(BasicFilteringRuleImpl rule, CompoundTag tag) {
+        return tag;
     }
     
-    public void setCache(FilteringRule<?> rule, @Nullable Object value) {
-        CACHE.put(rule, Optional.ofNullable(value));
+    @Override
+    public BasicFilteringRuleImpl readFrom(CompoundTag tag) {
+        return BasicFilteringRuleImpl.INSTANCE;
+    }
+    
+    @Override
+    public Component getTitle(BasicFilteringRuleImpl rule) {
+        return Component.translatable("rule.roughlyenoughitems.filtering.basic");
+    }
+    
+    @Override
+    public Component getSubtitle(BasicFilteringRuleImpl rule) {
+        return Component.translatable("rule.roughlyenoughitems.filtering.basic.subtitle");
+    }
+    
+    @Override
+    public BasicFilteringRuleImpl createNew() {
+        return BasicFilteringRuleImpl.INSTANCE;
+    }
+    
+    @Override
+    public boolean isSingular() {
+        return true;
     }
 }

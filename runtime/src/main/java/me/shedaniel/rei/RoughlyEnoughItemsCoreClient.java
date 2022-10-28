@@ -35,6 +35,7 @@ import dev.architectury.networking.NetworkManager;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
@@ -58,6 +59,7 @@ import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.addon.ConfigAddonRegistryImpl;
+import me.shedaniel.rei.impl.client.entry.filtering.rules.FilteringRuleTypeRegistryImpl;
 import me.shedaniel.rei.impl.client.entry.renderer.EntryRendererRegistryImpl;
 import me.shedaniel.rei.impl.client.favorites.DelegatingFavoriteEntryProviderImpl;
 import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
@@ -201,6 +203,7 @@ public class RoughlyEnoughItemsCoreClient {
                 return categories.stream();
             }
         }, "clickAreaHandlerResult");
+        ClientInternals.attachInstanceSupplier(new FilteringRuleTypeRegistryImpl(), "filteringRuleTypeRegistry");
         ClientInternals.attachInstanceSupplier(new PluginManagerImpl<>(
                 REIClientPlugin.class,
                 view -> view.then(PluginView.getInstance()),
@@ -211,6 +214,7 @@ public class RoughlyEnoughItemsCoreClient {
                 new ConfigManagerImpl(),
                 new EntryRegistryImpl(),
                 new CollapsibleEntryRegistryImpl(),
+                FilteringRuleTypeRegistry.getInstance().basic(),
                 new CategoryRegistryImpl(),
                 new DisplayRegistryImpl(),
                 new ScreenRegistryImpl(),

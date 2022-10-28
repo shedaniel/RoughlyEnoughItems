@@ -313,9 +313,11 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         }
         
         try {
-            for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
+            DisplayRegistry displayRegistry = DisplayRegistry.getInstance();
+            for (List<Display> displays : displayRegistry.getAll().values()) {
                 for (Display display : displays) {
-                    if (ViewsImpl.isRecipesFor(getEntries(), display)) {
+                    if ((!ConfigObject.getInstance().shouldFilterDisplays() || displayRegistry.isDisplayVisible(display))
+                        && ViewsImpl.isRecipesFor(getEntries(), display)) {
                         AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
                         if (result.successful) {
                             this.display = display;

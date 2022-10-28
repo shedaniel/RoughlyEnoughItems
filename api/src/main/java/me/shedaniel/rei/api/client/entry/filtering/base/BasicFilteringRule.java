@@ -21,11 +21,24 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.entry.filtering;
+package me.shedaniel.rei.api.client.entry.filtering.base;
 
-import org.jetbrains.annotations.Nullable;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringResult;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
+import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.common.registry.Reloadable;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.ApiStatus;
 
-public interface FilteringCache {
-    @Nullable
-    Object getCache(FilteringRule<?> rule);
+/**
+ * The basic filtering rule that can be used to filter entries,
+ * without registering a new filtering rule type, for external
+ * plugins.
+ *
+ * @param <Cache> the cache type
+ */
+@ApiStatus.Experimental
+@Environment(EnvType.CLIENT)
+public interface BasicFilteringRule<Cache> extends Reloadable<REIClientPlugin>, FilteringRule<Cache>, FilteringResult {
 }

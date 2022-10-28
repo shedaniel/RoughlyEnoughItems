@@ -29,23 +29,29 @@ import it.unimi.dsi.fastutil.objects.Reference2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanMaps;
 import it.unimi.dsi.fastutil.objects.Reference2BooleanOpenHashMap;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.display.visibility.DisplayVisibilityPredicate;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
-import me.shedaniel.rei.impl.client.entry.filtering.*;
+import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextImpl;
+import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextType;
+import me.shedaniel.rei.impl.client.entry.filtering.FilteringResultImpl;
 import me.shedaniel.rei.impl.common.InternalLogger;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 public class FilteredStacksVisibilityHandler implements DisplayVisibilityPredicate {
     private boolean checkHiddenStacks;
     private Reference2BooleanMap<Display> visible = Reference2BooleanMaps.synchronize(new Reference2BooleanOpenHashMap<>());
     private List<FilteringRule<?>> filteringRules;
-    private FilteringCacheImpl cache;
+    private Map<FilteringRule<?>, Object> cache = new HashMap<>();
     private final Predicate<Display> displayPredicate = this::checkHiddenStacks;
     
     @Override
@@ -63,10 +69,10 @@ public class FilteredStacksVisibilityHandler implements DisplayVisibilityPredica
         
         if (checkHiddenStacks) {
             filteringRules = ((ConfigObjectImpl) ConfigObject.getInstance()).getFilteringRules();
-            cache = new FilteringCacheImpl();
+            cache = new HashMap<>();
             for (int i = filteringRules.size() - 1; i >= 0; i--) {
                 FilteringRule<?> rule = filteringRules.get(i);
-                cache.setCache(rule, rule.prepareCache(false));
+                cache.put(rule, rule.prepareCache(false));
             }
             
             cacheExisting();
@@ -105,11 +111,13 @@ public class FilteredStacksVisibilityHandler implements DisplayVisibilityPredica
         return true;
     }
     
-    private static boolean isEntryIngredientAllHidden(EntryIngredient ingredient, FilteringCache cache, List<FilteringRule<?>> rules) {
+    private static boolean isEntryIngredientAllHidden(EntryIngredient ingredient, Map<FilteringRule<?>, Object> cache, List<FilteringRule<?>> rules) {
         FilteringContextImpl context = new FilteringContextImpl(false, ingredient);
         for (int i = rules.size() - 1; i >= 0; i--) {
             FilteringRule<?> rule = rules.get(i);
-            context.handleResult(rule.processFilteredStacks(context, cache, false));
+            context.handleResult((FilteringResultImpl) ((FilteringRule<Object>) rule).processFilteredStacks(context,
+                    () -> new FilteringResultImpl(new ArrayList<>(), new ArrayList<>()),
+                    cache.get(rule), false));
         }
         return context.stacks.get(FilteringContextType.SHOWN).isEmpty() && context.stacks.get(FilteringContextType.DEFAULT).isEmpty();
     }

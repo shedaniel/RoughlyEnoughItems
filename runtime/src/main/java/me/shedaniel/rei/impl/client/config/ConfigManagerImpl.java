@@ -46,11 +46,13 @@ import me.shedaniel.clothconfig2.gui.AbstractConfigScreen;
 import me.shedaniel.clothconfig2.gui.GlobalizedClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
 import me.shedaniel.clothconfig2.gui.entries.TextListEntry;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.addon.ConfigAddonRegistry;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.CheatingMode;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
@@ -62,8 +64,6 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.addon.ConfigAddonRegistryImpl;
 import me.shedaniel.rei.impl.client.config.entries.*;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
-import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
 import me.shedaniel.rei.impl.client.gui.performance.entry.PerformanceEntry;
@@ -237,7 +237,7 @@ public class ConfigManagerImpl implements ConfigManager {
         // FilteringRule
         builder.registerSerializer(FilteringRule.class, (value, marshaller) -> {
             try {
-                return marshaller.serialize(FilteringRule.save(value, new CompoundTag()));
+                return marshaller.serialize(FilteringRuleType.save(value, new CompoundTag()));
             } catch (Exception e) {
                 e.printStackTrace();
                 return JsonNull.INSTANCE;
@@ -245,7 +245,7 @@ public class ConfigManagerImpl implements ConfigManager {
         });
         builder.registerDeserializer(Tag.class, FilteringRule.class, (value, marshaller) -> {
             try {
-                return FilteringRule.read((CompoundTag) value);
+                return FilteringRuleType.read((CompoundTag) value);
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -253,7 +253,7 @@ public class ConfigManagerImpl implements ConfigManager {
         });
         builder.registerDeserializer(String.class, FilteringRule.class, (value, marshaller) -> {
             try {
-                return FilteringRule.read(TagParser.parseTag(value));
+                return FilteringRuleType.read(TagParser.parseTag(value));
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -295,8 +295,10 @@ public class ConfigManagerImpl implements ConfigManager {
     
     @Override
     public void saveConfig() {
-        if (getConfig().getFilteringRules().stream().noneMatch(filteringRule -> filteringRule instanceof ManualFilteringRule)) {
-            getConfig().getFilteringRules().add(new ManualFilteringRule());
+        for (FilteringRuleType<?> type : FilteringRuleTypeRegistry.getInstance()) {
+            if (type.isSingular() && getConfig().getFilteringRules().stream().noneMatch(filteringRule -> filteringRule.getType().equals(type))) {
+                getConfig().getFilteringRules().add(type.createNew());
+            }
         }
         AutoConfig.getConfigHolder(ConfigObjectImpl.class).registerLoadListener((configHolder, configObject) -> {
             object = configObject;
