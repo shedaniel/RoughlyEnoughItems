@@ -21,24 +21,43 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.entry.filtering;
+package me.shedaniel.rei.impl.client.entry.filtering.rules;
 
-import org.jetbrains.annotations.Nullable;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-public class FilteringCacheImpl implements FilteringCache {
-    private final Map<FilteringRule<?>, Optional<?>> CACHE = new HashMap<>();
+public enum ManualFilteringRuleType implements FilteringRuleType<ManualFilteringRule> {
+    INSTANCE;
     
     @Override
-    @Nullable
-    public Object getCache(FilteringRule<?> rule) {
-        return CACHE.getOrDefault(rule, Optional.empty()).orElse(null);
+    public CompoundTag saveTo(ManualFilteringRule rule, CompoundTag tag) {
+        return tag;
     }
     
-    public void setCache(FilteringRule<?> rule, @Nullable Object value) {
-        CACHE.put(rule, Optional.ofNullable(value));
+    @Override
+    public ManualFilteringRule readFrom(CompoundTag tag) {
+        return new ManualFilteringRule();
+    }
+    
+    @Override
+    public Component getTitle(ManualFilteringRule rule) {
+        return new TranslatableComponent("rule.roughlyenoughitems.filtering.manual");
+    }
+    
+    @Override
+    public Component getSubtitle(ManualFilteringRule rule) {
+        return new TranslatableComponent("rule.roughlyenoughitems.filtering.manual.subtitle");
+    }
+    
+    @Override
+    public ManualFilteringRule createNew() {
+        return new ManualFilteringRule();
+    }
+    
+    @Override
+    public boolean isSingular() {
+        return true;
     }
 }

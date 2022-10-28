@@ -25,8 +25,9 @@ package me.shedaniel.rei.impl.client.config.entries;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
-import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -41,7 +42,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class FilteringAddRuleScreen extends Screen {
     private final FilteringEntry entry;
@@ -64,8 +65,8 @@ public class FilteringAddRuleScreen extends Screen {
             }));
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
-        for (FilteringRule<?> rule : FilteringRule.REGISTRY) {
-            if (!(rule instanceof ManualFilteringRule))
+        for (FilteringRuleType<?> rule : FilteringRuleTypeRegistry.getInstance()) {
+            if (!rule.isSingular())
                 rulesList.addItem(new DefaultRuleEntry(parent, entry, rule.createNew(), null));
         }
         rulesList.selectItem(rulesList.children().get(0));
@@ -146,14 +147,14 @@ public class FilteringAddRuleScreen extends Screen {
     
     public static class DefaultRuleEntry extends RuleEntry {
         private final Button addButton;
-        private final BiFunction<FilteringEntry, Screen, Screen> screenFunction;
+        private final Function<Screen, Screen> screenFunction;
         
-        public DefaultRuleEntry(Screen parent, FilteringEntry entry, FilteringRule<?> rule, BiFunction<FilteringEntry, Screen, Screen> screenFunction) {
+        public DefaultRuleEntry(Screen parent, FilteringEntry entry, FilteringRule<?> rule, Function<Screen, Screen> screenFunction) {
             super(rule);
-            this.screenFunction = (screenFunction == null ? rule.createEntryScreen().orElse(null) : screenFunction);
+            this.screenFunction = (screenFunction == null ? ((FilteringRuleType<FilteringRule<?>>) rule.getType()).createEntryScreen(rule) : screenFunction);
             addButton = new Button(0, 0, 20, 20, Component.nullToEmpty(" + "), button -> {
                 entry.edited = true;
-                Minecraft.getInstance().setScreen(this.screenFunction.apply(entry, parent));
+                Minecraft.getInstance().setScreen(this.screenFunction.apply(parent));
                 entry.rules.add(0, rule);
             });
             addButton.active = this.screenFunction != null;
@@ -163,7 +164,7 @@ public class FilteringAddRuleScreen extends Screen {
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             Minecraft client = Minecraft.getInstance();
             {
-                Component title = getRule().getTitle();
+                Component title = ((FilteringRuleType<FilteringRule<?>>) getRule().getType()).getTitle(getRule());
                 int i = client.font.width(title);
                 if (i > entryWidth - 28) {
                     FormattedText titleTrimmed = FormattedText.composite(client.font.substrByWidth(title, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
@@ -173,7 +174,7 @@ public class FilteringAddRuleScreen extends Screen {
                 }
             }
             {
-                Component subtitle = getRule().getSubtitle();
+                Component subtitle = ((FilteringRuleType<FilteringRule<?>>) getRule().getType()).getSubtitle(getRule());
                 int i = client.font.width(subtitle);
                 if (i > entryWidth - 28) {
                     FormattedText subtitleTrimmed = FormattedText.composite(client.font.substrByWidth(subtitle, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));

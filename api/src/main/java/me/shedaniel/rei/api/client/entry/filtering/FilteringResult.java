@@ -21,27 +21,23 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.entry.filtering;
+package me.shedaniel.rei.api.client.entry.filtering;
 
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 
-@ApiStatus.Internal
+@Environment(EnvType.CLIENT)
 @ApiStatus.Experimental
-public interface FilteringContext {
-    Collection<EntryStack<?>> getStacks(FilteringContextType type);
+public interface FilteringResult {
+    FilteringResult hide(EntryStack<?> stack);
     
-    default Collection<EntryStack<?>> getShownStacks() {
-        return getStacks(FilteringContextType.SHOWN);
-    }
+    FilteringResult hide(Collection<? extends EntryStack<?>> stacks);
     
-    default Collection<EntryStack<?>> getUnsetStacks() {
-        return getStacks(FilteringContextType.DEFAULT);
-    }
+    FilteringResult show(EntryStack<?> stack);
     
-    default Collection<EntryStack<?>> getHiddenStacks() {
-        return getStacks(FilteringContextType.HIDDEN);
-    }
+    FilteringResult show(Collection<? extends EntryStack<?>> stacks);
 }

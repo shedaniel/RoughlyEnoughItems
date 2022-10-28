@@ -21,20 +21,46 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.entry.filtering;
+package me.shedaniel.rei.api.client.entry.filtering;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.ApiStatus;
 
+/**
+ * A filtering rule type that is used to filter the entries on the entry panel,
+ * dictate what shows up in slots, or hide the entire display if all ingredients are filtered.
+ *
+ * @param <Cache> the type of the cache
+ */
+@ApiStatus.Experimental
 @Environment(EnvType.CLIENT)
-public abstract class AbstractFilteringRule<T extends AbstractFilteringRule<?>> implements FilteringRule<T> {
-    @Override
-    public boolean equals(Object obj) {
-        return getClass() == obj.getClass();
+public interface FilteringRule<Cache> {
+    /**
+     * Returns the type of this filtering rule.
+     *
+     * @return the type of this filtering rule
+     */
+    FilteringRuleType<? extends FilteringRule<Cache>> getType();
+    
+    /**
+     * Prepares the cache for this filtering rule.
+     *
+     * @param async whether the cache should be prepared asynchronously
+     * @return the cache
+     */
+    default Cache prepareCache(boolean async) {
+        return null;
     }
     
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
+    /**
+     * Processes the specified entry with the specified cache.
+     *
+     * @param context       the context of this filtering
+     * @param resultFactory the result factory
+     * @param cache         the cache
+     * @param async         whether the stacks should be processed asynchronously
+     * @return the result of the processing
+     */
+    FilteringResult processFilteredStacks(FilteringContext context, FilteringResultFactory resultFactory, Cache cache, boolean async);
 }

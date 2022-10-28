@@ -33,6 +33,7 @@ import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.*;
 import me.shedaniel.rei.api.common.entry.EntryStack;
