@@ -29,7 +29,6 @@ import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.math.Matrix4f;
 import it.unimi.dsi.fastutil.Pair;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -73,6 +72,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.*;
 import java.util.function.Supplier;

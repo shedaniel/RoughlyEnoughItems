@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.widget.region;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector4f;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
@@ -38,6 +37,7 @@ import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
 import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import org.joml.Vector4f;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -81,7 +81,7 @@ public class RegionEntryWidget<T extends RegionEntry<T>> extends DisplayedEntryW
                     CollectionUtils.map(menuEntries.get().get(), entry -> convertMenu(overlay, entry)));
         }
         Vector4f vector4f = new Vector4f(mouseX, mouseY, 0, 1.0F);
-        vector4f.transform(matrices.last().pose());
+        matrices.last().pose().transform(vector4f);
         super.render(matrices, (int) vector4f.x(), (int) vector4f.y(), delta);
     }
     

@@ -41,6 +41,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class ConfigAddonsScreen extends Screen {
     private AddonsList rulesList;
@@ -56,9 +57,9 @@ public class ConfigAddonsScreen extends Screen {
         super.init();
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
-            addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+            addRenderableWidget(Button.builder(backText, button -> {
                 minecraft.setScreen(parent);
-            }));
+            }).bounds(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20).build());
         }
         rulesList = addWidget(new AddonsList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
         ConfigAddonRegistryImpl addonRegistry = (ConfigAddonRegistryImpl) ConfigAddonRegistry.getInstance();
@@ -138,12 +139,12 @@ public class ConfigAddonsScreen extends Screen {
             this.addon = addon;
             this.configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
                 Minecraft.getInstance().setScreen(this.addon.createScreen(Minecraft.getInstance().screen));
-            }) {
+            }, Button.NO_TOOLTIP, Supplier::get) {
                 @Override
                 protected void renderBg(PoseStack matrices, Minecraft client, int mouseX, int mouseY) {
                     super.renderBg(matrices, client, mouseX, mouseY);
                     RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
-                    blit(matrices, x + 3, y + 3, 0, 0, 14, 14);
+                    blit(matrices, getX() + 3, getY() + 3, 0, 0, 14, 14);
                 }
             };
         }
@@ -171,8 +172,8 @@ public class ConfigAddonsScreen extends Screen {
                     client.font.drawShadow(matrices, subtitle.getVisualOrderText(), x + 2, y + 12, 8421504);
                 }
             }
-            configureButton.x = x + entryWidth - 25;
-            configureButton.y = y + 1;
+            configureButton.setX(x + entryWidth - 25);
+            configureButton.setY(y + 1);
             configureButton.render(matrices, mouseX, mouseY, delta);
         }
         

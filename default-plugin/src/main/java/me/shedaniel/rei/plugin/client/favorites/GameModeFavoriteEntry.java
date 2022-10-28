@@ -38,7 +38,6 @@ import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.VersionAdapter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -148,7 +147,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             if (mode == null) {
                 mode = GameType.byId(Minecraft.getInstance().gameMode.getPlayerMode().getId() + 1 % 4);
             }
-            VersionAdapter.INSTANCE.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", mode.name().toLowerCase(Locale.ROOT)), "/"));
+            Minecraft.getInstance().player.connection.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", mode.name().toLowerCase(Locale.ROOT)), "/"));
             Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             return true;
         }
@@ -276,7 +275,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             boolean disabled = this.minecraft.gameMode.getPlayerMode() == gameMode;
             if (!disabled && rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12) {
-                VersionAdapter.INSTANCE.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", gameMode.name().toLowerCase(Locale.ROOT)), "/"));
+                Minecraft.getInstance().player.connection.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", gameMode.name().toLowerCase(Locale.ROOT)), "/"));
                 minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 closeMenu();
                 return true;

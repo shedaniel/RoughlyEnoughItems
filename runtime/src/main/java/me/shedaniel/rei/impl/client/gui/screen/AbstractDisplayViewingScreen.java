@@ -27,7 +27,6 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Matrix4f;
 import dev.architectury.fluid.FluidStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
@@ -69,6 +68,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.*;
 import java.util.function.UnaryOperator;

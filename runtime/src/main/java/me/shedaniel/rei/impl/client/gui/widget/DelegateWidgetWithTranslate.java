@@ -24,13 +24,13 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
-import com.mojang.math.Vector4f;
 import me.shedaniel.rei.api.client.gui.widgets.DelegateWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
 
 import java.util.function.Supplier;
 
@@ -53,7 +53,7 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float delta) {
         poseStack.pushPose();
-        poseStack.last().pose().multiply(translate());
+        poseStack.last().pose().mul(translate());
         Vector4f mouse = transformMouse(mouseX, mouseY);
         super.render(poseStack, (int) mouse.x(), (int) mouse.y(), delta);
         poseStack.popPose();
@@ -61,7 +61,7 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     
     private Vector4f transformMouse(double mouseX, double mouseY) {
         Vector4f mouse = new Vector4f((float) mouseX, (float) mouseY, 0, 1);
-        mouse.transform(inverseTranslate());
+        inverseTranslate().transform(mouse);
         return mouse;
     }
     

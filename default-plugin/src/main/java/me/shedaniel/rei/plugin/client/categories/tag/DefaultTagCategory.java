@@ -25,7 +25,6 @@ package me.shedaniel.rei.plugin.client.categories.tag;
 
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingRectangle;
 import me.shedaniel.math.Point;
@@ -51,6 +50,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -191,9 +191,9 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
             }
         }, 0, 0, 10));
         
-        Matrix4f translateMatrix = Matrix4f.createTranslateMatrix(0, 0, 200);
+        Matrix4f translateMatrix = new Matrix4f().translate(0, 0, 200);
         Matrix4f identity = new Matrix4f();
-        identity.setIdentity();
+        identity.identity();
         return CollectionUtils.map(widgets, widget -> Widgets.withTranslate(widget, () ->
                 expanded[0] || !boundsAnimator.value().equals(boundsAnimator.target()) ? translateMatrix : identity));
     }

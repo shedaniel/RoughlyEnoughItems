@@ -24,7 +24,6 @@
 package me.shedaniel.rei.api.client.gui.widgets;
 
 import com.google.common.collect.AbstractIterator;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Dimension;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -43,6 +42,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -106,7 +106,7 @@ public final class Widgets {
     }
     
     public static WidgetWithBounds withTranslate(Widget widget, double x, double y, double z) {
-        return withTranslate(widget, Matrix4f.createTranslateMatrix((float) x, (float) y, (float) z));
+        return withTranslate(widget, new Matrix4f().translate((float) x, (float) y, (float) z));
     }
     
     public static WidgetWithBounds withTranslate(Widget widget, Matrix4f translate) {

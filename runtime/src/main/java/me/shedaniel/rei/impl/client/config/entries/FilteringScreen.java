@@ -27,7 +27,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
@@ -56,6 +55,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -113,52 +113,62 @@ public class FilteringScreen extends Screen {
         this.searchField = new OverlaySearchField(0, 0, 0, 0);
         {
             Component selectAllText = Component.translatable("config.roughlyenoughitems.filteredEntries.selectAll");
-            this.selectAllButton = new Button(0, 0, Minecraft.getInstance().font.width(selectAllText) + 10, 20, selectAllText, button -> {
-                this.points.clear();
-                this.points.add(new PointPair(new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2), new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2)));
-            });
+            this.selectAllButton = Button.builder(selectAllText, button -> {
+                        this.points.clear();
+                        this.points.add(new PointPair(new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2), new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2)));
+                    })
+                    .bounds(0, 0, Minecraft.getInstance().font.width(selectAllText) + 10, 20)
+                    .build();
         }
         {
             Component selectNoneText = Component.translatable("config.roughlyenoughitems.filteredEntries.selectNone");
-            this.selectNoneButton = new Button(0, 0, Minecraft.getInstance().font.width(selectNoneText) + 10, 20, selectNoneText, button -> {
-                this.points.clear();
-            });
+            this.selectNoneButton = Button.builder(selectNoneText, button -> {
+                        this.points.clear();
+                    })
+                    .bounds(0, 0, Minecraft.getInstance().font.width(selectNoneText) + 10, 20)
+                    .build();
         }
         {
             Component hideText = Component.translatable("config.roughlyenoughitems.filteredEntries.hide");
-            this.hideButton = new Button(0, 0, Minecraft.getInstance().font.width(hideText) + 10, 20, hideText, button -> {
-                for (int i = 0; i < entryStacks.size(); i++) {
-                    EntryStack<?> stack = entryStacks.get(i);
-                    FilteringListEntry entry = entries.get(i);
-                    entry.getBounds().y = entry.backupY - scrolling.scrollAmountInt();
-                    if (entry.isSelected() && !entry.isFiltered()) {
-                        filteringEntry.configFiltered.add(stack);
-                        filteringEntry.edited = true;
-                        entry.dirty = true;
-                    }
-                }
-            });
+            this.hideButton = Button.builder(hideText, button -> {
+                        for (int i = 0; i < entryStacks.size(); i++) {
+                            EntryStack<?> stack = entryStacks.get(i);
+                            FilteringListEntry entry = entries.get(i);
+                            entry.getBounds().y = entry.backupY - scrolling.scrollAmountInt();
+                            if (entry.isSelected() && !entry.isFiltered()) {
+                                filteringEntry.configFiltered.add(stack);
+                                filteringEntry.edited = true;
+                                entry.dirty = true;
+                            }
+                        }
+                    })
+                    .bounds(0, 0, Minecraft.getInstance().font.width(hideText) + 10, 20)
+                    .build();
         }
         {
             Component showText = Component.translatable("config.roughlyenoughitems.filteredEntries.show");
-            this.showButton = new Button(0, 0, Minecraft.getInstance().font.width(showText) + 10, 20, showText, button -> {
-                for (int i = 0; i < entryStacks.size(); i++) {
-                    EntryStack<?> stack = entryStacks.get(i);
-                    FilteringListEntry entry = entries.get(i);
-                    entry.getBounds().y = entry.backupY - scrolling.scrollAmountInt();
-                    if (entry.isSelected() && filteringEntry.configFiltered.remove(stack)) {
-                        filteringEntry.edited = true;
-                        entry.dirty = true;
-                    }
-                }
-            });
+            this.showButton = Button.builder(showText, button -> {
+                        for (int i = 0; i < entryStacks.size(); i++) {
+                            EntryStack<?> stack = entryStacks.get(i);
+                            FilteringListEntry entry = entries.get(i);
+                            entry.getBounds().y = entry.backupY - scrolling.scrollAmountInt();
+                            if (entry.isSelected() && filteringEntry.configFiltered.remove(stack)) {
+                                filteringEntry.edited = true;
+                                entry.dirty = true;
+                            }
+                        }
+                    })
+                    .bounds(0, 0, Minecraft.getInstance().font.width(showText) + 10, 20)
+                    .build();
         }
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
-            this.backButton = new Button(0, 0, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
-                minecraft.setScreen(parent);
-                this.parent = null;
-            });
+            this.backButton = Button.builder(backText, button -> {
+                        minecraft.setScreen(parent);
+                        this.parent = null;
+                    })
+                    .bounds(0, 0, Minecraft.getInstance().font.width(backText) + 10, 20)
+                    .build();
         }
         this.searchField.isMain = false;
     }
@@ -177,18 +187,18 @@ public class FilteringScreen extends Screen {
         super.init();
         Rectangle bounds = getBounds();
         updateSearch(this.searchField.getText());
-        this.selectAllButton.x = 2;
-        this.selectAllButton.y = bounds.getMaxY() - 22;
-        this.selectNoneButton.x = 4 + selectAllButton.getWidth();
-        this.selectNoneButton.y = bounds.getMaxY() - 22;
-        int searchFieldWidth = Math.max(bounds.width - (selectNoneButton.x + selectNoneButton.getWidth() + hideButton.getWidth() + showButton.getWidth() + 12), 100);
-        this.searchField.getBounds().setBounds(selectNoneButton.x + selectNoneButton.getWidth() + 4, bounds.getMaxY() - 21, searchFieldWidth, 18);
-        this.hideButton.x = bounds.getMaxX() - hideButton.getWidth() - showButton.getWidth() - 4;
-        this.hideButton.y = bounds.getMaxY() - 22;
-        this.showButton.x = bounds.getMaxX() - showButton.getWidth() - 2;
-        this.showButton.y = bounds.getMaxY() - 22;
-        this.backButton.x = 4;
-        this.backButton.y = 4;
+        this.selectAllButton.setX(2);
+        this.selectAllButton.setY(bounds.getMaxY() - 22);
+        this.selectNoneButton.setX(4 + selectAllButton.getWidth());
+        this.selectNoneButton.setY(bounds.getMaxY() - 22);
+        int searchFieldWidth = Math.max(bounds.width - (selectNoneButton.getX() + selectNoneButton.getWidth() + hideButton.getWidth() + showButton.getWidth() + 12), 100);
+        this.searchField.getBounds().setBounds(selectNoneButton.getX() + selectNoneButton.getWidth() + 4, bounds.getMaxY() - 21, searchFieldWidth, 18);
+        this.hideButton.setX(bounds.getMaxX() - hideButton.getWidth() - showButton.getWidth() - 4);
+        this.hideButton.setY(bounds.getMaxY() - 22);
+        this.showButton.setX(bounds.getMaxX() - showButton.getWidth() - 2);
+        this.showButton.setY(bounds.getMaxY() - 22);
+        this.backButton.setX(4);
+        this.backButton.setY(4);
         this.searchField.setResponder(this::updateSearch);
     }
     

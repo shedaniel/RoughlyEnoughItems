@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 import com.google.common.base.Predicates;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
@@ -38,6 +37,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import org.joml.Matrix4f;
 
 import java.util.Collections;
 import java.util.List;

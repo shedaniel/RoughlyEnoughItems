@@ -37,7 +37,6 @@ import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.common.InternalLogger;
-import me.shedaniel.rei.impl.VersionAdapter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.item.Item;
@@ -131,7 +130,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     public List<ItemStack> appendStacksForItem(Item item) {
-        return VersionAdapter.INSTANCE.appendStacksForItem(item, STACK_COMPARATOR);
+        return List.of(item.getDefaultInstance());
     }
     
     @ApiStatus.Internal

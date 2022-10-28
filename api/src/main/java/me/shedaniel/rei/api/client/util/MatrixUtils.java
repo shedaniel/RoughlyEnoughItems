@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.api.client.util;
 
-import com.mojang.math.Matrix4f;
 import com.mojang.math.Transformation;
-import com.mojang.math.Vector4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import org.jetbrains.annotations.ApiStatus;
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
 
 @ApiStatus.Experimental
 public class MatrixUtils {
@@ -41,9 +41,9 @@ public class MatrixUtils {
     
     public static Rectangle transform(Matrix4f matrix, Rectangle rectangle) {
         Vector4f vec1 = new Vector4f((float) rectangle.x, (float) rectangle.y, 0, 1);
-        vec1.transform(matrix);
+        matrix.transform(vec1);
         Vector4f vec2 = new Vector4f((float) rectangle.getMaxX(), (float) rectangle.getMaxY(), 0, 1);
-        vec2.transform(matrix);
+        matrix.transform(vec2);
         int x1 = Math.round(vec1.x());
         int x2 = Math.round(vec2.x());
         int y1 = Math.round(vec1.y());
@@ -53,7 +53,7 @@ public class MatrixUtils {
     
     public static Point transform(Matrix4f matrix, Point point) {
         Vector4f mouse = new Vector4f((float) point.x, (float) point.y, 0, 1);
-        mouse.transform(matrix);
+        matrix.transform(mouse);
         return new Point(mouse.x(), mouse.y());
     }
 }

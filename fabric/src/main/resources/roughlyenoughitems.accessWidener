@@ -22,7 +22,7 @@ accessible    field  net/minecraft/world/item/alchemy/PotionBrewing$Mix         
 accessible    field  net/minecraft/world/item/alchemy/PotionBrewing$Mix                        to                      Ljava/lang/Object;
 accessible    field  net/minecraft/world/item/crafting/UpgradeRecipe                           addition                Lnet/minecraft/world/item/crafting/Ingredient;
 accessible    field  net/minecraft/world/item/crafting/UpgradeRecipe                           base                    Lnet/minecraft/world/item/crafting/Ingredient;
-accessible    method net/minecraft/client/gui/GuiComponent                                     innerBlit               (Lcom/mojang/math/Matrix4f;IIIIIFFFF)V
+accessible    method net/minecraft/client/gui/GuiComponent                                     innerBlit               (Lorg/joml/Matrix4f;IIIIIFFFF)V
 accessible    method net/minecraft/client/gui/screens/Screen                                   addWidget               (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
 accessible    method net/minecraft/client/gui/screens/Screen                                   init                    ()V
 accessible    method net/minecraft/client/gui/screens/Screen                                   insertText              (Ljava/lang/String;Z)V
@@ -31,7 +31,7 @@ accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContaine
 mutable       field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        draggingItem            Lnet/minecraft/world/item/ItemStack;
 extendable    method net/minecraft/client/gui/screens/Screen                                   init                    (Lnet/minecraft/client/Minecraft;II)V
 accessible    method net/minecraft/client/gui/screens/Screen                                   addRenderableWidget     (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
-accessible    method net/minecraft/client/gui/screens/Screen                                   addRenderableOnly       (Lnet/minecraft/client/gui/components/Widget;)Lnet/minecraft/client/gui/components/Widget;
+accessible    method net/minecraft/client/gui/screens/Screen                                   addRenderableOnly       (Lnet/minecraft/client/gui/components/Renderable;)Lnet/minecraft/client/gui/components/Renderable;
 accessible    method net/minecraft/client/gui/screens/Screen                                   addWidget               (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
 accessible    method net/minecraft/client/gui/screens/Screen                                   renderTooltipInternal   (Lcom/mojang/blaze3d/vertex/PoseStack;Ljava/util/List;II)V
 accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;ILnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;

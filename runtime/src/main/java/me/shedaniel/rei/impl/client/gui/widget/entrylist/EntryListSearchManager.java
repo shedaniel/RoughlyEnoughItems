@@ -34,7 +34,6 @@ import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.impl.VersionAdapter;
 import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
@@ -48,7 +47,7 @@ import java.util.function.Consumer;
 
 public class EntryListSearchManager {
     private static final Comparator<? super EntryStack<?>> ENTRY_NAME_COMPARER = Comparator.comparing(stack -> stack.asFormatStrippedText().getString());
-    private static final Comparator<? super EntryStack<?>> ENTRY_GROUP_COMPARER = VersionAdapter.INSTANCE.getEntryGroupComparator();
+    // private static final Comparator<? super EntryStack<?>> ENTRY_GROUP_COMPARER = VersionAdapter.INSTANCE.getEntryGroupComparator();
     
     public static final EntryListSearchManager INSTANCE = new EntryListSearchManager();
     
@@ -85,8 +84,8 @@ public class EntryListSearchManager {
         EntryPanelOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
         if (ordering == EntryPanelOrdering.NAME)
             list.sort(ENTRY_NAME_COMPARER);
-        if (ordering == EntryPanelOrdering.GROUPS)
-            list.sort(ENTRY_GROUP_COMPARER);
+        // if (ordering == EntryPanelOrdering.GROUPS)
+            // list.sort(ENTRY_GROUP_COMPARER);
         if (!ConfigObject.getInstance().isItemListAscending()) {
             Collections.reverse(list);
         }

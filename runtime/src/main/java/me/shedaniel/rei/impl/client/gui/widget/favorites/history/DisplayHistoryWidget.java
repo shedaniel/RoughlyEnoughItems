@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.widget.favorites.history;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
@@ -50,6 +49,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Collection;

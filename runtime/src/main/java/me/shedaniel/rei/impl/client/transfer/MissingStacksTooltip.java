@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.transfer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.SimpleDisplayRenderer;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
@@ -39,6 +38,7 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import org.joml.Matrix4f;
 
 import java.util.List;
 

@@ -72,7 +72,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
             addRenderableWidget(new Button(this.width - 4 - width - 10, 4, width + 10, 20, doneText, button -> {
                 save();
                 minecraft.setScreen(parent);
-            }));
+            }, Button.NO_TOOLTIP, Supplier::get) {});
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
         addEntries(ruleEntry -> rulesList.addItem(ruleEntry));
@@ -200,8 +200,8 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         
         @Override
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-            widget.x = x + 2;
-            widget.y = y + 2;
+            widget.setX(x + 2);
+            widget.setY(y + 2);
             widget.render(matrices, mouseX, mouseY, delta);
         }
         
@@ -235,7 +235,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
             this.widget = new Button(0, 0, 100, 20, textFunction.apply(b), button -> {
                 this.b = !this.b;
                 button.setMessage(textFunction.apply(this.b));
-            });
+            }, Button.NO_TOOLTIP, Supplier::get) {};
         }
         
         public boolean getBoolean() {
@@ -244,8 +244,8 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         
         @Override
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-            widget.x = x + 2;
-            widget.y = y;
+            widget.setX(x + 2);
+            widget.setY(y);
             widget.render(matrices, mouseX, mouseY, delta);
         }
         

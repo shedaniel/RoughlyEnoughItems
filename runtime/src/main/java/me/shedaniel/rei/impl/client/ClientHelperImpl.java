@@ -47,7 +47,6 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.ClientInternals;
-import me.shedaniel.rei.impl.VersionAdapter;
 import me.shedaniel.rei.impl.client.gui.screen.CompositeDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
@@ -226,7 +225,7 @@ public class ClientHelperImpl implements ClientHelper {
                 madeUpCommand = og.replaceAll("\\{player_name}", Minecraft.getInstance().player.getScoreboardName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", "").replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
                 Minecraft.getInstance().player.displayClientMessage(Component.translatable("text.rei.too_long_nbt"), false);
             }
-            VersionAdapter.INSTANCE.sendCommand(StringUtils.removeStart(madeUpCommand, "/"));
+            Minecraft.getInstance().player.connection.sendCommand(StringUtils.removeStart(madeUpCommand, "/"));
             return true;
         }
     }

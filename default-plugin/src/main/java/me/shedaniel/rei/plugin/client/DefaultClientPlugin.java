@@ -23,9 +23,7 @@
 
 package me.shedaniel.rei.plugin.client;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import dev.architectury.platform.Platform;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
@@ -44,7 +42,6 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
-import me.shedaniel.rei.impl.VersionAdapter;
 import me.shedaniel.rei.plugin.autocrafting.recipebook.DefaultRecipeBookHandler;
 import me.shedaniel.rei.plugin.client.categories.*;
 import me.shedaniel.rei.plugin.client.categories.anvil.DefaultAnvilCategory;
@@ -73,6 +70,7 @@ import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomDisplay;
 import me.shedaniel.rei.plugin.common.displays.tag.DefaultTagDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.*;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.core.Registry;
@@ -81,6 +79,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionBrewing;
@@ -120,7 +119,37 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerEntries(EntryRegistry registry) {
-        VersionAdapter.INSTANCE.registerDefaultItems(registry);
+        FeatureFlagSet features = Minecraft.getInstance().player.getLevel().enabledFeatures();
+        Multimap<Item, EntryStack<ItemStack>> items = HashMultimap.create();
+        
+        for (CreativeModeTab tab : CreativeModeTabs.TABS) {
+            if (tab != CreativeModeTabs.TAB_HOTBAR && tab != CreativeModeTabs.TAB_INVENTORY) {
+                try {
+                    for (ItemStack stack : tab.getDisplayItems(features)) {
+                        try {
+                            items.put(stack.getItem(), EntryStacks.of(stack));
+                        } catch (Exception ignore) {
+                        }
+                    }
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+            }
+        }
+        
+        for (Item item : Registry.ITEM) {
+            Collection<EntryStack<ItemStack>> stacks = items.get(item);
+            if (stacks.isEmpty()) {
+                try {
+                    registry.addEntry(EntryStacks.of(item.getDefaultInstance()));
+                } catch (Exception ignore) {
+                    registry.addEntry(EntryStacks.of(item));
+                }
+            } else {
+                registry.addEntries(stacks);
+            }
+        }
+        
         for (Fluid fluid : Registry.FLUID) {
             FluidState state = fluid.defaultFluidState();
             if (!state.isEmpty() && state.isSource()) {

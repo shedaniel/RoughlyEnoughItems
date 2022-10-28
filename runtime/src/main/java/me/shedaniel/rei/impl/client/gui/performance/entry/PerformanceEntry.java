@@ -39,13 +39,14 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public class PerformanceEntry extends AbstractConfigListEntry<Unit> {
     private int width;
     private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.empty(), button -> {
         Minecraft.getInstance().setScreen(new PerformanceScreen(Minecraft.getInstance().screen));
-    });
+    }, Button.NO_TOOLTIP, Supplier::get) {};
     private List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public PerformanceEntry(int width) {
@@ -74,8 +75,8 @@ public class PerformanceEntry extends AbstractConfigListEntry<Unit> {
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = this.isEditable();
-        this.buttonWidget.y = y;
-        this.buttonWidget.x = x + entryWidth / 2 - width / 2;
+        this.buttonWidget.setY(y);
+        this.buttonWidget.setX(x + entryWidth / 2 - width / 2);
         this.buttonWidget.setWidth(width);
         this.buttonWidget.render(matrices, mouseX, mouseY, delta);
     }

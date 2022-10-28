@@ -25,7 +25,6 @@ package me.shedaniel.rei.plugin.client.categories.tag;
 
 import com.google.common.base.Predicates;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.*;
@@ -35,6 +34,7 @@ import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,7 +71,7 @@ public class ValueTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
             i++;
         }
         this.widget = Widgets.withTranslate(Widgets.concat(this.widgets),
-                $ -> Matrix4f.createTranslateMatrix(getBounds().x, getBounds().y, 0));
+                $ -> new Matrix4f().translate(getBounds().x, getBounds().y, 0));
         this.children = Collections.singletonList(this.widget);
     }
     

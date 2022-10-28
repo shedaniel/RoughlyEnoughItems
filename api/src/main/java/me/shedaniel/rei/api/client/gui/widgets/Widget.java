@@ -24,8 +24,6 @@
 package me.shedaniel.rei.api.client.gui.widgets;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector4f;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -37,7 +35,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.Renderable;
 import org.jetbrains.annotations.ApiStatus;
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
 
 import java.util.Stack;
 
@@ -47,7 +48,7 @@ import java.util.Stack;
  * @see WidgetWithBounds for a widget with bounds
  */
 @Environment(EnvType.CLIENT)
-public abstract class Widget extends AbstractContainerEventHandler implements net.minecraft.client.gui.components.Widget, Renderer {
+public abstract class Widget extends AbstractContainerEventHandler implements Renderable, Renderer {
     
     /**
      * The Minecraft Client instance
@@ -76,13 +77,13 @@ public abstract class Widget extends AbstractContainerEventHandler implements ne
     }
     
     public static Point translateMouse(double x, double y, double z) {
-        return translateMouse(Matrix4f.createTranslateMatrix((float) x, (float) y, (float) z));
+        return translateMouse(new Matrix4f().translate((float) x, (float) y, (float) z));
     }
     
     public static Point translateMouse(Matrix4f pose) {
         Point mouse = mouse();
         Vector4f mouseVec = new Vector4f(mouse.x, mouse.y, 0, 1);
-        mouseVec.transform(pose);
+        pose.transform(mouseVec);
         return pushMouse(new Point(mouseVec.x(), mouseVec.y()));
     }
     

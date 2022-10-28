@@ -40,13 +40,14 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public class ConfigAddonsEntry extends AbstractConfigListEntry<Unit> {
     private int width;
     private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.empty(), button -> {
         Minecraft.getInstance().setScreen(new ConfigAddonsScreen(Minecraft.getInstance().screen));
-    });
+    }, Button.NO_TOOLTIP, Supplier::get) {};
     private List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public ConfigAddonsEntry(int width) {
@@ -77,8 +78,8 @@ public class ConfigAddonsEntry extends AbstractConfigListEntry<Unit> {
         Window window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = REIRuntime.getInstance().getPreviousContainerScreen() != null && Minecraft.getInstance().getConnection() != null
                                    && Minecraft.getInstance().getConnection().getRecipeManager() != null && this.isEditable();
-        this.buttonWidget.y = y;
-        this.buttonWidget.x = x + entryWidth / 2 - width / 2;
+        this.buttonWidget.setY(y);
+        this.buttonWidget.setX(x + entryWidth / 2 - width / 2);
         this.buttonWidget.setWidth(width);
         this.buttonWidget.render(matrices, mouseX, mouseY, delta);
     }

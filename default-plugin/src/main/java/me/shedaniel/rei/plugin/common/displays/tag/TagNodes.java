@@ -32,7 +32,6 @@ import dev.architectury.utils.EnvExecutor;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import me.shedaniel.rei.impl.VersionAdapter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -208,7 +207,7 @@ public class TagNodes {
         TagNode<T> self = TagNode.ofReference(tagKey);
         List<Holder<T>> holders = new ArrayList<>();
         for (int element : tagData.otherElements()) {
-            Optional<Holder<T>> holder = VersionAdapter.INSTANCE.getHolder(registry, element);
+            Optional<Holder.Reference<T>> holder = registry.getHolder(element);
             if (holder.isPresent()) {
                 holders.add(holder.get());
             }

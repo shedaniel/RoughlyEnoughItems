@@ -26,8 +26,6 @@ package me.shedaniel.rei.impl.client.gui.error;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector4f;
 import me.shedaniel.clothconfig2.gui.widget.DynamicEntryListWidget;
 import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
 import net.minecraft.ChatFormatting;
@@ -50,6 +48,8 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
+import org.joml.Vector4f;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -194,7 +194,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         public ScaledEntry(Entry entry, float scale) {
             this.entry = entry;
             this.scale = scale;
-            this.transform = Matrix4f.createScaleMatrix(scale, scale, scale);
+            this.transform = new Matrix4f().scale(scale, scale, scale);
         }
         
         public Entry getEntry() {
@@ -204,7 +204,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         
         private Vector4f transformMouse(double mouseX, double mouseY) {
             Vector4f mouse = new Vector4f((float) mouseX, (float) mouseY, 0, 1);
-            mouse.transform(transform);
+            transform.transform(mouse);
             return mouse;
         }
         
@@ -212,10 +212,10 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             Vector4f mouse = transformMouse(mouseX, mouseY);
             matrices.pushPose();
-            matrices.last().pose().multiply(transform);
+            matrices.last().pose().mul(transform);
             
             Vector4f pos = new Vector4f(x, y, 0, 1);
-            pos.transform(Matrix4f.createScaleMatrix(1 / scale, 1 / scale, 1 / scale));
+            pos.mul(new Matrix4f().scale(1 / scale, 1 / scale, 1 / scale));
             getEntry().render(matrices, index, Math.round(pos.y()), Math.round(pos.x()), Math.round(entryWidth / scale), Math.round(entryHeight / scale), (int) mouse.x(), (int) mouse.y(), isSelected, delta);
             matrices.popPose();
         }
@@ -340,7 +340,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         public boolean changeFocus(boolean boolean_1) {
             return false;
         }
-    
+        
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (button == 0) {
@@ -360,7 +360,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
             
             return super.mouseClicked(mouseX, mouseY, button);
         }
-    
+        
         @Nullable
         private Style getTextAt(double x, double y) {
             int lineCount = this.textSplit.size();

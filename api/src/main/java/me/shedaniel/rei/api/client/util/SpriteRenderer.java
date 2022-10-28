@@ -26,15 +26,14 @@ package me.shedaniel.rei.api.client.util;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import me.shedaniel.rei.impl.VersionAdapter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class SpriteRenderer {
@@ -192,7 +191,7 @@ public class SpriteRenderer {
                 throw new RuntimeException("Invalid Sprite!");
             }
             
-            next(VersionAdapter.INSTANCE.spriteName(sprite));
+            next(sprite.contents().name());
         }
         
         public void next(ResourceLocation texture) {
@@ -213,8 +212,8 @@ public class SpriteRenderer {
                 this.normal = this.matrices.last().normal();
             }
             
-            float sX = VersionAdapter.INSTANCE.spriteWidth(sprite);
-            float sY = VersionAdapter.INSTANCE.spriteHeight(sprite);
+            float sX = sprite.contents().width();
+            float sY = sprite.contents().height();
             
             RenderSystem.setShaderTexture(0, texture);
             

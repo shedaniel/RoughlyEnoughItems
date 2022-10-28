@@ -263,7 +263,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
                 matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, 1.0F);
                 PoseStack modelViewStack = RenderSystem.getModelViewStack();
                 modelViewStack.pushPose();
-                modelViewStack.last().pose().load(matrices.last().pose());
+                modelViewStack.last().pose().set(matrices.last().pose());
                 RenderSystem.applyModelViewMatrix();
                 MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
                 Minecraft.getInstance().getItemRenderer().render(value, ItemTransforms.TransformType.GUI, false, new PoseStack(), immediate,

@@ -42,6 +42,7 @@ import org.jetbrains.annotations.ApiStatus;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @ApiStatus.Internal
@@ -126,7 +127,7 @@ public class CreditsScreen extends Screen {
         entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(Component.literal("Visit the project page at CurseForge."), "https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items", entryListWidget.getItemWidth(), false));
         entryListWidget.creditsAddEntry(new CreditsEntryListWidget.LinkItem(Component.literal("Support the project via Patreon!"), "https://patreon.com/shedaniel", entryListWidget.getItemWidth(), true));
         entryListWidget.creditsAddEntry(new TextCreditsItem(Component.empty()));
-        addRenderableWidget(buttonDone = new Button(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> openPrevious()));
+        addRenderableWidget(buttonDone = new Button(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> openPrevious(), Button.NO_TOOLTIP, Supplier::get) {});
     }
     
     private static void fillTranslators(Exception[] exception, List<Tuple<String, List<TranslatorEntry>>> translators) {

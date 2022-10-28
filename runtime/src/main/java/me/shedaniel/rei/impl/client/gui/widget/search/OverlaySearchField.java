@@ -28,7 +28,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Color;
@@ -61,6 +60,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;

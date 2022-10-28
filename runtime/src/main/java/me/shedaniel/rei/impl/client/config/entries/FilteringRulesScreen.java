@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 public class FilteringRulesScreen extends Screen {
     private final FilteringEntry entry;
@@ -64,7 +65,7 @@ public class FilteringRulesScreen extends Screen {
             addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
-            }));
+            }, Button.NO_TOOLTIP, Supplier::get) {});
         }
         {
             Component addText = Component.literal(" + ");
@@ -72,7 +73,7 @@ public class FilteringRulesScreen extends Screen {
                 FilteringAddRuleScreen screen = new FilteringAddRuleScreen(entry);
                 screen.parent = this;
                 minecraft.setScreen(screen);
-            }));
+            }, Button.NO_TOOLTIP, Supplier::get) {});
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
         for (int i = entry.rules.size() - 1; i >= 0; i--) {
@@ -186,12 +187,12 @@ public class FilteringRulesScreen extends Screen {
             configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
                 entry.edited = true;
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(entry, Minecraft.getInstance().screen));
-            }) {
+            }, Button.NO_TOOLTIP, Supplier::get) {
                 @Override
                 protected void renderBg(PoseStack matrices, Minecraft client, int mouseX, int mouseY) {
                     super.renderBg(matrices, client, mouseX, mouseY);
                     RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
-                    blit(matrices, x + 3, y + 3, 0, 0, 14, 14);
+                    blit(matrices, getX() + 3, getY() + 3, 0, 0, 14, 14);
                 }
             };
             {
@@ -201,7 +202,7 @@ public class FilteringRulesScreen extends Screen {
                     entry.edited = true;
                     entry.rules.remove(rule);
                     screen.init(Minecraft.getInstance(), screen.width, screen.height);
-                });
+                }, Button.NO_TOOLTIP, Supplier::get) {};
             }
             configureButton.active = this.screenFunction != null;
             deleteButton.active = !(rule instanceof ManualFilteringRule);
@@ -230,11 +231,11 @@ public class FilteringRulesScreen extends Screen {
                     client.font.drawShadow(matrices, subtitle.getVisualOrderText(), x + 2, y + 12, 8421504);
                 }
             }
-            configureButton.x = x + entryWidth - 25;
-            configureButton.y = y + 1;
+            configureButton.setX(x + entryWidth - 25);
+            configureButton.setY(y + 1);
             configureButton.render(matrices, mouseX, mouseY, delta);
-            deleteButton.x = x + entryWidth - 27 - deleteButton.getWidth();
-            deleteButton.y = y + 1;
+            deleteButton.setX(x + entryWidth - 27 - deleteButton.getWidth());
+            deleteButton.setY(y + 1);
             deleteButton.render(matrices, mouseX, mouseY, delta);
         }
         

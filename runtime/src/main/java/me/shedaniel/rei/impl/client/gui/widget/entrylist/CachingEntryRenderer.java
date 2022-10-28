@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -37,6 +36,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.function.IntSupplier;
 

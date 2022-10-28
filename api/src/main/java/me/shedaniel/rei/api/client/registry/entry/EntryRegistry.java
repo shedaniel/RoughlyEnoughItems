@@ -96,7 +96,9 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
      *
      * @param item the item to find
      * @return the list of possible stacks, will never be empty.
+     * @deprecated deprecated logic due to 1.19.3 new creative tabs logic
      */
+    @Deprecated(forRemoval = true)
     List<ItemStack> appendStacksForItem(Item item);
     
     /**

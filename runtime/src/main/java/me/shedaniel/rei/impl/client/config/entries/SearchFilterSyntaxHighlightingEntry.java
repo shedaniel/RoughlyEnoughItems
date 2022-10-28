@@ -38,6 +38,7 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class SearchFilterSyntaxHighlightingEntry extends TooltipListEntry<SyntaxHighlightingMode> {
     private final SyntaxHighlightingMode original;
@@ -46,7 +47,7 @@ public class SearchFilterSyntaxHighlightingEntry extends TooltipListEntry<Syntax
     private Consumer<SyntaxHighlightingMode> save;
     private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.empty(), $ -> {
         type = SyntaxHighlightingMode.values()[(type.ordinal() + 1) % SyntaxHighlightingMode.values().length];
-    }) {
+    }, Button.NO_TOOLTIP, Supplier::get) {
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             setMessage(Component.literal(type.toString()));
@@ -99,14 +100,14 @@ public class SearchFilterSyntaxHighlightingEntry extends TooltipListEntry<Syntax
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = this.isEditable();
-        this.buttonWidget.y = y;
+        this.buttonWidget.setY(y);
         Component displayedFieldName = this.getDisplayedFieldName();
         if (Minecraft.getInstance().font.isBidirectional()) {
             Minecraft.getInstance().font.drawShadow(matrices, displayedFieldName.getVisualOrderText(), window.getGuiScaledWidth() - x - Minecraft.getInstance().font.width(displayedFieldName), y + 6, 16777215);
-            this.buttonWidget.x = x;
+            this.buttonWidget.setX(x);
         } else {
             Minecraft.getInstance().font.drawShadow(matrices, displayedFieldName.getVisualOrderText(), x, y + 6, this.getPreferredTextColor());
-            this.buttonWidget.x = x + entryWidth - 150;
+            this.buttonWidget.setX(x + entryWidth - 150);
         }
         
         this.buttonWidget.setWidth(150);

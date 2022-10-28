@@ -25,11 +25,11 @@ package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
+import org.joml.Matrix4f;
 
 @ApiStatus.Internal
 public class SearchFilterSyntaxHighlightingScreen extends Screen {

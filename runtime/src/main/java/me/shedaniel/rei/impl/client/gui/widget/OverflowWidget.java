@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
@@ -33,6 +32,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import org.joml.Matrix4f;
 
 @SuppressWarnings("UnstableApiUsage")
 public class OverflowWidget extends DelegateWidgetWithTranslate {
@@ -57,8 +57,8 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     protected Matrix4f translate() {
         FloatingPoint translate = this.translate.value();
         float scale = 1 / Math.max(this.scale.floatValue(), 0.001f);
-        Matrix4f matrix = Matrix4f.createTranslateMatrix(bounds.getCenterX() + (float) translate.x * scale, bounds.getCenterY() + (float) translate.y * scale, 0);
-        matrix.multiply(Matrix4f.createScaleMatrix(scale, scale, 1));
+        Matrix4f matrix = new Matrix4f().translate(bounds.getCenterX() + (float) translate.x * scale, bounds.getCenterY() + (float) translate.y * scale, 0);
+        matrix.mul(new Matrix4f().scale(scale, scale, 1));
         return matrix;
     }
     

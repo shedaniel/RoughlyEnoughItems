@@ -26,13 +26,12 @@ package me.shedaniel.rei.impl.client.gui.widget;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.Widget;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -43,6 +42,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Environment(EnvType.CLIENT)
-public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFreeEntryListWidget.Entry<E>> extends AbstractContainerEventHandler implements Widget, NarratableEntry {
+public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFreeEntryListWidget.Entry<E>> extends AbstractContainerEventHandler implements Renderable, NarratableEntry {
     protected static final int DRAG_OUTSIDE = -2;
     protected final Minecraft client;
     private final List<E> entries = new Entries();

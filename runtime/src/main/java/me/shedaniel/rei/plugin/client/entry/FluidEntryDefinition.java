@@ -45,7 +45,6 @@ import me.shedaniel.rei.api.common.entry.comparison.FluidComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
-import me.shedaniel.rei.impl.VersionAdapter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
@@ -257,7 +256,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
                     .alpha(0xff)
                     .normal(matrices.last().normal(), 0, 0, 0)
                     .position(matrices.last().pose(), bounds.x, bounds.getMaxY() - bounds.height * Mth.clamp(entry.get(EntryStack.Settings.FLUID_RENDER_RATIO), 0, 1), bounds.getMaxX(), bounds.getMaxY(), entry.getZ())
-                    .next(VersionAdapter.INSTANCE.spriteAtlasLocation(s));
+                    .next(s.atlasLocation());
         }
         
         @Override

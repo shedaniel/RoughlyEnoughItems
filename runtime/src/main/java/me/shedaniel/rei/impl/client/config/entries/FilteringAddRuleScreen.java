@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 public class FilteringAddRuleScreen extends Screen {
     private final FilteringEntry entry;
@@ -60,7 +61,7 @@ public class FilteringAddRuleScreen extends Screen {
             addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
-            }));
+            }, Button.NO_TOOLTIP, Supplier::get) {});
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
         for (FilteringRule<?> rule : FilteringRule.REGISTRY.values()) {
@@ -154,7 +155,7 @@ public class FilteringAddRuleScreen extends Screen {
                 entry.edited = true;
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(entry, parent));
                 entry.rules.add(0, rule);
-            });
+            }, Button.NO_TOOLTIP, Supplier::get) {};
             addButton.active = this.screenFunction != null;
         }
         
@@ -181,8 +182,8 @@ public class FilteringAddRuleScreen extends Screen {
                     client.font.drawShadow(matrices, subtitle.getVisualOrderText(), x + 2, y + 12, 8421504);
                 }
             }
-            addButton.x = x + entryWidth - 25;
-            addButton.y = y + 1;
+            addButton.setX(x + entryWidth - 25);
+            addButton.setY(y + 1);
             addButton.render(matrices, mouseX, mouseY, delta);
         }
         

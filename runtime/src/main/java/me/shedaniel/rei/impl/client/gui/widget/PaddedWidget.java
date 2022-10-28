@@ -23,9 +23,9 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import org.joml.Matrix4f;
 
 public class PaddedWidget extends DelegateWidgetWithTranslate {
     private final int padLeft, padRight, padTop, padBottom;
@@ -40,7 +40,7 @@ public class PaddedWidget extends DelegateWidgetWithTranslate {
     
     @Override
     protected Matrix4f translate() {
-        return Matrix4f.createTranslateMatrix(padLeft, padRight, 0);
+        return new Matrix4f().translate(padLeft, padRight, 0);
     }
     
     @Override

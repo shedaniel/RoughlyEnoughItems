@@ -41,6 +41,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>>> {
@@ -56,7 +57,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>>>
     private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.translatable("config.roughlyenoughitems.filteringScreen"), button -> {
         filteringRulesScreen.parent = Minecraft.getInstance().screen;
         Minecraft.getInstance().setScreen(filteringRulesScreen);
-    });
+    }, Button.NO_TOOLTIP, Supplier::get) {};
     private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public FilteringEntry(int width, List<EntryStack<?>> configFiltered, List<FilteringRule<?>> rules, List<EntryStack<?>> defaultValue, Consumer<List<EntryStack<?>>> saveConsumer, Consumer<List<FilteringRule<?>>> rulesSaveConsumer) {
@@ -92,8 +93,8 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>>>
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = this.isEditable();
-        this.buttonWidget.y = y;
-        this.buttonWidget.x = x + entryWidth / 2 - width / 2;
+        this.buttonWidget.setY(y);
+        this.buttonWidget.setX(x + entryWidth / 2 - width / 2);
         this.buttonWidget.setWidth(width);
         this.buttonWidget.render(matrices, mouseX, mouseY, delta);
     }

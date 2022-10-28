@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.widget.favorites.history;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector4f;
 import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Dimension;
@@ -42,6 +41,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector4f;
 
 import java.util.Collections;
 import java.util.List;
@@ -169,7 +169,7 @@ public class DisplayEntry extends WidgetWithBounds {
                 poses.translate(0, 0, 800);
             }
             Vector4f mouse = new Vector4f((float) mouseX, (float) mouseY, 0, 1);
-            mouse.transform(poses.last().pose());
+            poses.last().pose().transform(mouse);
             
             AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, display::provideInternalDisplayIds);
             

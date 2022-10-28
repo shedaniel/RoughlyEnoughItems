@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueProvider;
 import me.shedaniel.math.Color;
@@ -41,6 +40,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.Collections;
 import java.util.List;

@@ -49,6 +49,7 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public class WarningAndErrorScreen extends Screen {
@@ -123,7 +124,7 @@ public class WarningAndErrorScreen extends Screen {
         }
         addRenderableWidget(buttonExit = new Button(width / 2 - 100, height - 26, 200, 20,
                 Component.literal(errors.isEmpty() ? "Continue" : "Exit"),
-                button -> onContinue.accept(parent)));
+                button -> onContinue.accept(parent), Button.NO_TOOLTIP, Supplier::get) {});
     }
     
     @Override

@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -50,6 +49,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
+import org.joml.Matrix4f;
 
 import java.util.Collection;
 import java.util.List;

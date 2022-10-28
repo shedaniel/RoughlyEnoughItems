@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.gui.screen;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import dev.architectury.platform.Platform;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
@@ -57,6 +56,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
+import org.joml.Matrix4f;
 
 import java.util.Collections;
 import java.util.List;
@@ -167,9 +167,9 @@ public class UncertainDisplayViewingScreen extends Screen {
             
             @Override
             public void renderButton(PoseStack poseStack, int i, int j, float f) {
-                y = UncertainDisplayViewingScreen.this.height * 2 - 64;
+                setY(UncertainDisplayViewingScreen.this.height * 2 - 64);
                 super.renderButton(poseStack, i, j, f);
-                y = UncertainDisplayViewingScreen.this.height * 2 - 64 - (int) (scroll.floatValue() / 200f * height);
+                setY(UncertainDisplayViewingScreen.this.height * 2 - 64 - (int) (scroll.floatValue() / 200f * height));
             }
         })));
         this._children().addAll(widgets);
@@ -180,7 +180,7 @@ public class UncertainDisplayViewingScreen extends Screen {
     }
     
     private Widget transformScroll(Widget widget) {
-        return Widgets.withTranslate(widget, () -> Matrix4f.createTranslateMatrix(0, -(scroll.floatValue() / 200f * height), 0));
+        return Widgets.withTranslate(widget, () -> new Matrix4f().translate(0, -(scroll.floatValue() / 200f * height), 0));
     }
     
     @Override

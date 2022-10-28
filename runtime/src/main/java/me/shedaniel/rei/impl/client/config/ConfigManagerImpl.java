@@ -46,7 +46,6 @@ import me.shedaniel.clothconfig2.gui.AbstractConfigScreen;
 import me.shedaniel.clothconfig2.gui.GlobalizedClothConfigScreen;
 import me.shedaniel.clothconfig2.gui.entries.KeyCodeEntry;
 import me.shedaniel.clothconfig2.gui.entries.TextListEntry;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.addon.ConfigAddonRegistry;
@@ -90,6 +89,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static me.shedaniel.autoconfig.util.Utils.getUnsafely;
 import static me.shedaniel.autoconfig.util.Utils.setUnsafely;
@@ -422,7 +422,7 @@ public class ConfigManagerImpl implements ConfigManager {
                     ScreenHooks.addRenderableWidget(screen, new Button(screen.width - 104, 4, 100, 20, Component.translatable("text.rei.credits"), button -> {
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
                         Minecraft.getInstance().setScreen(creditsScreen);
-                    }));
+                    }, Button.NO_TOOLTIP, Supplier::get) {});
                 }).setSavingRunnable(() -> {
                     saveConfig();
                     EntryRegistry.getInstance().refilter();

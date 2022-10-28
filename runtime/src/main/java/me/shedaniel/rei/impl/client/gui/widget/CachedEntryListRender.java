@@ -30,7 +30,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Matrix4f;
 import dev.architectury.registry.ReloadListenerRegistry;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
@@ -52,6 +51,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.List;
 
@@ -145,7 +145,7 @@ public class CachedEntryListRender {
         Minecraft minecraft = Minecraft.getInstance();
         TextureTarget target = new TextureTarget(width, height, true, false);
         target.bindWrite(true);
-        Matrix4f projectionMatrix = Matrix4f.orthographic(0.0F, width, 0.0F, height, 1000.0F, 3000.0F);
+        Matrix4f projectionMatrix = new Matrix4f().setOrtho(0.0F, width, 0.0F, height, 1000.0F, 3000.0F);
         RenderSystem.setProjectionMatrix(projectionMatrix);
         PoseStack modelViewStack = RenderSystem.getModelViewStack();
         modelViewStack.pushPose();

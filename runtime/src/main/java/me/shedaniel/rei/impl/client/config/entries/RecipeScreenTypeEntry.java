@@ -39,6 +39,7 @@ import net.minecraft.network.chat.Component;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class RecipeScreenTypeEntry extends TooltipListEntry<DisplayScreenType> {
     private int width;
@@ -51,7 +52,7 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<DisplayScreenType> {
             Minecraft.getInstance().setScreen(getConfigScreen());
             type = original ? DisplayScreenType.ORIGINAL : DisplayScreenType.COMPOSITE;
         }));
-    }) {
+    }, Button.NO_TOOLTIP, Supplier::get) {
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             setMessage(Component.translatable("config.roughlyenoughitems.recipeScreenType.config", type.toString()));
@@ -105,8 +106,8 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<DisplayScreenType> {
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = this.isEditable();
-        this.buttonWidget.y = y;
-        this.buttonWidget.x = x + entryWidth / 2 - width / 2;
+        this.buttonWidget.setY(y);
+        this.buttonWidget.setX(x + entryWidth / 2 - width / 2);
         this.buttonWidget.setWidth(width);
         this.buttonWidget.render(matrices, mouseX, mouseY, delta);
     }

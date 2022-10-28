@@ -44,6 +44,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
@@ -51,7 +52,7 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     private AbstractWidget reloadPluginsButton = new Button(0, 0, 0, 20, Component.empty(), button -> {
         RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
         RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
-    }) {
+    }, Button.NO_TOOLTIP, Supplier::get) {
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             if (PluginManager.areAnyReloading()) {
@@ -64,7 +65,7 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     };
     private AbstractWidget reloadSearchButton = new Button(0, 0, 0, 20, Component.empty(), button -> {
         Argument.SEARCH_CACHE.clear();
-    });
+    }, Button.NO_TOOLTIP, Supplier::get) {};
     private List<AbstractWidget> children = ImmutableList.of(reloadPluginsButton, reloadSearchButton);
     
     public ReloadPluginsEntry(int width) {
@@ -94,14 +95,14 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
         this.reloadPluginsButton.active = this.isEditable();
-        this.reloadPluginsButton.y = y;
+        this.reloadPluginsButton.setY(y);
         this.reloadPluginsButton.setWidth(width / 2 - 2);
-        this.reloadPluginsButton.x = x + entryWidth / 2 - width / 2;
+        this.reloadPluginsButton.setX(x + entryWidth / 2 - width / 2);
         this.reloadPluginsButton.render(matrices, mouseX, mouseY, delta);
         this.reloadSearchButton.active = this.isEditable() && !Argument.SEARCH_CACHE.isEmpty();
-        this.reloadSearchButton.y = y;
+        this.reloadSearchButton.setY(y);
         this.reloadSearchButton.setWidth(width / 2 - 2);
-        this.reloadSearchButton.x = x + entryWidth / 2 + 2;
+        this.reloadSearchButton.setX(x + entryWidth / 2 + 2);
         this.reloadSearchButton.render(matrices, mouseX, mouseY, delta);
     }
     
