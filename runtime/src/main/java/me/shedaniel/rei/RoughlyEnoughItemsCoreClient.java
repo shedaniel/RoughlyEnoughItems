@@ -457,6 +457,7 @@ public class RoughlyEnoughItemsCoreClient {
     
     @ApiStatus.Internal
     public static void reloadPlugins(MutableLong lastReload, @Nullable ReloadStage start) {
+        if (Minecraft.getInstance().level == null) return;
         if (lastReload != null) {
             if (lastReload.getValue() > 0 && System.currentTimeMillis() - lastReload.getValue() <= 5000) {
                 InternalLogger.getInstance().warn("Suppressing Reload Plugins of stage " + start);
