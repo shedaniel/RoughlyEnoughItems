@@ -140,7 +140,17 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         }
         
         public String getPluginProviderName() {
-            return provider.getPluginProviderName();
+            String providerName = provider.getPluginProviderName();
+            
+            if (provider.provide().size() >= 1) {
+                String pluginName = plugin.getPluginProviderName();
+                
+                if (!providerName.equals(pluginName)) {
+                    providerName = pluginName + " of " + providerName;
+                }
+            }
+            
+            return providerName;
         }
     }
     
