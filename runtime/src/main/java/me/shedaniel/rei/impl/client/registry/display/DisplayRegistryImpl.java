@@ -27,6 +27,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.ForwardingMapEntry;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Sets;
 import dev.architectury.event.EventResult;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -73,16 +74,18 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
             } else {
                 return ((DisplaysList) list).unmodifiableList;
             }
-        });
+        }, key -> CategoryRegistry.getInstance().tryGet(key).isPresent());
     }
     
     private static class RemappingMap<K, V> extends ForwardingMap<K, V> {
         protected final Map<K, V> map;
         protected final UnaryOperator<V> remapper;
+        protected final Predicate<K> keyPredicate;
         
-        public RemappingMap(Map<K, V> map, UnaryOperator<V> remapper) {
+        public RemappingMap(Map<K, V> map, UnaryOperator<V> remapper, Predicate<K> keyPredicate) {
             this.map = map;
             this.remapper = remapper;
+            this.keyPredicate = keyPredicate;
         }
         
         @Override
@@ -93,7 +96,21 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
         
         @Override
         public V get(Object key) {
-            return remapper.apply(super.get(key));
+            if (keyPredicate.test((K) key)) {
+                return remapper.apply(super.get(key));
+            } else {
+                return null;
+            }
+        }
+        
+        @Override
+        public boolean containsKey(@Nullable Object key) {
+            return super.containsKey(key) && keyPredicate.test((K) key);
+        }
+        
+        @Override
+        public Set<K> keySet() {
+            return Sets.filter(super.keySet(), keyPredicate::test);
         }
         
         @SuppressWarnings("UnstableApiUsage")
@@ -108,8 +125,29 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
             };
         }
         
+        @Override
+        public int size() {
+            return keySet().size();
+        }
+        
+        @Override
+        public Collection<V> values() {
+            return new AbstractCollection<V>() {
+                @Override
+                public Iterator<V> iterator() {
+                    return Iterators.transform(entrySet().iterator(), Entry::getValue);
+                }
+                
+                @Override
+                public int size() {
+                    return RemappingMap.this.size();
+                }
+            };
+        }
+        
         private Iterator<Entry<K, V>> mapIterator(Iterator<Entry<K, V>> iterator) {
-            return Iterators.transform(iterator, this::mapEntry);
+            return Iterators.transform(Iterators.filter(iterator, entry -> this.keyPredicate.test(entry.getKey())),
+                    this::mapEntry);
         }
         
         private Entry<K, V> mapEntry(Entry<K, V> entry) {
