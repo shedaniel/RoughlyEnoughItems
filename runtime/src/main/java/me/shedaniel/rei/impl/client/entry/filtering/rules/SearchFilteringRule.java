@@ -24,12 +24,12 @@
 package me.shedaniel.rei.impl.client.entry.filtering.rules;
 
 import com.google.common.base.Suppliers;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.client.entry.filtering.*;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.StringUtil;
@@ -93,7 +93,7 @@ public class SearchFilteringRule implements FilteringRule<Unit> {
     }
     
     private void processList(Collection<EntryStack<?>> stacks, List<CompletableFuture<List<EntryStack<?>>>> completableFutures) {
-        for (Iterable<EntryStack<?>> partitionStacks : CollectionUtils.partition((List<EntryStack<?>>) stacks, 100)) {
+        for (Iterable<EntryStack<?>> partitionStacks : (Iterable<List<EntryStack<?>>>) () -> Iterators.partition(stacks.iterator(), 100)) {
             completableFutures.add(CompletableFuture.supplyAsync(() -> {
                 List<EntryStack<?>> output = Lists.newArrayList();
                 for (EntryStack<?> stack : partitionStacks) {

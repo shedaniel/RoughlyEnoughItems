@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.common.util;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.collect.UnmodifiableIterator;
@@ -361,7 +362,7 @@ public class CollectionUtils {
     }
     
     public static <T> Iterable<List<T>> partition(List<T> list, int size) {
-        return () -> new UnmodifiableIterator<List<T>>() {
+        return () -> new UnmodifiableIterator<>() {
             int i = 0;
             int partitionSize = Mth.ceil(list.size() / (float) size);
             
@@ -374,7 +375,7 @@ public class CollectionUtils {
             public List<T> next() {
                 int cursor = i++ * size;
                 int realSize = Math.min(list.size() - cursor, size);
-                return new AbstractList<T>() {
+                return new AbstractList<>() {
                     @Override
                     public T get(int index) {
                         if (index < 0 || index >= realSize)
@@ -408,6 +409,70 @@ public class CollectionUtils {
                                 }
                             }
                         };
+                    }
+                };
+            }
+        };
+    }
+    
+    public static <T> Iterable<Iterator<T>> partitionIterator(Iterator<T> iterator, int iteratorSize, int size) {
+        return partitionCollection(new AbstractCollection<>() {
+            
+            @Override
+            public Iterator<T> iterator() {
+                return iterator;
+            }
+            
+            @Override
+            public int size() {
+                return iteratorSize;
+            }
+        }, size);
+    }
+    
+    public static <T> Iterable<Iterator<T>> partitionCollection(Collection<T> collection, int size) {
+        if (collection instanceof List) {
+            return Iterables.transform(partition((List<T>) collection, size), List::iterator);
+        }
+        
+        return () -> new Iterator<>() {
+            int i = 0;
+            int partitionSize = Mth.ceil(collection.size() / (float) size);
+            int advanced = 0;
+            Iterator<T> iterator = collection.iterator();
+            
+            @Override
+            public boolean hasNext() {
+                return i < partitionSize;
+            }
+            
+            @Override
+            public Iterator<T> next() {
+                int cursor = i++ * size;
+                int realSize = Math.min(collection.size() - cursor, size);
+                
+                if (advanced < cursor) {
+                    for (int j = 0; j < cursor - advanced; j++) {
+                        if (iterator.hasNext()) {
+                            iterator.next();
+                        } else {
+                            advanced = cursor;
+                            return Collections.emptyIterator();
+                        }
+                    }
+                    advanced = cursor;
+                }
+                
+                return new Iterator<>() {
+                    @Override
+                    public boolean hasNext() {
+                        return iterator.hasNext() && advanced < cursor + realSize;
+                    }
+                    
+                    @Override
+                    public T next() {
+                        advanced++;
+                        return iterator.next();
                     }
                 };
             }
