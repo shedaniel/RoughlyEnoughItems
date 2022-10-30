@@ -331,8 +331,9 @@ public class Argument<T, R> {
             if (async) {
                 try {
                     CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(30, TimeUnit.SECONDS);
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                } catch (ExecutionException | TimeoutException e) {
                     e.printStackTrace();
+                } catch (InterruptedException ignore) {
                 }
                 for (Pair<ArgumentType<?, ?>, CompletableFuture<Long2ObjectMap<Object>>> pair : pairs) {
                     Long2ObjectMap<Object> now = pair.second().getNow(null);

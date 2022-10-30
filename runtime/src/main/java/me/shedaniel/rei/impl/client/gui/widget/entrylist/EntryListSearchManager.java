@@ -77,10 +77,11 @@ public class EntryListSearchManager {
         if (ignoreLastSearch) searchManager.markDirty();
         searchManager.updateFilter(searchTerm);
         if (searchManager.isDirty()) {
-            searchManager.getAsync(list -> {
+            searchManager.getAsync((list, filter) -> {
+                InternalLogger.getInstance().log(ConfigObject.getInstance().doDebugSearchTimeRequired() ? Level.INFO : Level.TRACE, "Search \"%s\" Used [%s]: %s", filter.getFilter(), Thread.currentThread().toString(), stopwatch.toString());
                 List</*EntryStack<?> | CollapsedStack*/ Object> finalList = collapse(copyAndOrder(list));
                 
-                InternalLogger.getInstance().log(ConfigObject.getInstance().doDebugSearchTimeRequired() ? Level.INFO : Level.TRACE, "Search Used: %s", stopwatch.stop().toString());
+                InternalLogger.getInstance().log(ConfigObject.getInstance().doDebugSearchTimeRequired() ? Level.INFO : Level.TRACE, "Search \"%s\" Used and Applied [%s]: %s", filter.getFilter(), Thread.currentThread().toString(), stopwatch.stop().toString());
                 
                 Minecraft.getInstance().executeBlocking(() -> {
                     update.accept(finalList);
