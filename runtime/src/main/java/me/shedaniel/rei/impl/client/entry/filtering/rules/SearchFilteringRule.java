@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.client.entry.filtering.*;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.impl.client.util.ThreadCreator;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.util.StringUtil;
@@ -37,14 +38,12 @@ import net.minecraft.util.Unit;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
 public class SearchFilteringRule implements FilteringRule<Unit> {
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadCreator("REI-SearchFiltering").asService();
     String filterStr;
     Supplier<SearchFilter> filter;
     boolean show;
@@ -102,9 +101,7 @@ public class SearchFilteringRule implements FilteringRule<Unit> {
                     }
                 }
                 return output;
-            }));
+            }, EXECUTOR_SERVICE));
         }
     }
-    
-    
 }
