@@ -24,27 +24,27 @@
 package me.shedaniel.rei.impl.client.search;
 
 import com.google.common.collect.Lists;
+import dev.architectury.platform.Platform;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.common.InternalLogger;
+import me.shedaniel.rei.impl.client.util.ThreadCreator;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 public class AsyncSearchManager {
-    private static final ThreadGroup GROUP = new ThreadGroup("REI-SearchManager");
-    private static final AtomicInteger THREAD_ID = new AtomicInteger(0);
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadCreator("REI-AsyncSearchManager").asService();
     private final Supplier<List<EntryStack<?>>> stacksProvider;
     private final Supplier<Predicate<EntryStack<?>>> additionalPredicateSupplier;
     private final UnaryOperator<EntryStack<?>> transformer;
@@ -58,34 +58,24 @@ public class AsyncSearchManager {
         this.transformer = transformer;
     }
     
-    private static Thread createThread(Runnable task) {
-        Thread thread = new Thread(GROUP, task, "REI-SearchManager-" + THREAD_ID.getAndIncrement());
-        thread.setDaemon(true);
-        thread.setUncaughtExceptionHandler(($, exception) -> {
-            if (!(exception instanceof InterruptedException) && !(exception instanceof CancellationException) && !(exception instanceof ThreadDeath)) {
-                InternalLogger.getInstance().throwException(exception);
-            }
-        });
-        return thread;
-    }
-    
     public void markDirty() {
         synchronized (AsyncSearchManager.this) {
             this.last = null;
         }
     }
     
-    private record ExecutorTuple(List<Thread> threads, SearchFilter filter, CompletableFuture<Map.Entry<List<EntryStack<?>>, SearchFilter>> future) {
+    @Nullable
+    public SearchFilter filter() {
+        return this.filter;
+    }
+    
+    private record ExecutorTuple(SearchFilter filter, CompletableFuture<Map.Entry<List<EntryStack<?>>, SearchFilter>> future) {
     }
     
     public void updateFilter(String filter) {
         if (this.filter == null || !this.filter.getFilter().equals(filter)) {
             if (this.executor != null) {
-                for (Thread thread : this.executor.threads()) {
-                    try {
-                        thread.stop();
-                    } catch (ThreadDeath ignored) {}
-                }
+                this.executor.future().cancel(Platform.isFabric());
             }
             this.executor = null;
             this.filter = SearchProvider.getInstance().createFilter(filter);
@@ -99,35 +89,20 @@ public class AsyncSearchManager {
     }
     
     public Future<?> getAsync(BiConsumer<List<EntryStack<?>>, SearchFilter> consumer) {
-        if (executor == null || executor.filter() != filter) {
-            if (executor != null) {
-                for (Thread thread : this.executor.threads()) {
-                    try {
-                        thread.stop();
-                    } catch (ThreadDeath ignored) {}
-                }
-                executor = null;
+        if (this.executor == null || this.executor.filter() != filter) {
+            if (this.executor != null) {
+                this.executor.future().cancel(Platform.isFabric());
             }
-            List<Thread> threads = new ArrayList<>();
-            executor = new ExecutorTuple(threads, filter, get(task -> {
-                Thread thread = createThread(task);
-                threads.add(thread);
-                thread.start();
-            }));
+            this.executor = new ExecutorTuple(filter, get(EXECUTOR_SERVICE));
         }
         SearchFilter savedFilter = filter;
-        ExecutorTuple tuple = executor;
-        return (executor = new ExecutorTuple(tuple.threads(), executor.filter(), executor.future().thenApplyAsync(result -> {
+        return (this.executor = new ExecutorTuple(this.executor.filter(), this.executor.future().thenApplyAsync(result -> {
             if (savedFilter == filter) {
                 consumer.accept(result.getKey(), result.getValue());
             }
             
             return result;
-        }, task -> {
-            Thread thread = createThread(task);
-            tuple.threads().add(thread);
-            thread.start();
-        }))).future();
+        }, EXECUTOR_SERVICE))).future();
     }
     
     public List<EntryStack<?>> getNow() {
@@ -163,23 +138,30 @@ public class AsyncSearchManager {
             UnaryOperator<EntryStack<?>> transformer, List<EntryStack<?>> stacks, Map.Entry<List<EntryStack<?>>, SearchFilter> last,
             AsyncSearchManager manager, Executor executor) {
         int searchPartitionSize = ConfigObject.getInstance().getAsyncSearchPartitionSize();
+        boolean shouldAsync = ConfigObject.getInstance().shouldAsyncSearch() && stacks.size() > searchPartitionSize * 4;
         
         if (!stacks.isEmpty()) {
             CompletableFuture<Void> preparationFuture = CompletableFuture.completedFuture(null);
             
             if (last == null || last.getValue() != filter) {
-                preparationFuture = CompletableFuture.runAsync(() -> {
+                Runnable prepare = () -> {
                     if (manager.filter == filter) {
                         filter.prepareFilter(stacks);
                     } else {
                         throw new CancellationException();
                     }
-                }, executor);
+                };
+                if (shouldAsync) {
+                    preparationFuture = CompletableFuture.runAsync(prepare, executor);
+                } else {
+                    prepare.run();
+                    preparationFuture = CompletableFuture.completedFuture(null);
+                }
             }
             
-            if (ConfigObject.getInstance().shouldAsyncSearch() && stacks.size() > searchPartitionSize * 4) {
+            if (shouldAsync) {
                 List<CompletableFuture<List<EntryStack<?>>>> futures = Lists.newArrayList();
-                for (Iterable<EntryStack<?>> partitionStacks : CollectionUtils.partition(stacks, searchPartitionSize)) {
+                for (Iterable<EntryStack<?>> partitionStacks : CollectionUtils.partition(stacks, Math.max(searchPartitionSize, stacks.size() * 3 / Runtime.getRuntime().availableProcessors()))) {
                     futures.add(CompletableFuture.supplyAsync(() -> {
                         List<EntryStack<?>> filtered = Lists.newArrayList();
                         for (EntryStack<?> stack : partitionStacks) {
@@ -189,7 +171,7 @@ public class AsyncSearchManager {
                             if (manager.filter != filter) throw new CancellationException();
                         }
                         return filtered;
-                    }));
+                    }, executor));
                 }
                 return preparationFuture.thenCompose($ -> CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
                                 .orTimeout(30, TimeUnit.SECONDS))
@@ -211,22 +193,16 @@ public class AsyncSearchManager {
                             return new AbstractMap.SimpleImmutableEntry<>(result, filter);
                         });
             } else {
-                return preparationFuture.thenApplyAsync($ -> {
-                            List<EntryStack<?>> list = new ArrayList<>();
-                            
-                            for (EntryStack<?> stack : stacks) {
-                                if (filter.test(stack) && additionalPredicate.test(stack)) {
-                                    list.add(transformer.apply(stack));
-                                }
-                                if (manager.filter != filter) throw new CancellationException();
-                            }
-                            
-                            return list;
-                        }, executor)
-                        .thenApply(result -> {
-                            return new AbstractMap.SimpleImmutableEntry<>(result, filter);
-                        });
+                List<EntryStack<?>> list = new ArrayList<>();
                 
+                for (EntryStack<?> stack : stacks) {
+                    if (filter.test(stack) && additionalPredicate.test(stack)) {
+                        list.add(transformer.apply(stack));
+                    }
+                    if (manager.filter != filter) throw new CancellationException();
+                }
+                
+                return CompletableFuture.completedFuture(new AbstractMap.SimpleImmutableEntry<>(list, filter));
             }
         }
         

@@ -64,7 +64,7 @@ public class REITestPlugin implements REIClientPlugin {
     
     @Override
     public void registerEntries(EntryRegistry registry) {
-        int times = 100;
+        int times = 10;
         for (Item item : Registry.ITEM) {
             EntryStack<ItemStack> base = EntryStacks.of(item);
             registry.addEntriesAfter(base, IntStream.range(0, times).mapToObj(value -> transformStack(EntryStacks.of(item))).collect(Collectors.toList()));
@@ -79,7 +79,10 @@ public class REITestPlugin implements REIClientPlugin {
     
     @Override
     public void registerCollapsibleEntries(CollapsibleEntryRegistry registry) {
+        int i = 0;
         for (Item item : Registry.ITEM) {
+            if (i++ % 10 != 0)
+                continue;
             registry.group(Registry.ITEM.getKey(item), new TextComponent(Registry.ITEM.getKey(item).toString()),
                     stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(item));
         }

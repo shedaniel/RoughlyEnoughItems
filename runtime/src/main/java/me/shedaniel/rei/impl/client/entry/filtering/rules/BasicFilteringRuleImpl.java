@@ -34,19 +34,18 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.client.util.ThreadCreator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public enum BasicFilteringRuleImpl implements BasicFilteringRule<Pair<LongSet, LongSet>> {
     INSTANCE;
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadCreator("REI-BasicFiltering").asService();
     private final List<EntryStack<?>> hidden = new ArrayList<>(), shown = new ArrayList<>();
     
     @Override
@@ -73,7 +72,7 @@ public enum BasicFilteringRuleImpl implements BasicFilteringRule<Pair<LongSet, L
                         }
                     }
                     return output;
-                }));
+                }, EXECUTOR_SERVICE));
             }
             try {
                 CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(5, TimeUnit.MINUTES);
