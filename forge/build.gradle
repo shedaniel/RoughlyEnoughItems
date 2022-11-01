@@ -49,12 +49,6 @@ processServerComponentResources {
 }
 
 loom {
-    launches {
-        all {
-            arg "--mixin", "rei-jei-internals-workaround.mixins.json"
-        }
-    }
-
     forge {
         mixinConfig "rei.mixins.json"
     }

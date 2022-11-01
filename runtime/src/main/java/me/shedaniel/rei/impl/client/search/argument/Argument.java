@@ -43,6 +43,8 @@ import me.shedaniel.rei.impl.client.search.IntRange;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentTypesRegistry;
 import me.shedaniel.rei.impl.client.search.result.ArgumentApplicableResult;
+import me.shedaniel.rei.impl.client.util.ThreadCreator;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -58,10 +60,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -69,6 +68,7 @@ import java.util.regex.Pattern;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class Argument<T, R> {
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadCreator("REI-ArgumentCache").asService();
     public static final Short2ObjectMap<Long2ObjectMap<Object>> SEARCH_CACHE = Short2ObjectMaps.synchronize(new Short2ObjectOpenHashMap<>());
     private static final Object NO_CACHE = new Object();
     private static final AtomicReference<String> lastLanguage = new AtomicReference<>();
@@ -269,7 +269,7 @@ public class Argument<T, R> {
     }
     
     public static Long prepareStart = null;
-    public static Collection<EntryStack<?>> prepareStacks = null;
+    public static List<HashedEntryStackWrapper> prepareStacks = null;
     public static MutablePair<Integer, Integer> prepareStage = null;
     public static MutablePair<Integer, Integer>[] currentStages = null;
     
@@ -277,22 +277,34 @@ public class Argument<T, R> {
         if (prepareStage != null || currentStages != null) return;
         try {
             prepareStart = Util.getEpochMillis();
-            prepareStacks = stacks;
+            Long2ObjectMap<Object>[] caches = CollectionUtils.map(argumentTypes, Argument::getSearchCache).toArray(Long2ObjectMap[]::new);
+            prepareStacks = CollectionUtils.mapAndFilter(stacks, stack -> {
+                for (Long2ObjectMap<Object> cache : caches) {
+                    if (!cache.containsKey(stack.hashExact())) {
+                        return true;
+                    }
+                }
+                
+                return false;
+            }, HashedEntryStackWrapper::new);
+            if (prepareStacks.isEmpty()) {
+                return;
+            }
+            InternalLogger.getInstance().trace("Preparing " + prepareStacks.size() + " stacks for search arguments");
         prepareStage = new MutablePair<>(0, argumentTypes.size());
         currentStages = new MutablePair[argumentTypes.size()];
-            List<HashedEntryStackWrapper> hashedStacks = CollectionUtils.map(stacks, HashedEntryStackWrapper::new);
             int searchPartitionSize = ConfigObject.getInstance().getAsyncSearchPartitionSize();
-            boolean async = ConfigObject.getInstance().shouldAsyncSearch() && stacks.size() > searchPartitionSize * 4;
+            boolean async = ConfigObject.getInstance().shouldAsyncSearch() && prepareStacks.size() > searchPartitionSize * 4;
             List<CompletableFuture<Long2ObjectMap<Object>>> futures = Lists.newArrayList();
             List<Pair<ArgumentType<?, ?>, CompletableFuture<Long2ObjectMap<Object>>>> pairs = Lists.newArrayList();
             
             for (ArgumentType<?, ?> argumentType : argumentTypes) {
             prepareStage.setLeft(prepareStage.getLeft() + 1);
                 Long2ObjectMap<Object> map = getSearchCache(argumentType);
-            MutablePair<Integer, Integer> currentStage = currentStages[prepareStage.getLeft() - 1] = new MutablePair<>(0, hashedStacks.size());
+            MutablePair<Integer, Integer> currentStage = currentStages[prepareStage.getLeft() - 1] = new MutablePair<>(0, prepareStacks.size());
                 
                 if (async) {
-                    for (Collection<HashedEntryStackWrapper> partitionStacks : CollectionUtils.partition(hashedStacks, searchPartitionSize)) {
+                    for (Collection<HashedEntryStackWrapper> partitionStacks : CollectionUtils.partition(prepareStacks, searchPartitionSize)) {
                         CompletableFuture<Long2ObjectMap<Object>> future = CompletableFuture.supplyAsync(() -> {
                             Long2ObjectMap<Object> out = new Long2ObjectArrayMap<>(searchPartitionSize + 1);
                             for (HashedEntryStackWrapper stack : partitionStacks) {
@@ -305,14 +317,14 @@ public class Argument<T, R> {
                                 }
                             }
                             return out;
-                        }).whenComplete((objectLong2ObjectMap, throwable) -> {
+                        }, EXECUTOR_SERVICE).whenComplete((objectLong2ObjectMap, throwable) -> {
                         currentStage.setLeft(currentStage.getLeft() + partitionStacks.size());
                         });
                         futures.add(future);
                         pairs.add(Pair.of(argumentType, future));
                     }
                 } else {
-                    for (HashedEntryStackWrapper stack : hashedStacks) {
+                    for (HashedEntryStackWrapper stack : prepareStacks) {
                     currentStage.setLeft(currentStage.getLeft() + 1);
                         
                         if (map.get(stack.hashExact()) == null) {
@@ -338,6 +350,8 @@ public class Argument<T, R> {
                 if (now != null) getSearchCache(pair.getLeft()).putAll(now);
                 }
             }
+    
+            InternalLogger.getInstance().debug("Prepared " + prepareStacks.size() + " stacks for search arguments in " + (Util.getEpochMillis() - prepareStart) + "ms");
         } finally {
             prepareStart = null;
             prepareStacks = null;
