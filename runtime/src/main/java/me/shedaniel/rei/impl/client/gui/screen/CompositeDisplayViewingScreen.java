@@ -43,20 +43,15 @@ import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
-import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
-import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
-import me.shedaniel.rei.impl.client.gui.widget.TabWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -71,7 +66,6 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
     private final List<Widget> widgets = Lists.newArrayList();
     private final List<Button> buttonList = Lists.newArrayList();
     private final List<DisplayRenderer> displayRenderers = Lists.newArrayList();
-    private final List<TabWidget> tabs = Lists.newArrayList();
     public Rectangle scrollListBounds;
     private int selectedRecipeIndex = 0;
     private final ScrollingContainer scrolling = new ScrollingContainer() {
@@ -92,15 +86,14 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
     private float scrollBarAlpha = 0;
     private float scrollBarAlphaFuture = 0;
     private long scrollBarAlphaFutureTime = -1;
-    private int tabsPage = -1;
     
     public CompositeDisplayViewingScreen(Map<DisplayCategory<?>, List<DisplaySpec>> categoryMap, @Nullable CategoryIdentifier<?> category) {
-        super(categoryMap, category, 8);
+        super(categoryMap, category);
     }
     
     @Override
     public void recalculateCategoryPage() {
-        this.tabsPage = -1;
+        super.recalculateCategoryPage();
         this.selectedRecipeIndex = 0;
     }
     
@@ -115,18 +108,16 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         this.widgets.clear();
         this.buttonList.clear();
         this.displayRenderers.clear();
-        this.tabs.clear();
         int largestWidth = width - 100;
         int largestHeight = height - 40;
         DisplayCategory<Display> category = getCurrentCategory();
         DisplaySpec display = categoryMap.get(category).get(selectedRecipeIndex);
         int guiWidth = Mth.clamp(category.getDisplayWidth(display.provideInternalDisplay()) + 30, 0, largestWidth) + 100;
         int guiHeight = Mth.clamp(category.getDisplayHeight() + 40, 166, largestHeight);
-        this.tabsPerPage = Math.max(5, Mth.floor((guiWidth - tabButtonsSize * 2d) / tabSize));
-        if (this.tabsPage == -1) {
-            this.tabsPage = selectedCategoryIndex / tabsPerPage;
-        }
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
+        
+        this.initTabs();
+        this.widgets.addAll(this.tabs.widgets());
         
         List<EntryIngredient> workstations = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getWorkstations();
         if (!workstations.isEmpty()) {
@@ -193,66 +184,12 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                     .onRender((matrices, button) -> button.setEnabled(selectedRecipeIndex != finalIndex)));
             index++;
         }
-        int tabV = isCompactTabs ? 166 : 192;
-        for (int i = 0; i < tabsPerPage; i++) {
-            int j = i + tabsPage * tabsPerPage;
-            if (categories.size() > j) {
-                DisplayCategory<?> tabCategory = categories.get(j);
-                TabWidget tab;
-                tabs.add(tab = TabWidget.create(i, tabSize, bounds.x + bounds.width / 2 - Math.min(categories.size() - tabsPage * tabsPerPage, tabsPerPage) * tabSize / 2, bounds.y, 0, tabV, widget -> {
-                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                    if (widget.selected)
-                        return false;
-                    selectCategory(tabCategory.getCategoryIdentifier());
-                    return true;
-                }));
-                tab.setRenderer(tabCategory, tabCategory.getIcon(), tabCategory.getTitle(), j == selectedCategoryIndex);
-            }
-        }
-        Button tabLeft, tabRight;
-        this.widgets.add(tabLeft = Widgets.createButton(new Rectangle(bounds.x + 2, bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), ImmutableTextComponent.EMPTY)
-                .onClick(button -> {
-                    tabsPage--;
-                    if (tabsPage < 0)
-                        tabsPage = Mth.ceil(categories.size() / (float) tabsPerPage) - 1;
-                    CompositeDisplayViewingScreen.this.init();
-                })
-                .tooltipLine(new TranslatableComponent("text.rei.previous_page"))
-                .enabled(categories.size() > tabsPerPage));
-        this.widgets.add(tabRight = Widgets.createButton(new Rectangle(bounds.x + bounds.width - (isCompactTabButtons ? tabButtonsSize + 2 : tabButtonsSize + 3), bounds.y - (isCompactTabButtons ? 16 : 20), tabButtonsSize, tabButtonsSize), ImmutableTextComponent.EMPTY)
-                .onClick(button -> {
-                    tabsPage++;
-                    if (tabsPage > Mth.ceil(categories.size() / (float) tabsPerPage) - 1)
-                        tabsPage = 0;
-                    CompositeDisplayViewingScreen.this.init();
-                })
-                .tooltipLine(new TranslatableComponent("text.rei.next_page"))
-                .enabled(categories.size() > tabsPerPage));
-        this.widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            Rectangle tabLeftBounds = tabLeft.getBounds();
-            Rectangle tabRightBounds = tabRight.getBounds();
-            if (isCompactTabButtons) {
-                matrices.pushPose();
-                matrices.translate(0, 0.5, 0);
-                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_SMALL_TEXTURE);
-                blit(matrices, tabLeftBounds.x + 2, tabLeftBounds.y + 2, 0, 0, 6, 6, 6, 6);
-                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_SMALL_TEXTURE);
-                blit(matrices, tabRightBounds.x + 2, tabRightBounds.y + 2, 0, 0, 6, 6, 6, 6);
-                matrices.popPose();
-            } else {
-                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_TEXTURE);
-                blit(matrices, tabLeftBounds.x + 4, tabLeftBounds.y + 4, 0, 0, 8, 8, 8, 8);
-                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_TEXTURE);
-                blit(matrices, tabRightBounds.x + 4, tabRightBounds.y + 4, 0, 0, 8, 8, 8, 8);
-            }
-        }), 0, 0, 1));
         
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.x + 4 + scrollListBounds.width / 2, bounds.y + 6), categories.get(selectedCategoryIndex).getTitle(), label -> {
             ViewSearchBuilder.builder().addAllCategories().open();
         }).tooltip(new TranslatableComponent("text.rei.view_all_categories")).noShadow().color(0xFF404040, 0xFFBBBBBB).hoveredColor(0xFF0041FF, 0xFFFFBD4D));
         
         this.children().addAll(buttonList);
-        this.widgets.addAll(tabs);
         this.children().addAll(widgets);
     }
     
@@ -319,15 +256,6 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             }
         }
         REIRuntimeImpl.isWithinRecipeViewingScreen = false;
-        int tabSize = ConfigObject.getInstance().isUsingCompactTabs() ? 24 : 28;
-        if (mouseX >= bounds.x && mouseX <= bounds.getMaxX() && mouseY >= bounds.y - tabSize && mouseY < bounds.y) {
-            if (amount < 0) selectedCategoryIndex++;
-            else if (amount > 0) selectedCategoryIndex--;
-            if (selectedCategoryIndex < 0) selectedCategoryIndex = categories.size() - 1;
-            else if (selectedCategoryIndex >= categories.size()) selectedCategoryIndex = 0;
-            selectCategory(categories.get(selectedCategoryIndex).getCategoryIdentifier());
-            return true;
-        }
         if (bounds.contains(PointHelper.ofMouse())) {
             if (amount < 0 && categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
                 selectedRecipeIndex++;

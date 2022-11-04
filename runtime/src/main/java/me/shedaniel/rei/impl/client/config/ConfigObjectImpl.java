@@ -683,7 +683,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares how the scrollbar in composite screen should act.") private boolean compositeScrollBarPermanent = false;
             private boolean toastDisplayedOnCopyIdentifier = true;
             @Comment("Declares whether REI should use compact tabs for categories.") private boolean useCompactTabs = true;
-            @Comment("Declares whether REI should use compact tab buttons for categories.") private boolean useCompactTabButtons = false;
+            @Comment("Declares whether REI should use compact tab buttons for categories.") @ConfigEntry.Gui.Excluded private boolean useCompactTabButtons = false;
         }
         
         public static class Search {
