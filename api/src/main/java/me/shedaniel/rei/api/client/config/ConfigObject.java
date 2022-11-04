@@ -29,6 +29,7 @@ import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.*;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.resources.ResourceLocation;
@@ -36,6 +37,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 
 @Environment(EnvType.CLIENT)
 public interface ConfigObject {
@@ -312,6 +314,9 @@ public interface ConfigObject {
     
     @ApiStatus.Experimental
     boolean shouldFilterDisplays();
+    
+    @ApiStatus.Experimental
+    Map<CategoryIdentifier<?>, Boolean> getFilteringQuickCraftCategories();
     
     @ApiStatus.Experimental
     boolean shouldAsyncSearch();
