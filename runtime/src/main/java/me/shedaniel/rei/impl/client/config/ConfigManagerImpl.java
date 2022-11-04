@@ -59,6 +59,7 @@ import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
@@ -72,6 +73,7 @@ import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -133,6 +135,18 @@ public class ConfigManagerImpl implements ConfigManager {
                             Collections.singletonList(new FilteringEntry(220, value, ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules, defaultValue, saveConsumer, list -> ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules = Lists.newArrayList(list)));
                 }
                 , (field) -> field.getType() == List.class, ConfigObjectImpl.UseFilteringScreen.class);
+        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
+                    Map<CategoryIdentifier<?>, Boolean> value = Utils.<Map<CategoryIdentifier<?>, Boolean>>getUnsafely(field, config, new HashMap<>());
+                    Map<CategoryIdentifier<?>, Boolean> defaultValue = Utils.getUnsafely(field, defaults);
+                    Consumer<Map<CategoryIdentifier<?>, Boolean>> saveConsumer = (newValue) -> {
+                        setUnsafely(field, config, newValue);
+                    };
+                    return REIRuntime.getInstance().getPreviousContainerScreen() == null || Minecraft.getInstance().getConnection() == null || Minecraft.getInstance().getConnection().getRecipeManager() == null ?
+                            Collections.singletonList(new NoFilteringCategoriesEntry(new TranslatableComponent(i13n), value, defaultValue, saveConsumer))
+                            :
+                            Collections.singletonList(new FilteringCategoriesEntry(new TranslatableComponent(i13n), value, defaultValue, saveConsumer));
+                }
+                , (field) -> field.getType() == Map.class, ConfigObjectImpl.UseFilteringCategoriesScreen.class);
         InternalLogger.getInstance().info("Config loaded");
         saveConfig();
     }
@@ -280,6 +294,18 @@ public class ConfigManagerImpl implements ConfigManager {
             }
         });
         
+        // CategoryIdentifier
+        builder.registerSerializer(CategoryIdentifier.class, (value, marshaller) -> {
+            return marshaller.serialize(value.toString());
+        });
+        builder.registerDeserializer(String.class, CategoryIdentifier.class, (value, marshaller) -> {
+            try {
+                return CategoryIdentifier.of(value);
+            } catch (ResourceLocationException e) {
+                throw new DeserializationException(e);
+            }
+        });
+        
         return builder.build();
     }
     
@@ -377,12 +403,12 @@ public class ConfigManagerImpl implements ConfigManager {
                 if (Minecraft.getInstance().getConnection() != null && Minecraft.getInstance().getConnection().getRecipeManager() != null) {
                     TextListEntry feedbackEntry = ConfigEntryBuilder.create().startTextDescription(
                             new TranslatableComponent("text.rei.feedback", new TranslatableComponent("text.rei.feedback.link")
-                                            .withStyle(style -> style
-                                                    .withColor(TextColor.fromRgb(0xff1fc3ff))
-                                                    .withUnderlined(true)
-                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://forms.gle/5tdnK5WN1wng78pV8"))
+                                    .withStyle(style -> style
+                                            .withColor(TextColor.fromRgb(0xff1fc3ff))
+                                            .withUnderlined(true)
+                                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://forms.gle/5tdnK5WN1wng78pV8"))
                                             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ImmutableTextComponent("https://forms.gle/5tdnK5WN1wng78pV8")))
-                                            ))
+                                    ))
                                     .withStyle(ChatFormatting.GRAY)
                     ).build();
                     builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.advanced")).getEntries().add(0, feedbackEntry);
@@ -401,18 +427,18 @@ public class ConfigManagerImpl implements ConfigManager {
                     TextListEntry supportText = ConfigEntryBuilder.create().startTextDescription(
                             new TranslatableComponent("text.rei.support.me.desc",
                                     new TranslatableComponent("text.rei.support.me.patreon")
-                                                    .withStyle(style -> style
-                                                            .withColor(TextColor.fromRgb(0xff1fc3ff))
-                                                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://patreon.com/shedaniel"))
+                                            .withStyle(style -> style
+                                                    .withColor(TextColor.fromRgb(0xff1fc3ff))
+                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://patreon.com/shedaniel"))
                                                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ImmutableTextComponent("https://patreon.com/shedaniel")))
-                                                    ),
+                                            ),
                                     new TranslatableComponent("text.rei.support.me.bisect")
-                                                    .withStyle(style -> style
-                                                            .withColor(TextColor.fromRgb(0xff1fc3ff))
-                                                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.bisecthosting.com/shedaniel"))
+                                            .withStyle(style -> style
+                                                    .withColor(TextColor.fromRgb(0xff1fc3ff))
+                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.bisecthosting.com/shedaniel"))
                                                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ImmutableTextComponent("https://www.bisecthosting.com/shedaniel")))
-                                                    )
-                                    )
+                                            )
+                            )
                                     .withStyle(ChatFormatting.GRAY)
                     ).build();
                     supportText.setScreen((AbstractConfigScreen) screen);

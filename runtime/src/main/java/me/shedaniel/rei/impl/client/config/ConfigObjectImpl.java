@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.*;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesEntriesManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -52,7 +53,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @ApiStatus.Internal
 @Config(name = "roughlyenoughitems/config")
@@ -413,6 +416,12 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return advanced.filtering.filteringRules;
     }
     
+    @ApiStatus.Experimental
+    @Override
+    public Map<CategoryIdentifier<?>, Boolean> getFilteringQuickCraftCategories() {
+        return advanced.filtering.filteringQuickCraftCategories;
+    }
+    
     @Override
     @ApiStatus.Experimental
     public boolean shouldAsyncSearch() {
@@ -545,6 +554,10 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface UseFilteringScreen {}
+    
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.FIELD})
+    @interface UseFilteringCategoriesScreen {}
     
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
@@ -709,6 +722,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @UseFilteringScreen private List<EntryStackProvider<?>> filteredStacks = new ArrayList<>();
             public boolean shouldFilterDisplays = true;
             @ConfigEntry.Gui.Excluded public List<FilteringRule<?>> filteringRules = new ArrayList<>();
+            @UseFilteringCategoriesScreen public Map<CategoryIdentifier<?>, Boolean> filteringQuickCraftCategories = new HashMap<>();
         }
     }
 }
