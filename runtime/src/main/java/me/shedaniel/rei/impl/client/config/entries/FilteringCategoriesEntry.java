@@ -49,7 +49,7 @@ public class FilteringCategoriesEntry extends AbstractConfigListEntry<Map<Catego
     private Map<CategoryIdentifier<?>, Boolean> configFiltered;
     final FilteringCategoriesScreen filteringScreen = new FilteringCategoriesScreen(this);
     boolean edited = false;
-    private final AbstractWidget buttonWidget = new Button(0, 0, 150, 20, new TranslatableComponent("config.roughlyenoughitems.filtering.excludedQuickCraftCategories.configure"), button -> {
+    private final AbstractWidget buttonWidget = new Button(0, 0, 150, 20, new TranslatableComponent("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure"), button -> {
         filteringScreen.parent = Minecraft.getInstance().screen;
         Minecraft.getInstance().setScreen(filteringScreen);
     });

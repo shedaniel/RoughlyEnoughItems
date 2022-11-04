@@ -51,7 +51,7 @@ public class FilteringCategoriesScreen extends Screen {
     Screen parent;
     
     public FilteringCategoriesScreen(FilteringCategoriesEntry entry) {
-        super(new TranslatableComponent("config.roughlyenoughitems.filtering.excludedQuickCraftCategories.configure.title"));
+        super(new TranslatableComponent("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure.title"));
         this.entry = entry;
     }
     
@@ -161,7 +161,7 @@ public class FilteringCategoriesScreen extends Screen {
         public DefaultListEntry(CategoryRegistry.CategoryConfiguration<?> configuration) {
             this.configuration = configuration;
             {
-                Component toggleText = new TranslatableComponent("config.roughlyenoughitems.filtering.excludedQuickCraftCategories.configure.toggle");
+                Component toggleText = new TranslatableComponent("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure.toggle");
                 toggleButton = new Button(0, 0, Minecraft.getInstance().font.width(toggleText) + 10, 20, toggleText, button -> {
                     boolean quickCraftingEnabledByDefault = configuration.isQuickCraftingEnabledByDefault();
                     boolean enabled = entry.getValue().getOrDefault(configuration.getCategoryIdentifier(), quickCraftingEnabledByDefault);
@@ -205,7 +205,7 @@ public class FilteringCategoriesScreen extends Screen {
                 }
             }
             {
-                Component subtitle = new TranslatableComponent("config.roughlyenoughitems.filtering.excludedQuickCraftCategories.configure." + entry.getValue().getOrDefault(configuration.getCategoryIdentifier(), configuration.isQuickCraftingEnabledByDefault()))
+                Component subtitle = new TranslatableComponent("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure." + entry.getValue().getOrDefault(configuration.getCategoryIdentifier(), configuration.isQuickCraftingEnabledByDefault()))
                         .withStyle(ChatFormatting.GRAY);
                 int i = client.font.width(subtitle);
                 if (i > entryWidth - 28) {
