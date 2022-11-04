@@ -45,10 +45,12 @@ import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
@@ -316,8 +318,12 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         
         try {
             DisplayRegistry displayRegistry = DisplayRegistry.getInstance();
-            for (List<Display> displays : displayRegistry.getAll().values()) {
-                for (Display display : displays) {
+            CategoryRegistry categoryRegistry = CategoryRegistry.getInstance();
+            for (Map.Entry<CategoryIdentifier<?>, List<Display>> entry : displayRegistry.getAll().entrySet()) {
+                Optional<? extends CategoryRegistry.CategoryConfiguration<?>> configuration;
+                if ((configuration = categoryRegistry.tryGet(entry.getKey())).isEmpty()
+                    || categoryRegistry.isCategoryInvisible(configuration.get().getCategory())) continue;
+                for (Display display : entry.getValue()) {
                     if ((!ConfigObject.getInstance().shouldFilterDisplays() || displayRegistry.isDisplayVisible(display))
                         && ViewsImpl.isRecipesFor(getEntries(), display)) {
                         AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
