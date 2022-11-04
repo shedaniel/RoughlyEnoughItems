@@ -29,6 +29,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 import dev.architectury.fluid.FluidStack;
+import dev.architectury.utils.value.IntValue;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -50,6 +51,7 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import me.shedaniel.rei.impl.client.gui.widget.TabContainerWidget;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
@@ -79,17 +81,17 @@ import java.util.stream.Stream;
 public abstract class AbstractDisplayViewingScreen extends Screen implements DisplayScreen {
     protected final Map<DisplayCategory<?>, List<DisplaySpec>> categoryMap;
     protected final List<DisplayCategory<?>> categories;
+    protected final TabContainerWidget tabs = new TabContainerWidget();
     protected List<EntryStack<?>> ingredientStackToNotice = new ArrayList<>();
     protected List<EntryStack<?>> resultStackToNotice = new ArrayList<>();
     protected int selectedCategoryIndex = 0;
-    protected int tabsPerPage;
+    protected int categoryPages = -1;
     protected Rectangle bounds;
     
-    protected AbstractDisplayViewingScreen(Map<DisplayCategory<?>, List<DisplaySpec>> categoryMap, @Nullable CategoryIdentifier<?> category, int tabsPerPage) {
+    protected AbstractDisplayViewingScreen(Map<DisplayCategory<?>, List<DisplaySpec>> categoryMap, @Nullable CategoryIdentifier<?> category) {
         super(NarratorChatListener.NO_TITLE);
         this.categoryMap = categoryMap;
         this.categories = Lists.newArrayList(categoryMap.keySet());
-        this.tabsPerPage = tabsPerPage;
         if (category != null) {
             selectCategory(category, false);
         }
@@ -108,10 +110,40 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         }
         
         recalculateCategoryPage();
+        this.tabs.updateScroll(categories, selectedCategoryIndex, !init ? 0 : 300);
         
         if (init) {
             init();
         }
+    }
+    
+    @Override
+    public void recalculateCategoryPage() {
+        this.categoryPages = -1;
+    }
+    
+    protected void initTabs() {
+        this.tabs.init(new Rectangle(bounds.x, bounds.y - 28, bounds.width, 28), categories, new IntValue() {
+            @Override
+            public void accept(int value) {
+                AbstractDisplayViewingScreen.this.categoryPages = value;
+            }
+            
+            @Override
+            public int getAsInt() {
+                return AbstractDisplayViewingScreen.this.categoryPages;
+            }
+        }, new IntValue() {
+            @Override
+            public void accept(int value) {
+                AbstractDisplayViewingScreen.this.selectCategory(categories.get(value).getCategoryIdentifier());
+            }
+            
+            @Override
+            public int getAsInt() {
+                return selectedCategoryIndex;
+            }
+        }, AbstractDisplayViewingScreen.this::init);
     }
     
     @Override

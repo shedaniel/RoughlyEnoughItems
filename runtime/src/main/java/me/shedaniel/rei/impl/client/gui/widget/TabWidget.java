@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
 import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
@@ -57,19 +58,18 @@ import java.util.function.Predicate;
 public class TabWidget extends WidgetWithBounds implements DraggableStackProviderWidget {
     public boolean selected = false;
     public Renderer renderer;
-    public int id;
     public Component categoryName;
     public Rectangle bounds;
     public DisplayCategory<?> category;
     public int u, v;
+    public float opacity = 1.0F;
     @Nullable
     private Predicate<TabWidget> onClick;
     private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
             .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
             .asFloat();
     
-    private TabWidget(int id, Rectangle bounds, int u, int v, @Nullable Predicate<TabWidget> onClick) {
-        this.id = id;
+    private TabWidget(Rectangle bounds, int u, int v, @Nullable Predicate<TabWidget> onClick) {
         this.bounds = bounds;
         this.u = u;
         this.v = v;
@@ -78,7 +78,7 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     
     @ApiStatus.Internal
     public static TabWidget create(int id, int tabSize, int leftX, int bottomY, int u, int v, @Nullable Predicate<TabWidget> onClick) {
-        return new TabWidget(id, new Rectangle(leftX + id * tabSize, bottomY - tabSize, tabSize, tabSize), u, v, onClick);
+        return new TabWidget(new Rectangle(leftX + id * tabSize, bottomY - tabSize, tabSize, tabSize), u, v, onClick);
     }
     
     @Override
@@ -97,10 +97,6 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
         return selected;
     }
     
-    public int getId() {
-        return id;
-    }
-    
     public boolean isShown() {
         return renderer != null;
     }
@@ -112,20 +108,23 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        if (bounds.getMaxX() < 0 || opacity == 0) return;
         if (renderer != null) {
-            darkBackgroundAlpha.update(delta);
-            RenderSystem.enableBlend();
-            RenderSystem.blendFuncSeparate(770, 771, 1, 0);
-            RenderSystem.blendFunc(770, 771);
-            RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            this.blit(matrices, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
-            RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE_DARK);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value());
-            this.blit(matrices, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 1));
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            renderer.setZ(100);
-            renderer.render(matrices, new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 5, 16, 16), mouseX, mouseY, delta);
+            try (CloseableScissors scissors = Widget.scissor(matrices, new Rectangle(bounds.x, bounds.y + 2, bounds.width, (selected ? bounds.height + 2 : bounds.height - 2)))) {
+                darkBackgroundAlpha.update(delta);
+                RenderSystem.enableBlend();
+                RenderSystem.blendFuncSeparate(770, 771, 1, 0);
+                RenderSystem.blendFunc(770, 771);
+                RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, opacity);
+                this.blit(matrices, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 2));
+                RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE_DARK);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value() * opacity);
+                this.blit(matrices, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 2));
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, opacity);
+                renderer.setZ(100);
+                renderer.render(matrices, new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 5, 16, 16), mouseX, mouseY, delta);
+            }
             if (containsMouse(mouseX, mouseY)) {
                 drawTooltip();
             }

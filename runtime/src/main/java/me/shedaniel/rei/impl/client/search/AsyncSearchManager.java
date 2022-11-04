@@ -89,7 +89,7 @@ public class AsyncSearchManager {
     }
     
     public Future<?> getAsync(BiConsumer<List<EntryStack<?>>, SearchFilter> consumer) {
-        if (this.executor == null || this.executor.filter() != filter) {
+        if (this.executor == null || this.executor.filter() != filter || isDirty()) {
             if (this.executor != null) {
                 this.executor.future().cancel(Platform.isFabric());
             }
