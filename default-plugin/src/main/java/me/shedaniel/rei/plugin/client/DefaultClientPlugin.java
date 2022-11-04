@@ -174,6 +174,9 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.addWorkstations(BEACON_PAYMENT, EntryStacks.of(Items.BEACON));
         registry.addWorkstations(WAXING, EntryStacks.of(Items.HONEYCOMB));
         
+        registry.configure(INFO, config -> config.setQuickCraftingEnabledByDefault(false));
+        registry.configure(TAG, config -> config.setQuickCraftingEnabledByDefault(false));
+        
         Set<Item> axes = Sets.newHashSet(), hoes = Sets.newHashSet(), shovels = Sets.newHashSet();
         EntryRegistry.getInstance().getEntryStacks().filter(stack -> stack.getValueType() == ItemStack.class).map(stack -> ((ItemStack) stack.getValue()).getItem()).forEach(item -> {
             if (item instanceof AxeItem && axes.add(item)) {

@@ -270,6 +270,22 @@ public interface CategoryRegistry extends Reloadable<REIClientPlugin>, Iterable<
         void setPlusButtonArea(ButtonArea area);
         
         /**
+         * Returns whether the category is available for quick crafting by default.
+         *
+         * @return whether the category is available for quick crafting by default
+         */
+        @ApiStatus.Experimental
+        boolean isQuickCraftingEnabledByDefault();
+        
+        /**
+         * Sets whether the category is available for quick crafting by default.
+         *
+         * @param enabled whether the category is available for quick crafting by default
+         */
+        @ApiStatus.Experimental
+        void setQuickCraftingEnabledByDefault(boolean enabled);
+        
+        /**
          * Returns the optional plus button area provider
          *
          * @return the optional plus button area provider
