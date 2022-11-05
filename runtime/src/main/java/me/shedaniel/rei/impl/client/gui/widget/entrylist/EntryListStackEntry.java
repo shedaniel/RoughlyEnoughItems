@@ -93,6 +93,8 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
             if (CachedEntryListRender.cachedTextureLocation != null) {
                 return our;
             }
+        } else if (collapsedStack != null && !this.getEntries().isEmpty() && !collapsedStack.isExpanded()) {
+            return this.getEntries().get(0);
         }
         
         return super.getCurrentEntry();
