@@ -34,7 +34,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
@@ -49,7 +48,7 @@ public class FilteringCategoriesEntry extends AbstractConfigListEntry<Map<Catego
     private Map<CategoryIdentifier<?>, Boolean> configFiltered;
     final FilteringCategoriesScreen filteringScreen = new FilteringCategoriesScreen(this);
     boolean edited = false;
-    private final AbstractWidget buttonWidget = new Button(0, 0, 150, 20, new TranslatableComponent("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure"), button -> {
+    private final AbstractWidget buttonWidget = new Button(0, 0, 150, 20, Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure"), button -> {
         filteringScreen.parent = Minecraft.getInstance().screen;
         Minecraft.getInstance().setScreen(filteringScreen);
     });

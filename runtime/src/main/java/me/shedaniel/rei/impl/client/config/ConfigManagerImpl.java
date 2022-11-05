@@ -144,9 +144,9 @@ public class ConfigManagerImpl implements ConfigManager {
                         setUnsafely(field, config, newValue);
                     };
                     return REIRuntime.getInstance().getPreviousContainerScreen() == null || Minecraft.getInstance().getConnection() == null || Minecraft.getInstance().getConnection().getRecipeManager() == null ?
-                            Collections.singletonList(new NoFilteringCategoriesEntry(new TranslatableComponent(i13n), value, defaultValue, saveConsumer))
+                            Collections.singletonList(new NoFilteringCategoriesEntry(Component.translatable(i13n), value, defaultValue, saveConsumer))
                             :
-                            Collections.singletonList(new FilteringCategoriesEntry(new TranslatableComponent(i13n), value, defaultValue, saveConsumer));
+                            Collections.singletonList(new FilteringCategoriesEntry(Component.translatable(i13n), value, defaultValue, saveConsumer));
                 }
                 , (field) -> field.getType() == Map.class, ConfigObjectImpl.UseFilteringCategoriesScreen.class);
         InternalLogger.getInstance().info("Config loaded");

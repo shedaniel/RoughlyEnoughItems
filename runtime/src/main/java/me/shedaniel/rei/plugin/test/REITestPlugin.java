@@ -41,7 +41,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -83,7 +83,7 @@ public class REITestPlugin implements REIClientPlugin {
         for (Item item : Registry.ITEM) {
             if (i++ % 10 != 0)
                 continue;
-            registry.group(Registry.ITEM.getKey(item), new TextComponent(Registry.ITEM.getKey(item).toString()),
+            registry.group(Registry.ITEM.getKey(item), Component.literal(Registry.ITEM.getKey(item).toString()),
                     stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(item));
         }
     }

@@ -37,8 +37,6 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 
@@ -51,7 +49,7 @@ public class FilteringCategoriesScreen extends Screen {
     Screen parent;
     
     public FilteringCategoriesScreen(FilteringCategoriesEntry entry) {
-        super(new TranslatableComponent("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure.title"));
+        super(Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure.title"));
         this.entry = entry;
     }
     
@@ -59,7 +57,7 @@ public class FilteringCategoriesScreen extends Screen {
     public void init() {
         super.init();
         {
-            Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));
+            Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
@@ -161,7 +159,7 @@ public class FilteringCategoriesScreen extends Screen {
         public DefaultListEntry(CategoryRegistry.CategoryConfiguration<?> configuration) {
             this.configuration = configuration;
             {
-                Component toggleText = new TranslatableComponent("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure.toggle");
+                Component toggleText = Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure.toggle");
                 toggleButton = new Button(0, 0, Minecraft.getInstance().font.width(toggleText) + 10, 20, toggleText, button -> {
                     boolean quickCraftingEnabledByDefault = configuration.isQuickCraftingEnabledByDefault();
                     boolean enabled = entry.getValue().getOrDefault(configuration.getCategoryIdentifier(), quickCraftingEnabledByDefault);
@@ -209,7 +207,7 @@ public class FilteringCategoriesScreen extends Screen {
                 }
             }
             {
-                Component subtitle = new TranslatableComponent("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure." + entry.getValue().getOrDefault(configuration.getCategoryIdentifier(), configuration.isQuickCraftingEnabledByDefault()))
+                Component subtitle = Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure." + entry.getValue().getOrDefault(configuration.getCategoryIdentifier(), configuration.isQuickCraftingEnabledByDefault()))
                         .withStyle(ChatFormatting.GRAY);
                 int i = client.font.width(subtitle);
                 if (i > entryWidth - 28) {
@@ -220,7 +218,7 @@ public class FilteringCategoriesScreen extends Screen {
                 }
             }
             {
-                Component id = new TextComponent(configuration.getCategoryIdentifier().toString())
+                Component id = Component.literal(configuration.getCategoryIdentifier().toString())
                         .withStyle(ChatFormatting.DARK_GRAY);
                 int i = client.font.width(id);
                 if (i > entryWidth - 28) {

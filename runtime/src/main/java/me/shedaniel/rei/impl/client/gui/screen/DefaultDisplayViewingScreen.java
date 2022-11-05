@@ -142,8 +142,8 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         this.widgets.addAll(this.tabs.widgets());
         
         this.page = Mth.clamp(page, 0, getCurrentTotalPages() - 1);
-        this.widgets.add(categoryBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), ImmutableTextComponent.EMPTY)
-                .onClick(button -> previousCategory()).tooltipLine(new TranslatableComponent("text.rei.previous_category")));
+        this.widgets.add(categoryBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), Component.empty())
+                .onClick(button -> previousCategory()).tooltipLine(Component.translatable("text.rei.previous_category")));
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), getCurrentCategory().getTitle(), clickableLabelWidget -> {
             ViewSearchBuilder.builder().addAllCategories().open();
         }).tooltip(Component.translatable("text.rei.view_all_categories")));
