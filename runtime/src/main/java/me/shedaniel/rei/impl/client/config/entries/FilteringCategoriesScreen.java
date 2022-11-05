@@ -188,6 +188,10 @@ public class FilteringCategoriesScreen extends Screen {
         
         @Override
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+            if (y + entryHeight < 0 || y > height) {
+                return;
+            }
+            
             Minecraft client = Minecraft.getInstance();
             matrices.pushPose();
             matrices.translate(0, 0, 100);
