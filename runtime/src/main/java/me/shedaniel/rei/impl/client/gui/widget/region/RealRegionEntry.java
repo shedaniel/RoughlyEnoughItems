@@ -38,11 +38,21 @@ public class RealRegionEntry<T extends RegionEntry<T>> {
     private boolean hidden;
     public ValueAnimator<FloatingPoint> pos = ValueAnimator.ofFloatingPoint();
     public NumberAnimator<Double> size = ValueAnimator.ofDouble();
-    
+
+    private RealRegionEntry(EntryStacksRegionWidget<T> region, RegionEntryWidget<T> widget, T entry) {
+        this.region = region;
+        this.widget = widget;
+        this.entry = entry;
+    }
+
     public RealRegionEntry(EntryStacksRegionWidget<T> region, T entry, int entrySize) {
         this.region = region;
         this.entry = entry;
         this.widget = (RegionEntryWidget<T>) new RegionEntryWidget<>(this, 0, 0, entrySize).noBackground();
+    }
+
+    public RealRegionEntry copy() {
+        return new RealRegionEntry(region, widget, entry.deepCopy());
     }
     
     public void remove() {

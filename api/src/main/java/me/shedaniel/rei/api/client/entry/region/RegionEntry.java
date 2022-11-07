@@ -55,4 +55,12 @@ public interface RegionEntry<T extends RegionEntry<T>> {
     default boolean doAction(int button) {
         return false;
     }
+
+    default boolean shouldDeepCopy() {
+        return false;
+    }
+
+    default RegionEntry<T> deepCopy() {
+        return copy();
+    }
 }

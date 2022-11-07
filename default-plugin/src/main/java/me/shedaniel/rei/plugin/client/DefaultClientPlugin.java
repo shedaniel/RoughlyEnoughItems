@@ -56,6 +56,7 @@ import me.shedaniel.rei.plugin.client.categories.tag.DefaultTagCategory;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultPotionEffectExclusionZones;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultRecipeBookExclusionZones;
 import me.shedaniel.rei.plugin.client.favorites.GameModeFavoriteEntry;
+import me.shedaniel.rei.plugin.client.favorites.SpacingFavoriteEntry;
 import me.shedaniel.rei.plugin.client.favorites.TimeFavoriteEntry;
 import me.shedaniel.rei.plugin.client.favorites.WeatherFavoriteEntry;
 import me.shedaniel.rei.plugin.common.displays.*;
@@ -372,6 +373,10 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                         Arrays.stream(TimeFavoriteEntry.Time.values()),
                         Stream.of((TimeFavoriteEntry.Time) null)
                 ).<FavoriteEntry>map(TimeFavoriteEntry::new).toArray(FavoriteEntry[]::new));
+        registry.register(SpacingFavoriteEntry.ID, SpacingFavoriteEntry.Type.INSTANCE);
+        registry.getOrCrateSection(new TranslatableComponent(SpacingFavoriteEntry.TRANSLATION_KEY))
+                .add(Arrays.stream(SpacingFavoriteEntry.Spacing.values())
+                .<FavoriteEntry>map(SpacingFavoriteEntry::new).toArray(FavoriteEntry[]::new));
     }
     
     @Override

@@ -37,6 +37,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
+import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.drag.*;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
@@ -45,6 +46,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import me.shedaniel.rei.impl.common.entry.TypedEntryStack;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
@@ -65,6 +67,7 @@ import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.
 public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWithBounds implements DraggableStackProviderWidget, DraggableStackVisitorWidget {
     public final RegionListener<T> listener;
     protected int blockedCount;
+    private int rowCount;
     private Rectangle bounds = new Rectangle(), innerBounds;
     public final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
@@ -75,7 +78,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         @Override
         public int getMaxScrollHeight() {
             if (innerBounds.width == 0) return 0;
-            return Mth.ceil((entries.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
+            return rowCount * entrySize();
         }
         
         @Override
@@ -342,7 +345,15 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                     blockedCount++;
                 }
             }
+            EntryStack<?> currentEntry = entry.getWidget().getCurrentEntry();
+            if (currentEntry instanceof TypedEntryStack<?> t) {
+                if (t.getValue() instanceof AbstractRenderer o && o.causeNewLine()) {
+                    currentX = 0;
+                    currentY++;
+                }
+            }
         }
+        rowCount = currentY + 1;
     }
     
     private int getReleaseIndex(@Nullable Point position) {
@@ -370,6 +381,13 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                         break;
                     } else {
                         blockedCount++;
+                    }
+                }
+                EntryStack<?> currentEntry = entry.getWidget().getCurrentEntry();
+                if (currentEntry instanceof TypedEntryStack<?> t) {
+                    if (t.getValue() instanceof AbstractRenderer o && o.causeNewLine()) {
+                        currentX = 0;
+                        currentY++;
                     }
                 }
             }
@@ -429,6 +447,9 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     }
     
     public boolean drop(RealRegionEntry<T> entry, double x, double y, int newIndex) {
+        if (entry.getEntry().shouldDeepCopy()) {
+            entry = entry.copy();
+        }
         if (newIndex < 0) return drop(entry, x, y);
         if (!listener.canAcceptDrop(entry)) {
             return false;

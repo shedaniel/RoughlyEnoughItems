@@ -38,4 +38,8 @@ public abstract class AbstractRenderer extends GuiComponent implements Renderer 
     public void setZ(int z) {
         setBlitOffset(z);
     }
+
+    public boolean causeNewLine() {
+        return false;
+    }
 }
