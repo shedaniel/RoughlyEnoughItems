@@ -56,8 +56,8 @@ public final class ThreadCreator {
     }
     
     public ExecutorService asService() {
-        return new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors() * 4,
-                0L, TimeUnit.SECONDS,
+        return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
+                10L, TimeUnit.SECONDS,
                 new SynchronousQueue<>(),
                 this::create);
     }
