@@ -26,6 +26,8 @@ package me.shedaniel.rei.plugin.client;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import dev.architectury.event.EventResult;
+import dev.architectury.networking.NetworkManager;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
@@ -72,6 +74,7 @@ import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomDisplay;
 import me.shedaniel.rei.plugin.common.displays.tag.DefaultTagDisplay;
+import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -175,6 +178,14 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         
         registry.configure(INFO, config -> config.setQuickCraftingEnabledByDefault(false));
         registry.configure(TAG, config -> config.setQuickCraftingEnabledByDefault(false));
+        
+        registry.registerVisibilityPredicate(category -> {
+            if (category instanceof DefaultTagCategory && Minecraft.getInstance().getSingleplayerServer() == null && !NetworkManager.canServerReceive(TagNodes.REQUEST_TAGS_PACKET_C2S)) {
+                return EventResult.interruptFalse();
+            }
+            
+            return EventResult.pass();
+        });
         
         Set<Item> axes = Sets.newHashSet(), hoes = Sets.newHashSet(), shovels = Sets.newHashSet();
         EntryRegistry.getInstance().getEntryStacks().filter(stack -> stack.getValueType() == ItemStack.class).map(stack -> ((ItemStack) stack.getValue()).getItem()).forEach(item -> {
