@@ -63,7 +63,7 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
         }
     };
     private AbstractWidget reloadSearchButton = new Button(0, 0, 0, 20, Component.empty(), button -> {
-        Argument.SEARCH_CACHE.clear();
+        Argument.resetCache(true);
     });
     private List<AbstractWidget> children = ImmutableList.of(reloadPluginsButton, reloadSearchButton);
     
@@ -98,7 +98,7 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
         this.reloadPluginsButton.setWidth(width / 2 - 2);
         this.reloadPluginsButton.x = x + entryWidth / 2 - width / 2;
         this.reloadPluginsButton.render(matrices, mouseX, mouseY, delta);
-        this.reloadSearchButton.active = this.isEditable() && !Argument.SEARCH_CACHE.isEmpty();
+        this.reloadSearchButton.active = this.isEditable() && Argument.hasCache();
         this.reloadSearchButton.y = y;
         this.reloadSearchButton.setWidth(width / 2 - 2);
         this.reloadSearchButton.x = x + entryWidth / 2 + 2;

@@ -47,7 +47,7 @@ public class SearchFilterPrepareWatcher implements HintProvider {
         try {
             if (Argument.prepareStage != null && Argument.currentStages != null && Argument.prepareStacks != null && Argument.prepareStacks.size() > 100
                 && Argument.prepareStart != null) {
-                if (Util.getEpochMillis() - Argument.prepareStart < 500) return Collections.emptyList();
+                if (Util.getEpochMillis() - Argument.prepareStart < 100) return Collections.emptyList();
                 int prepareStageCurrent = Argument.prepareStage.firstInt();
                 int prepareStageTotal = Argument.prepareStage.secondInt();
                 IntIntPair currentStage = ArrayUtils.get(Argument.currentStages, prepareStageCurrent - 1);
