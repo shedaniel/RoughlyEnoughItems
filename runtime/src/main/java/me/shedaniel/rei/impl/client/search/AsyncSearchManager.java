@@ -30,6 +30,8 @@ import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.client.search.argument.Argument;
+import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
 import me.shedaniel.rei.impl.client.util.ThreadCreator;
 import org.jetbrains.annotations.Nullable;
 
@@ -146,7 +148,8 @@ public class AsyncSearchManager {
             if (last == null || last.getValue() != filter) {
                 Runnable prepare = () -> {
                     if (manager.filter == filter) {
-                        filter.prepareFilter(stacks);
+                        List<ArgumentType<?, ?>> argumentTypes = ((SearchProviderImpl.SearchFilterImpl) filter).getArgumentTypes();
+                        Argument.prepareFilter(stacks, argumentTypes, () -> manager.filter() != null && manager.filter() == filter, executor);
                     } else {
                         throw new CancellationException();
                     }

@@ -255,7 +255,7 @@ public class REIRuntimeImpl implements REIRuntime {
     
     @Override
     public void startReload() {
-        Argument.SEARCH_CACHE.clear();
+        Argument.resetCache(false);
         getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
         lastDisplayScreen.clear();
         if (!RenderSystem.isOnRenderThread()) {
@@ -272,7 +272,7 @@ public class REIRuntimeImpl implements REIRuntime {
     
     @Override
     public void endReload(ReloadStage stage) {
-        Argument.SEARCH_CACHE.clear();
+        Argument.resetCache(true);
         getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
     }
     
