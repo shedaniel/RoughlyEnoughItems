@@ -42,6 +42,7 @@ import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.impl.client.init.CoreClientInitialization;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.Internals;
+import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
 import org.apache.commons.lang3.mutable.MutableLong;
@@ -99,6 +100,7 @@ public class CoreInitialization {
     }
     
     public static void reloadPlugins(MutableLong lastReload, @Nullable ReloadStage start) {
+        if (Minecraft.getInstance().level == null) return;
         if (lastReload != null) {
             if (lastReload.getValue() > 0 && System.currentTimeMillis() - lastReload.getValue() <= 5000) {
                 InternalLogger.getInstance().warn("Suppressing Reload Plugins of stage " + start);
