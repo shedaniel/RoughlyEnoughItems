@@ -49,12 +49,6 @@ processServerComponentResources {
 }
 
 loom {
-    launches {
-        all {
-            arg "--mixin", "rei-jei-internals-workaround.mixins.json"
-        }
-    }
-
     forge {
         mixinConfig "rei.mixins.json"
     }
@@ -70,6 +64,7 @@ dependencies {
         shadowCommon(project(path: it, configuration: "transformProductionForge")) { transitive false }
     }
 
+    modRuntime("curse.maven:lazy-dfu-forge-460819:3544496")
     // modRuntime("curse.maven:chiselsbits-231095:3492889")
     // modRuntime("curse.maven:jumbofurnace-390880:3120970")
     // modRuntime("curse.maven:cyclic-239286:3221427")

@@ -32,16 +32,16 @@ import me.shedaniel.rei.api.client.entry.filtering.*;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.client.util.ThreadCreator;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class ManualFilteringRule implements FilteringRule<LongSet> {
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadCreator("REI-ManualFiltering").asService();
+    
     @Override
     public FilteringRuleType<? extends FilteringRule<LongSet>> getType() {
         return ManualFilteringRuleType.INSTANCE;
@@ -61,7 +61,7 @@ public class ManualFilteringRule implements FilteringRule<LongSet> {
                         }
                     }
                     return output;
-                }));
+                }, EXECUTOR_SERVICE));
             }
             try {
                 CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(5, TimeUnit.MINUTES);

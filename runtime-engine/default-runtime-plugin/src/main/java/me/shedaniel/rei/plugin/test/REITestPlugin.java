@@ -27,9 +27,11 @@ import com.google.common.collect.ImmutableList;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -39,6 +41,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -61,7 +64,7 @@ public class REITestPlugin implements REIClientPlugin {
     
     @Override
     public void registerEntries(EntryRegistry registry) {
-        int times = 100;
+        int times = 10;
         for (Item item : Registry.ITEM) {
             EntryStack<ItemStack> base = EntryStacks.of(item);
             registry.addEntriesAfter(base, IntStream.range(0, times).mapToObj(value -> transformStack(EntryStacks.of(item))).collect(Collectors.toList()));
@@ -71,6 +74,17 @@ public class REITestPlugin implements REIClientPlugin {
                 }
             } catch (Exception ignored) {
             }
+        }
+    }
+    
+    @Override
+    public void registerCollapsibleEntries(CollapsibleEntryRegistry registry) {
+        int i = 0;
+        for (Item item : Registry.ITEM) {
+            if (i++ % 10 != 0)
+                continue;
+            registry.group(Registry.ITEM.getKey(item), new TextComponent(Registry.ITEM.getKey(item).toString()),
+                    stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(item));
         }
     }
     

@@ -32,7 +32,6 @@ import me.shedaniel.rei.api.client.gui.config.EntryPanelOrdering;
 import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntry;
 import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
-import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
@@ -47,6 +46,7 @@ import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 public class EntryListSearchManager {
@@ -78,12 +78,16 @@ public class EntryListSearchManager {
         if (ignoreLastSearch) searchManager.markDirty();
         searchManager.updateFilter(searchTerm);
         if (searchManager.isDirty()) {
-            searchManager.getAsync(list -> {
-                List</*EntryStack<?> | CollapsedStack*/ Object> finalList = collapse(copyAndOrder(list));
+            searchManager.getAsync((list, filter) -> {
+                if (!filter.getFilter().equals(searchTerm)) return;
+                if (searchManager.getSearchFilter() == null || searchManager.getSearchFilter() != filter) return;
+                InternalLogger.getInstance().log(ConfigObject.getInstance().doDebugSearchTimeRequired() ? Level.INFO : Level.TRACE, "Search \"%s\" Used [%s]: %s", filter.getFilter(), Thread.currentThread().toString(), stopwatch.toString());
+                List</*EntryStack<?> | CollapsedStack*/ Object> finalList = collapse(copyAndOrder(list), () -> searchManager.getSearchFilter() != null && searchManager.getSearchFilter() == filter);
                 
-                InternalLogger.getInstance().log(ConfigObject.getInstance().doDebugSearchTimeRequired() ? Level.INFO : Level.TRACE, "Search Used: %s", stopwatch.stop().toString());
+                InternalLogger.getInstance().log(ConfigObject.getInstance().doDebugSearchTimeRequired() ? Level.INFO : Level.TRACE, "Search \"%s\" Used and Applied [%s]: %s", filter.getFilter(), Thread.currentThread().toString(), stopwatch.stop().toString());
                 
-                Minecraft.getInstance().executeBlocking(() -> {
+                Minecraft.getInstance().submit(() -> {
+                    if (searchManager.getSearchFilter() == null || searchManager.getSearchFilter() != filter) return;
                     update.accept(finalList);
                 });
             });
@@ -104,7 +108,7 @@ public class EntryListSearchManager {
         return list;
     }
     
-    private List</*EntryStack<?> | CollapsedStack*/ Object> collapse(List<EntryStack<?>> stacks) {
+    private List</*EntryStack<?> | CollapsedStack*/ Object> collapse(List<EntryStack<?>> stacks, BooleanSupplier isValid) {
         CollapsibleEntryRegistry collapsibleRegistry = CollapsibleEntryRegistry.getInstance();
         Map<CollapsibleEntry, @Nullable CollapsedStack> entries = new HashMap<>();
         
@@ -112,7 +116,11 @@ public class EntryListSearchManager {
             entries.put(entry, null);
         }
         
+        if (!isValid.getAsBoolean()) return List.of();
+        
         List</*EntryStack<?> | CollapsedStack*/ Object> list = new ArrayList<>();
+        
+        int i = 0;
         
         for (EntryStack<?> stack : stacks) {
             long hashExact = EntryStacks.hashExact(stack);
@@ -137,6 +145,8 @@ public class EntryListSearchManager {
                     matchedAny = true;
                 }
             }
+            
+            if (i++ % 50 == 0 && !isValid.getAsBoolean()) return List.of();
             
             if (!matchedAny) {
                 list.add(stack);

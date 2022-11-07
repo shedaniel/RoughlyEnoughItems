@@ -29,21 +29,18 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public interface SearchManager extends Supplier<List<EntryStack<?>>> {
     void markDirty();
     
-    void markFilterDirty();
-    
     void updateFilter(String filter);
     
     boolean isDirty();
     
-    boolean isFilterDirty();
-    
-    Future<Void> getAsync(Consumer<List<EntryStack<?>>> consumer);
+    Future<?> getAsync(BiConsumer<List<EntryStack<?>>, SearchFilter> consumer);
     
     boolean matches(EntryStack<?> stack);
     

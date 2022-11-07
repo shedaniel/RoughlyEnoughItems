@@ -192,7 +192,11 @@ public class EntryRegistryImpl implements EntryRegistry {
         
         if (afterEntry != null) {
             int index = registryList.lastIndexOf(afterEntry);
-            registryList.addAll(index, filtered, hashes);
+            if (index != -1) {
+                registryList.addAll(index, filtered, hashes);
+            } else {
+                registryList.addAll(filtered, hashes);
+            }
         } else registryList.addAll(filtered, hashes);
         
         for (EntryRegistryListener listener : listeners) {

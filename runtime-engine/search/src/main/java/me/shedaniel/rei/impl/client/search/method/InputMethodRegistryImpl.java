@@ -99,7 +99,7 @@ public class InputMethodRegistryImpl implements InputMethodRegistry {
         }).join();
         service.shutdown();
         
-        InternalLogger.getInstance().debug("Registered %d input methods: ", inputMethods.size(),
+        InternalLogger.getInstance().debug("Registered %d input methods: %s", inputMethods.size(),
                 inputMethods.values().stream().map(inputMethod -> inputMethod.getName().getString()).collect(Collectors.joining(", ")));
     }
     

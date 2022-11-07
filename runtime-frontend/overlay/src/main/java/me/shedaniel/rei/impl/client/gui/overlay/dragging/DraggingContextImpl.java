@@ -166,6 +166,10 @@ public class DraggingContextImpl extends Widget implements DraggingContext<Scree
     
     @Override
     public boolean mouseReleased(double d, double e, int i) {
+        if (i != 0) {
+            return false;
+        }
+        drop();
         return false;
     }
     
