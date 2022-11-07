@@ -48,7 +48,6 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.DisplayScreenStack;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
@@ -93,12 +92,26 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         this.categories = Lists.newArrayList(categoryMap.keySet());
         this.tabsPerPage = tabsPerPage;
         if (category != null) {
-            for (int i = 0; i < categories.size(); i++) {
-                if (categories.get(i).getCategoryIdentifier().equals(category)) {
-                    this.selectedCategoryIndex = i;
-                    break;
-                }
+            selectCategory(category, false);
+        }
+    }
+    
+    protected void selectCategory(CategoryIdentifier<?> category) {
+        selectCategory(category, true);
+    }
+    
+    protected void selectCategory(CategoryIdentifier<?> category, boolean init) {
+        for (int i = 0; i < categories.size(); i++) {
+            if (categories.get(i).getCategoryIdentifier().equals(category)) {
+                this.selectedCategoryIndex = i;
+                break;
             }
+        }
+        
+        recalculateCategoryPage();
+        
+        if (init) {
+            init();
         }
     }
     
@@ -157,7 +170,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         currentCategoryIndex--;
         if (currentCategoryIndex < 0)
             currentCategoryIndex = categories.size() - 1;
-        ClientHelperImpl.getInstance().openView(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+        selectCategory(categories.get(currentCategoryIndex).getCategoryIdentifier());
     }
     
     @Override
@@ -166,7 +179,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         currentCategoryIndex++;
         if (currentCategoryIndex >= categories.size())
             currentCategoryIndex = 0;
-        ClientHelperImpl.getInstance().openView(categoryMap, categories.get(currentCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+        selectCategory(categories.get(currentCategoryIndex).getCategoryIdentifier());
     }
     
     protected void transformIngredientNotice(List<Widget> setupDisplay, List<EntryStack<?>> noticeStacks) {

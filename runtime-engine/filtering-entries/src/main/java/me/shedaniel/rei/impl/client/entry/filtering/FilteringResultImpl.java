@@ -24,17 +24,20 @@
 package me.shedaniel.rei.impl.client.entry.filtering;
 
 import com.google.common.collect.Sets;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringResult;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 @Environment(EnvType.CLIENT)
 public class FilteringResultImpl implements FilteringResult {
-    private final Set<HashedEntryStackWrapper> hiddenStacks, shownStacks;
+    public final Set<HashedEntryStackWrapper> hiddenStacks, shownStacks;
     
     public FilteringResultImpl(List<? extends EntryStack<?>> hiddenStacks, List<? extends EntryStack<?>> shownStacks) {
         this.hiddenStacks = Sets.newHashSetWithExpectedSize(hiddenStacks.size());
@@ -44,12 +47,26 @@ public class FilteringResultImpl implements FilteringResult {
     }
     
     @Override
-    public Set<HashedEntryStackWrapper> getHiddenStacks() {
-        return hiddenStacks;
+    public FilteringResult hide(EntryStack<?> stack) {
+        this.hiddenStacks.add(new HashedEntryStackWrapper(stack));
+        return this;
     }
     
     @Override
-    public Set<HashedEntryStackWrapper> getShownStacks() {
-        return shownStacks;
+    public FilteringResult hide(Collection<? extends EntryStack<?>> stacks) {
+        this.hiddenStacks.addAll(CollectionUtils.map(stacks, HashedEntryStackWrapper::new));
+        return this;
+    }
+    
+    @Override
+    public FilteringResult show(EntryStack<?> stack) {
+        this.shownStacks.add(new HashedEntryStackWrapper(stack));
+        return this;
+    }
+    
+    @Override
+    public FilteringResult show(Collection<? extends EntryStack<?>> stacks) {
+        this.shownStacks.addAll(CollectionUtils.map(stacks, HashedEntryStackWrapper::new));
+        return this;
     }
 }

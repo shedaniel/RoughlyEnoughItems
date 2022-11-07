@@ -186,9 +186,11 @@ public abstract class DisplayedEntryWidget extends GuiComponent implements Unary
         }
         
         try {
-            for (List<Display> displays : DisplayRegistry.getInstance().getAll().values()) {
+            DisplayRegistry displayRegistry = DisplayRegistry.getInstance();
+            for (List<Display> displays : displayRegistry.getAll().values()) {
                 for (Display display : displays) {
-                    if (Views.getInstance().isRecipesFor(slot.getEntries(), display)) {
+                    if ((!ConfigObject.getInstance().shouldFilterDisplays() || displayRegistry.isDisplayVisible(display))
+                        && Views.getInstance().isRecipesFor(slot.getEntries(), display)) {
                         AutoCraftingEvaluator.Result result = ClientInternals.getAutoCraftingEvaluator(display).get();
                         
                         if (result.isSuccessful()) {

@@ -31,11 +31,10 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonNull;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringRuleInternal;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringRuleType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -76,7 +75,7 @@ public class FilteringConfigEntries implements ConfigManagerInternal.SystemSetup
         // FilteringRule
         builder.registerSerializer(FilteringRule.class, (value, marshaller) -> {
             try {
-                return marshaller.serialize(FilteringRuleType.save((FilteringRuleInternal) value, new CompoundTag()));
+                return marshaller.serialize(FilteringRuleType.save(value, new CompoundTag()));
             } catch (Exception e) {
                 e.printStackTrace();
                 return JsonNull.INSTANCE;

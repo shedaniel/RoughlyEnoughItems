@@ -21,21 +21,43 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.entry.filtering;
+package me.shedaniel.rei.impl.client.entry.filtering.rules;
 
-import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import org.jetbrains.annotations.ApiStatus;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 
-@ApiStatus.Internal
-@Environment(EnvType.CLIENT)
-public interface FilteringRuleInternal extends FilteringRule {
-    FilteringRuleType<?> getType();
+public enum BasicFilteringRuleType implements FilteringRuleType<BasicFilteringRuleImpl> {
+    INSTANCE;
     
-    default Object prepareCache(boolean async) {
-        return null;
+    @Override
+    public CompoundTag saveTo(BasicFilteringRuleImpl rule, CompoundTag tag) {
+        return tag;
     }
     
-    FilteringResult processFilteredStacks(FilteringContext context, FilteringCache cache, boolean async);
+    @Override
+    public BasicFilteringRuleImpl readFrom(CompoundTag tag) {
+        return BasicFilteringRuleImpl.INSTANCE;
+    }
+    
+    @Override
+    public Component getTitle(BasicFilteringRuleImpl rule) {
+        return new TranslatableComponent("rule.roughlyenoughitems.filtering.basic");
+    }
+    
+    @Override
+    public Component getSubtitle(BasicFilteringRuleImpl rule) {
+        return new TranslatableComponent("rule.roughlyenoughitems.filtering.basic.subtitle");
+    }
+    
+    @Override
+    public BasicFilteringRuleImpl createNew() {
+        return BasicFilteringRuleImpl.INSTANCE;
+    }
+    
+    @Override
+    public boolean isSingular() {
+        return true;
+    }
 }

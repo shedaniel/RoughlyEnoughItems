@@ -23,13 +23,13 @@
 
 package me.shedaniel.rei.impl.client.entry.filtering.rules;
 
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringRuleType;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
-public class ManualFilteringRuleType implements FilteringRuleType<ManualFilteringRule> {
-    public static final ManualFilteringRuleType INSTANCE = new ManualFilteringRuleType();
+public enum ManualFilteringRuleType implements FilteringRuleType<ManualFilteringRule> {
+    INSTANCE;
     
     @Override
     public CompoundTag saveTo(ManualFilteringRule rule, CompoundTag tag) {
@@ -37,22 +37,27 @@ public class ManualFilteringRuleType implements FilteringRuleType<ManualFilterin
     }
     
     @Override
-    public ManualFilteringRule createFromTag(CompoundTag tag) {
+    public ManualFilteringRule readFrom(CompoundTag tag) {
         return new ManualFilteringRule();
     }
     
     @Override
-    public Component getTitle() {
+    public Component getTitle(ManualFilteringRule rule) {
         return new TranslatableComponent("rule.roughlyenoughitems.filtering.manual");
     }
     
     @Override
-    public Component getSubtitle() {
+    public Component getSubtitle(ManualFilteringRule rule) {
         return new TranslatableComponent("rule.roughlyenoughitems.filtering.manual.subtitle");
     }
     
     @Override
     public ManualFilteringRule createNew() {
-        throw new UnsupportedOperationException();
+        return new ManualFilteringRule();
+    }
+    
+    @Override
+    public boolean isSingular() {
+        return true;
     }
 }

@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.client.entry.filtering.rules;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
 import me.shedaniel.rei.api.client.gui.widgets.BatchedSlots;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -33,11 +34,7 @@ import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.client.config.entries.FilteringEntry;
 import me.shedaniel.rei.impl.client.config.entries.FilteringRuleOptionsScreen;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringRuleType;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -46,20 +43,18 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-@Environment(EnvType.CLIENT)
-public class SearchFilteringRuleType implements FilteringRuleType<SearchFilteringRule> {
-    public static final SearchFilteringRuleType INSTANCE = new SearchFilteringRuleType();
+public enum SearchFilteringRuleType implements FilteringRuleType<SearchFilteringRule> {
+    INSTANCE;
     
     @Override
     public CompoundTag saveTo(SearchFilteringRule rule, CompoundTag tag) {
@@ -69,7 +64,7 @@ public class SearchFilteringRuleType implements FilteringRuleType<SearchFilterin
     }
     
     @Override
-    public SearchFilteringRule createFromTag(CompoundTag tag) {
+    public SearchFilteringRule readFrom(CompoundTag tag) {
         String filter = tag.getString("filter");
         boolean show = tag.getBoolean("show");
         return new SearchFilteringRule(filter, show);
@@ -81,18 +76,19 @@ public class SearchFilteringRuleType implements FilteringRuleType<SearchFilterin
     }
     
     @Override
-    public Component getTitle() {
+    public Component getTitle(SearchFilteringRule rule) {
         return new TranslatableComponent("rule.roughlyenoughitems.filtering.search");
     }
     
     @Override
-    public Component getSubtitle() {
+    public Component getSubtitle(SearchFilteringRule rule) {
         return new TranslatableComponent("rule.roughlyenoughitems.filtering.search.subtitle");
     }
     
     @Override
-    public Optional<BiFunction<FilteringEntry, Screen, Screen>> createEntryScreen(SearchFilteringRule rule) {
-        return Optional.of((entry, screen) -> new FilteringRuleOptionsScreen<SearchFilteringRule>(entry, rule, screen) {
+    @Nullable
+    public Function<Screen, Screen> createEntryScreen(SearchFilteringRule rule) {
+        return screen -> new FilteringRuleOptionsScreen<>(rule, screen) {
             TextFieldRuleEntry entry = null;
             BooleanRuleEntry show = null;
             List<Slot> entryStacks = new ArrayList<>();
@@ -130,7 +126,12 @@ public class SearchFilteringRuleType implements FilteringRuleType<SearchFilterin
                 rule.setFilter(entry.getWidget().getValue());
                 rule.show = show.getBoolean();
             }
-        });
+        };
+    }
+    
+    @Override
+    public boolean isSingular() {
+        return false;
     }
     
     public static class EntryStacksRuleEntry extends FilteringRuleOptionsScreen.RuleEntry {

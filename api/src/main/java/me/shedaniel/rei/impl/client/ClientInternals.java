@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.client;
 import com.mojang.serialization.DataResult;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
@@ -69,6 +70,7 @@ public final class ClientInternals {
     private static final TooltipQueue TOOLTIP_QUEUE = resolveService(TooltipQueue.class);
     private static final TooltipRenderer TOOLTIP_RENDERER = resolveService(TooltipRenderer.class);
     private static final OverlayProvider SCREEN_OVERLAY_PROVIDER = resolveService(OverlayProvider.class);
+    private static final FilteringRuleTypeRegistry FILTERING_RULE_TYPE_REGISTRY = resolveService(FilteringRuleTypeRegistry.class);
     private static Function<CompoundTag, DataResult<FavoriteEntry>> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
     private static BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
@@ -206,6 +208,10 @@ public final class ClientInternals {
     
     public static PreFilteredEntryList getPreFilteredEntryList() {
         return preFilteredEntryList.get();
+    }
+    
+    public static FilteringRuleTypeRegistry getFilteringRuleTypeRegistry() {
+        return FILTERING_RULE_TYPE_REGISTRY;
     }
     
     public static void crash(ReportedException exception, String component) {

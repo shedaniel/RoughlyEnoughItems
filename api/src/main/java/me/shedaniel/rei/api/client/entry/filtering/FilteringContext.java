@@ -21,25 +21,36 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.entry.filtering;
+package me.shedaniel.rei.api.client.entry.filtering;
 
-import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
-import org.jetbrains.annotations.Nullable;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.ApiStatus;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Collection;
 
-public class FilteringCacheImpl implements FilteringCache {
-    private final Map<FilteringRule, Optional<?>> CACHE = new HashMap<>();
+@ApiStatus.Experimental
+@Environment(EnvType.CLIENT)
+public interface FilteringContext {
+    /**
+     * Returns the list of stacks that are previously marked as <b>shown</b> from other filtering rules.
+     *
+     * @return the list of stacks that are previously marked as shown from other filtering rules.
+     */
+    Collection<EntryStack<?>> getShownStacks();
     
-    @Override
-    @Nullable
-    public Object getCache(FilteringRule rule) {
-        return CACHE.getOrDefault(rule, Optional.empty()).orElse(null);
-    }
+    /**
+     * Returns the list of stacks that have not been processed by any filtering rules.
+     *
+     * @return the list of stacks that have not been processed by any filtering rules.
+     */
+    Collection<EntryStack<?>> getUnsetStacks();
     
-    public void setCache(FilteringRule rule, @Nullable Object value) {
-        CACHE.put(rule, Optional.ofNullable(value));
-    }
+    /**
+     * Returns the list of stacks that are previously marked as <b>hidden</b> from other filtering rules.
+     *
+     * @return the list of stacks that are previously marked as hidden from other filtering rules.
+     */
+    Collection<EntryStack<?>> getHiddenStacks();
 }

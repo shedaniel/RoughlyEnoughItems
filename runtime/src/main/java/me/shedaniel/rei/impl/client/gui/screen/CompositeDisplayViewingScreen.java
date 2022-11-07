@@ -44,7 +44,6 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
-import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.DisplayScreenStack;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingButtonWidget;
@@ -201,7 +200,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     if (widget.selected)
                         return false;
-                    ClientHelperImpl.getInstance().openView(categoryMap, tabCategory.getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+                    selectCategory(tabCategory.getCategoryIdentifier());
                     return true;
                 }));
                 tab.setRenderer(tabCategory, tabCategory.getIcon(), tabCategory.getTitle(), j == selectedCategoryIndex);
@@ -320,7 +319,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             else if (amount > 0) selectedCategoryIndex--;
             if (selectedCategoryIndex < 0) selectedCategoryIndex = categories.size() - 1;
             else if (selectedCategoryIndex >= categories.size()) selectedCategoryIndex = 0;
-            ClientHelperImpl.getInstance().openView(categoryMap, categories.get(selectedCategoryIndex).getCategoryIdentifier(), ingredientStackToNotice, resultStackToNotice);
+            selectCategory(categories.get(selectedCategoryIndex).getCategoryIdentifier());
             return true;
         }
         if (bounds.contains(PointHelper.ofMouse())) {

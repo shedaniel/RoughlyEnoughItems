@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.client.plugins;
 
 import me.shedaniel.rei.api.client.config.addon.ConfigAddonRegistry;
+import me.shedaniel.rei.api.client.entry.filtering.base.BasicFilteringRule;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRendererRegistry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -95,6 +96,15 @@ public interface REIClientPlugin extends REIPlugin<REIClientPlugin> {
      */
     @ApiStatus.OverrideOnly
     default void registerEntries(EntryRegistry registry) {
+    }
+    
+    /**
+     * Registers basic entry filtering.
+     *
+     * @param rule the filtering rule
+     */
+    @ApiStatus.OverrideOnly
+    default void registerBasicEntryFiltering(BasicFilteringRule<?> rule) {
     }
     
     /**

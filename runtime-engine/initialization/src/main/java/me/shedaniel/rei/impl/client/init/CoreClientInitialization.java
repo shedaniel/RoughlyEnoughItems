@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.config.addon.ConfigAddonRegistry;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRendererRegistry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
@@ -115,6 +116,7 @@ public class CoreClientInitialization {
         manager.registerReloadable(ConfigManager.class);
         manager.registerReloadable(EntryRegistry.class);
         manager.registerReloadable(CollapsibleEntryRegistry.class);
+        manager.registerReloadable(FilteringRuleTypeRegistry.getInstance().basic());
         manager.registerReloadable(CategoryRegistry.class);
         manager.registerReloadable(DisplayRegistry.class);
         manager.registerReloadable(ScreenRegistry.class);

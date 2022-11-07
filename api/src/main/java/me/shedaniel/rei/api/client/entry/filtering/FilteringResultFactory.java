@@ -21,14 +21,9 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.entry.filtering;
+package me.shedaniel.rei.api.client.entry.filtering;
 
-import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
-
-@ApiStatus.Experimental
-public interface FilteringCache {
-    @Nullable
-    Object getCache(FilteringRule rule);
+@FunctionalInterface
+public interface FilteringResultFactory {
+    FilteringResult create();
 }
