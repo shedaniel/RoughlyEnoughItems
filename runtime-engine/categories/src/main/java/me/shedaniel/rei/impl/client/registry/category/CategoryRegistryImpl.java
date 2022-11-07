@@ -146,6 +146,7 @@ public class CategoryRegistryImpl implements CategoryRegistry {
         private final DisplayCategory<T> category;
         private final List<EntryIngredient> workstations = Collections.synchronizedList(new ArrayList<>());
         private final List<CategoryExtensionProvider<T>> extensionProviders = Collections.synchronizedList(new ArrayList<>());
+        private boolean quickCraftingEnabledByDefault = true;
         
         private ButtonArea plusButtonArea = ButtonArea.defaultArea();
         
@@ -161,6 +162,16 @@ public class CategoryRegistryImpl implements CategoryRegistry {
         @Override
         public void setPlusButtonArea(ButtonArea area) {
             this.plusButtonArea = MoreObjects.firstNonNull(area, ButtonArea.defaultArea());
+        }
+        
+        @Override
+        public boolean isQuickCraftingEnabledByDefault() {
+            return quickCraftingEnabledByDefault;
+        }
+        
+        @Override
+        public void setQuickCraftingEnabledByDefault(boolean enabled) {
+            this.quickCraftingEnabledByDefault = enabled;
         }
         
         @Override

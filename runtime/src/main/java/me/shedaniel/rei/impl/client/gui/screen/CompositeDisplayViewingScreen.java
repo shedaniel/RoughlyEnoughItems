@@ -100,6 +100,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
     @Override
     public void recalculateCategoryPage() {
         this.tabsPage = -1;
+        this.selectedRecipeIndex = 0;
     }
     
     @Override

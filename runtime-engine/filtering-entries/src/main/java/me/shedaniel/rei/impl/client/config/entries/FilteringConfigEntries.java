@@ -28,22 +28,24 @@ import me.shedaniel.autoconfig.gui.registry.GuiRegistry;
 import me.shedaniel.autoconfig.util.Utils;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Jankson;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonNull;
+import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.api.DeserializationException;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.ConfigManagerInternal;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.TranslatableComponent;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static me.shedaniel.autoconfig.util.Utils.setUnsafely;
@@ -68,6 +70,18 @@ public class FilteringConfigEntries implements ConfigManagerInternal.SystemSetup
                     }
                 }
                 , (field) -> field.getType() == List.class && field.getName().equals("filteredStacks"));
+        registry.registerPredicateProvider((i13n, field, config, defaults, guiProvider) -> {
+                    Map<CategoryIdentifier<?>, Boolean> value = Utils.<Map<CategoryIdentifier<?>, Boolean>>getUnsafely(field, config, new HashMap<>());
+                    Map<CategoryIdentifier<?>, Boolean> defaultValue = Utils.getUnsafely(field, defaults);
+                    Consumer<Map<CategoryIdentifier<?>, Boolean>> saveConsumer = (newValue) -> {
+                        setUnsafely(field, config, newValue);
+                    };
+                    return REIRuntime.getInstance().getPreviousContainerScreen() == null || Minecraft.getInstance().getConnection() == null || Minecraft.getInstance().getConnection().getRecipeManager() == null ?
+                            Collections.singletonList(new NoFilteringCategoriesEntry(new TranslatableComponent(i13n), value, defaultValue, saveConsumer))
+                            :
+                            Collections.singletonList(new FilteringCategoriesEntry(new TranslatableComponent(i13n), value, defaultValue, saveConsumer));
+                }
+                , (field) -> field.getType() == Map.class && field.getName().equals("filteringQuickCraftCategories"));
     }
     
     @Override
@@ -95,6 +109,18 @@ public class FilteringConfigEntries implements ConfigManagerInternal.SystemSetup
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
+            }
+        });
+        
+        // CategoryIdentifier
+        builder.registerSerializer(CategoryIdentifier.class, (value, marshaller) -> {
+            return marshaller.serialize(value.toString());
+        });
+        builder.registerDeserializer(String.class, CategoryIdentifier.class, (value, marshaller) -> {
+            try {
+                return CategoryIdentifier.of(value);
+            } catch (ResourceLocationException e) {
+                throw new DeserializationException(e);
             }
         });
     }
