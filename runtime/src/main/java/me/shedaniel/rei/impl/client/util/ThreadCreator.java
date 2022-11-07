@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.util;
 
+import dev.architectury.platform.Platform;
 import me.shedaniel.rei.impl.common.InternalLogger;
 
 import java.util.concurrent.*;
@@ -56,7 +57,7 @@ public final class ThreadCreator {
     }
     
     public ExecutorService asService() {
-        return new ThreadPoolExecutor(0, Runtime.getRuntime().availableProcessors() * 4,
+        return new ThreadPoolExecutor(0, Platform.isFabric() ? (Runtime.getRuntime().availableProcessors() * 4) : Integer.MAX_VALUE,
                 0L, TimeUnit.SECONDS,
                 new SynchronousQueue<>(),
                 this::create);
