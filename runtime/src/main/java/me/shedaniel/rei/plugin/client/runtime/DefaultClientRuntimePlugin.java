@@ -144,9 +144,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         zones.register(Screen.class, screen -> {
             FavoritesListWidget widget = ScreenOverlayImpl.getFavoritesListWidget();
             if (widget != null) {
-                if (widget.togglePanelButton.isVisible()) {
-                    return Collections.singletonList(widget.togglePanelButton.bounds);
-                }
+                return widget.getExclusionZones();
             }
             return Collections.emptyList();
         });

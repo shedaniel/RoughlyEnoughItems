@@ -266,8 +266,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
         updateEntries(entrySize, zoomed);
         FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
         if (favoritesListWidget != null) {
-            favoritesListWidget.getSystemRegion().updateEntriesPosition(entry -> true);
-            favoritesListWidget.getRegion().updateEntriesPosition(entry -> true);
+            favoritesListWidget.updateEntriesPosition();
         }
     }
     

@@ -27,6 +27,8 @@ import me.shedaniel.rei.api.client.entry.region.RegionEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +40,7 @@ public interface RegionListener<T extends RegionEntry<T>> {
     default void onDrop(Stream<T> entries) {}
     
     @Nullable
-    default T convertDraggableStack(DraggingContext<Screen> context, DraggableStack stack) {
+    default T convertDraggableStack(DraggingContext<Screen> context, DraggableComponent<EntryStack<?>> stack) {
         return null;
     }
     

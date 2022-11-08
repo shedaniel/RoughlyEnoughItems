@@ -25,25 +25,19 @@ package me.shedaniel.rei.impl.client.gui.widget.favorites.listeners;
 
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesEntriesManager;
-import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
-import me.shedaniel.rei.impl.client.gui.widget.region.RegionEntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionListener;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FavoritesRegionListener implements RegionListener<FavoriteEntry> {
-    private final FavoritesListWidget favoritesListWidget;
-    
-    public FavoritesRegionListener(FavoritesListWidget favoritesListWidget) {this.favoritesListWidget = favoritesListWidget;}
-    
     @Override
     public void onDrop(Stream<FavoriteEntry> entries) {
         if (ConfigObject.getInstance().isFavoritesEnabled()) {
@@ -59,18 +53,8 @@ public class FavoritesRegionListener implements RegionListener<FavoriteEntry> {
     }
     
     @Override
-    public void onConsumed(RealRegionEntry<FavoriteEntry> entry) {
-        favoritesListWidget.setSystemRegionEntries(entry);
-    }
-    
-    @Override
     @Nullable
-    public FavoriteEntry convertDraggableStack(DraggingContext<Screen> context, DraggableStack stack) {
-        return FavoriteEntry.fromEntryStack(stack.getStack().copy());
-    }
-    
-    @Override
-    public void onSetNewEntries(List<RegionEntryWidget<FavoriteEntry>> regionEntryListEntries) {
-        favoritesListWidget.setSystemRegionEntries(null);
+    public FavoriteEntry convertDraggableStack(DraggingContext<Screen> context, DraggableComponent<EntryStack<?>> stack) {
+        return FavoriteEntry.fromEntryStack(stack.get().copy());
     }
 }

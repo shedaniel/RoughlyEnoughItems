@@ -39,8 +39,6 @@ import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import org.apache.commons.lang3.mutable.MutableLong;
-import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,7 +49,6 @@ import java.util.Map;
 @ApiStatus.Internal
 public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry {
     private final BiMap<ResourceLocation, FavoriteEntryType<?>> registry = HashBiMap.create();
-    private final List<Triple<SystemFavoriteEntryProvider<?>, MutableLong, List<FavoriteEntry>>> systemFavorites = Lists.newArrayList();
     private final Map<Component, FavoriteEntryType.Section> sections = Maps.newConcurrentMap();
     private final List<FavoriteEntryType.Section> sectionsList = Lists.newCopyOnWriteArrayList();
     
@@ -98,18 +95,11 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
     
     @Override
     public <A extends FavoriteEntry> void registerSystemFavorites(SystemFavoriteEntryProvider<A> provider) {
-        this.systemFavorites.add(Triple.of(provider, new MutableLong(-1), new ArrayList<>()));
-        InternalLogger.getInstance().debug("Added system favorites: %s", provider);
-    }
-    
-    public List<Triple<SystemFavoriteEntryProvider<?>, MutableLong, List<FavoriteEntry>>> getSystemProviders() {
-        return this.systemFavorites;
     }
     
     @Override
     public void startReload() {
         this.registry.clear();
-        this.systemFavorites.clear();
         this.sections.clear();
         this.sectionsList.clear();
     }

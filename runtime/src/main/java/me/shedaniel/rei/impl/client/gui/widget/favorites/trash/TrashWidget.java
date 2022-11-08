@@ -27,11 +27,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.element.FavoritesListElement;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.FavoritesPanel;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
@@ -40,7 +44,7 @@ import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class TrashWidget extends WidgetWithBounds {
+public class TrashWidget extends WidgetWithBounds implements FavoritesListElement {
     private final Rectangle bounds = new Rectangle();
     private final FavoritesListWidget parent;
     private final NumberAnimator<Double> height;
@@ -66,10 +70,10 @@ public class TrashWidget extends WidgetWithBounds {
     public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
         if (updateBounds(delta)) {
             int alpha = 0x12 + (int) (0x22 * lastProgress * (Mth.cos((float) (System.currentTimeMillis() % 2000 / 1000F * Math.PI)) + 1) / 2);
-            fillGradient(poses, this.bounds.x, this.bounds.y, this.bounds.getMaxX(), this.bounds.getMaxY(), 0xFFFFFF | (alpha << 24), 0xFFFFFF | (alpha << 24));
-            int lineColor = (int) (0x60 * lastProgress) << 24 | 0xFFFFFF;
-            fillGradient(poses, this.bounds.x, this.bounds.y, this.bounds.getMaxX(), this.bounds.y + 1, lineColor, lineColor);
-            fillGradient(poses, this.bounds.x, this.bounds.getMaxY() - 1, this.bounds.getMaxX(), this.bounds.getMaxY(), lineColor, lineColor);
+            fillGradient(poses, this.bounds.x + 1, this.bounds.y + 1, this.bounds.getMaxX() - 1, this.bounds.getMaxY() - 1, 0xFF3333 | ((alpha * 10 / 9) << 24), 0xFF3333 | (alpha << 24));
+            int lineColor = (int) (0x60 * lastProgress) << 24 | 0xFF3333;
+            fillGradient(poses, this.bounds.x + 1, this.bounds.y, this.bounds.getMaxX() - 1, this.bounds.y + 1, lineColor, lineColor);
+            fillGradient(poses, this.bounds.x + 1, this.bounds.getMaxY() - 1, this.bounds.getMaxX() - 1, this.bounds.getMaxY(), lineColor, lineColor);
             
             fillGradient(poses, this.bounds.x, this.bounds.y + 1, this.bounds.x + 1, this.bounds.getMaxY() - 1, lineColor, lineColor);
             fillGradient(poses, this.bounds.getMaxX() - 1, this.bounds.y + 1, this.bounds.getMaxX(), this.bounds.getMaxY() - 1, lineColor, lineColor);
@@ -106,5 +110,15 @@ public class TrashWidget extends WidgetWithBounds {
     
     public double getHeight() {
         return height.value();
+    }
+    
+    @Override
+    public DraggedAcceptorResult acceptDragged(DraggingContext<Screen> context, DraggableComponent<?> component) {
+        if (containsMouse(context.getCurrentPosition())) {
+            context.renderToVoid(component);
+            return DraggedAcceptorResult.CONSUMED;
+        }
+        
+        return DraggedAcceptorResult.PASS;
     }
 }

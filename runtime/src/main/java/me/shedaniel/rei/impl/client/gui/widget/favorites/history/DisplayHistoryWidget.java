@@ -45,6 +45,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayCompositeWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.element.FavoritesListElement;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -57,7 +58,7 @@ import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableComponentVisitorWidget, DraggableComponentProviderWidget<Object> {
+public class DisplayHistoryWidget extends WidgetWithBounds implements FavoritesListElement {
     private final FavoritesListWidget parent;
     private final Rectangle bounds = new Rectangle();
     private final NumberAnimator<Double> height;

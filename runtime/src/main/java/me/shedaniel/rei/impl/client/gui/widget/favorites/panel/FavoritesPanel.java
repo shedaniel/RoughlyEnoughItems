@@ -35,19 +35,24 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
+import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.element.FavoritesListElement;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.rows.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("UnstableApiUsage")
-public class FavoritesPanel extends WidgetWithBounds {
+public class FavoritesPanel extends WidgetWithBounds implements FavoritesListElement {
     private final FavoritesListWidget parent;
     public final ProgressValueAnimator<Boolean> expendState = ValueAnimator.ofBoolean(0.1, false);
     private final Rectangle bounds = new Rectangle();
@@ -147,14 +152,15 @@ public class FavoritesPanel extends WidgetWithBounds {
         return scroller.scrollAmountInt();
     }
     
+    @Override
     @Nullable
-    public DraggableStack getHoveredStack(double mouseX, double mouseY) {
+    public DraggableComponent<Object> getHovered(DraggingContext<Screen> context, double mouseX, double mouseY) {
         for (FavoritesPanelRow row : rows.get()) {
             if (row instanceof FavoritesPanelEntriesRow entriesRow) {
                 DraggableStack hoveredStack = entriesRow.getHoveredStack(mouseX, mouseY);
                 
                 if (hoveredStack != null) {
-                    return hoveredStack;
+                    return (DraggableComponent<Object>) (DraggableComponent<?>) hoveredStack;
                 }
             }
         }
@@ -162,8 +168,19 @@ public class FavoritesPanel extends WidgetWithBounds {
         return null;
     }
     
-    @Nullable
+    @Override
+    public DraggedAcceptorResult acceptDragged(DraggingContext<Screen> context, DraggableComponent<?> component) {
+        if (containsMouse(context.getCurrentPosition())) {
+            context.renderToVoid(component);
+            return DraggedAcceptorResult.CONSUMED;
+        }
+    
+        return DraggedAcceptorResult.PASS;
+    }
+    
+    @Override
     public EntryStack<?> getFocusedStack(Point mouse) {
+        if (!containsMouse(mouse)) return EntryStack.empty();
         for (FavoritesPanelRow row : rows.get()) {
             if (row instanceof FavoritesPanelEntriesRow entriesRow) {
                 EntryStack<?> focusedStack = entriesRow.getFocusedStack(mouse);
@@ -174,6 +191,6 @@ public class FavoritesPanel extends WidgetWithBounds {
             }
         }
         
-        return null;
+        return EntryStack.empty();
     }
 }

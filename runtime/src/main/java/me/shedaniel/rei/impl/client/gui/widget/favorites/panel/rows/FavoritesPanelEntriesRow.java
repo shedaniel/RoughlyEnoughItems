@@ -122,7 +122,8 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
     public DraggableStack getHoveredStack(double mouseX, double mouseY) {
         for (SectionFavoriteWidget widget : widgets) {
             if (widget.containsMouse(mouseX, mouseY + panel.getScrolledAmount())) {
-                RealRegionEntry<FavoriteEntry> entry = new RealRegionEntry<>(panel.getParent().getRegion(), widget.entry.copy(), entrySize());
+                FavoriteEntry favoriteEntry = widget.entry.copy();
+                RealRegionEntry<FavoriteEntry> entry = new RealRegionEntry<>(favoriteEntry, entrySize(), true, favoriteEntry);
                 entry.size.setAs(entrySize() * 100);
                 return new RegionDraggableStack<>(entry, widget);
             }

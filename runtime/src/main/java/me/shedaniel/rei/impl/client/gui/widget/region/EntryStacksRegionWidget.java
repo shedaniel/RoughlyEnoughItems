@@ -28,16 +28,16 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
-import me.shedaniel.rei.api.client.gui.drag.*;
+import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
+import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
@@ -45,6 +45,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.element.FavoritesListElement;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
@@ -62,11 +63,13 @@ import java.util.stream.Stream;
 
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
-public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWithBounds implements DraggableStackProviderWidget, DraggableStackVisitorWidget {
+@SuppressWarnings("UnstableApiUsage")
+public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWithBounds implements FavoritesListElement {
     public final RegionListener<T> listener;
     protected int blockedCount;
-    private Rectangle bounds = new Rectangle(), innerBounds;
-    public final ScrollingContainer scrolling = new ScrollingContainer() {
+    private final Rectangle bounds = new Rectangle();
+    private Rectangle innerBounds;
+    public RegionWidgetScroller scroller = RegionWidgetScroller.ofScrollingContainer(new ScrollingContainer() {
         @Override
         public Rectangle getBounds() {
             return EntryStacksRegionWidget.this.getBounds();
@@ -74,17 +77,16 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         
         @Override
         public int getMaxScrollHeight() {
-            if (innerBounds.width == 0) return 0;
-            return Mth.ceil((entries.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
+            return EntryStacksRegionWidget.this.contentHeight();
         }
         
         @Override
         public int getScrollBarX(int maxX) {
-            if (!ConfigObject.getInstance().isLeftHandSidePanel())
+            if (ConfigObject.getInstance().isLeftHandSidePanel())
                 return bounds.x + 1;
             return maxX - 7;
         }
-    };
+    });
     private final Int2ObjectMap<RealRegionEntry<T>> entries = new Int2ObjectLinkedOpenHashMap<>();
     private final Int2ObjectMap<RealRegionEntry<T>> removedEntries = new Int2ObjectLinkedOpenHashMap<>();
     private List<RegionEntryWidget<T>> entriesList = Lists.newArrayList();
@@ -92,6 +94,11 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     
     public EntryStacksRegionWidget(RegionListener<T> listener) {
         this.listener = listener;
+    }
+    
+    public int contentHeight() {
+        if (innerBounds.width == 0) return 0;
+        return Mth.ceil((entries.size() + blockedCount) / (innerBounds.width / (float) entrySize())) * entrySize();
     }
     
     @Override
@@ -129,8 +136,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         new BatchedEntryRendererManager(entryStream.collect(Collectors.toList()))
                 .render(poses, mouseX, mouseY, delta);
         
-        updatePosition(delta);
-        scrolling.renderScrollBar(0, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+        scroller.renderExtra(poses, mouseX, mouseY, delta);
         ScissorsHandler.INSTANCE.removeLastScissor();
     }
     
@@ -141,30 +147,18 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (scrolling.updateDraggingState(mouseX, mouseY, button)) {
-            return true;
-        }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return scroller.mouseClicked(mouseX, mouseY, button) || super.mouseClicked(mouseX, mouseY, button);
     }
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (containsMouse(mouseX, mouseY)) {
-            scrolling.offset(ClothConfigInitializer.getScrollStep() * -amount, true);
-            return true;
-        }
-        return super.mouseScrolled(mouseX, mouseY, amount);
+        return (containsMouse(mouseX, mouseY) && scroller.mouseScrolled(mouseX, mouseY, amount))
+               || super.mouseScrolled(mouseX, mouseY, amount);
     }
     
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        if (scrolling.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
-            return true;
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
-    }
-    
-    private void updatePosition(float delta) {
-        scrolling.updatePosition(delta);
+        return scroller.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
     
     @Override
@@ -178,19 +172,19 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     
     @Override
     @Nullable
-    public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
+    public DraggableComponent<Object> getHovered(DraggingContext<Screen> context, double mouseX, double mouseY) {
         if (innerBounds.contains(mouseX, mouseY)) {
             for (RealRegionEntry<T> entry : entries.values()) {
                 if (entry.getWidget().containsMouse(mouseX, mouseY) && listener.canBeDragged(entry)) {
-                    return new RegionDraggableStack<>(entry, null);
+                    return (DraggableComponent<Object>) (DraggableComponent<?>) new RegionDraggableStack<>(entry, null);
                 }
             }
         }
         return null;
     }
     
-    public EntryStack<?> getFocusedStack() {
-        Point mouse = mouse();
+    @Override
+    public EntryStack<?> getFocusedStack(Point mouse) {
         if (innerBounds.contains(mouse)) {
             for (RealRegionEntry<T> entry : entries.values()) {
                 if (entry.getWidget().containsMouse(mouse)) {
@@ -198,6 +192,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                 }
             }
         }
+        
         return EntryStack.empty();
     }
     
@@ -209,11 +204,12 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     }
     
     @Override
-    public DraggedAcceptorResult acceptDraggedStack(DraggingContext<Screen> context, DraggableStack stack) {
-        return checkDraggedStacks(context, stack)
+    public DraggedAcceptorResult acceptDragged(DraggingContext<Screen> context, DraggableComponent<?> component) {
+        if (!(component.get() instanceof EntryStack<?> stack)) return DraggedAcceptorResult.PASS;
+        return checkDraggedStacks(context, (DraggableComponent<EntryStack<?>>) component)
                 .filter(entry -> innerBounds.contains(context.getCurrentPosition()))
                 .flatMap(entry -> {
-                    if (stack instanceof RegionDraggableStack && ((RegionDraggableStack<?>) stack).getEntry().region == this && ((RegionDraggableStack<?>) stack).getShowcaseWidget() == null) {
+                    if (stack instanceof RegionDraggableStack && ((RegionDraggableStack<?>) stack).getEntry().region() == this && ((RegionDraggableStack<?>) stack).getShowcaseWidget() == null) {
                         return Optional.empty();
                     }
                     if (!drop(entry)) {
@@ -223,8 +219,8 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                 }).isPresent() ? DraggedAcceptorResult.CONSUMED : DraggedAcceptorResult.PASS;
     }
     
-    public Optional<RealRegionEntry<T>> checkDraggedStacks(DraggingContext<Screen> context, DraggableStack stack) {
-        EntrySerializer<?> serializer = stack.getStack().getDefinition().getSerializer();
+    public Optional<RealRegionEntry<T>> checkDraggedStacks(DraggingContext<Screen> context, DraggableComponent<EntryStack<?>> stack) {
+        EntrySerializer<?> serializer = stack.get().getDefinition().getSerializer();
         if (serializer != null && (stack instanceof RegionDraggableStack || (serializer.supportReading() && serializer.supportSaving()))) {
             try {
                 T regionEntry = stack instanceof RegionDraggableStack ? ((RegionDraggableStack<T>) stack).getEntry().getEntry().copy()
@@ -331,7 +327,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                     currentY++;
                 }
                 
-                if (listener.notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize)) {
+                if (listener.notSteppingOnExclusionZones(xPos, yPos - scroller.scrollOffsetInt(), entrySize, entrySize)) {
                     if (slotIndex++ == releaseIndex) {
                         continue;
                     }
@@ -365,7 +361,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                         currentY++;
                     }
                     
-                    if (listener.notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize)) {
+                    if (listener.notSteppingOnExclusionZones(xPos, yPos - scroller.scrollOffsetInt(), entrySize, entrySize)) {
                         entriesPoints.add(new Tuple<>(entry, new Point(xPos, yPos)));
                         break;
                     } else {
@@ -379,13 +375,13 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                 int xPos = currentX * entrySize + innerBounds.x;
                 int yPos = currentY * entrySize + innerBounds.y;
                 
-                if (listener.notSteppingOnExclusionZones(xPos, yPos - scrolling.scrollAmountInt(), entrySize, entrySize)) {
+                if (listener.notSteppingOnExclusionZones(xPos, yPos - scroller.scrollOffsetInt(), entrySize, entrySize)) {
                     entriesPoints.add(new Tuple<>(null, new Point(xPos, yPos)));
                 }
             }
             
             double x = position.x - 8;
-            double y = position.y + scrolling.scrollAmount() - 8;
+            double y = position.y + scroller.scrollOffset() - 8;
             
             return Mth.clamp(entriesPoints.stream()
                             .filter(value -> {
@@ -411,14 +407,14 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         int entrySize = entrySize();
         int width = Math.max(Mth.floor((bounds.width - 2 - 6) / (float) entrySize), 1);
         if (!ConfigObject.getInstance().isLeftHandSidePanel())
-            return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f) + 3), bounds.y, width * entrySize, bounds.height);
-        return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f) - 3), bounds.y, width * entrySize, bounds.height);
+            return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f) - 3), bounds.y, width * entrySize, bounds.height);
+        return new Rectangle((int) (bounds.getCenterX() - width * (entrySize / 2f) + 3), bounds.y, width * entrySize, bounds.height);
     }
     
     public boolean drop(RealRegionEntry<T> entry) {
         DraggingContext<?> context = DraggingContext.getInstance();
         double x = context.getCurrentPosition().x;
-        double y = context.getCurrentPosition().y + scrolling.scrollAmount();
+        double y = context.getCurrentPosition().y + scroller.scrollOffset();
         return drop(entry, x, y);
     }
     
@@ -484,7 +480,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     }
     
     public double getScrollAmount() {
-        return scrolling.scrollAmount();
+        return scroller.scrollOffset();
     }
     
     public boolean has(RealRegionEntry<T> entry) {

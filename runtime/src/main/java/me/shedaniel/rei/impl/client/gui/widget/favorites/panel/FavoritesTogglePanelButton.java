@@ -29,11 +29,14 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.element.FavoritesListElement;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.TranslatableComponent;
 
+import java.util.stream.Stream;
+
 @SuppressWarnings("UnstableApiUsage")
-public class FavoritesTogglePanelButton extends FadingFavoritesPanelButton {
+public class FavoritesTogglePanelButton extends FadingFavoritesPanelButton implements FavoritesListElement {
     public FavoritesTogglePanelButton(FavoritesListWidget parent) {
         super(parent);
     }
@@ -70,6 +73,15 @@ public class FavoritesTogglePanelButton extends FadingFavoritesPanelButton {
         if (expendProgress > .1f) {
             int textColor = 0xFFFFFF | (Math.round(0xFF * alpha.floatValue() * expendProgress) << 24);
             font.drawInBatch("+", bounds.getCenterX() - 2.5f, bounds.getCenterY() - 3, textColor, false, matrices.last().pose(), bufferSource, false, 0, 15728880);
+        }
+    }
+    
+    @Override
+    public Stream<Rectangle> getExclusionZones() {
+        if (this.isVisible()) {
+            return Stream.of(this.bounds);
+        } else {
+            return Stream.empty();
         }
     }
 }

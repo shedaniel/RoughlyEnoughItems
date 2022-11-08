@@ -42,6 +42,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import java.util.*;
 import java.util.function.Supplier;
 
+@SuppressWarnings("UnstableApiUsage")
 public class RegionEntryWidget<T extends RegionEntry<T>> extends DisplayedEntryWidget {
     private final RealRegionEntry<T> entry;
     
@@ -53,12 +54,12 @@ public class RegionEntryWidget<T extends RegionEntry<T>> extends DisplayedEntryW
     
     @Override
     protected FavoriteEntry asFavoriteEntry() {
-        return entry.region.listener.asFavorite(entry);
+        return entry.asFavorite();
     }
     
     @Override
     public boolean containsMouse(double mouseX, double mouseY) {
-        return super.containsMouse(mouseX, mouseY) && entry.region.containsMouse(mouseX, mouseY);
+        return super.containsMouse(mouseX, mouseY) && (entry.region() == null || entry.region().containsMouse(mouseX, mouseY));
     }
     
     @Override

@@ -28,21 +28,49 @@ import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
+import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.function.Supplier;
 
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
+@SuppressWarnings("UnstableApiUsage")
 public class RealRegionEntry<T extends RegionEntry<T>> {
-    public EntryStacksRegionWidget<T> region;
-    private T entry;
+    @Nullable
+    private final EntryStacksRegionWidget<T> region;
+    private final T entry;
     private final RegionEntryWidget<T> widget;
+    private final boolean removeOnDrag;
+    private final Supplier<FavoriteEntry> favoriteEntry;
     private boolean hidden;
     public ValueAnimator<FloatingPoint> pos = ValueAnimator.ofFloatingPoint();
     public NumberAnimator<Double> size = ValueAnimator.ofDouble();
     
     public RealRegionEntry(EntryStacksRegionWidget<T> region, T entry, int entrySize) {
-        this.region = region;
+        this.region = Objects.requireNonNull(region);
         this.entry = entry;
         this.widget = (RegionEntryWidget<T>) new RegionEntryWidget<>(this, 0, 0, entrySize).noBackground();
+        this.removeOnDrag = region.listener.removeOnDrag();
+        this.favoriteEntry = () -> region.listener.asFavorite(this);
+    }
+    
+    public RealRegionEntry(T entry, int entrySize, boolean removeOnDrag, FavoriteEntry favoriteEntry) {
+        this.region = null;
+        this.entry = entry;
+        this.widget = (RegionEntryWidget<T>) new RegionEntryWidget<>(this, 0, 0, entrySize).noBackground();
+        this.removeOnDrag = removeOnDrag;
+        this.favoriteEntry = () -> favoriteEntry;
+    }
+    
+    @Nullable
+    public EntryStacksRegionWidget<T> region() {
+        return region;
+    }
+    
+    public boolean removeOnDrag() {
+        return removeOnDrag;
     }
     
     public void remove() {
@@ -59,7 +87,7 @@ public class RealRegionEntry<T extends RegionEntry<T>> {
         this.getWidget().getBounds().width = this.getWidget().getBounds().height = (int) Math.round(this.size.doubleValue() / 100);
         double offsetSize = (entrySize() - this.size.doubleValue() / 100) / 2;
         this.getWidget().getBounds().x = (int) Math.round(pos.value().x + offsetSize);
-        this.getWidget().getBounds().y = (int) Math.round(pos.value().y + offsetSize) - (int) region.getScrollAmount();
+        this.getWidget().getBounds().y = (int) Math.round(pos.value().y + offsetSize) - (this.region != null ? (int) this.region.getScrollAmount() : 0);
     }
     
     public RegionEntryWidget<T> getWidget() {
@@ -80,5 +108,9 @@ public class RealRegionEntry<T extends RegionEntry<T>> {
     
     public void moveTo(boolean animated, int xPos, int yPos) {
         pos.setTo(new FloatingPoint(xPos, yPos), animated && ConfigObject.getInstance().isFavoritesAnimated() ? 200 : -1);
+    }
+    
+    FavoriteEntry asFavorite() {
+        return this.region.listener.asFavorite(this);
     }
 }
