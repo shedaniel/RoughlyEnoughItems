@@ -40,13 +40,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public class NoFilteringCategoriesEntry extends AbstractConfigListEntry<Map<CategoryIdentifier<?>, Boolean>> {
     private Consumer<Map<CategoryIdentifier<?>, Boolean>> saveConsumer;
     private Map<CategoryIdentifier<?>, Boolean> defaultValue;
     private Map<CategoryIdentifier<?>, Boolean> configFiltered;
-    private final AbstractWidget buttonWidget = new Button(0, 0, 150, 20, Component.translatable("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {});
+    private final AbstractWidget buttonWidget = new Button(0, 0, 150, 20, Component.translatable("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {}, Button.NO_TOOLTIP, Supplier::get) {};
     private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public NoFilteringCategoriesEntry(Component fieldName, Map<CategoryIdentifier<?>, Boolean> configFiltered, Map<CategoryIdentifier<?>, Boolean> defaultValue, Consumer<Map<CategoryIdentifier<?>, Boolean>> saveConsumer) {
@@ -76,15 +77,15 @@ public class NoFilteringCategoriesEntry extends AbstractConfigListEntry<Map<Cate
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = false;
-        this.buttonWidget.y = y;
+        this.buttonWidget.setY(y);
         
         Component displayedFieldName = this.getDisplayedFieldName();
         if (Minecraft.getInstance().font.isBidirectional()) {
             Minecraft.getInstance().font.drawShadow(matrices, displayedFieldName.getVisualOrderText(), (float) (window.getGuiScaledWidth() - x - Minecraft.getInstance().font.width(displayedFieldName)), (float) (y + 6), 16777215);
-            this.buttonWidget.x = x + 2;
+            this.buttonWidget.setX(x + 2);
         } else {
             Minecraft.getInstance().font.drawShadow(matrices, displayedFieldName.getVisualOrderText(), (float) x, (float) (y + 6), this.getPreferredTextColor());
-            this.buttonWidget.x = x + entryWidth - 150;
+            this.buttonWidget.setX(x + entryWidth - 150);
         }
         
         this.buttonWidget.render(matrices, mouseX, mouseY, delta);

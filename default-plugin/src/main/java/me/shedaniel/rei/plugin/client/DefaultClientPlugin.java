@@ -128,7 +128,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         for (CreativeModeTab tab : CreativeModeTabs.TABS) {
             if (tab != CreativeModeTabs.TAB_HOTBAR && tab != CreativeModeTabs.TAB_INVENTORY) {
                 try {
-                    for (ItemStack stack : tab.getDisplayItems(features)) {
+                    for (ItemStack stack : tab.getDisplayItems(features, true)) {
                         try {
                             items.put(stack.getItem(), EntryStacks.of(stack));
                         } catch (Exception ignore) {

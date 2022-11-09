@@ -42,6 +42,7 @@ import net.minecraft.sounds.SoundEvents;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class FilteringCategoriesScreen extends Screen {
     private final FilteringCategoriesEntry entry;
@@ -61,7 +62,7 @@ public class FilteringCategoriesScreen extends Screen {
             addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
-            }));
+            }, Button.NO_TOOLTIP, Supplier::get) {});
         }
         listWidget = addWidget(new ListWidget(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
         for (CategoryRegistry.CategoryConfiguration<?> configuration : CategoryRegistry.getInstance()) {
@@ -180,7 +181,7 @@ public class FilteringCategoriesScreen extends Screen {
                     }
                     
                     entry.edited = true;
-                });
+                }, Button.NO_TOOLTIP, Supplier::get) {};
             }
         }
         
@@ -228,8 +229,8 @@ public class FilteringCategoriesScreen extends Screen {
                     client.font.drawShadow(matrices, id.getVisualOrderText(), xPos, y + 22, 8421504);
                 }
             }
-            toggleButton.x = x + entryWidth - 6 - toggleButton.getWidth();
-            toggleButton.y = y + 5;
+            toggleButton.setX(x + entryWidth - 6 - toggleButton.getWidth());
+            toggleButton.setY(y + 5);
             toggleButton.render(matrices, mouseX, mouseY, delta);
         }
         
