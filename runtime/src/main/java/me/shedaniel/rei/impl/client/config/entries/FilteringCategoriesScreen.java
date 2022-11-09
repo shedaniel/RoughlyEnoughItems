@@ -23,13 +23,11 @@
 
 package me.shedaniel.rei.impl.client.config.entries;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
-import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
-import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
-import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
-import me.shedaniel.rei.impl.client.gui.InternalTextures;
+import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -42,19 +40,16 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
-public class FilteringRulesScreen extends Screen {
-    private final FilteringEntry entry;
-    private RulesList rulesList;
+public class FilteringCategoriesScreen extends Screen {
+    private final FilteringCategoriesEntry entry;
+    private ListWidget listWidget;
     Screen parent;
     
-    public FilteringRulesScreen(FilteringEntry entry) {
-        super(Component.translatable("config.roughlyenoughitems.filteringRulesScreen"));
+    public FilteringCategoriesScreen(FilteringCategoriesEntry entry) {
+        super(Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure.title"));
         this.entry = entry;
     }
     
@@ -66,40 +61,25 @@ public class FilteringRulesScreen extends Screen {
             addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
-            }, Button.NO_TOOLTIP, Supplier::get) {});
+            }));
         }
-        {
-            Component addText = Component.literal(" + ");
-            addRenderableWidget(new Button(width - 4 - 20, 4, 20, 20, addText, button -> {
-                FilteringAddRuleScreen screen = new FilteringAddRuleScreen(entry);
-                screen.parent = this;
-                minecraft.setScreen(screen);
-            }, Button.NO_TOOLTIP, Supplier::get) {});
+        listWidget = addWidget(new ListWidget(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
+        for (CategoryRegistry.CategoryConfiguration<?> configuration : CategoryRegistry.getInstance()) {
+            listWidget.addItem(new DefaultListEntry(configuration));
         }
-        rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
-        for (int i = entry.rules.size() - 1; i >= 0; i--) {
-            FilteringRule<?> rule = entry.rules.get(i);
-            if (rule instanceof ManualFilteringRule)
-                rulesList.addItem(new DefaultRuleEntry(rule, entry, (screen) -> {
-                    entry.filteringScreen.parent = screen;
-                    return entry.filteringScreen;
-                }));
-            else rulesList.addItem(new DefaultRuleEntry(rule, entry, null));
-        }
-        rulesList.selectItem(rulesList.children().get(0));
     }
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        this.rulesList.render(matrices, mouseX, mouseY, delta);
+        this.listWidget.render(matrices, mouseX, mouseY, delta);
         super.render(matrices, mouseX, mouseY, delta);
         this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
     }
     
-    public static class RulesList extends DynamicElementListWidget<RuleEntry> {
+    private static class ListWidget extends DynamicElementListWidget<ListEntry> {
         private boolean inFocus;
         
-        public RulesList(Minecraft client, int width, int height, int top, int bottom, ResourceLocation backgroundLocation) {
+        public ListWidget(Minecraft client, int width, int height, int top, int bottom, ResourceLocation backgroundLocation) {
             super(client, width, height, top, bottom, backgroundLocation);
         }
         
@@ -121,19 +101,24 @@ public class FilteringRulesScreen extends Screen {
         
         @Override
         protected boolean isSelected(int index) {
-            return Objects.equals(this.getSelectedItem(), this.children().get(index));
+            return false;
         }
         
         @Override
-        protected int addItem(RuleEntry item) {
+        public ListEntry getSelectedItem() {
+            return null;
+        }
+        
+        @Override
+        protected int addItem(ListEntry item) {
             return super.addItem(item);
         }
         
         @Override
-        public boolean mouseClicked(double double_1, double double_2, int int_1) {
-            if (super.mouseClicked(double_1, double_2, int_1))
+        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            if (super.mouseClicked(mouseX, mouseY, button))
                 return true;
-            RuleEntry item = getItemAtPosition(double_1, double_2);
+            ListEntry item = getItemAtPosition(mouseX, mouseY);
             if (item != null) {
                 client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                 selectItem(item);
@@ -155,20 +140,10 @@ public class FilteringRulesScreen extends Screen {
         }
     }
     
-    public static abstract class RuleEntry extends DynamicElementListWidget.ElementEntry<RuleEntry> {
-        private final FilteringRule<?> rule;
-        
-        public RuleEntry(FilteringRule<?> rule) {
-            this.rule = rule;
-        }
-        
-        public FilteringRule<?> getRule() {
-            return rule;
-        }
-        
+    private static abstract class ListEntry extends DynamicElementListWidget.ElementEntry<ListEntry> {
         @Override
         public int getItemHeight() {
-            return 26;
+            return 35;
         }
         
         @Override
@@ -177,77 +152,95 @@ public class FilteringRulesScreen extends Screen {
         }
     }
     
-    public static class DefaultRuleEntry extends RuleEntry {
-        private final Button configureButton;
-        private final Button deleteButton;
-        private final Function<Screen, Screen> screenFunction;
+    private class DefaultListEntry extends ListEntry {
+        private final Button toggleButton;
+        private final CategoryRegistry.CategoryConfiguration<?> configuration;
         
-        public DefaultRuleEntry(FilteringRule<?> rule, FilteringEntry entry, Function<Screen, Screen> screenFunction) {
-            super(rule);
-            this.screenFunction = (screenFunction == null ? ((FilteringRuleType<FilteringRule<?>>) rule.getType()).createEntryScreen(rule) : screenFunction);
-            configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
-                entry.edited = true;
-                Minecraft.getInstance().setScreen(this.screenFunction.apply(Minecraft.getInstance().screen));
-            }, Button.NO_TOOLTIP, Supplier::get) {
-                @Override
-                protected void renderBg(PoseStack matrices, Minecraft client, int mouseX, int mouseY) {
-                    super.renderBg(matrices, client, mouseX, mouseY);
-                    RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
-                    blit(matrices, getX() + 3, getY() + 3, 0, 0, 14, 14);
-                }
-            };
+        public DefaultListEntry(CategoryRegistry.CategoryConfiguration<?> configuration) {
+            this.configuration = configuration;
             {
-                Component deleteText = Component.translatable("config.roughlyenoughitems.filteringRulesScreen.delete");
-                deleteButton = new Button(0, 0, Minecraft.getInstance().font.width(deleteText) + 10, 20, deleteText, button -> {
-                    final Screen screen = Minecraft.getInstance().screen;
+                Component toggleText = Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure.toggle");
+                toggleButton = new Button(0, 0, Minecraft.getInstance().font.width(toggleText) + 10, 20, toggleText, button -> {
+                    boolean quickCraftingEnabledByDefault = configuration.isQuickCraftingEnabledByDefault();
+                    boolean enabled = entry.getValue().getOrDefault(configuration.getCategoryIdentifier(), quickCraftingEnabledByDefault);
+                    if (enabled) {
+                        // set to false
+                        if (!quickCraftingEnabledByDefault) {
+                            entry.getValue().remove(configuration.getCategoryIdentifier());
+                        } else {
+                            entry.getValue().put(configuration.getCategoryIdentifier(), false);
+                        }
+                    } else {
+                        // set to true
+                        if (quickCraftingEnabledByDefault) {
+                            entry.getValue().remove(configuration.getCategoryIdentifier());
+                        } else {
+                            entry.getValue().put(configuration.getCategoryIdentifier(), true);
+                        }
+                    }
+                    
                     entry.edited = true;
-                    entry.rules.remove(rule);
-                    screen.init(Minecraft.getInstance(), screen.width, screen.height);
-                }, Button.NO_TOOLTIP, Supplier::get) {};
+                });
             }
-            configureButton.active = this.screenFunction != null;
-            deleteButton.active = !rule.getType().isSingular();
         }
         
         @Override
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+            if (y + entryHeight < 0 || y > height) {
+                return;
+            }
+            
             Minecraft client = Minecraft.getInstance();
+            matrices.pushPose();
+            matrices.translate(0, 0, 100);
+            configuration.getCategory().getIcon().render(matrices, new Rectangle(x + 2, y + 5, 16, 16), mouseY, mouseY, delta);
+            matrices.popPose();
+            int xPos = x + 22;
             {
-                Component title = ((FilteringRuleType<FilteringRule<?>>) getRule().getType()).getTitle(getRule());
+                Component title = configuration.getCategory().getTitle();
                 int i = client.font.width(title);
                 if (i > entryWidth - 28) {
                     FormattedText titleTrimmed = FormattedText.composite(client.font.substrByWidth(title, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
                     client.font.drawShadow(matrices, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
                 } else {
-                    client.font.drawShadow(matrices, title.getVisualOrderText(), x + 2, y + 1, 16777215);
+                    client.font.drawShadow(matrices, title.getVisualOrderText(), xPos, y + 1, 16777215);
                 }
             }
             {
-                Component subtitle = ((FilteringRuleType<FilteringRule<?>>) getRule().getType()).getSubtitle(getRule());
+                Component subtitle = Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure." + entry.getValue().getOrDefault(configuration.getCategoryIdentifier(), configuration.isQuickCraftingEnabledByDefault()))
+                        .withStyle(ChatFormatting.GRAY);
                 int i = client.font.width(subtitle);
                 if (i > entryWidth - 28) {
                     FormattedText subtitleTrimmed = FormattedText.composite(client.font.substrByWidth(subtitle, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
                     client.font.drawShadow(matrices, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 8421504);
                 } else {
-                    client.font.drawShadow(matrices, subtitle.getVisualOrderText(), x + 2, y + 12, 8421504);
+                    client.font.drawShadow(matrices, subtitle.getVisualOrderText(), xPos, y + 12, 8421504);
                 }
             }
-            configureButton.setX(x + entryWidth - 25);
-            configureButton.setY(y + 1);
-            configureButton.render(matrices, mouseX, mouseY, delta);
-            deleteButton.setX(x + entryWidth - 27 - deleteButton.getWidth());
-            deleteButton.setY(y + 1);
-            deleteButton.render(matrices, mouseX, mouseY, delta);
+            {
+                Component id = Component.literal(configuration.getCategoryIdentifier().toString())
+                        .withStyle(ChatFormatting.DARK_GRAY);
+                int i = client.font.width(id);
+                if (i > entryWidth - 28) {
+                    FormattedText idTrimmed = FormattedText.composite(client.font.substrByWidth(id, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
+                    client.font.drawShadow(matrices, Language.getInstance().getVisualOrder(idTrimmed), x + 2, y + 22, 8421504);
+                } else {
+                    client.font.drawShadow(matrices, id.getVisualOrderText(), xPos, y + 22, 8421504);
+                }
+            }
+            toggleButton.x = x + entryWidth - 6 - toggleButton.getWidth();
+            toggleButton.y = y + 5;
+            toggleButton.render(matrices, mouseX, mouseY, delta);
         }
         
         @Override
         public List<? extends GuiEventListener> children() {
-            return Arrays.asList(configureButton, deleteButton);
+            return Collections.singletonList(toggleButton);
         }
         
         @Override
         public List<? extends NarratableEntry> narratables() {
-            return Arrays.asList(configureButton, deleteButton);
+            return Collections.singletonList(toggleButton);
         }
     }
 }

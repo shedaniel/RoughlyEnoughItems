@@ -98,6 +98,10 @@ public class SearchProviderImpl implements SearchProvider {
             return filter;
         }
         
+        public List<ArgumentType<?, ?>> getArgumentTypes() {
+            return argumentTypes.get();
+        }
+        
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;

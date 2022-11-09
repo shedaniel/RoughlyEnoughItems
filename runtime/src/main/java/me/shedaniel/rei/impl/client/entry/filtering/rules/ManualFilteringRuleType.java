@@ -21,27 +21,42 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.entry.filtering;
+package me.shedaniel.rei.impl.client.entry.filtering.rules;
 
-import me.shedaniel.rei.api.common.entry.EntryStack;
-import org.jetbrains.annotations.ApiStatus;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 
-import java.util.Collection;
-
-@ApiStatus.Internal
-@ApiStatus.Experimental
-public interface FilteringContext {
-    Collection<EntryStack<?>> getStacks(FilteringContextType type);
+public enum ManualFilteringRuleType implements FilteringRuleType<ManualFilteringRule> {
+    INSTANCE;
     
-    default Collection<EntryStack<?>> getShownStacks() {
-        return getStacks(FilteringContextType.SHOWN);
+    @Override
+    public CompoundTag saveTo(ManualFilteringRule rule, CompoundTag tag) {
+        return tag;
     }
     
-    default Collection<EntryStack<?>> getUnsetStacks() {
-        return getStacks(FilteringContextType.DEFAULT);
+    @Override
+    public ManualFilteringRule readFrom(CompoundTag tag) {
+        return new ManualFilteringRule();
     }
     
-    default Collection<EntryStack<?>> getHiddenStacks() {
-        return getStacks(FilteringContextType.HIDDEN);
+    @Override
+    public Component getTitle(ManualFilteringRule rule) {
+        return Component.translatable("rule.roughlyenoughitems.filtering.manual");
+    }
+    
+    @Override
+    public Component getSubtitle(ManualFilteringRule rule) {
+        return Component.translatable("rule.roughlyenoughitems.filtering.manual.subtitle");
+    }
+    
+    @Override
+    public ManualFilteringRule createNew() {
+        return new ManualFilteringRule();
+    }
+    
+    @Override
+    public boolean isSingular() {
+        return true;
     }
 }

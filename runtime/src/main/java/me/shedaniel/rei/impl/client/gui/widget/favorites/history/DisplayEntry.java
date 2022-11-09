@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.favorites.history;
 
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -47,12 +48,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public class DisplayEntry extends WidgetWithBounds {
     private final LazyResettable<List<Widget>> widgets = new LazyResettable<>(this::setupWidgets);
     private final DisplayHistoryWidget parent;
     private final Display display;
     private final Dimension size = new Dimension(1, 1);
+    private final Supplier<AutoCraftingEvaluator.AutoCraftingResult> autoCraftingResult =
+            Suppliers.memoizeWithExpiration(this::evaluateAutoCrafting, 1000, TimeUnit.MILLISECONDS);
     private boolean hasInitialBounds;
     private final ValueAnimator<FloatingRectangle> bounds = ValueAnimator.ofFloatingRectangle();
     private final Button plusButton;
@@ -70,6 +75,11 @@ public class DisplayEntry extends WidgetWithBounds {
         } else {
             this.plusButton = Widgets.createButton(new Rectangle(-1000, -1000, 10, 10), Component.literal("+"));
         }
+    }
+    
+    private AutoCraftingEvaluator.AutoCraftingResult evaluateAutoCrafting() {
+        if (this.display == null) return new AutoCraftingEvaluator.AutoCraftingResult();
+        return AutoCraftingEvaluator.evaluateAutoCrafting(false, false, this.display, this.display::provideInternalDisplayIds);
     }
     
     public UUID getUuid() {
@@ -171,7 +181,7 @@ public class DisplayEntry extends WidgetWithBounds {
             Vector4f mouse = new Vector4f((float) mouseX, (float) mouseY, 0, 1);
             poses.last().pose().transform(mouse);
             
-            AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, display::provideInternalDisplayIds);
+            AutoCraftingEvaluator.AutoCraftingResult result = this.autoCraftingResult.get();
             
             plusButton.setEnabled(result.successful);
             plusButton.setTint(result.tint);

@@ -28,37 +28,27 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
+import me.shedaniel.rei.api.client.entry.filtering.*;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.impl.client.entry.filtering.AbstractFilteringRule;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringCache;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringContext;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringResult;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
+import me.shedaniel.rei.impl.client.util.ThreadCreator;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-public class ManualFilteringRule extends AbstractFilteringRule<ManualFilteringRule> {
+public class ManualFilteringRule implements FilteringRule<LongSet> {
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadCreator("REI-ManualFiltering").asService();
+    
     @Override
-    public CompoundTag save(CompoundTag tag) {
-        return tag;
+    public FilteringRuleType<? extends FilteringRule<LongSet>> getType() {
+        return ManualFilteringRuleType.INSTANCE;
     }
     
     @Override
-    public ManualFilteringRule createFromTag(CompoundTag tag) {
-        return new ManualFilteringRule();
-    }
-    
-    @Override
-    public Object prepareCache(boolean async) {
+    public LongSet prepareCache(boolean async) {
         if (async) {
             LongSet all = new LongOpenHashSet();
             List<CompletableFuture<LongSet>> completableFutures = Lists.newArrayList();
@@ -71,7 +61,7 @@ public class ManualFilteringRule extends AbstractFilteringRule<ManualFilteringRu
                         }
                     }
                     return output;
-                }));
+                }, EXECUTOR_SERVICE));
             }
             try {
                 CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(5, TimeUnit.MINUTES);
@@ -91,30 +81,14 @@ public class ManualFilteringRule extends AbstractFilteringRule<ManualFilteringRu
     }
     
     @Override
-    public FilteringResult processFilteredStacks(FilteringContext context, FilteringCache cache, boolean async) {
-        LongSet filteredStacks = (LongSet) cache.getCache(this);
-        FilteringResult result = FilteringResult.create();
-        processList(context.getShownStacks(), result, async, filteredStacks);
-        processList(context.getUnsetStacks(), result, async, filteredStacks);
+    public FilteringResult processFilteredStacks(FilteringContext context, FilteringResultFactory resultFactory, LongSet cache, boolean async) {
+        FilteringResult result = resultFactory.create();
+        processList(context.getShownStacks(), result, async, cache);
+        processList(context.getUnsetStacks(), result, async, cache);
         return result;
     }
     
     private void processList(Collection<EntryStack<?>> stacks, FilteringResult result, boolean async, LongSet filteredStacks) {
         result.hide((async ? stacks.parallelStream() : stacks.stream()).filter(stack -> filteredStacks.contains(EntryStacks.hashExact(stack))).collect(Collectors.toList()));
-    }
-    
-    @Override
-    public Component getTitle() {
-        return Component.translatable("rule.roughlyenoughitems.filtering.manual");
-    }
-    
-    @Override
-    public Component getSubtitle() {
-        return Component.translatable("rule.roughlyenoughitems.filtering.manual.subtitle");
-    }
-    
-    @Override
-    public ManualFilteringRule createNew() {
-        throw new UnsupportedOperationException();
     }
 }

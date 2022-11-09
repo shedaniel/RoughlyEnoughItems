@@ -27,7 +27,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -50,14 +50,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> extends Screen {
-    private final FilteringEntry entry;
     private RulesList rulesList;
     Screen parent;
     public T rule;
     
-    public FilteringRuleOptionsScreen(FilteringEntry entry, T rule, Screen screen) {
+    public FilteringRuleOptionsScreen(T rule, Screen screen) {
         super(Component.translatable("config.roughlyenoughitems.filteringRulesScreen"));
-        this.entry = entry;
         this.rule = rule;
         this.parent = screen;
     }

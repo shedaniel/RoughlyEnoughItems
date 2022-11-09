@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoProvider;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.api.common.transfer.info.MenuSerializationContext;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
@@ -53,11 +54,28 @@ public class MenuInfoRegistryImpl implements MenuInfoRegistry {
         map.computeIfAbsent(category, id -> Maps.newLinkedHashMap())
                 .computeIfAbsent(menuClass, c -> Lists.newArrayList())
                 .add(menuInfo);
+        InternalLogger.getInstance().debug("Added menu info for %s [%s]: %s", menuClass, category, menuInfo);
     }
     
     @Override
     public <D extends Display> void registerGeneric(Predicate<CategoryIdentifier<?>> categoryPredicate, MenuInfoProvider<?, D> menuInfo) {
-        mapGeneric.computeIfAbsent(categoryPredicate, id -> Lists.newArrayList()).add(menuInfo);
+        mapGeneric.computeIfAbsent(new Predicate<>() {
+            @Override
+            public boolean test(CategoryIdentifier<?> categoryIdentifier) {
+                return categoryPredicate.test(categoryIdentifier);
+            }
+            
+            @Override
+            public int hashCode() {
+                return System.identityHashCode(this);
+            }
+            
+            @Override
+            public boolean equals(Object obj) {
+                return this == obj;
+            }
+        }, id -> Lists.newArrayList()).add(menuInfo);
+        InternalLogger.getInstance().debug("Added generic menu info for: %s", menuInfo);
     }
     
     @Override
@@ -119,6 +137,11 @@ public class MenuInfoRegistryImpl implements MenuInfoRegistry {
     public void startReload() {
         map.clear();
         mapGeneric.clear();
+    }
+    
+    @Override
+    public void endReload() {
+        InternalLogger.getInstance().debug("Registered %d menu infos", infoSize());
     }
     
     @Override

@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.client.search.argument;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
@@ -38,6 +39,7 @@ import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchMode;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.method.CharacterUnpackingInputMethod;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.common.entry.EntryStack;
@@ -47,31 +49,30 @@ import me.shedaniel.rei.impl.client.search.IntRange;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentTypesRegistry;
 import me.shedaniel.rei.impl.client.search.result.ArgumentApplicableResult;
+import me.shedaniel.rei.impl.client.util.ThreadCreator;
+import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class Argument<T, R> {
-    public static final Short2ObjectMap<Long2ObjectMap<Object>> SEARCH_CACHE = Short2ObjectMaps.synchronize(new Short2ObjectOpenHashMap<>());
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadCreator("REI-ArgumentCache").asService();
+    private static final Short2ObjectMap<Long2ObjectMap<Object>> SEARCH_CACHE = Short2ObjectMaps.synchronize(new Short2ObjectOpenHashMap<>());
     private static final Object NO_CACHE = new Object();
     private static final AtomicReference<String> lastLanguage = new AtomicReference<>();
     private ArgumentType<T, R> argumentType;
@@ -89,6 +90,28 @@ public class Argument<T, R> {
         this.filterData = null;
         this.start = start;
         this.end = end;
+    }
+    
+    public static void resetCache(boolean cache) {
+        SEARCH_CACHE.clear();
+        if (cache) {
+            Argument.prepareFilter(new AbstractCollection<>() {
+                @Override
+                public Iterator<EntryStack<?>> iterator() {
+                    return Iterators.transform(EntryRegistry.getInstance().getPreFilteredList().iterator(),
+                            EntryStack::normalize);
+                }
+                
+                @Override
+                public int size() {
+                    return EntryRegistry.getInstance().getPreFilteredList().size();
+                }
+            }, ArgumentTypesRegistry.ARGUMENT_TYPE_LIST, () -> true, EXECUTOR_SERVICE);
+        }
+    }
+    
+    public static boolean hasCache() {
+        return !SEARCH_CACHE.isEmpty();
     }
     
     public int start() {
@@ -183,7 +206,7 @@ public class Argument<T, R> {
         if (compoundArguments.isEmpty()) return true;
         String newLanguage = Minecraft.getInstance().options.languageCode;
         if (!Objects.equals(lastLanguage.getAndSet(newLanguage), newLanguage)) {
-            SEARCH_CACHE.clear();
+            resetCache(false);
         }
         
         a:
@@ -271,32 +294,50 @@ public class Argument<T, R> {
     }
     
     public static Long prepareStart = null;
-    public static Collection<EntryStack<?>> prepareStacks = null;
+    public static List<HashedEntryStackWrapper> prepareStacks = null;
     public static IntIntPair prepareStage = null;
     public static IntIntPair[] currentStages = null;
     
     public static void prepareFilter(Collection<EntryStack<?>> stacks, Collection<ArgumentType<?, ?>> argumentTypes) {
+        Argument.prepareFilter(stacks, argumentTypes, () -> true, null);
+    }
+    
+    public static void prepareFilter(Collection<EntryStack<?>> stacks, Collection<ArgumentType<?, ?>> argumentTypes, BooleanSupplier isValid, @Nullable Executor executor) {
         if (prepareStage != null || currentStages != null) return;
         try {
             prepareStart = Util.getEpochMillis();
-            prepareStacks = stacks;
+            Long2ObjectMap<Object>[] caches = CollectionUtils.map(argumentTypes, Argument::getSearchCache).toArray(Long2ObjectMap[]::new);
+            prepareStacks = CollectionUtils.mapAndFilter(stacks, stack -> {
+                for (Long2ObjectMap<Object> cache : caches) {
+                    if (!cache.containsKey(stack.hashExact())) {
+                        return true;
+                    }
+                }
+                
+                return false;
+            }, HashedEntryStackWrapper::new);
+            if (prepareStacks.isEmpty() && !isValid.getAsBoolean()) {
+                return;
+            }
+            InternalLogger.getInstance().log(ConfigObject.getInstance().doDebugSearchTimeRequired() ? Level.INFO : Level.TRACE, "Preparing " + (prepareStacks.size() * argumentTypes.size()) + " stacks for search arguments");
             prepareStage = new IntIntMutablePair(0, argumentTypes.size());
             currentStages = new IntIntPair[argumentTypes.size()];
-            List<HashedEntryStackWrapper> hashedStacks = CollectionUtils.map(stacks, HashedEntryStackWrapper::new);
             int searchPartitionSize = ConfigObject.getInstance().getAsyncSearchPartitionSize();
-            boolean async = ConfigObject.getInstance().shouldAsyncSearch() && stacks.size() > searchPartitionSize * 4;
+            boolean async = ConfigObject.getInstance().shouldAsyncSearch() && prepareStacks.size() > searchPartitionSize * 4;
             List<CompletableFuture<Long2ObjectMap<Object>>> futures = Lists.newArrayList();
             List<Pair<ArgumentType<?, ?>, CompletableFuture<Long2ObjectMap<Object>>>> pairs = Lists.newArrayList();
             
             for (ArgumentType<?, ?> argumentType : argumentTypes) {
                 prepareStage.first(prepareStage.firstInt() + 1);
                 Long2ObjectMap<Object> map = getSearchCache(argumentType);
-                IntIntPair currentStage = currentStages[prepareStage.firstInt() - 1] = new IntIntMutablePair(0, hashedStacks.size());
+                IntIntPair currentStage = currentStages[prepareStage.firstInt() - 1] = new IntIntMutablePair(0, prepareStacks.size());
+                if (!isValid.getAsBoolean()) return;
                 
                 if (async) {
-                    for (Collection<HashedEntryStackWrapper> partitionStacks : CollectionUtils.partition(hashedStacks, searchPartitionSize)) {
+                    for (Collection<HashedEntryStackWrapper> partitionStacks : CollectionUtils.partition(prepareStacks, searchPartitionSize)) {
                         CompletableFuture<Long2ObjectMap<Object>> future = CompletableFuture.supplyAsync(() -> {
                             Long2ObjectMap<Object> out = new Long2ObjectArrayMap<>(searchPartitionSize + 1);
+                            int i = 0;
                             for (HashedEntryStackWrapper stack : partitionStacks) {
                                 if (map.get(stack.hashExact()) == null) {
                                     Object data = argumentType.cacheData(stack.unwrap());
@@ -305,16 +346,18 @@ public class Argument<T, R> {
                                         out.put(stack.hashExact(), data);
                                     }
                                 }
+                                if (i++ % 40 == 0) if (!isValid.getAsBoolean()) return Long2ObjectMaps.emptyMap();
                             }
+                            if (!isValid.getAsBoolean()) return Long2ObjectMaps.emptyMap();
                             return out;
-                        }).whenComplete((objectLong2ObjectMap, throwable) -> {
+                        }, Objects.requireNonNullElse(executor, EXECUTOR_SERVICE)).whenComplete((objectLong2ObjectMap, throwable) -> {
                             currentStage.first(currentStage.firstInt() + partitionStacks.size());
                         });
                         futures.add(future);
                         pairs.add(Pair.of(argumentType, future));
                     }
                 } else {
-                    for (HashedEntryStackWrapper stack : hashedStacks) {
+                    for (HashedEntryStackWrapper stack : prepareStacks) {
                         currentStage.first(currentStage.firstInt() + 1);
                         
                         if (map.get(stack.hashExact()) == null) {
@@ -331,13 +374,22 @@ public class Argument<T, R> {
             if (async) {
                 try {
                     CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(30, TimeUnit.SECONDS);
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                } catch (ExecutionException | TimeoutException e) {
                     e.printStackTrace();
+                } catch (InterruptedException ignore) {
+                } finally {
+                    int sum = 0;
+                    for (Pair<ArgumentType<?, ?>, CompletableFuture<Long2ObjectMap<Object>>> pair : pairs) {
+                        Long2ObjectMap<Object> now = pair.second().getNow(null);
+                        if (now != null) {
+                            getSearchCache(pair.left()).putAll(now);
+                            sum += now.size();
+                        }
+                    }
+                    InternalLogger.getInstance().log(ConfigObject.getInstance().doDebugSearchTimeRequired() ? Level.INFO : Level.TRACE, "Prepared " + sum + " / " + (prepareStacks.size() * argumentTypes.size()) + " stacks for search arguments in " + (Util.getEpochMillis() - prepareStart) + "ms");
                 }
-                for (Pair<ArgumentType<?, ?>, CompletableFuture<Long2ObjectMap<Object>>> pair : pairs) {
-                    Long2ObjectMap<Object> now = pair.second().getNow(null);
-                    if (now != null) getSearchCache(pair.left()).putAll(now);
-                }
+            } else {
+                InternalLogger.getInstance().log(ConfigObject.getInstance().doDebugSearchTimeRequired() ? Level.INFO : Level.TRACE, "Prepared " + (prepareStacks.size() * argumentTypes.size()) + " stacks for search arguments in " + (Util.getEpochMillis() - prepareStart) + "ms");
             }
         } finally {
             prepareStart = null;

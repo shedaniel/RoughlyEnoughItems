@@ -50,19 +50,21 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.addon.ConfigAddonRegistry;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.CheatingMode;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.addon.ConfigAddonRegistryImpl;
 import me.shedaniel.rei.impl.client.config.entries.*;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringRule;
-import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
 import me.shedaniel.rei.impl.client.gui.performance.entry.PerformanceEntry;
@@ -70,6 +72,7 @@ import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
+import net.minecraft.ResourceLocationException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -135,6 +138,18 @@ public class ConfigManagerImpl implements ConfigManager {
                             Collections.singletonList(new FilteringEntry(220, value, ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules, defaultValue, saveConsumer, list -> ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules = Lists.newArrayList(list)));
                 }
                 , (field) -> field.getType() == List.class, ConfigObjectImpl.UseFilteringScreen.class);
+        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
+                    Map<CategoryIdentifier<?>, Boolean> value = Utils.<Map<CategoryIdentifier<?>, Boolean>>getUnsafely(field, config, new HashMap<>());
+                    Map<CategoryIdentifier<?>, Boolean> defaultValue = Utils.getUnsafely(field, defaults);
+                    Consumer<Map<CategoryIdentifier<?>, Boolean>> saveConsumer = (newValue) -> {
+                        setUnsafely(field, config, newValue);
+                    };
+                    return REIRuntime.getInstance().getPreviousContainerScreen() == null || Minecraft.getInstance().getConnection() == null || Minecraft.getInstance().getConnection().getRecipeManager() == null ?
+                            Collections.singletonList(new NoFilteringCategoriesEntry(Component.translatable(i13n), value, defaultValue, saveConsumer))
+                            :
+                            Collections.singletonList(new FilteringCategoriesEntry(Component.translatable(i13n), value, defaultValue, saveConsumer));
+                }
+                , (field) -> field.getType() == Map.class, ConfigObjectImpl.UseFilteringCategoriesScreen.class);
         InternalLogger.getInstance().info("Config loaded");
         saveConfig();
     }
@@ -237,7 +252,7 @@ public class ConfigManagerImpl implements ConfigManager {
         // FilteringRule
         builder.registerSerializer(FilteringRule.class, (value, marshaller) -> {
             try {
-                return marshaller.serialize(FilteringRule.save(value, new CompoundTag()));
+                return marshaller.serialize(FilteringRuleType.save(value, new CompoundTag()));
             } catch (Exception e) {
                 e.printStackTrace();
                 return JsonNull.INSTANCE;
@@ -245,7 +260,7 @@ public class ConfigManagerImpl implements ConfigManager {
         });
         builder.registerDeserializer(Tag.class, FilteringRule.class, (value, marshaller) -> {
             try {
-                return FilteringRule.read((CompoundTag) value);
+                return FilteringRuleType.read((CompoundTag) value);
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -253,7 +268,7 @@ public class ConfigManagerImpl implements ConfigManager {
         });
         builder.registerDeserializer(String.class, FilteringRule.class, (value, marshaller) -> {
             try {
-                return FilteringRule.read(TagParser.parseTag(value));
+                return FilteringRuleType.read(TagParser.parseTag(value));
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -282,6 +297,18 @@ public class ConfigManagerImpl implements ConfigManager {
             }
         });
         
+        // CategoryIdentifier
+        builder.registerSerializer(CategoryIdentifier.class, (value, marshaller) -> {
+            return marshaller.serialize(value.toString());
+        });
+        builder.registerDeserializer(String.class, CategoryIdentifier.class, (value, marshaller) -> {
+            try {
+                return CategoryIdentifier.of(value);
+            } catch (ResourceLocationException e) {
+                throw new DeserializationException(e);
+            }
+        });
+        
         return builder.build();
     }
     
@@ -295,8 +322,10 @@ public class ConfigManagerImpl implements ConfigManager {
     
     @Override
     public void saveConfig() {
-        if (getConfig().getFilteringRules().stream().noneMatch(filteringRule -> filteringRule instanceof ManualFilteringRule)) {
-            getConfig().getFilteringRules().add(new ManualFilteringRule());
+        for (FilteringRuleType<?> type : FilteringRuleTypeRegistry.getInstance()) {
+            if (type.isSingular() && getConfig().getFilteringRules().stream().noneMatch(filteringRule -> filteringRule.getType().equals(type))) {
+                getConfig().getFilteringRules().add(type.createNew());
+            }
         }
         AutoConfig.getConfigHolder(ConfigObjectImpl.class).registerLoadListener((configHolder, configObject) -> {
             object = configObject;
@@ -377,12 +406,12 @@ public class ConfigManagerImpl implements ConfigManager {
                 if (Minecraft.getInstance().getConnection() != null && Minecraft.getInstance().getConnection().getRecipeManager() != null) {
                     TextListEntry feedbackEntry = ConfigEntryBuilder.create().startTextDescription(
                             Component.translatable("text.rei.feedback", Component.translatable("text.rei.feedback.link")
-                                            .withStyle(style -> style
-                                                    .withColor(TextColor.fromRgb(0xff1fc3ff))
-                                                    .withUnderlined(true)
-                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://forms.gle/5tdnK5WN1wng78pV8"))
+                                    .withStyle(style -> style
+                                            .withColor(TextColor.fromRgb(0xff1fc3ff))
+                                            .withUnderlined(true)
+                                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://forms.gle/5tdnK5WN1wng78pV8"))
                                                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("https://forms.gle/5tdnK5WN1wng78pV8")))
-                                            ))
+                                    ))
                                     .withStyle(ChatFormatting.GRAY)
                     ).build();
                     builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.advanced")).getEntries().add(0, feedbackEntry);
@@ -401,18 +430,18 @@ public class ConfigManagerImpl implements ConfigManager {
                     TextListEntry supportText = ConfigEntryBuilder.create().startTextDescription(
                             Component.translatable("text.rei.support.me.desc",
                                             Component.translatable("text.rei.support.me.patreon")
-                                                    .withStyle(style -> style
-                                                            .withColor(TextColor.fromRgb(0xff1fc3ff))
-                                                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://patreon.com/shedaniel"))
+                                            .withStyle(style -> style
+                                                    .withColor(TextColor.fromRgb(0xff1fc3ff))
+                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://patreon.com/shedaniel"))
                                                             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("https://patreon.com/shedaniel")))
-                                                    ),
+                                            ),
                                             Component.translatable("text.rei.support.me.bisect")
-                                                    .withStyle(style -> style
-                                                            .withColor(TextColor.fromRgb(0xff1fc3ff))
-                                                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.bisecthosting.com/shedaniel"))
+                                            .withStyle(style -> style
+                                                    .withColor(TextColor.fromRgb(0xff1fc3ff))
+                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.bisecthosting.com/shedaniel"))
                                                             .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("https://www.bisecthosting.com/shedaniel")))
-                                                    )
-                                    )
+                                            )
+                            )
                                     .withStyle(ChatFormatting.GRAY)
                     ).build();
                     supportText.setScreen((AbstractConfigScreen) screen);

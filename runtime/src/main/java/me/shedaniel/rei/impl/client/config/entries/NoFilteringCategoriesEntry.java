@@ -24,13 +24,10 @@
 package me.shedaniel.rei.impl.client.config.entries;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
-import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
-import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -39,63 +36,57 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 @ApiStatus.Internal
-public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>>> {
-    private int width;
-    Consumer<List<EntryStack<?>>> saveConsumer;
-    Consumer<List<FilteringRule<?>>> rulesSaveConsumer;
-    List<EntryStack<?>> defaultValue;
-    Set<EntryStack<?>> configFiltered;
-    List<FilteringRule<?>> rules;
-    boolean edited = false;
-    final FilteringScreen filteringScreen = new FilteringScreen(this);
-    final FilteringRulesScreen filteringRulesScreen = new FilteringRulesScreen(this);
-    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.translatable("config.roughlyenoughitems.filteringScreen"), button -> {
-        filteringRulesScreen.parent = Minecraft.getInstance().screen;
-        Minecraft.getInstance().setScreen(filteringRulesScreen);
-    }, Button.NO_TOOLTIP, Supplier::get) {};
+public class NoFilteringCategoriesEntry extends AbstractConfigListEntry<Map<CategoryIdentifier<?>, Boolean>> {
+    private Consumer<Map<CategoryIdentifier<?>, Boolean>> saveConsumer;
+    private Map<CategoryIdentifier<?>, Boolean> defaultValue;
+    private Map<CategoryIdentifier<?>, Boolean> configFiltered;
+    private final AbstractWidget buttonWidget = new Button(0, 0, 150, 20, Component.translatable("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {});
     private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
-    public FilteringEntry(int width, List<EntryStack<?>> configFiltered, List<FilteringRule<?>> rules, List<EntryStack<?>> defaultValue, Consumer<List<EntryStack<?>>> saveConsumer, Consumer<List<FilteringRule<?>>> rulesSaveConsumer) {
-        super(Component.empty(), false);
-        this.width = width;
-        this.configFiltered = new TreeSet<>(Comparator.comparing(EntryStacks::hashExact));
-        this.configFiltered.addAll(configFiltered);
-        this.rules = Lists.newArrayList(rules);
+    public NoFilteringCategoriesEntry(Component fieldName, Map<CategoryIdentifier<?>, Boolean> configFiltered, Map<CategoryIdentifier<?>, Boolean> defaultValue, Consumer<Map<CategoryIdentifier<?>, Boolean>> saveConsumer) {
+        super(fieldName, false);
+        this.configFiltered = configFiltered;
         this.defaultValue = defaultValue;
         this.saveConsumer = saveConsumer;
-        this.rulesSaveConsumer = rulesSaveConsumer;
     }
     
     @Override
-    public List<EntryStack<?>> getValue() {
-        return Lists.newArrayList(configFiltered);
+    public Map<CategoryIdentifier<?>, Boolean> getValue() {
+        return configFiltered;
     }
     
     @Override
-    public Optional<List<EntryStack<?>>> getDefaultValue() {
+    public Optional<Map<CategoryIdentifier<?>, Boolean>> getDefaultValue() {
         return Optional.ofNullable(defaultValue);
     }
     
     @Override
     public void save() {
         saveConsumer.accept(getValue());
-        rulesSaveConsumer.accept(rules);
-        this.edited = false;
     }
     
     @Override
     public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
-        this.buttonWidget.active = this.isEditable();
-        this.buttonWidget.setY(y);
-        this.buttonWidget.setX(x + entryWidth / 2 - width / 2);
-        this.buttonWidget.setWidth(width);
+        this.buttonWidget.active = false;
+        this.buttonWidget.y = y;
+        
+        Component displayedFieldName = this.getDisplayedFieldName();
+        if (Minecraft.getInstance().font.isBidirectional()) {
+            Minecraft.getInstance().font.drawShadow(matrices, displayedFieldName.getVisualOrderText(), (float) (window.getGuiScaledWidth() - x - Minecraft.getInstance().font.width(displayedFieldName)), (float) (y + 6), 16777215);
+            this.buttonWidget.x = x + 2;
+        } else {
+            Minecraft.getInstance().font.drawShadow(matrices, displayedFieldName.getVisualOrderText(), (float) x, (float) (y + 6), this.getPreferredTextColor());
+            this.buttonWidget.x = x + entryWidth - 150;
+        }
+        
         this.buttonWidget.render(matrices, mouseX, mouseY, delta);
     }
     
@@ -107,10 +98,5 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>>>
     @Override
     public List<? extends NarratableEntry> narratables() {
         return children;
-    }
-    
-    @Override
-    public boolean isEdited() {
-        return super.isEdited() || edited;
     }
 }
