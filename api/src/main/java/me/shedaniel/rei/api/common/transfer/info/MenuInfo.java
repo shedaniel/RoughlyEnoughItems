@@ -216,7 +216,7 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> ex
             if (widget instanceof Slot && ((Slot) widget).getNoticeMark() == Slot.INPUT) {
                 if (missingIndices.contains(i++)) {
                     matrices.pushPose();
-                    matrices.translate(0, 0, 400);
+                    matrices.translate(0, 0, 50);
                     Rectangle innerBounds = ((Slot) widget).getInnerBounds();
                     GuiComponent.fill(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), 0x40ff0000);
                     matrices.popPose();
