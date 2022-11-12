@@ -122,8 +122,8 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         this.categoryPages = -1;
     }
     
-    protected void initTabs() {
-        this.tabs.init(new Rectangle(bounds.x, bounds.y - 28, bounds.width, 28), categories, new IntValue() {
+    protected void initTabs(int width) {
+        this.tabs.init(new Rectangle(bounds.getCenterX() - width / 2, bounds.y - 28, width, 28), new Rectangle(bounds.getCenterX() - width / 2, bounds.y - 28, width, 28), categories, new IntValue() {
             @Override
             public void accept(int value) {
                 AbstractDisplayViewingScreen.this.categoryPages = value;

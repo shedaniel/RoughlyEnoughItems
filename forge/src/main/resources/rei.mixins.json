@@ -5,6 +5,7 @@
   "client": [
     "MixinClientPacketListener",
     "MixinEffectRenderingInventoryScreen",
+    "MixinFontSet",
     "MixinInputConstants",
     "MixinRecipeToast"
   ],

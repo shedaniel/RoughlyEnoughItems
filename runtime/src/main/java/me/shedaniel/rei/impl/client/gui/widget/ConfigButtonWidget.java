@@ -69,10 +69,18 @@ public class ConfigButtonWidget {
                     ConfigManager.getInstance().openConfigScreen(REIRuntime.getInstance().getPreviousScreen());
                 })
                 .onRender((matrices, button) -> {
-                    if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && ClientHelperImpl.getInstance().hasOperatorPermission()) {
-                        button.setTint(ClientHelperImpl.getInstance().hasPermissionToUsePackets() ? 721354752 : 1476440063);
-                    } else {
+                    if (!ClientHelper.getInstance().isCheating() || Minecraft.getInstance().screen instanceof DisplayScreen) {
                         button.removeTint();
+                    } else if (!ClientHelperImpl.getInstance().hasOperatorPermission()) {
+                        if (Minecraft.getInstance().gameMode.hasInfiniteItems()) {
+                            button.setTint(0x2aff0000);
+                        } else {
+                            button.setTint(0x58fcf003);
+                        }
+                    } else if (ClientHelperImpl.getInstance().hasPermissionToUsePackets()) {
+                        button.setTint(0x2aff0000);
+                    } else {
+                        button.setTint(0x5800afff);
                     }
                     
                     access.openOrClose(CONFIG_MENU_UUID, button.getBounds(), ConfigButtonWidget::menuEntries);
@@ -85,7 +93,7 @@ public class ConfigButtonWidget {
             helper.blit(matrices, bounds.x + 3, bounds.y + 3, 0, 0, 14, 14);
             helper.setBlitOffset(helper.getBlitOffset() - 1);
         });
-        return InternalWidgets.wrapLateRenderable(Widgets.concat(configButton, overlayWidget));
+        return Widgets.concat(configButton, overlayWidget);
     }
     
     private static Collection<MenuEntry> menuEntries() {
