@@ -93,7 +93,7 @@ public class ConfigButtonWidget {
             helper.blit(matrices, bounds.x + 3, bounds.y + 3, 0, 0, 14, 14);
             helper.setBlitOffset(helper.getBlitOffset() - 1);
         });
-        return InternalWidgets.wrapLateRenderable(Widgets.concat(configButton, overlayWidget));
+        return Widgets.concat(configButton, overlayWidget);
     }
     
     private static Collection<MenuEntry> menuEntries() {

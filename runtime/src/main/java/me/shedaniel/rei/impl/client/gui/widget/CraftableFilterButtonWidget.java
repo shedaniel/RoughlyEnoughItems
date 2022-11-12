@@ -87,7 +87,7 @@ public class CraftableFilterButtonWidget {
             itemRenderer.renderGuiItem(icon, (int) vector.x(), (int) vector.y());
             itemRenderer.blitOffset = 0.0F;
         });
-        return InternalWidgets.wrapLateRenderable(Widgets.concat(filterButton, overlayWidget));
+        return Widgets.concat(filterButton, overlayWidget);
     }
     
     private static Collection<MenuEntry> menuEntries() {

@@ -24,6 +24,8 @@
 package me.shedaniel.rei;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.DataResult;
 import me.shedaniel.architectury.event.Event;
 import me.shedaniel.architectury.event.EventFactory;
@@ -396,14 +398,51 @@ public class RoughlyEnoughItemsCoreClient {
                 return InteractionResult.SUCCESS;
             return InteractionResult.PASS;
         });
-        GuiEvent.RENDER_POST.register((screen, matrices, mouseX, mouseY, delta) -> {
+        int[] rendered = {0};
+        GuiEvent.RENDER_PRE.register((screen, matrices, mouseX, mouseY, delta) -> {
+            if (shouldReturn(screen))
+                return EventResult.pass();
+            rendered[0] = 0;
+            return EventResult.pass();
+        });
+        GuiEvent.RENDER_CONTAINER_BACKGROUND.register((screen, matrices, mouseX, mouseY, delta) -> {
             if (shouldReturn(screen))
                 return;
+            rendered[0] = 1;
             resetFocused(screen);
             if (!(screen instanceof DisplayScreen)) {
                 getOverlay().render(matrices, mouseX, mouseY, delta);
             }
+            resetFocused(screen);
+        });
+        GuiEvent.RENDER_CONTAINER_FOREGROUND.register((screen, matrices, mouseX, mouseY, delta) -> {
+            if (shouldReturn(screen))
+                return;
+            rendered[0] = 2;
+            resetFocused(screen);
+            PoseStack poseStack = RenderSystem.getModelViewStack();
+            poseStack.pushPose();
+            poseStack.translate(-screen.leftPos, -screen.topPos, 0.0);
+            RenderSystem.applyModelViewMatrix();
             ((ScreenOverlayImpl) getOverlay()).lateRender(matrices, mouseX, mouseY, delta);
+            poseStack.popPose();
+            RenderSystem.applyModelViewMatrix();
+            resetFocused(screen);
+        });
+        GuiEvent.RENDER_POST.register((screen, matrices, mouseX, mouseY, delta) -> {
+            if (shouldReturn(screen) || rendered[0] == 2)
+                return;
+            if (screen instanceof AbstractContainerScreen) {
+                InternalLogger.getInstance().warn("Screen " + screen.getClass().getName() + " did not render background and foreground! This might cause rendering issues!");
+            }
+            resetFocused(screen);
+            if (rendered[0] == 0 && !(screen instanceof DisplayScreen)) {
+                getOverlay().render(matrices, mouseX, mouseY, delta);
+            }
+            rendered[0] = 1;
+            if (rendered[0] == 1) {
+                ((ScreenOverlayImpl) getOverlay()).lateRender(matrices, mouseX, mouseY, delta);
+            }
             resetFocused(screen);
         });
         ClientScreenInputEvent.MOUSE_DRAGGED_PRE.register((minecraftClient, screen, mouseX1, mouseY1, button, mouseX2, mouseY2) -> {
