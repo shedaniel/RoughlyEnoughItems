@@ -261,7 +261,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             this.recipeBounds.put(displayBounds, Pair.of(display, setupDisplay));
             this.widgets.add(new DisplayCompositeWidget(display, setupDisplay, displayBounds));
             if (plusButtonArea.isPresent()) {
-                this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, plusButtonArea.get().get(displayBounds), Component.literal(plusButtonArea.get().getButtonText()), displaySupplier, display::provideInternalDisplayIds, setupDisplay, getCurrentCategory()));
+                this.widgets.add(Widgets.withTranslate(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, plusButtonArea.get().get(displayBounds), Component.literal(plusButtonArea.get().getButtonText()), displaySupplier, display::provideInternalDisplayIds, setupDisplay, getCurrentCategory()), 0, 0, 100));
             }
         }
     }

@@ -160,7 +160,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         this.widgets.addAll(setupDisplay);
         Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getPlusButtonArea();
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
-            this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), Component.literal(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category));
+            this.widgets.add(Widgets.withTranslate(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), Component.literal(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category), 0, 0, 100));
         
         int index = 0;
         for (DisplaySpec recipeDisplay : categoryMap.get(category)) {
