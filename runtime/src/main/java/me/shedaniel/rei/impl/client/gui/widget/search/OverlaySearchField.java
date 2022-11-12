@@ -80,7 +80,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     public int keybindFocusKey = -1;
     public boolean isMain = true;
     protected Tuple<Long, Point> lastClickedDetails = null;
-    private List<String> history = Lists.newArrayListWithCapacity(100);
+    private final List<String> history = Lists.newArrayListWithCapacity(100);
     private final NumberAnimator<Double> progress = ValueAnimator.ofDouble();
     
     public OverlaySearchField(int x, int y, int width, int height) {
@@ -255,8 +255,6 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     protected void renderSuggestion(PoseStack matrices, int x, int y) {
-        matrices.pushPose();
-        matrices.translate(0, 0, 400);
         int color;
         if (containsMouse(PointHelper.ofMouse()) || isFocused()) {
             color = 0xddeaeaea;
@@ -264,7 +262,6 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
             color = -6250336;
         }
         this.font.drawShadow(matrices, this.font.plainSubstrByWidth(this.getSuggestion(), this.getWidth()), x, y, color);
-        matrices.popPose();
     }
     
     @Override
@@ -366,5 +363,6 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        laterRender(matrices, mouseX, mouseY, delta);
     }
 }

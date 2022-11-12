@@ -291,7 +291,6 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     
     public void lateRender(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (REIRuntime.getInstance().isOverlayVisible() && hasSpace()) {
-            REIRuntimeImpl.getSearchField().laterRender(matrices, mouseX, mouseY, delta);
             for (Widget widget : widgets) {
                 if (widget instanceof LateRenderable && widget != menuHolder.widget())
                     widget.render(matrices, mouseX, mouseY, delta);
