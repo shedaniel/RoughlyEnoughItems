@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import dev.architectury.utils.value.IntValue;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -34,13 +33,9 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
@@ -102,22 +97,22 @@ public class TabContainerWidget extends GuiComponent {
         
         if (categories.size() > tabsPerPage) {
             Button tabLeft, tabRight;
-            this.widgets.add(tabLeft = Widgets.createButton(new Rectangle(bounds.x, bounds.getMaxY() - tabSize + 1 - tabButtonsSize, tabButtonsSize, tabButtonsSize), new TextComponent(""))
+            this.widgets.add(tabLeft = Widgets.createButton(new Rectangle(bounds.x, bounds.getMaxY() - tabSize + 1 - tabButtonsSize, tabButtonsSize, tabButtonsSize), Component.empty())
                     .onClick(button -> {
                         int currentCategoryPage = selectedCategory.getAsInt() / tabsPerPage();
                         currentCategoryPage = Math.floorMod(currentCategoryPage - 1, categories.size() / tabsPerPage() + 1);
                         selectedCategory.accept(Mth.clamp(currentCategoryPage * tabsPerPage() + tabsPerPage() / 2,
                                 tabsPerPage() / 2, categories.size() - (int) Math.ceil(tabsPerPage() / 2.0)));
                     })
-                    .tooltipLine(new TranslatableComponent("text.rei.previous_page")));
-            this.widgets.add(tabRight = Widgets.createButton(new Rectangle(bounds.x + bounds.width - tabButtonsSize - (isCompactTabButtons ? 0 : 1), bounds.getMaxY() - tabSize + 1 - tabButtonsSize, tabButtonsSize, tabButtonsSize), new TextComponent(""))
+                    .tooltipLine(Component.translatable("text.rei.previous_page")));
+            this.widgets.add(tabRight = Widgets.createButton(new Rectangle(bounds.x + bounds.width - tabButtonsSize - (isCompactTabButtons ? 0 : 1), bounds.getMaxY() - tabSize + 1 - tabButtonsSize, tabButtonsSize, tabButtonsSize), Component.empty())
                     .onClick(button -> {
                         int currentCategoryPage = selectedCategory.getAsInt() / tabsPerPage();
                         currentCategoryPage = Math.floorMod(currentCategoryPage + 1, categories.size() / tabsPerPage() + 1);
                         selectedCategory.accept(Mth.clamp(currentCategoryPage * tabsPerPage() + tabsPerPage() / 2,
                                 tabsPerPage() / 2, categories.size() - (int) Math.ceil(tabsPerPage() / 2.0)));
                     })
-                    .tooltipLine(new TranslatableComponent("text.rei.next_page")));
+                    .tooltipLine(Component.translatable("text.rei.next_page")));
             
             this.widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
                 Rectangle tabLeftBounds = tabLeft.getBounds();
