@@ -241,6 +241,33 @@ public class CollectionUtils {
         return Stream.of(list).max(comparator);
     }
     
+    public static <T, R> Optional<R> mapAndMin(Collection<T> list, Function<T, R> function, Comparator<R> comparator) {
+        if (list.isEmpty()) {
+            return Optional.empty();
+        }
+        return list.stream().min(Comparator.comparing(function, comparator)).map(function);
+    }
+    
+    public static <T, R> Optional<R> mapAndMin(T[] list, Function<T, R> function, Comparator<R> comparator) {
+        if (list.length <= 0)
+            return Optional.empty();
+        return Stream.of(list).min(Comparator.comparing(function, comparator)).map(function);
+    }
+    
+    public static <T> Optional<T> min(Collection<T> list, Comparator<T> comparator) {
+        if (list.isEmpty()) {
+            return Optional.empty();
+        }
+        return list.stream().min(comparator);
+    }
+    
+    public static <T> Optional<T> min(T[] list, Comparator<T> comparator) {
+        if (list.length <= 0) {
+            return Optional.empty();
+        }
+        return Stream.of(list).min(comparator);
+    }
+    
     public static String joinToString(Iterable<CharSequence> list, CharSequence separator) {
         return String.join(separator, list);
     }

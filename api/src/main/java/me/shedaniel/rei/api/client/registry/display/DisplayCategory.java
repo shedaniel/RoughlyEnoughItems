@@ -104,7 +104,7 @@ public interface DisplayCategory<T extends Display> extends DisplayCategoryView<
      * @return the display width
      */
     default int getDisplayWidth(T display) {
-        return 150;
+        return getCategoryIdentifier().getPath().equals("plugins/campfire") ? 190 : 150;
     }
     
     /**
