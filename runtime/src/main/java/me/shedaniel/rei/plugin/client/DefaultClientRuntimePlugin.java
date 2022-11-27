@@ -66,6 +66,7 @@ import me.shedaniel.rei.impl.client.search.method.unihan.PinyinInputMethod;
 import me.shedaniel.rei.impl.client.search.method.unihan.UniHanManager;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryListener;
+import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -119,7 +120,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         
         ((EntryRegistryImpl) registry).listeners.add(new EntryRegistryListener() {
             @Override
-            public void onReFilter(List<EntryStack<?>> stacks) {
+            public void onReFilter(List<HashedEntryStackWrapper> stacks) {
                 filteredStacksVisibilityHandler.reset();
             }
         });

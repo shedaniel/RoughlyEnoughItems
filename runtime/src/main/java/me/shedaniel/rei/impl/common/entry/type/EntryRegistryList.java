@@ -25,10 +25,9 @@ package me.shedaniel.rei.impl.common.entry.type;
 
 import it.unimi.dsi.fastutil.longs.LongList;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 
 import java.util.List;
-import java.util.function.LongPredicate;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public interface EntryRegistryList {
@@ -37,6 +36,8 @@ public interface EntryRegistryList {
     Stream<EntryStack<?>> stream();
     
     List<EntryStack<?>> collect();
+    
+    List<HashedEntryStackWrapper> collectHashed();
     
     int indexOf(EntryStack<?> stack);
     
@@ -52,9 +53,11 @@ public interface EntryRegistryList {
     
     void remove(EntryStack<?> stack, long hashExact);
     
-    boolean removeIf(Predicate<? extends EntryStack<?>> predicate);
-    
-    boolean removeExactIf(LongPredicate predicate);
+    boolean removeExactIf(StackFilteringPredicate predicate);
     
     boolean needsHash();
+    
+    interface StackFilteringPredicate {
+        boolean test(EntryStack<?> stack, long hashExact);
+    }
 }

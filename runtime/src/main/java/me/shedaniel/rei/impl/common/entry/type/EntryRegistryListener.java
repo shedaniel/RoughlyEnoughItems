@@ -25,10 +25,10 @@ package me.shedaniel.rei.impl.common.entry.type;
 
 import it.unimi.dsi.fastutil.longs.LongList;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 public interface EntryRegistryListener {
     default void addEntryAfter(@Nullable EntryStack<?> afterEntry, EntryStack<?> stack, long stackHashExact) {}
@@ -39,7 +39,5 @@ public interface EntryRegistryListener {
     
     default void removeEntries(List<EntryStack<?>> stacks, @Nullable LongList hashes) {}
     
-    default void removeEntriesIf(Predicate<EntryStack<?>> predicate) {}
-    
-    default void onReFilter(List<EntryStack<?>> stacks) {}
+    default void onReFilter(List<HashedEntryStackWrapper> stacks) {}
 }

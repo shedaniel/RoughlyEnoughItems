@@ -33,12 +33,13 @@ import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextImpl;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringResultImpl;
+import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextType;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.SearchFilteringRuleType;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import me.shedaniel.rei.impl.common.entry.type.FilteringLogic;
+import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -55,6 +56,7 @@ import net.minecraft.sounds.SoundEvents;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class FilteringRulesScreen extends Screen {
     private final FilteringEntry entry;
@@ -266,19 +268,17 @@ public class FilteringRulesScreen extends Screen {
                 Function<Boolean, Component> function = bool -> {
                     return new TranslatableComponent("rule.roughlyenoughitems.filtering.search.show." + bool);
                 };
-                FilteringContextImpl context = new FilteringContextImpl(EntryRegistry.getInstance().getEntryStacks().toList());
-                rule.processFilteredStacks(context, () -> new FilteringResultImpl(new ArrayList<>(), new ArrayList<>()),
-                        rule.prepareCache(false), false);
+                Map<FilteringContextType, Set<HashedEntryStackWrapper>> stacks = FilteringLogic.hidden(FilteringLogic.getRules(), false, false, EntryRegistry.getInstance().getEntryStacks().collect(Collectors.toList()));
                 
                 entryConsumer.accept(new SubRulesEntry(rule, () -> function.apply(true),
                         Collections.singletonList(new SearchFilteringRuleType.EntryStacksRuleEntry(rule,
-                                Suppliers.ofInstance(CollectionUtils.map(context.getShownStacks(),
-                                        stack -> (EntryWidget) Widgets.createSlot(new Rectangle(0, 0, 18, 18)).disableBackground().entry(stack.normalize())))))));
+                                Suppliers.ofInstance(CollectionUtils.map(stacks.get(FilteringContextType.SHOWN),
+                                        stack -> (EntryWidget) Widgets.createSlot(new Rectangle(0, 0, 18, 18)).disableBackground().entry(stack.unwrap().normalize())))))));
                 addEmpty(entryConsumer, 10);
                 entryConsumer.accept(new SubRulesEntry(rule, () -> function.apply(false),
                         Collections.singletonList(new SearchFilteringRuleType.EntryStacksRuleEntry(rule,
-                                Suppliers.ofInstance(CollectionUtils.map(context.getHiddenStacks(),
-                                        stack -> (EntryWidget) Widgets.createSlot(new Rectangle(0, 0, 18, 18)).disableBackground().entry(stack.normalize())))))));
+                                Suppliers.ofInstance(CollectionUtils.map(stacks.get(FilteringContextType.HIDDEN),
+                                        stack -> (EntryWidget) Widgets.createSlot(new Rectangle(0, 0, 18, 18)).disableBackground().entry(stack.unwrap().normalize())))))));
             }
             
             @Override
