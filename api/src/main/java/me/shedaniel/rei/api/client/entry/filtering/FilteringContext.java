@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.api.client.entry.filtering;
 
+import it.unimi.dsi.fastutil.longs.LongCollection;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -53,4 +54,28 @@ public interface FilteringContext {
      * @return the list of stacks that are previously marked as hidden from other filtering rules.
      */
     Collection<EntryStack<?>> getHiddenStacks();
+    
+    /**
+     * Returns the list of hashes that are previously marked as <b>shown</b> from other filtering rules.
+     *
+     * @return the list of hashes that are previously marked as shown from other filtering rules.
+     */
+    @ApiStatus.Experimental
+    LongCollection getShownExactHashes();
+    
+    /**
+     * Returns the list of hashes that are previously marked as <b>hidden</b> from other filtering rules.
+     *
+     * @return the list of hashes that are previously marked as hidden from other filtering rules.
+     */
+    @ApiStatus.Experimental
+    LongCollection getUnsetExactHashes();
+    
+    /**
+     * Returns the list of hashes that are previously marked as <b>hidden</b> from other filtering rules.
+     *
+     * @return the list of hashes that are previously marked as hidden from other filtering rules.
+     */
+    @ApiStatus.Experimental
+    LongCollection getHiddenExactHashes();
 }

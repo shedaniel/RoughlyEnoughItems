@@ -24,11 +24,15 @@
 package me.shedaniel.rei.plugin.test;
 
 import com.google.common.collect.ImmutableList;
+import dev.architectury.event.events.common.CommandRegistrationEvent;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
+import me.shedaniel.rei.api.client.entry.filtering.base.BasicFilteringRule;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
@@ -39,6 +43,9 @@ import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.item.ItemArgument;
+import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
@@ -55,7 +62,24 @@ import java.util.stream.IntStream;
 @TestOnly
 @Environment(EnvType.CLIENT)
 public class REITestPlugin implements REIClientPlugin {
-    private Random random = new Random();
+    private final Random random = new Random();
+    private BasicFilteringRule.MarkDirty markDirty;
+    
+    public REITestPlugin() {
+        CommandRegistrationEvent.EVENT.register((dispatcher, selection) -> {
+            dispatcher.register(Commands.literal("rei_test_reload_filtering")
+                    .then(Commands.argument("item", ItemArgument.item())
+                            .executes(context -> {
+                                BasicFilteringRule<?> basic = FilteringRuleTypeRegistry.getInstance().basic();
+                                basic.hide(EntryStacks.of(context.getArgument("item", ItemInput.class).createItemStack(1, false)));
+                                return 0;
+                            }))
+                    .executes(context -> {
+                        if (this.markDirty != null) this.markDirty.markDirty();
+                        return 0;
+                    }));
+        });
+    }
     
     @Override
     public void preStage(PluginManager<REIClientPlugin> manager, ReloadStage stage) {
@@ -64,6 +88,7 @@ public class REITestPlugin implements REIClientPlugin {
     
     @Override
     public void registerEntries(EntryRegistry registry) {
+        if (1 + 1 == 2) return;
         int times = 10;
         for (Item item : Registry.ITEM) {
             EntryStack<ItemStack> base = EntryStacks.of(item);
@@ -86,6 +111,19 @@ public class REITestPlugin implements REIClientPlugin {
             registry.group(Registry.ITEM.getKey(item), new TextComponent(Registry.ITEM.getKey(item).toString()),
                     stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(item));
         }
+    }
+    
+    @Override
+    public void registerBasicEntryFiltering(BasicFilteringRule<?> rule) {
+        markDirty = rule.hide(() -> {
+            EntryIngredient.Builder builder = EntryIngredient.builder();
+            for (Item item : Registry.ITEM) {
+                if (random.nextInt() % 10 == 0) {
+                    builder.add(EntryStacks.of(item));
+                }
+            }
+            return builder.build();
+        });
     }
     
     @Override
