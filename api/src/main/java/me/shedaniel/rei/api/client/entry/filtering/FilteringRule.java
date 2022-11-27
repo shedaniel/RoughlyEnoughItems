@@ -23,9 +23,15 @@
 
 package me.shedaniel.rei.api.client.entry.filtering;
 
+import it.unimi.dsi.fastutil.longs.LongCollection;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Collection;
 
 /**
  * A filtering rule type that is used to filter the entries on the entry panel,
@@ -63,4 +69,20 @@ public interface FilteringRule<Cache> {
      * @return the result of the processing
      */
     FilteringResult processFilteredStacks(FilteringContext context, FilteringResultFactory resultFactory, Cache cache, boolean async);
+    
+    /**
+     * Returns whether the entry registry is in its reloading phase.
+     * Registration after the reloading phase will be slow and may not be reflected immediately.
+     *
+     * @return whether the entry registry is in its reloading phase
+     */
+    @ApiStatus.NonExtendable
+    default boolean isReloading() {
+        return EntryRegistry.getInstance().isReloading();
+    }
+    
+    @ApiStatus.NonExtendable
+    default void markDirty(Collection<EntryStack<?>> stacks, @Nullable LongCollection hashes) {
+        EntryRegistry.getInstance().markFilteringRuleDirty(this, stacks, hashes);
+    }
 }

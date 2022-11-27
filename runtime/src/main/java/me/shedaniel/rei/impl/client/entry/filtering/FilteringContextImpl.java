@@ -27,6 +27,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import it.unimi.dsi.fastutil.longs.*;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -69,26 +70,68 @@ public class FilteringContextImpl implements FilteringContext {
     
     @Override
     public Collection<EntryStack<?>> getHiddenStacks() {
-        return getPublicFacing(FilteringContextType.HIDDEN);
+        return getStacksFacing(FilteringContextType.HIDDEN);
     }
     
     @Override
     public Collection<EntryStack<?>> getShownStacks() {
-        return getPublicFacing(FilteringContextType.SHOWN);
+        return getStacksFacing(FilteringContextType.SHOWN);
     }
     
     @Override
     public Collection<EntryStack<?>> getUnsetStacks() {
-        return getPublicFacing(FilteringContextType.DEFAULT);
+        return getStacksFacing(FilteringContextType.DEFAULT);
     }
     
-    private Collection<EntryStack<?>> getPublicFacing(FilteringContextType type) {
+    @Override
+    public LongCollection getHiddenExactHashes() {
+        return getHashesFacing(FilteringContextType.HIDDEN);
+    }
+    
+    @Override
+    public LongCollection getShownExactHashes() {
+        return getHashesFacing(FilteringContextType.SHOWN);
+    }
+    
+    @Override
+    public LongCollection getUnsetExactHashes() {
+        return getHashesFacing(FilteringContextType.DEFAULT);
+    }
+    
+    private Collection<EntryStack<?>> getStacksFacing(FilteringContextType type) {
         Set<HashedEntryStackWrapper> wrappers = this.stacks.get(type);
         if (wrappers == null || wrappers.isEmpty()) return List.of();
         return new AbstractSet<>() {
             @Override
             public Iterator<EntryStack<?>> iterator() {
                 return Iterators.transform(wrappers.iterator(), HashedEntryStackWrapper::unwrap);
+            }
+            
+            @Override
+            public int size() {
+                return wrappers.size();
+            }
+        };
+    }
+    
+    private LongCollection getHashesFacing(FilteringContextType type) {
+        Set<HashedEntryStackWrapper> wrappers = this.stacks.get(type);
+        if (wrappers == null || wrappers.isEmpty()) return LongSets.emptySet();
+        return new AbstractLongSet() {
+            @Override
+            public LongIterator iterator() {
+                Iterator<HashedEntryStackWrapper> iterator = wrappers.iterator();
+                return new AbstractLongIterator() {
+                    @Override
+                    public long nextLong() {
+                        return iterator.next().hashExact();
+                    }
+                    
+                    @Override
+                    public boolean hasNext() {
+                        return iterator.hasNext();
+                    }
+                };
             }
             
             @Override
