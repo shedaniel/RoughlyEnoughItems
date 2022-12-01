@@ -91,6 +91,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CraftingScreen;
@@ -390,9 +391,13 @@ public class RoughlyEnoughItemsCoreClient {
         ClientScreenInputEvent.CHAR_TYPED_PRE.register((minecraftClient, screen, character, keyCode) -> {
             if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
-            if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
-                if (!REIRuntimeImpl.getSearchField().isFocused())
-                    return EventResult.pass();
+            if (!REIRuntimeImpl.getSearchField().isFocused()) {
+                GuiEventListener focused = screen.getFocused();
+                if (focused != null) {
+                    if (focused instanceof EditBox editBox && editBox.isFocused()) return EventResult.pass();
+                    if (focused instanceof RecipeBookComponent book && book.searchBox != null && book.searchBox.isFocused()) return EventResult.pass();
+                }
+            }
             resetFocused(screen);
             if (getOverlay().charTyped(character, keyCode)
                 && resetFocused(screen))
@@ -464,9 +469,13 @@ public class RoughlyEnoughItemsCoreClient {
                     return EventResult.interruptFalse();
                 }
             }
-            if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
-                if (!REIRuntimeImpl.getSearchField().isFocused())
-                    return EventResult.pass();
+            if (!REIRuntimeImpl.getSearchField().isFocused()) {
+                GuiEventListener focused = screen.getFocused();
+                if (focused != null) {
+                    if (focused instanceof EditBox editBox && editBox.isFocused()) return EventResult.pass();
+                    if (focused instanceof RecipeBookComponent book && book.searchBox != null && book.searchBox.isFocused()) return EventResult.pass();
+                }
+            }
             resetFocused(screen);
             if (getOverlay().keyPressed(i, i1, i2)
                 && resetFocused(screen))
@@ -476,9 +485,13 @@ public class RoughlyEnoughItemsCoreClient {
         ClientScreenInputEvent.KEY_RELEASED_PRE.register((minecraftClient, screen, i, i1, i2) -> {
             if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
-            if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
-                if (!REIRuntimeImpl.getSearchField().isFocused())
-                    return EventResult.pass();
+            if (!REIRuntimeImpl.getSearchField().isFocused()) {
+                GuiEventListener focused = screen.getFocused();
+                if (focused != null) {
+                    if (focused instanceof EditBox editBox && editBox.isFocused()) return EventResult.pass();
+                    if (focused instanceof RecipeBookComponent book && book.searchBox != null && book.searchBox.isFocused()) return EventResult.pass();
+                }
+            }
             resetFocused(screen);
             if (getOverlay().keyReleased(i, i1, i2)
                 && resetFocused(screen))
