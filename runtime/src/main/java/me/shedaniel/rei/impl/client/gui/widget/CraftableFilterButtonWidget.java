@@ -51,6 +51,7 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 
@@ -132,7 +133,8 @@ public class CraftableFilterButtonWidget {
                                         
                                         ConfigManagerImpl.getInstance().getConfig().setInputMethodId(new ResourceLocation("rei:default"));
                                     }).join();
-                                    CompletableFuture<Void> future = pair.getValue().prepare(service).whenComplete((unused, throwable) -> {
+                                    double[] progress = {0};
+                                    CompletableFuture<Void> future = pair.getValue().prepare(service, p -> progress[0] = Mth.clamp(p, 0, 1)).whenComplete((unused, throwable) -> {
                                         if (throwable != null) {
                                             InternalLogger.getInstance().error("Failed to prepare input method", throwable);
                                             ConfigManagerImpl.getInstance().getConfig().setInputMethodId(new ResourceLocation("rei:default"));
@@ -141,10 +143,12 @@ public class CraftableFilterButtonWidget {
                                         }
                                     });
                                     Screen screen = Minecraft.getInstance().screen;
-                                    Minecraft.getInstance().setScreen(new ConfigReloadingScreen(new TranslatableComponent("text.rei.input.methods.initializing"),
+                                    ConfigReloadingScreen reloadingScreen = new ConfigReloadingScreen(new TranslatableComponent("text.rei.input.methods.initializing"),
                                             () -> !future.isDone(), () -> {
                                         Minecraft.getInstance().setScreen(screen);
-                                    }));
+                                    });
+                                    reloadingScreen.setSubtitle(() -> new TranslatableComponent("text.rei.input.methods.reload.progress", String.format("%.2f", progress[0] * 100)));
+                                    Minecraft.getInstance().setScreen(reloadingScreen);
                                     future.whenComplete((unused, throwable) -> {
                                         service.shutdown();
                                     });

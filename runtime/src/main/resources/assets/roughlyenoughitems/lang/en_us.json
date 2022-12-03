@@ -78,6 +78,7 @@
   "text.rei.addons": "REI Addons",
   "text.rei.shapeless": "Shapeless",
   "text.rei.input.methods": "Input Methods",
+  "text.rei.input.methods.reload.progress": "Progress: %s%%",
   "text.rei.input.methods.default": "Default",
   "text.rei.input.methods.default.description": "The default input method. This does not transform the search term.",
   "text.rei.input.methods.jyutping": "Jyutping (Cantonese)",

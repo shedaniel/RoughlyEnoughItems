@@ -29,20 +29,27 @@ import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public class ConfigReloadingScreen extends Screen {
     private final Component title;
     private final BooleanSupplier predicate;
-    private Runnable parent;
+    private Supplier<@Nullable Component> subtitle = () -> null;
+    private final Runnable parent;
     
     public ConfigReloadingScreen(Component title, BooleanSupplier predicate, Runnable parent) {
         super(NarratorChatListener.NO_TITLE);
         this.title = title;
         this.predicate = predicate;
         this.parent = parent;
+    }
+    
+    public void setSubtitle(Supplier<@Nullable Component> subtitle) {
+        this.subtitle = subtitle;
     }
     
     @Override
@@ -57,21 +64,17 @@ public class ConfigReloadingScreen extends Screen {
             parent.run();
             return;
         }
-        drawCenteredString(matrices, this.font, title, this.width / 2, this.height / 2 - 50, 16777215);
-        String text;
-        switch ((int) (Util.getMillis() / 300L % 4L)) {
-            case 0:
-            default:
-                text = "O o o";
-                break;
-            case 1:
-            case 3:
-                text = "o O o";
-                break;
-            case 2:
-                text = "o o O";
+        drawCenteredString(matrices, this.font, title, this.width / 2, this.height / 2 - 50, 0xffffff);
+        String text = switch ((int) (Util.getMillis() / 300L % 4L)) {
+            case 1, 3 -> "o O o";
+            case 2 -> "o o O";
+            default -> "O o o";
+        };
+        drawCenteredString(matrices, this.font, text, this.width / 2, this.height / 2 - 50 + 9, 0x808080);
+        Component subtitle = this.subtitle.get();
+        if (subtitle != null) {
+            drawCenteredString(matrices, this.font, subtitle, this.width / 2, this.height / 2 - 50 + 9 + 9, 0x808080);
         }
-        drawCenteredString(matrices, this.font, text, this.width / 2, this.height / 2 - 41, 8421504);
         super.render(matrices, mouseX, mouseY, delta);
     }
 }
