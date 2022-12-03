@@ -45,9 +45,8 @@ public interface CharacterUnpackingInputMethod extends InputMethod<IntList> {
     default String suggestInputString(String str) {
         return str.codePoints().mapToObj(c -> {
             List<ExpendedChar> chars = expendSourceChar(c);
-            String result;
-            if (chars.isEmpty()) return result = ((char) c) + "";
-            result = chars.get(0).phonemes().stream()
+            if (chars.isEmpty()) return ((char) c) + "";
+            String result = chars.get(0).phonemes().stream()
                     .flatMap(integers -> integers.intStream().mapToObj(value -> ((char) value) + ""))
                     .collect(Collectors.joining());
             if (result.codePointCount(0, result.length()) == 1 && result.codePointAt(0) == c) {

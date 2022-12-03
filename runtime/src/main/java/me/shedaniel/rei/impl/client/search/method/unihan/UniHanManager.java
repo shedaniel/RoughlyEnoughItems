@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.search.method.unihan;
 
+import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
@@ -50,10 +51,18 @@ public class UniHanManager {
         return Files.exists(unihanPath);
     }
     
-    public void download() {
+    public void download(InputMethod.ProgressCallback progressCallback) {
+        try {
+            download("https://www.shedaniel.moe/uoAqECzbQo5s.zip", progressCallback);
+        } catch (Exception e) {
+            download("https://www.unicode.org/Public/UCD/latest/ucd/Unihan.zip", progressCallback);
+        }
+    }
+    
+    public void download(String URL, InputMethod.ProgressCallback progressCallback) {
         if (downloaded()) return;
         try {
-            URL url = new URL("https://www.unicode.org/Public/UCD/latest/ucd/Unihan.zip");
+            URL url = new URL("https://shedaniel.moe/uoAqECzbQo5s.zip");
             Files.deleteIfExists(unihanPath);
             Path parent = unihanPath.getParent();
             if (parent != null) Files.createDirectories(parent);
@@ -74,6 +83,7 @@ public class UniHanManager {
                     lastPercent = percent;
                     InternalLogger.getInstance().debug("Downloading UniHan Progress: %d%%".formatted(percent));
                 }
+                progressCallback.onProgress(progress);
                 bufferedStream.write(data, 0, x);
             }
             bufferedStream.close();

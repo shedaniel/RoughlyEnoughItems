@@ -50,9 +50,15 @@ public abstract class UniHanInputMethod implements InputMethod<IntList> {
     
     @Override
     public CompletableFuture<Void> prepare(Executor executor) {
+        return this.prepare(executor, p -> {});
+    }
+    
+    @Override
+    public CompletableFuture<Void> prepare(Executor executor, ProgressCallback progressCallback) {
         return dispose(executor)
-                .thenRunAsync(manager::download, executor)
-                .thenRunAsync(this::load, executor);
+                .thenRunAsync(() -> manager.download(p -> progressCallback.onProgress(p * 0.99)), executor)
+                .thenRunAsync(this::load, executor)
+                .whenComplete((aVoid, throwable) -> progressCallback.onProgress(1.0));
     }
     
     public void load() {
