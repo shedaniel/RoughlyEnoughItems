@@ -29,11 +29,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.impl.client.gui.InternalTextures;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.common.util.ImmutableTextComponent;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
-import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
@@ -45,20 +45,25 @@ import java.util.function.Supplier;
 public class SubMenuEntry extends AbstractMenuEntry {
     public final Component text;
     private int textWidth = -69;
-    protected List<MenuEntry> entries;
+    protected List<FavoriteMenuEntry> entries;
+    protected Menu parent;
     protected Menu childMenu;
     
     public SubMenuEntry(Component text) {
         this(text, Collections.emptyList());
     }
     
-    public SubMenuEntry(Component text, Supplier<List<MenuEntry>> entries) {
+    public SubMenuEntry(Component text, Supplier<List<FavoriteMenuEntry>> entries) {
         this(text, entries.get());
     }
     
-    public SubMenuEntry(Component text, List<MenuEntry> entries) {
+    public SubMenuEntry(Component text, List<FavoriteMenuEntry> entries) {
         this.text = MoreObjects.firstNonNull(text, ImmutableTextComponent.EMPTY);
         this.entries = entries;
+    }
+    
+    public void setParent(Menu parent) {
+        this.parent = parent;
     }
     
     private int getTextWidth() {
@@ -70,7 +75,7 @@ public class SubMenuEntry extends AbstractMenuEntry {
     
     public Menu getChildMenu() {
         if (childMenu == null) {
-            this.childMenu = new Menu(new Rectangle(getParent().getBounds().x + 1, getY() - 1, getParent().getBounds().width - 2, getEntryHeight() - 2), entries, false);
+            this.childMenu = new Menu(new Rectangle(parent.getBounds().x + 1, getY() - 1, parent.getBounds().width - 2, getEntryHeight() - 2), entries, false);
         }
         return childMenu;
     }
@@ -92,11 +97,11 @@ public class SubMenuEntry extends AbstractMenuEntry {
             if (!entries.isEmpty()) {
                 Menu menu = getChildMenu();
                 
-                Rectangle menuStart = new Rectangle(getParent().getBounds().x, getY(), getParent().getBounds().width, getEntryHeight());
+                Rectangle menuStart = new Rectangle(parent.getBounds().x, getY(), parent.getBounds().width, getEntryHeight());
                 
                 int fullWidth = Minecraft.getInstance().screen.width;
                 int fullHeight = Minecraft.getInstance().screen.height;
-                boolean facingRight = getParent().facingRight;
+                boolean facingRight = parent.facingRight;
                 int menuWidth = menu.getMaxEntryWidth() + 2 + (menu.hasScrollBar() ? 6 : 0);
                 if (facingRight && fullWidth - menuStart.getMaxX() < menuWidth + 10) {
                     facingRight = false;

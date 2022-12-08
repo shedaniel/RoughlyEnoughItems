@@ -61,10 +61,7 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.search.method.DefaultInputMethod;
-import me.shedaniel.rei.impl.client.search.method.unihan.BomopofoInputMethod;
-import me.shedaniel.rei.impl.client.search.method.unihan.JyutpingInputMethod;
-import me.shedaniel.rei.impl.client.search.method.unihan.PinyinInputMethod;
-import me.shedaniel.rei.impl.client.search.method.unihan.UniHanManager;
+import me.shedaniel.rei.impl.client.search.method.unihan.*;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryListener;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
@@ -178,6 +175,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         registry.add(new ResourceLocation("rei:pinyin"), new PinyinInputMethod(manager));
         registry.add(new ResourceLocation("rei:jyutping"), new JyutpingInputMethod(manager));
         registry.add(new ResourceLocation("rei:bomopofo"), new BomopofoInputMethod(manager));
+        registry.add(new ResourceLocation("rei:double_pinyin"), new DoublePinyinInputMethod(manager));
     }
     
     private enum EntryStackFavoriteType implements FavoriteEntryType<EntryStackFavoriteEntry> {

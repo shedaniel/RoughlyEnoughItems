@@ -280,6 +280,15 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public boolean doDisplayIMEHints() {
+        return advanced.tooltips.displayIMEHints;
+    }
+    
+    public void setDoDisplayIMEHints(boolean displayIMEHints) {
+        advanced.tooltips.displayIMEHints = displayIMEHints;
+    }
+    
+    @Override
     public boolean doesFastEntryRendering() {
         return advanced.miscellaneous.newFastEntryRendering;
     }
@@ -661,6 +670,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         public static class Tooltips {
             @Comment("Declares whether REI should append mod names to entries.") private boolean appendModNames = true;
             @Comment("Declares whether favorites tooltip should be displayed.") private boolean displayFavoritesTooltip = false;
+            @ConfigEntry.Gui.Excluded private boolean displayIMEHints = true;
         }
         
         public static class Layout {

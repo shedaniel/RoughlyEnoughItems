@@ -23,14 +23,29 @@
 
 package me.shedaniel.rei.api.client.favorites;
 
+import dev.architectury.utils.value.BooleanValue;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 @Environment(EnvType.CLIENT)
 public abstract class FavoriteMenuEntry extends Widget {
+    @ApiStatus.Experimental
+    public static FavoriteMenuEntry createSubMenu(Component text, List<FavoriteMenuEntry> entries) {
+        return ClientInternals.createSubMenuEntry(text, entries);
+    }
+    
+    @ApiStatus.Experimental
+    public static FavoriteMenuEntry createToggle(Component text, BooleanValue value) {
+        return ClientInternals.createToggleEntry(text, value);
+    }
+    
     @Nullable
     @ApiStatus.Internal
     public Runnable closeMenu = null;

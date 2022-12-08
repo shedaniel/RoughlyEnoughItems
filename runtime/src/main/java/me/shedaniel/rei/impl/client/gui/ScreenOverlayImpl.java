@@ -59,6 +59,7 @@ import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.PaginatedEntryListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.ScrolledEntryListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
+import me.shedaniel.rei.impl.client.gui.widget.hint.HintsContainerWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import me.shedaniel.rei.impl.common.util.RectangleUtils;
 import net.minecraft.client.Minecraft;
@@ -86,10 +87,11 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     private Rectangle bounds;
     private Window window;
     private Widget configButton;
-    private CurrentDraggingStack draggingStack = new CurrentDraggingStack();
+    private final CurrentDraggingStack draggingStack = new CurrentDraggingStack();
     @Nullable
     public DefaultDisplayChoosePageWidget choosePageWidget;
-    private MenuHolder menuHolder = new MenuHolder();
+    private final MenuHolder menuHolder = new MenuHolder();
+    private final HintsContainerWidget hintsWidget = new HintsContainerWidget();
     
     public static EntryListWidget getEntryListWidget() {
         boolean widgetScrolled = ConfigObject.getInstance().isEntryListWidgetScrolled();
@@ -118,7 +120,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public static ScreenOverlayImpl getInstance() {
-        return (ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().get();
+        return (ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().orElseThrow();
     }
     
     public void tick() {
@@ -183,6 +185,8 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         }
         
         this.widgets.add(draggingStack);
+        this.widgets.add(InternalWidgets.wrapLateRenderable(hintsWidget));
+        this.hintsWidget.init();
     }
     
     private Rectangle getSearchFieldArea() {
@@ -294,6 +298,8 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             for (Widget widget : widgets) {
                 if (widget instanceof LateRenderable && widget != menuHolder.widget())
                     widget.render(matrices, mouseX, mouseY, delta);
+                else if (widget instanceof OverlaySearchField field)
+                    field.laterRender(matrices, mouseX, mouseY, delta);
             }
             matrices.pushPose();
             matrices.translate(0, 0, 500);
@@ -347,6 +353,8 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             return false;
         if (menuHolder.mouseScrolled(mouseX, mouseY, amount))
             return true;
+        if (hintsWidget.mouseScrolled(mouseX, mouseY, amount))
+            return true;
         if (isInside(mouseX, mouseY) && getEntryListWidget().mouseScrolled(mouseX, mouseY, amount)) {
             return true;
         }
@@ -357,6 +365,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         for (Widget widget : widgets)
             if (widget != getEntryListWidget() && (favoritesListWidget == null || widget != favoritesListWidget)
                 && widget != menuHolder.widget()
+                && widget != hintsWidget
                 && widget.mouseScrolled(mouseX, mouseY, amount))
                 return true;
         return false;
@@ -488,6 +497,13 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
                 REIRuntimeImpl.getSearchField().setFocused(false);
                 return true;
             }
+            if (hintsWidget.mouseClicked(mouseX, mouseY, button)) {
+                this.setFocused(hintsWidget);
+                if (button == 0)
+                    this.setDragging(true);
+                REIRuntimeImpl.getSearchField().setFocused(false);
+                return true;
+            }
         }
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             Screen screen = Minecraft.getInstance().screen;
@@ -500,7 +516,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             return false;
         }
         for (GuiEventListener element : widgets) {
-            if (element != configButton && element != menuHolder.widget() && element.mouseClicked(mouseX, mouseY, button)) {
+            if (element != configButton && element != menuHolder.widget() && element != hintsWidget && element.mouseClicked(mouseX, mouseY, button)) {
                 this.setFocused(element);
                 if (button == 0)
                     this.setDragging(true);
@@ -567,5 +583,9 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     
     public MenuAccess menuAccess() {
         return menuHolder;
+    }
+    
+    public HintsContainerWidget getHintsContainer() {
+        return this.hintsWidget;
     }
 }

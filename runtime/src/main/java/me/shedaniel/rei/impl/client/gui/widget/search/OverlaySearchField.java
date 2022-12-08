@@ -37,6 +37,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -149,8 +150,6 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         progress.update(delta);
         RenderSystem.disableDepthTest();
         if (isMain) drawHint(matrices, mouseX, mouseY);
-        setSuggestion(!isFocused() && getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
-        super.render(matrices, mouseX, mouseY, delta);
         RenderSystem.enableDepthTest();
     }
     
@@ -192,8 +191,11 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                     return Color.ofRGBA(r, g, b, (color1.getAlpha() + color2.getAlpha()) / 2);
                 }).orElse(Color.ofTransparent(0x50000000));
         int height = 6 + font.lineHeight * sequences.size() + (hasProgress ? 2 : 0) + (buttons.isEmpty() ? 0 : (int) Math.ceil(buttons.size() / 3.0) * 20);
+        boolean top = ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE;
         int x = getBounds().getX() + 2;
-        int y = getBounds().getY() - height;
+        int y = getBounds().getY() + (top ? getBounds().getHeight() : -height);
+        if (new Rectangle(x - 1, y - 1, width + 2, height + 2).contains(mouseX, mouseY))
+            ScreenOverlayImpl.getInstance().clearTooltips();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -202,15 +204,15 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         int background = 0xf0100010;
         int color1 = color.getColor();
         int color2 = color.darker(2).getColor();
-        fillGradient(pose, bufferBuilder, x, y - 1, x + width, y, 400, background, background);
-        fillGradient(pose, bufferBuilder, x, y + height, x + width, y + height + 1, 400, background, background);
+        if (!top) fillGradient(pose, bufferBuilder, x, y - 1, x + width, y, 400, background, background);
+        if (top) fillGradient(pose, bufferBuilder, x, y + height, x + width, y + height + 1, 400, background, background);
         fillGradient(pose, bufferBuilder, x, y, x + width, y + height, 400, background, background);
         fillGradient(pose, bufferBuilder, x - 1, y, x, y + height, 400, background, background);
         fillGradient(pose, bufferBuilder, x + width, y, x + width + 1, y + height, 400, background, background);
         fillGradient(pose, bufferBuilder, x, y + 1, x + 1, y + height - 1, 400, color1, color2);
         fillGradient(pose, bufferBuilder, x + width - 1, y + 1, x + width, y + height - 1, 400, color1, color2);
-        fillGradient(pose, bufferBuilder, x, y, x + width, y + 1, 400, color1, color1);
-        fillGradient(pose, bufferBuilder, x, y + height - 1, x + width, y + height, 400, color2, color2);
+        if (!top) fillGradient(pose, bufferBuilder, x, y, x + width, y + 1, 400, color1, color1);
+        if (top) fillGradient(pose, bufferBuilder, x, y + height - 1, x + width, y + height, 400, color2, color2);
         
         if (hasProgress) {
             int progressWidth = (int) Math.round(width * this.progress.doubleValue());
@@ -363,6 +365,9 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        laterRender(matrices, mouseX, mouseY, delta);
+        RenderSystem.disableDepthTest();
+        setSuggestion(!isFocused() && getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
+        super.render(matrices, mouseX, mouseY, delta);
+        RenderSystem.enableDepthTest();
     }
 }

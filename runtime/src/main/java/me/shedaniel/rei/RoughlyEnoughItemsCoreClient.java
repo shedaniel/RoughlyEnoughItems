@@ -34,6 +34,7 @@ import dev.architectury.event.events.client.ClientGuiEvent;
 import dev.architectury.event.events.client.ClientRecipeUpdateEvent;
 import dev.architectury.event.events.client.ClientScreenInputEvent;
 import dev.architectury.networking.NetworkManager;
+import dev.architectury.utils.value.BooleanValue;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -41,6 +42,7 @@ import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
@@ -67,6 +69,8 @@ import me.shedaniel.rei.impl.client.entry.renderer.EntryRendererRegistryImpl;
 import me.shedaniel.rei.impl.client.favorites.DelegatingFavoriteEntryProviderImpl;
 import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.modules.entries.SubMenuEntry;
+import me.shedaniel.rei.impl.client.gui.modules.entries.ToggleMenuEntry;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.client.gui.widget.TooltipContextImpl;
@@ -154,6 +158,8 @@ public class RoughlyEnoughItemsCoreClient {
         ClientInternals.attachInstance((BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip>) QueuedTooltip::impl, "tooltipProvider");
         ClientInternals.attachInstance((TriFunction<Point, @Nullable TooltipFlag, Boolean, TooltipContext>) TooltipContextImpl::new, "tooltipContextProvider");
         ClientInternals.attachInstance((Function<Object, Tooltip.Entry>) QueuedTooltip.TooltipEntryImpl::new, "tooltipEntryProvider");
+        ClientInternals.attachInstance((BiFunction<Component, List<FavoriteMenuEntry>, FavoriteMenuEntry>) SubMenuEntry::new, "subMenuEntry");
+        ClientInternals.attachInstance((BiFunction<Component, BooleanValue, FavoriteMenuEntry>) (text, value) -> ToggleMenuEntry.of(text, value::get, value), "toggleEntry");
         ClientInternals.attachInstance((Function<@Nullable Boolean, ClickArea.Result>) successful -> new ClickArea.Result() {
             private List<CategoryIdentifier<?>> categories = Lists.newArrayList();
             private BooleanSupplier execute = () -> {

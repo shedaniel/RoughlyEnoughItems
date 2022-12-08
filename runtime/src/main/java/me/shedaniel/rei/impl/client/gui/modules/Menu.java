@@ -31,7 +31,9 @@ import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.entries.SubMenuEntry;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import net.minecraft.client.Minecraft;
@@ -50,12 +52,12 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     public final Point menuStartPoint;
     public final boolean facingRight;
     public final boolean facingDownwards;
-    private final List<MenuEntry> entries = Lists.newArrayList();
+    private final List<FavoriteMenuEntry> entries = Lists.newArrayList();
     public final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
         public int getMaxScrollHeight() {
             int i = 0;
-            for (MenuEntry entry : children()) {
+            for (FavoriteMenuEntry entry : children()) {
                 i += entry.getEntryHeight();
             }
             return i;
@@ -72,7 +74,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
         }
     };
     
-    public Menu(Rectangle menuStart, Collection<MenuEntry> entries, boolean sort) {
+    public Menu(Rectangle menuStart, Collection<FavoriteMenuEntry> entries, boolean sort) {
         buildEntries(entries, sort);
         int fullWidth = Minecraft.getInstance().screen.width;
         int fullHeight = Minecraft.getInstance().screen.height;
@@ -91,16 +93,18 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
         this.menuStartPoint = new Point(x, y);
     }
     
-    @SuppressWarnings("deprecation")
-    private void buildEntries(Collection<MenuEntry> entries, boolean sort) {
+    private void buildEntries(Collection<FavoriteMenuEntry> entries, boolean sort) {
         this.entries.clear();
         this.entries.addAll(entries);
         if (sort) {
             this.entries.sort(Comparator.comparing(entry -> entry instanceof SubMenuEntry ? 0 : 1)
                     .thenComparing(entry -> entry instanceof SubMenuEntry menuEntry ? menuEntry.text.getString() : ""));
         }
-        for (MenuEntry entry : this.entries) {
-            entry.parent = this;
+        for (FavoriteMenuEntry entry : this.entries) {
+            entry.closeMenu = ScreenOverlayImpl.getInstance().menuAccess()::close;
+            if (entry instanceof SubMenuEntry menuEntry) {
+                menuEntry.setParent(this);
+            }
         }
     }
     
@@ -123,7 +127,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     
     public int getMaxEntryWidth() {
         int i = 0;
-        for (MenuEntry entry : children()) {
+        for (FavoriteMenuEntry entry : children()) {
             if (entry.getEntryWidth() > i)
                 i = entry.getEntryWidth();
         }
@@ -137,9 +141,9 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
         fill(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), containsMouse(mouseX, mouseY) ? (REIRuntime.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
         fill(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), -16777216);
         boolean contains = innerBounds.contains(mouseX, mouseY);
-        MenuEntry focused = getFocused() instanceof MenuEntry menuEntry ? menuEntry : null;
+        FavoriteMenuEntry focused = getFocused() instanceof FavoriteMenuEntry menuEntry ? menuEntry : null;
         int currentY = innerBounds.y - scrolling.scrollAmountInt();
-        for (MenuEntry child : children()) {
+        for (FavoriteMenuEntry child : children()) {
             boolean containsMouse = contains && mouseY >= currentY && mouseY < currentY + child.getEntryHeight();
             if (containsMouse) {
                 focused = child;
@@ -148,7 +152,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
         }
         currentY = innerBounds.y - scrolling.scrollAmountInt();
         ScissorsHandler.INSTANCE.scissor(scrolling.getScissorBounds());
-        for (MenuEntry child : children()) {
+        for (FavoriteMenuEntry child : children()) {
             boolean rendering = currentY + child.getEntryHeight() >= innerBounds.y && currentY <= innerBounds.getMaxY();
             boolean containsMouse = contains && mouseY >= currentY && mouseY < currentY + child.getEntryHeight();
             child.updateInformation(innerBounds.x, currentY, focused == child || containsMouse, containsMouse, rendering, getMaxEntryWidth());
@@ -183,7 +187,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
             scrolling.offset(ClothConfigInitializer.getScrollStep() * -amount, true);
             return true;
         }
-        for (MenuEntry child : children()) {
+        for (FavoriteMenuEntry child : children()) {
             if (child instanceof SubMenuEntry) {
                 if (child.mouseScrolled(mouseX, mouseY, amount))
                     return true;
@@ -195,7 +199,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     @Override
     public boolean containsMouse(double mouseX, double mouseY) {
         if (super.containsMouse(mouseX, mouseY)) return true;
-        for (MenuEntry child : children()) {
+        for (FavoriteMenuEntry child : children()) {
             if (child.containsMouse(mouseX, mouseY)) {
                 return true;
             }
@@ -204,7 +208,7 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     }
     
     @Override
-    public List<MenuEntry> children() {
+    public List<FavoriteMenuEntry> children() {
         return entries;
     }
 }

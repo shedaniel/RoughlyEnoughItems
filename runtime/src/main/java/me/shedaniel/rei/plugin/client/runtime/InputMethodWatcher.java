@@ -93,12 +93,12 @@ public class InputMethodWatcher implements HintProvider {
     @Override
     public List<HintButton> getButtons() {
         return List.of(
-                new HintButton(new TranslatableComponent("text.rei.input.methods.hint.configure"), bounds -> {
+                new HintButton(new TranslatableComponent("text.rei.hint.configure"), bounds -> {
                     MenuAccess access = ScreenOverlayImpl.getInstance().menuAccess();
                     access.openOrClose(CraftableFilterButtonWidget.FILTER_MENU_UUID, bounds.clone(),
-                            () -> CraftableFilterButtonWidget.createInputMethodEntries(CraftableFilterButtonWidget.getApplicableInputMethods()));
+                            () -> CraftableFilterButtonWidget.createInputMethodEntries(access, CraftableFilterButtonWidget.getApplicableInputMethods()));
                 }),
-                new HintButton(new TranslatableComponent("text.rei.input.methods.hint.ignore"), bounds -> {
+                new HintButton(new TranslatableComponent("text.rei.hint.ignore"), bounds -> {
                     ConfigManagerImpl.getInstance().getConfig().setInputMethodId(new ResourceLocation("rei:default"));
                     ConfigManager.getInstance().saveConfig();
                 })
