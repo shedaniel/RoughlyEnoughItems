@@ -24,11 +24,9 @@
 package me.shedaniel.rei.impl.common.entry.type;
 
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.longs.LongArrayList;
-import it.unimi.dsi.fastutil.longs.LongList;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.longs.*;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
@@ -37,6 +35,7 @@ import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.common.InternalLogger;
+import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.item.Item;
@@ -53,16 +52,15 @@ import java.util.stream.Stream;
 @Environment(EnvType.CLIENT)
 public class EntryRegistryImpl implements EntryRegistry {
     public List<EntryRegistryListener> listeners = Lists.newCopyOnWriteArrayList();
-    private PreFilteredEntryList preFilteredList;
-    private EntryRegistryList registryList;
+    private final EntryRegistryList registryList = new EntryRegistryListImpl();
+    private FilteredEntryList filteredList;
     private LongSet entriesHash;
     private boolean reloading;
     
     public EntryRegistryImpl() {
-        registryList = new NormalEntryRegistryList();
-        entriesHash = new LongOpenHashSet();
-        preFilteredList = new PreFilteredEntryList(this);
-        listeners.add(preFilteredList);
+        this.entriesHash = new LongOpenHashSet();
+        this.filteredList = new PreFilteredEntryList(this, this.registryList);
+        this.listeners.add(this.filteredList);
     }
     
     @Override
@@ -77,21 +75,17 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     public void startReload() {
-        listeners.clear();
-        registryList = new ReloadingEntryRegistryList();
-        entriesHash = new LongOpenHashSet();
-        preFilteredList = new PreFilteredEntryList(this);
-        listeners.add(preFilteredList);
-        reloading = true;
+        this.listeners.clear();
+        this.registryList.collectHashed().clear();
+        this.entriesHash = new LongOpenHashSet();
+        this.filteredList = new PreFilteredEntryList(this, this.registryList);
+        this.listeners.add(filteredList);
+        this.reloading = true;
     }
     
     @Override
     public void endReload() {
-        reloading = false;
-        if (!(registryList instanceof ReloadingEntryRegistryList)) {
-            throw new IllegalStateException("Expected ReloadingEntryRegistryList, got " + registryList.getClass().getName());
-        }
-        registryList = new NormalEntryRegistryList(registryList.stream().filter(((Predicate<EntryStack<?>>) EntryStack::isEmpty).negate()));
+        this.reloading = false;
         refilter();
         REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
         InternalLogger.getInstance().debug("Reloaded entry registry with %d entries and %d filtered entries", size(), getPreFilteredList().size());
@@ -100,6 +94,11 @@ public class EntryRegistryImpl implements EntryRegistry {
     @Override
     public boolean isReloading() {
         return reloading;
+    }
+    
+    @Override
+    public <Cache> void markFilteringRuleDirty(FilteringRule<Cache> cacheFilteringRule, Collection<EntryStack<?>> stacks, @Nullable LongCollection hashes) {
+        this.filteredList.refreshFilteringFor(Set.of(cacheFilteringRule), stacks, hashes);
     }
     
     @Override
@@ -114,12 +113,12 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     public List<EntryStack<?>> getPreFilteredList() {
-        return Collections.unmodifiableList(preFilteredList.getList());
+        return Collections.unmodifiableList(filteredList.getList());
     }
     
     @Override
     public void refilter() {
-        List<EntryStack<?>> stacks = registryList.collect();
+        List<HashedEntryStackWrapper> stacks = registryList.collectHashed();
         
         for (EntryRegistryListener listener : listeners) {
             listener.onReFilter(stacks);
@@ -136,7 +135,8 @@ public class EntryRegistryImpl implements EntryRegistry {
     @ApiStatus.Internal
     @Override
     public Collection<EntryStack<?>> refilterNew(boolean warn, Collection<EntryStack<?>> entries) {
-        return preFilteredList.refilterNew(warn, entries);
+        if (warn) FilteringLogic.warnFiltering();
+        return FilteringLogic.filter(FilteringLogic.getRules(), false, true, entries);
     }
     
     @Override
@@ -211,9 +211,8 @@ public class EntryRegistryImpl implements EntryRegistry {
         List<EntryStack<?>> removedStacks = new ArrayList<>();
         LongList hashes = registryList.needsHash() ? new LongArrayList() : null;
         
-        boolean removed = registryList.removeIf(stack -> {
+        boolean removed = registryList.removeExactIf((stack, hashExact) -> {
             if (((Predicate<EntryStack<?>>) predicate).test(stack)) {
-                long hashExact = EntryStacks.hashExact(stack);
                 entriesHash.remove(hashExact);
                 removedStacks.add(stack);
                 if (hashes != null) hashes.add(hashExact);
@@ -234,37 +233,35 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     public boolean removeEntryExactHashIf(LongPredicate predicate) {
-        LongPredicate entryStackPredicate = hash -> {
+        EntryRegistryList.StackFilteringPredicate entryStackPredicate = (stack, hash) -> {
             if (predicate.test(hash)) {
                 entriesHash.remove(hash);
+                for (EntryRegistryListener listener : listeners) {
+                    listener.removeEntry(stack, hash);
+                }
                 return true;
             }
             
             return false;
         };
-        
-        for (EntryRegistryListener listener : listeners) {
-            listener.removeEntriesIf(stack -> predicate.test(EntryStacks.hashExact(stack)));
-        }
         
         return registryList.removeExactIf(entryStackPredicate);
     }
     
     @Override
     public boolean removeEntryFuzzyHashIf(LongPredicate predicate) {
-        Predicate<EntryStack<?>> entryStackPredicate = stack -> {
+        EntryRegistryList.StackFilteringPredicate entryStackPredicate = (stack, hashExact) -> {
             if (predicate.test(EntryStacks.hashFuzzy(stack))) {
-                entriesHash.remove(EntryStacks.hashExact(stack));
+                entriesHash.remove(hashExact);
+                for (EntryRegistryListener listener : listeners) {
+                    listener.removeEntry(stack, hashExact);
+                }
                 return true;
             }
             
             return false;
         };
         
-        for (EntryRegistryListener listener : listeners) {
-            listener.removeEntriesIf(entryStackPredicate);
-        }
-        
-        return registryList.removeIf(entryStackPredicate);
+        return registryList.removeExactIf(entryStackPredicate);
     }
 }

@@ -98,10 +98,6 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
     @Override
     public void init() {
         super.init();
-        boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
-        boolean isCompactTabButtons = ConfigObject.getInstance().isUsingCompactTabButtons();
-        int tabButtonsSize = isCompactTabButtons ? 10 : 16;
-        int tabSize = isCompactTabs ? 24 : 28;
         this.children().clear();
         this.widgets.clear();
         this.buttonList.clear();
@@ -114,7 +110,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         int guiHeight = Mth.clamp(category.getDisplayHeight() + 40, 166, largestHeight);
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
         
-        this.initTabs();
+        this.initTabs(this.bounds.width);
         this.widgets.addAll(this.tabs.widgets());
         
         List<EntryIngredient> workstations = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getWorkstations();
@@ -164,7 +160,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         this.widgets.addAll(setupDisplay);
         Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getPlusButtonArea();
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
-            this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), Component.literal(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category));
+            this.widgets.add(Widgets.withTranslate(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), Component.literal(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category), 0, 0, 100));
         
         int index = 0;
         for (DisplaySpec recipeDisplay : categoryMap.get(category)) {

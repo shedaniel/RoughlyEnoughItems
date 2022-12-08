@@ -23,30 +23,32 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.utils.value.IntValue;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
-import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
-import me.shedaniel.rei.api.client.gui.widgets.DelegateWidget;
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class TabContainerWidget extends GuiComponent {
     private final Rectangle bounds = new Rectangle();
     private final List<Widget> widgets = new ArrayList<>();
     private final NumberAnimator<Double> scrollAnimator = ValueAnimator.ofDouble();
+    private boolean isCompactTabs;
+    private boolean isCompactTabButtons;
+    private int tabSize;
+    private int tabButtonsSize;
     private int tabsPerPage = 5;
     
     public TabContainerWidget() {
@@ -57,29 +59,79 @@ public class TabContainerWidget extends GuiComponent {
     }
     
     public void updateScroll(List<DisplayCategory<?>> categories, int selectedCategory, long duration) {
-        boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
-        int tabSize = isCompactTabs ? 24 : 28;
-        
-        double curr = scrollAnimator.doubleValue() % (tabSize * categories.size());
-        double newValue1 = selectedCategory * tabSize + Math.floor(scrollAnimator.doubleValue() / (tabSize * categories.size())) * (tabSize * categories.size());
-        double newValue2 = newValue1 - (tabSize * categories.size());
-        double newValue3 = newValue1 + (tabSize * categories.size());
-        
-        Stream.of(newValue1, newValue2, newValue3).min(Comparator.comparingDouble(value -> Math.abs(value - scrollAnimator.doubleValue()))).ifPresent(newValue -> {
-            scrollAnimator.setTo(newValue, duration);
-        });
+        this.initTabsVariables();
+        if (categories.size() <= tabsPerPage) {
+            scrollAnimator.setAs(0d);
+        } else if (selectedCategory < tabsPerPage / 2) {
+            scrollAnimator.setTo(0d, duration);
+        } else if (selectedCategory >= categories.size() - (int) Math.ceil(tabsPerPage / 2)) {
+            scrollAnimator.setTo((categories.size() - tabsPerPage) * tabSize, duration);
+        } else {
+            scrollAnimator.setTo((selectedCategory - (tabsPerPage - 1) / 2.0) * tabSize, duration);
+        }
     }
     
-    public void init(Rectangle bounds, List<DisplayCategory<?>> categories, IntValue categoryPages, IntValue selectedCategory, Runnable reInit) {
+    private void initTabsVariables() {
+        this.isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
+        this.isCompactTabButtons = ConfigObject.getInstance().isUsingCompactTabButtons();
+        this.tabSize = isCompactTabs ? 24 : 28;
+        this.tabButtonsSize = isCompactTabButtons ? 10 : 16;
+    }
+    
+    public void initTabsSize(int width) {
+        this.initTabsVariables();
+        this.tabsPerPage = Mth.floor((width - 6) / tabSize);
+        if (this.tabsPerPage % 2 == 0)
+            this.tabsPerPage--;
+    }
+    
+    public void init(Rectangle scissorsBounds, Rectangle bounds, List<DisplayCategory<?>> categories, IntValue categoryPages, IntValue selectedCategory, Runnable reInit) {
         this.setBounds(bounds);
         this.widgets.clear();
         
-        boolean isCompactTabs = ConfigObject.getInstance().isUsingCompactTabs();
-        int tabSize = isCompactTabs ? 24 : 28;
-        this.tabsPerPage = Mth.floor((this.bounds.getWidth() - 10) / tabSize);
+        initTabsSize(bounds.width);
         
         if (categoryPages.getAsInt() == -1) {
             categoryPages.accept(Math.max(0, selectedCategory.getAsInt() / tabsPerPage()));
+        }
+        
+        if (categories.size() > tabsPerPage) {
+            Button tabLeft, tabRight;
+            this.widgets.add(tabLeft = Widgets.createButton(new Rectangle(bounds.x, bounds.getMaxY() - tabSize + 1 - tabButtonsSize, tabButtonsSize, tabButtonsSize), Component.empty())
+                    .onClick(button -> {
+                        int currentCategoryPage = selectedCategory.getAsInt() / tabsPerPage();
+                        currentCategoryPage = Math.floorMod(currentCategoryPage - 1, categories.size() / tabsPerPage() + 1);
+                        selectedCategory.accept(Mth.clamp(currentCategoryPage * tabsPerPage() + tabsPerPage() / 2,
+                                tabsPerPage() / 2, categories.size() - (int) Math.ceil(tabsPerPage() / 2.0)));
+                    })
+                    .tooltipLine(Component.translatable("text.rei.previous_page")));
+            this.widgets.add(tabRight = Widgets.createButton(new Rectangle(bounds.x + bounds.width - tabButtonsSize - (isCompactTabButtons ? 0 : 1), bounds.getMaxY() - tabSize + 1 - tabButtonsSize, tabButtonsSize, tabButtonsSize), Component.empty())
+                    .onClick(button -> {
+                        int currentCategoryPage = selectedCategory.getAsInt() / tabsPerPage();
+                        currentCategoryPage = Math.floorMod(currentCategoryPage + 1, categories.size() / tabsPerPage() + 1);
+                        selectedCategory.accept(Mth.clamp(currentCategoryPage * tabsPerPage() + tabsPerPage() / 2,
+                                tabsPerPage() / 2, categories.size() - (int) Math.ceil(tabsPerPage() / 2.0)));
+                    })
+                    .tooltipLine(Component.translatable("text.rei.next_page")));
+            
+            this.widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+                Rectangle tabLeftBounds = tabLeft.getBounds();
+                Rectangle tabRightBounds = tabRight.getBounds();
+                if (isCompactTabButtons) {
+                    matrices.pushPose();
+                    matrices.translate(0, 0.5, 0);
+                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_SMALL_TEXTURE);
+                    blit(matrices, tabLeftBounds.x + 2, tabLeftBounds.y + 2, 0, 0, 6, 6, 6, 6);
+                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_SMALL_TEXTURE);
+                    blit(matrices, tabRightBounds.x + 2, tabRightBounds.y + 2, 0, 0, 6, 6, 6, 6);
+                    matrices.popPose();
+                } else {
+                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_TEXTURE);
+                    blit(matrices, tabLeftBounds.x + 4, tabLeftBounds.y + 4, 0, 0, 8, 8, 8, 8);
+                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_TEXTURE);
+                    blit(matrices, tabRightBounds.x + 4, tabRightBounds.y + 4, 0, 0, 8, 8, 8, 8);
+                }
+            }), 0, 0, 1));
         }
         
         this.widgets.add(new Widget() {
@@ -87,53 +139,36 @@ public class TabContainerWidget extends GuiComponent {
             public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
                 scrollAnimator.update(delta);
                 int absLeft = bounds.x + bounds.width / 2 - tabsPerPage() * tabSize / 2;
+                int absRight = bounds.x + bounds.width / 2 + tabsPerPage() * tabSize / 2;
                 int left;
                 if (categories.size() > tabsPerPage()) {
-                    left = bounds.x + bounds.width / 2 - tabSize / 2 - (int) Math.round(scrollAnimator.doubleValue());
+                    left = bounds.x + bounds.width / 2 - Math.min(categories.size(), tabsPerPage()) * tabSize / 2 - (int) Math.round(scrollAnimator.doubleValue());
                     updateScroll(categories, selectedCategory.getAsInt(), 300);
                 } else {
                     left = bounds.x + bounds.width / 2 - categories.size() * tabSize / 2;
                 }
-                int passed = 0;
                 for (TabWidget tab : Widgets.<TabWidget>walk(TabContainerWidget.this.widgets(), widget -> widget instanceof TabWidget)) {
-                    if (categories.size() <= tabsPerPage()) {
-                        tab.getBounds().x = left;
-                        left += tabSize;
-                    } else {
-                        if (left > bounds.getMaxX()) {
-                            while (left > bounds.getMaxX()) {
-                                left -= tabSize * categories.size();
-                            }
-                            tab.getBounds().x = left;
-                            left += tabSize;
-                        } else if (left + tabSize < bounds.x) {
-                            while (left + tabSize < bounds.x) {
-                                left += tabSize * categories.size();
-                            }
-                            tab.getBounds().x = left;
-                            left += tabSize;
-                        } else {
-                            tab.getBounds().x = left;
-                            left += tabSize;
-                        }
-                    }
-                    passed++;
+                    tab.getBounds().x = left;
+                    left += tabSize;
                     
-                    if (tab.getBounds().x > bounds.getMaxX() || tab.getBounds().getMaxX() < bounds.x) {
-                        tab.getBounds().x = -1000;
-                    }
-                    
-                    if (tab.getBounds().getCenterX() <= absLeft + 20) {
-                        tab.opacity = 1 - (absLeft + 20 - tab.getBounds().getCenterX()) / 20f;
-                        tab.opacity = (float) Math.pow(Mth.clamp(tab.opacity, 0, 1), 0.9);
-                    } else if (tab.getBounds().getCenterX() >= absLeft + tabsPerPage() * tabSize - 20) {
-                        tab.opacity = 1 - (tab.getBounds().getCenterX() - (absLeft + tabsPerPage() * tabSize - 20)) / 20f;
-                        tab.opacity = (float) Math.pow(Mth.clamp(tab.opacity, 0, 1), 0.9);
+                    if (tab.isSelected()) {
+                        tab.opacity = 1;
+                    } else if (tab.getBounds().getCenterX() <= absLeft) {
+                        tab.opacity = 1 - (absLeft - tab.getBounds().getCenterX()) / 20f;
+                        tab.opacity = (float) Math.pow(Mth.clamp(tab.opacity, 0, 1), 1.2);
+                    } else if (tab.getBounds().getCenterX() >= absRight) {
+                        tab.opacity = 1 - (tab.getBounds().getCenterX() - absRight) / 20f;
+                        tab.opacity = (float) Math.pow(Mth.clamp(tab.opacity, 0, 1), 1.2);
                     } else {
                         tab.opacity = 1;
                     }
                     
                     if (tab.opacity < 0.1) {
+                        tab.opacity = 0;
+                    }
+                    
+                    if (tab.opacity == 0 || tab.getBounds().x > bounds.getMaxX() || tab.getBounds().getMaxX() < bounds.x) {
+                        tab.getBounds().x = -1000;
                         tab.opacity = 0;
                     }
                 }
@@ -184,7 +219,7 @@ public class TabContainerWidget extends GuiComponent {
             this.widgets.add(new DelegateWidget(tab) {
                 @Override
                 public void render(PoseStack poseStack, int mouseX, int mouseY, float delta) {
-                    try (CloseableScissors scissors = Widget.scissor(poseStack, new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height + 4))) {
+                    try (CloseableScissors scissors = Widget.scissor(poseStack, new Rectangle(scissorsBounds.x, scissorsBounds.y, scissorsBounds.width, scissorsBounds.height + 4))) {
                         super.render(poseStack, mouseX, mouseY, delta);
                     }
                 }
@@ -198,5 +233,13 @@ public class TabContainerWidget extends GuiComponent {
     
     public int tabsPerPage() {
         return tabsPerPage;
+    }
+    
+    public int tabButtonsSize() {
+        return tabButtonsSize;
+    }
+    
+    public int tabSize() {
+        return tabSize;
     }
 }

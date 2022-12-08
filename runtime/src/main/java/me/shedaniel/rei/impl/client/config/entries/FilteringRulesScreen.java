@@ -23,13 +23,23 @@
 
 package me.shedaniel.rei.impl.client.config.entries;
 
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextType;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
+import me.shedaniel.rei.impl.client.entry.filtering.rules.SearchFilteringRuleType;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
+import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import me.shedaniel.rei.impl.common.entry.type.FilteringLogic;
+import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -42,11 +52,11 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class FilteringRulesScreen extends Screen {
     private final FilteringEntry entry;
@@ -184,7 +194,7 @@ public class FilteringRulesScreen extends Screen {
         
         public DefaultRuleEntry(FilteringRule<?> rule, FilteringEntry entry, Function<Screen, Screen> screenFunction) {
             super(rule);
-            this.screenFunction = (screenFunction == null ? ((FilteringRuleType<FilteringRule<?>>) rule.getType()).createEntryScreen(rule) : screenFunction);
+            this.screenFunction = Objects.requireNonNullElseGet(screenFunction == null ? ((FilteringRuleType<FilteringRule<?>>) rule.getType()).createEntryScreen(rule) : screenFunction, () -> placeholderScreen(rule));
             configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
                 entry.edited = true;
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(Minecraft.getInstance().screen));
@@ -249,5 +259,37 @@ public class FilteringRulesScreen extends Screen {
         public List<? extends NarratableEntry> narratables() {
             return Arrays.asList(configureButton, deleteButton);
         }
+    }
+    
+    private static <Cache> Function<Screen, Screen> placeholderScreen(FilteringRule<Cache> r) {
+        class PlaceholderScreen extends FilteringRuleOptionsScreen<FilteringRule<Cache>> {
+            public PlaceholderScreen(Screen parent) {
+                super(r, parent);
+            }
+            
+            @Override
+            public void addEntries(Consumer<RuleEntry> entryConsumer) {
+                addEmpty(entryConsumer, 10);
+                Function<Boolean, Component> function = bool -> {
+                    return Component.translatable("rule.roughlyenoughitems.filtering.search.show." + bool);
+                };
+                Map<FilteringContextType, Set<HashedEntryStackWrapper>> stacks = FilteringLogic.hidden(FilteringLogic.getRules(), false, false, EntryRegistry.getInstance().getEntryStacks().collect(Collectors.toList()));
+                
+                entryConsumer.accept(new SubRulesEntry(rule, () -> function.apply(true),
+                        Collections.singletonList(new SearchFilteringRuleType.EntryStacksRuleEntry(rule,
+                                Suppliers.ofInstance(CollectionUtils.map(stacks.get(FilteringContextType.SHOWN),
+                                        stack -> (EntryWidget) Widgets.createSlot(new Rectangle(0, 0, 18, 18)).disableBackground().entry(stack.unwrap().normalize())))))));
+                addEmpty(entryConsumer, 10);
+                entryConsumer.accept(new SubRulesEntry(rule, () -> function.apply(false),
+                        Collections.singletonList(new SearchFilteringRuleType.EntryStacksRuleEntry(rule,
+                                Suppliers.ofInstance(CollectionUtils.map(stacks.get(FilteringContextType.HIDDEN),
+                                        stack -> (EntryWidget) Widgets.createSlot(new Rectangle(0, 0, 18, 18)).disableBackground().entry(stack.unwrap().normalize())))))));
+            }
+            
+            @Override
+            public void save() {
+            }
+        }
+        return PlaceholderScreen::new;
     }
 }

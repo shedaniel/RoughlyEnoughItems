@@ -21,36 +21,23 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.entry.filtering.base;
+package me.shedaniel.rei.impl.common.entry.type;
 
-import me.shedaniel.rei.api.client.entry.filtering.FilteringResult;
+import it.unimi.dsi.fastutil.longs.LongCollection;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
-import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.registry.Reloadable;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.function.Supplier;
+import java.util.List;
+import java.util.Set;
 
-/**
- * The basic filtering rule that can be used to filter entries,
- * without registering a new filtering rule type, for external
- * plugins.
- *
- * @param <Cache> the cache type
- */
-@ApiStatus.Experimental
-@Environment(EnvType.CLIENT)
-public interface BasicFilteringRule<Cache> extends Reloadable<REIClientPlugin>, FilteringRule<Cache>, FilteringResult {
-    MarkDirty hide(Supplier<Collection<EntryStack<?>>> provider);
+public interface FilteredEntryList extends EntryRegistryListener {
+    void refreshFilteringFor(@Nullable Set<FilteringRule<?>> refilterRules, Collection<EntryStack<?>> stack, @Nullable LongCollection hashes);
     
-    MarkDirty show(Supplier<Collection<EntryStack<?>>> provider);
+    void refreshFilteringFor(boolean log, @Nullable Set<FilteringRule<?>> refilterRules, Collection<EntryStack<?>> stacks, @Nullable LongCollection hashes);
     
-    @ApiStatus.NonExtendable
-    interface MarkDirty {
-        void markDirty();
-    }
+    List<EntryStack<?>> getList();
+    
+    boolean isFiltered(EntryStack<?> stack, long hashExact);
 }

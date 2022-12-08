@@ -60,6 +60,7 @@ import me.shedaniel.rei.impl.client.gui.widget.entrylist.PaginatedEntryListWidge
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.ScrolledEntryListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
+import me.shedaniel.rei.impl.common.util.RectangleUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -275,12 +276,21 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             bounds.width = maxWidth;
         }
         
-        return bounds;
+        return avoidButtons(bounds);
+    }
+    
+    private static Rectangle avoidButtons(Rectangle bounds) {
+        int buttonsHeight = 2;
+        if (REIRuntime.getInstance().getContextualSearchFieldLocation() == SearchFieldLocation.TOP_SIDE) buttonsHeight += 24;
+        if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) buttonsHeight += 22;
+        Rectangle area = REIRuntime.getInstance().calculateEntryListArea(bounds).clone();
+        area.height = buttonsHeight;
+        return RectangleUtils.excludeZones(bounds, ScreenRegistry.getInstance().exclusionZones().getExclusionZones(Minecraft.getInstance().screen).stream()
+                .filter(zone -> zone.intersects(area)));
     }
     
     public void lateRender(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (REIRuntime.getInstance().isOverlayVisible() && hasSpace()) {
-            REIRuntimeImpl.getSearchField().laterRender(matrices, mouseX, mouseY, delta);
             for (Widget widget : widgets) {
                 if (widget instanceof LateRenderable && widget != menuHolder.widget())
                     widget.render(matrices, mouseX, mouseY, delta);

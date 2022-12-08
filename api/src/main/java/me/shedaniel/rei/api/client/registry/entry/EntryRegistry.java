@@ -23,6 +23,8 @@
 
 package me.shedaniel.rei.api.client.registry.entry;
 
+import it.unimi.dsi.fastutil.longs.LongCollection;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
@@ -209,4 +211,7 @@ public interface EntryRegistry extends Reloadable<REIClientPlugin> {
      * @return whether the registry is in its reloading phase
      */
     boolean isReloading();
+    
+    @ApiStatus.Experimental
+    <Cache> void markFilteringRuleDirty(FilteringRule<Cache> cacheFilteringRule, Collection<EntryStack<?>> stacks, @Nullable LongCollection hashes);
 }

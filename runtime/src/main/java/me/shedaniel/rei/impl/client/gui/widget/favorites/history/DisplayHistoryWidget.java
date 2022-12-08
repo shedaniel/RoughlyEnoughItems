@@ -127,8 +127,8 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     }
     
     private void drawHorizontalDashedLine(PoseStack poses, int x1, int x2, int y, int color, boolean reverse) {
-        float offset = (System.currentTimeMillis() % 600) / 100.0F;
-        if (!reverse) offset = 6 - offset;
+        float offset = (System.currentTimeMillis() % 700) / 100.0F;
+        if (!reverse) offset = 7 - offset;
         
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();
@@ -157,8 +157,8 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     }
     
     private void drawVerticalDashedLine(PoseStack poses, int x, int y1, int y2, int color, boolean reverse) {
-        float offset = (System.currentTimeMillis() % 600) / 100.0F;
-        if (!reverse) offset = 6 - offset;
+        float offset = (System.currentTimeMillis() % 700) / 100.0F;
+        if (!reverse) offset = 7 - offset;
         
         RenderSystem.disableTexture();
         RenderSystem.enableBlend();

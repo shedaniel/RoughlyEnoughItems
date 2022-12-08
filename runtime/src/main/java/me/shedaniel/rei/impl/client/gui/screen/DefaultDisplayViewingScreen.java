@@ -38,6 +38,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -72,20 +73,37 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
+    private static final int INNER_PADDING_Y = 36;
+    private static final int OUTER_PADDING_TOP = 2;
+    private static final int OUTER_PADDING_BOTTOM = 2;
+    private static final int DISPLAY_GAP = 4;
     private final Map<Rectangle, Pair<DisplaySpec, List<Widget>>> recipeBounds = Maps.newHashMap();
     private List<Widget> widgets = Lists.newArrayList();
     public int page;
     @Nullable
     private Panel workingStationsBaseWidget;
     private Button recipeBack, recipeNext, categoryBack, categoryNext;
+    private final int bestWidthDisplay;
     
     public DefaultDisplayViewingScreen(Map<DisplayCategory<?>, List<DisplaySpec>> categoriesMap, @Nullable CategoryIdentifier<?> category) {
         super(categoriesMap, category);
         this.bounds = new Rectangle(0, 0, 176, 150);
+        //noinspection RedundantCast
+        List<Integer> list = CollectionUtils.mapAndFilter(categoriesMap.entrySet(), Objects::nonNull, entry -> ((Optional<Integer>) CollectionUtils.<DisplaySpec, Integer>mapAndMax(entry.getValue(),
+                display -> ((DisplayCategory<Display>) entry.getKey()).getDisplayWidth(display.provideInternalDisplay()), Comparator.naturalOrder())).orElse(null));
+        list.sort(Comparator.naturalOrder());
+        int mode = list.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting())).entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(150);
+        int median = list.size() % 2 == 0 ? (list.get(list.size() / 2) + list.get(list.size() / 2 - 1)) / 2 : list.get(list.size() / 2);
+        this.bestWidthDisplay = (int) Math.round((mode * 0.5 + median * 1.5) / 2.0);
     }
     
     @Override
@@ -130,24 +148,28 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         this.children().clear();
         this.recipeBounds.clear();
         this.widgets.clear();
-        int largestHeight = Math.min(Math.max(height - 34 - 30, 100), ConfigObject.getInstance().getMaxRecipesPageHeight());
-        int maxWidthDisplay = CollectionUtils.<DisplaySpec, Integer>mapAndMax(getCurrentDisplayed(), display -> getCurrentCategory().getDisplayWidth(display.provideInternalDisplay()), Comparator.naturalOrder()).orElse(150);
-        int maxHeight = Math.min(largestHeight, CollectionUtils.<DisplayCategory<?>, Integer>mapAndMax(categories,
-                category -> (category.getDisplayHeight() + 4) * Math.max(1, Math.min(getRecipesPerPage(largestHeight, category) + 1, Math.max(categoryMap.get(category).size(), ConfigObject.getInstance().getMaxRecipePerPage()))) + 36, Comparator.naturalOrder()).orElse(66));
-        int totalDisplayHeight = (getCurrentCategory().getDisplayHeight() + 4) * Math.max(1, getRecipesPerPage(maxHeight, getCurrentCategory()) + 1) + 36;
-        int guiWidth = Math.max(maxWidthDisplay + 10 + 14 + 14, 190);
-        this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - maxHeight / 2, guiWidth, maxHeight);
+//        int maxWidthDisplay = CollectionUtils.<DisplaySpec, Integer>mapAndMax(getCurrentDisplayed(), display -> getCurrentCategory().getDisplayWidth(display.provideInternalDisplay()), Comparator.naturalOrder()).orElse(150);
+//        int guiWidth = Math.max(maxWidthDisplay + 10 + 14 + 14, 190);
+        int guiWidth = Math.max(bestWidthDisplay + 10 + 14 + 14, 190);
+        this.tabs.initTabsSize(guiWidth);
         
-        this.initTabs();
+        int topMargin = OUTER_PADDING_TOP + this.tabs.tabSize() - 2 + (categories.size() > this.tabs.tabsPerPage() ? 16 : 0);
+        int bottomMargin = OUTER_PADDING_BOTTOM + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.CENTER ? 22 : 0);
+        int largestHeight = Math.min(Math.max(height - topMargin - bottomMargin, 100), ConfigObject.getInstance().getMaxRecipesPageHeight());
+        int maxHeight = Math.min(largestHeight, CollectionUtils.<DisplayCategory<?>, Integer>mapAndMax(categories,
+                category -> INNER_PADDING_Y + (category.getDisplayHeight() + DISPLAY_GAP) * Math.max(1, Math.min(getRecipesPerPage(largestHeight, category) + 1, Math.max(categoryMap.get(category).size(), ConfigObject.getInstance().getMaxRecipePerPage()))), Comparator.naturalOrder()).orElse(66));
+        this.bounds = new Rectangle(width / 2 - guiWidth / 2, topMargin + (height - topMargin - bottomMargin) / 2 - maxHeight / 2, guiWidth, maxHeight);
+        
+        this.initTabs(guiWidth);
         this.widgets.addAll(this.tabs.widgets());
         
         this.page = Mth.clamp(page, 0, getCurrentTotalPages() - 1);
-        this.widgets.add(categoryBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 5, 12, 12), Component.empty())
+        this.widgets.add(categoryBack = Widgets.createButton(new Rectangle(bounds.getCenterX() - guiWidth / 2 + 5, bounds.getY() + 5, 12, 12), Component.empty())
                 .onClick(button -> previousCategory()).tooltipLine(Component.translatable("text.rei.previous_category")));
         this.widgets.add(Widgets.createClickableLabel(new Point(bounds.getCenterX(), bounds.getY() + 7), getCurrentCategory().getTitle(), clickableLabelWidget -> {
             ViewSearchBuilder.builder().addAllCategories().open();
         }).tooltip(Component.translatable("text.rei.view_all_categories")));
-        this.widgets.add(categoryNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 5, 12, 12), Component.literal(""))
+        this.widgets.add(categoryNext = Widgets.createButton(new Rectangle(bounds.getCenterX() + guiWidth / 2 - 17, bounds.getY() + 5, 12, 12), Component.literal(""))
                 .onClick(button -> nextCategory()).tooltipLine(Component.translatable("text.rei.next_category")));
         this.categoryBack.setEnabled(categories.size() > 1);
         this.categoryNext.setEnabled(categories.size() > 1);
@@ -168,7 +190,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             matrices.popPose();
         }), 0, 0, 1));
         
-        this.widgets.add(recipeBack = Widgets.createButton(new Rectangle(bounds.getX() + 5, bounds.getY() + 19, 12, 12), Component.literal(""))
+        this.widgets.add(recipeBack = Widgets.createButton(new Rectangle(bounds.getCenterX() - guiWidth / 2 + 5, bounds.getY() + 19, 12, 12), Component.literal(""))
                 .onClick(button -> {
                     page--;
                     if (page < 0)
@@ -189,7 +211,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             label.setMessage(Component.literal(String.format("%d/%d", page + 1, getCurrentTotalPages())));
             label.setClickable(getCurrentTotalPages() > 1);
         }).tooltipFunction(label -> label.isClickable() ? new Component[]{Component.translatable("text.rei.go_back_first_page"), Component.literal(" "), Component.translatable("text.rei.shift_click_to", Component.translatable("text.rei.choose_page")).withStyle(ChatFormatting.GRAY)} : null));
-        this.widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getMaxX() - 17, bounds.getY() + 19, 12, 12), Component.literal(""))
+        this.widgets.add(recipeNext = Widgets.createButton(new Rectangle(bounds.getCenterX() + guiWidth / 2 - 17, bounds.getY() + 19, 12, 12), Component.literal(""))
                 .onClick(button -> {
                     page++;
                     if (page >= getCurrentTotalPages())
@@ -202,8 +224,8 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         widgets = CollectionUtils.map(widgets, widget -> Widgets.withTranslate(widget, 0, 0, 10));
         widgets.add(Widgets.withTranslate(new PanelWidget(bounds), 0, 0, 5));
         widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            fill(matrices, bounds.x + 17, bounds.y + 5, bounds.x + bounds.width - 17, bounds.y + 17, darkStripesColor.value().getColor());
-            fill(matrices, bounds.x + 17, bounds.y + 19, bounds.x + bounds.width - 17, bounds.y + 31, darkStripesColor.value().getColor());
+            fill(matrices, bounds.getCenterX() - guiWidth / 2 + 17, bounds.y + 5, bounds.getCenterX() + guiWidth / 2 - 17, bounds.y + 17, darkStripesColor.value().getColor());
+            fill(matrices, bounds.getCenterX() - guiWidth / 2 + 17, bounds.y + 19, bounds.getCenterX() + guiWidth / 2 - 17, bounds.y + 31, darkStripesColor.value().getColor());
         }), 0, 0, 6));
         initWorkstations(widgets);
         
@@ -218,7 +240,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             final DisplaySpec display = currentDisplayed.get(i);
             final Supplier<Display> displaySupplier = display::provideInternalDisplay;
             int displayWidth = getCurrentCategory().getDisplayWidth(displaySupplier.get());
-            final Rectangle displayBounds = new Rectangle(getBounds().getCenterX() - displayWidth / 2, getBounds().getCenterY() + 16 - displayHeight * (getRecipesPerPage() + 1) / 2 - 2 * (getRecipesPerPage() + 1) + displayHeight * i + 4 * i, displayWidth, displayHeight);
+            final Rectangle displayBounds = new Rectangle(getBounds().getCenterX() - displayWidth / 2, getBounds().getCenterY() + 16 - displayHeight * (getRecipesPerPage() + 1) / 2 - 2 * (getRecipesPerPage() + 1) + displayHeight * i + DISPLAY_GAP * i, displayWidth, displayHeight);
             List<Widget> setupDisplay;
             try {
                 setupDisplay = getCurrentCategoryView(display.provideInternalDisplay()).setupDisplay(display.provideInternalDisplay(), displayBounds);
@@ -239,7 +261,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             this.recipeBounds.put(displayBounds, Pair.of(display, setupDisplay));
             this.widgets.add(new DisplayCompositeWidget(display, setupDisplay, displayBounds));
             if (plusButtonArea.isPresent()) {
-                this.widgets.add(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, plusButtonArea.get().get(displayBounds), Component.literal(plusButtonArea.get().getButtonText()), displaySupplier, display::provideInternalDisplayIds, setupDisplay, getCurrentCategory()));
+                this.widgets.add(Widgets.withTranslate(InternalWidgets.createAutoCraftingButtonWidget(displayBounds, plusButtonArea.get().get(displayBounds), Component.literal(plusButtonArea.get().getButtonText()), displaySupplier, display::provideInternalDisplayIds, setupDisplay, getCurrentCategory()), 0, 0, 100));
             }
         }
     }
@@ -303,7 +325,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         if (category.getFixedDisplaysPerPage() > 0)
             return category.getFixedDisplaysPerPage() - 1;
         int height = category.getDisplayHeight();
-        return Mth.clamp(Mth.floor(((double) totalHeight - 36) / ((double) height + 4)) - 1, 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, category.getMaximumDisplaysPerPage() - 1));
+        return Mth.clamp(Mth.floor(((double) totalHeight - INNER_PADDING_Y) / ((double) height + DISPLAY_GAP)) - 1, 0, Math.min(ConfigObject.getInstance().getMaxRecipePerPage() - 1, category.getMaximumDisplaysPerPage() - 1));
     }
     
     private final ValueAnimator<Color> darkStripesColor = ValueAnimator.ofColor()

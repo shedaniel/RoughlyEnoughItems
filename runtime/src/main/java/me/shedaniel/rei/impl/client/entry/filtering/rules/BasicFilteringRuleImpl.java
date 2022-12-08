@@ -23,118 +23,160 @@
 
 package me.shedaniel.rei.impl.client.entry.filtering.rules;
 
-import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.datafixers.util.Unit;
+import it.unimi.dsi.fastutil.longs.LongCollection;
+import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.rei.api.client.entry.filtering.*;
 import me.shedaniel.rei.api.client.entry.filtering.base.BasicFilteringRule;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.util.ThreadCreator;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public enum BasicFilteringRuleImpl implements BasicFilteringRule<Pair<LongSet, LongSet>> {
+public enum BasicFilteringRuleImpl implements BasicFilteringRule<Unit> {
     INSTANCE;
     private static final ExecutorService EXECUTOR_SERVICE = new ThreadCreator("REI-BasicFiltering").asService();
-    private final List<EntryStack<?>> hidden = new ArrayList<>(), shown = new ArrayList<>();
+    private final LongSet hiddenHashes = new LongOpenHashSet(), shownHashes = new LongOpenHashSet();
+    private final List<CachedProvider> hiddenProviders = new ArrayList<>(), shownProviders = new ArrayList<>();
     
     @Override
-    public FilteringRuleType<? extends FilteringRule<Pair<LongSet, LongSet>>> getType() {
+    public FilteringRuleType<? extends FilteringRule<Unit>> getType() {
         return BasicFilteringRuleType.INSTANCE;
     }
     
     @Override
-    public Pair<LongSet, LongSet> prepareCache(boolean async) {
-        return new Pair<>(prepareCacheFor(hidden, async), prepareCacheFor(shown, async));
-    }
-    
-    @NotNull
-    private static LongSet prepareCacheFor(List<EntryStack<?>> stacks, boolean async) {
-        if (async) {
-            LongSet all = new LongOpenHashSet();
-            List<CompletableFuture<LongSet>> completableFutures = Lists.newArrayList();
-            for (Iterable<EntryStack<?>> partitionStacks : CollectionUtils.partition(stacks, 100)) {
-                completableFutures.add(CompletableFuture.supplyAsync(() -> {
-                    LongSet output = new LongOpenHashSet();
-                    for (EntryStack<?> stack : partitionStacks) {
-                        if (stack != null && !stack.isEmpty()) {
-                            output.add(EntryStacks.hashExact(stack));
-                        }
-                    }
-                    return output;
-                }, EXECUTOR_SERVICE));
-            }
-            try {
-                CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(5, TimeUnit.MINUTES);
-            } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                e.printStackTrace();
-            }
-            for (CompletableFuture<LongSet> future : completableFutures) {
-                LongSet now = future.getNow(null);
-                if (now != null) {
-                    all.addAll(now);
-                }
-            }
-            return all;
-        } else {
-            return stacks.stream().map(EntryStacks::hashExact).collect(Collectors.toCollection(LongOpenHashSet::new));
+    public Unit prepareCache(boolean async) {
+        for (CachedProvider provider : hiddenProviders) {
+            provider.get();
         }
+        for (CachedProvider provider : shownProviders) {
+            provider.get();
+        }
+        return Unit.INSTANCE;
     }
     
     @Override
-    public FilteringResult processFilteredStacks(FilteringContext context, FilteringResultFactory resultFactory, Pair<LongSet, LongSet> cache, boolean async) {
+    public FilteringResult processFilteredStacks(FilteringContext context, FilteringResultFactory resultFactory, Unit cache, boolean async) {
         FilteringResult result = resultFactory.create();
-        hideList(context.getShownStacks(), result, async, cache.getFirst());
-        hideList(context.getUnsetStacks(), result, async, cache.getFirst());
-        showList(context.getHiddenStacks(), result, async, cache.getSecond());
-        showList(context.getUnsetStacks(), result, async, cache.getSecond());
+        hideList(context.getShownStacks(), context.getShownExactHashes(), result, async, hiddenHashes);
+        hideList(context.getUnsetStacks(), context.getUnsetExactHashes(), result, async, hiddenHashes);
+        
+        for (CachedProvider provider : hiddenProviders) {
+            hideList(context.getShownStacks(), context.getShownExactHashes(), result, async, provider.getExactHashes());
+            hideList(context.getUnsetStacks(), context.getUnsetExactHashes(), result, async, provider.getExactHashes());
+        }
+        
+        showList(context.getHiddenStacks(), context.getHiddenExactHashes(), result, async, shownHashes);
+        showList(context.getUnsetStacks(), context.getUnsetExactHashes(), result, async, shownHashes);
+        
+        for (CachedProvider provider : shownProviders) {
+            showList(context.getHiddenStacks(), context.getHiddenExactHashes(), result, async, provider.getExactHashes());
+            showList(context.getUnsetStacks(), context.getUnsetExactHashes(), result, async, provider.getExactHashes());
+        }
+        
         return result;
     }
     
-    private void hideList(Collection<EntryStack<?>> stacks, FilteringResult result, boolean async, LongSet filteredStacks) {
-        result.hide((async ? stacks.parallelStream() : stacks.stream()).filter(stack -> filteredStacks.contains(EntryStacks.hashExact(stack))).collect(Collectors.toList()));
+    private void hideList(Collection<EntryStack<?>> stacks, LongCollection hashes, FilteringResult result, boolean async, LongSet filteredStacks) {
+        LongIterator iterator = hashes.iterator();
+        result.hide(stacks.stream()
+                .filter(stack -> filteredStacks.contains(iterator.nextLong()))
+                .collect(Collectors.toList()));
     }
     
-    private void showList(Collection<EntryStack<?>> stacks, FilteringResult result, boolean async, LongSet filteredStacks) {
-        result.show((async ? stacks.parallelStream() : stacks.stream()).filter(stack -> filteredStacks.contains(EntryStacks.hashExact(stack))).collect(Collectors.toList()));
+    private void showList(Collection<EntryStack<?>> stacks, LongCollection hashes, FilteringResult result, boolean async, LongSet filteredStacks) {
+        LongIterator iterator = hashes.iterator();
+        result.show(stacks.stream()
+                .filter(stack -> filteredStacks.contains(iterator.nextLong()))
+                .collect(Collectors.toList()));
     }
     
     @Override
     public FilteringResult hide(EntryStack<?> stack) {
-        hidden.add(stack);
-        shown.remove(stack);
+        long hashExact = EntryStacks.hashExact(stack);
+        hiddenHashes.add(hashExact);
+        shownHashes.remove(hashExact);
+        
+        if (!isReloading()) {
+            markDirty(List.of(stack), null);
+        }
+        
         return this;
     }
     
     @Override
     public FilteringResult hide(Collection<? extends EntryStack<?>> stacks) {
-        hidden.addAll(stacks);
-        shown.removeAll(stacks);
+        for (EntryStack<?> stack : stacks) {
+            long hashExact = EntryStacks.hashExact(stack);
+            hiddenHashes.add(hashExact);
+            shownHashes.remove(hashExact);
+        }
+        
+        if (!isReloading()) {
+            markDirty((Collection<EntryStack<?>>) stacks, null);
+        }
+        
         return this;
     }
     
     @Override
     public FilteringResult show(EntryStack<?> stack) {
-        shown.add(stack);
-        hidden.remove(stack);
+        long hashExact = EntryStacks.hashExact(stack);
+        shownHashes.add(hashExact);
+        hiddenHashes.remove(hashExact);
+        
+        if (!isReloading()) {
+            markDirty(List.of(stack), null);
+        }
+        
         return this;
     }
     
     @Override
     public FilteringResult show(Collection<? extends EntryStack<?>> stacks) {
-        shown.addAll(stacks);
-        hidden.removeAll(stacks);
+        for (EntryStack<?> stack : stacks) {
+            long hashExact = EntryStacks.hashExact(stack);
+            shownHashes.add(hashExact);
+            hiddenHashes.remove(hashExact);
+        }
+        
+        if (!isReloading()) {
+            markDirty((Collection<EntryStack<?>>) stacks, null);
+        }
+        
         return this;
+    }
+    
+    @Override
+    public MarkDirty hide(Supplier<Collection<EntryStack<?>>> provider) {
+        CachedProvider cachedProvider = new CachedProvider(provider);
+        shownProviders.remove(cachedProvider);
+        hiddenProviders.add(cachedProvider);
+        
+        cachedProvider.markDirty();
+        return cachedProvider;
+    }
+    
+    @Override
+    public MarkDirty show(Supplier<Collection<EntryStack<?>>> provider) {
+        CachedProvider cachedProvider = new CachedProvider(provider);
+        hiddenProviders.remove(cachedProvider);
+        shownProviders.add(cachedProvider);
+        
+        cachedProvider.markDirty();
+        return cachedProvider;
     }
     
     @Override
@@ -144,12 +186,49 @@ public enum BasicFilteringRuleImpl implements BasicFilteringRule<Pair<LongSet, L
     
     @Override
     public void startReload() {
-        hidden.clear();
-        shown.clear();
+        hiddenHashes.clear();
+        shownHashes.clear();
+        hiddenProviders.clear();
+        shownProviders.clear();
     }
     
     @Override
     public void acceptPlugin(REIClientPlugin plugin) {
         plugin.registerBasicEntryFiltering(this);
+    }
+    
+    private class CachedProvider implements MarkDirty {
+        private final Supplier<Collection<EntryStack<?>>> provider;
+        private final LazyResettable<Pair<Collection<EntryStack<?>>, LongSet>> cache = new LazyResettable<>(this::compose);
+        
+        private CachedProvider(Supplier<Collection<EntryStack<?>>> provider) {
+            this.provider = provider;
+        }
+        
+        @Override
+        public void markDirty() {
+            Pair<Collection<EntryStack<?>>, LongSet> prev = this.cache.get();
+            this.cache.reset();
+            Pair<Collection<EntryStack<?>>, LongSet> next = this.cache.get();
+            BasicFilteringRuleImpl.this.markDirty(prev.getFirst(), prev.getSecond());
+            BasicFilteringRuleImpl.this.markDirty(next.getFirst(), next.getSecond());
+        }
+        
+        public Collection<EntryStack<?>> get() {
+            return this.cache.get().getFirst();
+        }
+        
+        public LongSet getExactHashes() {
+            return this.cache.get().getSecond();
+        }
+        
+        private Pair<Collection<EntryStack<?>>, LongSet> compose() {
+            Collection<EntryStack<?>> stacks = this.provider.get();
+            LongSet hashes = new LongOpenHashSet(stacks.size());
+            for (EntryStack<?> stack : stacks) {
+                hashes.add(EntryStacks.hashExact(stack));
+            }
+            return Pair.of(stacks, hashes);
+        }
     }
 }
