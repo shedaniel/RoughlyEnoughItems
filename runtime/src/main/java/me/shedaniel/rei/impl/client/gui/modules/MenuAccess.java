@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.client.gui.modules;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -43,7 +44,7 @@ public interface MenuAccess {
     
     void open(UUID uuid, Menu menu, Predicate<Point> or, Predicate<Point> and);
     
-    default void openOrClose(UUID uuid, Rectangle selfBounds, Supplier<Collection<MenuEntry>> menuSupplier) {
+    default void openOrClose(UUID uuid, Rectangle selfBounds, Supplier<Collection<FavoriteMenuEntry>> menuSupplier) {
         boolean isOpened = isOpened(uuid);
         if (isOpened || !isAnyOpened()) {
             boolean inBounds = (isValidPoint(PointHelper.ofMouse()) && selfBounds.contains(PointHelper.ofMouse())) || isInBounds(uuid);

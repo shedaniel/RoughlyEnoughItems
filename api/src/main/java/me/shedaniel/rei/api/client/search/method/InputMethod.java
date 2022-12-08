@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.client.search.method;
 
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -150,6 +151,15 @@ public interface InputMethod<T> {
      * @return the description of this input method
      */
     Component getDescription();
+    
+    /**
+     * Returns the list of menu entries that will be used as options.
+     *
+     * @return the list of menu entries that will be used as options
+     */
+    default List<FavoriteMenuEntry> getOptionsMenuEntries() {
+        return List.of();
+    }
     
     record Locale(String code, Component name) {}
     

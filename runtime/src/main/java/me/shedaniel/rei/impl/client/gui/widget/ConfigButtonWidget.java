@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.gui.config.SyntaxHighlightingMode;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
@@ -43,7 +44,6 @@ import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
-import me.shedaniel.rei.impl.client.gui.modules.MenuEntry;
 import me.shedaniel.rei.impl.client.gui.modules.entries.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -95,7 +95,7 @@ public class ConfigButtonWidget {
         return Widgets.concat(configButton, overlayWidget);
     }
     
-    private static Collection<MenuEntry> menuEntries() {
+    private static Collection<FavoriteMenuEntry> menuEntries() {
         ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
         return List.of(
                 ToggleMenuEntry.of(Component.translatable("text.rei.cheating"),
