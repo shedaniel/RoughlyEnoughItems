@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagEntry;
@@ -66,7 +67,7 @@ public class MixinTagLoader<T> {
         TagNodes.TAG_DATA_MAP.put(resourceKey, new HashMap<>());
         Map<ResourceLocation, TagNodes.TagData> tagDataMap = TagNodes.TAG_DATA_MAP.get(resourceKey);
         if (tagDataMap == null) return;
-        Registry<T> registry = ((Registry<Registry<T>>) Registry.REGISTRY).get((ResourceKey<Registry<T>>) resourceKey);
+        Registry<T> registry = ((Registry<Registry<T>>) BuiltInRegistries.REGISTRY).get((ResourceKey<Registry<T>>) resourceKey);
         Stopwatch stopwatch = Stopwatch.createStarted();
         
         Iterator<Map.Entry<TagNodes.CollectionWrapper<?>, TagNodes.RawTagData>> entryIterator = TagNodes.RAW_TAG_DATA_MAP.getOrDefault(directory, Reference2ObjectMaps.emptyMap())

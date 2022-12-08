@@ -52,7 +52,7 @@ public class FilteringCategoriesEntry extends AbstractConfigListEntry<Map<Catego
     private final AbstractWidget buttonWidget = new Button(0, 0, 150, 20, Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure"), button -> {
         filteringScreen.parent = Minecraft.getInstance().screen;
         Minecraft.getInstance().setScreen(filteringScreen);
-    }, Button.NO_TOOLTIP, Supplier::get) {};
+    }, Supplier::get) {};
     private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public FilteringCategoriesEntry(Component fieldName, Map<CategoryIdentifier<?>, Boolean> configFiltered, Map<CategoryIdentifier<?>, Boolean> defaultValue, Consumer<Map<CategoryIdentifier<?>, Boolean>> saveConsumer) {

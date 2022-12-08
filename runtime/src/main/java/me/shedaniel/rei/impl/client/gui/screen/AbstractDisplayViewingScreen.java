@@ -63,6 +63,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -266,10 +267,10 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             Registry<?> registry;
             List<Holder<?>> objects;
             if (type == VanillaEntryTypes.ITEM) {
-                registry = Registry.ITEM;
+                registry = BuiltInRegistries.ITEM;
                 objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<ItemStack>castValue().getItem().builtInRegistryHolder());
             } else if (type == VanillaEntryTypes.FLUID) {
-                registry = Registry.FLUID;
+                registry = BuiltInRegistries.FLUID;
                 objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<FluidStack>castValue().getFluid().builtInRegistryHolder());
             } else continue;
             Stream<? extends TagKey<?>> collection = registry.getTags()

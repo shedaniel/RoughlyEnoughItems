@@ -76,7 +76,7 @@ public class FilteringRulesScreen extends Screen {
             addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
-            }, Button.NO_TOOLTIP, Supplier::get) {});
+            }, Supplier::get) {});
         }
         {
             Component addText = Component.literal(" + ");
@@ -84,7 +84,7 @@ public class FilteringRulesScreen extends Screen {
                 FilteringAddRuleScreen screen = new FilteringAddRuleScreen(entry);
                 screen.parent = this;
                 minecraft.setScreen(screen);
-            }, Button.NO_TOOLTIP, Supplier::get) {});
+            }, Supplier::get) {});
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
         for (int i = entry.rules.size() - 1; i >= 0; i--) {
@@ -198,7 +198,7 @@ public class FilteringRulesScreen extends Screen {
             configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
                 entry.edited = true;
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(Minecraft.getInstance().screen));
-            }, Button.NO_TOOLTIP, Supplier::get) {
+            }, Supplier::get) {
                 @Override
                 protected void renderBg(PoseStack matrices, Minecraft client, int mouseX, int mouseY) {
                     super.renderBg(matrices, client, mouseX, mouseY);
@@ -213,7 +213,7 @@ public class FilteringRulesScreen extends Screen {
                     entry.edited = true;
                     entry.rules.remove(rule);
                     screen.init(Minecraft.getInstance(), screen.width, screen.height);
-                }, Button.NO_TOOLTIP, Supplier::get) {};
+                }, Supplier::get) {};
             }
             configureButton.active = this.screenFunction != null;
             deleteButton.active = !rule.getType().isSingular();

@@ -88,7 +88,7 @@ public class RoughlyEnoughItemsNetwork {
             AbstractContainerMenu menu = player.containerMenu;
             ItemStack itemStack = buf.readItem();
             ItemStack stack = itemStack.copy();
-            if (!menu.getCarried().isEmpty() && ItemStack.isSameIgnoreDurability(menu.getCarried(), stack) && ItemStack.tagMatches(menu.getCarried(), stack)) {
+            if (!menu.getCarried().isEmpty() && ItemStack.isSameItemSameTags(menu.getCarried(), stack)) {
                 stack.setCount(Mth.clamp(stack.getCount() + menu.getCarried().getCount(), 1, stack.getMaxStackSize()));
             } else if (!menu.getCarried().isEmpty()) {
                 return;

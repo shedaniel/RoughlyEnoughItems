@@ -26,7 +26,7 @@ package me.shedaniel.rei.api.common.transfer;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.*;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -40,7 +40,7 @@ public class RecipeFinder {
     public final Int2IntMap idToAmountMap = new Int2IntOpenHashMap();
     
     public static int getItemId(ItemStack stack) {
-        return Registry.ITEM.getId(stack.getItem());
+        return BuiltInRegistries.ITEM.getId(stack.getItem());
     }
     
     public static ItemStack getStackFromId(int itemId) {

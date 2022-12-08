@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
@@ -140,7 +141,7 @@ public final class EntryIngredients {
     }
     
     public static <S, T> EntryIngredient ofTag(TagKey<S> tagKey, Function<Holder<S>, EntryStack<T>> mapper) {
-        Registry<S> registry = ((Registry<Registry<S>>) Registry.REGISTRY).get((ResourceKey<Registry<S>>) tagKey.registry());
+        Registry<S> registry = ((Registry<Registry<S>>) BuiltInRegistries.REGISTRY).get((ResourceKey<Registry<S>>) tagKey.registry());
         HolderSet.Named<S> holders = registry.getTag(tagKey).orElse(null);
         if (holders == null) return EntryIngredient.empty();
         EntryIngredient.Builder result = EntryIngredient.builder(holders.size());

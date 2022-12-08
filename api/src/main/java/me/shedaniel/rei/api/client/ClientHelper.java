@@ -32,7 +32,7 @@ import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -90,7 +90,7 @@ public interface ClientHelper {
     default String getModFromItem(Item item) {
         if (item.equals(Items.AIR))
             return "";
-        return getModFromIdentifier(Registry.ITEM.getKey(item));
+        return getModFromIdentifier(BuiltInRegistries.ITEM.getKey(item));
     }
     
     /**

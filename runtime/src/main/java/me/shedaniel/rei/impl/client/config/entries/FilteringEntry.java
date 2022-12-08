@@ -57,7 +57,7 @@ public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>>>
     private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.translatable("config.roughlyenoughitems.filteringScreen"), button -> {
         filteringRulesScreen.parent = Minecraft.getInstance().screen;
         Minecraft.getInstance().setScreen(filteringRulesScreen);
-    }, Button.NO_TOOLTIP, Supplier::get) {};
+    }, Supplier::get) {};
     private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public FilteringEntry(int width, List<EntryStack<?>> configFiltered, List<FilteringRule<?>> rules, List<EntryStack<?>> defaultValue, Consumer<List<EntryStack<?>>> saveConsumer, Consumer<List<FilteringRule<?>>> rulesSaveConsumer) {

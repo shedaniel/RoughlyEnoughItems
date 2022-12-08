@@ -38,6 +38,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -194,7 +195,7 @@ public class TagNodes {
     }
     
     public static <T> void create(TagKey<T> tagKey, Consumer<DataResult<TagNode<T>>> callback) {
-        Registry<T> registry = ((Registry<Registry<T>>) Registry.REGISTRY).get((ResourceKey<Registry<T>>) tagKey.registry());
+        Registry<T> registry = ((Registry<Registry<T>>) BuiltInRegistries.REGISTRY).get((ResourceKey<Registry<T>>) tagKey.registry());
         requestTagData(tagKey.registry(), result -> {
             callback.accept(result.flatMap(dataMap -> dataMap != null ? resolveTag(tagKey, registry, dataMap).orElse(DataResult.error("No tag data")) : DataResult.error("No tag data")));
         });

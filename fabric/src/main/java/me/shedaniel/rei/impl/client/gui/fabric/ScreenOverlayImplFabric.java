@@ -30,6 +30,7 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
@@ -79,7 +80,7 @@ public class ScreenOverlayImplFabric extends ScreenOverlayImpl {
             return;
         }
         matrices.pushPose();
-        Minecraft.getInstance().screen.renderTooltipInternal(matrices, lines, mouseX, mouseY);
+        Minecraft.getInstance().screen.renderTooltipInternal(matrices, lines, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE);
         matrices.popPose();
     }
 }

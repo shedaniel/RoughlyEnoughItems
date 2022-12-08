@@ -47,7 +47,7 @@ public class NoFilteringCategoriesEntry extends AbstractConfigListEntry<Map<Cate
     private Consumer<Map<CategoryIdentifier<?>, Boolean>> saveConsumer;
     private Map<CategoryIdentifier<?>, Boolean> defaultValue;
     private Map<CategoryIdentifier<?>, Boolean> configFiltered;
-    private final AbstractWidget buttonWidget = new Button(0, 0, 150, 20, Component.translatable("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {}, Button.NO_TOOLTIP, Supplier::get) {};
+    private final AbstractWidget buttonWidget = new Button(0, 0, 150, 20, Component.translatable("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {}, Supplier::get) {};
     private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public NoFilteringCategoriesEntry(Component fieldName, Map<CategoryIdentifier<?>, Boolean> configFiltered, Map<CategoryIdentifier<?>, Boolean> defaultValue, Consumer<Map<CategoryIdentifier<?>, Boolean>> saveConsumer) {

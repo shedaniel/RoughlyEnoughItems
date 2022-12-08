@@ -62,7 +62,7 @@ public class FilteringAddRuleScreen extends Screen {
             addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
-            }, Button.NO_TOOLTIP, Supplier::get) {});
+            }, Supplier::get) {});
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
         for (FilteringRuleType<?> rule : FilteringRuleTypeRegistry.getInstance()) {
@@ -156,7 +156,7 @@ public class FilteringAddRuleScreen extends Screen {
                 entry.edited = true;
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(parent));
                 entry.rules.add(0, rule);
-            }, Button.NO_TOOLTIP, Supplier::get) {};
+            }, Supplier::get) {};
             addButton.active = this.screenFunction != null;
         }
         

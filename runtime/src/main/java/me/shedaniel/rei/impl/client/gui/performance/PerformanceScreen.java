@@ -141,7 +141,7 @@ public class PerformanceScreen extends Screen {
             addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
-            }, Button.NO_TOOLTIP, Supplier::get) {});
+            }, Supplier::get) {});
         }
         list = new PerformanceEntryListWidget();
         long[] totalTime = {0};

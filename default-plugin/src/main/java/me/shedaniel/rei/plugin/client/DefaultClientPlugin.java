@@ -77,12 +77,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.*;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionBrewing;
@@ -122,13 +123,12 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerEntries(EntryRegistry registry) {
-        FeatureFlagSet features = Minecraft.getInstance().player.getLevel().enabledFeatures();
         Multimap<Item, EntryStack<ItemStack>> items = HashMultimap.create();
         
-        for (CreativeModeTab tab : CreativeModeTabs.TABS) {
-            if (tab != CreativeModeTabs.TAB_HOTBAR && tab != CreativeModeTabs.TAB_INVENTORY) {
+        for (CreativeModeTab tab : CreativeModeTabs.allTabs()) {
+            if (tab.getType() != CreativeModeTab.Type.HOTBAR && tab.getType() != CreativeModeTab.Type.INVENTORY) {
                 try {
-                    for (ItemStack stack : tab.getDisplayItems(features, true)) {
+                    for (ItemStack stack : tab.getDisplayItems()) {
                         try {
                             items.put(stack.getItem(), EntryStacks.of(stack));
                         } catch (Exception ignore) {
@@ -140,7 +140,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             }
         }
         
-        for (Item item : Registry.ITEM) {
+        for (Item item : BuiltInRegistries.ITEM) {
             Collection<EntryStack<ItemStack>> stacks = items.get(item);
             if (stacks.isEmpty()) {
                 try {
@@ -153,7 +153,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             }
         }
         
-        for (Fluid fluid : Registry.FLUID) {
+        for (Fluid fluid : BuiltInRegistries.FLUID) {
             FluidState state = fluid.defaultFluidState();
             if (!state.isEmpty() && state.isSource()) {
                 registry.addEntry(EntryStacks.of(fluid));
@@ -242,7 +242,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     }
     
     private static EntryIngredient getTag(ResourceLocation tagId) {
-        return EntryIngredients.ofItemTag(TagKey.create(Registry.ITEM_REGISTRY, tagId));
+        return EntryIngredients.ofItemTag(TagKey.create(Registries.ITEM, tagId));
     }
     
     @Override
@@ -259,11 +259,11 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.registerFiller(AnvilRecipe.class, DefaultAnvilDisplay::new);
         registry.registerFiller(BrewingRecipe.class, DefaultBrewingDisplay::new);
         registry.registerFiller(TagKey.class, tagKey -> {
-            if (tagKey.isFor(Registry.ITEM_REGISTRY)) {
+            if (tagKey.isFor(Registries.ITEM)) {
                 return DefaultTagDisplay.ofItems(tagKey);
-            } else if (tagKey.isFor(Registry.BLOCK_REGISTRY)) {
+            } else if (tagKey.isFor(Registries.BLOCK)) {
                 return DefaultTagDisplay.ofItems(tagKey);
-            } else if (tagKey.isFor(Registry.FLUID_REGISTRY)) {
+            } else if (tagKey.isFor(Registries.FLUID)) {
                 return DefaultTagDisplay.ofFluids(tagKey);
             }
             
@@ -299,24 +299,24 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             List<EntryIngredient> entries = iterator.next();
             registry.add(new DefaultCompostingDisplay(entries, Collections.singletonList(EntryIngredients.of(new ItemStack(Items.BONE_MEAL)))));
         }
-        DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
+        DummyAxeItem.getStrippedBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> BuiltInRegistries.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultStrippingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
         });
-        DummyShovelItem.getPathBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
+        DummyShovelItem.getPathBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> BuiltInRegistries.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultPathingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue().getBlock())));
         });
         registry.add(new DefaultBeaconBaseDisplay(Collections.singletonList(EntryIngredients.ofItemTag(BlockTags.BEACON_BASE_BLOCKS)), Collections.emptyList()));
         registry.add(new DefaultBeaconPaymentDisplay(Collections.singletonList(EntryIngredients.ofItemTag(ItemTags.BEACON_PAYMENT_ITEMS)), Collections.emptyList()));
-        HoneycombItem.WAXABLES.get().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
+        HoneycombItem.WAXABLES.get().entrySet().stream().sorted(Comparator.comparing(b -> BuiltInRegistries.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultWaxingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
         });
-        HoneycombItem.WAX_OFF_BY_BLOCK.get().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
+        HoneycombItem.WAX_OFF_BY_BLOCK.get().entrySet().stream().sorted(Comparator.comparing(b -> BuiltInRegistries.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultWaxScrapingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
         });
-        WeatheringCopper.NEXT_BY_BLOCK.get().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
+        WeatheringCopper.NEXT_BY_BLOCK.get().entrySet().stream().sorted(Comparator.comparing(b -> BuiltInRegistries.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultOxidizingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
         });
-        WeatheringCopper.PREVIOUS_BY_BLOCK.get().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
+        WeatheringCopper.PREVIOUS_BY_BLOCK.get().entrySet().stream().sorted(Comparator.comparing(b -> BuiltInRegistries.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultOxidationScrapingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
         });
         if (Platform.isFabric()) {
@@ -352,7 +352,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             registerForgePotions(registry, this);
         }
         
-        for (Registry<?> reg : Registry.REGISTRY) {
+        for (Registry<?> reg : BuiltInRegistries.REGISTRY) {
             reg.getTags().forEach(tagPair -> registry.add(tagPair.getFirst()));
         }
     }

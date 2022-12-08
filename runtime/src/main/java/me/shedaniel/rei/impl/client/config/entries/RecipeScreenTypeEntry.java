@@ -52,7 +52,7 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<DisplayScreenType> {
             Minecraft.getInstance().setScreen(getConfigScreen());
             type = original ? DisplayScreenType.ORIGINAL : DisplayScreenType.COMPOSITE;
         }));
-    }, Button.NO_TOOLTIP, Supplier::get) {
+    }, Supplier::get) {
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             setMessage(Component.translatable("config.roughlyenoughitems.recipeScreenType.config", type.toString()));

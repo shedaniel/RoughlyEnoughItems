@@ -124,7 +124,7 @@ public class WarningAndErrorScreen extends Screen {
         }
         addRenderableWidget(buttonExit = new Button(width / 2 - 100, height - 26, 200, 20,
                 Component.literal(errors.isEmpty() ? "Continue" : "Exit"),
-                button -> onContinue.accept(parent), Button.NO_TOOLTIP, Supplier::get) {});
+                button -> onContinue.accept(parent), Supplier::get) {});
     }
     
     @Override

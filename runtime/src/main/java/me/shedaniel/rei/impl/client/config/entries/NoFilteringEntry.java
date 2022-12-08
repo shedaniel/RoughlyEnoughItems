@@ -47,7 +47,7 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>
     private Consumer<List<EntryStack<?>>> saveConsumer;
     private List<EntryStack<?>> defaultValue;
     private List<EntryStack<?>> configFiltered;
-    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.translatable("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {}, Button.NO_TOOLTIP, Supplier::get) {};
+    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.translatable("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {}, Supplier::get) {};
     private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public NoFilteringEntry(int width, List<EntryStack<?>> configFiltered, List<EntryStack<?>> defaultValue, Consumer<List<EntryStack<?>>> saveConsumer) {

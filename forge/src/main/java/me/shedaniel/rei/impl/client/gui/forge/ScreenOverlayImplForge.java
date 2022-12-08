@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
@@ -61,7 +62,7 @@ public class ScreenOverlayImplForge extends ScreenOverlayImpl {
             }
         }
         screen.tooltipStack = itemStack;
-        screen.renderTooltipInternal(matrices, components, mouseX, mouseY);
+        screen.renderTooltipInternal(matrices, components, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE);
         screen.tooltipStack = ItemStack.EMPTY;
         matrices.popPose();
     }

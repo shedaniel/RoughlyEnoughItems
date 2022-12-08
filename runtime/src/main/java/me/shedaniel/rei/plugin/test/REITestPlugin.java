@@ -43,12 +43,10 @@ import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemInput;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -68,9 +66,9 @@ public class REITestPlugin implements REIClientPlugin {
     private BasicFilteringRule.MarkDirty markDirty;
     
     public REITestPlugin() {
-        CommandRegistrationEvent.EVENT.register((dispatcher, selection) -> {
+        CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) -> {
             dispatcher.register(Commands.literal("rei_test_reload_filtering")
-                    .then(Commands.argument("item", ItemArgument.item(new CommandBuildContext(RegistryAccess.fromRegistryOfRegistries(Registry.REGISTRY))))
+                    .then(Commands.argument("item", ItemArgument.item(registry))
                             .executes(context -> {
                                 BasicFilteringRule<?> basic = FilteringRuleTypeRegistry.getInstance().basic();
                                 basic.hide(EntryStacks.of(context.getArgument("item", ItemInput.class).createItemStack(1, false)));
@@ -92,7 +90,7 @@ public class REITestPlugin implements REIClientPlugin {
     public void registerEntries(EntryRegistry registry) {
         if (1 + 1 == 2) return;
         int times = 10;
-        for (Item item : Registry.ITEM) {
+        for (Item item : BuiltInRegistries.ITEM) {
             EntryStack<ItemStack> base = EntryStacks.of(item);
             registry.addEntriesAfter(base, IntStream.range(0, times).mapToObj(value -> transformStack(EntryStacks.of(item))).collect(Collectors.toList()));
             try {
@@ -107,10 +105,10 @@ public class REITestPlugin implements REIClientPlugin {
     @Override
     public void registerCollapsibleEntries(CollapsibleEntryRegistry registry) {
         int i = 0;
-        for (Item item : Registry.ITEM) {
+        for (Item item : BuiltInRegistries.ITEM) {
             if (i++ % 10 != 0)
                 continue;
-            registry.group(Registry.ITEM.getKey(item), Component.literal(Registry.ITEM.getKey(item).toString()),
+            registry.group(BuiltInRegistries.ITEM.getKey(item), Component.literal(BuiltInRegistries.ITEM.getKey(item).toString()),
                     stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(item));
         }
     }
@@ -119,7 +117,7 @@ public class REITestPlugin implements REIClientPlugin {
     public void registerBasicEntryFiltering(BasicFilteringRule<?> rule) {
         markDirty = rule.hide(() -> {
             EntryIngredient.Builder builder = EntryIngredient.builder();
-            for (Item item : Registry.ITEM) {
+            for (Item item : BuiltInRegistries.ITEM) {
                 if (random.nextInt() % 10 == 0) {
                     builder.add(EntryStacks.of(item));
                 }
@@ -130,7 +128,7 @@ public class REITestPlugin implements REIClientPlugin {
     
     @Override
     public void registerItemComparators(ItemComparatorRegistry registry) {
-        registry.registerNbt(Registry.ITEM.stream().toArray(Item[]::new));
+        registry.registerNbt(BuiltInRegistries.ITEM.stream().toArray(Item[]::new));
     }
     
     public EntryStack<ItemStack> transformStack(EntryStack<ItemStack> stack) {

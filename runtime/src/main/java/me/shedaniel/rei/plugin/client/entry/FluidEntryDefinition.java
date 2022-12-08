@@ -58,7 +58,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -111,7 +111,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     @Override
     @Nullable
     public ResourceLocation getIdentifier(EntryStack<FluidStack> entry, FluidStack value) {
-        return Registry.FLUID.getKey(value.getFluid());
+        return BuiltInRegistries.FLUID.getKey(value.getFluid());
     }
     
     @Override
@@ -213,7 +213,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     public void fillCrashReport(CrashReport report, CrashReportCategory category, EntryStack<FluidStack> entry) {
         EntryDefinition.super.fillCrashReport(report, category, entry);
         FluidStack stack = entry.getValue();
-        category.setDetail("Fluid Type", () -> String.valueOf(Registry.FLUID.getKey(stack.getFluid())));
+        category.setDetail("Fluid Type", () -> String.valueOf(BuiltInRegistries.FLUID.getKey(stack.getFluid())));
         category.setDetail("Fluid Amount", () -> String.valueOf(stack.getAmount()));
         category.setDetail("Fluid NBT", () -> String.valueOf(stack.getTag()));
     }
@@ -306,7 +306,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
                 }
             }
             if (Minecraft.getInstance().options.advancedItemTooltips) {
-                ResourceLocation fluidId = Registry.FLUID.getKey(entry.getValue().getFluid());
+                ResourceLocation fluidId = BuiltInRegistries.FLUID.getKey(entry.getValue().getFluid());
                 toolTip.add((Component.literal(fluidId.toString())).withStyle(ChatFormatting.DARK_GRAY));
             }
             return Tooltip.create(toolTip);

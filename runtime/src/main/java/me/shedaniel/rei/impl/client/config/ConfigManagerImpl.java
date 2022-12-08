@@ -451,7 +451,7 @@ public class ConfigManagerImpl implements ConfigManager {
                     ScreenHooks.addRenderableWidget(screen, new Button(screen.width - 104, 4, 100, 20, Component.translatable("text.rei.credits"), button -> {
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
                         Minecraft.getInstance().setScreen(creditsScreen);
-                    }, Button.NO_TOOLTIP, Supplier::get) {});
+                    }, Supplier::get) {});
                 }).setSavingRunnable(() -> {
                     saveConfig();
                     EntryRegistry.getInstance().refilter();

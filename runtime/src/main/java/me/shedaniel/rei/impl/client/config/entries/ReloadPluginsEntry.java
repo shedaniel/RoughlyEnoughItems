@@ -52,7 +52,7 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     private AbstractWidget reloadPluginsButton = new Button(0, 0, 0, 20, Component.empty(), button -> {
         RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
         RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
-    }, Button.NO_TOOLTIP, Supplier::get) {
+    }, Supplier::get) {
         @Override
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             if (PluginManager.areAnyReloading()) {
@@ -65,7 +65,7 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     };
     private AbstractWidget reloadSearchButton = new Button(0, 0, 0, 20, Component.empty(), button -> {
         Argument.resetCache(true);
-    }, Button.NO_TOOLTIP, Supplier::get) {};
+    }, Supplier::get) {};
     private List<AbstractWidget> children = ImmutableList.of(reloadPluginsButton, reloadSearchButton);
     
     public ReloadPluginsEntry(int width) {

@@ -57,7 +57,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -105,7 +105,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     @Override
     @Nullable
     public ResourceLocation getIdentifier(EntryStack<ItemStack> entry, ItemStack value) {
-        return Registry.ITEM.getKey(value.getItem());
+        return BuiltInRegistries.ITEM.getKey(value.getItem());
     }
     
     @Override
@@ -206,7 +206,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
                 SEARCH_BLACKLISTED.add(value.getItem());
             }
         try {
-            return Component.literal(I18n.get("item." + Registry.ITEM.getKey(value.getItem()).toString().replace(":", ".")));
+            return Component.literal(I18n.get("item." + BuiltInRegistries.ITEM.getKey(value.getItem()).toString().replace(":", ".")));
         } catch (Throwable e) {
             e.printStackTrace();
         }

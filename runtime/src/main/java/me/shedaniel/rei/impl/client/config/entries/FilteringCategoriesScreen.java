@@ -62,7 +62,7 @@ public class FilteringCategoriesScreen extends Screen {
             addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
-            }, Button.NO_TOOLTIP, Supplier::get) {});
+            }, Supplier::get) {});
         }
         listWidget = addWidget(new ListWidget(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
         for (CategoryRegistry.CategoryConfiguration<?> configuration : CategoryRegistry.getInstance()) {
@@ -181,7 +181,7 @@ public class FilteringCategoriesScreen extends Screen {
                     }
                     
                     entry.edited = true;
-                }, Button.NO_TOOLTIP, Supplier::get) {};
+                }, Supplier::get) {};
             }
         }
         

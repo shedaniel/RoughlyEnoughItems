@@ -80,9 +80,9 @@ public class ErrorsScreen extends Screen {
         }
         listWidget._addEntry(new TextEntry(Component.empty(), listWidget.getItemWidth()));
         if (quitable) {
-            addRenderableWidget(doneButton = new Button(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> Minecraft.getInstance().setScreen(parent), Button.NO_TOOLTIP, Supplier::get) {});
+            addRenderableWidget(doneButton = new Button(width / 2 - 100, height - 26, 200, 20, Component.translatable("gui.done"), button -> Minecraft.getInstance().setScreen(parent), Supplier::get) {});
         } else {
-            addRenderableWidget(doneButton = new Button(width / 2 - 100, height - 26, 200, 20, Component.translatable("menu.quit"), button -> exit(), Button.NO_TOOLTIP, Supplier::get) {});
+            addRenderableWidget(doneButton = new Button(width / 2 - 100, height - 26, 200, 20, Component.translatable("menu.quit"), button -> exit(), Supplier::get) {});
         }
     }
     

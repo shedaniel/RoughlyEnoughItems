@@ -139,7 +139,7 @@ public class ConfigAddonsScreen extends Screen {
             this.addon = addon;
             this.configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
                 Minecraft.getInstance().setScreen(this.addon.createScreen(Minecraft.getInstance().screen));
-            }, Button.NO_TOOLTIP, Supplier::get) {
+            }, Supplier::get) {
                 @Override
                 protected void renderBg(PoseStack matrices, Minecraft client, int mouseX, int mouseY) {
                     super.renderBg(matrices, client, mouseX, mouseY);

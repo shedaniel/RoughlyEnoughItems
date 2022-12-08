@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.common.entry.type;
 import it.unimi.dsi.fastutil.longs.LongList;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class EntryRegistryListImpl implements EntryRegistryList {
-    private final List<HashedEntryStackWrapper> hashedList = new ArrayList<>(Registry.ITEM.keySet().size() + 100);
+    private final List<HashedEntryStackWrapper> hashedList = new ArrayList<>(BuiltInRegistries.ITEM.keySet().size() + 100);
     private final List<EntryStack<?>> list = createMappedList(hashedList);
     
     public EntryRegistryListImpl() {
