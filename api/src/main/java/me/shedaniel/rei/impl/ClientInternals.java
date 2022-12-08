@@ -25,12 +25,14 @@ package me.shedaniel.rei.impl;
 
 import com.mojang.math.Matrix4f;
 import com.mojang.serialization.DataResult;
+import dev.architectury.utils.value.BooleanValue;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
@@ -67,6 +69,8 @@ public final class ClientInternals {
     private static Supplier<EntryRenderer<?>> emptyEntryRenderer = ClientInternals::throwNotSetup;
     private static Supplier<FilteringRuleTypeRegistry> filteringRuleTypeRegistry = ClientInternals::throwNotSetup;
     private static BiFunction<Supplier<DataResult<FavoriteEntry>>, Supplier<CompoundTag>, FavoriteEntry> delegateFavoriteEntry = (supplier, toJson) -> throwNotSetup();
+    private static BiFunction<Component, List<FavoriteMenuEntry>, FavoriteMenuEntry> subMenuEntry = (supplier, toJson) -> throwNotSetup();
+    private static BiFunction<Component, BooleanValue, FavoriteMenuEntry> toggleEntry = (supplier, toJson) -> throwNotSetup();
     private static Function<CompoundTag, DataResult<FavoriteEntry>> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
     private static BiFunction<@Nullable Point, Collection<Component>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
@@ -134,6 +138,14 @@ public final class ClientInternals {
     
     public static FavoriteEntry delegateFavoriteEntry(Supplier<DataResult<FavoriteEntry>> supplier, Supplier<CompoundTag> toJoin) {
         return delegateFavoriteEntry.apply(supplier, toJoin);
+    }
+    
+    public static FavoriteMenuEntry createSubMenuEntry(Component name, List<FavoriteMenuEntry> entries) {
+        return subMenuEntry.apply(name, entries);
+    }
+    
+    public static FavoriteMenuEntry createToggleEntry(Component name, BooleanValue value) {
+        return toggleEntry.apply(name, value);
     }
     
     public static DataResult<FavoriteEntry> favoriteEntryFromJson(CompoundTag tag) {
