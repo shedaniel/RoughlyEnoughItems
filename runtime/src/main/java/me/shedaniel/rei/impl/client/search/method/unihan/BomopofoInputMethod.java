@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.client.search.method.unihan;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
@@ -89,7 +90,12 @@ public class BomopofoInputMethod extends PinyinInputMethod {
     }
     
     @Override
-    protected ExpendedChar asExpendedChar(String string) {
+    public List<FavoriteMenuEntry> getOptionsMenuEntries() {
+        return List.of();
+    }
+    
+    @Override
+    protected List<ExpendedChar> asExpendedChars(String string) {
         IntList codepoints = new IntArrayList(string.length() + 1);
         int[] tone = {-1};
         string.codePoints().forEach(codepoint -> {
@@ -109,7 +115,7 @@ public class BomopofoInputMethod extends PinyinInputMethod {
             codepoints.add(Character.forDigit(tone[0], 10));
         }
         List<IntList> phonemes = standard(codepoints).stream().map(str -> CONVERSION.getOrDefault(str, str)).toList();
-        return new ExpendedChar(phonemes);
+        return List.of(new ExpendedChar(phonemes));
     }
     
     private static List<IntList> standard(IntList s) {
