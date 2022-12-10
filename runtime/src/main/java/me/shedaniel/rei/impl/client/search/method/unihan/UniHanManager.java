@@ -53,7 +53,7 @@ public class UniHanManager {
     
     public void download(InputMethod.ProgressCallback progressCallback) {
         try {
-            download("https://www.shedaniel.moe/uoAqECzbQo5s.zip", progressCallback);
+            download("https://shedaniel.moe/qntrML0EraNB.zip", progressCallback);
         } catch (Exception e) {
             download("https://www.unicode.org/Public/UCD/latest/ucd/Unihan.zip", progressCallback);
         }
@@ -62,7 +62,7 @@ public class UniHanManager {
     public void download(String URL, InputMethod.ProgressCallback progressCallback) {
         if (downloaded()) return;
         try {
-            URL url = new URL("https://shedaniel.moe/uoAqECzbQo5s.zip");
+            URL url = new URL(URL);
             Files.deleteIfExists(unihanPath);
             Path parent = unihanPath.getParent();
             if (parent != null) Files.createDirectories(parent);
