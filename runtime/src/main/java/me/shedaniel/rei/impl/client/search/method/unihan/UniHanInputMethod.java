@@ -68,7 +68,7 @@ public abstract class UniHanInputMethod implements InputMethod<IntList> {
                     String[] strings = data.split(getFieldDelimiter());
                     List<ExpendedChar> sequences = dataMap.computeIfAbsent(codepoint, value -> new ArrayList<>(strings.length));
                     for (String string : strings) {
-                        sequences.add(asExpendedChar(string));
+                        sequences.addAll(asExpendedChars(string));
                     }
                 }
             });
@@ -77,8 +77,8 @@ public abstract class UniHanInputMethod implements InputMethod<IntList> {
         }
     }
     
-    protected ExpendedChar asExpendedChar(String string) {
-        return new ExpendedChar(CollectionUtils.map(IntList.of(string.codePoints().toArray()), IntList::of));
+    protected List<ExpendedChar> asExpendedChars(String string) {
+        return List.of(new ExpendedChar(CollectionUtils.map(IntList.of(string.codePoints().toArray()), IntList::of)));
     }
     
     @Override

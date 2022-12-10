@@ -9,8 +9,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
@@ -27,10 +25,10 @@ public class DoublePinyinInputMethod extends PinyinInputMethod {
     
     public DoublePinyinInputMethod(UniHanManager manager) {
         super(manager);
-        this.read();
     }
     
-    private void read() {
+    @Override
+    protected void read() {
         Path path = Platform.getConfigFolder().resolve("roughlyenoughitems/pinyin_double.properties");
         this.converter = Converters.SOUGOU;
         if (Files.exists(path)) {
@@ -52,7 +50,8 @@ public class DoublePinyinInputMethod extends PinyinInputMethod {
         this.write();
     }
     
-    private void write() {
+    @Override
+    protected void write() {
         Path path = Platform.getConfigFolder().resolve("roughlyenoughitems/pinyin_double.properties");
         Properties properties = new Properties();
         properties.put("Converter", Converters.CONVERTERS.inverse().get(this.converter));
@@ -98,54 +97,17 @@ public class DoublePinyinInputMethod extends PinyinInputMethod {
     }
     
     @Override
-    protected ExpendedChar asExpendedChar(String string) {
-        IntList[] codepoints = new IntList[3];
-        int skip = 2;
-        int tone = -1;
-        char[] chars = string.toCharArray();
-        if (chars[0] == 's' && chars[1] == 'h') {
-            codepoints[0] = this.converter.convert("sh");
-        } else if (chars[0] == 'c' && chars[1] == 'h') {
-            codepoints[0] = this.converter.convert("ch");
-        } else if (chars[0] == 'z' && chars[1] == 'h') {
-            codepoints[0] = this.converter.convert("zh");
+    protected List<IntList> expendSimple(String string) {
+        return List.of(this.converter.convert(string));
+    }
+    
+    @Override
+    protected List<IntList>[] expendSingles(List<IntList> codepoint) {
+        if (this.converter == Converters.SOUGOU || this.converter == Converters.MICROSOFT) {
+            return new List[]{List.of(IntList.of('o')), codepoint};
         } else {
-            skip = 1;
-            ToneEntry toneEntry = toneMap.get(chars[0]);
-            if (toneEntry == null) {
-                codepoints[0] = this.converter.convert(chars[0] + "");
-            } else {
-                codepoints[0] = this.converter.convert(((char) toneEntry.codepoint()) + "");
-                tone = toneEntry.tone();
-            }
+            return new List[]{codepoint, codepoint};
         }
-        StringBuilder builder = new StringBuilder();
-        for (int i = skip; i < chars.length; i++) {
-            char c = chars[i];
-            if (c == 'ü') {
-                builder.append('v');
-            } else {
-                ToneEntry toneEntry = toneMap.get(c);
-                if (toneEntry == null) {
-                    builder.append(c);
-                } else {
-                    builder.append((char) toneEntry.codepoint());
-                    tone = toneEntry.tone();
-                }
-            }
-        }
-        if (builder.isEmpty()) {
-            codepoints[1] = codepoints[0];
-            if (this.converter == Converters.SOUGOU || this.converter == Converters.MICROSOFT) {
-                codepoints[0] = IntList.of('o');
-            }
-        } else {
-            codepoints[1] = this.converter.convert(builder.toString());
-        }
-        if (tone != -1) {
-            codepoints[2] = IntList.of(Character.forDigit(tone, 10));
-        }
-        return new ExpendedChar(Arrays.asList(codepoints).subList(0, tone == -1 ? 2 : 3));
     }
     
     public interface Converter {
