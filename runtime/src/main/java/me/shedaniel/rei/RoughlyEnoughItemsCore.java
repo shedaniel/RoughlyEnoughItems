@@ -24,6 +24,7 @@
 package me.shedaniel.rei;
 
 import com.google.common.collect.ImmutableList;
+import dev.architectury.platform.Mod;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.registry.ReloadListeners;
 import me.shedaniel.architectury.utils.Env;
@@ -55,6 +56,7 @@ import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
 import me.shedaniel.rei.impl.common.registry.RecipeManagerContextImpl;
 import me.shedaniel.rei.impl.common.transfer.MenuInfoRegistryImpl;
 import me.shedaniel.rei.impl.init.PluginDetector;
+import me.shedaniel.rei.impl.init.PrimitivePlatformAdapter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
@@ -63,7 +65,9 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Comparator;
 import java.util.ServiceLoader;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -71,12 +75,45 @@ import java.util.function.UnaryOperator;
 public class RoughlyEnoughItemsCore {
     @ApiStatus.Internal
     public static final InternalLogger LOGGER = new TransformingLogger(new MultiLogger(ImmutableList.of(
-            new FileLogger(Platform.getGameFolder().resolve("logs/rei.log")),
+            make(new FileLogger(Platform.getGameFolder().resolve("logs/rei.log")), logger -> {
+                PrimitivePlatformAdapter adapter = PrimitivePlatformAdapter.get();
+                boolean fabric = Platform.isFabric();
+                logger.info("========================================");
+                logger.info("Minecraft: " + adapter.getMinecraftVersion());
+                logger.info("Side: " + (adapter.isClient() ? "client" : "server"));
+                logger.info("Development: " + adapter.isDev());
+                logger.info("Version: " + Platform.getOptionalMod("roughlyenoughitems").map(Mod::getVersion).orElse(null));
+                logger.info("Loader:");
+                logger.info("- " + (fabric ? "Fabric" : "Forge") + ": " + Platform.getOptionalMod(fabric ? "fabricloader" : "forge").map(Mod::getVersion).orElse(null));
+                if (fabric) logger.info("- Fabric API: " + Platform.getOptionalMod("fabric").map(Mod::getVersion).orElse(null));
+                logger.info("Dependencies:");
+                logger.info("- Cloth Config: " + Platform.getOptionalMod(fabric ? "cloth-config2" : "cloth_config").map(Mod::getVersion).orElse(null));
+                logger.info("- Architectury: " + Platform.getOptionalMod("architectury").map(Mod::getVersion).orElse(null));
+                String mixin = "null";
+                try {
+                    mixin = (String) Class.forName("org.spongepowered.asm.launch.MixinBootstrap").getDeclaredField("VERSION").get(null);
+                } catch (Throwable ignored) {
+                }
+                logger.info("Mixin: " + mixin);
+                logger.info("OS: " + System.getProperty("os.name") + " " + System.getProperty("os.version") + " (" + System.getProperty("os.arch") + ")");
+                logger.info("Java: " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")");
+                logger.info("========================================");
+                logger.info("Mods:");
+                for (Mod mod : Platform.getMods().stream().sorted(Comparator.comparing(Mod::getModId)).toList()) {
+                    logger.info("- " + mod.getModId() + ": " + mod.getVersion());
+                }
+                logger.info("========================================");
+            }),
             new FilteringLogger(new FileLogger(Platform.getGameFolder().resolve("logs/rei-issues.log")), Level.WARN),
             new Log4JLogger(LogManager.getFormatterLogger("REI"))
     )), message -> "[REI] " + message);
     public static final PerformanceLogger PERFORMANCE_LOGGER = new PerformanceLoggerImpl();
     private static final ServiceLoader<PluginDetector> PLUGIN_DETECTOR_LOADER = ServiceLoader.load(PluginDetector.class);
+    
+    private static <T> T make(T object, Consumer<T> consumer) {
+        consumer.accept(object);
+        return object;
+    }
     
     static {
         attachCommonInternals();
