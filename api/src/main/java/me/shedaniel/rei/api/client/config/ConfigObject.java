@@ -265,6 +265,9 @@ public interface ConfigObject {
     
     boolean doDisplayFavoritesTooltip();
     
+    @ApiStatus.Experimental
+    boolean doDisplayIMEHints();
+    
     boolean doesFastEntryRendering();
     
     boolean doesCacheEntryRendering();

@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.client.search.method;
 
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,9 +46,9 @@ public interface CharacterUnpackingInputMethod extends InputMethod<IntList> {
     default String suggestInputString(String str) {
         return str.codePoints().mapToObj(c -> {
             List<ExpendedChar> chars = expendSourceChar(c);
-            String result;
-            if (chars.isEmpty()) return result = ((char) c) + "";
-            result = chars.get(0).phonemes().stream()
+            if (chars.isEmpty()) return ((char) c) + "";
+            int i = Mth.floor((System.currentTimeMillis() / 1000L % (double) chars.size()));
+            String result = chars.get(i).phonemes().stream()
                     .flatMap(integers -> integers.intStream().mapToObj(value -> ((char) value) + ""))
                     .collect(Collectors.joining());
             if (result.codePointCount(0, result.length()) == 1 && result.codePointAt(0) == c) {

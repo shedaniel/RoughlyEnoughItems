@@ -50,9 +50,15 @@ public abstract class UniHanInputMethod implements InputMethod<IntList> {
     
     @Override
     public CompletableFuture<Void> prepare(Executor executor) {
+        return this.prepare(executor, p -> {});
+    }
+    
+    @Override
+    public CompletableFuture<Void> prepare(Executor executor, ProgressCallback progressCallback) {
         return dispose(executor)
-                .thenRunAsync(manager::download, executor)
-                .thenRunAsync(this::load, executor);
+                .thenRunAsync(() -> manager.download(p -> progressCallback.onProgress(p * 0.99)), executor)
+                .thenRunAsync(this::load, executor)
+                .whenComplete((aVoid, throwable) -> progressCallback.onProgress(1.0));
     }
     
     public void load() {
@@ -62,7 +68,7 @@ public abstract class UniHanInputMethod implements InputMethod<IntList> {
                     String[] strings = data.split(getFieldDelimiter());
                     List<ExpendedChar> sequences = dataMap.computeIfAbsent(codepoint, value -> new ArrayList<>(strings.length));
                     for (String string : strings) {
-                        sequences.add(asExpendedChar(string));
+                        sequences.addAll(asExpendedChars(string));
                     }
                 }
             });
@@ -71,8 +77,8 @@ public abstract class UniHanInputMethod implements InputMethod<IntList> {
         }
     }
     
-    protected ExpendedChar asExpendedChar(String string) {
-        return new ExpendedChar(CollectionUtils.map(IntList.of(string.codePoints().toArray()), IntList::of));
+    protected List<ExpendedChar> asExpendedChars(String string) {
+        return List.of(new ExpendedChar(CollectionUtils.map(IntList.of(string.codePoints().toArray()), IntList::of)));
     }
     
     @Override

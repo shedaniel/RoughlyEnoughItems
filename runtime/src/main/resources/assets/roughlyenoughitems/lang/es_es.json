@@ -87,8 +87,6 @@
   "text.rei.input.methods.bopomofo": "Bopomofo (Mandarino)",
   "text.rei.input.methods.bopomofo.description": "El método de entrada para coincidir caracteres chinos con Bopomofo (Mandarino).",
   "text.rei.input.methods.hint": "Los métodos de entrada alternativa están disponibles para su idioma.",
-  "text.rei.input.methods.hint.configure": "Configurar",
-  "text.rei.input.methods.hint.ignore": "Ignorar",
   "text.rei.input.methods.initializing": "Inicializando método de entrada",
   "ordering.rei.ascending": "Ascendente",
   "ordering.rei.descending": "Descendente",
