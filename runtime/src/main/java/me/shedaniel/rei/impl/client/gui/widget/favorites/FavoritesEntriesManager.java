@@ -36,6 +36,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -70,9 +71,17 @@ public class FavoritesEntriesManager {
             config.getHiddenFavoriteEntries().add(entry);
             FavoritesListWidget widget = ScreenOverlayImpl.getFavoritesListWidget();
             if (widget != null) {
-                Supplier<Rectangle> buttonBounds = widget.togglePanelButton::getBounds;
-                ScreenOverlayImpl.getInstance().getHintsContainer().addHint(12, () -> new Point(buttonBounds.get().getCenterX(), buttonBounds.get().getCenterY()),
-                        "text.rei.hint.favorites.discover", List.of(new TranslatableComponent("text.rei.hint.favorites.discover")));
+                if (!widget.getExclusionZones().isEmpty()) {
+                    Rectangle[] bounds = new Rectangle[]{widget.getExclusionZones().iterator().next()};
+                    Supplier<Rectangle> buttonBounds = () -> {
+                        Collection<Rectangle> exclusionZones = widget.getExclusionZones();
+                        if (exclusionZones.isEmpty())
+                            return bounds[0];
+                        return bounds[0] = exclusionZones.iterator().next();
+                    };
+                    ScreenOverlayImpl.getInstance().getHintsContainer().addHint(12, () -> new Point(buttonBounds.get().getCenterX(), buttonBounds.get().getCenterY()),
+                            "text.rei.hint.favorites.discover", List.of(new TranslatableComponent("text.rei.hint.favorites.discover")));
+                }
             }
         }
         
