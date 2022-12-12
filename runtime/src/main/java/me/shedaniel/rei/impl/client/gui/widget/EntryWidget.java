@@ -58,6 +58,7 @@ import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.dragging.CurrentDraggingStack;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import net.minecraft.ChatFormatting;
@@ -557,6 +558,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             return false;
         if (wasClicked() && containsMouse(mouseX, mouseY)) {
             if (doAction(mouseX, mouseY, button)) {
+                ((CurrentDraggingStack) DraggingContext.getInstance()).drop();
                 return true;
             }
         }
