@@ -24,6 +24,8 @@
 package me.shedaniel.rei;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.DataResult;
 import dev.architectury.event.Event;
 import dev.architectury.event.EventFactory;
@@ -32,6 +34,7 @@ import dev.architectury.event.events.client.ClientGuiEvent;
 import dev.architectury.event.events.client.ClientRecipeUpdateEvent;
 import dev.architectury.event.events.client.ClientScreenInputEvent;
 import dev.architectury.networking.NetworkManager;
+import dev.architectury.utils.value.BooleanValue;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -39,6 +42,7 @@ import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
@@ -65,6 +69,8 @@ import me.shedaniel.rei.impl.client.entry.renderer.EntryRendererRegistryImpl;
 import me.shedaniel.rei.impl.client.favorites.DelegatingFavoriteEntryProviderImpl;
 import me.shedaniel.rei.impl.client.favorites.FavoriteEntryTypeRegistryImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.modules.entries.SubMenuEntry;
+import me.shedaniel.rei.impl.client.gui.modules.entries.ToggleMenuEntry;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
 import me.shedaniel.rei.impl.client.gui.widget.QueuedTooltip;
 import me.shedaniel.rei.impl.client.gui.widget.TooltipContextImpl;
@@ -89,6 +95,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CraftingScreen;
@@ -151,6 +158,8 @@ public class RoughlyEnoughItemsCoreClient {
         ClientInternals.attachInstance((BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip>) QueuedTooltip::impl, "tooltipProvider");
         ClientInternals.attachInstance((TriFunction<Point, @Nullable TooltipFlag, Boolean, TooltipContext>) TooltipContextImpl::new, "tooltipContextProvider");
         ClientInternals.attachInstance((Function<Object, Tooltip.Entry>) QueuedTooltip.TooltipEntryImpl::new, "tooltipEntryProvider");
+        ClientInternals.attachInstance((BiFunction<Component, List<FavoriteMenuEntry>, FavoriteMenuEntry>) SubMenuEntry::new, "subMenuEntry");
+        ClientInternals.attachInstance((BiFunction<Component, BooleanValue, FavoriteMenuEntry>) (text, value) -> ToggleMenuEntry.of(text, value::get, value), "toggleEntry");
         ClientInternals.attachInstance((Function<@Nullable Boolean, ClickArea.Result>) successful -> new ClickArea.Result() {
             private List<CategoryIdentifier<?>> categories = Lists.newArrayList();
             private BooleanSupplier execute = () -> {
@@ -388,23 +397,64 @@ public class RoughlyEnoughItemsCoreClient {
         ClientScreenInputEvent.CHAR_TYPED_PRE.register((minecraftClient, screen, character, keyCode) -> {
             if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
-            if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
-                if (!REIRuntimeImpl.getSearchField().isFocused())
-                    return EventResult.pass();
+            if (!REIRuntimeImpl.getSearchField().isFocused()) {
+                GuiEventListener focused = screen.getFocused();
+                if (focused != null) {
+                    if (focused instanceof EditBox editBox && editBox.isFocused()) return EventResult.pass();
+                    if (focused instanceof RecipeBookComponent book && book.searchBox != null && book.searchBox.isFocused()) return EventResult.pass();
+                }
+            }
             resetFocused(screen);
             if (getOverlay().charTyped(character, keyCode)
                 && resetFocused(screen))
                 return EventResult.interruptFalse();
             return EventResult.pass();
         });
-        ClientGuiEvent.RENDER_POST.register((screen, matrices, mouseX, mouseY, delta) -> {
+        int[] rendered = {0};
+        ClientGuiEvent.RENDER_PRE.register((screen, matrices, mouseX, mouseY, delta) -> {
+            if (shouldReturn(screen))
+                return EventResult.pass();
+            rendered[0] = 0;
+            return EventResult.pass();
+        });
+        ClientGuiEvent.RENDER_CONTAINER_BACKGROUND.register((screen, matrices, mouseX, mouseY, delta) -> {
             if (shouldReturn(screen))
                 return;
+            rendered[0] = 1;
             resetFocused(screen);
             if (!(screen instanceof DisplayScreen)) {
                 getOverlay().render(matrices, mouseX, mouseY, delta);
             }
+            resetFocused(screen);
+        });
+        ClientGuiEvent.RENDER_CONTAINER_FOREGROUND.register((screen, matrices, mouseX, mouseY, delta) -> {
+            if (shouldReturn(screen))
+                return;
+            rendered[0] = 2;
+            resetFocused(screen);
+            PoseStack poseStack = RenderSystem.getModelViewStack();
+            poseStack.pushPose();
+            poseStack.translate(-screen.leftPos, -screen.topPos, 0.0);
+            RenderSystem.applyModelViewMatrix();
             ((ScreenOverlayImpl) getOverlay()).lateRender(matrices, mouseX, mouseY, delta);
+            poseStack.popPose();
+            RenderSystem.applyModelViewMatrix();
+            resetFocused(screen);
+        });
+        ClientGuiEvent.RENDER_POST.register((screen, matrices, mouseX, mouseY, delta) -> {
+            if (shouldReturn(screen) || rendered[0] == 2)
+                return;
+            if (screen instanceof AbstractContainerScreen) {
+                InternalLogger.getInstance().warn("Screen " + screen.getClass().getName() + " did not render background and foreground! This might cause rendering issues!");
+            }
+            resetFocused(screen);
+            if (rendered[0] == 0 && !(screen instanceof DisplayScreen)) {
+                getOverlay().render(matrices, mouseX, mouseY, delta);
+            }
+            rendered[0] = 1;
+            if (rendered[0] == 1) {
+                ((ScreenOverlayImpl) getOverlay()).lateRender(matrices, mouseX, mouseY, delta);
+            }
             resetFocused(screen);
         });
         ClientScreenInputEvent.MOUSE_DRAGGED_PRE.register((minecraftClient, screen, mouseX1, mouseY1, button, mouseX2, mouseY2) -> {
@@ -425,9 +475,13 @@ public class RoughlyEnoughItemsCoreClient {
                     return EventResult.interruptFalse();
                 }
             }
-            if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
-                if (!REIRuntimeImpl.getSearchField().isFocused())
-                    return EventResult.pass();
+            if (!REIRuntimeImpl.getSearchField().isFocused()) {
+                GuiEventListener focused = screen.getFocused();
+                if (focused != null) {
+                    if (focused instanceof EditBox editBox && editBox.isFocused()) return EventResult.pass();
+                    if (focused instanceof RecipeBookComponent book && book.searchBox != null && book.searchBox.isFocused()) return EventResult.pass();
+                }
+            }
             resetFocused(screen);
             if (getOverlay().keyPressed(i, i1, i2)
                 && resetFocused(screen))
@@ -437,9 +491,13 @@ public class RoughlyEnoughItemsCoreClient {
         ClientScreenInputEvent.KEY_RELEASED_PRE.register((minecraftClient, screen, i, i1, i2) -> {
             if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
-            if (screen.getFocused() != null && screen.getFocused() instanceof EditBox || (screen.getFocused() instanceof RecipeBookComponent && ((RecipeBookComponent) screen.getFocused()).searchBox != null && ((RecipeBookComponent) screen.getFocused()).searchBox.isFocused()))
-                if (!REIRuntimeImpl.getSearchField().isFocused())
-                    return EventResult.pass();
+            if (!REIRuntimeImpl.getSearchField().isFocused()) {
+                GuiEventListener focused = screen.getFocused();
+                if (focused != null) {
+                    if (focused instanceof EditBox editBox && editBox.isFocused()) return EventResult.pass();
+                    if (focused instanceof RecipeBookComponent book && book.searchBox != null && book.searchBox.isFocused()) return EventResult.pass();
+                }
+            }
             resetFocused(screen);
             if (getOverlay().keyReleased(i, i1, i2)
                 && resetFocused(screen))

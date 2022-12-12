@@ -87,8 +87,6 @@
   "text.rei.input.methods.bopomofo": "Bopomofo (Mandarínština)",
   "text.rei.input.methods.bopomofo.description": "Vstupní metoda porovnávání čínských znaků s Bopomofo (Mandarínština).",
   "text.rei.input.methods.hint": "Alternativní vstupní metody jsou k dispozici pro váš jazyk.",
-  "text.rei.input.methods.hint.configure": "Konfigurace",
-  "text.rei.input.methods.hint.ignore": "Ignorovat",
   "text.rei.input.methods.initializing": "Inicializace vstupní metody",
   "ordering.rei.ascending": "Vzestupně",
   "ordering.rei.descending": "Sestupně",

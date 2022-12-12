@@ -21,24 +21,23 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.modules;
+package me.shedaniel.rei.impl.common.entry.type;
 
-import me.shedaniel.rei.api.client.gui.widgets.Widget;
-import org.jetbrains.annotations.ApiStatus;
+import it.unimi.dsi.fastutil.longs.LongCollection;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import org.jetbrains.annotations.Nullable;
 
-@ApiStatus.Internal
-public abstract class MenuEntry extends Widget {
-    @ApiStatus.Internal
-    @Deprecated
-    Menu parent = null;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+public interface FilteredEntryList extends EntryRegistryListener {
+    void refreshFilteringFor(@Nullable Set<FilteringRule<?>> refilterRules, Collection<EntryStack<?>> stack, @Nullable LongCollection hashes);
     
-    public final Menu getParent() {
-        return parent;
-    }
+    void refreshFilteringFor(boolean log, @Nullable Set<FilteringRule<?>> refilterRules, Collection<EntryStack<?>> stacks, @Nullable LongCollection hashes);
     
-    public abstract int getEntryWidth();
+    List<EntryStack<?>> getList();
     
-    public abstract int getEntryHeight();
-    
-    public abstract void updateInformation(int xPos, int yPos, boolean selected, boolean containsMouse, boolean rendering, int width);
+    boolean isFiltered(EntryStack<?> stack, long hashExact);
 }

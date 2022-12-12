@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.client.entry.filtering.rules;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
@@ -119,7 +120,7 @@ public enum SearchFilteringRuleType implements FilteringRuleType<SearchFiltering
                 entryConsumer.accept(show = new BooleanRuleEntry(width - 36, show == null ? rule.show : show.getBoolean(), rule, function));
                 addEmpty(entryConsumer, 10);
                 entryConsumer.accept(new SubRulesEntry(rule, () -> function.apply(show == null ? rule.show : show.getBoolean()),
-                        Collections.singletonList(new EntryStacksRuleEntry(rule, () -> entryStacks, entry, show))));
+                        Collections.singletonList(new EntryStacksRuleEntry(rule, () -> entryStacks))));
             }
             
             @Override
@@ -136,10 +137,10 @@ public enum SearchFilteringRuleType implements FilteringRuleType<SearchFiltering
     }
     
     public static class EntryStacksRuleEntry extends FilteringRuleOptionsScreen.RuleEntry {
-        private final Supplier<List<EntryWidget>> entryStacks;
+        private final Supplier<Iterable<EntryWidget>> entryStacks;
         private int totalHeight;
         
-        public EntryStacksRuleEntry(SearchFilteringRule rule, Supplier<List<EntryWidget>> entryStacks, FilteringRuleOptionsScreen.TextFieldRuleEntry entry, FilteringRuleOptionsScreen.BooleanRuleEntry show) {
+        public EntryStacksRuleEntry(FilteringRule<?> rule, Supplier<Iterable<EntryWidget>> entryStacks) {
             super(rule);
             this.entryStacks = entryStacks;
         }

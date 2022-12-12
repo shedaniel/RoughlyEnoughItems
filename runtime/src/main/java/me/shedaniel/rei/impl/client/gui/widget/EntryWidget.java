@@ -475,7 +475,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 }
             }
             
-            if (!tooltip.entries().isEmpty()) {
+            if (!tooltip.entries().isEmpty() && ConfigObject.getInstance().doDisplayIMEHints()) {
                 Tooltip.Entry entry = tooltip.entries().get(0);
                 
                 if (entry.isText()) {

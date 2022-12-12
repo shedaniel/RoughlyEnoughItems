@@ -280,6 +280,15 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public boolean doDisplayIMEHints() {
+        return advanced.tooltips.displayIMEHints;
+    }
+    
+    public void setDoDisplayIMEHints(boolean displayIMEHints) {
+        advanced.tooltips.displayIMEHints = displayIMEHints;
+    }
+    
+    @Override
     public boolean doesFastEntryRendering() {
         return advanced.miscellaneous.newFastEntryRendering;
     }
@@ -661,6 +670,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         public static class Tooltips {
             @Comment("Declares whether REI should append mod names to entries.") private boolean appendModNames = true;
             @Comment("Declares whether favorites tooltip should be displayed.") private boolean displayFavoritesTooltip = false;
+            @ConfigEntry.Gui.Excluded private boolean displayIMEHints = true;
         }
         
         public static class Layout {
@@ -684,7 +694,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares how the scrollbar in composite screen should act.") private boolean compositeScrollBarPermanent = false;
             private boolean toastDisplayedOnCopyIdentifier = true;
             @Comment("Declares whether REI should use compact tabs for categories.") private boolean useCompactTabs = true;
-            @Comment("Declares whether REI should use compact tab buttons for categories.") @ConfigEntry.Gui.Excluded private boolean useCompactTabButtons = false;
+            @Comment("Declares whether REI should use compact tab buttons for categories.") private boolean useCompactTabButtons = false;
         }
         
         public static class Search {

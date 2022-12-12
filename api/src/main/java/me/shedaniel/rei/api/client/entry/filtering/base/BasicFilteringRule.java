@@ -26,10 +26,14 @@ package me.shedaniel.rei.api.client.entry.filtering.base;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringResult;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import org.jetbrains.annotations.ApiStatus;
+
+import java.util.Collection;
+import java.util.function.Supplier;
 
 /**
  * The basic filtering rule that can be used to filter entries,
@@ -41,4 +45,12 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Experimental
 @Environment(EnvType.CLIENT)
 public interface BasicFilteringRule<Cache> extends Reloadable<REIClientPlugin>, FilteringRule<Cache>, FilteringResult {
+    MarkDirty hide(Supplier<Collection<EntryStack<?>>> provider);
+    
+    MarkDirty show(Supplier<Collection<EntryStack<?>>> provider);
+    
+    @ApiStatus.NonExtendable
+    interface MarkDirty {
+        void markDirty();
+    }
 }

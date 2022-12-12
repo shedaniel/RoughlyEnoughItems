@@ -24,8 +24,10 @@
 package me.shedaniel.rei.impl.common.entry.type;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.AbstractIterator;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.longs.LongList;
+import it.unimi.dsi.fastutil.longs.*;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
@@ -34,26 +36,26 @@ import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextImpl;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextType;
-import me.shedaniel.rei.impl.client.entry.filtering.FilteringResultImpl;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
-public class PreFilteredEntryList implements EntryRegistryListener {
+public class PreFilteredEntryList implements FilteredEntryList {
     private final EntryRegistry registry;
-    private final MutableLong lastRefilterWarning = new MutableLong(-1);
-    private List<EntryStack<?>> preFilteredList = Lists.newCopyOnWriteArrayList();
+    private final EntryRegistryList list;
+    private final Map<FilteringRule<?>, DataPair> filteringData = new HashMap<>();
+    private final Long2BooleanMap cached = new Long2BooleanOpenHashMap();
+    private final List<EntryStack<?>> listView = new InternalListView();
+    private long mod = 0;
     
-    public PreFilteredEntryList(EntryRegistry registry) {
+    public PreFilteredEntryList(EntryRegistry registry, EntryRegistryList list) {
         this.registry = registry;
+        this.list = list;
     }
     
     private static <T> Predicate<T> not(Predicate<? super T> target) {
@@ -64,65 +66,33 @@ public class PreFilteredEntryList implements EntryRegistryListener {
     @Override
     public void addEntryAfter(@Nullable EntryStack<?> afterEntry, EntryStack<?> stack, long stackHashExact) {
         if (!registry.isReloading()) {
-            Collection<EntryStack<?>> refilterNew = refilterNew(true, Collections.singletonList(stack));
-            if (afterEntry != null) {
-                int index = preFilteredList.lastIndexOf(afterEntry);
-                if (index >= 0) {
-                    preFilteredList.addAll(index, refilterNew);
-                    queueSearchUpdate();
-                    return;
-                }
-            }
-            
-            preFilteredList.addAll(refilterNew);
-            queueSearchUpdate();
+            refreshFilteringFor(null, List.of(stack), LongList.of(stackHashExact));
         }
     }
     
     @Override
     public void addEntriesAfter(@Nullable EntryStack<?> afterEntry, List<EntryStack<?>> stacks, @Nullable LongList hashes) {
         if (!registry.isReloading()) {
-            Collection<EntryStack<?>> refilterNew = refilterNew(true, stacks);
-            if (afterEntry != null) {
-                int index = preFilteredList.lastIndexOf(afterEntry);
-                if (index >= 0) {
-                    preFilteredList.addAll(index, refilterNew);
-                    queueSearchUpdate();
-                    return;
-                }
-            }
-            
-            preFilteredList.addAll(refilterNew);
-            queueSearchUpdate();
+            refreshFilteringFor(null, stacks, hashes);
         }
     }
     
     @Override
     public void removeEntry(EntryStack<?> stack, long hashExact) {
         if (!registry.isReloading()) {
-            preFilteredList.remove(stack);
-            queueSearchUpdate();
+            removeFilteringFor(List.of(stack), LongList.of(hashExact));
         }
     }
     
     @Override
     public void removeEntries(List<EntryStack<?>> stacks, @Nullable LongList hashes) {
         if (!registry.isReloading()) {
-            preFilteredList.removeAll(stacks);
-            queueSearchUpdate();
+            removeFilteringFor(stacks, hashes);
         }
     }
     
     @Override
-    public void removeEntriesIf(Predicate<EntryStack<?>> predicate) {
-        if (!registry.isReloading()) {
-            preFilteredList.removeIf(predicate);
-            queueSearchUpdate();
-        }
-    }
-    
-    @Override
-    public void onReFilter(List<EntryStack<?>> stacks) {
+    public void onReFilter(List<HashedEntryStackWrapper> stacks) {
         ConfigObject config = ConfigObject.getInstance();
         if (config.getFilteredStackProviders() != null) {
             List<EntryStack<?>> normalizedFilteredStacks = CollectionUtils.map(config.getFilteredStackProviders(), EntryStackProvider::provide);
@@ -132,71 +102,179 @@ public class PreFilteredEntryList implements EntryRegistryListener {
         }
         
         Stopwatch stopwatch = Stopwatch.createStarted();
-        
-        FilteringContextImpl context = new FilteringContextImpl(stacks);
-        Map<FilteringRule<?>, Object> cache = new HashMap<>();
-        List<FilteringRule<?>> rules = ((ConfigObjectImpl) ConfigObject.getInstance()).getFilteringRules();
-        Stopwatch innerStopwatch = Stopwatch.createStarted();
-        for (int i = rules.size() - 1; i >= 0; i--) {
-            innerStopwatch.reset().start();
-            FilteringRule<?> rule = rules.get(i);
-            cache.put(rule, rule.prepareCache(true));
-            context.handleResult((FilteringResultImpl) ((FilteringRule<Object>) rule).processFilteredStacks(context,
-                    () -> new FilteringResultImpl(new ArrayList<>(), new ArrayList<>()),
-                    cache.get(rule), true));
-            InternalLogger.getInstance().debug("Refiltered rule [%s] in %s.", rule.getType().toString(), innerStopwatch.stop().toString());
-        }
-        
-        Set<HashedEntryStackWrapper> hiddenStacks = context.stacks.get(FilteringContextType.HIDDEN);
-        if (hiddenStacks.isEmpty()) {
-            preFilteredList = Lists.newCopyOnWriteArrayList(stacks);
-        } else {
-            preFilteredList = stacks.parallelStream()
-                    .map(HashedEntryStackWrapper::new)
-                    .filter(not(hiddenStacks::contains))
-                    .map(HashedEntryStackWrapper::unwrap)
-                    .collect(Collectors.toCollection(Lists::newCopyOnWriteArrayList));
-        }
-        
-        InternalLogger.getInstance().debug("Refiltered %d entries with %d rules in %s.", stacks.size() - preFilteredList.size(), rules.size(), stopwatch.stop().toString());
-    }
-    
-    public Collection<EntryStack<?>> refilterNew(boolean warn, Collection<EntryStack<?>> entries) {
-        if (lastRefilterWarning != null && warn) {
-            if (lastRefilterWarning.getValue() > 0 && System.currentTimeMillis() - lastRefilterWarning.getValue() > 5000) {
-                InternalLogger.getInstance().warn("Detected runtime EntryRegistry modification, this can be extremely dangerous, or be extremely inefficient!");
+        refreshFilteringFor(true, null, Lists.transform(stacks, HashedEntryStackWrapper::unwrap), new AbstractLongList() {
+            @Override
+            public long getLong(int index) {
+                return stacks.get(index).hashExact();
             }
-            lastRefilterWarning.setValue(System.currentTimeMillis());
-        }
-        
-        FilteringContextImpl context = new FilteringContextImpl(entries);
-        Map<FilteringRule<?>, Object> cache = new HashMap<>();
-        List<FilteringRule<?>> rules = ((ConfigObjectImpl) ConfigObject.getInstance()).getFilteringRules();
-        for (int i = rules.size() - 1; i >= 0; i--) {
-            FilteringRule<?> rule = rules.get(i);
-            cache.put(rule, rule.prepareCache(entries.size() > 100));
-            context.handleResult((FilteringResultImpl) ((FilteringRule<Object>) rule).processFilteredStacks(context,
-                    () -> new FilteringResultImpl(new ArrayList<>(), new ArrayList<>()),
-                    cache.get(rule), entries.size() > 100));
-        }
-        
-        Set<HashedEntryStackWrapper> hiddenStacks = context.stacks.get(FilteringContextType.HIDDEN);
-        if (hiddenStacks.isEmpty()) {
-            return entries;
-        } else {
-            return entries.parallelStream()
-                    .map(HashedEntryStackWrapper::new)
-                    .filter(not(hiddenStacks::contains))
-                    .map(HashedEntryStackWrapper::unwrap)
-                    .collect(Collectors.toList());
-        }
+            
+            @Override
+            public int size() {
+                return stacks.size();
+            }
+        });
+        InternalLogger.getInstance().debug("Refiltered entries with %d rules in %s.", FilteringLogic.getRules().size(), stopwatch.stop().toString());
     }
     
     private void queueSearchUpdate() {
         REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadSearch);
     }
     
+    @Override
+    public void refreshFilteringFor(@Nullable Set<FilteringRule<?>> refilterRules, Collection<EntryStack<?>> stack, @Nullable LongCollection hashes) {
+        refreshFilteringFor(false, refilterRules, stack, hashes);
+    }
+    
+    @Override
+    public void refreshFilteringFor(boolean log, @Nullable Set<FilteringRule<?>> refilterRules, Collection<EntryStack<?>> stacks, @Nullable LongCollection hashes) {
+        if (hashes == null) {
+            hashes = new LongArrayList(stacks.size());
+            for (EntryStack<?> stack : stacks) {
+                hashes.add(EntryStacks.hashExact(stack));
+            }
+        }
+        
+        LongIterator hashIterator = hashes.iterator();
+        while (hashIterator.hasNext()) {
+            long hash = hashIterator.nextLong();
+            cached.remove(hash);
+        }
+        
+        List<FilteringRule<?>> rules = FilteringLogic.getRules();
+        for (int i = rules.size() - 1; i >= 0; i--) {
+            FilteringRule<?> rule = rules.get(i);
+            if (!filteringData.containsKey(rule)) filteringData.put(rule, new DataPair());
+            DataPair longPair = filteringData.get(rule);
+            LongSet hidden = longPair.hidden();
+            LongSet shown = longPair.shown();
+            boolean refilter = refilterRules == null || refilterRules.contains(rule);
+            if (refilter) {
+                if (!hidden.isEmpty()) {
+                    hidden.removeAll(hashes);
+                    mod++;
+                }
+                if (!shown.isEmpty()) {
+                    shown.removeAll(hashes);
+                    mod++;
+                }
+                Map<FilteringContextType, Set<HashedEntryStackWrapper>> map = FilteringLogic.hidden(List.of(rule), log, true, stacks);
+                Set<HashedEntryStackWrapper> hiddenWrappers = map.get(FilteringContextType.HIDDEN);
+                Set<HashedEntryStackWrapper> shownWrappers = map.get(FilteringContextType.SHOWN);
+                for (HashedEntryStackWrapper stack : hiddenWrappers) {
+                    hidden.add(stack.hashExact());
+                    cached.put(stack.hashExact(), false);
+                }
+                for (HashedEntryStackWrapper stack : shownWrappers) {
+                    shown.add(stack.hashExact());
+                    cached.put(stack.hashExact(), true);
+                }
+                if (!hiddenWrappers.isEmpty() || !shownWrappers.isEmpty()) mod++;
+            } else {
+                hashIterator = hashes.iterator();
+                while (hashIterator.hasNext()) {
+                    long hash = hashIterator.nextLong();
+                    if (hidden.contains(hash)) {
+                        cached.put(hash, false);
+                        mod++;
+                    } else if (shown.contains(hash)) {
+                        cached.put(hash, true);
+                        mod++;
+                    }
+                }
+            }
+        }
+        
+        queueSearchUpdate();
+    }
+    
+    private void removeFilteringFor(List<EntryStack<?>> stacks, @Nullable LongList hashes) {
+        if (hashes == null) {
+            hashes = new LongArrayList(stacks.size());
+            for (EntryStack<?> stack : stacks) {
+                hashes.add(EntryStacks.hashExact(stack));
+            }
+        }
+        
+        removeFilteringFor(hashes);
+    }
+    
+    private void removeFilteringFor(LongList hashes) {
+        for (DataPair value : filteringData.values()) {
+            value.hidden().removeAll(hashes);
+            value.shown().removeAll(hashes);
+        }
+        
+        LongListIterator hashIterator = hashes.iterator();
+        while (hashIterator.hasNext()) {
+            long hash = hashIterator.nextLong();
+            cached.remove(hash);
+        }
+    }
+    
+    @Override
     public List<EntryStack<?>> getList() {
-        return preFilteredList;
+        return listView;
+    }
+    
+    private class InternalListView extends AbstractList<EntryStack<?>> {
+        private long prevMod = -1;
+        private List<EntryStack<?>> stacks;
+        
+        @Override
+        public EntryStack<?> get(int index) {
+            if (prevMod == mod) {
+                return stacks.get(index);
+            }
+            
+            if (index < list.size() / 5) {
+                return Iterators.get(iterator(), index);
+            }
+            
+            stacks = Lists.newArrayList(iterator());
+            prevMod = mod;
+            return stacks.get(index);
+        }
+        
+        @Override
+        public int size() {
+            if (prevMod != mod) {
+                stacks = Lists.newArrayList(iterator());
+                prevMod = mod;
+            }
+            
+            return stacks.size();
+        }
+        
+        @Override
+        public Iterator<EntryStack<?>> iterator() {
+            if (prevMod == mod) {
+                return stacks.iterator();
+            }
+            
+            Iterator<HashedEntryStackWrapper> iterator = list.collectHashed().iterator();
+            return new AbstractIterator<>() {
+                @Nullable
+                @Override
+                protected EntryStack<?> computeNext() {
+                    while (iterator.hasNext()) {
+                        HashedEntryStackWrapper wrapper = iterator.next();
+                        if (isFiltered(wrapper.unwrap(), wrapper.hashExact())) return wrapper.unwrap();
+                    }
+                    
+                    return endOfData();
+                }
+            };
+        }
+    }
+    
+    @Override
+    public boolean isFiltered(EntryStack<?> stack, long hashExact) {
+        return !stack.isEmpty() && cached.getOrDefault(hashExact, true);
+    }
+    
+    private record DataPair(LongSet hidden, LongSet shown) {
+        private DataPair() {
+            this(new LongOpenHashSet(), new LongOpenHashSet());
+        }
     }
 }
