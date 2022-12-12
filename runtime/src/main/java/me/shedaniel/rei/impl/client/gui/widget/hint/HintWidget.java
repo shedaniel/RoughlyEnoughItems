@@ -41,9 +41,9 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 
@@ -139,8 +139,7 @@ public class HintWidget extends WidgetWithBounds {
         fillGradient(pose, bufferBuilder, x + width - 1, y + 1, x + width, y + height - 1, 400, color1, color2);
         fillGradient(pose, bufferBuilder, x, y, x + width, y + 1, 400, color1, color1);
         fillGradient(pose, bufferBuilder, x, y + height - 1, x + width, y + height, 400, color2, color2);
-        bufferBuilder.end();
-        BufferUploader.end(bufferBuilder);
+        BufferUploader.drawWithShader(bufferBuilder.end());
         int lineY = y + 4;
         
         try (CloseableScissors scissors = Widget.scissor(pose, new Rectangle(x + 4, y + 4, width - 8, height - 8 - 9 - 2))) {
@@ -154,7 +153,7 @@ public class HintWidget extends WidgetWithBounds {
             }
         }
         
-        MutableComponent okay = new TranslatableComponent("gui.ok");
+        MutableComponent okay = Component.translatable("gui.ok");
         int okayWidth = font.width(okay);
         int midPoint = x + 4 + (width - 4) / 2;
         this.okayBounds.setBounds(midPoint - okayWidth / 2, lineY, okayWidth, 9);

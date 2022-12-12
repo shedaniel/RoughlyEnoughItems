@@ -32,7 +32,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -72,7 +72,7 @@ public class FavoritesEntriesManager {
             if (widget != null) {
                 Supplier<Rectangle> buttonBounds = widget.togglePanelButton::getBounds;
                 ScreenOverlayImpl.getInstance().getHintsContainer().addHint(12, () -> new Point(buttonBounds.get().getCenterX(), buttonBounds.get().getCenterY()),
-                        "text.rei.hint.favorites.discover", List.of(new TranslatableComponent("text.rei.hint.favorites.discover")));
+                        "text.rei.hint.favorites.discover", List.of(Component.translatable("text.rei.hint.favorites.discover")));
             }
         }
         

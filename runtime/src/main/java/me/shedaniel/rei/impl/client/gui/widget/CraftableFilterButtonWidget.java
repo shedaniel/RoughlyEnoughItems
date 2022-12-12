@@ -151,14 +151,14 @@ public class CraftableFilterButtonWidget {
                                             () -> !future.isDone(), () -> {
                                         Minecraft.getInstance().setScreen(screen);
                                     });
-                                    reloadingScreen.setSubtitle(() -> new TranslatableComponent("text.rei.input.methods.reload.progress", String.format("%.2f", progress[0] * 100)));
+                                    reloadingScreen.setSubtitle(() -> Component.translatable("text.rei.input.methods.reload.progress", String.format("%.2f", progress[0] * 100)));
                                     Minecraft.getInstance().setScreen(reloadingScreen);
                                     access.close();
                                     future.whenComplete((unused, throwable) -> {
                                         service.shutdown();
                                     });
                                     ScreenOverlayImpl.getInstance().getHintsContainer().addHint(12, () -> new Point(getCraftableFilterBounds().getCenterX(), getCraftableFilterBounds().getCenterY()),
-                                            "text.rei.hint.input.methods", List.of(new TranslatableComponent("text.rei.hint.input.methods")));
+                                            "text.rei.hint.input.methods", List.of(Component.translatable("text.rei.hint.input.methods")));
                                 })
                         .withActive(() -> !Objects.equals(config.getInputMethodId(), pair.getKey()))
                         .withTooltip(() -> Tooltip.create(Widget.mouse(), pair.getValue().getDescription()))
@@ -167,7 +167,7 @@ public class CraftableFilterButtonWidget {
         InputMethod<?> active = InputMethod.active();
         if (!(active instanceof DefaultInputMethod)) {
             entries.add(0, new SeparatorMenuEntry());
-            entries.add(0, FavoriteMenuEntry.createToggle(new TranslatableComponent("text.rei.input.methods.tooltip.hints"), new BooleanValue() {
+            entries.add(0, FavoriteMenuEntry.createToggle(Component.translatable("text.rei.input.methods.tooltip.hints"), new BooleanValue() {
                 @Override
                 public void accept(boolean t) {
                     ConfigManagerImpl.getInstance().getConfig().setDoDisplayIMEHints(!getAsBoolean());

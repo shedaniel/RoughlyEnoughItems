@@ -180,7 +180,7 @@ public class PinyinInputMethod extends UniHanInputMethod implements CharacterUnp
     public List<FavoriteMenuEntry> getOptionsMenuEntries() {
         List<FavoriteMenuEntry> innerEntries = new ArrayList<>();
         this.fuzzyMap.forEach((from, to) -> {
-            innerEntries.add(FavoriteMenuEntry.createToggle(new TextComponent("%s -> %s".formatted(new String(from.toIntArray(), 0, from.size()), new String(to.toIntArray(), 0, to.size()))),
+            innerEntries.add(FavoriteMenuEntry.createToggle(Component.literal("%s -> %s".formatted(new String(from.toIntArray(), 0, from.size()), new String(to.toIntArray(), 0, to.size()))),
                     new BooleanValue() {
                         @Override
                         public boolean getAsBoolean() {
@@ -200,7 +200,7 @@ public class PinyinInputMethod extends UniHanInputMethod implements CharacterUnp
                         }
                     }));
         });
-        return List.of(FavoriteMenuEntry.createSubMenu(new TranslatableComponent("text.rei.input.methods.pinyin.fuzzy.matching"),
+        return List.of(FavoriteMenuEntry.createSubMenu(Component.translatable("text.rei.input.methods.pinyin.fuzzy.matching"),
                 innerEntries));
     }
     

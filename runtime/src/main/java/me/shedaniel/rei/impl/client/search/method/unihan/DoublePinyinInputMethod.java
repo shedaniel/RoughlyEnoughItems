@@ -33,7 +33,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -87,19 +86,19 @@ public class DoublePinyinInputMethod extends PinyinInputMethod {
     
     @Override
     public Component getName() {
-        return new TranslatableComponent("text.rei.input.methods.pinyin.double");
+        return Component.translatable("text.rei.input.methods.pinyin.double");
     }
     
     @Override
     public Component getDescription() {
-        return new TranslatableComponent("text.rei.input.methods.pinyin.double.description");
+        return Component.translatable("text.rei.input.methods.pinyin.double.description");
     }
     
     @Override
     public List<FavoriteMenuEntry> getOptionsMenuEntries() {
         List<FavoriteMenuEntry> innerEntries = new ArrayList<>();
         for (Map.Entry<String, Converter> entry : Converters.CONVERTERS.entrySet()) {
-            innerEntries.add(FavoriteMenuEntry.createToggle(new TranslatableComponent("text.rei.input.methods.pinyin.double.scheme." + entry.getKey()),
+            innerEntries.add(FavoriteMenuEntry.createToggle(Component.translatable("text.rei.input.methods.pinyin.double.scheme." + entry.getKey()),
                     new BooleanValue() {
                         @Override
                         public void accept(boolean t) {
@@ -115,7 +114,7 @@ public class DoublePinyinInputMethod extends PinyinInputMethod {
                         }
                     }));
         }
-        return List.of(FavoriteMenuEntry.createSubMenu(new TranslatableComponent("text.rei.input.methods.pinyin.double.scheme"),
+        return List.of(FavoriteMenuEntry.createSubMenu(Component.translatable("text.rei.input.methods.pinyin.double.scheme"),
                 innerEntries));
     }
     
