@@ -41,21 +41,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
+import java.util.function.*;
 
 public class AsyncSearchManager {
     private static final ExecutorService EXECUTOR_SERVICE = new ThreadCreator("REI-AsyncSearchManager").asService(Math.min(3, Runtime.getRuntime().availableProcessors()));
-    private final Supplier<List<? extends HashedEntryStackWrapper>> stacksProvider;
+    private final Function<SearchFilter, List<? extends HashedEntryStackWrapper>> stacksProvider;
     private final Supplier<Predicate<HashedEntryStackWrapper>> additionalPredicateSupplier;
     private final UnaryOperator<HashedEntryStackWrapper> transformer;
     private volatile Map.Entry<List<HashedEntryStackWrapper>, SearchFilter> last;
     public volatile ExecutorTuple executor;
     public volatile SearchFilter filter;
     
-    public AsyncSearchManager(Supplier<List<? extends HashedEntryStackWrapper>> stacksProvider, Supplier<Predicate<HashedEntryStackWrapper>> additionalPredicateSupplier, UnaryOperator<HashedEntryStackWrapper> transformer) {
+    public AsyncSearchManager(Function<SearchFilter, List<? extends HashedEntryStackWrapper>> stacksProvider, Supplier<Predicate<HashedEntryStackWrapper>> additionalPredicateSupplier, UnaryOperator<HashedEntryStackWrapper> transformer) {
         this.stacksProvider = stacksProvider;
         this.additionalPredicateSupplier = additionalPredicateSupplier;
         this.transformer = transformer;
@@ -123,7 +120,7 @@ public class AsyncSearchManager {
             Map.Entry<List<HashedEntryStackWrapper>, SearchFilter> last;
             last = this.last;
             return get(this.filter, this.additionalPredicateSupplier.get(), this.transformer,
-                    this.stacksProvider.get(), last, this, executor, steps)
+                    this.stacksProvider.apply(filter), last, this, executor, steps)
                     .thenApply(entry -> {
                         this.last = entry;
                         return entry;
