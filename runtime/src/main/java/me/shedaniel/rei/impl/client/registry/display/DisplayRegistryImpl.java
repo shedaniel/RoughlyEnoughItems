@@ -146,14 +146,31 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     }
     
     @Override
+    public <T, D extends Display> void registerDisplaysFiller(Class<T> typeClass, Predicate<? extends T> predicate, Function<? extends T, @Nullable Collection<? extends D>> filler) {
+        registerDisplaysFiller(o -> typeClass.isInstance(o) && ((Predicate<T>) predicate).test((T) o), o -> ((Function<T, Collection<? extends D>>) filler).apply((T) o));
+    }
+    
+    @Override
     public <T, D extends Display> void registerFiller(Class<T> typeClass, BiPredicate<? extends T, DisplayAdditionReasons> predicate, Function<? extends T, D> filler) {
-        fillers.add(new DisplayFiller<>((o, s) -> typeClass.isInstance(o) && ((BiPredicate<Object, DisplayAdditionReasons>) predicate).test(o, s), (Function<Object, D>) filler));
+        fillers.add(DisplayFiller.of((o, s) -> typeClass.isInstance(o) && ((BiPredicate<Object, DisplayAdditionReasons>) predicate).test(o, s), (Function<Object, D>) filler));
+        InternalLogger.getInstance().debug("Added display filter: %s for %s", filler, typeClass.getName());
+    }
+    
+    @Override
+    public <T, D extends Display> void registerDisplaysFiller(Class<T> typeClass, BiPredicate<? extends T, DisplayAdditionReasons> predicate, Function<? extends T, @Nullable Collection<? extends D>> filler) {
+        fillers.add(new DisplayFiller<>((o, s) -> typeClass.isInstance(o) && ((BiPredicate<Object, DisplayAdditionReasons>) predicate).test(o, s), (Function<Object, Collection<? extends D>>) filler));
         InternalLogger.getInstance().debug("Added display filter: %s for %s", filler, typeClass.getName());
     }
     
     @Override
     public <D extends Display> void registerFiller(Predicate<?> predicate, Function<?, D> filler) {
-        fillers.add(new DisplayFiller<>((o, s) -> ((Predicate<Object>) predicate).test(o), (Function<Object, D>) filler));
+        fillers.add(DisplayFiller.of((o, s) -> ((Predicate<Object>) predicate).test(o), (Function<Object, D>) filler));
+        InternalLogger.getInstance().debug("Added display filter: %s", filler);
+    }
+    
+    @Override
+    public <D extends Display> void registerDisplaysFiller(Predicate<?> predicate, Function<?, @Nullable Collection<? extends D>> filler) {
+        fillers.add(new DisplayFiller<>((o, s) -> ((Predicate<Object>) predicate).test(o), (Function<Object, Collection<? extends D>>) filler));
         InternalLogger.getInstance().debug("Added display filter: %s", filler);
     }
     
@@ -194,28 +211,27 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     @Override
     public <T> Collection<Display> tryFillDisplay(T value, DisplayAdditionReason... reason) {
         if (value instanceof Display) return Collections.singleton((Display) value);
-        List<Display> displays = null;
+        List<Display> out = null;
         DisplayAdditionReasons reasons = reason.length == 0 ? DisplayAdditionReasons.Impl.EMPTY : new DisplayAdditionReasons.Impl(reason);
         for (DisplayFiller<?> filler : fillers) {
-            Display display = tryFillDisplayGenerics(filler, value, reasons);
-            if (display != null) {
-                if (displays == null) displays = Collections.singletonList(display);
-                else {
-                    if (!(displays instanceof ArrayList)) displays = new ArrayList<>(displays);
-                    displays.add(display);
+            Collection<Display> displays = tryFillDisplayGenerics(filler, value, reasons);
+            if (displays != null && !displays.isEmpty()) {
+                if (out == null) out = new ArrayList<>();
+                for (Display display : displays) {
+                    if (display != null) out.add(display);
                 }
             }
         }
-        if (displays != null) {
-            return displays;
+        if (out != null) {
+            return out;
         }
         return Collections.emptyList();
     }
     
-    private <D extends Display> D tryFillDisplayGenerics(DisplayFiller<D> filler, Object value, DisplayAdditionReasons reasons) {
+    private <D extends Display> Collection<D> tryFillDisplayGenerics(DisplayFiller<? extends D> filler, Object value, DisplayAdditionReasons reasons) {
         try {
             if (filler.predicate.test(value, reasons)) {
-                return filler.mappingFunction.apply(value);
+                return (Collection<D>) filler.mappingFunction.apply(value);
             }
         } catch (Throwable e) {
             throw new RuntimeException("Failed to fill displays!", e);
@@ -233,7 +249,10 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     private record DisplayFiller<D extends Display>(
             BiPredicate<Object, DisplayAdditionReasons> predicate,
             
-            Function<Object, D> mappingFunction
+            Function<Object, Collection<? extends D>> mappingFunction
     ) {
+        public static <D extends Display> DisplayFiller<D> of(BiPredicate<Object, DisplayAdditionReasons> predicate, Function<Object, D> mappingFunction) {
+            return new DisplayFiller<>(predicate, o -> Collections.singleton(mappingFunction.apply(o)));
+        }
     }
 }

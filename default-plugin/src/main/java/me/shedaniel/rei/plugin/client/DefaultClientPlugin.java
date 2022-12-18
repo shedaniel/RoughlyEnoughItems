@@ -29,6 +29,7 @@ import com.google.common.collect.Sets;
 import dev.architectury.event.EventResult;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Rectangle;
@@ -55,6 +56,7 @@ import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconBaseCategor
 import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconPaymentCategory;
 import me.shedaniel.rei.plugin.client.categories.cooking.DefaultCookingCategory;
 import me.shedaniel.rei.plugin.client.categories.crafting.DefaultCraftingCategory;
+import me.shedaniel.rei.plugin.client.categories.crafting.filler.TippedArrowRecipeFiller;
 import me.shedaniel.rei.plugin.client.categories.tag.DefaultTagCategory;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultPotionEffectExclusionZones;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultRecipeBookExclusionZones;
@@ -73,7 +75,6 @@ import me.shedaniel.rei.plugin.common.displays.cooking.DefaultBlastingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmeltingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
-import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomDisplay;
 import me.shedaniel.rei.plugin.common.displays.tag.DefaultTagDisplay;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.fabricmc.api.EnvType;
@@ -253,25 +254,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.getFuel().entrySet()) {
             registry.add(new DefaultFuelDisplay(Collections.singletonList(EntryIngredients.of(entry.getKey())), Collections.emptyList(), entry.getValue()));
         }
-        EntryIngredient arrowStack = EntryIngredient.of(EntryStacks.of(Items.ARROW));
-        ReferenceSet<Potion> registeredPotions = new ReferenceOpenHashSet<>();
-        EntryRegistry.getInstance().getEntryStacks().filter(entry -> entry.getValueType() == ItemStack.class && entry.<ItemStack>castValue().getItem() == Items.LINGERING_POTION).forEach(entry -> {
-            ItemStack itemStack = (ItemStack) entry.getValue();
-            Potion potion = PotionUtils.getPotion(itemStack);
-            if (registeredPotions.add(potion)) {
-                List<EntryIngredient> input = new ArrayList<>();
-                for (int i = 0; i < 4; i++)
-                    input.add(arrowStack);
-                input.add(EntryIngredients.of(itemStack));
-                for (int i = 0; i < 4; i++)
-                    input.add(arrowStack);
-                ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
-                PotionUtils.setPotion(outputStack, potion);
-                PotionUtils.setCustomEffects(outputStack, PotionUtils.getCustomEffects(itemStack));
-                EntryIngredient output = EntryIngredients.of(outputStack);
-                registry.add(new DefaultCustomDisplay(null, input, Collections.singletonList(output)));
-            }
-        });
+        registry.registerRecipesFiller(TippedArrowRecipe.class, RecipeType.CRAFTING, new TippedArrowRecipeFiller()::apply);
         if (ComposterBlock.COMPOSTABLES.isEmpty()) {
             ComposterBlock.bootStrap();
         }
