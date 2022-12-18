@@ -60,6 +60,7 @@ import java.util.Map;
 @ApiStatus.Internal
 @Config(name = "roughlyenoughitems/config")
 @Environment(EnvType.CLIENT)
+@SuppressWarnings("FieldMayBeFinal")
 public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @ConfigEntry.Category("basics") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
     public Basics basics = new Basics();
@@ -137,6 +138,15 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public void setEntryListWidgetScrolled(boolean scrollingEntryListWidget) {
         appearance.scrollingEntryListWidget = scrollingEntryListWidget;
+    }
+    
+    @Override
+    public boolean isHidingEntryPanelIfIdle() {
+        return appearance.hideEntryPanelIfIdle;
+    }
+    
+    public void setHidingEntryPanelIfIdle(boolean hideEntryPanelIfIdle) {
+        appearance.hideEntryPanelIfIdle = hideEntryPanelIfIdle;
     }
     
     @Override
@@ -625,6 +635,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares the appearance of recipe's border.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private RecipeBorderType recipeBorder = RecipeBorderType.DEFAULT;
         @Comment("Declares whether entry panel is scrolled.") private boolean scrollingEntryListWidget = false;
+        @Comment("Declares whether entry panel should be invisible when not searching") private boolean hideEntryPanelIfIdle = false;
         
         public static class Layout {
             @Comment("Declares the position of the search field.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)

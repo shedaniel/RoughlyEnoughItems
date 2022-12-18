@@ -135,6 +135,9 @@ public interface ConfigObject {
      */
     boolean isEntryListWidgetScrolled();
     
+    @ApiStatus.Experimental
+    boolean isHidingEntryPanelIfIdle();
+    
     /**
      * Returns whether REI should append mod names to tooltips.
      *
