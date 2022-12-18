@@ -30,6 +30,8 @@ import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongMaps;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -122,7 +124,7 @@ public class ViewsImpl implements Views {
         DisplayRegistry displayRegistry = DisplayRegistry.getInstance();
         DisplaysHolder displaysHolder = ((DisplayRegistryImpl) displayRegistry).displaysHolder();
         
-        Map<DisplayCategory<?>, List<Display>> result = Maps.newLinkedHashMap();
+        Map<DisplayCategory<?>, List<Display>> result = Maps.newHashMap();
         for (CategoryRegistry.CategoryConfiguration<?> categoryConfiguration : CategoryRegistry.getInstance()) {
             DisplayCategory<?> category = categoryConfiguration.getCategory();
             if (processingVisibilityHandlers && CategoryRegistry.getInstance().isCategoryInvisible(category)) continue;
@@ -218,10 +220,30 @@ public class ViewsImpl implements Views {
             generateLiveDisplays(displayRegistry, wrapForError(generator), builder, displayConsumer);
         }
         
-        Map<DisplayCategory<?>, List<DisplaySpec>> resultSpeced = (Map<DisplayCategory<?>, List<DisplaySpec>>) (Map) new LinkedHashMap<>(result);
-        // optimize displays
+        Stopwatch mergingStopwatch = Stopwatch.createStarted(), sortingStopwatch = Stopwatch.createUnstarted();
+        Map<DisplayCategory<?>, List<DisplaySpec>> merged = mergeDisplays(builder, result);
+        mergingStopwatch.stop();
+        sortingStopwatch.start();
+        Map<DisplayCategory<?>, List<DisplaySpec>> sorted = sortDisplays(merged);
+        sortingStopwatch.stop();
+        
+        String message = String.format("Built Recipe View in %s for %d categories, %d recipes for, %d usages for and %d live recipe generators." +
+                                       " Merging took %s and sorting took %s.",
+                stopwatch.stop(), categories.size(), recipesForStacks.size(), usagesForStacks.size(), generatorsCount, mergingStopwatch, sortingStopwatch);
+        if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
+            InternalLogger.getInstance().info(message);
+        } else {
+            InternalLogger.getInstance().trace(message);
+        }
+        
+        return sorted;
+    }
+    
+    private static Map<DisplayCategory<?>, List<DisplaySpec>> mergeDisplays(ViewSearchBuilder builder, Map<DisplayCategory<?>, List<Display>> displays) {
+        Map<DisplayCategory<?>, List<DisplaySpec>> result = (Map<DisplayCategory<?>, List<DisplaySpec>>) (Map<?, ?>) new HashMap<>(displays);
+        
         if (builder.isMergingDisplays() && ConfigObject.getInstance().doMergeDisplayUnderOne()) {
-            for (Map.Entry<DisplayCategory<?>, List<Display>> entry : result.entrySet()) {
+            for (Map.Entry<DisplayCategory<?>, List<Display>> entry : displays.entrySet()) {
                 DisplayMerger<Display> merger = (DisplayMerger<Display>) entry.getKey().getDisplayMerger();
                 
                 if (merger != null) {
@@ -272,8 +294,8 @@ public class ViewsImpl implements Views {
                             }
                         }
                     }
-                    Map<Wrapped, Wrapped> wrappedSet = new LinkedHashMap<>();
-                    List<Wrapped> wrappeds = new ArrayList<>();
+                    Map<Wrapped, Wrapped> wrappedSet = new HashMap<>();
+                    List<Wrapped> specs = new ArrayList<>();
                     
                     for (Display display : sortAutoCrafting(entry.getValue())) {
                         Wrapped wrapped = new Wrapped(display);
@@ -281,23 +303,28 @@ public class ViewsImpl implements Views {
                             wrappedSet.get(wrapped).add(display);
                         } else {
                             wrappedSet.put(wrapped, wrapped);
-                            wrappeds.add(wrapped);
+                            specs.add(wrapped);
                         }
                     }
                     
-                    resultSpeced.put(entry.getKey(), (List<DisplaySpec>) (List) wrappeds);
+                    result.put(entry.getKey(), (List<DisplaySpec>) (List<?>) specs);
                 }
             }
         }
         
-        String message = String.format("Built Recipe View in %s for %d categories, %d recipes for, %d usages for and %d live recipe generators.",
-                stopwatch.stop(), categories.size(), recipesForStacks.size(), usagesForStacks.size(), generatorsCount);
-        if (ConfigObject.getInstance().doDebugSearchTimeRequired()) {
-            InternalLogger.getInstance().info(message);
-        } else {
-            InternalLogger.getInstance().trace(message);
+        return result;
+    }
+    
+    private static Map<DisplayCategory<?>, List<DisplaySpec>> sortDisplays(Map<DisplayCategory<?>, List<DisplaySpec>> unsorted) {
+        Object2IntMap<CategoryIdentifier<?>> categoryOrder = new Object2IntOpenHashMap<>();
+        categoryOrder.defaultReturnValue(Integer.MAX_VALUE);
+        int i = 0;
+        for (CategoryRegistry.CategoryConfiguration<?> configuration : CategoryRegistry.getInstance()) {
+            categoryOrder.put(configuration.getCategoryIdentifier(), i++);
         }
-        return resultSpeced;
+        Map<DisplayCategory<?>, List<DisplaySpec>> result = new TreeMap<>(Comparator.comparingInt(category -> categoryOrder.getInt(category.getCategoryIdentifier())));
+        result.putAll(unsorted);
+        return result;
     }
     
     public static boolean isRecipesFor(@Nullable DisplaysHolder displaysHolder, List<EntryStack<?>> stacks, Display display) {
