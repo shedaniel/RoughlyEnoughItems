@@ -198,6 +198,8 @@
   "text.rei.collapsed.entry.hint.expand.macos": "Option-Click to expand all %s (%d entries)",
   "text.rei.collapsed.entry.hint.collapse": "Alt-Click to collapse all %s (%d entries)",
   "text.rei.collapsed.entry.hint.collapse.macos": "Option-Click to collapse all %s (%d entries)",
+  "text.rei.spawn_egg": "Spawn Egg",
+  "text.rei.music_disc": "Music Disc",
   "favorite.section.gamemode": "Game Mode",
   "favorite.section.weather": "Weather",
   "favorite.section.time": "Time",

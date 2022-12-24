@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
@@ -43,6 +44,7 @@ import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.simple.SimpleTransferHandler;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
@@ -154,6 +156,24 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 registry.addEntry(EntryStacks.of(fluid));
             }
         }
+    }
+    
+    @Override
+    public void registerCollapsibleEntries(CollapsibleEntryRegistry registry) {
+        registry.group(new ResourceLocation("roughlyenoughitems", "enchanted_book"), new TranslatableComponent("item.minecraft.enchanted_book"),
+                stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(Items.ENCHANTED_BOOK));
+        registry.group(new ResourceLocation("roughlyenoughitems", "potion"), new TranslatableComponent("item.minecraft.potion"),
+                stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(Items.POTION));
+        registry.group(new ResourceLocation("roughlyenoughitems", "splash_potion"), new TranslatableComponent("item.minecraft.splash_potion"),
+                stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(Items.SPLASH_POTION));
+        registry.group(new ResourceLocation("roughlyenoughitems", "lingering_potion"), new TranslatableComponent("item.minecraft.lingering_potion"),
+                stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(Items.LINGERING_POTION));
+        registry.group(new ResourceLocation("roughlyenoughitems", "spawn_egg"), new TranslatableComponent("text.rei.spawn_egg"),
+                stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().getItem() instanceof SpawnEggItem);
+        registry.group(new ResourceLocation("roughlyenoughitems", "tipped_arrow"), new TranslatableComponent("item.minecraft.tipped_arrow"),
+                stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(Items.TIPPED_ARROW));
+        registry.group(new ResourceLocation("roughlyenoughitems", "music_disc"), new TranslatableComponent("text.rei.music_disc"),
+                stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().getItem() instanceof RecordItem);
     }
     
     @Override
