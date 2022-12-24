@@ -80,6 +80,8 @@
   "text.rei.performance": "Performance Analysis",
   "text.rei.addons": "REI Addons",
   "text.rei.shapeless": "Shapeless",
+  "text.rei.crafting.firework.gunpowder.amount": "The amount of gunpowder affects the flight duration of the firework.",
+  "text.rei.crafting.suspicious_stew": "The resultant stew will have a random effect.",
   "text.rei.input.methods": "Input Methods",
   "text.rei.input.methods.reload.progress": "Progress: %s%%",
   "text.rei.input.methods.default": "Default",
