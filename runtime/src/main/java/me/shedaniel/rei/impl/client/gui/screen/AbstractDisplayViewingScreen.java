@@ -30,6 +30,9 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
 import dev.architectury.fluid.FluidStack;
 import dev.architectury.utils.value.IntValue;
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -45,7 +48,9 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategoryView;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.settings.EntryIngredientSetting;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -53,6 +58,8 @@ import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.TabContainerWidget;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
+import me.shedaniel.rei.impl.client.util.ClientTickCounter;
+import me.shedaniel.rei.impl.client.util.CyclingList;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -221,13 +228,30 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     private static void transformNotice(int marker, List<? extends GuiEventListener> setupDisplay, List<EntryStack<?>> noticeStacks) {
         if (noticeStacks.isEmpty())
             return;
+        Map<EntryStack<?>, LongSet> noticeSet = new HashMap<>();
         for (EntryWidget widget : Widgets.<EntryWidget>walk(setupDisplay, EntryWidget.class::isInstance)) {
-            if (widget.getNoticeMark() == marker && widget.getEntries().size() > 1) {
+            List<EntryStack<?>> entries = widget.getEntries();
+            if (widget.getNoticeMark() == marker && entries.size() > 1) {
                 for (EntryStack<?> noticeStack : noticeStacks) {
-                    EntryStack<?> stack = CollectionUtils.findFirstOrNullEqualsExact(widget.getEntries(), noticeStack);
+                    EntryStack<?> stack = CollectionUtils.findFirstOrNullEqualsExact(entries, noticeStack);
                     if (stack != null) {
                         widget.clearStacks();
                         widget.entry(stack);
+                        if (entries instanceof EntryIngredient ingredient) noticeSet.computeIfAbsent(stack, $ -> new LongOpenHashSet())
+                                .add(hashFocusIngredient(ingredient));
+                        break;
+                    }
+                }
+            }
+        }
+        for (EntryWidget widget : Widgets.<EntryWidget>walk(setupDisplay, EntryWidget.class::isInstance)) {
+            List<EntryStack<?>> entries = widget.getEntries();
+            if (widget.getNoticeMark() != marker && entries.size() > 1 && entries instanceof EntryIngredient ingredient) {
+                long hashFocusIngredient = hashFocusIngredient(ingredient);
+                for (Map.Entry<EntryStack<?>, LongSet> entry : noticeSet.entrySet()) {
+                    if (entry.getValue().contains(hashFocusIngredient)) {
+                        widget.clearStacks();
+                        widget.entry(entry.getKey());
                         break;
                     }
                 }
@@ -235,16 +259,29 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         }
     }
     
+    @SuppressWarnings("RedundantCast")
     protected void transformFiltering(List<? extends GuiEventListener> setupDisplay) {
         for (EntryWidget widget : Widgets.<EntryWidget>walk(setupDisplay, EntryWidget.class::isInstance)) {
             if (widget.getEntries().size() > 1) {
                 Collection<EntryStack<?>> refiltered = EntryRegistry.getInstance().refilterNew(false, widget.getEntries());
-                if (!refiltered.isEmpty()) {
+                EntryIngredient asEntryIngredient = widget.getEntries() instanceof EntryIngredient ingredient ? ingredient : null;
+                if (!refiltered.isEmpty() && !widget.getEntries().equals(refiltered)) {
                     widget.clearStacks();
-                    widget.entries(refiltered);
+                    EntryIngredient newIngredient = EntryIngredient.of(refiltered);
+                    if (asEntryIngredient != null && (Object) asEntryIngredient.getSetting(EntryIngredientSetting.FOCUS_UUID) instanceof UUID uuid) {
+                        newIngredient.setting(EntryIngredientSetting.FOCUS_UUID,
+                                new UUID(uuid.getMostSignificantBits() ^ refiltered.size(), uuid.getLeastSignificantBits() ^ refiltered.size()));
+                    }
+                    widget.entries(newIngredient);
                 }
             }
         }
+    }
+    
+    protected static long hashFocusIngredient(EntryIngredient ingredient) {
+        UUID uuid = ingredient.getSetting(EntryIngredientSetting.FOCUS_UUID);
+        if (uuid == null) return System.identityHashCode(ingredient);
+        return uuid.hashCode() ^ ingredient.size();
     }
     
     protected void setupTags(List<Widget> widgets) {
@@ -279,6 +316,32 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                     key -> CollectionUtils.allMatch(objects, holder -> ((Holder<Object>) holder).is((TagKey<Object>) key)));
             if (firstOrNull != null) {
                 widget.tagMatch = firstOrNull.location();
+            }
+        }
+    }
+    
+    protected void unifyIngredients(List<Widget> widgets) {
+        Map<EntryIngredient, List<EntryWidget>> slots = new TreeMap<>(Comparator.comparingLong(AbstractDisplayViewingScreen::hashFocusIngredient));
+        for (EntryWidget slot : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
+            CyclingList<EntryStack<?>> entries = slot.getBackingCyclingEntries();
+            if (entries.get() instanceof EntryIngredient ingredient) {
+                slots.computeIfAbsent(ingredient, key -> new ArrayList<>()).add(slot);
+            }
+        }
+        for (Map.Entry<EntryIngredient, List<EntryWidget>> entry : slots.entrySet()) {
+            List<EntryWidget> slotList = entry.getValue();
+            if (slotList.size() > 1) {
+                List<CyclingList<EntryStack<?>>> all = new ArrayList<>();
+                Limiter<CyclingList<EntryStack<?>>> limiter = new TickCountLimiter<>(all);
+                for (EntryWidget slot : slotList) {
+                    CyclingList<EntryStack<?>> limited;
+                    CyclingList<EntryStack<?>> backing = slot.getBackingCyclingEntries();
+                    if (backing instanceof CyclingList.Mutable<EntryStack<?>> mutable)
+                        limited = new LimitedCyclingList.Mutable<>(mutable, limiter);
+                    else limited = new LimitedCyclingList<>(backing, limiter);
+                    slot.entries(limited);
+                    all.add(backing);
+                }
             }
         }
     }
@@ -442,5 +505,124 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     @Override
     public boolean charTyped(char character, int modifiers) {
         return super.charTyped(character, modifiers) || (getOverlay().charTyped(character, modifiers) && handleFocuses());
+    }
+    
+    private interface Limiter<T> {
+        boolean canExecute(T t);
+        
+        List<T> getEntries();
+    }
+    
+    private static class TickCountLimiter<T> implements Limiter<T> {
+        private int ticks = -1;
+        private final List<T> list;
+        private final Set<T> set = new ReferenceOpenHashSet<>();
+        
+        public TickCountLimiter(List<T> list) {
+            this.list = list;
+        }
+        
+        @Override
+        public boolean canExecute(T t) {
+            int currentTick = ClientTickCounter.getTicks();
+            if (this.ticks != currentTick) {
+                this.ticks = currentTick;
+                this.set.clear();
+            }
+            return this.set.add(t);
+        }
+        
+        @Override
+        public List<T> getEntries() {
+            return list;
+        }
+    }
+    
+    private static class LimitedCyclingList<T> implements CyclingList<T> {
+        protected final CyclingList<T> provider;
+        private final Limiter<CyclingList<T>> limiter;
+        
+        public LimitedCyclingList(CyclingList<T> provider, Limiter<CyclingList<T>> limiter) {
+            this.provider = provider;
+            this.limiter = limiter;
+        }
+        
+        @Override
+        public T peek() {
+            return provider.peek();
+        }
+        
+        @Override
+        public void resetToStart() {
+            provider.resetToStart();
+        }
+        
+        @Override
+        public int size() {
+            return provider.size();
+        }
+        
+        @Override
+        public int currentIndex() {
+            return provider.currentIndex();
+        }
+        
+        @Override
+        public T previous() {
+            if (this.limiter.canExecute(provider)) {
+                for (CyclingList<T> list : this.limiter.getEntries()) {
+                    list.previous();
+                }
+            }
+            
+            return provider.peek();
+        }
+        
+        @Override
+        public int nextIndex() {
+            return provider.nextIndex();
+        }
+        
+        @Override
+        public int previousIndex() {
+            return provider.previousIndex();
+        }
+        
+        @Override
+        public T next() {
+            if (this.limiter.canExecute(provider)) {
+                for (CyclingList<T> list : this.limiter.getEntries()) {
+                    list.next();
+                }
+            }
+            
+            return provider.peek();
+        }
+        
+        @Override
+        public List<T> get() {
+            return provider.get();
+        }
+        
+        private static class Mutable<T> extends LimitedCyclingList<T> implements CyclingList.Mutable<T> {
+            public Mutable(CyclingList.Mutable<T> provider, Limiter<CyclingList<T>> limiter) {
+                super(provider, limiter);
+            }
+            
+            @Override
+            public void add(T entry) {
+                ((CyclingList.Mutable<T>) provider).add(entry);
+            }
+            
+            @Override
+            public void addAll(Collection<? extends T> entries) {
+                ((CyclingList.Mutable<T>) provider).addAll(entries);
+            }
+            
+            @Override
+            public void clear() {
+                ((CyclingList.Mutable<T>) provider).clear();
+            }
+        }
     }
 }
