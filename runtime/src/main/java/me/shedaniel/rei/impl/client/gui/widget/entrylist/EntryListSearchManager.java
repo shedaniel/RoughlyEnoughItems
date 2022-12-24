@@ -80,6 +80,7 @@ public class EntryListSearchManager {
     }, HashedEntryStackWrapper::normalize);
     
     private static List<EntryStack<?>> getAllEntriesContextually(SearchFilter filter) {
+        if (EntryRegistry.getInstance().isReloading()) return List.of();
         if (ConfigObject.getInstance().isHidingEntryPanelIfIdle() && filter.getFilter().isEmpty()) {
             return List.of();
         }
