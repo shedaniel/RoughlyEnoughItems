@@ -36,7 +36,6 @@ import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
@@ -88,7 +87,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                     CachedEntryListRender.Sprite sprite = CachedEntryListRender.get(entry.getCurrentEntry());
                     if (sprite != null) {
                         CachingEntryRenderer renderer = new CachingEntryRenderer(sprite, this::getBlitOffset);
-                        entry.our = ClientEntryStacks.setRenderer(entry.getCurrentEntry().copy().cast(), stack -> renderer);
+                        entry.our = entry.getCurrentEntry().copy().cast().withRenderer(stack -> renderer);
                     }
                 }
             }

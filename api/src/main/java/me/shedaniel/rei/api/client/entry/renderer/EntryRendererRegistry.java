@@ -36,7 +36,7 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Registry to transform {@link EntryRenderer} for stacks at a global level.
- * For specific stacks, you can use {@link me.shedaniel.rei.api.client.util.ClientEntryStacks#setRenderer}
+ * For specific stacks, you can use {@link EntryStack#withRenderer}
  */
 @ApiStatus.Experimental
 public interface EntryRendererRegistry extends Reloadable<REIClientPlugin> {
