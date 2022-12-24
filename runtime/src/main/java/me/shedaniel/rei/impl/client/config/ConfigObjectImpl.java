@@ -413,15 +413,15 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public List<FavoriteEntry> getConfigFavoriteEntries() {
-        return basics.favorites;
+        return FavoritesConfigManager.getInstance().getConfig().favorites;
     }
     
     public List<FavoriteEntry> getHiddenFavoriteEntries() {
-        return basics.hiddenFavorites;
+        return FavoritesConfigManager.getInstance().getConfig().hiddenFavorites;
     }
     
     public List<CompoundTag> getDisplayHistory() {
-        return basics.displayHistory;
+        return FavoritesConfigManager.getInstance().getConfig().displays;
     }
     
     @Override

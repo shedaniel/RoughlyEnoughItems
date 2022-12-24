@@ -152,9 +152,10 @@ public class ConfigManagerImpl implements ConfigManager {
                 , (field) -> field.getType() == Map.class, ConfigObjectImpl.UseFilteringCategoriesScreen.class);
         InternalLogger.getInstance().info("Config loaded");
         saveConfig();
+        FavoritesConfigManager.getInstance().syncFrom(this);
     }
     
-    private static Jankson buildJankson(Jankson.Builder builder) {
+    public static Jankson buildJankson(Jankson.Builder builder) {
         // ResourceLocation
         builder.registerSerializer(ResourceLocation.class, (location, marshaller) -> {
             return new JsonPrimitive(location == null ? null : location.toString());
@@ -332,6 +333,7 @@ public class ConfigManagerImpl implements ConfigManager {
             return InteractionResult.PASS;
         });
         AutoConfig.getConfigHolder(ConfigObjectImpl.class).save();
+        FavoritesConfigManager.getInstance().saveConfig();
         InternalLogger.getInstance().debug("Config saved");
     }
     
