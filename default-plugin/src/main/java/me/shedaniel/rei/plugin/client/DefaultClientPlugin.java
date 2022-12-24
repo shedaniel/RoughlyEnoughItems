@@ -54,7 +54,7 @@ import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconBaseCategor
 import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconPaymentCategory;
 import me.shedaniel.rei.plugin.client.categories.cooking.DefaultCookingCategory;
 import me.shedaniel.rei.plugin.client.categories.crafting.DefaultCraftingCategory;
-import me.shedaniel.rei.plugin.client.categories.crafting.filler.TippedArrowRecipeFiller;
+import me.shedaniel.rei.plugin.client.categories.crafting.filler.*;
 import me.shedaniel.rei.plugin.client.categories.tag.DefaultTagCategory;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultPotionEffectExclusionZones;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultRecipeBookExclusionZones;
@@ -112,6 +112,19 @@ import java.util.stream.Stream;
 @Environment(EnvType.CLIENT)
 @ApiStatus.Internal
 public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin {
+    private static final CraftingRecipeFiller<?>[] CRAFTING_RECIPE_FILLERS = new CraftingRecipeFiller[]{
+            new TippedArrowRecipeFiller(),
+            new ShulkerBoxColoringFiller(),
+            new BannerDuplicateRecipeFiller(),
+            new ShieldDecorationRecipeFiller(),
+            new SuspiciousStewRecipeFiller(),
+            new BookCloningRecipeFiller(),
+            new FireworkRocketRecipeFiller(),
+            new ArmorDyeRecipeFiller(),
+            new MapCloningRecipeFiller(),
+            new MapExtendingRecipeFiller()
+    };
+    
     public DefaultClientPlugin() {
         ClientInternals.attachInstance((Supplier<Object>) () -> this, "builtinClientPlugin");
     }
@@ -194,6 +207,10 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             return EventResult.pass();
         });
         
+        for (CraftingRecipeFiller<?> filler : CRAFTING_RECIPE_FILLERS) {
+            filler.registerCategories(registry);
+        }
+        
         Set<Item> axes = Sets.newHashSet(), hoes = Sets.newHashSet(), shovels = Sets.newHashSet();
         EntryRegistry.getInstance().getEntryStacks().filter(stack -> stack.getValueType() == ItemStack.class).map(stack -> ((ItemStack) stack.getValue()).getItem()).forEach(item -> {
             if (item instanceof AxeItem && axes.add(item)) {
@@ -254,7 +271,9 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.getFuel().entrySet()) {
             registry.add(new DefaultFuelDisplay(Collections.singletonList(EntryIngredients.of(entry.getKey())), Collections.emptyList(), entry.getValue()));
         }
-        registry.registerRecipesFiller(TippedArrowRecipe.class, RecipeType.CRAFTING, new TippedArrowRecipeFiller()::apply);
+        for (CraftingRecipeFiller<?> filler : CRAFTING_RECIPE_FILLERS) {
+            filler.registerDisplays(registry);
+        }
         if (ComposterBlock.COMPOSTABLES.isEmpty()) {
             ComposterBlock.bootStrap();
         }

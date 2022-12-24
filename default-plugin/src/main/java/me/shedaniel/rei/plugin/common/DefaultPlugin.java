@@ -82,6 +82,7 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
         registry.registerNbt(Items.SPLASH_POTION);
         registry.registerNbt(Items.LINGERING_POTION);
         registry.registerNbt(Items.TIPPED_ARROW);
+        registry.register((context, stack) -> 0, Items.FIREWORK_ROCKET, Items.FILLED_MAP);
     }
     
     @Override

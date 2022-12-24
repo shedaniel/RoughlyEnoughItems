@@ -40,9 +40,8 @@ import net.minecraft.world.item.crafting.TippedArrowRecipe;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 
-public class TippedArrowRecipeFiller implements Function<TippedArrowRecipe, Collection<Display>> {
+public class TippedArrowRecipeFiller implements CraftingRecipeFiller<TippedArrowRecipe> {
     @Override
     public Collection<Display> apply(TippedArrowRecipe recipe) {
         EntryIngredient arrowStack = EntryIngredient.of(EntryStacks.of(Items.ARROW));
@@ -67,5 +66,10 @@ public class TippedArrowRecipeFiller implements Function<TippedArrowRecipe, Coll
         });
         
         return displays;
+    }
+    
+    @Override
+    public Class<TippedArrowRecipe> getRecipeClass() {
+        return TippedArrowRecipe.class;
     }
 }
