@@ -23,13 +23,16 @@
 
 package me.shedaniel.rei.api.common.entry;
 
+import me.shedaniel.rei.api.common.entry.settings.EntryIngredientSetting;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collector;
@@ -197,6 +200,54 @@ public interface EntryIngredient extends List<EntryStack<?>> {
      * @return the transformed {@link EntryIngredient}
      */
     EntryIngredient map(UnaryOperator<EntryStack<?>> transformer);
+    
+    /**
+     * Returns the value of a {@link EntryIngredientSetting} of this {@link EntryIngredient}.
+     * <p>
+     * This method returns {@code null} if the setting is not set.
+     *
+     * @param setting the setting to get
+     * @param <T>     the type of the setting
+     * @return the value of the setting
+     */
+    @Nullable
+    @ApiStatus.Experimental
+    <T> T getSetting(EntryIngredientSetting<T> setting);
+    
+    /**
+     * Applies a setting to this {@link EntryIngredient}.
+     * <p>
+     * It is generally not recommended to use this method, but to instead use the helper
+     * methods such as {@link EntryIngredient#unifyFocuses(EntryIngredient...)}.
+     *
+     * @param setting the setting to apply
+     * @param value   the value of the setting to apply
+     * @param <T>     the type of the setting
+     * @return this {@link EntryStack}
+     */
+    @ApiStatus.Experimental
+    <T> EntryIngredient setting(EntryIngredientSetting<T> setting, T value);
+    
+    /**
+     * Unifies focuses for the given {@link EntryIngredient}s, so the selection for these
+     * {@link EntryIngredient}s will be the same.
+     * <p>
+     * For example, a recipe that accepts some type of banner pattern and will output a certain
+     * type of cloned banner pattern should have both these ingredients unified, such that
+     * the natural cycling of the ingredient should still make sure these two ingredients
+     * are matching.
+     * <p>
+     * For that reason, all ingredients passed to this method must have the same size.
+     *
+     * @param ingredients the ingredients to unify
+     */
+    @ApiStatus.Experimental
+    static void unifyFocuses(EntryIngredient... ingredients) {
+        UUID uuid = UUID.randomUUID();
+        for (EntryIngredient ingredient : ingredients) {
+            ingredient.setting(EntryIngredientSetting.FOCUS_UUID, uuid);
+        }
+    }
     
     @ApiStatus.NonExtendable
     interface Builder {
