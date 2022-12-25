@@ -233,6 +233,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param filler    the filler, taking a {@code T} and returning a {@code D}
      * @param <T>       the type of object
      * @param <D>       the type of display
+     * @since 8.4
      */
     @ApiStatus.Experimental
     default <T extends Recipe<?>, D extends Display> void registerRecipesFiller(Class<T> typeClass, RecipeType<? super T> recipeType, Function<? extends T, @Nullable Collection<? extends D>> filler) {
@@ -264,6 +265,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param filler    the filler, taking a {@code T} and returning a {@code D}
      * @param <T>       the type of object
      * @param <D>       the type of display
+     * @since 8.4
      */
     @ApiStatus.Experimental
     default <T extends Recipe<?>, D extends Display> void registerRecipesFiller(Class<T> typeClass, Predicate<RecipeType<? super T>> recipeType, Function<? extends T, @Nullable Collection<? extends D>> filler) {
@@ -295,6 +297,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param filler    the filler, taking a {@code T} and returning a {@code D}
      * @param <T>       the type of object
      * @param <D>       the type of display
+     * @since 8.4
      */
     @ApiStatus.Experimental
     default <T extends Recipe<?>, D extends Display> void registerRecipesFiller(Class<T> typeClass, Predicate<RecipeType<? super T>> recipeType, Predicate<? extends T> predicate, Function<? extends T, @Nullable Collection<? extends D>> filler) {
@@ -326,6 +329,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param filler    the filler, taking a {@code T} and returning a {@code D}
      * @param <T>       the type of object
      * @param <D>       the type of display
+     * @since 8.4
      */
     @ApiStatus.Experimental
     default <T, D extends Display> void registerDisplaysFiller(Class<T> typeClass, Function<? extends T, @Nullable Collection<? extends D>> filler) {
@@ -357,6 +361,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param filler    the filler, taking a {@code T} and returning a {@code D}
      * @param <T>       the type of object
      * @param <D>       the type of display
+     * @since 8.4
      */
     @ApiStatus.Experimental
     <T, D extends Display> void registerDisplaysFiller(Class<T> typeClass, Predicate<? extends T> predicate, Function<? extends T, @Nullable Collection<? extends D>> filler);
@@ -387,6 +392,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param filler    the filler, taking a {@code T} and returning a {@code D}
      * @param <T>       the type of object
      * @param <D>       the type of display
+     * @since 8.4
      */
     @ApiStatus.Experimental
     <T, D extends Display> void registerDisplaysFiller(Class<T> typeClass, BiPredicate<? extends T, DisplayAdditionReasons> predicate, Function<? extends T, @Nullable Collection<? extends D>> filler);
@@ -412,6 +418,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param predicate the predicate of the object
      * @param filler    the filler, taking an object and returning a {@code D}
      * @param <D>       the type of display
+     * @since 8.4
      */
     @ApiStatus.Experimental
     <D extends Display> void registerDisplaysFiller(Predicate<?> predicate, Function<?, @Nullable Collection<? extends D>> filler);

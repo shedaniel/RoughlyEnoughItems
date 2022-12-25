@@ -516,6 +516,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * @param tooltipProcessor the processor to modify the tooltips
      * @return this {@link EntryStack}
      * @see EntryStack#getTooltip(TooltipContext, boolean) for how the tooltip is resolved
+     * @since 8.4
      */
     @SuppressWarnings("rawtypes")
     @Environment(EnvType.CLIENT)
@@ -533,6 +534,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * @return this {@link EntryStack}
      * @see EntryStack#getRenderer() for how the tooltip is resolved
      * @see EntryRenderer#empty() for an empty renderer
+     * @since 8.4
      */
     @Environment(EnvType.CLIENT)
     default EntryStack<T> withRenderer(EntryRenderer<? super T> renderer) {
@@ -548,6 +550,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * @param renderer the new renderer to use
      * @return this {@link EntryStack}
      * @see EntryStack#getRenderer() for how the tooltip is resolved
+     * @since 8.4
      */
     @SuppressWarnings("rawtypes")
     @Environment(EnvType.CLIENT)

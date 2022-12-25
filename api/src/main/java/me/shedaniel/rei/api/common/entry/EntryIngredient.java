@@ -209,6 +209,7 @@ public interface EntryIngredient extends List<EntryStack<?>> {
      * @param setting the setting to get
      * @param <T>     the type of the setting
      * @return the value of the setting
+     * @since 8.4
      */
     @Nullable
     @ApiStatus.Experimental
@@ -224,6 +225,7 @@ public interface EntryIngredient extends List<EntryStack<?>> {
      * @param value   the value of the setting to apply
      * @param <T>     the type of the setting
      * @return this {@link EntryStack}
+     * @since 8.4
      */
     @ApiStatus.Experimental
     <T> EntryIngredient setting(EntryIngredientSetting<T> setting, T value);
@@ -240,6 +242,7 @@ public interface EntryIngredient extends List<EntryStack<?>> {
      * For that reason, all ingredients passed to this method must have the same size.
      *
      * @param ingredients the ingredients to unify
+     * @since 8.4
      */
     @ApiStatus.Experimental
     static void unifyFocuses(EntryIngredient... ingredients) {
