@@ -67,7 +67,7 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
         this.widgets = CollectionUtils.map(this.entries, entry -> new SectionFavoriteWidget(new Point(0, 0), entrySize, entry));
         
         for (SectionFavoriteWidget widget : this.widgets) {
-            widget.size.setTo(entrySize * 100, 300);
+            widget.size.setTo(entrySize * 100, ConfigObject.getInstance().isReducedMotion() ? 0 : 300);
         }
         
         this.lastY = panel.getInnerBounds().y;
@@ -85,7 +85,7 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
         this.lastY = y;
         int entrySize = entrySize();
         boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
-        updateEntriesPosition(entry -> true);
+        updateEntriesPosition(entry -> !ConfigObject.getInstance().isReducedMotion());
         for (SectionFavoriteWidget widget : widgets) {
             widget.update(delta);
             

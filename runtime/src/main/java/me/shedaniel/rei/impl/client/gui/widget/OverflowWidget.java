@@ -31,6 +31,7 @@ import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.FloatingPoint;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 
@@ -84,7 +85,7 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
         this.velocity.setTo(new FloatingPoint(
                 ScrollingContainer.handleBounceBack(this.velocity.target().x, 0, delta, .0001),
                 ScrollingContainer.handleBounceBack(this.velocity.target().y, 0, delta, .0001)
-        ), 20);
+        ), ConfigObject.getInstance().isReducedMotion() ? 0 : 20);
         
         try (CloseableScissors scissors = scissor(poseStack, this.bounds)) {
             boolean containsMouse = this.bounds.contains(mouseX, mouseY);
@@ -110,7 +111,7 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
         if (containsMouse(mouseX, mouseY)) {
-            this.scale.setTo(this.scale.target() + amount * -0.2f, 300);
+            this.scale.setTo(this.scale.target() + amount * -0.2f, ConfigObject.getInstance().isReducedMotion() ? 0 : 300);
             return true;
         }
         

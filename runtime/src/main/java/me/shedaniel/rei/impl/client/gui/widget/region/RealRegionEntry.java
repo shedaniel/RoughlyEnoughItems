@@ -48,7 +48,7 @@ public class RealRegionEntry<T extends RegionEntry<T>> {
     public void remove() {
         if (!hidden) {
             this.hidden = true;
-            if (!ConfigObject.getInstance().isFavoritesAnimated()) this.size.setAs(0);
+            if (ConfigObject.getInstance().isReducedMotion()) this.size.setAs(0);
             else this.size.setTo(0, 400);
         }
     }
@@ -79,6 +79,6 @@ public class RealRegionEntry<T extends RegionEntry<T>> {
     }
     
     public void moveTo(boolean animated, int xPos, int yPos) {
-        pos.setTo(new FloatingPoint(xPos, yPos), animated && ConfigObject.getInstance().isFavoritesAnimated() ? 200 : -1);
+        pos.setTo(new FloatingPoint(xPos, yPos), animated && !ConfigObject.getInstance().isReducedMotion() ? 200 : -1);
     }
 }

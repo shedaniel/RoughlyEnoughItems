@@ -276,7 +276,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
                 addedEntries.add(realEntry);
             }
             
-            if (!ConfigObject.getInstance().isFavoritesAnimated()) realEntry.size.setAs(entrySize * 100);
+            if (ConfigObject.getInstance().isReducedMotion()) realEntry.size.setAs(entrySize * 100);
             else realEntry.size.setTo(entrySize * 100, 300);
             entries.put(realEntry.hashIgnoreAmount(), realEntry);
         }

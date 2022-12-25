@@ -113,7 +113,9 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
         
         if (entries.isEmpty() && draggingDisplay && Math.round(onBoardingHeight) > 0) {
             double lastProgress = Math.pow(Mth.clamp(onBoardingHeight / Math.min(parent.excludedBounds.height, 80D), 0, 1), 7);
-            int alpha = (int) (0x50 * lastProgress) + (int) (0x42 * lastProgress * (Mth.cos((float) (System.currentTimeMillis() % 1000 / 500F * Math.PI)) + 1) / 2);
+            float opacity = (Mth.cos((float) (System.currentTimeMillis() % 1000 / 500F * Math.PI)) + 1) / 2f;
+            if (ConfigObject.getInstance().isReducedMotion()) opacity = 0.75F;
+            int alpha = (int) (0x50 * lastProgress) + (int) (0x42 * lastProgress * opacity);
             int lineColor = alpha << 24 | 0xFFFFFF;
             Rectangle bounds = this.bounds.clone();
             bounds.y += 10;
@@ -128,6 +130,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     
     private void drawHorizontalDashedLine(PoseStack poses, int x1, int x2, int y, int color, boolean reverse) {
         float offset = (System.currentTimeMillis() % 700) / 100.0F;
+        if (ConfigObject.getInstance().isReducedMotion()) offset = 0;
         if (!reverse) offset = 7 - offset;
         
         RenderSystem.disableTexture();
@@ -158,6 +161,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     
     private void drawVerticalDashedLine(PoseStack poses, int x, int y1, int y2, int color, boolean reverse) {
         float offset = (System.currentTimeMillis() % 700) / 100.0F;
+        if (ConfigObject.getInstance().isReducedMotion()) offset = 0;
         if (!reverse) offset = 7 - offset;
         
         RenderSystem.disableTexture();
@@ -360,7 +364,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     public void addDisplay(@Nullable Rectangle bounds, Display display) {
         DisplayHistoryManager.INSTANCE.addEntry(this, bounds, display);
         this.scroll.setAs(this.scroll.target() + getBounds().getWidth());
-        this.scroll.setTo(0, 800);
+        this.scroll.setTo(0, ConfigObject.getInstance().isReducedMotion() ? 0 : 800);
     }
     
     @Override
@@ -387,7 +391,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
                         public void drag() {
                             DisplayHistoryManager.INSTANCE.removeEntry(entry);
                             scroll.setAs(scroll.target() - getBounds().getWidth());
-                            scroll.setTo(scroll.target() + getBounds().getWidth(), 800);
+                            scroll.setTo(scroll.target() + getBounds().getWidth(), ConfigObject.getInstance().isReducedMotion() ? 0 : 800);
                         }
                         
                         @Override

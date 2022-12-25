@@ -27,10 +27,13 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
+import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
+import me.shedaniel.math.FloatingRectangle;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
@@ -42,16 +45,13 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 @ApiStatus.Internal
 public class Menu extends WidgetWithBounds implements LateRenderable {
-    public static final UUID WEATHER = UUID.randomUUID();
-    public static final UUID GAME_TYPE = UUID.randomUUID();
-    
     public final Point menuStartPoint;
     public final boolean facingRight;
     public final boolean facingDownwards;
+    public final ValueAnimator<FloatingRectangle> bounds = ValueAnimator.ofFloatingRectangle();
     private final List<FavoriteMenuEntry> entries = Lists.newArrayList();
     public final ScrollingContainer scrolling = new ScrollingContainer() {
         @Override
@@ -91,6 +91,8 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
         this.facingRight = facingRight;
         int x = facingRight ? menuStart.x : menuStart.getMaxX() - (getMaxEntryWidth() + 2 + (hasScrollBar ? 6 : 0));
         this.menuStartPoint = new Point(x, y);
+        Rectangle createBounds = createBounds();
+        this.bounds.setAs(new FloatingRectangle(facingRight ? createBounds.x : createBounds.getMaxX(), facingDownwards ? createBounds.y : createBounds.getMaxY(), 0.1, 0.1));
     }
     
     private void buildEntries(Collection<FavoriteMenuEntry> entries, boolean sort) {
@@ -110,11 +112,16 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     
     @Override
     public Rectangle getBounds() {
+        return bounds.value().getBounds();
+    }
+    
+    public Rectangle createBounds() {
         return new Rectangle(menuStartPoint.x, menuStartPoint.y, getMaxEntryWidth() + 2 + (hasScrollBar() ? 6 : 0), getInnerHeight(menuStartPoint.y) + 2);
     }
     
     public Rectangle getInnerBounds() {
-        return new Rectangle(menuStartPoint.x + 1, menuStartPoint.y + 1, getMaxEntryWidth() + (hasScrollBar() ? 6 : 0), getInnerHeight(menuStartPoint.y));
+        Rectangle rectangle = bounds.value().getBounds();
+        return new Rectangle(rectangle.x + 1, rectangle.y + 1, rectangle.width - 2, rectangle.height - 2);
     }
     
     public boolean hasScrollBar() {
@@ -136,6 +143,8 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        this.bounds.setTo(createBounds().getFloatingBounds(), ConfigObject.getInstance().isReducedMotion() ? 0 : 300);
+        this.bounds.update(delta);
         Rectangle bounds = getBounds();
         Rectangle innerBounds = getInnerBounds();
         fill(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), containsMouse(mouseX, mouseY) ? (REIRuntime.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);

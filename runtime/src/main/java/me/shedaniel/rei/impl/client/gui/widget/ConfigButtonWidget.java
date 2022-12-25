@@ -123,6 +123,10 @@ public class ConfigButtonWidget {
                             return false;
                         }
                 ),
+                ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.reduced_motion"),
+                        config::isReducedMotion,
+                        config::setReducedMotion
+                ),
                 ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.craftable_filter"),
                         config::isCraftableFilterEnabled,
                         config::setCraftableFilterEnabled

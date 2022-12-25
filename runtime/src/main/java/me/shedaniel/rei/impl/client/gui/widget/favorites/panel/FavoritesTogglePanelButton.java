@@ -27,6 +27,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -40,7 +41,7 @@ public class FavoritesTogglePanelButton extends FadingFavoritesPanelButton {
     
     @Override
     protected void onClick() {
-        parent.favoritePanel.expendState.setTo(!parent.favoritePanel.expendState.target(), 1500);
+        parent.favoritePanel.expendState.setTo(!parent.favoritePanel.expendState.target(), ConfigObject.getInstance().isReducedMotion() ? 0 : 1500);
         parent.favoritePanel.resetRows();
     }
     
