@@ -119,7 +119,17 @@ public interface ConfigObject {
      *
      * @return whether favorites motions are animated
      */
+    @Deprecated(forRemoval = true)
     boolean isFavoritesAnimated();
+    
+    /**
+     * Returns whether motions are reduced.
+     *
+     * @return whether motions are reduced
+     * @since 8.4
+     */
+    @ApiStatus.Experimental
+    boolean isReducedMotion();
     
     /**
      * Returns whether a toast is shown on screen when a display identifier is copied.

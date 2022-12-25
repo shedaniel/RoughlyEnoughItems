@@ -123,7 +123,16 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public boolean isFavoritesAnimated() {
-        return basics.motion.favoritesAnimation;
+        return !basics.reduceMotion;
+    }
+    
+    @Override
+    public boolean isReducedMotion() {
+        return basics.reduceMotion;
+    }
+    
+    public boolean setReducedMotion(boolean reducedMotion) {
+        return basics.reduceMotion = reducedMotion;
     }
     
     @Override
@@ -600,17 +609,12 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @Comment("Declares whether cheating mode is on.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private CheatingMode cheating = CheatingMode.OFF;
         private boolean favoritesEnabled = true;
+        private boolean reduceMotion = false;
         @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
         private KeyBindings keyBindings = new KeyBindings();
         @Comment("Declares whether REI is visible.") @ConfigEntry.Gui.Excluded private boolean overlayVisible = true;
         @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private ItemCheatingStyle cheatingStyle = ItemCheatingStyle.GRAB;
-        @ConfigEntry.Gui.CollapsibleObject
-        private Motion motion = new Motion();
-    }
-    
-    public static class Motion {
-        private boolean favoritesAnimation = true;
     }
     
     public static class KeyBindings {

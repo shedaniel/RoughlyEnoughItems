@@ -64,6 +64,7 @@ public class TabContainerWidget extends GuiComponent {
     }
     
     public void updateScroll(List<DisplayCategory<?>> categories, int selectedCategory, long duration) {
+        if (ConfigObject.getInstance().isReducedMotion()) duration = 0;
         this.initTabsVariables();
         if (categories.size() <= tabsPerPage) {
             scrollAnimator.setAs(0d);

@@ -27,6 +27,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
@@ -65,7 +66,9 @@ public class TrashWidget extends WidgetWithBounds {
     @Override
     public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
         if (updateBounds(delta)) {
-            int alpha = 0x12 + (int) (0x22 * lastProgress * (Mth.cos((float) (System.currentTimeMillis() % 2000 / 1000F * Math.PI)) + 1) / 2);
+            float opacity = (Mth.cos((float) (System.currentTimeMillis() % 2000 / 1000F * Math.PI)) + 1) / 2;
+            if (ConfigObject.getInstance().isReducedMotion()) opacity = 0.75F;
+            int alpha = 0x12 + (int) (0x22 * lastProgress * opacity);
             fillGradient(poses, this.bounds.x, this.bounds.y, this.bounds.getMaxX(), this.bounds.getMaxY(), 0xFFFFFF | (alpha << 24), 0xFFFFFF | (alpha << 24));
             int lineColor = (int) (0x60 * lastProgress) << 24 | 0xFFFFFF;
             fillGradient(poses, this.bounds.x, this.bounds.y, this.bounds.getMaxX(), this.bounds.y + 1, lineColor, lineColor);
@@ -82,6 +85,7 @@ public class TrashWidget extends WidgetWithBounds {
     }
     
     public boolean updateBounds(float delta) {
+        if (ConfigObject.getInstance().isReducedMotion()) this.height.setAs(this.height.target());
         this.height.update(delta);
         double trashBoundsHeight = this.height.value();
         if (Math.round(trashBoundsHeight) > 0) {
