@@ -23,10 +23,17 @@
 
 package me.shedaniel.rei.api.common.entry.settings;
 
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.UUID;
 
+/**
+ * Represents a setting for an {@link EntryIngredient}.
+ *
+ * @param <T> the type of the setting
+ * @since 8.4
+ */
 @ApiStatus.Experimental
 public interface EntryIngredientSetting<T> {
     EntryIngredientSetting<UUID> FOCUS_UUID = new EntryIngredientSetting<>() {};
