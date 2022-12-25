@@ -96,6 +96,7 @@ public final class Widgets {
             Point mouse = new Point(mouseX, mouseY);
             Tooltip tooltip = tooltipSupplier.apply(mouse);
             if (tooltip != null) {
+                tooltip = Tooltip.from(TooltipContext.ofMouse().getPoint(), tooltip.entries());
                 tooltip.queue();
             }
         });
