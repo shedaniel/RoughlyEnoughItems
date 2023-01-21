@@ -1,6 +1,6 @@
 /*
  * This file is licensed under the MIT License, part of Roughly Enough Items.
- * Copyright (c) 2018, 2019, 2020, 2021, 2022 shedaniel
+ * Copyright (c) 2018, 2019, 2020, 2021, 2022, 2023 shedaniel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ package me.shedaniel.rei.mixin.fabric;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
+import net.minecraft.network.protocol.game.ClientboundUpdateTagsPacket;
 import net.minecraft.world.item.crafting.RecipeManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,5 +42,10 @@ public class MixinClientPacketListener {
     @Inject(method = "handleUpdateRecipes", at = @At("HEAD"))
     private void handleUpdateRecipes(ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket, CallbackInfo ci) {
         RoughlyEnoughItemsCoreClient.PRE_UPDATE_RECIPES.invoker().update(recipeManager);
+    }
+    
+    @Inject(method = "handleUpdateTags", at = @At("HEAD"))
+    private void handleUpdateTags(ClientboundUpdateTagsPacket packet, CallbackInfo ci) {
+        RoughlyEnoughItemsCoreClient.POST_UPDATE_TAGS.invoker().run();
     }
 }

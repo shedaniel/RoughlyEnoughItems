@@ -1,6 +1,6 @@
 /*
  * This file is licensed under the MIT License, part of Roughly Enough Items.
- * Copyright (c) 2018, 2019, 2020, 2021, 2022 shedaniel
+ * Copyright (c) 2018, 2019, 2020, 2021, 2022, 2023 shedaniel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -129,6 +129,7 @@ import java.util.stream.Stream;
 @Environment(EnvType.CLIENT)
 public class RoughlyEnoughItemsCoreClient {
     public static final Event<ClientRecipeUpdateEvent> PRE_UPDATE_RECIPES = EventFactory.createLoop();
+    public static final Event<Runnable> POST_UPDATE_TAGS = EventFactory.createLoop();
     public static boolean isLeftMousePressed = false;
     private static final ExecutorService RELOAD_PLUGINS = Executors.newSingleThreadScheduledExecutor(task -> {
         Thread thread = new Thread(task, "REI-ReloadPlugins");

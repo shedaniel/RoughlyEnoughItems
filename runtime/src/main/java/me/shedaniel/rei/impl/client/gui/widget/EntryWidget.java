@@ -1,6 +1,6 @@
 /*
  * This file is licensed under the MIT License, part of Roughly Enough Items.
- * Copyright (c) 2018, 2019, 2020, 2021, 2022 shedaniel
+ * Copyright (c) 2018, 2019, 2020, 2021, 2022, 2023 shedaniel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,6 +58,7 @@ import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.dragging.CurrentDraggingStack;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import net.minecraft.ChatFormatting;
@@ -573,6 +574,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             return false;
         if (wasClicked() && containsMouse(mouseX, mouseY)) {
             if (doAction(mouseX, mouseY, button)) {
+                ((CurrentDraggingStack) DraggingContext.getInstance()).drop();
                 return true;
             }
         }

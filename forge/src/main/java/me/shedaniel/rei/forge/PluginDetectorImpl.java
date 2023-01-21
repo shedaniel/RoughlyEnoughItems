@@ -1,6 +1,6 @@
 /*
  * This file is licensed under the MIT License, part of Roughly Enough Items.
- * Copyright (c) 2018, 2019, 2020, 2021, 2022 shedaniel
+ * Copyright (c) 2018, 2019, 2020, 2021, 2022, 2023 shedaniel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,7 @@ import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.impl.init.PluginDetector;
 import me.shedaniel.rei.plugin.client.forge.DefaultClientPluginImpl;
 import me.shedaniel.rei.plugin.client.runtime.DefaultClientRuntimePlugin;
+import me.shedaniel.rei.plugin.client.runtime.HideIngredientsFromTagsPlugin;
 import me.shedaniel.rei.plugin.common.forge.DefaultPluginImpl;
 import me.shedaniel.rei.plugin.common.runtime.DefaultRuntimePlugin;
 import net.minecraftforge.api.distmarker.Dist;
@@ -178,6 +179,7 @@ public class PluginDetectorImpl implements PluginDetector {
         return () -> () -> {
             PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientPluginImpl()));
             PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientRuntimePlugin()));
+            PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new HideIngredientsFromTagsPlugin()));
             
             // Legacy Annotation
             AnnotationUtils.<REIPlugin, REIClientPlugin>scanAnnotation(REIPlugin.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {

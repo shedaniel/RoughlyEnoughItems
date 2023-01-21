@@ -1,6 +1,6 @@
 /*
  * This file is licensed under the MIT License, part of Roughly Enough Items.
- * Copyright (c) 2018, 2019, 2020, 2021, 2022 shedaniel
+ * Copyright (c) 2018, 2019, 2020, 2021, 2022, 2023 shedaniel
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -179,7 +179,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
         return button == 0 && entry != null && entry.dragging;
     }
     
-    private boolean drop() {
+    public boolean drop() {
         if (entry != null && entry.dragging) {
             DraggedAcceptorResult result = visitor.acceptDragged(this, entry.component);
             entry.component.release(result);
