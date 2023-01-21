@@ -368,6 +368,8 @@
   "rule.roughlyenoughitems.filtering.search.show.false": "Hide",
   "rule.roughlyenoughitems.filtering.basic": "Basic Plugin Filtering",
   "rule.roughlyenoughitems.filtering.basic.subtitle": "Filter entries by REI plugins. This is not configurable here.",
+  "rule.roughlyenoughitems.filtering.hide.tag": "Tag Filtering",
+  "rule.roughlyenoughitems.filtering.hide.tag.subtitle": "Filter entries by 'c:hidden_from_recipe_viewers'. This is not configurable here.",
   "language.roughlyenoughitems.english": "English",
   "language.roughlyenoughitems.japanese": "Japanese",
   "language.roughlyenoughitems.chinese_simplified": "Chinese Simplified",
