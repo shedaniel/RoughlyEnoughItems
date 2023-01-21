@@ -28,7 +28,8 @@
     ], 
     "rei_client": [
       "me.shedaniel.rei.plugin.client.DefaultClientPlugin",
-      "me.shedaniel.rei.plugin.client.DefaultClientRuntimePlugin"
+      "me.shedaniel.rei.plugin.client.DefaultClientRuntimePlugin",
+      "me.shedaniel.rei.plugin.client.runtime.HideIngredientsFromTagsPlugin"
     ]
   },
   "accessWidener": "roughlyenoughitems.accessWidener",

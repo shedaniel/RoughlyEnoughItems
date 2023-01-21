@@ -37,6 +37,7 @@ import me.shedaniel.rei.plugin.client.DefaultClientPlugin;
 import me.shedaniel.rei.impl.init.PluginDetector;
 import me.shedaniel.rei.plugin.client.forge.DefaultClientPluginImpl;
 import me.shedaniel.rei.plugin.client.DefaultClientRuntimePlugin;
+import me.shedaniel.rei.plugin.client.runtime.HideIngredientsFromTagsPlugin;
 import me.shedaniel.rei.plugin.common.forge.DefaultPluginImpl;
 import me.shedaniel.rei.plugin.common.DefaultRuntimePlugin;
 import net.minecraftforge.api.distmarker.Dist;
@@ -180,6 +181,7 @@ public class PluginDetectorImpl implements PluginDetector {
         return () -> () -> {
             PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientPluginImpl()));
             PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new DefaultClientRuntimePlugin()));
+            PluginView.getClientInstance().registerPlugin(wrapPlugin(Collections.singletonList("roughlyenoughitems"), new HideIngredientsFromTagsPlugin()));
             
             // Legacy Annotation
             AnnotationUtils.<REIPlugin, REIClientPlugin>scanAnnotation(REIPlugin.class, REIClientPlugin.class::isAssignableFrom, (modId, plugin, clazz) -> {

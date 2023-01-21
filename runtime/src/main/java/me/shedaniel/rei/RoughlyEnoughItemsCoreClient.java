@@ -131,6 +131,7 @@ import java.util.stream.Stream;
 @Environment(EnvType.CLIENT)
 public class RoughlyEnoughItemsCoreClient {
     public static final Event<RecipeUpdateEvent> PRE_UPDATE_RECIPES = EventFactory.createLoop();
+    public static final Event<Runnable> POST_UPDATE_TAGS = EventFactory.createLoop();
     public static boolean isLeftMousePressed = false;
     private static final ExecutorService RELOAD_PLUGINS = Executors.newSingleThreadScheduledExecutor(task -> {
         Thread thread = new Thread(task, "REI-ReloadPlugins");

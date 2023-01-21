@@ -24,8 +24,11 @@
 package me.shedaniel.rei.impl.common.entry.type;
 
 import com.google.common.base.Stopwatch;
+import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
+import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
@@ -52,7 +55,18 @@ public class FilteringLogic {
     }
     
     public static List<FilteringRule<?>> getRules() {
-        return ((ConfigObjectImpl) ConfigObject.getInstance()).getFilteringRules();
+        List<FilteringRule<?>> rules = ((ConfigObjectImpl) ConfigObject.getInstance()).getFilteringRules();
+        boolean added = false;
+        for (FilteringRuleType<?> type : FilteringRuleTypeRegistry.getInstance()) {
+            if (type.isSingular() && rules.stream().noneMatch(filteringRule -> filteringRule.getType().equals(type))) {
+                rules.add(type.createNew());
+                added = true;
+            }
+        }
+        if (added) {
+            ConfigManager.getInstance().saveConfig();
+        }
+        return rules;
     }
     
     private static LinkedHashMap<FilteringRule<?>, Object> prepareCache(List<FilteringRule<?>> rules, boolean async, Collection<EntryStack<?>> entries) {

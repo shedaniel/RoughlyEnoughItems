@@ -268,7 +268,7 @@ public class FilteringRulesScreen extends Screen {
                 Function<Boolean, Component> function = bool -> {
                     return new TranslatableComponent("rule.roughlyenoughitems.filtering.search.show." + bool);
                 };
-                Map<FilteringContextType, Set<HashedEntryStackWrapper>> stacks = FilteringLogic.hidden(FilteringLogic.getRules(), false, false, EntryRegistry.getInstance().getEntryStacks().collect(Collectors.toList()));
+                Map<FilteringContextType, Set<HashedEntryStackWrapper>> stacks = FilteringLogic.hidden(List.of(r), false, false, EntryRegistry.getInstance().getEntryStacks().collect(Collectors.toList()));
                 
                 entryConsumer.accept(new SubRulesEntry(rule, () -> function.apply(true),
                         Collections.singletonList(new SearchFilteringRuleType.EntryStacksRuleEntry(rule,
