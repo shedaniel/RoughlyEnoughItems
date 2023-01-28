@@ -64,8 +64,9 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
     protected void renderEntries(boolean fastEntryRendering, PoseStack matrices, int mouseX, int mouseY, float delta) {
         ScissorsHandler.INSTANCE.scissor(bounds);
         
-        int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / (float) entrySize()));
-        int nextIndex = skip * innerBounds.width / entrySize();
+        int entrySize = entrySize();
+        int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / (float) entrySize));
+        int nextIndex = skip * innerBounds.width / entrySize;
         this.blockedCount = 0;
         BatchedEntryRendererManager helper = new BatchedEntryRendererManager();
         Int2ObjectMap<CollapsedStack> indexedCollapsedStack = getCollapsedStackIndexed();
@@ -75,7 +76,7 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
             EntryListStackEntry entry = entries.get(cont);
             Rectangle entryBounds = entry.getBounds();
             
-            entryBounds.y = entry.backupY - scrolling.scrollAmountInt();
+            entryBounds.y = entry.backupY - scrolling.scrollAmountInt() - entryBounds.height / 2 + entrySize / 2;
             if (entryBounds.y > this.bounds.getMaxY()) break;
             if (stacks.size() <= i) break;
             if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height)) {

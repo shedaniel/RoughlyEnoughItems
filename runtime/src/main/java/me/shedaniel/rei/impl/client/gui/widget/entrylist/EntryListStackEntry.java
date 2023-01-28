@@ -110,7 +110,9 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
         Rectangle bounds = getBounds();
         
         if (collapsedStack != null) {
-            fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0x34FFFFFF, 0x34FFFFFF);
+            int entrySize = entrySize();
+            fillGradient(matrices, bounds.getCenterX() - entrySize / 2, bounds.getCenterY() - entrySize / 2,
+                    bounds.getCenterX() + entrySize / 2 + 1, bounds.getCenterY() + entrySize / 2 + 1, 0x34FFFFFF, 0x34FFFFFF);
         }
         
         super.drawBackground(matrices, mouseX, mouseY, delta);

@@ -186,7 +186,7 @@ public class BatchedEntryRendererManager {
             try {
                 @SuppressWarnings("rawtypes")
                 EntryStack currentEntry = entry.getCurrentEntry();
-                currentEntry.setZ(100);
+                currentEntry.setZ(entry.getBounds().contains(mouseX, mouseY) ? 150 : 100);
                 firstRenderer.renderBase(currentEntry, extraData[i++], matrices, immediate, entry.getInnerBounds(), mouseX, mouseY, delta);
                 if (debugTime && !currentEntry.isEmpty()) size.increment();
             } catch (Throwable throwable) {
