@@ -32,6 +32,7 @@ import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
@@ -109,10 +110,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         int guiWidth = Mth.clamp(category.getDisplayWidth(display.provideInternalDisplay()) + 30, 0, largestWidth) + 100;
         int guiHeight = Mth.clamp(category.getDisplayHeight() + 40, 166, largestHeight);
         this.bounds = new Rectangle(width / 2 - guiWidth / 2, height / 2 - guiHeight / 2, guiWidth, guiHeight);
-        
-        this.initTabs(this.bounds.width);
-        this.widgets.addAll(this.tabs.widgets());
-        
+
         List<EntryIngredient> workstations = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getWorkstations();
         if (!workstations.isEmpty()) {
             int ww = Mth.floor((bounds.width - 16) / 18f);
@@ -161,7 +159,10 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         Optional<ButtonArea> supplier = CategoryRegistry.getInstance().get(category.getCategoryIdentifier()).getPlusButtonArea();
         if (supplier.isPresent() && supplier.get().get(recipeBounds) != null)
             this.widgets.add(Widgets.withTranslate(InternalWidgets.createAutoCraftingButtonWidget(recipeBounds, supplier.get().get(recipeBounds), Component.literal(supplier.get().getButtonText()), display::provideInternalDisplay, display::provideInternalDisplayIds, setupDisplay, category), 0, 0, 100));
-        
+
+        this.initTabs(this.bounds.width);
+        this.widgets.addAll(this.tabs.widgets());
+
         int index = 0;
         for (DisplaySpec recipeDisplay : categoryMap.get(category)) {
             int finalIndex = index;
