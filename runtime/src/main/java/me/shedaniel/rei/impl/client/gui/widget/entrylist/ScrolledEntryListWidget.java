@@ -75,7 +75,7 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
             EntryListStackEntry entry = entries.get(cont);
             Rectangle entryBounds = entry.getBounds();
             
-            entryBounds.y = entry.backupY - scrolling.scrollAmountInt();
+            entryBounds.y = entry.backupY - scrolling.scrollAmountInt() - entryBounds.height / 2 + entrySize() / 2;
             if (entryBounds.y > this.bounds.getMaxY()) break;
             if (stacks.size() <= i) break;
             if (notSteppingOnExclusionZones(entryBounds.x, entryBounds.y, entryBounds.width, entryBounds.height)) {
