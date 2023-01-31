@@ -23,13 +23,16 @@
 
 package me.shedaniel.rei.impl.common.entry.type.collapsed;
 
+import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.client.config.collapsible.CollapsibleConfigManager;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
@@ -38,6 +41,7 @@ import java.util.stream.Collectors;
 
 public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
     private final Map<ResourceLocation, Entry> entries = new LinkedHashMap<>();
+    private final List<Entry> customEntries = new ArrayList<>();
     
     @Override
     public <T> void group(ResourceLocation id, Component name, List<? extends EntryStack<? extends T>> stacks) {
@@ -70,6 +74,7 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
     
     @Override
     public void endReload() {
+        this.recollectCustomEntries();
         InternalLogger.getInstance().debug("Registered %d collapsible entry groups: %s", entries.values().size(),
                 entries.values().stream().map(entry -> entry.getName().getString()).collect(Collectors.joining(", ")));
     }
@@ -79,8 +84,26 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
         plugin.registerCollapsibleEntries(this);
     }
     
+    public void recollectCustomEntries() {
+        InternalLogger.getInstance().debug("Recollecting custom collapsible entry groups");
+        this.customEntries.clear();
+        for (CollapsibleConfigManager.CustomGroup customEntry : CollapsibleConfigManager.getInstance().getConfig().customGroups) {
+            List<? extends EntryStack<?>> stacks = CollectionUtils.filterAndMap(customEntry.stacks, EntryStackProvider::isValid, EntryStackProvider::provide);
+            Entry entry = new Entry(customEntry.id, new TextComponent(customEntry.name),
+                    new ListMatcher(stacks));
+            this.customEntries.add(entry);
+            InternalLogger.getInstance().debug("Added custom collapsible entry group [%s] %s with %d entries", entry.getId(), entry.getName().getString(), stacks.size());
+        }
+        InternalLogger.getInstance().debug("Registered %d custom collapsible entry groups: ", customEntries.size(),
+                customEntries.stream().map(entry -> entry.getName().getString()).collect(Collectors.joining(", ")));
+    }
+    
     public Collection<Entry> getEntries() {
         return entries.values();
+    }
+    
+    public List<Entry> getCustomEntries() {
+        return customEntries;
     }
     
     public static class Entry {
@@ -95,6 +118,10 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
             this.name = name;
             this.matcher = matcher;
             this.canCache = canCache;
+        }
+        
+        public ResourceLocation getId() {
+            return id;
         }
         
         public ResourceLocation getId() {

@@ -23,56 +23,51 @@
 
 package me.shedaniel.rei.impl.client.config.entries;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
-import me.shedaniel.rei.RoughlyEnoughItemsCore;
-import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
-import me.shedaniel.rei.api.common.plugins.PluginManager;
-import me.shedaniel.rei.impl.client.gui.screen.ConfigReloadingScreen;
-import me.shedaniel.rei.impl.client.search.argument.Argument;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Unit;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @ApiStatus.Internal
-public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
-    private int width;
-    private AbstractWidget reloadPluginsButton = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
-        RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
-        RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
-    }) {
-        @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-            if (PluginManager.areAnyReloading()) {
-                Screen screen = Minecraft.getInstance().screen;
-                Minecraft.getInstance().setScreen(new ConfigReloadingScreen(new TranslatableComponent("text.rei.config.is.reloading"), PluginManager::areAnyReloading, () -> Minecraft.getInstance().setScreen(screen), null));
-            } else {
-                super.render(matrices, mouseX, mouseY, delta);
-            }
-        }
-    };
-    private AbstractWidget reloadSearchButton = new Button(0, 0, 0, 20, NarratorChatListener.NO_TITLE, button -> {
-        Argument.resetCache(true);
-    });
-    private List<AbstractWidget> children = ImmutableList.of(reloadPluginsButton, reloadSearchButton);
+public class ButtonsConfigEntry extends AbstractConfigListEntry<Unit> {
+    private final int width;
+    private final List<AbstractWidget> children;
+    private boolean edited;
+    private Runnable saveRunnable = () -> {};
     
-    public ReloadPluginsEntry(int width) {
+    public ButtonsConfigEntry(int width, Triple<Component, Consumer<Button>, Consumer<Runnable>>... buttons) {
         super(NarratorChatListener.NO_TITLE, false);
         this.width = width;
-        reloadPluginsButton.setMessage(new TranslatableComponent("text.rei.reload_config"));
-        reloadSearchButton.setMessage(new TranslatableComponent("text.rei.reload_search"));
+        this.children = Arrays.stream(buttons).map(pair -> {
+            return (AbstractWidget) new Button(0, 0, 0, 20, pair.getLeft(), button -> {
+                pair.getRight().accept(() -> this.edited = true);
+            }) {
+                @Override
+                public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+                    pair.getMiddle().accept(this);
+                    super.render(poses, mouseX, mouseY, delta);
+                }
+            };
+        }).toList();
+    }
+    
+    public ButtonsConfigEntry withSaveRunnable(Runnable runnable) {
+        this.saveRunnable = runnable;
+        return this;
     }
     
     @Override
@@ -87,23 +82,20 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     
     @Override
     public void save() {
-    
+        this.saveRunnable.run();
     }
     
     @Override
     public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
-        this.reloadPluginsButton.active = this.isEditable();
-        this.reloadPluginsButton.y = y;
-        this.reloadPluginsButton.setWidth(width / 2 - 2);
-        this.reloadPluginsButton.x = x + entryWidth / 2 - width / 2;
-        this.reloadPluginsButton.render(matrices, mouseX, mouseY, delta);
-        this.reloadSearchButton.active = this.isEditable() && Argument.hasCache();
-        this.reloadSearchButton.y = y;
-        this.reloadSearchButton.setWidth(width / 2 - 2);
-        this.reloadSearchButton.x = x + entryWidth / 2 + 2;
-        this.reloadSearchButton.render(matrices, mouseX, mouseY, delta);
+        for (AbstractWidget widget : this.children) {
+            widget.active = this.isEditable();
+            widget.y = y;
+            widget.setWidth(width / this.children.size() - (this.children.size() == 1 ? 0 : 2));
+            widget.x = x + entryWidth / 2 - width / 2 + (widget.getWidth() + 2) * this.children.indexOf(widget);
+            widget.render(matrices, mouseX, mouseY, delta);
+        }
     }
     
     @Override
@@ -114,5 +106,10 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     @Override
     public List<? extends NarratableEntry> narratables() {
         return children;
+    }
+    
+    @Override
+    public boolean isEdited() {
+        return edited;
     }
 }

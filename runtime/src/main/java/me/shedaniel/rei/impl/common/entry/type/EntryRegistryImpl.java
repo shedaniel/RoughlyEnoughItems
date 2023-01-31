@@ -118,7 +118,11 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     public List<EntryStack<?>> getPreFilteredList() {
-        return Collections.unmodifiableList(filteredList.getList());
+        return Collections.unmodifiableList(filteredList.getUnwrappedList());
+    }
+    
+    public FilteredEntryList getFilteredList() {
+        return filteredList;
     }
     
     public List<HNEntryStackWrapper> getPreFilteredComplexList() {

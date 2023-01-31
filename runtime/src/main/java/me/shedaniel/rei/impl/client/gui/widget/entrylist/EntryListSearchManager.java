@@ -37,6 +37,7 @@ import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.client.config.collapsible.CollapsibleConfigManager;
 import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
 import me.shedaniel.rei.impl.client.search.collapsed.CollapsedEntriesCache;
 import me.shedaniel.rei.impl.common.InternalLogger;
@@ -126,9 +127,18 @@ public class EntryListSearchManager {
     private List</*EntryStack<?> | CollapsedStack*/ Object> collapse(List<HashedEntryStackWrapper> stacks, BooleanSupplier isValid) {
         CollapsibleEntryRegistryImpl collapsibleRegistry = (CollapsibleEntryRegistryImpl) CollapsibleEntryRegistry.getInstance();
         Map<CollapsibleEntryRegistryImpl.Entry, @Nullable CollapsedStack> entries = new HashMap<>();
+        CollapsibleConfigManager.CollapsibleConfigObject collapsibleConfig = CollapsibleConfigManager.getInstance().getConfig();
         
         for (CollapsibleEntryRegistryImpl.Entry entry : collapsibleRegistry.getEntries()) {
-            entries.put(entry, null);
+            if (!collapsibleConfig.disabledGroups.contains(entry.getId())) {
+                entries.put(entry, null);
+            }
+        }
+        
+        for (CollapsibleEntryRegistryImpl.Entry entry : collapsibleRegistry.getCustomEntries()) {
+            if (!collapsibleConfig.disabledGroups.contains(entry.getId())) {
+                entries.put(entry, null);
+            }
         }
         
         if (entries.isEmpty()) return (List<Object>) (List<?>) new AbstractList<EntryStack<?>>() {

@@ -37,6 +37,7 @@ import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextType;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.SearchFilteringRuleType;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
+import me.shedaniel.rei.impl.client.gui.screen.generic.OptionEntriesScreen;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.FilteringLogic;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
@@ -105,6 +106,11 @@ public class FilteringRulesScreen extends Screen {
         this.rulesList.render(matrices, mouseX, mouseY, delta);
         super.render(matrices, mouseX, mouseY, delta);
         this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
+    }
+    
+    @Override
+    public void onClose() {
+        this.minecraft.setScreen(parent);
     }
     
     public static class RulesList extends DynamicElementListWidget<RuleEntry> {
@@ -263,26 +269,26 @@ public class FilteringRulesScreen extends Screen {
     }
     
     private static <Cache> Function<Screen, Screen> placeholderScreen(FilteringRule<Cache> r) {
-        class PlaceholderScreen extends FilteringRuleOptionsScreen<FilteringRule<Cache>> {
+        class PlaceholderScreen extends OptionEntriesScreen {
             public PlaceholderScreen(Screen parent) {
-                super(r, parent);
+                super(new TranslatableComponent("config.roughlyenoughitems.filteringRulesScreen"), parent);
             }
             
             @Override
-            public void addEntries(Consumer<RuleEntry> entryConsumer) {
+            public void addEntries(Consumer<ListEntry> entryConsumer) {
                 addEmpty(entryConsumer, 10);
                 Function<Boolean, Component> function = bool -> {
                     return new TranslatableComponent("rule.roughlyenoughitems.filtering.search.show." + bool);
                 };
                 Map<FilteringContextType, Set<HashedEntryStackWrapper>> stacks = FilteringLogic.hidden(List.of(r), false, false, EntryRegistry.getInstance().getEntryStacks().collect(Collectors.toList()));
                 
-                entryConsumer.accept(new SubRulesEntry(rule, () -> function.apply(true),
-                        Collections.singletonList(new SearchFilteringRuleType.EntryStacksRuleEntry(rule,
+                entryConsumer.accept(new SubListEntry(() -> function.apply(true),
+                        Collections.singletonList(new SearchFilteringRuleType.EntryStacksRuleEntry(
                                 Suppliers.ofInstance(CollectionUtils.map(stacks.get(FilteringContextType.SHOWN),
                                         stack -> (EntryWidget) Widgets.createSlot(new Rectangle(0, 0, 18, 18)).disableBackground().entry(stack.unwrap().normalize())))))));
                 addEmpty(entryConsumer, 10);
-                entryConsumer.accept(new SubRulesEntry(rule, () -> function.apply(false),
-                        Collections.singletonList(new SearchFilteringRuleType.EntryStacksRuleEntry(rule,
+                entryConsumer.accept(new SubListEntry(() -> function.apply(false),
+                        Collections.singletonList(new SearchFilteringRuleType.EntryStacksRuleEntry(
                                 Suppliers.ofInstance(CollectionUtils.map(stacks.get(FilteringContextType.HIDDEN),
                                         stack -> (EntryWidget) Widgets.createSlot(new Rectangle(0, 0, 18, 18)).disableBackground().entry(stack.unwrap().normalize())))))));
             }
