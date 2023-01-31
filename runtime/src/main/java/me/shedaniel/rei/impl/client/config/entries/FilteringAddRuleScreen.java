@@ -78,6 +78,11 @@ public class FilteringAddRuleScreen extends Screen {
         this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
     }
     
+    @Override
+    public void onClose() {
+        this.minecraft.setScreen(parent);
+    }
+    
     public static class RulesList extends DynamicElementListWidget<RuleEntry> {
         private boolean inFocus;
         

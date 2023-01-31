@@ -21,13 +21,11 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.performance.entry;
+package me.shedaniel.rei.impl.client.config.entries;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
-import me.shedaniel.rei.impl.client.gui.performance.PerformanceScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -35,23 +33,40 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Unit;
+import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @ApiStatus.Internal
-public class PerformanceEntry extends AbstractConfigListEntry<Unit> {
-    private int width;
-    private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.empty(), button -> {
-        Minecraft.getInstance().setScreen(new PerformanceScreen(Minecraft.getInstance().screen));
-    });
-    private List<AbstractWidget> children = ImmutableList.of(buttonWidget);
+public class ButtonsConfigEntry extends AbstractConfigListEntry<Unit> {
+    private final int width;
+    private final List<AbstractWidget> children;
+    private boolean edited;
+    private Runnable saveRunnable = () -> {};
     
-    public PerformanceEntry(int width) {
+    public ButtonsConfigEntry(int width, Triple<Component, Consumer<Button>, Consumer<Runnable>>... buttons) {
         super(Component.empty(), false);
         this.width = width;
-        buttonWidget.setMessage(Component.translatable("text.rei.performance"));
+        this.children = Arrays.stream(buttons).map(pair -> {
+            return (AbstractWidget) new Button(0, 0, 0, 20, pair.getLeft(), button -> {
+                pair.getRight().accept(() -> this.edited = true);
+            }) {
+                @Override
+                public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+                    pair.getMiddle().accept(this);
+                    super.render(poses, mouseX, mouseY, delta);
+                }
+            };
+        }).toList();
+    }
+    
+    public ButtonsConfigEntry withSaveRunnable(Runnable runnable) {
+        this.saveRunnable = runnable;
+        return this;
     }
     
     @Override
@@ -66,18 +81,20 @@ public class PerformanceEntry extends AbstractConfigListEntry<Unit> {
     
     @Override
     public void save() {
-        
+        this.saveRunnable.run();
     }
     
     @Override
     public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
         super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
-        this.buttonWidget.active = this.isEditable();
-        this.buttonWidget.y = y;
-        this.buttonWidget.x = x + entryWidth / 2 - width / 2;
-        this.buttonWidget.setWidth(width);
-        this.buttonWidget.render(matrices, mouseX, mouseY, delta);
+        for (AbstractWidget widget : this.children) {
+            widget.active = this.isEditable();
+            widget.y = y;
+            widget.setWidth(width / this.children.size() - (this.children.size() == 1 ? 0 : 2));
+            widget.x = x + entryWidth / 2 - width / 2 + (widget.getWidth() + 2) * this.children.indexOf(widget);
+            widget.render(matrices, mouseX, mouseY, delta);
+        }
     }
     
     @Override
@@ -88,5 +105,10 @@ public class PerformanceEntry extends AbstractConfigListEntry<Unit> {
     @Override
     public List<? extends NarratableEntry> narratables() {
         return children;
+    }
+    
+    @Override
+    public boolean isEdited() {
+        return edited;
     }
 }

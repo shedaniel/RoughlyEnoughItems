@@ -76,6 +76,11 @@ public class FilteringCategoriesScreen extends Screen {
         this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
     }
     
+    @Override
+    public void onClose() {
+        this.minecraft.setScreen(parent);
+    }
+    
     private static class ListWidget extends DynamicElementListWidget<ListEntry> {
         private boolean inFocus;
         

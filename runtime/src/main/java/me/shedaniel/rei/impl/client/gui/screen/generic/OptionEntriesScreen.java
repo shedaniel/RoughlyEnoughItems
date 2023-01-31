@@ -21,13 +21,12 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.config.entries;
+package me.shedaniel.rei.impl.client.gui.screen.generic;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -45,25 +44,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> extends Screen {
-    private RulesList rulesList;
-    Screen parent;
-    public T rule;
+public abstract class OptionEntriesScreen extends Screen {
+    private ListWidget listWidget;
+    public Screen parent;
     
-    public FilteringRuleOptionsScreen(T rule, Screen screen) {
-        super(Component.translatable("config.roughlyenoughitems.filteringRulesScreen"));
-        this.rule = rule;
+    public OptionEntriesScreen(Component title, Screen screen) {
+        super(title);
         this.parent = screen;
     }
     
     @Override
     public void init() {
         super.init();
-        if (rulesList != null) save();
+        if (listWidget != null) save();
         {
             Component doneText = Component.translatable("gui.done");
             int width = Minecraft.getInstance().font.width(doneText);
@@ -72,38 +70,43 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
                 minecraft.setScreen(parent);
             }));
         }
-        rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
-        addEntries(ruleEntry -> rulesList.addItem(ruleEntry));
+        listWidget = addWidget(new ListWidget(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
+        addEntries(ruleEntry -> listWidget.addItem(ruleEntry));
     }
     
-    public abstract void addEntries(Consumer<RuleEntry> entryConsumer);
+    @Override
+    public void onClose() {
+        this.minecraft.setScreen(parent);
+    }
+    
+    public abstract void addEntries(Consumer<ListEntry> entryConsumer);
     
     public abstract void save();
     
-    public void addText(Consumer<RuleEntry> entryConsumer, FormattedText text) {
+    public void addText(Consumer<ListEntry> entryConsumer, FormattedText text) {
         for (FormattedCharSequence s : font.split(text, width - 80)) {
-            entryConsumer.accept(new TextRuleEntry(rule, s));
+            entryConsumer.accept(new TextListEntry(s));
         }
     }
     
-    public void addEmpty(Consumer<RuleEntry> entryConsumer, int height) {
-        entryConsumer.accept(new EmptyRuleEntry(rule, height));
+    public void addEmpty(Consumer<ListEntry> entryConsumer, int height) {
+        entryConsumer.accept(new EmptyListEntry(height));
     }
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        this.rulesList.render(matrices, mouseX, mouseY, delta);
+        this.listWidget.render(matrices, mouseX, mouseY, delta);
         super.render(matrices, mouseX, mouseY, delta);
         this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
     }
     
-    public static class RulesList extends DynamicElementListWidget<RuleEntry> {
-        public RulesList(Minecraft client, int width, int height, int top, int bottom, ResourceLocation backgroundLocation) {
+    public static class ListWidget extends DynamicElementListWidget<ListEntry> {
+        public ListWidget(Minecraft client, int width, int height, int top, int bottom, ResourceLocation backgroundLocation) {
             super(client, width, height, top, bottom, backgroundLocation);
         }
         
         @Override
-        protected int addItem(RuleEntry item) {
+        protected int addItem(ListEntry item) {
             return super.addItem(item);
         }
         
@@ -118,23 +121,13 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
     }
     
-    public static abstract class RuleEntry extends DynamicElementListWidget.ElementEntry<RuleEntry> {
-        private final FilteringRule<?> rule;
-        
-        public RuleEntry(FilteringRule<?> rule) {
-            this.rule = rule;
-        }
-        
-        public FilteringRule<?> getRule() {
-            return rule;
-        }
+    public static abstract class ListEntry extends DynamicElementListWidget.ElementEntry<ListEntry> {
     }
     
-    public static class TextRuleEntry extends RuleEntry {
+    public static class TextListEntry extends ListEntry {
         private final FormattedCharSequence text;
         
-        public TextRuleEntry(FilteringRule<?> rule, FormattedCharSequence text) {
-            super(rule);
+        public TextListEntry(FormattedCharSequence text) {
             this.text = text;
         }
         
@@ -159,11 +152,10 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
     }
     
-    public static class EmptyRuleEntry extends RuleEntry {
+    public static class EmptyListEntry extends ListEntry {
         private final int height;
         
-        public EmptyRuleEntry(FilteringRule<?> rule, int height) {
-            super(rule);
+        public EmptyListEntry(int height) {
             this.height = height;
         }
         
@@ -187,11 +179,10 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
     }
     
-    public static class TextFieldRuleEntry extends RuleEntry {
+    public static class TextFieldListEntry extends ListEntry {
         private final EditBox widget;
         
-        public TextFieldRuleEntry(int width, FilteringRule<?> rule, Consumer<EditBox> widgetConsumer) {
-            super(rule);
+        public TextFieldListEntry(int width, Consumer<EditBox> widgetConsumer) {
             this.widget = new EditBox(Minecraft.getInstance().font, 0, 0, width, 18, Component.nullToEmpty(""));
             widgetConsumer.accept(widget);
         }
@@ -223,21 +214,14 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
     }
     
-    public static class BooleanRuleEntry extends RuleEntry {
-        private boolean b;
+    public static class ButtonListEntry extends ListEntry {
         private final Button widget;
         
-        public BooleanRuleEntry(int width, boolean b, FilteringRule<?> rule, Function<Boolean, Component> textFunction) {
-            super(rule);
-            this.b = b;
-            this.widget = new Button(0, 0, 100, 20, textFunction.apply(b), button -> {
-                this.b = !this.b;
-                button.setMessage(textFunction.apply(this.b));
+        public ButtonListEntry(int width, Function<ButtonListEntry, Component> textFunction, BiConsumer<ButtonListEntry, Button> buttonConsumer) {
+            this.widget = new Button(0, 0, 100, 20, textFunction.apply(this), button -> {
+                buttonConsumer.accept(this, button);
+                button.setMessage(textFunction.apply(this));
             });
-        }
-        
-        public boolean getBoolean() {
-            return b;
         }
         
         @Override
@@ -263,16 +247,32 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
     }
     
-    public static class SubRulesEntry extends RuleEntry {
+    public static class BooleanListEntry extends ButtonListEntry {
+        private Boolean b;
+        
+        public BooleanListEntry(int width, boolean b, Function<Boolean, Component> textFunction) {
+            super(width, self -> {
+                if (((BooleanListEntry) self).b == null) ((BooleanListEntry) self).b = b;
+                return textFunction.apply(((BooleanListEntry) self).b);
+            }, (self, button) -> {
+                ((BooleanListEntry) self).b = !((BooleanListEntry) self).b;
+            });
+        }
+        
+        public boolean getBoolean() {
+            return b;
+        }
+    }
+    
+    public static class SubListEntry extends ListEntry {
         private static final ResourceLocation CONFIG_TEX = new ResourceLocation("cloth-config2", "textures/gui/cloth_config.png");
         private final CategoryLabelWidget widget;
-        private final List<RuleEntry> rules;
+        private final List<ListEntry> rules;
         private final List<GuiEventListener> children;
         private boolean expanded;
         private Supplier<Component> name;
         
-        public SubRulesEntry(FilteringRule<?> rule, Supplier<Component> name, List<RuleEntry> rules) {
-            super(rule);
+        public SubListEntry(Supplier<Component> name, List<ListEntry> rules) {
             this.rules = rules;
             this.widget = new CategoryLabelWidget();
             this.name = name;
@@ -281,7 +281,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
             this.children.add(widget);
         }
         
-        public List<RuleEntry> getRules() {
+        public List<ListEntry> getRules() {
             return rules;
         }
         
@@ -296,15 +296,15 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
             this.blit(matrices, x + 3, y + 5, 24, (this.widget.rectangle.contains(mouseX, mouseY) ? 18 : 0) + (this.expanded ? 9 : 0), 9, 9);
             Minecraft.getInstance().font.drawShadow(matrices, this.name.get().getVisualOrderText(), (float) x + 3 + 15, (float) (y + 6), this.widget.rectangle.contains(mouseX, mouseY) ? -1638890 : -1);
             
-            for (RuleEntry performanceEntry : this.rules) {
+            for (ListEntry performanceEntry : this.rules) {
                 performanceEntry.setParent(this.getParent());
             }
             
             if (this.expanded) {
                 int yy = y + 24;
                 
-                RuleEntry entry;
-                for (Iterator<RuleEntry> iterator = this.rules.iterator(); iterator.hasNext(); yy += entry.getItemHeight()) {
+                ListEntry entry;
+                for (Iterator<ListEntry> iterator = this.rules.iterator(); iterator.hasNext(); yy += entry.getItemHeight()) {
                     entry = iterator.next();
                     entry.render(matrices, -1, yy, x + 3 + 15, entryWidth - 15 - 3, entry.getItemHeight(), mouseX, mouseY, isHovered && this.getFocused() == entry, delta);
                 }
@@ -319,7 +319,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
                 List<Integer> list = new ArrayList<>();
                 int i = 24;
                 
-                for (RuleEntry entry : this.rules) {
+                for (ListEntry entry : this.rules) {
                     i += entry.getItemHeight();
                     if (entry.getMorePossibleHeight() >= 0) {
                         list.add(i + entry.getMorePossibleHeight());
@@ -338,8 +338,8 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
             } else {
                 int i = 24;
                 
-                RuleEntry entry;
-                for (Iterator<RuleEntry> iterator = this.rules.iterator(); iterator.hasNext(); i += entry.getItemHeight()) {
+                ListEntry entry;
+                for (Iterator<ListEntry> iterator = this.rules.iterator(); iterator.hasNext(); i += entry.getItemHeight()) {
                     entry = iterator.next();
                 }
                 
@@ -366,7 +366,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
                 if (this.rectangle.contains(mouseX, mouseY)) {
-                    SubRulesEntry.this.expanded = !SubRulesEntry.this.expanded;
+                    SubListEntry.this.expanded = !SubListEntry.this.expanded;
                     Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                     return true;
                 } else {
