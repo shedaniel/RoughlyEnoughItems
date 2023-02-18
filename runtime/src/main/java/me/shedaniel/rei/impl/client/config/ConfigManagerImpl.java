@@ -416,8 +416,8 @@ public class ConfigManagerImpl implements ConfigManager {
                 }
                 ConfigAddonRegistryImpl addonRegistry = (ConfigAddonRegistryImpl) ConfigAddonRegistry.getInstance();
                 if (!addonRegistry.getAddons().isEmpty()) {
-                    builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.basics")).getEntries().add(0, new EmptyEntry(4));
-                    builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.basics")).getEntries().add(0, new ConfigAddonsEntry(220));
+                    builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.basics")).getEntries().add(0, new EmptyEntry(4));
+                    builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.basics")).getEntries().add(0, new ConfigAddonsEntry(220));
                 }
                 TextListEntry supportText = ConfigEntryBuilder.create().startTextDescription(
                             new TranslatableComponent("text.rei.support.me.desc",
@@ -436,10 +436,10 @@ public class ConfigManagerImpl implements ConfigManager {
                                 )
                                 .withStyle(ChatFormatting.GRAY)
                 ).build();
-                builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.basics")).getEntries().add(0, new EmptyEntry(4));
-                builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.basics")).getEntries().add(0, supportText);
-                builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.basics")).getEntries().add(0, new TitleTextEntry(new TranslatableComponent("text.rei.support.me")));
-                builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.basics")).getEntries().add(0, new EmptyEntry(4));
+                builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.basics")).getEntries().add(0, new EmptyEntry(4));
+                builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.basics")).getEntries().add(0, supportText);
+                builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.basics")).getEntries().add(0, new TitleTextEntry(new TranslatableComponent("text.rei.support.me")));
+                builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.basics")).getEntries().add(0, new EmptyEntry(4));
                 return builder.setAfterInitConsumer(screen -> {
                     ScreenHooks.addRenderableWidget(screen, new Button(screen.width - 104, 4, 100, 20, new TranslatableComponent("text.rei.credits"), button -> {
                         CreditsScreen creditsScreen = new CreditsScreen(screen);
