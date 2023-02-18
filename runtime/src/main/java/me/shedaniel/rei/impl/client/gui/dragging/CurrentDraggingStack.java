@@ -26,9 +26,7 @@ package me.shedaniel.rei.impl.client.gui.dragging;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
-import me.shedaniel.math.FloatingRectangle;
-import me.shedaniel.math.Point;
-import me.shedaniel.math.Rectangle;
+import me.shedaniel.math.*;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.drag.DraggableBoundsProvider;
@@ -87,13 +85,14 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
             if (entry.dragging) {
                 matrices.pushPose();
                 matrices.translate(0, 0, 600);
-                entry.bounds.update(delta);
+                entry.point.update(delta);
+                entry.dimension.update(delta);
                 int width = entry.component.getWidth();
                 int height = entry.component.getHeight();
                 Vec2 mouseStartOffset = entry.mouseStartOffset;
-                entry.bounds.setTo(new FloatingRectangle(mouseX - width / 2 - mouseStartOffset.x, mouseY - height / 2 - mouseStartOffset.y, width, height),
-                        reducedMotion ? 0 : 30);
-                entry.component.render(matrices, entry.bounds.value().getBounds(), mouseX, mouseY, delta);
+                entry.point.setTo(new FloatingPoint(mouseX - mouseStartOffset.x * width, mouseY - mouseStartOffset.y * height), reducedMotion ? 0 : 30);
+                entry.dimension.setTo(new FloatingDimension(width, height), reducedMotion ? 0 : 700);
+                entry.component.render(matrices, getCurrentBounds(), mouseX, mouseY, delta);
                 matrices.popPose();
                 
                 VoxelShape shape = entry.getBoundsProvider().bounds();
@@ -216,16 +215,18 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     public Point getCurrentPosition() {
         if (!isDraggingComponent()) return null;
         Vec2 mouseStartOffset = entry.mouseStartOffset;
-        FloatingRectangle rectangle = entry.bounds.value();
-        return new Point(rectangle.getCenterX() + mouseStartOffset.x, rectangle.getCenterY() + mouseStartOffset.y);
+        FloatingPoint point = entry.point.value();
+        FloatingDimension dimension = entry.dimension.value();
+        return new Point(point.x + mouseStartOffset.x * dimension.width, point.y + mouseStartOffset.y * dimension.height);
     }
     
     @Override
     @Nullable
     public Rectangle getCurrentBounds() {
         if (!isDraggingComponent()) return null;
-        FloatingRectangle rectangle = entry.bounds.value();
-        return rectangle.getBounds();
+        FloatingPoint point = entry.point.value();
+        FloatingDimension dimension = entry.dimension.value();
+        return new Rectangle(point.x - dimension.width / 2, point.y - dimension.height / 2, dimension.width, dimension.height);
     }
     
     @Override
@@ -249,7 +250,8 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
         private final DraggableComponent<?> component;
         private final Point start;
         private long startDragging = -1;
-        private final ValueAnimator<FloatingRectangle> bounds;
+        private final ValueAnimator<FloatingPoint> point;
+        private final ValueAnimator<FloatingDimension> dimension;
         private final Vec2 mouseStartOffset;
         private boolean dragging = false;
         private DraggableBoundsProvider boundsProvider;
@@ -257,9 +259,10 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
         private DraggableEntry(DraggableComponent<?> component, Point start) {
             this.component = component;
             this.start = start;
-            this.bounds = ValueAnimator.ofFloatingRectangle()
-                    .setAs(component.getOriginBounds(start).getFloatingBounds());
-            this.mouseStartOffset = new Vec2((float) (start.x - bounds.value().getCenterX()), (float) (start.y - bounds.value().getCenterY()));
+            FloatingRectangle floatingBounds = component.getOriginBounds(start).getFloatingBounds();
+            this.point = ValueAnimator.ofFloatingPoint().setAs(new FloatingPoint(floatingBounds.getCenterX(), floatingBounds.getCenterY()));
+            this.dimension = ValueAnimator.ofFloatingDimension().setAs(new FloatingDimension(floatingBounds.width, floatingBounds.height));
+            this.mouseStartOffset = new Vec2((float) (start.x - point.value().x) / (float) dimension.value().width, (float) (start.y - point.value().y) / (float) dimension.value().height);
         }
         
         public DraggableBoundsProvider getBoundsProvider() {

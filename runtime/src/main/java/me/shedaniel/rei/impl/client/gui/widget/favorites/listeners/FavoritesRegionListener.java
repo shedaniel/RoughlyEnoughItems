@@ -27,6 +27,8 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesEntriesManager;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
@@ -36,6 +38,7 @@ import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -67,6 +70,15 @@ public class FavoritesRegionListener implements RegionListener<FavoriteEntry> {
     @Nullable
     public FavoriteEntry convertDraggableStack(DraggingContext<Screen> context, DraggableStack stack) {
         return FavoriteEntry.fromEntryStack(stack.getStack().copy());
+    }
+    
+    @Override
+    @Nullable
+    public FavoriteEntry convertDraggableComponent(DraggingContext<Screen> context, DraggableComponent<?> component) {
+        return component.<Display>getIf()
+                .map(Supplier::get)
+                .map(FavoriteEntry::fromDisplay)
+                .orElse(null);
     }
     
     @Override
