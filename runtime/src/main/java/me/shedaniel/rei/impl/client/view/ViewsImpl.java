@@ -318,9 +318,13 @@ public class ViewsImpl implements Views {
     private static Map<DisplayCategory<?>, List<DisplaySpec>> sortDisplays(Map<DisplayCategory<?>, List<DisplaySpec>> unsorted) {
         Object2IntMap<CategoryIdentifier<?>> categoryOrder = new Object2IntOpenHashMap<>();
         categoryOrder.defaultReturnValue(Integer.MAX_VALUE);
-        int i = 0;
+        int i = 100000;
         for (CategoryRegistry.CategoryConfiguration<?> configuration : CategoryRegistry.getInstance()) {
             categoryOrder.put(configuration.getCategoryIdentifier(), i++);
+        }
+        i = 0;
+        for (CategoryIdentifier<?> identifier : ConfigObject.getInstance().getCategoryOrdering()) {
+            categoryOrder.put(identifier, i++);
         }
         Map<DisplayCategory<?>, List<DisplaySpec>> result = new TreeMap<>(Comparator.comparingInt(category -> categoryOrder.getInt(category.getCategoryIdentifier())));
         result.putAll(unsorted);

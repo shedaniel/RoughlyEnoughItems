@@ -52,10 +52,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @ApiStatus.Internal
 @Config(name = "roughlyenoughitems/config")
@@ -452,7 +449,34 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @ApiStatus.Experimental
     @Override
     public Map<CategoryIdentifier<?>, Boolean> getFilteringQuickCraftCategories() {
-        return advanced.filtering.filteringQuickCraftCategories;
+        return advanced.miscellaneous.categorySettings.filteringQuickCraftCategories;
+    }
+    
+    @ApiStatus.Internal
+    public void setFilteringQuickCraftCategories(Map<CategoryIdentifier<?>, Boolean> filteringQuickCraftCategories) {
+        advanced.miscellaneous.categorySettings.filteringQuickCraftCategories = filteringQuickCraftCategories;
+    }
+    
+    @ApiStatus.Experimental
+    @Override
+    public Set<CategoryIdentifier<?>> getHiddenCategories() {
+        return advanced.miscellaneous.categorySettings.hiddenCategories;
+    }
+    
+    @ApiStatus.Internal
+    public void setHiddenCategories(Set<CategoryIdentifier<?>> hiddenCategories) {
+        advanced.miscellaneous.categorySettings.hiddenCategories = hiddenCategories;
+    }
+    
+    @ApiStatus.Experimental
+    @Override
+    public List<CategoryIdentifier<?>> getCategoryOrdering() {
+        return advanced.miscellaneous.categorySettings.categoryOrdering;
+    }
+    
+    @ApiStatus.Internal
+    public void setCategoryOrdering(List<CategoryIdentifier<?>> categoryOrdering) {
+        advanced.miscellaneous.categorySettings.categoryOrdering = categoryOrdering;
     }
     
     @Override
@@ -587,10 +611,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface UseFilteringScreen {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseFilteringCategoriesScreen {}
     
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
@@ -747,13 +767,19 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @ConfigEntry.Gui.PrefixText
             private boolean cachingFastEntryRendering = false;
             private boolean cachingDisplayLookup = true;
+            @ConfigEntry.Gui.Excluded public CategorySettings categorySettings = new CategorySettings();
+            
+            public static class CategorySettings {
+                public Map<CategoryIdentifier<?>, Boolean> filteringQuickCraftCategories = new HashMap<>();
+                public List<CategoryIdentifier<?>> categoryOrdering = new ArrayList<>();
+                public Set<CategoryIdentifier<?>> hiddenCategories = new HashSet<>();
+            }
         }
         
         public static class Filtering {
             @UseFilteringScreen private List<EntryStackProvider<?>> filteredStacks = new ArrayList<>();
             public boolean shouldFilterDisplays = true;
             @ConfigEntry.Gui.Excluded public List<FilteringRule<?>> filteringRules = new ArrayList<>();
-            @UseFilteringCategoriesScreen public Map<CategoryIdentifier<?>, Boolean> filteringQuickCraftCategories = new HashMap<>();
         }
     }
 }
