@@ -392,5 +392,14 @@ public interface ConfigObject {
     
     SearchMode getModSearchMode();
     
-    boolean isJEICompatibilityLayerEnabled();
+    /**
+     * Returns whether the JEI compatibility layer is enabled.
+     *
+     * @return whether the JEI compatibility layer is enabled
+     * @deprecated the JEI compatibility layer is not bundled with REI anymore
+     */
+    @Deprecated(forRemoval = true)
+    default boolean isJEICompatibilityLayerEnabled() {
+        return false;
+    }
 }

@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.config;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.architectury.platform.Platform;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
@@ -587,15 +586,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return advanced.search.modSearch;
     }
     
-    @Override
-    public boolean isJEICompatibilityLayerEnabled() {
-        return Platform.isForge() && advanced.enableJeiCompatibilityLayer;
-    }
-    
-    public void setJEICompatibilityLayerEnabled(boolean value) {
-        advanced.enableJeiCompatibilityLayer = value;
-    }
-    
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
     @interface DontApplyFieldName {}
@@ -704,8 +694,6 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         private Miscellaneous miscellaneous = new Miscellaneous();
         @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
         public Filtering filtering = new Filtering();
-        @ConfigEntry.Gui.Excluded
-        public boolean enableJeiCompatibilityLayer = true;
         
         public static class Tooltips {
             @Comment("Declares whether REI should append mod names to entries.") private boolean appendModNames = true;
