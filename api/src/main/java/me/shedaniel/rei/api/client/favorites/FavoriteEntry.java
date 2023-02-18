@@ -28,12 +28,14 @@ import com.mojang.serialization.Lifecycle;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -71,6 +73,11 @@ public abstract class FavoriteEntry implements RegionEntry<FavoriteEntry> {
     
     public static FavoriteEntry fromEntryStack(EntryStack<?> stack) {
         return delegateResult(() -> FavoriteEntryType.registry().get(FavoriteEntryType.ENTRY_STACK).fromArgs(stack), null);
+    }
+    
+    @ApiStatus.Experimental
+    public static FavoriteEntry fromDisplay(Display display) {
+        return delegateResult(() -> FavoriteEntryType.registry().get(FavoriteEntryType.DISPLAY).fromArgs(display), null);
     }
     
     @Override

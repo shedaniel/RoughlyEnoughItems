@@ -25,7 +25,11 @@ package me.shedaniel.rei.api.client.entry.region;
 
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -54,5 +58,11 @@ public interface RegionEntry<T extends RegionEntry<T>> {
     
     default boolean doAction(int button) {
         return false;
+    }
+    
+    @Nullable
+    @ApiStatus.Experimental
+    default DraggableComponent<?> asDraggableComponent(Slot slot) {
+        return null;
     }
 }
