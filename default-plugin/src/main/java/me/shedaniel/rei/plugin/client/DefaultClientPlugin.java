@@ -27,6 +27,7 @@ import com.google.common.collect.*;
 import dev.architectury.event.EventResult;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Rectangle;
@@ -123,7 +124,14 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerEntries(EntryRegistry registry) {
-        Multimap<Item, EntryStack<ItemStack>> items = HashMultimap.create();
+        if (Minecraft.getInstance().player == null || Minecraft.getInstance().player.connection == null)
+            return;
+        Minecraft.getInstance().executeBlocking(() -> {
+            CreativeModeTabs.tryRebuildTabContents(Minecraft.getInstance().player.connection.enabledFeatures(),
+                    Minecraft.getInstance().options.operatorItemsTab().get() && Minecraft.getInstance().player.canUseGameMasterBlocks());
+        });
+        Multimap<Item, EntryStack<ItemStack>> items = Multimaps.newListMultimap(new Reference2ObjectOpenHashMap<>()
+                , ArrayList::new);
         
         for (CreativeModeTab tab : CreativeModeTabs.allTabs()) {
             if (tab.getType() != CreativeModeTab.Type.HOTBAR && tab.getType() != CreativeModeTab.Type.INVENTORY) {
