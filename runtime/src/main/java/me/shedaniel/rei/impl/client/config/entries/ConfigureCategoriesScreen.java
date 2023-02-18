@@ -25,8 +25,12 @@ package me.shedaniel.rei.impl.client.config.entries;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.gui.widgets.Label;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -40,17 +44,38 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
-public class FilteringCategoriesScreen extends Screen {
-    private final FilteringCategoriesEntry entry;
+public class ConfigureCategoriesScreen extends Screen {
+    private final Map<CategoryIdentifier<?>, Boolean> filteringQuickCraftCategories;
+    private final Set<CategoryIdentifier<?>> hiddenCategories;
+    private final List<CategoryIdentifier<?>> categoryOrdering;
     private ListWidget listWidget;
-    Screen parent;
+    public Runnable editedSink = () -> {};
+    public Screen parent;
     
-    public FilteringCategoriesScreen(FilteringCategoriesEntry entry) {
-        super(Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure.title"));
-        this.entry = entry;
+    public ConfigureCategoriesScreen(Map<CategoryIdentifier<?>, Boolean> filteringQuickCraftCategories, Set<CategoryIdentifier<?>> hiddenCategories, List<CategoryIdentifier<?>> categoryOrdering) {
+        super(new TranslatableComponent("config.roughlyenoughitems.configureCategories.title"));
+        this.filteringQuickCraftCategories = filteringQuickCraftCategories;
+        this.hiddenCategories = hiddenCategories;
+        this.categoryOrdering = categoryOrdering;
+        for (CategoryRegistry.CategoryConfiguration<?> configuration : CategoryRegistry.getInstance()) {
+            if (!this.categoryOrdering.contains(configuration.getCategoryIdentifier())) {
+                this.categoryOrdering.add(configuration.getCategoryIdentifier());
+            }
+        }
+    }
+    
+    public Map<CategoryIdentifier<?>, Boolean> getFilteringQuickCraftCategories() {
+        return filteringQuickCraftCategories;
+    }
+    
+    public Set<CategoryIdentifier<?>> getHiddenCategories() {
+        return hiddenCategories;
+    }
+    
+    public List<CategoryIdentifier<?>> getCategoryOrdering() {
+        return categoryOrdering;
     }
     
     @Override
@@ -64,7 +89,17 @@ public class FilteringCategoriesScreen extends Screen {
             }));
         }
         listWidget = addWidget(new ListWidget(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
-        for (CategoryRegistry.CategoryConfiguration<?> configuration : CategoryRegistry.getInstance()) {
+        this.resetListEntries();
+    }
+    
+    public void resetListEntries() {
+        listWidget.children().clear();
+        List<CategoryRegistry.CategoryConfiguration<?>> configurations = new ArrayList<>(CategoryRegistry.getInstance().stream().toList());
+        configurations.sort(Comparator.comparingInt(o -> {
+            int indexOf = categoryOrdering.indexOf(o.getCategoryIdentifier());
+            return indexOf == -1 ? Integer.MAX_VALUE : indexOf;
+        }));
+        for (CategoryRegistry.CategoryConfiguration<?> configuration : configurations) {
             listWidget.addItem(new DefaultListEntry(configuration));
         }
     }
@@ -148,7 +183,7 @@ public class FilteringCategoriesScreen extends Screen {
     private static abstract class ListEntry extends DynamicElementListWidget.ElementEntry<ListEntry> {
         @Override
         public int getItemHeight() {
-            return 35;
+            return 45;
         }
         
         @Override
@@ -158,34 +193,69 @@ public class FilteringCategoriesScreen extends Screen {
     }
     
     private class DefaultListEntry extends ListEntry {
-        private final Button toggleButton;
+        private final Label visibilityToggleButton, quickCraftToggleButton;
+        private final Button upButton, downButton;
         private final CategoryRegistry.CategoryConfiguration<?> configuration;
         
         public DefaultListEntry(CategoryRegistry.CategoryConfiguration<?> configuration) {
             this.configuration = configuration;
             {
                 Component toggleText = Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure.toggle");
-                toggleButton = new Button(0, 0, Minecraft.getInstance().font.width(toggleText) + 10, 20, toggleText, button -> {
+                visibilityToggleButton = Widgets.createClickableLabel(new Point(), toggleText, $ -> {
+                    boolean enabled = !hiddenCategories.contains(configuration.getCategoryIdentifier());
+                    if (enabled) {
+                        // set to false
+                        hiddenCategories.add(configuration.getCategoryIdentifier());
+                    } else {
+                        // set to true
+                        hiddenCategories.remove(configuration.getCategoryIdentifier());
+                    }
+        
+                    editedSink.run();
+                }).leftAligned();
+                quickCraftToggleButton = Widgets.createClickableLabel(new Point(), toggleText, $ -> {
                     boolean quickCraftingEnabledByDefault = configuration.isQuickCraftingEnabledByDefault();
-                    boolean enabled = entry.getValue().getOrDefault(configuration.getCategoryIdentifier(), quickCraftingEnabledByDefault);
+                    boolean enabled = filteringQuickCraftCategories.getOrDefault(configuration.getCategoryIdentifier(), quickCraftingEnabledByDefault);
                     if (enabled) {
                         // set to false
                         if (!quickCraftingEnabledByDefault) {
-                            entry.getValue().remove(configuration.getCategoryIdentifier());
+                            filteringQuickCraftCategories.remove(configuration.getCategoryIdentifier());
                         } else {
-                            entry.getValue().put(configuration.getCategoryIdentifier(), false);
+                            filteringQuickCraftCategories.put(configuration.getCategoryIdentifier(), false);
                         }
                     } else {
                         // set to true
                         if (quickCraftingEnabledByDefault) {
-                            entry.getValue().remove(configuration.getCategoryIdentifier());
+                            filteringQuickCraftCategories.remove(configuration.getCategoryIdentifier());
                         } else {
-                            entry.getValue().put(configuration.getCategoryIdentifier(), true);
+                            filteringQuickCraftCategories.put(configuration.getCategoryIdentifier(), true);
                         }
                     }
                     
-                    entry.edited = true;
+                    editedSink.run();
+                }).leftAligned();
+            }
+            {
+                this.upButton = new Button(0, 0, 20, 20, new TextComponent("↑"), button -> {
+                    int index = categoryOrdering.indexOf(configuration.getCategoryIdentifier());
+                    if (index > 0) {
+                        categoryOrdering.remove(index);
+                        categoryOrdering.add(index - 1, configuration.getCategoryIdentifier());
+                        editedSink.run();
+                        resetListEntries();
+                    }
                 });
+                this.downButton = new Button(0, 0, 20, 20, new TextComponent("↓"), button -> {
+                    int index = categoryOrdering.indexOf(configuration.getCategoryIdentifier());
+                    if (index < categoryOrdering.size() - 1) {
+                        categoryOrdering.remove(index);
+                        categoryOrdering.add(index + 1, configuration.getCategoryIdentifier());
+                        editedSink.run();
+                        resetListEntries();
+                    }
+                });
+                this.upButton.active = categoryOrdering.indexOf(configuration.getCategoryIdentifier()) > 0;
+                this.downButton.active = categoryOrdering.indexOf(configuration.getCategoryIdentifier()) < categoryOrdering.size() - 1;
             }
         }
         
@@ -198,7 +268,7 @@ public class FilteringCategoriesScreen extends Screen {
             Minecraft client = Minecraft.getInstance();
             matrices.pushPose();
             matrices.translate(0, 0, 100);
-            configuration.getCategory().getIcon().render(matrices, new Rectangle(x + 2, y + 5, 16, 16), mouseY, mouseY, delta);
+            configuration.getCategory().getIcon().render(matrices, new Rectangle(x + 2, y, 16, 16), mouseY, mouseY, delta);
             matrices.popPose();
             int xPos = x + 22;
             {
@@ -212,40 +282,49 @@ public class FilteringCategoriesScreen extends Screen {
                 }
             }
             {
-                Component subtitle = Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure." + entry.getValue().getOrDefault(configuration.getCategoryIdentifier(), configuration.isQuickCraftingEnabledByDefault()))
-                        .withStyle(ChatFormatting.GRAY);
-                int i = client.font.width(subtitle);
-                if (i > entryWidth - 28) {
-                    FormattedText subtitleTrimmed = FormattedText.composite(client.font.substrByWidth(subtitle, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    client.font.drawShadow(matrices, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 8421504);
-                } else {
-                    client.font.drawShadow(matrices, subtitle.getVisualOrderText(), xPos, y + 12, 8421504);
-                }
-            }
-            {
                 Component id = Component.literal(configuration.getCategoryIdentifier().toString())
                         .withStyle(ChatFormatting.DARK_GRAY);
                 int i = client.font.width(id);
                 if (i > entryWidth - 28) {
                     FormattedText idTrimmed = FormattedText.composite(client.font.substrByWidth(id, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    client.font.drawShadow(matrices, Language.getInstance().getVisualOrder(idTrimmed), x + 2, y + 22, 8421504);
+                    client.font.drawShadow(matrices, Language.getInstance().getVisualOrder(idTrimmed), x + 2, y + 12, 8421504);
                 } else {
-                    client.font.drawShadow(matrices, id.getVisualOrderText(), xPos, y + 22, 8421504);
+                    client.font.drawShadow(matrices, id.getVisualOrderText(), xPos, y + 12, 8421504);
                 }
             }
-            toggleButton.x = x + entryWidth - 6 - toggleButton.getWidth();
-            toggleButton.y = y + 5;
-            toggleButton.render(matrices, mouseX, mouseY, delta);
+            boolean shown = !hiddenCategories.contains(configuration.getCategoryIdentifier());
+            {
+                Component subtitle = new TranslatableComponent("config.roughlyenoughitems.configureCategories.visibility." + shown)
+                        .withStyle(shown ? ChatFormatting.GREEN : ChatFormatting.RED);
+                int i = client.font.drawShadow(matrices, subtitle.getVisualOrderText(), xPos, y + 22, 8421504);
+                visibilityToggleButton.getPoint().setLocation(i + 3, y + 22);
+                visibilityToggleButton.render(matrices, mouseX, mouseY, delta);
+            }
+            if (shown) {
+                Component subtitle = new TranslatableComponent("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure." + filteringQuickCraftCategories.getOrDefault(configuration.getCategoryIdentifier(), configuration.isQuickCraftingEnabledByDefault()))
+                        .withStyle(ChatFormatting.GRAY);
+                int i = client.font.drawShadow(matrices, subtitle.getVisualOrderText(), xPos, y + 32, 8421504);
+                quickCraftToggleButton.getPoint().setLocation(i + 3, y + 32);
+                quickCraftToggleButton.render(matrices, mouseX, mouseY, delta);
+            } else {
+                quickCraftToggleButton.getPoint().setLocation(-12390, -12390);
+            }
+            upButton.x = x + entryWidth - 20;
+            upButton.y = y + entryHeight / 2 - 21;
+            upButton.render(matrices, mouseX, mouseY, delta);
+            downButton.x = x + entryWidth - 20;
+            downButton.y = y + entryHeight / 2 + 1;
+            downButton.render(matrices, mouseX, mouseY, delta);
         }
         
         @Override
         public List<? extends GuiEventListener> children() {
-            return Collections.singletonList(toggleButton);
+            return List.of(visibilityToggleButton, quickCraftToggleButton, upButton, downButton);
         }
         
         @Override
         public List<? extends NarratableEntry> narratables() {
-            return Collections.singletonList(toggleButton);
+            return List.of();
         }
     }
 }

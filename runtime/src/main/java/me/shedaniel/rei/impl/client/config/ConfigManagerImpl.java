@@ -148,18 +148,6 @@ public class ConfigManagerImpl implements ConfigManager {
                             Collections.singletonList(new FilteringEntry(220, value, ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules, defaultValue, saveConsumer, list -> ((ConfigObjectImpl.Advanced.Filtering) config).filteringRules = Lists.newArrayList(list)));
                 }
                 , (field) -> field.getType() == List.class, ConfigObjectImpl.UseFilteringScreen.class);
-        guiRegistry.registerAnnotationProvider((i13n, field, config, defaults, guiProvider) -> {
-                    Map<CategoryIdentifier<?>, Boolean> value = Utils.<Map<CategoryIdentifier<?>, Boolean>>getUnsafely(field, config, new HashMap<>());
-                    Map<CategoryIdentifier<?>, Boolean> defaultValue = Utils.getUnsafely(field, defaults);
-                    Consumer<Map<CategoryIdentifier<?>, Boolean>> saveConsumer = (newValue) -> {
-                        setUnsafely(field, config, newValue);
-                    };
-                    return REIRuntime.getInstance().getPreviousContainerScreen() == null || Minecraft.getInstance().getConnection() == null || Minecraft.getInstance().getConnection().getRecipeManager() == null ?
-                            Collections.singletonList(new NoFilteringCategoriesEntry(Component.translatable(i13n), value, defaultValue, saveConsumer))
-                            :
-                            Collections.singletonList(new FilteringCategoriesEntry(Component.translatable(i13n), value, defaultValue, saveConsumer));
-                }
-                , (field) -> field.getType() == Map.class, ConfigObjectImpl.UseFilteringCategoriesScreen.class);
         InternalLogger.getInstance().info("Config loaded");
         saveConfig();
         FavoritesConfigManager.getInstance().syncFrom(this);
@@ -431,7 +419,12 @@ public class ConfigManagerImpl implements ConfigManager {
                     builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.functionality")).getEntries().add(0, new ButtonsConfigEntry(220,
                             Triple.of(new TranslatableComponent("text.rei.collapsible.entries"), $ -> {}, editedSink -> {
                                 Minecraft.getInstance().setScreen(new CollapsibleEntriesScreen(Minecraft.getInstance().screen, collapsibleConfigObject, editedSink));
-                            })).withSaveRunnable(() -> {
+                            })) {
+                        @Override
+                        public boolean isEditable() {
+                            return !(REIRuntime.getInstance().getPreviousContainerScreen() == null || Minecraft.getInstance().getConnection() == null || Minecraft.getInstance().getConnection().getRecipeManager() == null);
+                        }
+                    }.withSaveRunnable(() -> {
                         CollapsibleConfigManager.CollapsibleConfigObject actualConfig = CollapsibleConfigManager.getInstance().getConfig();
                         actualConfig.disabledGroups.clear();
                         actualConfig.disabledGroups.addAll(collapsibleConfigObject.disabledGroups);
@@ -439,6 +432,26 @@ public class ConfigManagerImpl implements ConfigManager {
                         actualConfig.customGroups.addAll(collapsibleConfigObject.customGroups);
                         CollapsibleConfigManager.getInstance().saveConfig();
                         ((CollapsibleEntryRegistryImpl) CollapsibleEntryRegistry.getInstance()).recollectCustomEntries();
+                    }));
+                    ConfigureCategoriesScreen filteringScreen = new ConfigureCategoriesScreen(
+                            new HashMap<>(getConfig().getFilteringQuickCraftCategories()),
+                            new HashSet<>(getConfig().getHiddenCategories()),
+                            new ArrayList<>(getConfig().getCategoryOrdering())
+                    );
+                    builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.functionality")).getEntries().add(0, new ButtonsConfigEntry(220,
+                            Triple.of(new TranslatableComponent("config.roughlyenoughitems.configureCategories"), $ -> {}, editedSink -> {
+                                filteringScreen.parent = Minecraft.getInstance().screen;
+                                filteringScreen.editedSink = editedSink;
+                                Minecraft.getInstance().setScreen(filteringScreen);
+                            })) {
+                        @Override
+                        public boolean isEditable() {
+                            return !(REIRuntime.getInstance().getPreviousContainerScreen() == null || Minecraft.getInstance().getConnection() == null || Minecraft.getInstance().getConnection().getRecipeManager() == null);
+                        }
+                    }.withSaveRunnable(() -> {
+                        getConfig().setFilteringQuickCraftCategories(filteringScreen.getFilteringQuickCraftCategories());
+                        getConfig().setHiddenCategories(filteringScreen.getHiddenCategories());
+                        getConfig().setCategoryOrdering(filteringScreen.getCategoryOrdering());
                     }));
                     builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.advanced")).getEntries().add(0, feedbackEntry);
                     builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.advanced")).getEntries().add(0, new ButtonsConfigEntry(220,
@@ -474,18 +487,18 @@ public class ConfigManagerImpl implements ConfigManager {
                 TextListEntry supportText = ConfigEntryBuilder.create().startTextDescription(
                         Component.translatable("text.rei.support.me.desc",
                                         Component.translatable("text.rei.support.me.patreon")
-                                                .withStyle(style -> style
-                                                        .withColor(TextColor.fromRgb(0xff1fc3ff))
-                                                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://patreon.com/shedaniel"))
+                                        .withStyle(style -> style
+                                                .withColor(TextColor.fromRgb(0xff1fc3ff))
+                                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://patreon.com/shedaniel"))
                                                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("https://patreon.com/shedaniel")))
-                                                ),
+                                        ),
                                         Component.translatable("text.rei.support.me.bisect")
-                                                .withStyle(style -> style
-                                                        .withColor(TextColor.fromRgb(0xff1fc3ff))
-                                                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.bisecthosting.com/shedaniel"))
+                                        .withStyle(style -> style
+                                                .withColor(TextColor.fromRgb(0xff1fc3ff))
+                                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.bisecthosting.com/shedaniel"))
                                                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("https://www.bisecthosting.com/shedaniel")))
-                                                )
-                                )
+                                        )
+                        )
                                 .withStyle(ChatFormatting.GRAY)
                 ).build();
                 builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.basics")).getEntries().add(0, new EmptyEntry(4));

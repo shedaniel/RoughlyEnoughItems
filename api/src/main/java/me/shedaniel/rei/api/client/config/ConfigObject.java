@@ -37,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Environment(EnvType.CLIENT)
 public interface ConfigObject {
@@ -333,6 +334,12 @@ public interface ConfigObject {
     
     @ApiStatus.Experimental
     Map<CategoryIdentifier<?>, Boolean> getFilteringQuickCraftCategories();
+    
+    @ApiStatus.Experimental
+    Set<CategoryIdentifier<?>> getHiddenCategories();
+    
+    @ApiStatus.Experimental
+    List<CategoryIdentifier<?>> getCategoryOrdering();
     
     @ApiStatus.Experimental
     boolean shouldAsyncSearch();
