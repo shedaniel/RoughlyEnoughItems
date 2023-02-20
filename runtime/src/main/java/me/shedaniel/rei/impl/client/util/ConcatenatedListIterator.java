@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.impl.client.util;
 
+import com.google.common.collect.Iterators;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import org.spongepowered.include.com.google.common.collect.Iterators;
 
 import java.util.List;
 
