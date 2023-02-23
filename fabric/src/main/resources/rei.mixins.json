@@ -1,8 +1,9 @@
 {
   "required": true,
+  "minVersion": "0.8",
   "package": "me.shedaniel.rei.mixin.fabric",
   "plugin": "me.shedaniel.rei.mixin.fabric.REIMixinPlugin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_17",
   "client": [
     "MixinClientPacketListener",
     "MixinEffectRenderingInventoryScreen",
