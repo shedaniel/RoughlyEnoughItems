@@ -58,7 +58,7 @@ public class ConfigReloadingScreen extends Screen {
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderDirtBackground(0);
+        this.renderDirtBackground(matrices);
         if (!predicate.getAsBoolean()) {
             parent.run();
             return;

@@ -198,9 +198,9 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         
         @Override
         public DataResult<GameModeFavoriteEntry> fromArgs(Object... args) {
-            if (args.length == 0) return DataResult.error("Cannot create GameModeFavoriteEntry from empty args!");
+            if (args.length == 0) return DataResult.error(() -> "Cannot create GameModeFavoriteEntry from empty args!");
             if (!(args[0] instanceof GameType type))
-                return DataResult.error("Creation of GameModeFavoriteEntry from args expected GameType as the first argument!");
+                return DataResult.error(() -> "Creation of GameModeFavoriteEntry from args expected GameType as the first argument!");
             return DataResult.success(new GameModeFavoriteEntry(type), Lifecycle.stable());
         }
         

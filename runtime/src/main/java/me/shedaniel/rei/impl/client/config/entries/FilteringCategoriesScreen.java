@@ -85,22 +85,6 @@ public class FilteringCategoriesScreen extends Screen {
         }
         
         @Override
-        public boolean changeFocus(boolean lookForwards) {
-            if (!this.inFocus && this.getItemCount() == 0) {
-                return false;
-            } else {
-                this.inFocus = !this.inFocus;
-                if (this.inFocus && this.getSelectedItem() == null && this.getItemCount() > 0) {
-                    this.moveSelection(1);
-                } else if (this.inFocus && this.getSelectedItem() != null) {
-                    this.getSelectedItem();
-                }
-                
-                return this.inFocus;
-            }
-        }
-        
-        @Override
         protected boolean isSelected(int index) {
             return false;
         }
@@ -145,11 +129,6 @@ public class FilteringCategoriesScreen extends Screen {
         @Override
         public int getItemHeight() {
             return 35;
-        }
-        
-        @Override
-        public boolean changeFocus(boolean lookForwards) {
-            return false;
         }
     }
     

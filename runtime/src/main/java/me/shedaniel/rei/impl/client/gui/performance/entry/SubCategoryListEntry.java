@@ -173,5 +173,14 @@ public class SubCategoryListEntry extends PerformanceScreen.PerformanceEntry imp
                 return false;
             }
         }
+        
+        @Override
+        public void setFocused(boolean bl) {
+        }
+        
+        @Override
+        public boolean isFocused() {
+            return false;
+        }
     }
 }

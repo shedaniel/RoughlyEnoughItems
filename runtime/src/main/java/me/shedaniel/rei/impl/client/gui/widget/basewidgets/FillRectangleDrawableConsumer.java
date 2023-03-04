@@ -46,7 +46,6 @@ public final class FillRectangleDrawableConsumer implements DrawableConsumer {
         float r = (color >> 16 & 255) / 255.0F;
         float g = (color >> 8 & 255) / 255.0F;
         float b = (color & 255) / 255.0F;
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         Tesselator tesselator = Tesselator.getInstance();
@@ -54,12 +53,11 @@ public final class FillRectangleDrawableConsumer implements DrawableConsumer {
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         Matrix4f pose = matrices.last().pose();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        bufferBuilder.vertex(pose, rectangle.getMaxX(), rectangle.getMinY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
-        bufferBuilder.vertex(pose, rectangle.getMinX(), rectangle.getMinY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
-        bufferBuilder.vertex(pose, rectangle.getMinX(), rectangle.getMaxY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
-        bufferBuilder.vertex(pose, rectangle.getMaxX(), rectangle.getMaxY(), helper.getBlitOffset()).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(pose, rectangle.getMaxX(), rectangle.getMinY(), 0).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(pose, rectangle.getMinX(), rectangle.getMinY(), 0).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(pose, rectangle.getMinX(), rectangle.getMaxY(), 0).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(pose, rectangle.getMaxX(), rectangle.getMaxY(), 0).color(r, g, b, a).endVertex();
         tesselator.end();
         RenderSystem.disableBlend();
-        RenderSystem.enableTexture();
     }
 }

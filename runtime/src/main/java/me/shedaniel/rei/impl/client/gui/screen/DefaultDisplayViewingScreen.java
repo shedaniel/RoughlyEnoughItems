@@ -61,6 +61,7 @@ import me.shedaniel.rei.impl.client.gui.widget.basewidgets.PanelWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -118,12 +119,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 258 && !minecraft.options.keyInventory.matches(keyCode, scanCode)) {
-            boolean next = !hasShiftDown();
-            if (!this.changeFocus(next))
-                this.changeFocus(next);
-            return true;
-        } else if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(keyCode, scanCode)) {
+        if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(keyCode, scanCode)) {
             if (recipeNext.isEnabled())
                 recipeNext.onClick();
             return recipeNext.isEnabled();
@@ -345,21 +341,22 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
             if (export.matchesCurrentKey() || export.matchesCurrentMouse()) {
                 for (Rectangle bounds : Iterables.concat(recipeBounds.keySet(), Iterables.transform(getTabs(), TabWidget::getBounds))) {
-                    setBlitOffset(470);
+                    matrices.pushPose();
+                    matrices.translate(0.0D, 0.0D, 480.0D);
                     if (bounds.contains(mouseX, mouseY)) {
                         fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744822402, 1744822402);
                         Component text = Component.translatable("text.rei.release_export", export.getLocalizedName().plainCopy().getString());
                         MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
                         matrices.pushPose();
-                        matrices.translate(0.0D, 0.0D, 480);
+                        matrices.translate(0.0D, 0.0D, 10.0D);
                         Matrix4f matrix4f = matrices.last().pose();
-                        font.drawInBatch(text.getVisualOrderText(), bounds.getCenterX() - font.width(text) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f, immediate, false, 0, 15728880);
+                        font.drawInBatch(text.getVisualOrderText(), bounds.getCenterX() - font.width(text) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f, immediate, Font.DisplayMode.NORMAL, 0, 15728880);
                         immediate.endBatch();
                         matrices.popPose();
                     } else {
                         fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744830463, 1744830463);
                     }
-                    setBlitOffset(0);
+                    matrices.popPose();
                 }
             }
         }

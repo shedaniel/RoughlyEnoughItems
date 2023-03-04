@@ -43,7 +43,7 @@ public abstract class DefaultCookingDisplay extends BasicDisplay implements Simp
     private double cookTime;
     
     public DefaultCookingDisplay(AbstractCookingRecipe recipe) {
-        this(EntryIngredients.ofIngredients(recipe.getIngredients()), Collections.singletonList(EntryIngredients.of(recipe.getResultItem())),
+        this(EntryIngredients.ofIngredients(recipe.getIngredients()), Collections.singletonList(EntryIngredients.of(recipe.getResultItem(BasicDisplay.registryAccess()))),
                 recipe, recipe.getExperience(), recipe.getCookingTime());
     }
     

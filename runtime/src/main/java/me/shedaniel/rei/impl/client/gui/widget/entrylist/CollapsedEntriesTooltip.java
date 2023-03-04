@@ -61,12 +61,12 @@ public class CollapsedEntriesTooltip implements ClientTooltipComponent, TooltipC
     }
     
     @Override
-    public void renderImage(Font font, int x, int y, PoseStack poses, ItemRenderer renderer, int z) {
+    public void renderImage(Font font, int x, int y, PoseStack poses, ItemRenderer renderer) {
         int entrySize = EntryListWidget.entrySize();
         int w = Math.max(1, MAX_WIDTH / entrySize);
         int i = 0;
         poses.pushPose();
-        poses.translate(0, 0, z + 50);
+        poses.translate(0, 0, 50);
         for (EntryStack<?> entry : stack.getIngredient()) {
             int x1 = x + (i % w) * entrySize;
             int y1 = y + (i / w) * entrySize;
@@ -75,7 +75,7 @@ public class CollapsedEntriesTooltip implements ClientTooltipComponent, TooltipC
                 poses.translate(0, 0, 200);
                 MultiBufferSource.BufferSource source = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
                 Component text = Component.literal("+" + (stack.getIngredient().size() - w * 3 + 1)).withStyle(ChatFormatting.GRAY);
-                font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, poses.last().pose(), source, false, 0, 15728880);
+                font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, poses.last().pose(), source, Font.DisplayMode.NORMAL, 0, 15728880);
                 source.endBatch();
                 break;
             } else {

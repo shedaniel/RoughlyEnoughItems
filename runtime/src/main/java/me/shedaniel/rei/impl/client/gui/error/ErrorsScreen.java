@@ -109,7 +109,7 @@ public class ErrorsScreen extends Screen {
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderDirtBackground(0);
+        this.renderDirtBackground(matrices);
         this.listWidget.render(matrices, mouseX, mouseY, delta);
         drawCenteredString(matrices, this.font, getTitle(), this.width / 2, 16, 16777215);
         super.render(matrices, mouseX, mouseY, delta);

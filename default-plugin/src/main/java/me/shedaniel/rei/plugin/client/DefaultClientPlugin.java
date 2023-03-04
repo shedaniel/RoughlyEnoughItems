@@ -40,6 +40,7 @@ import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
+import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
@@ -128,7 +129,8 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             return;
         Minecraft.getInstance().executeBlocking(() -> {
             CreativeModeTabs.tryRebuildTabContents(Minecraft.getInstance().player.connection.enabledFeatures(),
-                    Minecraft.getInstance().options.operatorItemsTab().get() && Minecraft.getInstance().player.canUseGameMasterBlocks());
+                    Minecraft.getInstance().options.operatorItemsTab().get() && Minecraft.getInstance().player.canUseGameMasterBlocks(),
+                    BasicDisplay.registryAccess());
         });
         Multimap<Item, EntryStack<ItemStack>> items = Multimaps.newListMultimap(new Reference2ObjectOpenHashMap<>()
                 , ArrayList::new);
@@ -263,7 +265,9 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.registerRecipeFiller(BlastingRecipe.class, RecipeType.BLASTING, DefaultBlastingDisplay::new);
         registry.registerRecipeFiller(CampfireCookingRecipe.class, RecipeType.CAMPFIRE_COOKING, DefaultCampfireDisplay::new);
         registry.registerRecipeFiller(StonecutterRecipe.class, RecipeType.STONECUTTING, DefaultStoneCuttingDisplay::new);
-        registry.registerRecipeFiller(UpgradeRecipe.class, RecipeType.SMITHING, DefaultSmithingDisplay::new);
+        registry.registerRecipeFiller(LegacyUpgradeRecipe.class, RecipeType.SMITHING, DefaultSmithingDisplay::new);
+        registry.registerRecipeFiller(SmithingTransformRecipe.class, RecipeType.SMITHING, DefaultSmithingDisplay::new);
+        registry.registerRecipeFiller(SmithingTrimRecipe.class, RecipeType.SMITHING, DefaultSmithingDisplay::new);
         registry.registerFiller(AnvilRecipe.class, DefaultAnvilDisplay::new);
         registry.registerFiller(BrewingRecipe.class, DefaultBrewingDisplay::new);
         registry.registerFiller(TagKey.class, tagKey -> {

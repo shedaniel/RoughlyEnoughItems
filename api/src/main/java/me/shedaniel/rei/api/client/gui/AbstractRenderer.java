@@ -29,13 +29,15 @@ import net.minecraft.client.gui.GuiComponent;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractRenderer extends GuiComponent implements Renderer {
+    private int z;
+    
     @Override
     public int getZ() {
-        return getBlitOffset();
+        return z;
     }
     
     @Override
     public void setZ(int z) {
-        setBlitOffset(z);
+        this.z = z;
     }
 }

@@ -35,7 +35,9 @@ import me.shedaniel.rei.api.client.gui.widgets.Label;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -291,12 +293,10 @@ public final class LabelWidget extends Label {
         return true;
     }
     
+    @Nullable
     @Override
-    public boolean changeFocus(boolean boolean_1) {
-        if (!isClickable() || !isFocusable())
-            return false;
-        this.focused = !this.focused;
-        return true;
+    public ComponentPath nextFocusPath(FocusNavigationEvent event) {
+        return isClickable() && focusable ? ComponentPath.leaf(this) : null;
     }
     
     public boolean isHovered(int mouseX, int mouseY) {

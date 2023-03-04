@@ -105,7 +105,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                 @Override
                 public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
                     RenderSystem.setShaderTexture(0, id);
-                    innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getBlitOffset(), 0, 1, 0, 1);
+                    innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getZ(), 0, 1, 0, 1);
                 }
                 
                 @Override
@@ -194,18 +194,18 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
             try {
                 stack = EntryStack.read(object.getCompound(key));
             } catch (Throwable throwable) {
-                return DataResult.error(throwable.getMessage());
+                return DataResult.error(throwable::getMessage);
             }
             return DataResult.success(new EntryStackFavoriteEntry(stack), Lifecycle.stable());
         }
         
         @Override
         public DataResult<EntryStackFavoriteEntry> fromArgs(Object... args) {
-            if (args.length == 0) return DataResult.error("Cannot create EntryStackFavoriteEntry from empty args!");
+            if (args.length == 0) return DataResult.error(() -> "Cannot create EntryStackFavoriteEntry from empty args!");
             if (!(args[0] instanceof EntryStack<?> stack))
-                return DataResult.error("Creation of EntryStackFavoriteEntry from args expected EntryStack as the first argument!");
+                return DataResult.error(() -> "Creation of EntryStackFavoriteEntry from args expected EntryStack as the first argument!");
             if (!stack.supportSaving())
-                return DataResult.error("Creation of EntryStackFavoriteEntry from an unserializable stack!");
+                return DataResult.error(() -> "Creation of EntryStackFavoriteEntry from an unserializable stack!");
             return DataResult.success(new EntryStackFavoriteEntry(stack), Lifecycle.stable());
         }
         

@@ -50,22 +50,6 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
         super(client, width, height, startY, endY, GuiComponent.BACKGROUND_LOCATION);
     }
     
-    @Override
-    public boolean changeFocus(boolean boolean_1) {
-        if (!this.inFocus && this.getItemCount() == 0) {
-            return false;
-        } else {
-            this.inFocus = !this.inFocus;
-            if (this.inFocus && this.getFocused() == null && this.getItemCount() > 0) {
-                this.moveSelection(1);
-            } else if (this.inFocus && this.getFocused() != null) {
-                this.moveSelection(0);
-            }
-            
-            return this.inFocus;
-        }
-    }
-    
     public void creditsClearEntries() {
         clearItems();
     }
@@ -93,6 +77,15 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
         public List<? extends NarratableEntry> narratables() {
             return Collections.emptyList();
         }
+        
+        @Override
+        public void setFocused(boolean bl) {
+        }
+        
+        @Override
+        public boolean isFocused() {
+            return false;
+        }
     }
     
     public static class TextCreditsItem extends CreditsItem {
@@ -110,11 +103,6 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
         @Override
         public int getItemHeight() {
             return 12;
-        }
-        
-        @Override
-        public boolean changeFocus(boolean boolean_1) {
-            return false;
         }
     }
     
@@ -142,11 +130,6 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
         @Override
         public int getItemHeight() {
             return 12 * translators.size();
-        }
-        
-        @Override
-        public boolean changeFocus(boolean boolean_1) {
-            return false;
         }
     }
     
@@ -191,11 +174,6 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
         @Override
         public int getItemHeight() {
             return 12 * textSplit.size();
-        }
-        
-        @Override
-        public boolean changeFocus(boolean boolean_1) {
-            return false;
         }
         
         @Override

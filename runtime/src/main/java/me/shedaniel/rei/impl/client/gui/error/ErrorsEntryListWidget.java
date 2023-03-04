@@ -64,22 +64,6 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         super(client, width, height, startY, endY, GuiComponent.BACKGROUND_LOCATION);
     }
     
-    @Override
-    public boolean changeFocus(boolean boolean_1) {
-        if (!this.inFocus && this.getItemCount() == 0) {
-            return false;
-        } else {
-            this.inFocus = !this.inFocus;
-            if (this.inFocus && this.getFocused() == null && this.getItemCount() > 0) {
-                this.moveSelection(1);
-            } else if (this.inFocus && this.getFocused() != null) {
-                this.moveSelection(0);
-            }
-            
-            return this.inFocus;
-        }
-    }
-    
     public void _clearItems() {
         clearItems();
     }
@@ -106,6 +90,15 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         @Override
         public List<? extends NarratableEntry> narratables() {
             return Collections.emptyList();
+        }
+        
+        @Override
+        public void setFocused(boolean bl) {
+        }
+        
+        @Override
+        public boolean isFocused() {
+            return false;
         }
     }
     
@@ -337,11 +330,6 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         }
         
         @Override
-        public boolean changeFocus(boolean boolean_1) {
-            return false;
-        }
-        
-        @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (button == 0) {
                 Style style = this.getTextAt(mouseX, mouseY);
@@ -399,11 +387,6 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         public int getItemHeight() {
             return 5;
         }
-        
-        @Override
-        public boolean changeFocus(boolean boolean_1) {
-            return false;
-        }
     }
     
     public static class ImageEntry extends Entry {
@@ -433,11 +416,6 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         @Override
         public int getItemHeight() {
             return height + 2;
-        }
-        
-        @Override
-        public boolean changeFocus(boolean boolean_1) {
-            return false;
         }
     }
     
@@ -478,11 +456,6 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         @Override
         public int getItemHeight() {
             return 12 * textSplit.size();
-        }
-        
-        @Override
-        public boolean changeFocus(boolean boolean_1) {
-            return false;
         }
         
         @Override

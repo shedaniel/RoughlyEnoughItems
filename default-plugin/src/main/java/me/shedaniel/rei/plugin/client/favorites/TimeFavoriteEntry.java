@@ -232,9 +232,9 @@ public class TimeFavoriteEntry extends FavoriteEntry {
         
         @Override
         public DataResult<TimeFavoriteEntry> fromArgs(Object... args) {
-            if (args.length == 0) return DataResult.error("Cannot create GameModeFavoriteEntry from empty args!");
+            if (args.length == 0) return DataResult.error(() -> "Cannot create GameModeFavoriteEntry from empty args!");
             if (!(args[0] instanceof Time type))
-                return DataResult.error("Creation of GameModeFavoriteEntry from args expected Time as the first argument!");
+                return DataResult.error(() -> "Creation of GameModeFavoriteEntry from args expected Time as the first argument!");
             return DataResult.success(new TimeFavoriteEntry(type), Lifecycle.stable());
         }
         

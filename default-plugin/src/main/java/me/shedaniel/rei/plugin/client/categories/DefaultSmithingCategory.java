@@ -60,11 +60,19 @@ public class DefaultSmithingCategory implements DisplayCategory<DefaultSmithingD
         Point startPoint = new Point(bounds.getCenterX() - 31, bounds.getCenterY() - 13);
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));
-        widgets.add(Widgets.createArrow(new Point(startPoint.x + 27, startPoint.y + 4)));
-        widgets.add(Widgets.createResultSlotBackground(new Point(startPoint.x + 61, startPoint.y + 5)));
-        widgets.add(Widgets.createSlot(new Point(startPoint.x + 4 - 22, startPoint.y + 5)).entries(display.getInputEntries().get(0)).markInput());
-        widgets.add(Widgets.createSlot(new Point(startPoint.x + 4, startPoint.y + 5)).entries(display.getInputEntries().get(1)).markInput());
-        widgets.add(Widgets.createSlot(new Point(startPoint.x + 61, startPoint.y + 5)).entries(display.getOutputEntries().get(0)).disableBackground().markOutput());
+        boolean legacy = display.getInputEntries().size() <= 2;
+        int offsetX = legacy ? 0 : 5;
+        widgets.add(Widgets.createArrow(new Point(startPoint.x + 27 + offsetX, startPoint.y + 4)));
+        widgets.add(Widgets.createResultSlotBackground(new Point(startPoint.x + 61 + offsetX, startPoint.y + 5)));
+        if (!legacy) {
+            widgets.add(Widgets.createSlot(new Point(startPoint.x + 4 - 18 * 2 + offsetX, startPoint.y + 5)).entries(display.getInputEntries().get(0)).markInput());
+            widgets.add(Widgets.createSlot(new Point(startPoint.x + 4 - 18 + offsetX, startPoint.y + 5)).entries(display.getInputEntries().get(1)).markInput());
+            widgets.add(Widgets.createSlot(new Point(startPoint.x + 4 + offsetX, startPoint.y + 5)).entries(display.getInputEntries().get(2)).markInput());
+        } else {
+            widgets.add(Widgets.createSlot(new Point(startPoint.x + 4 - 22 + offsetX, startPoint.y + 5)).entries(display.getInputEntries().get(0)).markInput());
+            widgets.add(Widgets.createSlot(new Point(startPoint.x + 4 + offsetX, startPoint.y + 5)).entries(display.getInputEntries().get(1)).markInput());
+        }
+        widgets.add(Widgets.createSlot(new Point(startPoint.x + 61 + offsetX, startPoint.y + 5)).entries(display.getOutputEntries().get(0)).disableBackground().markOutput());
         return widgets;
     }
     

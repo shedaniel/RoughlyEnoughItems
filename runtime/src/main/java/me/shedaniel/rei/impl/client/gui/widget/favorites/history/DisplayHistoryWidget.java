@@ -130,7 +130,6 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
         float offset = (System.currentTimeMillis() % 700) / 100.0F;
         if (!reverse) offset = 7 - offset;
         
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -153,14 +152,12 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
         
         tesselator.end();
         RenderSystem.disableBlend();
-        RenderSystem.enableTexture();
     }
     
     private void drawVerticalDashedLine(PoseStack poses, int x, int y1, int y2, int color, boolean reverse) {
         float offset = (System.currentTimeMillis() % 700) / 100.0F;
         if (!reverse) offset = 7 - offset;
         
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -183,7 +180,6 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
         
         tesselator.end();
         RenderSystem.disableBlend();
-        RenderSystem.enableTexture();
     }
     
     private boolean updateBounds(Rectangle fullBounds) {

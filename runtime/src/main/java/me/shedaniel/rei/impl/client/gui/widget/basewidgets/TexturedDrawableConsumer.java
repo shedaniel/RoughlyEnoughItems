@@ -54,7 +54,7 @@ public final class TexturedDrawableConsumer implements DrawableConsumer {
     @Override
     public void render(GuiComponent helper, PoseStack matrices, int mouseX, int mouseY, float delta) {
         RenderSystem.setShaderTexture(0, identifier);
-        innerBlit(matrices.last().pose(), x, x + width, y, y + height, helper.getBlitOffset(), uWidth, vHeight, u, v, textureWidth, textureHeight);
+        innerBlit(matrices.last().pose(), x, x + width, y, y + height, 0, uWidth, vHeight, u, v, textureWidth, textureHeight);
     }
     
     private static void innerBlit(Matrix4f matrix, int xStart, int xEnd, int yStart, int yEnd, int z, int width, int height, float u, float v, int texWidth, int texHeight) {

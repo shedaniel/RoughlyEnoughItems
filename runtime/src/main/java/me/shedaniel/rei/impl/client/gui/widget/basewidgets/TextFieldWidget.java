@@ -32,6 +32,8 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
+import net.minecraft.client.gui.ComponentPath;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Style;
@@ -487,19 +489,17 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
         int b = (color & 255);
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.getBuilder();
-        RenderSystem.disableTexture();
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
         Matrix4f matrix = matrices.last().pose();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        buffer.vertex(matrix, x1, y2, getBlitOffset() + 50f).color(r, g, b, 120).endVertex();
-        buffer.vertex(matrix, x2, y2, getBlitOffset() + 50f).color(r, g, b, 120).endVertex();
-        buffer.vertex(matrix, x2, y1, getBlitOffset() + 50f).color(r, g, b, 120).endVertex();
-        buffer.vertex(matrix, x1, y1, getBlitOffset() + 50f).color(r, g, b, 120).endVertex();
+        buffer.vertex(matrix, x1, y2, getZ() + 50f).color(r, g, b, 120).endVertex();
+        buffer.vertex(matrix, x2, y2, getZ() + 50f).color(r, g, b, 120).endVertex();
+        buffer.vertex(matrix, x2, y1, getZ() + 50f).color(r, g, b, 120).endVertex();
+        buffer.vertex(matrix, x1, y1, getZ() + 50f).color(r, g, b, 120).endVertex();
         tesselator.end();
         RenderSystem.disableBlend();
-        RenderSystem.enableTexture();
     }
     
     @Override
@@ -546,13 +546,9 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
         this.notEditableColor = notEditableColor;
     }
     
-    @Override
-    public boolean changeFocus(boolean next) {
-        if (this.visible && this.editable) {
-            this.setFocused(!this.focused);
-            return this.focused;
-        }
-        return false;
+    @Nullable
+    public ComponentPath nextFocusPath(FocusNavigationEvent event) {
+        return this.visible && this.editable ? super.nextFocusPath(event) : null;
     }
     
     @Override

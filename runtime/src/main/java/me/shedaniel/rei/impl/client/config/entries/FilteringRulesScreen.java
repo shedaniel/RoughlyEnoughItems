@@ -114,22 +114,6 @@ public class FilteringRulesScreen extends Screen {
         }
         
         @Override
-        public boolean changeFocus(boolean lookForwards) {
-            if (!this.inFocus && this.getItemCount() == 0) {
-                return false;
-            } else {
-                this.inFocus = !this.inFocus;
-                if (this.inFocus && this.getSelectedItem() == null && this.getItemCount() > 0) {
-                    this.moveSelection(1);
-                } else if (this.inFocus && this.getSelectedItem() != null) {
-                    this.getSelectedItem();
-                }
-                
-                return this.inFocus;
-            }
-        }
-        
-        @Override
         protected boolean isSelected(int index) {
             return Objects.equals(this.getSelectedItem(), this.children().get(index));
         }
@@ -180,11 +164,6 @@ public class FilteringRulesScreen extends Screen {
         public int getItemHeight() {
             return 26;
         }
-        
-        @Override
-        public boolean changeFocus(boolean lookForwards) {
-            return false;
-        }
     }
     
     public static class DefaultRuleEntry extends RuleEntry {
@@ -200,8 +179,8 @@ public class FilteringRulesScreen extends Screen {
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(Minecraft.getInstance().screen));
             }, Supplier::get) {
                 @Override
-                protected void renderBg(PoseStack matrices, Minecraft client, int mouseX, int mouseY) {
-                    super.renderBg(matrices, client, mouseX, mouseY);
+                public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+                    super.render(matrices, mouseX, mouseY, delta);
                     RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
                     blit(matrices, getX() + 3, getY() + 3, 0, 0, 14, 14);
                 }

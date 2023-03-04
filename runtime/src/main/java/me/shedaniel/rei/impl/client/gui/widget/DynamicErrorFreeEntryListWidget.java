@@ -261,7 +261,6 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         this.renderHoleBackground(matrices, this.bottom, this.height, 255, 255);
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 0, 1);
-        RenderSystem.disableTexture();
         Matrix4f matrix = matrices.last().pose();
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
         buffer.vertex(matrix, this.left, this.top + 4, 0.0F).uv(0, 1).color(0, 0, 0, 0).endVertex();
@@ -277,7 +276,6 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         renderScrollBar(matrices, tessellator, buffer, maxScroll, scrollbarPosition, int_4);
         
         this.renderDecorations(matrices, mouseX, mouseY);
-        RenderSystem.enableTexture();
         RenderSystem.disableBlend();
     }
     
@@ -462,7 +460,6 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
             if (this.selectionVisible && this.isSelected(renderIndex)) {
                 itemMinX = this.left + this.width / 2 - itemWidth / 2;
                 itemMaxX = itemMinX + itemWidth;
-                RenderSystem.disableTexture();
                 float float_2 = this.isFocused() ? 1.0F : 0.5F;
                 Matrix4f matrix = matrices.last().pose();
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -477,7 +474,6 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
                 buffer.vertex(matrix, itemMaxX - 1, itemY - 1, 0.0F).color(0.0F, 0.0F, 0.0F, 1.0F).endVertex();
                 buffer.vertex(matrix, itemMinX + 1, itemY - 1, 0.0F).color(0.0F, 0.0F, 0.0F, 1.0F).endVertex();
                 tessellator.end();
-                RenderSystem.enableTexture();
             }
             
             int y = this.getRowTop(renderIndex);
@@ -502,7 +498,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         return integer;
     }
     
-    protected boolean isFocused() {
+    public boolean isFocused() {
         return false;
     }
     

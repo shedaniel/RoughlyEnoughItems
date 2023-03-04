@@ -306,9 +306,10 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             menuHolder.lateRender(matrices, mouseX, mouseY, delta);
             matrices.popPose();
             if (choosePageWidget != null) {
-                setBlitOffset(500);
-                this.fillGradient(matrices, 0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight(), -1072689136, -804253680);
-                setBlitOffset(0);
+                matrices.pushPose();
+                matrices.translate(0, 0, 500);
+                fillGradient(matrices, 0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight(), -1072689136, -804253680);
+                matrices.popPose();
                 choosePageWidget.render(matrices, mouseX, mouseY, delta);
             }
         }

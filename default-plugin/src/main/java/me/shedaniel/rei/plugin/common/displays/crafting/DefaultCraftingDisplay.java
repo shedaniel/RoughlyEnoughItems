@@ -101,13 +101,13 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
                 
                 if (size != null) {
                     return new DefaultCustomShapedDisplay(recipe, EntryIngredients.ofIngredients(recipe.getIngredients()),
-                            Collections.singletonList(EntryIngredients.of(recipe.getResultItem())),
+                            Collections.singletonList(EntryIngredients.of(recipe.getResultItem(BasicDisplay.registryAccess()))),
                             size.getWidth(), size.getHeight());
                 }
             }
             
             return new DefaultCustomDisplay(recipe, EntryIngredients.ofIngredients(recipe.getIngredients()),
-                    Collections.singletonList(EntryIngredients.of(recipe.getResultItem())));
+                    Collections.singletonList(EntryIngredients.of(recipe.getResultItem(BasicDisplay.registryAccess()))));
         }
         
         return null;

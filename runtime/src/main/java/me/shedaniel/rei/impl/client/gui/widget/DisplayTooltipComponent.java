@@ -72,9 +72,9 @@ public class DisplayTooltipComponent implements TooltipComponent, ClientTooltipC
     }
     
     @Override
-    public void renderImage(Font font, int x, int y, PoseStack matrices, ItemRenderer itemRenderer, int z) {
+    public void renderImage(Font font, int x, int y, PoseStack matrices, ItemRenderer itemRenderer) {
         matrices.pushPose();
-        matrices.translate(x + 2, y + 2, z);
+        matrices.translate(x + 2, y + 2, 0);
         matrices.translate(-this.bounds.getX(), -this.bounds.getY(), 0);
         widget.render(matrices, -1000, -1000, 0);
         matrices.popPose();

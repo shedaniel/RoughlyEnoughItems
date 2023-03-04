@@ -87,7 +87,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                 if (entry.our == null) {
                     CachedEntryListRender.Sprite sprite = CachedEntryListRender.get(entry.getCurrentEntry());
                     if (sprite != null) {
-                        CachingEntryRenderer renderer = new CachingEntryRenderer(sprite, this::getBlitOffset);
+                        CachingEntryRenderer renderer = new CachingEntryRenderer(sprite, this::getZ);
                         entry.our = ClientEntryStacks.setRenderer(entry.getCurrentEntry().copy().cast(), stack -> renderer);
                     }
                 }
@@ -200,13 +200,12 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                 .focusable(false);
         this.additionalWidgets.add(leftButton);
         this.additionalWidgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            helper.setBlitOffset(helper.getBlitOffset() + 1);
             RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_TEXTURE);
             Rectangle bounds = leftButton.getBounds();
             matrices.pushPose();
+            matrices.translate(0, 0, 1);
             blit(matrices, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
             matrices.popPose();
-            helper.setBlitOffset(helper.getBlitOffset() - 1);
         }));
         this.changelogButton = Widgets.createButton(new Rectangle(overlayBounds.getMaxX() - 18 - 18, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), Component.translatable(""))
                 .onClick(button -> {
@@ -217,14 +216,12 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                 .focusable(false);
         this.additionalWidgets.add(changelogButton);
         this.additionalWidgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            helper.setBlitOffset(helper.getBlitOffset() + 1);
             RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
             Rectangle bounds = changelogButton.getBounds();
             matrices.pushPose();
-            matrices.translate(0.5f, 0, 0);
-            helper.blit(matrices, bounds.x + 1, bounds.y + 2, !ChangelogLoader.hasVisited() ? 28 : 14, 0, 14, 14);
+            matrices.translate(0.5f, 0, 1);
+            blit(matrices, bounds.x + 1, bounds.y + 2, !ChangelogLoader.hasVisited() ? 28 : 14, 0, 14, 14);
             matrices.popPose();
-            helper.setBlitOffset(helper.getBlitOffset() - 1);
         }));
         this.rightButton = Widgets.createButton(new Rectangle(overlayBounds.getMaxX() - 18, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), Component.literal(""))
                 .onClick(button -> {
@@ -238,13 +235,12 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                 .focusable(false);
         this.additionalWidgets.add(rightButton);
         this.additionalWidgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            helper.setBlitOffset(helper.getBlitOffset() + 1);
             RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_TEXTURE);
             Rectangle bounds = rightButton.getBounds();
             matrices.pushPose();
+            matrices.translate(0, 0, 1);
             blit(matrices, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
             matrices.popPose();
-            helper.setBlitOffset(helper.getBlitOffset() - 1);
         }));
         this.additionalWidgets.add(Widgets.createClickableLabel(new Point(overlayBounds.x + ((overlayBounds.width - 18) / 2), overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), Component.empty(), label -> {
             if (!Screen.hasShiftDown()) {

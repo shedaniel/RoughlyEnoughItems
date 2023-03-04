@@ -52,7 +52,6 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.language.I18n;
@@ -64,6 +63,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -266,7 +266,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
                 modelViewStack.last().pose().set(matrices.last().pose());
                 RenderSystem.applyModelViewMatrix();
                 MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-                Minecraft.getInstance().getItemRenderer().render(value, ItemTransforms.TransformType.GUI, false, new PoseStack(), immediate,
+                Minecraft.getInstance().getItemRenderer().render(value, ItemDisplayContext.GUI, false, new PoseStack(), immediate,
                         ITEM_LIGHT, OverlayTexture.NO_OVERLAY, model);
                 immediate.endBatch();
                 matrices.popPose();
@@ -279,7 +279,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
             modelViewStack.translate(bounds.x, bounds.y, 0);
             modelViewStack.scale(bounds.width / 16f, (bounds.getWidth() + bounds.getHeight()) / 2f / 16f, 1.0F);
             RenderSystem.applyModelViewMatrix();
-            renderOverlay(entry, bounds);
+            renderOverlay(new PoseStack(), entry, bounds);
             modelViewStack.popPose();
             endGL(entry, model);
             RenderSystem.applyModelViewMatrix();
@@ -316,7 +316,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
                 matrices.pushPose();
                 matrices.translate(bounds.getCenterX() / SCALE, bounds.getCenterY() / -SCALE, entry.getZ());
                 matrices.scale(bounds.getWidth() / SCALE, (bounds.getWidth() + bounds.getHeight()) / 2f / SCALE, 1.0F);
-                Minecraft.getInstance().getItemRenderer().render(value, ItemTransforms.TransformType.GUI, false, matrices, immediate,
+                Minecraft.getInstance().getItemRenderer().render(value, ItemDisplayContext.GUI, false, matrices, immediate,
                         ITEM_LIGHT, OverlayTexture.NO_OVERLAY, model);
                 matrices.popPose();
             }
@@ -337,16 +337,14 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
             modelViewStack.translate(bounds.x, bounds.y, 0);
             modelViewStack.scale(bounds.width / 16f, (bounds.getWidth() + bounds.getHeight()) / 2f / 16f, 1.0F);
             RenderSystem.applyModelViewMatrix();
-            renderOverlay(entry, bounds);
+            renderOverlay(new PoseStack(), entry, bounds);
             modelViewStack.popPose();
             RenderSystem.applyModelViewMatrix();
         }
         
-        public void renderOverlay(EntryStack<ItemStack> entry, Rectangle bounds) {
+        public void renderOverlay(PoseStack matrices, EntryStack<ItemStack> entry, Rectangle bounds) {
             if (!entry.isEmpty()) {
-                Minecraft.getInstance().getItemRenderer().blitOffset = entry.getZ();
-                Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(Minecraft.getInstance().font, entry.getValue(), 0, 0, null);
-                Minecraft.getInstance().getItemRenderer().blitOffset = 0.0F;
+                Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(matrices, Minecraft.getInstance().font, entry.getValue(), 0, 0, null);
             }
         }
         

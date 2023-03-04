@@ -33,8 +33,10 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -243,12 +245,10 @@ public class ButtonWidget extends Button {
         return containsMouse(mouseX, mouseY) || focused;
     }
     
+    @Nullable
     @Override
-    public boolean changeFocus(boolean boolean_1) {
-        if (!enabled || !focusable)
-            return false;
-        this.focused = !this.focused;
-        return true;
+    public ComponentPath nextFocusPath(FocusNavigationEvent event) {
+        return enabled && focusable ? ComponentPath.leaf(this) : null;
     }
     
     @Override
@@ -316,10 +316,10 @@ public class ButtonWidget extends Button {
         // 9 Patch Texture
         
         // Four Corners
-        blit(matrices, x, y, getBlitOffset(), 0, textureOffset * 80, 8, 8, 256, 512);
-        blit(matrices, x + width - 8, y, getBlitOffset(), 248, textureOffset * 80, 8, 8, 256, 512);
-        blit(matrices, x, y + height - 8, getBlitOffset(), 0, textureOffset * 80 + 72, 8, 8, 256, 512);
-        blit(matrices, x + width - 8, y + height - 8, getBlitOffset(), 248, textureOffset * 80 + 72, 8, 8, 256, 512);
+        blit(matrices, x, y, getZ(), 0, textureOffset * 80, 8, 8, 256, 512);
+        blit(matrices, x + width - 8, y, getZ(), 248, textureOffset * 80, 8, 8, 256, 512);
+        blit(matrices, x, y + height - 8, getZ(), 0, textureOffset * 80 + 72, 8, 8, 256, 512);
+        blit(matrices, x + width - 8, y + height - 8, getZ(), 248, textureOffset * 80 + 72, 8, 8, 256, 512);
         
         Matrix4f matrix = matrices.last().pose();
         // Sides

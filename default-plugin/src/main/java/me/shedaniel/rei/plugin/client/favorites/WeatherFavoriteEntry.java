@@ -206,9 +206,9 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
         
         @Override
         public DataResult<WeatherFavoriteEntry> fromArgs(Object... args) {
-            if (args.length == 0) return DataResult.error("Cannot create WeatherFavoriteEntry from empty args!");
+            if (args.length == 0) return DataResult.error(() -> "Cannot create WeatherFavoriteEntry from empty args!");
             if (!(args[0] instanceof Weather weather))
-                return DataResult.error("Creation of WeatherFavoriteEntry from args expected Weather as the first argument!");
+                return DataResult.error(() -> "Creation of WeatherFavoriteEntry from args expected Weather as the first argument!");
             return DataResult.success(new WeatherFavoriteEntry(weather), Lifecycle.stable());
         }
         

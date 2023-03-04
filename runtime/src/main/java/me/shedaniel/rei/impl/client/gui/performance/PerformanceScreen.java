@@ -168,7 +168,7 @@ public class PerformanceScreen extends Screen {
     
     @Override
     public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-        renderDirtBackground(0);
+        renderDirtBackground(poses);
         list.render(poses, mouseX, mouseY, delta);
         this.font.drawShadow(poses, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
         super.render(poses, mouseX, mouseY, delta);

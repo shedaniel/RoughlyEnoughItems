@@ -30,14 +30,17 @@ import me.shedaniel.rei.api.client.config.addon.ConfigAddon;
 import me.shedaniel.rei.api.client.config.addon.ConfigAddonRegistry;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -83,22 +86,6 @@ public class ConfigAddonsScreen extends Screen {
         }
         
         @Override
-        public boolean changeFocus(boolean lookForwards) {
-            if (!this.inFocus && this.getItemCount() == 0) {
-                return false;
-            } else {
-                this.inFocus = !this.inFocus;
-                if (this.inFocus && this.getSelectedItem() == null && this.getItemCount() > 0) {
-                    this.moveSelection(1);
-                } else if (this.inFocus && this.getSelectedItem() != null) {
-                    this.getSelectedItem();
-                }
-                
-                return this.inFocus;
-            }
-        }
-        
-        @Override
         protected boolean isSelected(int index) {
             return false;
         }
@@ -126,8 +113,9 @@ public class ConfigAddonsScreen extends Screen {
         }
         
         @Override
-        public boolean changeFocus(boolean lookForwards) {
-            return false;
+        @Nullable
+        public ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
+            return null;
         }
     }
     
@@ -141,8 +129,8 @@ public class ConfigAddonsScreen extends Screen {
                 Minecraft.getInstance().setScreen(this.addon.createScreen(Minecraft.getInstance().screen));
             }, Supplier::get) {
                 @Override
-                protected void renderBg(PoseStack matrices, Minecraft client, int mouseX, int mouseY) {
-                    super.renderBg(matrices, client, mouseX, mouseY);
+                public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+                    super.render(matrices, mouseX, mouseY, delta);
                     RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
                     blit(matrices, getX() + 3, getY() + 3, 0, 0, 14, 14);
                 }

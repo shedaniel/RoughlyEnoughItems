@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.plugin.common.displays.crafting;
 
+import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 
@@ -33,7 +34,7 @@ public class DefaultShapelessDisplay extends DefaultCraftingDisplay<ShapelessRec
     public DefaultShapelessDisplay(ShapelessRecipe recipe) {
         super(
                 EntryIngredients.ofIngredients(recipe.getIngredients()),
-                Collections.singletonList(EntryIngredients.of(recipe.getResultItem())),
+                Collections.singletonList(EntryIngredients.of(recipe.getResultItem(BasicDisplay.registryAccess()))),
                 Optional.of(recipe)
         );
     }

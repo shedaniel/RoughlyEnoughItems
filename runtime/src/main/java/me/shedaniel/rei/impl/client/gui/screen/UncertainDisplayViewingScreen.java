@@ -164,13 +164,6 @@ public class UncertainDisplayViewingScreen extends Screen {
             protected void applyValue() {
                 
             }
-            
-            @Override
-            public void renderButton(PoseStack poseStack, int i, int j, float f) {
-                setY(UncertainDisplayViewingScreen.this.height * 2 - 64);
-                super.renderButton(poseStack, i, j, f);
-                setY(UncertainDisplayViewingScreen.this.height * 2 - 64 - (int) (scroll.floatValue() / 200f * height));
-            }
         })));
         this._children().addAll(widgets);
     }

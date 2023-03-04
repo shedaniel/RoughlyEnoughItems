@@ -334,12 +334,12 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             }
             
             @Override
-            public void renderImage(Font font, int x, int y, PoseStack poses, ItemRenderer renderer, int z) {
+            public void renderImage(Font font, int x, int y, PoseStack poses, ItemRenderer renderer) {
                 int entrySize = EntryListWidget.entrySize();
                 int w = Math.max(1, MAX_WIDTH / entrySize);
                 int i = 0;
                 poses.pushPose();
-                poses.translate(0, 0, z + 50);
+                poses.translate(0, 0, 50);
                 for (EntryStack<?> entry : widget.getEntries()) {
                     int x1 = x + (i % w) * entrySize;
                     int y1 = y + 13 + (i / w) * entrySize;
@@ -347,7 +347,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                     if (i / w > 5) {
                         MultiBufferSource.BufferSource source = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
                         Component text = Component.literal("+" + (widget.getEntries().size() - w * 6 + 1)).withStyle(ChatFormatting.GRAY);
-                        font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, poses.last().pose(), source, false, 0, 15728880);
+                        font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, poses.last().pose(), source, Font.DisplayMode.NORMAL, 0, 15728880);
                         source.endBatch();
                         break;
                     } else {
@@ -360,7 +360,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             @Override
             public void renderText(Font font, int x, int y, Matrix4f pose, MultiBufferSource.BufferSource buffers) {
                 font.drawInBatch(Component.translatable("text.rei.accepts").withStyle(ChatFormatting.GRAY),
-                        x, y + 2, -1, true, pose, buffers, false, 0, 15728880);
+                        x, y + 2, -1, true, pose, buffers, Font.DisplayMode.NORMAL, 0, 15728880);
                 
                 if (widget.tagMatch != null) {
                     int entrySize = EntryListWidget.entrySize();
@@ -368,7 +368,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                     font.drawInBatch(Component.translatable("text.rei.tag_accept", widget.tagMatch.toString())
                                     .withStyle(ChatFormatting.GRAY),
                             x, y + 16 + Math.min(6, Mth.ceil(widget.getEntries().size() / (float) w)) * entrySize,
-                            -1, true, pose, buffers, false, 0, 15728880);
+                            -1, true, pose, buffers, Font.DisplayMode.NORMAL, 0, 15728880);
                 }
             }
         }

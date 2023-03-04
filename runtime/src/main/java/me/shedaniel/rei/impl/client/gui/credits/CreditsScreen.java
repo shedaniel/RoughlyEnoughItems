@@ -153,7 +153,7 @@ public class CreditsScreen extends Screen {
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderDirtBackground(0);
+        this.renderDirtBackground(matrices);
         this.entryListWidget.render(matrices, mouseX, mouseY, delta);
         drawCenteredString(matrices, this.font, I18n.get("text.rei.credits"), this.width / 2, 16, 16777215);
         super.render(matrices, mouseX, mouseY, delta);

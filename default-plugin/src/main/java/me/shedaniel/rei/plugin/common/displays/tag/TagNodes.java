@@ -141,7 +141,7 @@ public class TagNodes {
         if (Minecraft.getInstance().getSingleplayerServer() != null) {
             callback.accept(DataResult.success(TAG_DATA_MAP.get(resourceKey)));
         } else if (!NetworkManager.canServerReceive(REQUEST_TAGS_PACKET_C2S)) {
-            callback.accept(DataResult.error("Cannot request tags from server"));
+            callback.accept(DataResult.error(() -> "Cannot request tags from server"));
         } else if (requestedTags.containsKey(resourceKey)) {
             requestedTags.get(resourceKey).accept(callback);
             callback.accept(DataResult.success(TAG_DATA_MAP.getOrDefault(resourceKey, Collections.emptyMap())));
@@ -197,7 +197,7 @@ public class TagNodes {
     public static <T> void create(TagKey<T> tagKey, Consumer<DataResult<TagNode<T>>> callback) {
         Registry<T> registry = ((Registry<Registry<T>>) BuiltInRegistries.REGISTRY).get((ResourceKey<Registry<T>>) tagKey.registry());
         requestTagData(tagKey.registry(), result -> {
-            callback.accept(result.flatMap(dataMap -> dataMap != null ? resolveTag(tagKey, registry, dataMap).orElse(DataResult.error("No tag data")) : DataResult.error("No tag data")));
+            callback.accept(result.flatMap(dataMap -> dataMap != null ? resolveTag(tagKey, registry, dataMap).orElse(DataResult.error(() -> "No tag data")) : DataResult.error(() -> "No tag data")));
         });
     }
     
@@ -222,7 +222,7 @@ public class TagNodes {
                 Optional<DataResult<TagNode<T>>> resultOptional = resolveTag(childTagKey, registry, tagDataMap);
                 if (resultOptional.isPresent()) {
                     DataResult<TagNode<T>> result = resultOptional.get();
-                    if (result.error().isPresent()) return Optional.of(DataResult.error(result.error().get().message()));
+                    if (result.error().isPresent()) return Optional.of(DataResult.error(() -> result.error().get().message()));
                     self.addChild(result.result().get());
                 }
             }

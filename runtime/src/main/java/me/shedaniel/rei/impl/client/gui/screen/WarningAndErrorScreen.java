@@ -134,7 +134,7 @@ public class WarningAndErrorScreen extends Screen {
     
     @Override
     public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
-        this.renderDirtBackground(0);
+        this.renderDirtBackground(matrices);
         this.listWidget.render(matrices, int_1, int_2, float_1);
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
             drawCenteredString(matrices, this.font, "Warnings during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
@@ -151,22 +151,6 @@ public class WarningAndErrorScreen extends Screen {
         
         public StringEntryListWidget(Minecraft client, int width, int height, int startY, int endY) {
             super(client, width, height, startY, endY, GuiComponent.BACKGROUND_LOCATION);
-        }
-        
-        @Override
-        public boolean changeFocus(boolean boolean_1) {
-            if (!this.inFocus && this.getItemCount() == 0) {
-                return false;
-            } else {
-                this.inFocus = !this.inFocus;
-                if (this.inFocus && this.getFocused() == null && this.getItemCount() > 0) {
-                    this.moveSelection(1);
-                } else if (this.inFocus && this.getFocused() != null) {
-                    this.moveSelection(0);
-                }
-                
-                return this.inFocus;
-            }
         }
         
         public void creditsClearEntries() {
@@ -194,6 +178,15 @@ public class WarningAndErrorScreen extends Screen {
     
     private abstract static class StringItem extends DynamicErrorFreeEntryListWidget.Entry<StringItem> {
         public abstract int getWidth();
+        
+        @Override
+        public void setFocused(boolean bl) {
+        }
+        
+        @Override
+        public boolean isFocused() {
+            return false;
+        }
     }
     
     private static class EmptyItem extends StringItem {
@@ -233,11 +226,6 @@ public class WarningAndErrorScreen extends Screen {
         @Override
         public int getItemHeight() {
             return 12;
-        }
-        
-        @Override
-        public boolean changeFocus(boolean boolean_1) {
-            return false;
         }
         
         @Override
@@ -290,11 +278,6 @@ public class WarningAndErrorScreen extends Screen {
         @Override
         public int getItemHeight() {
             return 12;
-        }
-        
-        @Override
-        public boolean changeFocus(boolean boolean_1) {
-            return false;
         }
         
         @Override

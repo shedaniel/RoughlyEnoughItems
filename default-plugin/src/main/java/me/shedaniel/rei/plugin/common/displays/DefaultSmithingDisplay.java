@@ -29,21 +29,54 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.UpgradeRecipe;
+import net.minecraft.world.item.crafting.LegacyUpgradeRecipe;
+import net.minecraft.world.item.crafting.SmithingRecipe;
+import net.minecraft.world.item.crafting.SmithingTransformRecipe;
+import net.minecraft.world.item.crafting.SmithingTrimRecipe;
+import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 public class DefaultSmithingDisplay extends BasicDisplay {
-    public DefaultSmithingDisplay(UpgradeRecipe recipe) {
+    public DefaultSmithingDisplay(LegacyUpgradeRecipe recipe) {
         this(
-                Arrays.asList(
+                recipe,
+                List.of(
                         EntryIngredients.ofIngredient(recipe.base),
                         EntryIngredients.ofIngredient(recipe.addition)
-                ),
-                Collections.singletonList(EntryIngredients.of(recipe.getResultItem())),
+                )
+        );
+    }
+    
+    @ApiStatus.Experimental
+    public DefaultSmithingDisplay(SmithingTransformRecipe recipe) {
+        this(
+                recipe,
+                List.of(
+                        EntryIngredients.ofIngredient(recipe.template),
+                        EntryIngredients.ofIngredient(recipe.base),
+                        EntryIngredients.ofIngredient(recipe.addition)
+                )
+        );
+    }
+    
+    @ApiStatus.Experimental
+    public DefaultSmithingDisplay(SmithingTrimRecipe recipe) {
+        this(
+                recipe,
+                List.of(
+                        EntryIngredients.ofIngredient(recipe.template),
+                        EntryIngredients.ofIngredient(recipe.base),
+                        EntryIngredients.ofIngredient(recipe.addition)
+                )
+        );
+    }
+    
+    public DefaultSmithingDisplay(SmithingRecipe recipe, List<EntryIngredient> inputs) {
+        this(
+                inputs,
+                List.of(EntryIngredients.of(recipe.getResultItem(BasicDisplay.registryAccess()))),
                 Optional.ofNullable(recipe.getId())
         );
     }

@@ -345,12 +345,6 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == 258 && !minecraft.options.keyInventory.matches(keyCode, scanCode)) {
-            boolean boolean_1 = !hasShiftDown();
-            if (!this.changeFocus(boolean_1))
-                this.changeFocus(boolean_1);
-            return true;
-        }
         if (ConfigObject.getInstance().getNextPageKeybind().matchesKey(keyCode, scanCode)) {
             if (categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
                 selectedRecipeIndex++;

@@ -37,7 +37,7 @@ import java.util.Optional;
 
 public class DefaultStoneCuttingDisplay extends BasicDisplay {
     public DefaultStoneCuttingDisplay(StonecutterRecipe recipe) {
-        this(EntryIngredients.ofIngredients(recipe.getIngredients()), Collections.singletonList(EntryIngredients.of(recipe.getResultItem())),
+        this(EntryIngredients.ofIngredients(recipe.getIngredients()), Collections.singletonList(EntryIngredients.of(recipe.getResultItem(BasicDisplay.registryAccess()))),
                 Optional.ofNullable(recipe.getId()));
     }
     

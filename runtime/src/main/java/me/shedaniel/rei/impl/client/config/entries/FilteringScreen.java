@@ -260,7 +260,6 @@ public class FilteringScreen extends Screen {
         BufferBuilder buffer = tesselator.getBuilder();
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 0, 1);
-        RenderSystem.disableTexture();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         Matrix4f matrix = matrices.last().pose();
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
@@ -269,7 +268,6 @@ public class FilteringScreen extends Screen {
         buffer.vertex(matrix, width, bounds.y, 0.0F).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
         buffer.vertex(matrix, 0, bounds.y, 0.0F).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
         tesselator.end();
-        RenderSystem.enableTexture();
         RenderSystem.disableBlend();
         renderHoleBackground(matrices, 0, bounds.y, 64, 255, 255);
         
@@ -428,13 +426,6 @@ public class FilteringScreen extends Screen {
         }
         if (keyCode == 256 && this.shouldCloseOnEsc()) {
             this.backButton.onPress();
-            return true;
-        } else if (keyCode == 258) {
-            boolean bl = !hasShiftDown();
-            if (!this.changeFocus(bl)) {
-                this.changeFocus(bl);
-            }
-            
             return true;
         }
         return false;

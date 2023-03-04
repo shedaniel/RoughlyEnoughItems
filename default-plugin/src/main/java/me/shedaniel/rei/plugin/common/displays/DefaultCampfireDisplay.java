@@ -40,7 +40,7 @@ public class DefaultCampfireDisplay extends BasicDisplay {
     private double cookTime;
     
     public DefaultCampfireDisplay(CampfireCookingRecipe recipe) {
-        this(EntryIngredients.ofIngredients(recipe.getIngredients()), Collections.singletonList(EntryIngredients.of(recipe.getResultItem())),
+        this(EntryIngredients.ofIngredients(recipe.getIngredients()), Collections.singletonList(EntryIngredients.of(recipe.getResultItem(BasicDisplay.registryAccess()))),
                 Optional.ofNullable(recipe).map(CampfireCookingRecipe::getId), recipe.getCookingTime());
     }
     

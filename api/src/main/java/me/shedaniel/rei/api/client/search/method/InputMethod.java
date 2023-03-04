@@ -58,8 +58,8 @@ public interface InputMethod<T> {
      * @return the list of all Minecraft supported locales
      */
     static List<Locale> getAllLocales() {
-        return CollectionUtils.map(Minecraft.getInstance().getLanguageManager().getLanguages(), info ->
-                new Locale(info.getCode(), Component.literal(info.getName())));
+        return CollectionUtils.map(Minecraft.getInstance().getLanguageManager().getLanguages().entrySet(), entry ->
+                new Locale(entry.getKey(), entry.getValue().toComponent()));
     }
     
     /**

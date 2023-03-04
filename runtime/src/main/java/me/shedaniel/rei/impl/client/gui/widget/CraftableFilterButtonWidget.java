@@ -56,7 +56,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import org.joml.Vector4f;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -86,11 +85,10 @@ public class CraftableFilterButtonWidget {
                 .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y))
                 .tooltipLineSupplier(button -> Component.translatable(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all"));
         Widget overlayWidget = Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            Vector4f vector = new Vector4f(bounds.x + 2, bounds.y + 2, helper.getBlitOffset() - 10, 1.0F);
-            matrices.last().pose().transform(vector);
-            itemRenderer.blitOffset = vector.z();
-            itemRenderer.renderGuiItem(icon, (int) vector.x(), (int) vector.y());
-            itemRenderer.blitOffset = 0.0F;
+            matrices.pushPose();
+            matrices.translate(bounds.x + 2, bounds.y + 2, 10);
+            itemRenderer.renderGuiItem(matrices, icon, 0, 0);
+            matrices.popPose();
         });
         return Widgets.concat(filterButton, overlayWidget);
     }

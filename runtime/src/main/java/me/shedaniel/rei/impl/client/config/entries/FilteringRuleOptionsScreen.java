@@ -29,10 +29,12 @@ import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -40,6 +42,7 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -372,6 +375,21 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
                 } else {
                     return false;
                 }
+            }
+            
+            @Nullable
+            @Override
+            public ComponentPath nextFocusPath(FocusNavigationEvent event) {
+                return null;
+            }
+            
+            @Override
+            public void setFocused(boolean bl) {
+            }
+            
+            @Override
+            public boolean isFocused() {
+                return false;
             }
         }
     }

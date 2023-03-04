@@ -59,6 +59,7 @@ public abstract class Widget extends AbstractContainerEventHandler implements Re
      */
     protected final Font font = minecraft.font;
     private static final Stack<Point> mouseStack = new Stack<>();
+    private int z;
     
     public static Point mouse() {
         return mouseStack.empty() ? PointHelper.ofMouse() : mouseStack.peek();
@@ -87,12 +88,14 @@ public abstract class Widget extends AbstractContainerEventHandler implements Re
         return pushMouse(new Point(mouseVec.x(), mouseVec.y()));
     }
     
+    @Override
     public int getZ() {
-        return this.getBlitOffset();
+        return this.z;
     }
     
+    @Override
     public void setZ(int z) {
-        this.setBlitOffset(z);
+        this.z = z;
     }
     
     public boolean containsMouse(double mouseX, double mouseY) {

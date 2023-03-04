@@ -98,7 +98,7 @@ public class DefaultCompostingCategory implements DisplayCategory<DefaultCompost
                     ItemStack firstStack = (ItemStack) entryIngredient.get(0).getValue();
                     float chance = ComposterBlock.COMPOSTABLES.getFloat(firstStack.getItem());
                     if (chance > 0.0f) {
-                        entryIngredient = entryIngredient.map(stack -> stack.copy().tooltip(Component.translatable("text.rei.composting.chance", Mth.clamp(Mth.fastFloor(chance * 100), 0, 100)).withStyle(ChatFormatting.YELLOW)));
+                        entryIngredient = entryIngredient.map(stack -> stack.copy().tooltip(Component.translatable("text.rei.composting.chance", Mth.clamp(Mth.floor(chance * 100), 0, 100)).withStyle(ChatFormatting.YELLOW)));
                     }
                 }
                 widgets.add(Widgets.createSlot(new Point(bounds.getCenterX() - 72 + 9 + x * 18, bounds.y + 12 + y * 18)).entries(entryIngredient).markInput());
