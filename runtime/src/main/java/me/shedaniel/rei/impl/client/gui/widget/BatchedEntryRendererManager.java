@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -32,26 +33,29 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
 import net.minecraft.CrashReport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
-public class BatchedEntryRendererManager {
-    private boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
-    private Int2ObjectMap<List<Object>> grouping = new Int2ObjectOpenHashMap<>();
-    private List<EntryWidget> toRender = new ArrayList<>();
+public class BatchedEntryRendererManager<T extends EntryWidget> implements Iterable<T> {
+    private final boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
+    private final Int2ObjectMap<List<Object>> grouping = new Int2ObjectOpenHashMap<>();
+    private final List<T> toRender = new ArrayList<>();
     
     public BatchedEntryRendererManager() {
     }
     
-    public BatchedEntryRendererManager(Collection<? extends EntryWidget> widgets) {
+    public BatchedEntryRendererManager(Collection<? extends T> widgets) {
         addAll(widgets);
     }
     
@@ -59,9 +63,9 @@ public class BatchedEntryRendererManager {
         return fastEntryRendering;
     }
     
-    public void addAll(Collection<? extends EntryWidget> widgets) {
+    public void addAll(Collection<? extends T> widgets) {
         if (fastEntryRendering) {
-            for (EntryWidget widget : widgets) {
+            for (T widget : widgets) {
                 add(widget);
             }
         } else {
@@ -69,7 +73,7 @@ public class BatchedEntryRendererManager {
         }
     }
     
-    public void add(EntryWidget widget) {
+    public void add(T widget) {
         if (fastEntryRendering) {
             EntryStack<?> currentEntry = widget.getCurrentEntry();
             try {
@@ -101,11 +105,11 @@ public class BatchedEntryRendererManager {
         addSlow(widget);
     }
     
-    public void addAllSlow(Collection<? extends EntryWidget> widgets) {
+    public void addAllSlow(Collection<? extends T> widgets) {
         toRender.addAll(widgets);
     }
     
-    public void addSlow(EntryWidget widget) {
+    public void addSlow(T widget) {
         toRender.add(widget);
     }
     
@@ -120,15 +124,15 @@ public class BatchedEntryRendererManager {
                 for (int i = 0; i < extraData.length; i++) {
                     extraData[i] = entries.get(i * 2 + 1);
                 }
-                renderBatched(debugTime, size, time, matrices, mouseX, mouseY, delta, () -> new AbstractIterator<EntryWidget>() {
+                renderBatched(debugTime, size, time, matrices, mouseX, mouseY, delta, () -> new AbstractIterator<T>() {
                     public int i = 0;
                     
                     @Override
-                    protected EntryWidget computeNext() {
+                    protected T computeNext() {
                         if (i >= entries.size()) {
                             return endOfData();
                         }
-                        EntryWidget widget = (EntryWidget) entries.get(i);
+                        T widget = (T) entries.get(i);
                         i += 2;
                         return widget;
                     }
@@ -251,5 +255,25 @@ public class BatchedEntryRendererManager {
                 return;
             }
         }
+    }
+    
+    @NotNull
+    @Override
+    public Iterator<T> iterator() {
+        return Iterators.concat(toRender.iterator(), Iterators.concat(
+                CollectionUtils.<List<Object>, Iterator<T>>map(grouping.values(), entries -> new AbstractIterator<>() {
+                    public int i = 0;
+                    
+                    @Override
+                    protected T computeNext() {
+                        if (i >= entries.size()) {
+                            return endOfData();
+                        }
+                        T widget = (T) entries.get(i);
+                        i += 2;
+                        return widget;
+                    }
+                }).iterator()
+        ));
     }
 }

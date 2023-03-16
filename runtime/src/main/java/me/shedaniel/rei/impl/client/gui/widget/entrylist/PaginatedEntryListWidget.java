@@ -27,6 +27,8 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -53,16 +55,14 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
     private Button leftButton, rightButton, changelogButton;
     private List<Widget> additionalWidgets;
     private List</*EntryStack<?> | EntryIngredient*/ Object> stacks = new ArrayList<>();
+    private Object2IntMap<CollapsedStack> collapsedStackIndices = new Object2IntOpenHashMap<>();
     protected List<EntryListStackEntry> entries = Collections.emptyList();
     private int page;
     
@@ -96,7 +96,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             }
         }
         
-        BatchedEntryRendererManager manager = new BatchedEntryRendererManager();
+        BatchedEntryRendererManager<EntryListStackEntry> manager = new BatchedEntryRendererManager<>();
         if (manager.isFastEntryRendering()) {
             for (EntryListStackEntry entry : entries) {
                 CollapsedStack collapsedStack = entry.getCollapsedStack();
@@ -110,6 +110,8 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             manager.addAllSlow(entries);
         }
         manager.render(debugger.debugTime, debugger.size, debugger.time, matrices, mouseX, mouseY, delta);
+        
+        new CollapsedEntriesBorderRenderer().render(matrices, entries, collapsedStackIndices);
         
         for (Widget widget : additionalWidgets) {
             widget.render(matrices, mouseX, mouseY, delta);
@@ -139,6 +141,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
         int skip = Math.max(0, page * entries.size());
         List</*EntryStack<?> | List<EntryStack<?>>*/ Object> subList = stacks.stream().skip(skip).limit(Math.max(0, entries.size() - Math.max(0, -page * entries.size()))).toList();
         Int2ObjectMap<CollapsedStack> indexedCollapsedStack = getCollapsedStackIndexed();
+        Set<CollapsedStack> collapsedStacks = new LinkedHashSet<>();
         for (int i = 0; i < subList.size(); i++) {
             /*EntryStack<?> | List<EntryStack<?>>*/
             Object stack = subList.get(i);
@@ -154,11 +157,17 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             CollapsedStack collapsedStack = indexedCollapsedStack.get(i + skip);
             if (collapsedStack != null && collapsedStack.getIngredient().size() > 1) {
                 entry.collapsed(collapsedStack);
+                collapsedStacks.add(collapsedStack);
             } else {
                 entry.collapsed(null);
             }
         }
         this.entries = entries;
+        this.collapsedStackIndices = new Object2IntOpenHashMap<>();
+        int index = 0;
+        for (CollapsedStack stack : collapsedStacks) {
+            collapsedStackIndices.put(stack, index++);
+        }
     }
     
     @Override
