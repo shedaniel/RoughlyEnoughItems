@@ -232,7 +232,7 @@ public class FilteringScreen extends Screen {
         int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / (float) entrySize()));
         int nextIndex = skip * innerBounds.width / entrySize();
         int i = nextIndex;
-        BatchedEntryRendererManager manager = new BatchedEntryRendererManager();
+        BatchedEntryRendererManager<FilteringListEntry> manager = new BatchedEntryRendererManager<>();
         for (; i < entryStacks.size(); i++) {
             EntryStack<?> stack = entryStacks.get(i);
             FilteringListEntry entry = entries.get(nextIndex);

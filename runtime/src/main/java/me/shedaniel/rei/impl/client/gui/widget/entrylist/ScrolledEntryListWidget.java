@@ -27,6 +27,8 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
@@ -39,9 +41,7 @@ import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
@@ -68,8 +68,11 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
         int skip = Math.max(0, Mth.floor(scrolling.scrollAmount() / (float) entrySize));
         int nextIndex = skip * innerBounds.width / entrySize;
         this.blockedCount = 0;
-        BatchedEntryRendererManager helper = new BatchedEntryRendererManager();
+        BatchedEntryRendererManager<EntryListStackEntry> helper = new BatchedEntryRendererManager<>();
         Int2ObjectMap<CollapsedStack> indexedCollapsedStack = getCollapsedStackIndexed();
+        int collapsedStacksIndex = 0;
+        Object2IntMap<CollapsedStack> collapsedStackIndices = new Object2IntOpenHashMap<>();
+        collapsedStackIndices.defaultReturnValue(-1);
         
         int i = nextIndex;
         for (int cont = nextIndex; cont < entries.size(); cont++) {
@@ -100,6 +103,9 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
                 CollapsedStack collapsedStack = indexedCollapsedStack.get(i - 1);
                 if (collapsedStack != null && collapsedStack.getIngredient().size() > 1) {
                     entry.collapsed(collapsedStack);
+                    if (!collapsedStackIndices.containsKey(collapsedStack)) {
+                        collapsedStackIndices.put(collapsedStack, collapsedStacksIndex++);
+                    }
                 } else {
                     entry.collapsed(null);
                 }
@@ -109,6 +115,8 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
         }
         
         helper.render(debugger.debugTime, debugger.size, debugger.time, matrices, mouseX, mouseY, delta);
+    
+        new CollapsedEntriesBorderRenderer().render(matrices, helper, collapsedStackIndices);
         
         scrolling.updatePosition(delta);
         ScissorsHandler.INSTANCE.removeLastScissor();
