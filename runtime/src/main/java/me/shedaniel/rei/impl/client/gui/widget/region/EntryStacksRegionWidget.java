@@ -126,7 +126,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
         Stream<RegionEntryWidget<T>> entryStream = this.entriesList.stream()
                 .filter(entry -> entry.getBounds().getMaxY() >= this.bounds.getY() && entry.getBounds().y <= this.bounds.getMaxY());
         
-        new BatchedEntryRendererManager(entryStream.collect(Collectors.toList()))
+        new BatchedEntryRendererManager<>(entryStream.collect(Collectors.toList()))
                 .render(poses, mouseX, mouseY, delta);
         
         updatePosition(delta);

@@ -146,7 +146,7 @@ public enum SearchFilteringRuleType implements FilteringRuleType<SearchFiltering
         
         @Override
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-            BatchedEntryRendererManager manager = new BatchedEntryRendererManager();
+            BatchedEntryRendererManager<EntryWidget> manager = new BatchedEntryRendererManager<>();
             int entrySize = entrySize();
             int width = entryWidth / entrySize;
             int i = 0;
