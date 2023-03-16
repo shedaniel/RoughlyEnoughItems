@@ -66,6 +66,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.List;
 import java.util.Optional;
@@ -248,7 +249,8 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         
         @Override
         public BakedModel getExtraData(EntryStack<ItemStack> entry) {
-            return Minecraft.getInstance().getItemRenderer().getModel(entry.getValue(), null, null, 0);
+            Minecraft minecraft = Minecraft.getInstance();
+            return minecraft.getItemRenderer().getModel(entry.getValue(), minecraft.level, minecraft.player, 0);
         }
         
         @Override
@@ -258,20 +260,14 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
             if (!entry.isEmpty()) {
                 ItemStack value = entry.getValue();
                 matrices.pushPose();
-                matrices.mulPoseMatrix(RenderSystem.getModelViewMatrix());
                 matrices.translate(bounds.getCenterX(), bounds.getCenterY(), entry.getZ());
-                matrices.scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, 1.0F);
-                PoseStack modelViewStack = RenderSystem.getModelViewStack();
-                modelViewStack.pushPose();
-                modelViewStack.last().pose().set(matrices.last().pose());
-                RenderSystem.applyModelViewMatrix();
+                matrices.mulPoseMatrix(new Matrix4f().scaling(1.0F, -1.0F, 1.0F));
+                matrices.scale(bounds.getWidth(), bounds.getHeight(), (bounds.getWidth() + bounds.getHeight()) / 2.0F);
                 MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-                Minecraft.getInstance().getItemRenderer().render(value, ItemDisplayContext.GUI, false, new PoseStack(), immediate,
+                Minecraft.getInstance().getItemRenderer().render(value, ItemDisplayContext.GUI, false, matrices, immediate,
                         ITEM_LIGHT, OverlayTexture.NO_OVERLAY, model);
                 immediate.endBatch();
                 matrices.popPose();
-                modelViewStack.popPose();
-                RenderSystem.applyModelViewMatrix();
             }
             PoseStack modelViewStack = RenderSystem.getModelViewStack();
             modelViewStack.pushPose();

@@ -16,20 +16,20 @@ To allow players to view items and recipes.
 [[dependencies.roughlyenoughitems]]
 modId = "architectury"
 mandatory = true
-versionRange = "[5.7,)"
+versionRange = "[8,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.roughlyenoughitems]]
 modId = "cloth_config"
 mandatory = true
-versionRange = "[7.0,)"
+versionRange = "[10.0,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.roughlyenoughitems]]
 modId = "forge"
 mandatory = true
-versionRange = "[41.0.64,)"
+versionRange = "[45.0.0,)"
 ordering = "NONE"
 side = "BOTH"

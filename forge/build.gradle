@@ -66,7 +66,7 @@ dependencies {
         shadowCommon(project(path: it, configuration: "transformProductionForge")) { transitive false }
     }
 
-    modRuntime("curse.maven:lazy-dfu-forge-460819:3544496")
+    // modRuntime("curse.maven:lazy-dfu-forge-460819:3544496")
     // modRuntime("curse.maven:chiselsbits-231095:3492889")
     // modRuntime("curse.maven:jumbofurnace-390880:3120970")
     // modRuntime("curse.maven:cyclic-239286:3221427")
@@ -215,7 +215,7 @@ unifiedPublishing {
     project {
         displayName = "[Forge $rootProject.supported_version] v$project.version"
         releaseType = "beta"
-        gameVersions = ["1.19.3"]
+        gameVersions = ["1.19.4"]
         gameLoaders = ["forge"]
         changelog = rootProject.releaseChangelog
 
@@ -255,7 +255,7 @@ unifiedPublishing {
     project {
         displayName = "[Forge $rootProject.supported_version] v$project.version"
         releaseType = "release"
-        gameVersions = ["1.19.3"]
+        gameVersions = ["1.19.4"]
         gameLoaders = ["forge"]
         changelog = rootProject.releaseChangelog
 
