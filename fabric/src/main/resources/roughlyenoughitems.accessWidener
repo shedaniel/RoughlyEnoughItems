@@ -35,8 +35,6 @@ accessible    method net/minecraft/client/gui/screens/Screen                    
 accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;ILnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
 accessible field net/minecraft/tags/TagEntry tag Z
 accessible field net/minecraft/tags/TagEntry id Lnet/minecraft/resources/ResourceLocation;
-accessible field net/minecraft/world/item/crafting/LegacyUpgradeRecipe base Lnet/minecraft/world/item/crafting/Ingredient;
-accessible field net/minecraft/world/item/crafting/LegacyUpgradeRecipe addition Lnet/minecraft/world/item/crafting/Ingredient;
 accessible field net/minecraft/world/item/crafting/SmithingTransformRecipe template Lnet/minecraft/world/item/crafting/Ingredient;
 accessible field net/minecraft/world/item/crafting/SmithingTransformRecipe base Lnet/minecraft/world/item/crafting/Ingredient;
 accessible field net/minecraft/world/item/crafting/SmithingTransformRecipe addition Lnet/minecraft/world/item/crafting/Ingredient;

@@ -119,6 +119,6 @@
     }
   },
   "depends": {
-    "minecraft": "~1.19-beta.1"
+    "minecraft": "~1.20-"
   }
 }

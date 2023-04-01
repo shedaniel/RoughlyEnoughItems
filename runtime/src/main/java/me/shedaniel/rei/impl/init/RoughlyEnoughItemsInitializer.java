@@ -29,8 +29,8 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 
 public class RoughlyEnoughItemsInitializer {
-    public static final String COMPATIBLE_MC_VERSION_LOW = "1.19";
-    public static final String COMPATIBLE_MC_VERSION_HIGH = "1.20";
+    public static final String COMPATIBLE_MC_VERSION_LOW = "1.20";
+    public static final String COMPATIBLE_MC_VERSION_HIGH = "1.21";
     
     public static void onInitialize() {
         PrimitivePlatformAdapter adapter = PrimitivePlatformAdapter.get();

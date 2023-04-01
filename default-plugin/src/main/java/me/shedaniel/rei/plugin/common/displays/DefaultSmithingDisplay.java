@@ -28,13 +28,7 @@ import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
-import net.minecraft.core.Holder;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.armortrim.*;
-import net.minecraft.world.item.crafting.LegacyUpgradeRecipe;
 import net.minecraft.world.item.crafting.SmithingRecipe;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 import net.minecraft.world.item.crafting.SmithingTrimRecipe;
@@ -42,19 +36,8 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 public class DefaultSmithingDisplay extends BasicDisplay {
-    public DefaultSmithingDisplay(LegacyUpgradeRecipe recipe) {
-        this(
-                recipe,
-                List.of(
-                        EntryIngredients.ofIngredient(recipe.base),
-                        EntryIngredients.ofIngredient(recipe.addition)
-                )
-        );
-    }
-    
     @ApiStatus.Experimental
     public DefaultSmithingDisplay(SmithingTransformRecipe recipe) {
         this(

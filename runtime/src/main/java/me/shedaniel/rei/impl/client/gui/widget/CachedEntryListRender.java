@@ -30,6 +30,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import dev.architectury.registry.ReloadListenerRegistry;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
@@ -146,7 +147,7 @@ public class CachedEntryListRender {
         TextureTarget target = new TextureTarget(width, height, true, false);
         target.bindWrite(true);
         Matrix4f projectionMatrix = new Matrix4f().setOrtho(0.0F, width, 0.0F, height, 1000.0F, 3000.0F);
-        RenderSystem.setProjectionMatrix(projectionMatrix);
+        RenderSystem.setProjectionMatrix(projectionMatrix, VertexSorting.ORTHOGRAPHIC_Z);
         PoseStack modelViewStack = RenderSystem.getModelViewStack();
         modelViewStack.pushPose();
         modelViewStack.setIdentity();
