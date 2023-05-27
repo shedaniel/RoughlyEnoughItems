@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
 import com.google.common.base.Predicates;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
@@ -35,9 +34,9 @@ import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.config.RecipeBorderType;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import org.joml.Matrix4f;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collections;
 import java.util.List;
@@ -109,7 +108,7 @@ public final class PanelWidget extends Panel {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.darkBackgroundAlpha.update(delta);
         if (!getRendering().test(this))
             return;
@@ -118,38 +117,37 @@ public final class PanelWidget extends Panel {
         float red = ((color >> 16) & 0xFF) / 255f;
         float green = ((color >> 8) & 0xFF) / 255f;
         float blue = (color & 0xFF) / 255f;
-        renderBackground(matrices, x, y, width, height, false, alpha, red, green, blue);
+        renderBackground(graphics, x, y, width, height, false, alpha, red, green, blue);
         if (darkBackgroundAlpha.value() * alpha > 0.0F) {
-            renderBackground(matrices, x, y, width, height, true, this.darkBackgroundAlpha.value() * alpha, red, green, blue);
+            renderBackground(graphics, x, y, width, height, true, this.darkBackgroundAlpha.value() * alpha, red, green, blue);
         }
     }
     
-    public void renderBackground(PoseStack matrices, int x, int y, int width, int height, boolean dark, float alpha, float red, float green, float blue) {
+    public void renderBackground(GuiGraphics graphics, int x, int y, int width, int height, boolean dark, float alpha, float red, float green, float blue) {
         RenderSystem.setShaderColor(red, green, blue, alpha);
-        RenderSystem.setShaderTexture(0, dark ? InternalTextures.CHEST_GUI_TEXTURE_DARK : InternalTextures.CHEST_GUI_TEXTURE);
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
         RenderSystem.blendFunc(770, 771);
         int xTextureOffset = getXTextureOffset();
         int yTextureOffset = getYTextureOffset();
+        ResourceLocation texture = dark ? InternalTextures.CHEST_GUI_TEXTURE_DARK : InternalTextures.CHEST_GUI_TEXTURE;
         
         // 9 Patch Texture
         
         // Four Corners
-        this.blit(matrices, x, y, 106 + xTextureOffset, 124 + yTextureOffset, 8, 8);
-        this.blit(matrices, x + width - 8, y, 248 + xTextureOffset, 124 + yTextureOffset, 8, 8);
-        this.blit(matrices, x, y + height - 8, 106 + xTextureOffset, 182 + yTextureOffset, 8, 8);
-        this.blit(matrices, x + width - 8, y + height - 8, 248 + xTextureOffset, 182 + yTextureOffset, 8, 8);
+        graphics.blit(texture, x, y, 106 + xTextureOffset, 124 + yTextureOffset, 8, 8);
+        graphics.blit(texture, x + width - 8, y, 248 + xTextureOffset, 124 + yTextureOffset, 8, 8);
+        graphics.blit(texture, x, y + height - 8, 106 + xTextureOffset, 182 + yTextureOffset, 8, 8);
+        graphics.blit(texture, x + width - 8, y + height - 8, 248 + xTextureOffset, 182 + yTextureOffset, 8, 8);
         
-        Matrix4f matrix = matrices.last().pose();
         // Sides
-        GuiComponent.innerBlit(matrix, x + 8, x + width - 8, y, y + 8, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (124 + yTextureOffset) / 256f, (132 + yTextureOffset) / 256f);
-        GuiComponent.innerBlit(matrix, x + 8, x + width - 8, y + height - 8, y + height, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (182 + yTextureOffset) / 256f, (190 + yTextureOffset) / 256f);
-        GuiComponent.innerBlit(matrix, x, x + 8, y + 8, y + height - 8, getZ(), (106 + xTextureOffset) / 256f, (114 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
-        GuiComponent.innerBlit(matrix, x + width - 8, x + width, y + 8, y + height - 8, getZ(), (248 + xTextureOffset) / 256f, (256 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
+        graphics.innerBlit(texture, x + 8, x + width - 8, y, y + 8, 0, (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (124 + yTextureOffset) / 256f, (132 + yTextureOffset) / 256f);
+        graphics.innerBlit(texture, x + 8, x + width - 8, y + height - 8, y + height, 0, (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (182 + yTextureOffset) / 256f, (190 + yTextureOffset) / 256f);
+        graphics.innerBlit(texture, x, x + 8, y + 8, y + height - 8, 0, (106 + xTextureOffset) / 256f, (114 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
+        graphics.innerBlit(texture, x + width - 8, x + width, y + 8, y + height - 8, 0, (248 + xTextureOffset) / 256f, (256 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
         
         // Center
-        GuiComponent.innerBlit(matrix, x + 8, x + width - 8, y + 8, y + height - 8, getZ(), (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
+        graphics.innerBlit(texture, x + 8, x + width - 8, y + 8, y + height - 8, 0, (114 + xTextureOffset) / 256f, (248 + xTextureOffset) / 256f, (132 + yTextureOffset) / 256f, (182 + yTextureOffset) / 256f);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
     

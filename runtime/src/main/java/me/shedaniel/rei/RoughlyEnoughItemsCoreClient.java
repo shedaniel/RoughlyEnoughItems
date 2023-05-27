@@ -430,13 +430,7 @@ public class RoughlyEnoughItemsCoreClient {
                 return;
             rendered[0] = 2;
             resetFocused(screen);
-            PoseStack poseStack = RenderSystem.getModelViewStack();
-            poseStack.pushPose();
-            poseStack.translate(-screen.leftPos, -screen.topPos, 0.0);
-            RenderSystem.applyModelViewMatrix();
             ((ScreenOverlayImpl) getOverlay()).lateRender(matrices, mouseX, mouseY, delta);
-            poseStack.popPose();
-            RenderSystem.applyModelViewMatrix();
             resetFocused(screen);
         });
         ClientGuiEvent.RENDER_POST.register((screen, matrices, mouseX, mouseY, delta) -> {

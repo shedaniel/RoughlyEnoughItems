@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.api.client.gui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -97,11 +97,11 @@ public abstract class Button extends BaseWidget<Button> {
     }
     
     @Nullable
-    public abstract BiConsumer<PoseStack, Button> getOnRender();
+    public abstract BiConsumer<GuiGraphics, Button> getOnRender();
     
-    public abstract void setOnRender(@Nullable BiConsumer<PoseStack, Button> onRender);
+    public abstract void setOnRender(@Nullable BiConsumer<GuiGraphics, Button> onRender);
     
-    public final Button onRender(@Nullable BiConsumer<PoseStack, Button> onRender) {
+    public final Button onRender(@Nullable BiConsumer<GuiGraphics, Button> onRender) {
         setOnRender(onRender);
         return this;
     }

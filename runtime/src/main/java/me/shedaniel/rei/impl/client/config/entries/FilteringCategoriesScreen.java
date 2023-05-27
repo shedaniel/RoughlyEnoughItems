@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.impl.client.config.entries;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -71,10 +71,10 @@ public class FilteringCategoriesScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        this.listWidget.render(matrices, mouseX, mouseY, delta);
-        super.render(matrices, mouseX, mouseY, delta);
-        this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        this.listWidget.render(graphics, mouseX, mouseY, delta);
+        super.render(graphics, mouseX, mouseY, delta);
+        graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
     }
     
     private static class ListWidget extends DynamicElementListWidget<ListEntry> {
@@ -165,25 +165,25 @@ public class FilteringCategoriesScreen extends Screen {
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             if (y + entryHeight < 0 || y > height) {
                 return;
             }
             
             Minecraft client = Minecraft.getInstance();
-            matrices.pushPose();
-            matrices.translate(0, 0, 100);
-            configuration.getCategory().getIcon().render(matrices, new Rectangle(x + 2, y + 5, 16, 16), mouseY, mouseY, delta);
-            matrices.popPose();
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, 0, 100);
+            configuration.getCategory().getIcon().render(graphics, new Rectangle(x + 2, y + 5, 16, 16), mouseY, mouseY, delta);
+            graphics.pose().popPose();
             int xPos = x + 22;
             {
                 Component title = configuration.getCategory().getTitle();
                 int i = client.font.width(title);
                 if (i > entryWidth - 28) {
                     FormattedText titleTrimmed = FormattedText.composite(client.font.substrByWidth(title, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    client.font.drawShadow(matrices, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
                 } else {
-                    client.font.drawShadow(matrices, title.getVisualOrderText(), xPos, y + 1, 16777215);
+                    graphics.drawString(client.font, title.getVisualOrderText(), xPos, y + 1, 16777215);
                 }
             }
             {
@@ -192,9 +192,9 @@ public class FilteringCategoriesScreen extends Screen {
                 int i = client.font.width(subtitle);
                 if (i > entryWidth - 28) {
                     FormattedText subtitleTrimmed = FormattedText.composite(client.font.substrByWidth(subtitle, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    client.font.drawShadow(matrices, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 8421504);
                 } else {
-                    client.font.drawShadow(matrices, subtitle.getVisualOrderText(), xPos, y + 12, 8421504);
+                    graphics.drawString(client.font, subtitle.getVisualOrderText(), xPos, y + 12, 8421504);
                 }
             }
             {
@@ -203,14 +203,14 @@ public class FilteringCategoriesScreen extends Screen {
                 int i = client.font.width(id);
                 if (i > entryWidth - 28) {
                     FormattedText idTrimmed = FormattedText.composite(client.font.substrByWidth(id, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    client.font.drawShadow(matrices, Language.getInstance().getVisualOrder(idTrimmed), x + 2, y + 22, 8421504);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(idTrimmed), x + 2, y + 22, 8421504);
                 } else {
-                    client.font.drawShadow(matrices, id.getVisualOrderText(), xPos, y + 22, 8421504);
+                    graphics.drawString(client.font, id.getVisualOrderText(), xPos, y + 22, 8421504);
                 }
             }
             toggleButton.setX(x + entryWidth - 6 - toggleButton.getWidth());
             toggleButton.setY(y + 5);
-            toggleButton.render(matrices, mouseX, mouseY, delta);
+            toggleButton.render(graphics, mouseX, mouseY, delta);
         }
         
         @Override

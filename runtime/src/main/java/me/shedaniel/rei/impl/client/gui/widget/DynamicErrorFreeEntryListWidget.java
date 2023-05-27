@@ -25,12 +25,15 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -218,21 +221,21 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     protected void clickedHeader(int int_1, int int_2) {
     }
     
-    protected void renderHeader(PoseStack matrices, int rowLeft, int startY, Tesselator tessellator) {
+    protected void renderHeader(GuiGraphics graphics, int rowLeft, int startY, Tesselator tessellator) {
     }
     
     protected void drawBackground() {
     }
     
-    protected void renderDecorations(PoseStack matrices, int mouseX, int mouseY) {
+    protected void renderDecorations(GuiGraphics graphics, int mouseX, int mouseY) {
     }
     
     @Deprecated
-    protected void renderBackBackground(PoseStack matrices, BufferBuilder buffer, Tesselator tessellator) {
+    protected void renderBackBackground(GuiGraphics graphics, BufferBuilder buffer, Tesselator tessellator) {
         RenderSystem.setShaderTexture(0, backgroundLocation);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        Matrix4f matrix = matrices.last().pose();
+        Matrix4f matrix = graphics.pose().last().pose();
         float float_2 = 32.0F;
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
         buffer.vertex(matrix, this.left, this.bottom, 0.0F).uv(this.left / 32.0F, ((this.bottom + (int) this.getScroll()) / 32.0F)).color(32, 32, 32, 255).endVertex();
@@ -243,25 +246,25 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.drawBackground();
         int scrollbarPosition = this.getScrollbarPosition();
         int int_4 = scrollbarPosition + 6;
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder buffer = tessellator.getBuilder();
-        renderBackBackground(matrices, buffer, tessellator);
+        renderBackBackground(graphics, buffer, tessellator);
         int rowLeft = this.getRowLeft();
         int startY = this.top + 4 - (int) this.getScroll();
         if (this.renderSelection)
-            this.renderHeader(matrices, rowLeft, startY, tessellator);
-        this.renderList(matrices, rowLeft, startY, mouseX, mouseY, delta);
+            this.renderHeader(graphics, rowLeft, startY, tessellator);
+        this.renderList(graphics, rowLeft, startY, mouseX, mouseY, delta);
         RenderSystem.disableDepthTest();
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        this.renderHoleBackground(matrices, 0, this.top, 255, 255);
-        this.renderHoleBackground(matrices, this.bottom, this.height, 255, 255);
+        this.renderHoleBackground(graphics, 0, this.top, 255, 255);
+        this.renderHoleBackground(graphics, this.bottom, this.height, 255, 255);
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 0, 1);
-        Matrix4f matrix = matrices.last().pose();
+        Matrix4f matrix = graphics.pose().last().pose();
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
         buffer.vertex(matrix, this.left, this.top + 4, 0.0F).uv(0, 1).color(0, 0, 0, 0).endVertex();
         buffer.vertex(matrix, this.right, this.top + 4, 0.0F).uv(1, 1).color(0, 0, 0, 0).endVertex();
@@ -273,13 +276,13 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         buffer.vertex(matrix, this.left, this.bottom - 4, 0.0F).uv(0, 0).color(0, 0, 0, 0).endVertex();
         tessellator.end();
         int maxScroll = this.getMaxScroll();
-        renderScrollBar(matrices, tessellator, buffer, maxScroll, scrollbarPosition, int_4);
+        renderScrollBar(graphics, tessellator, buffer, maxScroll, scrollbarPosition, int_4);
         
-        this.renderDecorations(matrices, mouseX, mouseY);
+        this.renderDecorations(graphics, mouseX, mouseY);
         RenderSystem.disableBlend();
     }
     
-    protected void renderScrollBar(PoseStack matrices, Tesselator tessellator, BufferBuilder buffer, int maxScroll, int scrollbarPositionMinX, int scrollbarPositionMaxX) {
+    protected void renderScrollBar(GuiGraphics graphics, Tesselator tessellator, BufferBuilder buffer, int maxScroll, int scrollbarPositionMinX, int scrollbarPositionMaxX) {
         if (maxScroll > 0) {
             int int_9 = ((this.bottom - this.top) * (this.bottom - this.top)) / this.getMaxScrollPosition();
             int_9 = Mth.clamp(int_9, 32, this.bottom - this.top - 8);
@@ -289,7 +292,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
             }
             
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            Matrix4f matrix = matrices.last().pose();
+            Matrix4f matrix = graphics.pose().last().pose();
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             buffer.vertex(matrix, scrollbarPositionMinX, this.bottom, 0.0F).color(0, 0, 0, 255).endVertex();
             buffer.vertex(matrix, scrollbarPositionMaxX, this.bottom, 0.0F).color(0, 0, 0, 255).endVertex();
@@ -443,7 +446,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         return double_2 >= (double) this.top && double_2 <= (double) this.bottom && double_1 >= (double) this.left && double_1 <= (double) this.right;
     }
     
-    protected void renderList(PoseStack matrices, int startX, int startY, int int_3, int int_4, float float_1) {
+    protected void renderList(GuiGraphics graphics, int startX, int startY, int int_3, int int_4, float float_1) {
         this.hoveredItem = this.isMouseOver(int_3, int_4) ? this.getItemAtPosition(int_3, int_4) : null;
         int itemCount = this.getItemCount();
         Tesselator tessellator = Tesselator.getInstance();
@@ -461,7 +464,7 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
                 itemMinX = this.left + this.width / 2 - itemWidth / 2;
                 itemMaxX = itemMinX + itemWidth;
                 float float_2 = this.isFocused() ? 1.0F : 0.5F;
-                Matrix4f matrix = matrices.last().pose();
+                Matrix4f matrix = graphics.pose().last().pose();
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 RenderSystem.setShader(GameRenderer::getPositionColorShader);
                 buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
@@ -478,13 +481,13 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
             
             int y = this.getRowTop(renderIndex);
             int x = this.getRowLeft();
-            renderItem(matrices, item, renderIndex, y, x, itemWidth, itemHeight, int_3, int_4, Objects.equals(hoveredItem, item), float_1);
+            renderItem(graphics, item, renderIndex, y, x, itemWidth, itemHeight, int_3, int_4, Objects.equals(hoveredItem, item), float_1);
         }
         
     }
     
-    protected void renderItem(PoseStack matrices, E item, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-        item.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
+    protected void renderItem(GuiGraphics graphics, E item, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        item.render(graphics, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
     }
     
     protected int getRowLeft() {
@@ -502,11 +505,11 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         return false;
     }
     
-    protected void renderHoleBackground(PoseStack matrices, int y1, int y2, int alpha1, int alpha2) {
+    protected void renderHoleBackground(GuiGraphics graphics, int y1, int y2, int alpha1, int alpha2) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.getBuilder();
         RenderSystem.setShaderTexture(0, backgroundLocation);
-        Matrix4f matrix = matrices.last().pose();
+        Matrix4f matrix = graphics.pose().last().pose();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         float float_1 = 32.0F;
@@ -535,19 +538,21 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     public static final class SmoothScrollingSettings {
         public static final double CLAMP_EXTENSION = 200;
         
-        private SmoothScrollingSettings() {}
+        private SmoothScrollingSettings() {
+        }
     }
     
     @Environment(EnvType.CLIENT)
-    public abstract static class Entry<E extends Entry<E>> extends GuiComponent implements GuiEventListener {
-        @Deprecated DynamicErrorFreeEntryListWidget<E> parent;
+    public abstract static class Entry<E extends Entry<E>> implements GuiEventListener {
+        @Deprecated
+        DynamicErrorFreeEntryListWidget<E> parent;
         @Nullable
         private NarratableEntry lastNarratable;
         
         public Entry() {
         }
         
-        public abstract void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta);
+        public abstract void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta);
         
         public boolean isMouseOver(double double_1, double double_2) {
             return Objects.equals(this.parent.getItemAtPosition(double_1, double_2), this);

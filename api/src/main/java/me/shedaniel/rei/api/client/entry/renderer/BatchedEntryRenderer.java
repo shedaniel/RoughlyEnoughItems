@@ -29,6 +29,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 
 /**
@@ -77,37 +78,41 @@ public interface BatchedEntryRenderer<T, E> extends EntryRenderer<T> {
      *
      * @param entry     the first entry in the batch
      * @param extraData the extra data returned from {@link #getExtraData(EntryStack)}
-     * @param matrices  the matrix stack
+     * @param graphics  the graphics context
      * @param delta     the tick delta
      */
-    void startBatch(EntryStack<T> entry, E extraData, PoseStack matrices, float delta);
+    void startBatch(EntryStack<T> entry, E extraData, GuiGraphics graphics, float delta);
     
-    void renderBase(EntryStack<T> entry, E extraData, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta);
+    void renderBase(EntryStack<T> entry, E extraData, GuiGraphics graphics, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta);
     
-    void afterBase(EntryStack<T> entry, E extraData, PoseStack matrices, float delta);
+    void afterBase(EntryStack<T> entry, E extraData, GuiGraphics graphics, float delta);
     
-    void renderOverlay(EntryStack<T> entry, E extraData, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta);
+    void renderOverlay(EntryStack<T> entry, E extraData, GuiGraphics graphics, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta);
     
     /**
      * Ends the batch rendering, used to setup states, only called once with every batch.
      *
      * @param entry     the first entry in the batch
      * @param extraData the extra data returned from {@link #getExtraData(EntryStack)}
-     * @param matrices  the matrix stack
+     * @param graphics  the graphics context
      * @param delta     the tick delta
      */
-    void endBatch(EntryStack<T> entry, E extraData, PoseStack matrices, float delta);
+    void endBatch(EntryStack<T> entry, E extraData, GuiGraphics graphics, float delta);
     
     @Override
-    default void render(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-        matrices = batchModifyMatrices(matrices);
+    default void render(EntryStack<T> entry, GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        PoseStack newStack = batchModifyMatrices(graphics.pose());
+        graphics.pose().pushPose();
+        graphics.pose().last().pose().set(newStack.last().pose());
+        graphics.pose().last().normal().set(newStack.last().normal());
         E data = getExtraData(entry);
-        startBatch(entry, data, matrices, delta);
+        startBatch(entry, data, graphics, delta);
         MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-        renderBase(entry, data, matrices, immediate, bounds, mouseX, mouseY, delta);
+        renderBase(entry, data, graphics, immediate, bounds, mouseX, mouseY, delta);
         immediate.endBatch();
-        renderOverlay(entry, data, matrices, immediate, bounds, mouseX, mouseY, delta);
+        renderOverlay(entry, data, graphics, immediate, bounds, mouseX, mouseY, delta);
         immediate.endBatch();
-        endBatch(entry, data, matrices, delta);
+        endBatch(entry, data, graphics, delta);
+        graphics.pose().popPose();
     }
 }

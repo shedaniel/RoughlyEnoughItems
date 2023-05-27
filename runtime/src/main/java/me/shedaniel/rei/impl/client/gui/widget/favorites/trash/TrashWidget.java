@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.favorites.trash;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
@@ -31,6 +30,7 @@ import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.FavoritesPanel;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -62,20 +62,20 @@ public class TrashWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (updateBounds(delta)) {
             int alpha = 0x12 + (int) (0x22 * lastProgress * (Mth.cos((float) (System.currentTimeMillis() % 2000 / 1000F * Math.PI)) + 1) / 2);
-            fillGradient(poses, this.bounds.x, this.bounds.y, this.bounds.getMaxX(), this.bounds.getMaxY(), 0xFFFFFF | (alpha << 24), 0xFFFFFF | (alpha << 24));
+            graphics.fillGradient(this.bounds.x, this.bounds.y, this.bounds.getMaxX(), this.bounds.getMaxY(), 0xFFFFFF | (alpha << 24), 0xFFFFFF | (alpha << 24));
             int lineColor = (int) (0x60 * lastProgress) << 24 | 0xFFFFFF;
-            fillGradient(poses, this.bounds.x, this.bounds.y, this.bounds.getMaxX(), this.bounds.y + 1, lineColor, lineColor);
-            fillGradient(poses, this.bounds.x, this.bounds.getMaxY() - 1, this.bounds.getMaxX(), this.bounds.getMaxY(), lineColor, lineColor);
+            graphics.fillGradient(this.bounds.x, this.bounds.y, this.bounds.getMaxX(), this.bounds.y + 1, lineColor, lineColor);
+            graphics.fillGradient(this.bounds.x, this.bounds.getMaxY() - 1, this.bounds.getMaxX(), this.bounds.getMaxY(), lineColor, lineColor);
             
-            fillGradient(poses, this.bounds.x, this.bounds.y + 1, this.bounds.x + 1, this.bounds.getMaxY() - 1, lineColor, lineColor);
-            fillGradient(poses, this.bounds.getMaxX() - 1, this.bounds.y + 1, this.bounds.getMaxX(), this.bounds.getMaxY() - 1, lineColor, lineColor);
+            graphics.fillGradient(this.bounds.x, this.bounds.y + 1, this.bounds.x + 1, this.bounds.getMaxY() - 1, lineColor, lineColor);
+            graphics.fillGradient(this.bounds.getMaxX() - 1, this.bounds.y + 1, this.bounds.getMaxX(), this.bounds.getMaxY() - 1, lineColor, lineColor);
             
             Component text = Component.translatable("text.rei.dispose_here");
             if (0xAA * lastProgress > 0x4) {
-                font.draw(poses, text, this.bounds.getCenterX() - font.width(text) / 2, this.bounds.getCenterY() - 4F, (int) (0xAA * lastProgress) << 24 | 0xFFFFFF);
+                graphics.drawString(font, text, this.bounds.getCenterX() - font.width(text) / 2, this.bounds.getCenterY() - 4, (int) (0xAA * lastProgress) << 24 | 0xFFFFFF, false);
             }
         }
     }

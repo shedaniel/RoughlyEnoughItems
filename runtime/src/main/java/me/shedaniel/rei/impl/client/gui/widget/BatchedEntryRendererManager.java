@@ -37,6 +37,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
 import net.minecraft.CrashReport;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
@@ -84,7 +85,7 @@ public class BatchedEntryRendererManager<T extends EntryWidget> implements Itera
                     if (batchedRenderer.isBatched(cast)) {
                         Object extraData = batchedRenderer.getExtraData(cast);
                         int hash = batchedRenderer.getBatchIdentifier(cast, widget.getBounds(), extraData)
-                                   ^ widget.getCurrentEntry().getType().hashCode();
+                                ^ widget.getCurrentEntry().getType().hashCode();
                         List<Object> entries = grouping.get(hash);
                         if (entries == null) {
                             grouping.put(hash, entries = new ArrayList<>());
@@ -113,18 +114,18 @@ public class BatchedEntryRendererManager<T extends EntryWidget> implements Itera
         toRender.add(widget);
     }
     
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        render(false, null, null, matrices, mouseX, mouseY, delta);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        render(false, null, null, graphics, mouseX, mouseY, delta);
     }
     
-    public void render(boolean debugTime, MutableInt size, MutableLong time, PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(boolean debugTime, MutableInt size, MutableLong time, GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (fastEntryRendering) {
             for (List<Object> entries : grouping.values()) {
                 Object[] extraData = new Object[entries.size() / 2];
                 for (int i = 0; i < extraData.length; i++) {
                     extraData[i] = entries.get(i * 2 + 1);
                 }
-                renderBatched(debugTime, size, time, matrices, mouseX, mouseY, delta, () -> new AbstractIterator<T>() {
+                renderBatched(debugTime, size, time, graphics, mouseX, mouseY, delta, () -> new AbstractIterator<T>() {
                     public int i = 0;
                     
                     @Override
@@ -140,11 +141,11 @@ public class BatchedEntryRendererManager<T extends EntryWidget> implements Itera
             }
         }
         if (!toRender.isEmpty()) {
-            renderSlow(debugTime, size, time, matrices, mouseX, mouseY, delta, toRender);
+            renderSlow(debugTime, size, time, graphics, mouseX, mouseY, delta, toRender);
         }
     }
     
-    public static <T extends EntryWidget> void renderEntries(boolean debugTime, MutableInt size, MutableLong time, boolean fastEntryRendering, PoseStack matrices, int mouseX, int mouseY, float delta, Collection<T> entries) {
+    public static <T extends EntryWidget> void renderEntries(boolean debugTime, MutableInt size, MutableLong time, boolean fastEntryRendering, GuiGraphics graphics, int mouseX, int mouseY, float delta, Collection<T> entries) {
         if (fastEntryRendering) {
             T firstWidget = Iterables.getFirst(entries, null);
             if (firstWidget == null) return;
@@ -157,27 +158,30 @@ public class BatchedEntryRendererManager<T extends EntryWidget> implements Itera
                     EntryStack<?> currentEntry = entry.getCurrentEntry();
                     extraData[i++] = ((BatchedEntryRenderer<Object, Object>) currentEntry.getRenderer()).getExtraData(currentEntry.cast());
                 }
-                renderBatched(debugTime, size, time, matrices, mouseX, mouseY, delta, entries, extraData);
+                renderBatched(debugTime, size, time, graphics, mouseX, mouseY, delta, entries, extraData);
                 return;
             }
         }
-        renderSlow(debugTime, size, time, matrices, mouseX, mouseY, delta, entries);
+        renderSlow(debugTime, size, time, graphics, mouseX, mouseY, delta, entries);
     }
     
-    private static <T extends EntryWidget> void renderBatched(boolean debugTime, MutableInt size, MutableLong time, PoseStack matrices, int mouseX, int mouseY, float delta, Iterable<T> entries, Object[] extraData) {
+    private static <T extends EntryWidget> void renderBatched(boolean debugTime, MutableInt size, MutableLong time, GuiGraphics graphics, int mouseX, int mouseY, float delta, Iterable<T> entries, Object[] extraData) {
         T firstWidget = Iterables.getFirst(entries, null);
         if (firstWidget == null) return;
         @SuppressWarnings("rawtypes")
         EntryStack first = firstWidget.getCurrentEntry();
         EntryRenderer<?> renderer = first.getRenderer();
         BatchedEntryRenderer<?, Object> firstRenderer = (BatchedEntryRenderer<?, Object>) renderer;
-        matrices = firstRenderer.batchModifyMatrices(matrices);
+        PoseStack newStack = firstRenderer.batchModifyMatrices(graphics.pose());
+        graphics.pose().pushPose();
+        graphics.pose().last().pose().set(newStack.last().pose());
+        graphics.pose().last().normal().set(newStack.last().normal());
         long l = debugTime ? System.nanoTime() : 0;
         MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
         int i = 0;
         for (T entry : entries) {
             try {
-                entry.drawBackground(matrices, mouseX, mouseY, delta);
+                entry.drawBackground(graphics, mouseX, mouseY, delta);
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry background");
                 CrashReportUtils.renderer(report, entry);
@@ -185,13 +189,15 @@ public class BatchedEntryRendererManager<T extends EntryWidget> implements Itera
                 return;
             }
         }
-        firstRenderer.startBatch(first, extraData[0], matrices, delta);
+        firstRenderer.startBatch(first, extraData[0], graphics, delta);
         for (T entry : entries) {
             try {
                 @SuppressWarnings("rawtypes")
                 EntryStack currentEntry = entry.getCurrentEntry();
-                currentEntry.setZ(entry.getBounds().contains(mouseX, mouseY) ? 150 : 100);
-                firstRenderer.renderBase(currentEntry, extraData[i++], matrices, immediate, entry.getInnerBounds(), mouseX, mouseY, delta);
+                graphics.pose().pushPose();
+                graphics.pose().translate(0, 0, entry.getBounds().contains(mouseX, mouseY) ? 150 : 100);
+                firstRenderer.renderBase(currentEntry, extraData[i++], graphics, immediate, entry.getInnerBounds(), mouseX, mouseY, delta);
+                graphics.pose().popPose();
                 if (debugTime && !currentEntry.isEmpty()) size.increment();
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry base");
@@ -201,13 +207,13 @@ public class BatchedEntryRendererManager<T extends EntryWidget> implements Itera
             }
         }
         immediate.endBatch();
-        firstRenderer.afterBase(first, extraData[0], matrices, delta);
+        firstRenderer.afterBase(first, extraData[0], graphics, delta);
         i = 0;
         for (T entry : entries) {
             try {
                 @SuppressWarnings("rawtypes")
                 EntryStack currentEntry = entry.getCurrentEntry();
-                firstRenderer.renderOverlay(currentEntry, extraData[i++], matrices, immediate, entry.getInnerBounds(), mouseX, mouseY, delta);
+                firstRenderer.renderOverlay(currentEntry, extraData[i++], graphics, immediate, entry.getInnerBounds(), mouseX, mouseY, delta);
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry base");
                 CrashReportUtils.renderer(report, entry);
@@ -219,13 +225,13 @@ public class BatchedEntryRendererManager<T extends EntryWidget> implements Itera
         for (T entry : entries) {
             try {
                 if (entry.containsMouse(mouseX, mouseY)) {
-                    entry.queueTooltip(matrices, mouseX, mouseY, delta);
+                    entry.queueTooltip(graphics, mouseX, mouseY, delta);
                     
                     if (entry.hasHighlight()) {
-                        entry.drawHighlighted(matrices, mouseX, mouseY, delta);
+                        entry.drawHighlighted(graphics, mouseX, mouseY, delta);
                     }
                 }
-                entry.drawExtra(matrices, mouseX, mouseY, delta);
+                entry.drawExtra(graphics, mouseX, mouseY, delta);
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry extra");
                 CrashReportUtils.renderer(report, entry);
@@ -234,10 +240,11 @@ public class BatchedEntryRendererManager<T extends EntryWidget> implements Itera
             }
         }
         if (debugTime) time.add(System.nanoTime() - l);
-        firstRenderer.endBatch(first, extraData[0], matrices, delta);
+        firstRenderer.endBatch(first, extraData[0], graphics, delta);
+        graphics.pose().popPose();
     }
     
-    public static <T extends EntryWidget> void renderSlow(boolean debugTime, MutableInt size, MutableLong time, PoseStack matrices, int mouseX, int mouseY, float delta, Iterable<T> entries) {
+    public static <T extends EntryWidget> void renderSlow(boolean debugTime, MutableInt size, MutableLong time, GuiGraphics graphics, int mouseX, int mouseY, float delta, Iterable<T> entries) {
         for (T entry : entries) {
             if (entry.getCurrentEntry().isEmpty())
                 continue;
@@ -245,9 +252,9 @@ public class BatchedEntryRendererManager<T extends EntryWidget> implements Itera
                 if (debugTime) {
                     size.increment();
                     long l = System.nanoTime();
-                    entry.render(matrices, mouseX, mouseY, delta);
+                    entry.render(graphics, mouseX, mouseY, delta);
                     time.add(System.nanoTime() - l);
-                } else entry.render(matrices, mouseX, mouseY, delta);
+                } else entry.render(graphics, mouseX, mouseY, delta);
             } catch (Throwable throwable) {
                 CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry");
                 CrashReportUtils.renderer(report, entry);

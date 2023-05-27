@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.widget.favorites;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
@@ -63,6 +62,7 @@ import me.shedaniel.rei.impl.client.gui.widget.region.EntryStacksRegionWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionDraggableStack;
 import me.shedaniel.rei.impl.common.util.RectangleUtils;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.Triple;
@@ -176,11 +176,11 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (fullBounds.isEmpty())
             return;
         
-        this.trash.render(matrices, mouseX, mouseY, delta);
+        this.trash.render(graphics, mouseX, mouseY, delta);
         double trashHeight = this.trash.getHeight();
         
         if (!PluginManager.areAnyReloading()) {
@@ -188,7 +188,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
         }
         
         boolean draggingDisplay = DraggingContext.getInstance().isDraggingComponent()
-                                  && DraggingContext.getInstance().getDragged().get() instanceof Display;
+                && DraggingContext.getInstance().getDragged().get() instanceof Display;
         int topOffsetHeight = 0;
         this.favoritesBounds = DisplayHistoryManager.INSTANCE.getEntries(displayHistory).isEmpty() && !draggingDisplay
                 ? fullBounds : RectangleUtils.excludeZones(this.fullBounds, Stream.of(displayHistory.createBounds(this.excludedBounds)));
@@ -197,11 +197,11 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
         int systemHeight = systemRegion.getBounds().getHeight();
         if (systemHeight > 1 && !region.isEmpty()) {
             Rectangle innerBounds = systemRegion.getInnerBounds();
-            fillGradient(matrices, innerBounds.x + 1, this.favoritesBounds.y + systemHeight + 2, innerBounds.getMaxX() - 1, this.favoritesBounds.y + systemHeight + 3, 0xFF777777, 0xFF777777);
+            graphics.fillGradient(innerBounds.x + 1, this.favoritesBounds.y + systemHeight + 2, innerBounds.getMaxX() - 1, this.favoritesBounds.y + systemHeight + 3, 0xFF777777, 0xFF777777);
             topOffsetHeight += systemHeight + 4;
         }
         
-        displayHistory.render(matrices, mouseX, mouseY, delta);
+        displayHistory.render(graphics, mouseX, mouseY, delta);
         
         if (favoritePanel.getBounds().height > 20) {
             // Opened favorites panel
@@ -210,9 +210,9 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
             region.getBounds().setBounds(this.favoritesBounds.x, this.favoritesBounds.y + topOffsetHeight, this.favoritesBounds.width, this.favoritesBounds.height - topOffsetHeight - (Math.round(trashHeight) <= 0 ? 0 : trashHeight + 24));
         }
         
-        systemRegion.render(matrices, mouseX, mouseY, delta);
-        region.render(matrices, mouseX, mouseY, delta);
-        renderAddFavorite(matrices, mouseX, mouseY, delta);
+        systemRegion.render(graphics, mouseX, mouseY, delta);
+        region.render(graphics, mouseX, mouseY, delta);
+        renderAddFavorite(graphics, mouseX, mouseY, delta);
     }
     
     private void updateSystemRegion() {
@@ -257,9 +257,9 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
         }), EntryStacksRegionWidget.RemovalMode.DISAPPEAR);
     }
     
-    private void renderAddFavorite(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        this.favoritePanel.render(matrices, mouseX, mouseY, delta);
-        this.togglePanelButton.render(matrices, mouseX, mouseY, delta);
+    private void renderAddFavorite(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        this.favoritePanel.render(graphics, mouseX, mouseY, delta);
+        this.togglePanelButton.render(graphics, mouseX, mouseY, delta);
     }
     
     @Override

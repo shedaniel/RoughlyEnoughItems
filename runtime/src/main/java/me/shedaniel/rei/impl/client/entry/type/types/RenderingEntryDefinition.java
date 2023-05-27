@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.entry.type.types;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.entry.type.BuiltinClientEntryTypes;
@@ -35,6 +34,7 @@ import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.impl.common.entry.type.types.BuiltinEntryDefinition;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -78,8 +78,8 @@ public class RenderingEntryDefinition {
         INSTANCE;
         
         @Override
-        public void render(EntryStack<Renderer> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-            entry.getValue().render(matrices, bounds, mouseX, mouseY, delta);
+        public void render(EntryStack<Renderer> entry, GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
+            entry.getValue().render(graphics, bounds, mouseX, mouseY, delta);
         }
         
         @Override

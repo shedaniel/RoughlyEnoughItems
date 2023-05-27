@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.plugin.client.favorites;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import me.shedaniel.math.Rectangle;
@@ -33,7 +32,6 @@ import me.shedaniel.rei.api.client.favorites.CompoundFavoriteRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
-import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
@@ -41,6 +39,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
@@ -101,23 +100,26 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
     
     private static Renderer getRenderer(int id) {
         GameType type = GameType.byId(id);
-        return new AbstractRenderer() {
+        return new Renderer() {
             @Override
-            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+            public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 int color = bounds.contains(mouseX, mouseY) ? 0xFFEEEEEE : 0xFFAAAAAA;
                 if (bounds.width > 4 && bounds.height > 4) {
-                    matrices.pushPose();
-                    matrices.translate(bounds.getCenterX(), bounds.getCenterY(), 0);
-                    matrices.scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f, 1);
-                    renderGameModeText(matrices, type, 0, 0, color);
-                    matrices.popPose();
+                    graphics.pose().pushPose();
+                    graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY(), 0);
+                    graphics.pose().scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f, 1);
+                    renderGameModeText(graphics, type, 0, 0, color);
+                    graphics.pose().popPose();
                 }
             }
             
-            private void renderGameModeText(PoseStack matrices, GameType type, int centerX, int centerY, int color) {
+            private void renderGameModeText(GuiGraphics graphics, GameType type, int centerX, int centerY, int color) {
                 Component s = Component.translatable("text.rei.short_gamemode." + type.getName());
                 Font font = Minecraft.getInstance().font;
-                font.draw(matrices, s, centerX - font.width(s) / 2f + 0.5f, centerY - 3.5f, color);
+                graphics.pose().pushPose();
+                graphics.pose().translate(centerX - font.width(s) / 2f + 0.5f, centerY - 3.5f, 0);
+                graphics.drawString(font, s, 0, 0, color, false);
+                graphics.pose().popPose();
             }
             
             @Override
@@ -256,10 +258,10 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         }
         
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             boolean disabled = this.minecraft.gameMode.getPlayerMode() == gameMode;
             if (selected && !disabled) {
-                fill(matrices, x, y, x + width, y + 12, -12237499);
+                graphics.fill(x, y, x + width, y + 12, -12237499);
             }
             if (!disabled && selected && containsMouse) {
                 REIRuntime.getInstance().queueTooltip(Tooltip.create(Component.translatable("text.rei.gamemode_button.tooltip.entry", text)));
@@ -268,7 +270,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
             if (disabled) {
                 s = ChatFormatting.STRIKETHROUGH + s;
             }
-            font.draw(matrices, s, x + 2, y + 2, selected && !disabled ? 16777215 : 8947848);
+            graphics.drawString(font, s, x + 2, y + 2, selected && !disabled ? 16777215 : 8947848, false);
         }
         
         @Override

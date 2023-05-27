@@ -24,7 +24,10 @@
 package me.shedaniel.rei.impl.client.gui.widget.favorites.history;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
@@ -44,6 +47,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayCompositeWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -83,7 +87,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     }
     
     @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         Rectangle fullBounds = parent.excludedBounds;
         List<DisplayEntry> entries = new ArrayList<>(DisplayHistoryManager.INSTANCE.getEntries(this));
         if (updateBounds(fullBounds)) {
@@ -101,7 +105,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
             if (entry.isStable()) {
                 ScissorsHandler.INSTANCE.scissor(getBounds());
             }
-            entry.render(poses, mouseX, mouseY, delta);
+            entry.render(graphics, mouseX, mouseY, delta);
             if (entry.isStable()) {
                 ScissorsHandler.INSTANCE.removeLastScissor();
             }
@@ -118,15 +122,15 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
             Rectangle bounds = this.bounds.clone();
             bounds.y += 10;
             bounds.height -= 20;
-            drawHorizontalDashedLine(poses, bounds.x, bounds.getMaxX(), bounds.y, lineColor, false);
-            drawHorizontalDashedLine(poses, bounds.x, bounds.getMaxX(), bounds.getMaxY() - 1, lineColor, true);
+            drawHorizontalDashedLine(graphics, bounds.x, bounds.getMaxX(), bounds.y, lineColor, false);
+            drawHorizontalDashedLine(graphics, bounds.x, bounds.getMaxX(), bounds.getMaxY() - 1, lineColor, true);
             
-            drawVerticalDashedLine(poses, bounds.x, bounds.y, bounds.getMaxY(), lineColor, true);
-            drawVerticalDashedLine(poses, bounds.getMaxX() - 1, bounds.y, bounds.getMaxY(), lineColor, false);
+            drawVerticalDashedLine(graphics, bounds.x, bounds.y, bounds.getMaxY(), lineColor, true);
+            drawVerticalDashedLine(graphics, bounds.getMaxX() - 1, bounds.y, bounds.getMaxY(), lineColor, false);
         }
     }
     
-    private void drawHorizontalDashedLine(PoseStack poses, int x1, int x2, int y, int color, boolean reverse) {
+    private void drawHorizontalDashedLine(GuiGraphics graphics, int x1, int x2, int y, int color, boolean reverse) {
         float offset = (System.currentTimeMillis() % 700) / 100.0F;
         if (!reverse) offset = 7 - offset;
         
@@ -141,20 +145,20 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
         float r = (float) (color >> 16 & 255) / 255.0F;
         float g = (float) (color >> 8 & 255) / 255.0F;
         float b = (float) (color & 255) / 255.0F;
-        Matrix4f pose = poses.last().pose();
+        Matrix4f pose = graphics.pose().last().pose();
         
         for (float x = x1 - offset; x < x2; x += 7) {
-            builder.vertex(pose, Mth.clamp(x + 4, x1, x2), y, getZ()).color(r, g, b, a).endVertex();
-            builder.vertex(pose, Mth.clamp(x, x1, x2), y, getZ()).color(r, g, b, a).endVertex();
-            builder.vertex(pose, Mth.clamp(x, x1, x2), y + 1, getZ()).color(r, g, b, a).endVertex();
-            builder.vertex(pose, Mth.clamp(x + 4, x1, x2), y + 1, getZ()).color(r, g, b, a).endVertex();
+            builder.vertex(pose, Mth.clamp(x + 4, x1, x2), y, 0).color(r, g, b, a).endVertex();
+            builder.vertex(pose, Mth.clamp(x, x1, x2), y, 0).color(r, g, b, a).endVertex();
+            builder.vertex(pose, Mth.clamp(x, x1, x2), y + 1, 0).color(r, g, b, a).endVertex();
+            builder.vertex(pose, Mth.clamp(x + 4, x1, x2), y + 1, 0).color(r, g, b, a).endVertex();
         }
         
         tesselator.end();
         RenderSystem.disableBlend();
     }
     
-    private void drawVerticalDashedLine(PoseStack poses, int x, int y1, int y2, int color, boolean reverse) {
+    private void drawVerticalDashedLine(GuiGraphics graphics, int x, int y1, int y2, int color, boolean reverse) {
         float offset = (System.currentTimeMillis() % 700) / 100.0F;
         if (!reverse) offset = 7 - offset;
         
@@ -169,13 +173,13 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
         float r = (float) (color >> 16 & 255) / 255.0F;
         float g = (float) (color >> 8 & 255) / 255.0F;
         float b = (float) (color & 255) / 255.0F;
-        Matrix4f pose = poses.last().pose();
+        Matrix4f pose = graphics.pose().last().pose();
         
         for (float y = y1 - offset; y < y2; y += 7) {
-            builder.vertex(pose, x + 1, Mth.clamp(y, y1, y2), getZ()).color(r, g, b, a).endVertex();
-            builder.vertex(pose, x, Mth.clamp(y, y1, y2), getZ()).color(r, g, b, a).endVertex();
-            builder.vertex(pose, x, Mth.clamp(y + 4, y1, y2), getZ()).color(r, g, b, a).endVertex();
-            builder.vertex(pose, x + 1, Mth.clamp(y + 4, y1, y2), getZ()).color(r, g, b, a).endVertex();
+            builder.vertex(pose, x + 1, Mth.clamp(y, y1, y2), 0).color(r, g, b, a).endVertex();
+            builder.vertex(pose, x, Mth.clamp(y, y1, y2), 0).color(r, g, b, a).endVertex();
+            builder.vertex(pose, x, Mth.clamp(y + 4, y1, y2), 0).color(r, g, b, a).endVertex();
+            builder.vertex(pose, x + 1, Mth.clamp(y + 4, y1, y2), 0).color(r, g, b, a).endVertex();
         }
         
         tesselator.end();

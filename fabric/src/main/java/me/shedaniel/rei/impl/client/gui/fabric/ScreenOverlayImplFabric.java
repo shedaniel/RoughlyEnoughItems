@@ -23,11 +23,11 @@
 
 package me.shedaniel.rei.impl.client.gui.fabric;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 
 public class ScreenOverlayImplFabric extends ScreenOverlayImpl {
     @Override
-    public void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY) {
+    public void renderTooltipInner(Screen screen, GuiGraphics graphics, Tooltip tooltip, int mouseX, int mouseY) {
         List<ClientTooltipComponent> lines = tooltip.entries().stream()
                 .flatMap(component -> {
                     if (component.isText()) {
@@ -72,15 +72,15 @@ public class ScreenOverlayImplFabric extends ScreenOverlayImpl {
                 }
             }
         }
-        renderTooltipInner(matrices, lines, tooltip.getX(), tooltip.getY());
+        renderTooltipInner(graphics, lines, tooltip.getX(), tooltip.getY());
     }
     
-    public static void renderTooltipInner(PoseStack matrices, List<ClientTooltipComponent> lines, int mouseX, int mouseY) {
+    public static void renderTooltipInner(GuiGraphics graphics, List<ClientTooltipComponent> lines, int mouseX, int mouseY) {
         if (lines.isEmpty()) {
             return;
         }
-        matrices.pushPose();
-        Minecraft.getInstance().screen.renderTooltipInternal(matrices, lines, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE);
-        matrices.popPose();
+        graphics.pose().pushPose();
+        graphics.renderTooltipInternal(Minecraft.getInstance().font, lines, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE);
+        graphics.pose().popPose();
     }
 }

@@ -27,7 +27,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import it.unimi.dsi.fastutil.Pair;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
@@ -62,6 +61,7 @@ import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -169,21 +169,19 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 .onClick(button -> nextCategory()).tooltipLine(Component.translatable("text.rei.next_category")));
         this.categoryBack.setEnabled(categories.size() > 1);
         this.categoryNext.setEnabled(categories.size() > 1);
-        this.widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+        this.widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             Rectangle recipeBackBounds = recipeBack.getBounds();
             Rectangle recipeNextBounds = recipeNext.getBounds();
             Rectangle categoryBackBounds = categoryBack.getBounds();
             Rectangle categoryNextBounds = categoryNext.getBounds();
-            matrices.pushPose();
-            matrices.translate(0.5, 0.5, 0);
-            RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_TEXTURE);
-            blit(matrices, recipeBackBounds.x + 2, recipeBackBounds.y + 2, 0, 0, 8, 8, 8, 8);
-            blit(matrices, categoryBackBounds.x + 2, categoryBackBounds.y + 2, 0, 0, 8, 8, 8, 8);
-            matrices.translate(-0.5, 0, 0);
-            RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_TEXTURE);
-            blit(matrices, recipeNextBounds.x + 2, recipeNextBounds.y + 2, 0, 0, 8, 8, 8, 8);
-            blit(matrices, categoryNextBounds.x + 2, categoryNextBounds.y + 2, 0, 0, 8, 8, 8, 8);
-            matrices.popPose();
+            graphics.pose().pushPose();
+            graphics.pose().translate(0.5, 0.5, 0);
+            graphics.blit(InternalTextures.ARROW_LEFT_TEXTURE, recipeBackBounds.x + 2, recipeBackBounds.y + 2, 0, 0, 8, 8, 8, 8);
+            graphics.blit(InternalTextures.ARROW_LEFT_TEXTURE, categoryBackBounds.x + 2, categoryBackBounds.y + 2, 0, 0, 8, 8, 8, 8);
+            graphics.pose().translate(-0.5, 0, 0);
+            graphics.blit(InternalTextures.ARROW_RIGHT_TEXTURE, recipeNextBounds.x + 2, recipeNextBounds.y + 2, 0, 0, 8, 8, 8, 8);
+            graphics.blit(InternalTextures.ARROW_RIGHT_TEXTURE, categoryNextBounds.x + 2, categoryNextBounds.y + 2, 0, 0, 8, 8, 8, 8);
+            graphics.pose().popPose();
         }), 0, 0, 1));
         
         this.widgets.add(recipeBack = Widgets.createButton(new Rectangle(bounds.getCenterX() - guiWidth / 2 + 5, bounds.getY() + 19, 12, 12), Component.literal(""))
@@ -219,9 +217,9 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         initDisplays();
         widgets = CollectionUtils.map(widgets, widget -> Widgets.withTranslate(widget, 0, 0, 10));
         widgets.add(Widgets.withTranslate(new PanelWidget(bounds), 0, 0, 5));
-        widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            fill(matrices, bounds.getCenterX() - guiWidth / 2 + 17, bounds.y + 5, bounds.getCenterX() + guiWidth / 2 - 17, bounds.y + 17, darkStripesColor.value().getColor());
-            fill(matrices, bounds.getCenterX() - guiWidth / 2 + 17, bounds.y + 19, bounds.getCenterX() + guiWidth / 2 - 17, bounds.y + 31, darkStripesColor.value().getColor());
+        widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
+            graphics.fill(bounds.getCenterX() - guiWidth / 2 + 17, bounds.y + 5, bounds.getCenterX() + guiWidth / 2 - 17, bounds.y + 17, darkStripesColor.value().getColor());
+            graphics.fill(bounds.getCenterX() - guiWidth / 2 + 17, bounds.y + 19, bounds.getCenterX() + guiWidth / 2 - 17, bounds.y + 31, darkStripesColor.value().getColor());
         }), 0, 0, 6));
         initWorkstations(widgets);
         
@@ -328,35 +326,35 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             .withConvention(() -> Color.ofTransparent(REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFF404040 : 0xFF9E9E9E), ValueAnimator.typicalTransitionTime());
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         darkStripesColor.update(delta);
-        renderBackground(matrices);
-        super.render(matrices, mouseX, mouseY, delta);
-        getOverlay().render(matrices, mouseX, mouseY, delta);
+        renderBackground(graphics);
+        super.render(graphics, mouseX, mouseY, delta);
+        getOverlay().render(graphics, mouseX, mouseY, delta);
         for (Widget widget : widgets()) {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            widget.render(matrices, mouseX, mouseY, delta);
+            widget.render(graphics, mouseX, mouseY, delta);
         }
         {
             ModifierKeyCode export = ConfigObject.getInstance().getExportImageKeybind();
             if (export.matchesCurrentKey() || export.matchesCurrentMouse()) {
                 for (Rectangle bounds : Iterables.concat(recipeBounds.keySet(), Iterables.transform(getTabs(), TabWidget::getBounds))) {
-                    matrices.pushPose();
-                    matrices.translate(0.0D, 0.0D, 480.0D);
+                    graphics.pose().pushPose();
+                    graphics.pose().translate(0.0D, 0.0D, 480.0D);
                     if (bounds.contains(mouseX, mouseY)) {
-                        fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744822402, 1744822402);
+                        graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744822402, 1744822402);
                         Component text = Component.translatable("text.rei.release_export", export.getLocalizedName().plainCopy().getString());
                         MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-                        matrices.pushPose();
-                        matrices.translate(0.0D, 0.0D, 10.0D);
-                        Matrix4f matrix4f = matrices.last().pose();
+                        graphics.pose().pushPose();
+                        graphics.pose().translate(0.0D, 0.0D, 10.0D);
+                        Matrix4f matrix4f = graphics.pose().last().pose();
                         font.drawInBatch(text.getVisualOrderText(), bounds.getCenterX() - font.width(text) / 2f, bounds.getCenterY() - 4.5f, 0xff000000, false, matrix4f, immediate, Font.DisplayMode.NORMAL, 0, 15728880);
                         immediate.endBatch();
-                        matrices.popPose();
+                        graphics.pose().popPose();
                     } else {
-                        fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744830463, 1744830463);
+                        graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 1744830463, 1744830463);
                     }
-                    matrices.popPose();
+                    graphics.pose().popPose();
                 }
             }
         }

@@ -23,16 +23,15 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.longs.*;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
-public class CollapsedEntriesBorderRenderer extends GuiComponent {
+public class CollapsedEntriesBorderRenderer {
     private static final int TOP = 0b00;
     private static final int BOTTOM = 0b01;
     private static final int LEFT = 0b10;
@@ -42,7 +41,7 @@ public class CollapsedEntriesBorderRenderer extends GuiComponent {
     private static final int LEFT_O = 0b110;
     private static final int RIGHT_O = 0b111;
     
-    public void render(PoseStack matrices, Iterable<EntryListStackEntry> entries, Object2IntMap<CollapsedStack> collapsedStackIndicesGlobal) {
+    public void render(GuiGraphics graphics, Iterable<EntryListStackEntry> entries, Object2IntMap<CollapsedStack> collapsedStackIndicesGlobal) {
         if (collapsedStackIndicesGlobal.isEmpty()) return;
         LongSet edgeSet = new LongOpenHashSet();
         int entrySize = entrySize();
@@ -98,8 +97,8 @@ public class CollapsedEntriesBorderRenderer extends GuiComponent {
         }
         edgeSet.removeAll(toRemove);
     
-        matrices.pushPose();
-        matrices.translate(-100, -100, 0);
+        graphics.pose().pushPose();
+        graphics.pose().translate(-100, -100, 0);
         
         iterator = edgeSet.iterator();
         while (iterator.hasNext()) {
@@ -118,33 +117,33 @@ public class CollapsedEntriesBorderRenderer extends GuiComponent {
                     int fEnd = edgeSet.contains(shiftLongX(l, entrySize)) || edgeSet.contains(withDirD(l, RIGHT, false)) ? 0 : 1;
                     if (fStart == 1 && edgeSet.contains(getPackedLong(x - entrySize, y - entrySize, collapsedStackIndices, RIGHT, false))) fStart = -1;
                     if (fEnd == 1 && edgeSet.contains(getPackedLong(x + entrySize, y - entrySize, collapsedStackIndices, LEFT, false))) fEnd = -1;
-                    fillGradient(matrices, x1 + fStart, y1, x2 - fEnd, y1 + 1, 0x67FFFFFF, 0x67FFFFFF);
+                    graphics.fillGradient(x1 + fStart, y1, x2 - fEnd, y1 + 1, 0x67FFFFFF, 0x67FFFFFF);
                 }
                 case 1 -> { // bottom
                     int fStart = edgeSet.contains(shiftLongX(l, -entrySize)) || edgeSet.contains(withDirD(l, LEFT, false)) ? 0 : 1;
                     int fEnd = edgeSet.contains(shiftLongX(l, entrySize)) || edgeSet.contains(withDirD(l, RIGHT, false)) ? 0 : 1;
                     if (fStart == 1 && edgeSet.contains(getPackedLong(x - entrySize, y + entrySize, collapsedStackIndices, RIGHT, false))) fStart = -1;
                     if (fEnd == 1 && edgeSet.contains(getPackedLong(x + entrySize, y + entrySize, collapsedStackIndices, LEFT, false))) fEnd = -1;
-                    fillGradient(matrices, x1 + fStart, y2 - 1, x2 - fEnd, y2, 0x67FFFFFF, 0x67FFFFFF);
+                    graphics.fillGradient(x1 + fStart, y2 - 1, x2 - fEnd, y2, 0x67FFFFFF, 0x67FFFFFF);
                 }
                 case 2 -> { // left
                     int fStart = edgeSet.contains(shiftLongY(l, -entrySize)) ? 0 : 1;
                     int fEnd = edgeSet.contains(shiftLongY(l, entrySize)) ? 0 : 1;
                     if (fStart == 1 && edgeSet.contains(getPackedLong(x - entrySize, y - entrySize, collapsedStackIndices, BOTTOM, false))) fStart = 0;
                     if (fEnd == 1 && edgeSet.contains(getPackedLong(x - entrySize, y + entrySize, collapsedStackIndices, TOP, false))) fEnd = 0;
-                    fillGradient(matrices, x1, y1 + fStart, x1 + 1, y2 - fEnd, 0x67FFFFFF, 0x67FFFFFF);
+                    graphics.fillGradient(x1, y1 + fStart, x1 + 1, y2 - fEnd, 0x67FFFFFF, 0x67FFFFFF);
                 }
                 case 3 -> { // right
                     int fStart = edgeSet.contains(shiftLongY(l, -entrySize)) ? 0 : 1;
                     int fEnd = edgeSet.contains(shiftLongY(l, entrySize)) ? 0 : 1;
                     if (fStart == 1 && edgeSet.contains(getPackedLong(x + entrySize, y - entrySize, collapsedStackIndices, BOTTOM, false))) fStart = 0;
                     if (fEnd == 1 && edgeSet.contains(getPackedLong(x + entrySize, y + entrySize, collapsedStackIndices, TOP, false))) fEnd = 0;
-                    fillGradient(matrices, x2 - 1, y1 + fStart, x2, y2 - fEnd, 0x67FFFFFF, 0x67FFFFFF);
+                    graphics.fillGradient(x2 - 1, y1 + fStart, x2, y2 - fEnd, 0x67FFFFFF, 0x67FFFFFF);
                 }
             }
         }
     
-        matrices.popPose();
+        graphics.pose().popPose();
     }
     
     private static long getPackedLong(int x, int y, int collapsedStackIndices, int direction, boolean occupied) {

@@ -25,10 +25,10 @@ package me.shedaniel.rei.impl.client.config.entries;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -47,7 +47,9 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>
     private Consumer<List<EntryStack<?>>> saveConsumer;
     private List<EntryStack<?>> defaultValue;
     private List<EntryStack<?>> configFiltered;
-    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.translatable("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {}, Supplier::get) {};
+    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.translatable("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {
+    }, Supplier::get) {
+    };
     private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public NoFilteringEntry(int width, List<EntryStack<?>> configFiltered, List<EntryStack<?>> defaultValue, Consumer<List<EntryStack<?>>> saveConsumer) {
@@ -74,14 +76,14 @@ public class NoFilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>
     }
     
     @Override
-    public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-        super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
+    public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        super.render(graphics, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = false;
         this.buttonWidget.setY(y);
         this.buttonWidget.setX(x + entryWidth / 2 - width / 2);
         this.buttonWidget.setWidth(width);
-        this.buttonWidget.render(matrices, mouseX, mouseY, delta);
+        this.buttonWidget.render(graphics, mouseX, mouseY, delta);
     }
     
     @Override

@@ -23,14 +23,14 @@
 
 package me.shedaniel.rei.api.client.registry.transfer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.common.display.Display;
+import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.List;
 
 @FunctionalInterface
 public interface TransferHandlerRenderer {
-    void render(PoseStack matrices, int mouseX, int mouseY, float delta, List<Widget> widgets, Rectangle bounds, Display display);
+    void render(GuiGraphics graphics, int mouseX, int mouseY, float delta, List<Widget> widgets, Rectangle bounds, Display display);
 }

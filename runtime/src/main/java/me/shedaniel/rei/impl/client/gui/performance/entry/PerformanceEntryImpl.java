@@ -24,11 +24,11 @@
 package me.shedaniel.rei.impl.client.gui.performance.entry;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.impl.client.gui.performance.PerformanceScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
@@ -47,11 +47,11 @@ public class PerformanceEntryImpl extends PerformanceScreen.PerformanceEntry {
         this.time = time;
     }
     
-    public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+    public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        Minecraft.getInstance().font.drawShadow(matrices, this.name.getVisualOrderText(), (float) x, (float) (y + 6), -1);
+        graphics.drawString(Minecraft.getInstance().font, this.name.getVisualOrderText(), x, y + 6, -1);
         FormattedCharSequence timeText = PerformanceScreen.formatTime(time, false);
-        Minecraft.getInstance().font.drawShadow(matrices, timeText, (float) x + entryWidth - 6 - 4 - Minecraft.getInstance().font.width(timeText), (float) (y + 6), -1);
+        graphics.drawString(Minecraft.getInstance().font, timeText, x + entryWidth - 6 - 4 - Minecraft.getInstance().font.width(timeText), y + 6, -1);
     }
     
     @Override

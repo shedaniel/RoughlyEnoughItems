@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.entry.filtering.rules;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
@@ -37,6 +36,7 @@ import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
@@ -145,7 +145,7 @@ public enum SearchFilteringRuleType implements FilteringRuleType<SearchFiltering
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             BatchedEntryRendererManager<EntryWidget> manager = new BatchedEntryRendererManager<>();
             int entrySize = entrySize();
             int width = entryWidth / entrySize;
@@ -157,7 +157,7 @@ public enum SearchFilteringRuleType implements FilteringRuleType<SearchFiltering
                 }
                 i++;
             }
-            manager.render(matrices, mouseX, mouseY, delta);
+            manager.render(graphics, mouseX, mouseY, delta);
             totalHeight = (i / width + 1) * entrySize;
         }
         

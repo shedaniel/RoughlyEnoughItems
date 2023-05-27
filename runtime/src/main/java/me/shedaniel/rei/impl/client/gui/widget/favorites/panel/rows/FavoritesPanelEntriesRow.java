@@ -41,6 +41,7 @@ import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.FavoritesPanel;
 import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionDraggableStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -81,7 +82,7 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
     }
     
     @Override
-    public void render(PoseStack matrices, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
         this.lastY = y;
         int entrySize = entrySize();
         boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
@@ -92,7 +93,7 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
             if (widget.getBounds().getMaxY() > lastY && widget.getBounds().getY() <= lastY + rowHeight) {
                 if (widget.getCurrentEntry().isEmpty())
                     continue;
-                widget.render(matrices, mouseX, mouseY, delta);
+                widget.render(graphics, mouseX, mouseY, delta);
             }
         }
     }

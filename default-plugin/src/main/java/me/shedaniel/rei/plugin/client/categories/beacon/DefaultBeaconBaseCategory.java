@@ -24,7 +24,6 @@
 package me.shedaniel.rei.plugin.client.categories.beacon;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
@@ -40,6 +39,7 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconBaseDisplay;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -74,8 +74,8 @@ public class DefaultBeaconBaseCategory implements DisplayCategory<DefaultBeaconB
             }
             
             @Override
-            public void render(PoseStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
-                Minecraft.getInstance().font.draw(matrices, name, rectangle.x + 5, rectangle.y + 6, -1);
+            public void render(GuiGraphics graphics, Rectangle rectangle, int mouseX, int mouseY, float delta) {
+                graphics.drawString(Minecraft.getInstance().font, name, rectangle.x + 5, rectangle.y + 6, -1, false);
             }
         };
     }
@@ -150,10 +150,10 @@ public class DefaultBeaconBaseCategory implements DisplayCategory<DefaultBeaconB
         }
         
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             scrolling.updatePosition(delta);
             Rectangle innerBounds = scrolling.getScissorBounds();
-            try (CloseableScissors scissors = scissor(matrices, innerBounds)) {
+            try (CloseableScissors scissors = scissor(graphics, innerBounds)) {
                 for (int y = 0; y < Mth.ceil(widgets.size() / 8f); y++) {
                     for (int x = 0; x < 8; x++) {
                         int index = y * 8 + x;
@@ -161,12 +161,12 @@ public class DefaultBeaconBaseCategory implements DisplayCategory<DefaultBeaconB
                             break;
                         Slot widget = widgets.get(index);
                         widget.getBounds().setLocation(bounds.x + 1 + x * 18, bounds.y + 1 + y * 18 - scrolling.scrollAmountInt());
-                        widget.render(matrices, mouseX, mouseY, delta);
+                        widget.render(graphics, mouseX, mouseY, delta);
                     }
                 }
             }
-            try (CloseableScissors scissors = scissor(matrices, scrolling.getBounds())) {
-                scrolling.renderScrollBar(0xff000000, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+            try (CloseableScissors scissors = scissor(graphics, scrolling.getBounds())) {
+                scrolling.renderScrollBar(graphics, 0xff000000, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
             }
         }
         

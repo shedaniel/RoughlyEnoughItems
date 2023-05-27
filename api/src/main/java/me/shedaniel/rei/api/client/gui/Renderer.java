@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.api.client.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
@@ -32,11 +31,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
+import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.Nullable;
 
 public interface Renderer {
     @Environment(EnvType.CLIENT)
-    void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta);
+    void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta);
     
     @Nullable
     @Environment(EnvType.CLIENT)
@@ -44,15 +44,8 @@ public interface Renderer {
         return null;
     }
     
-    @Environment(EnvType.CLIENT)
-    int getZ();
-    
-    @Environment(EnvType.CLIENT)
-    void setZ(int z);
-    
     default void fillCrashReport(CrashReport report, CrashReportCategory category) {
         category.setDetail("Renderer name", () -> getClass().getCanonicalName());
-        category.setDetail("Z level", () -> String.valueOf(getZ()));
         if (this instanceof WidgetWithBounds widget) {
             category.setDetail("Bounds", () -> String.valueOf(widget.getBounds()));
         }

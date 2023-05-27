@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingRectangle;
@@ -40,6 +39,7 @@ import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -75,7 +75,7 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
     }
     
     @Override
-    protected void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void drawExtra(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (size != null) {
             size.update(delta);
             int centerX = getBounds().getCenterX();
@@ -83,7 +83,7 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
             int entrySize = (int) Math.round(entrySize() * size.value());
             getBounds().setBounds(centerX - entrySize / 2, centerY - entrySize / 2, entrySize, entrySize);
         }
-        super.drawExtra(matrices, mouseX, mouseY, delta);
+        super.drawExtra(graphics, mouseX, mouseY, delta);
     }
     
     @Override
@@ -105,7 +105,7 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
     }
     
     @Override
-    protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         Rectangle bounds = getBounds();
         
         if (collapsedStack != null) {
@@ -115,24 +115,24 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
             int x2 = x1 + entrySize;
             int y2 = y1 + entrySize;
             if (collapsedStack.isExpanded()) {
-                fillGradient(matrices, x1, y1, x2, y2, 0x34FFFFFF, 0x34FFFFFF);
+                graphics.fillGradient(x1, y1, x2, y2, 0x34FFFFFF, 0x34FFFFFF);
             } else {
-                fillGradient(matrices, x1, y1, x2, y2, 0x53FFFFFF, 0x53FFFFFF);
+                graphics.fillGradient(x1, y1, x2, y2, 0x53FFFFFF, 0x53FFFFFF);
             }
         }
         
-        super.drawBackground(matrices, mouseX, mouseY, delta);
+        super.drawBackground(graphics, mouseX, mouseY, delta);
     }
     
     @Override
-    protected void drawCurrentEntry(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void drawCurrentEntry(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (collapsedStack != null && !collapsedStack.isExpanded()) {
             Rectangle bounds = getBounds();
             List<EntryStack<?>> stacks = collapsedStack.getIngredient();
             float fullSize = bounds.getWidth();
             
-            matrices.pushPose();
-            matrices.translate(0, 0, 10);
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, 0, 10);
             
             for (int i = stacks.size() - 1; i >= 0; i--) {
                 EntryStack<?> stack = stacks.get(i);
@@ -147,14 +147,14 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
                 
                 double scaledSize = value.width * fullSize;
                 
-                stack.render(matrices, new Rectangle(x - scaledSize / 2, y - scaledSize / 2, scaledSize, scaledSize), mouseX, mouseY, delta);
+                stack.render(graphics, new Rectangle(x - scaledSize / 2, y - scaledSize / 2, scaledSize, scaledSize), mouseX, mouseY, delta);
                 
-                matrices.translate(0, 0, 10);
+                graphics.pose().translate(0, 0, 10);
             }
             
-            matrices.popPose();
+            graphics.pose().popPose();
         } else {
-            super.drawCurrentEntry(matrices, mouseX, mouseY, delta);
+            super.drawCurrentEntry(graphics, mouseX, mouseY, delta);
         }
     }
     

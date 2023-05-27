@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.modules.entries;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Rectangle;
@@ -34,6 +33,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -107,27 +107,27 @@ public class ToggleMenuEntry extends AbstractMenuEntry {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (isSelected() && active.getAsBoolean()) {
-            fill(matrices, getX(), getY(), getX() + getWidth(), getY() + getEntryHeight(), -12237499);
+            graphics.fill(getX(), getY(), getX() + getWidth(), getY() + getEntryHeight(), -12237499);
             
             Tooltip tooltip = this.tooltip.get();
             
             if (tooltip != null) {
                 List<Rectangle> areas = Lists.newArrayList(ScissorsHandler.INSTANCE.getScissorsAreas());
                 ScissorsHandler.INSTANCE.clearScissors();
-                matrices.pushPose();
-                matrices.translate(0, 0, -400);
-                ScreenOverlayImpl.getInstance().renderTooltip(matrices, tooltip);
-                matrices.popPose();
+                graphics.pose().pushPose();
+                graphics.pose().translate(0, 0, -400);
+                ScreenOverlayImpl.getInstance().renderTooltip(graphics, tooltip);
+                graphics.pose().popPose();
                 for (Rectangle area : areas) {
                     ScissorsHandler.INSTANCE.scissor(area);
                 }
             }
         }
-        font.draw(matrices, text, getX() + 2, getY() + 2, isSelected() && active.getAsBoolean() ? 16777215 : 8947848);
+        graphics.drawString(font, text, getX() + 2, getY() + 2, isSelected() && active.getAsBoolean() ? 16777215 : 8947848, false);
         if (supplier.getAsBoolean()) {
-            font.draw(matrices, "✔", getX() + getWidth() - 2 - font.width("✔"), getY() + 2, isSelected() && active.getAsBoolean() ? 16777215 : 8947848);
+            graphics.drawString(font, "✔", getX() + getWidth() - 2 - font.width("✔"), getY() + 2, isSelected() && active.getAsBoolean() ? 16777215 : 8947848, false);
         }
     }
     

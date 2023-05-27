@@ -35,6 +35,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Matrix4f;
@@ -59,7 +60,6 @@ public abstract class Widget extends AbstractContainerEventHandler implements Re
      */
     protected final Font font = minecraft.font;
     private static final Stack<Point> mouseStack = new Stack<>();
-    private int z;
     
     public static Point mouse() {
         return mouseStack.empty() ? PointHelper.ofMouse() : mouseStack.peek();
@@ -88,16 +88,6 @@ public abstract class Widget extends AbstractContainerEventHandler implements Re
         return pushMouse(new Point(mouseVec.x(), mouseVec.y()));
     }
     
-    @Override
-    public int getZ() {
-        return this.z;
-    }
-    
-    @Override
-    public void setZ(int z) {
-        this.z = z;
-    }
-    
     public boolean containsMouse(double mouseX, double mouseY) {
         return false;
     }
@@ -119,8 +109,8 @@ public abstract class Widget extends AbstractContainerEventHandler implements Re
     
     @Override
     @Deprecated
-    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-        render(matrices, mouseX, mouseY, delta);
+    public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        render(graphics, mouseX, mouseY, delta);
     }
     
     @ApiStatus.Experimental
@@ -129,8 +119,8 @@ public abstract class Widget extends AbstractContainerEventHandler implements Re
     }
     
     @ApiStatus.Experimental
-    public static CloseableScissors scissor(PoseStack matrices, Rectangle bounds) {
-        return scissor(matrices.last().pose(), bounds);
+    public static CloseableScissors scissor(GuiGraphics graphics, Rectangle bounds) {
+        return scissor(graphics.pose().last().pose(), bounds);
     }
     
     @ApiStatus.Experimental

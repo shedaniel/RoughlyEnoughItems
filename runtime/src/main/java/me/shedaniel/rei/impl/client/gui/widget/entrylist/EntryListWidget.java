@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Point;
@@ -56,6 +55,7 @@ import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionRenderingDebugger;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -189,13 +189,13 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (!hasSpace()) return;
         
         boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
-        renderEntries(fastEntryRendering, matrices, mouseX, mouseY, delta);
+        renderEntries(fastEntryRendering, graphics, mouseX, mouseY, delta);
         
-        debugger.render(matrices, bounds.x, bounds.y, delta);
+        debugger.render(graphics, bounds.x, bounds.y, delta);
         
         if (containsChecked(mouseX, mouseY, false) && ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && !minecraft.player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
             EntryStack<?> stack = EntryStacks.of(minecraft.player.containerMenu.getCarried().copy());
@@ -215,19 +215,19 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
         
         scaleIndicator.update(delta);
         if (scaleIndicator.value() > 0.04) {
-            matrices.pushPose();
-            matrices.translate(0, 0, 500);
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, 0, 500);
             Component component = Component.literal(Math.round(ConfigObject.getInstance().getEntrySize() * 100) + "%");
             int width = font.width(component);
             int backgroundColor = ((int) Math.round(0xa0 * Mth.clamp(scaleIndicator.value(), 0.0, 1.0))) << 24;
             int textColor = ((int) Math.round(0xdd * Mth.clamp(scaleIndicator.value(), 0.0, 1.0))) << 24;
-            fillGradient(matrices, bounds.getCenterX() - width / 2 - 2, bounds.getCenterY() - 6, bounds.getCenterX() + width / 2 + 2, bounds.getCenterY() + 6, backgroundColor, backgroundColor);
-            font.draw(matrices, component, bounds.getCenterX() - width / 2, bounds.getCenterY() - 4, 0xFFFFFF | textColor);
-            matrices.popPose();
+            graphics.fillGradient(bounds.getCenterX() - width / 2 - 2, bounds.getCenterY() - 6, bounds.getCenterX() + width / 2 + 2, bounds.getCenterY() + 6, backgroundColor, backgroundColor);
+            graphics.drawString(font, component, bounds.getCenterX() - width / 2, bounds.getCenterY() - 4, 0xFFFFFF | textColor, false);
+            graphics.pose().popPose();
         }
     }
     
-    protected abstract void renderEntries(boolean fastEntryRendering, PoseStack matrices, int mouseX, int mouseY, float delta);
+    protected abstract void renderEntries(boolean fastEntryRendering, GuiGraphics graphics, int mouseX, int mouseY, float delta);
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {

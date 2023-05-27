@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueProvider;
@@ -36,6 +35,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import net.minecraft.client.gui.ComponentPath;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.locale.Language;
@@ -70,9 +70,12 @@ public final class LabelWidget extends Label {
                 return hoveredColor.value();
             }, ValueAnimator.typicalTransitionTime() / 2);
     private Point point;
-    @Nullable private Function<Label, @Nullable Component[]> tooltip;
-    @Nullable private Consumer<Label> onClick;
-    @Nullable private BiConsumer<PoseStack, Label> onRender;
+    @Nullable
+    private Function<Label, @Nullable Component[]> tooltip;
+    @Nullable
+    private Consumer<Label> onClick;
+    @Nullable
+    private BiConsumer<GuiGraphics, Label> onRender;
     private FormattedText text;
     private boolean rainbow;
     private final LazyResettable<FormattedCharSequence> orderedText = new LazyResettable<>(() -> Language.getInstance().getVisualOrder(getMessage()));
@@ -105,12 +108,12 @@ public final class LabelWidget extends Label {
     
     @Nullable
     @Override
-    public final BiConsumer<PoseStack, Label> getOnRender() {
+    public final BiConsumer<GuiGraphics, Label> getOnRender() {
         return onRender;
     }
     
     @Override
-    public final void setOnRender(@Nullable BiConsumer<PoseStack, Label> onRender) {
+    public final void setOnRender(@Nullable BiConsumer<GuiGraphics, Label> onRender) {
         this.onRender = onRender;
     }
     
@@ -183,7 +186,7 @@ public final class LabelWidget extends Label {
     }
     
     @Override
-    public final void setHoveredColor(int hoveredColor) {                                                                                                                                   
+    public final void setHoveredColor(int hoveredColor) {
         this.hoveredColor = ValueProvider.constant(Color.ofTransparent(hoveredColor));
         this.finalColor.completeImmediately();
     }
@@ -226,12 +229,12 @@ public final class LabelWidget extends Label {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.color.update(delta);
         this.hoveredColor.update(delta);
         this.finalColor.update(delta);
         if (getOnRender() != null)
-            getOnRender().accept(matrices, this);
+            getOnRender().accept(graphics, this);
         int color = finalColor.value().getColor();
         hovered = isClickable() && isHovered(mouseX, mouseY);
         Point pos = getPoint();
@@ -240,23 +243,14 @@ public final class LabelWidget extends Label {
         int width = font.width(sequence);
         switch (getHorizontalAlignment()) {
             case LEFT_ALIGNED:
-                if (hasShadow())
-                    font.drawShadow(matrices, sequence, pos.x, pos.y, color);
-                else
-                    font.draw(matrices, sequence, pos.x, pos.y, color);
+                graphics.drawString(font, sequence, pos.x, pos.y, color, hasShadow());
                 break;
             case RIGHT_ALIGNED:
-                if (hasShadow())
-                    font.drawShadow(matrices, sequence, pos.x - width, pos.y, color);
-                else
-                    font.draw(matrices, sequence, pos.x - width, pos.y, color);
+                graphics.drawString(font, sequence, pos.x - width, pos.y, color, hasShadow());
                 break;
             case CENTER:
             default:
-                if (hasShadow())
-                    font.drawShadow(matrices, sequence, pos.x - width / 2f, pos.y, color);
-                else
-                    font.draw(matrices, sequence, pos.x - width / 2f, pos.y, color);
+                graphics.drawString(font, sequence, (int) (pos.x - width / 2f), pos.y, color, hasShadow());
                 break;
         }
         if (isHovered(mouseX, mouseY)) {

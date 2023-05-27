@@ -24,12 +24,12 @@
 package me.shedaniel.rei.impl.client.config.entries;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -73,7 +73,8 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
             addRenderableWidget(new Button(this.width - 4 - width - 10, 4, width + 10, 20, doneText, button -> {
                 save();
                 minecraft.setScreen(parent);
-            }, Supplier::get) {});
+            }, Supplier::get) {
+            });
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
         addEntries(ruleEntry -> rulesList.addItem(ruleEntry));
@@ -94,10 +95,10 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        this.rulesList.render(matrices, mouseX, mouseY, delta);
-        super.render(matrices, mouseX, mouseY, delta);
-        this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        this.rulesList.render(graphics, mouseX, mouseY, delta);
+        super.render(graphics, mouseX, mouseY, delta);
+        graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
     }
     
     public static class RulesList extends DynamicElementListWidget<RuleEntry> {
@@ -142,8 +143,8 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-            Minecraft.getInstance().font.drawShadow(matrices, text, x + 5, y, -1);
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+            graphics.drawString(Minecraft.getInstance().font, text, x + 5, y, -1);
         }
         
         @Override
@@ -171,7 +172,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
         }
         
         @Override
@@ -200,10 +201,10 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             widget.setX(x + 2);
             widget.setY(y + 2);
-            widget.render(matrices, mouseX, mouseY, delta);
+            widget.render(graphics, mouseX, mouseY, delta);
         }
         
         @Override
@@ -236,7 +237,8 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
             this.widget = new Button(0, 0, 100, 20, textFunction.apply(b), button -> {
                 this.b = !this.b;
                 button.setMessage(textFunction.apply(this.b));
-            }, Supplier::get) {};
+            }, Supplier::get) {
+            };
         }
         
         public boolean getBoolean() {
@@ -244,10 +246,10 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             widget.setX(x + 2);
             widget.setY(y);
-            widget.render(matrices, mouseX, mouseY, delta);
+            widget.render(graphics, mouseX, mouseY, delta);
         }
         
         @Override
@@ -289,15 +291,15 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             RenderSystem.setShaderTexture(0, CONFIG_TEX);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             this.widget.rectangle.x = x + 3;
             this.widget.rectangle.y = y;
             this.widget.rectangle.width = entryWidth - 6;
             this.widget.rectangle.height = 24;
-            this.blit(matrices, x + 3, y + 5, 24, (this.widget.rectangle.contains(mouseX, mouseY) ? 18 : 0) + (this.expanded ? 9 : 0), 9, 9);
-            Minecraft.getInstance().font.drawShadow(matrices, this.name.get().getVisualOrderText(), (float) x + 3 + 15, (float) (y + 6), this.widget.rectangle.contains(mouseX, mouseY) ? -1638890 : -1);
+            graphics.blit(CONFIG_TEX, x + 3, y + 5, 24, (this.widget.rectangle.contains(mouseX, mouseY) ? 18 : 0) + (this.expanded ? 9 : 0), 9, 9);
+            graphics.drawString(Minecraft.getInstance().font, this.name.get().getVisualOrderText(), x + 3 + 15, y + 6, this.widget.rectangle.contains(mouseX, mouseY) ? -1638890 : -1);
             
             for (RuleEntry performanceEntry : this.rules) {
                 performanceEntry.setParent(this.getParent());
@@ -309,7 +311,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
                 RuleEntry entry;
                 for (Iterator<RuleEntry> iterator = this.rules.iterator(); iterator.hasNext(); yy += entry.getItemHeight()) {
                     entry = iterator.next();
-                    entry.render(matrices, -1, yy, x + 3 + 15, entryWidth - 15 - 3, entry.getItemHeight(), mouseX, mouseY, isHovered && this.getFocused() == entry, delta);
+                    entry.render(graphics, -1, yy, x + 3 + 15, entryWidth - 15 - 3, entry.getItemHeight(), mouseX, mouseY, isHovered && this.getFocused() == entry, delta);
                 }
             }
         }

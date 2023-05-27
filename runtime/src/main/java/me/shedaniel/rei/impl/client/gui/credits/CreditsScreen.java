@@ -24,12 +24,12 @@
 package me.shedaniel.rei.impl.client.gui.credits;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.platform.Platform;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TextCreditsItem;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsEntryListWidget.TranslationCreditsItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -152,11 +152,11 @@ public class CreditsScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderDirtBackground(matrices);
-        this.entryListWidget.render(matrices, mouseX, mouseY, delta);
-        drawCenteredString(matrices, this.font, I18n.get("text.rei.credits"), this.width / 2, 16, 16777215);
-        super.render(matrices, mouseX, mouseY, delta);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        this.renderDirtBackground(graphics);
+        this.entryListWidget.render(graphics, mouseX, mouseY, delta);
+        graphics.drawCenteredString(this.font, I18n.get("text.rei.credits"), this.width / 2, 16, 16777215);
+        super.render(graphics, mouseX, mouseY, delta);
     }
     
 }

@@ -24,7 +24,6 @@
 package me.shedaniel.rei.plugin.client.categories.tag;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -33,6 +32,7 @@ import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.Holder;
@@ -68,15 +68,14 @@ public class ReferenceTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
     }
     
     @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-        if (this.overflowBounds.intersects(MatrixUtils.transform(poses.last().pose(), getBounds()))) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        if (this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose().last().pose(), getBounds()))) {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderTexture(0, new ResourceLocation("textures/gui/advancements/widgets.png"));
-            this.blit(poses, bounds.x, bounds.y, 1, 128 + 27, 24, 24);
+            graphics.blit(new ResourceLocation("textures/gui/advancements/widgets.png"), bounds.x, bounds.y, 1, 128 + 27, 24, 24);
             this.slot.getBounds().setLocation(bounds.getCenterX() - this.slot.getBounds().getWidth() / 2, bounds.y + (bounds.height - this.slot.getBounds().getHeight()) / 2 + 1);
-            this.slot.render(poses, mouseX, mouseY, delta);
+            this.slot.render(graphics, mouseX, mouseY, delta);
             if (this.containsMouse(mouseX, mouseY)) {
-            Tooltip.create(Component.literal("#" + this.node.getReference().location().toString())).queue();
+                Tooltip.create(Component.literal("#" + this.node.getReference().location().toString())).queue();
             }
         }
     }

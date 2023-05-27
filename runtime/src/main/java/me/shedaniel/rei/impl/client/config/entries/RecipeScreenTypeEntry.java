@@ -25,11 +25,11 @@ package me.shedaniel.rei.impl.client.config.entries;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.entries.TooltipListEntry;
 import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.impl.client.gui.screen.UncertainDisplayViewingScreen;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -54,9 +54,9 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<DisplayScreenType> {
         }));
     }, Supplier::get) {
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             setMessage(Component.translatable("config.roughlyenoughitems.recipeScreenType.config", type.toString()));
-            super.render(matrices, mouseX, mouseY, delta);
+            super.render(graphics, mouseX, mouseY, delta);
         }
     };
     private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
@@ -102,13 +102,13 @@ public class RecipeScreenTypeEntry extends TooltipListEntry<DisplayScreenType> {
     }
     
     @Override
-    public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-        super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
+    public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        super.render(graphics, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = this.isEditable();
         this.buttonWidget.setY(y);
         this.buttonWidget.setX(x + entryWidth / 2 - width / 2);
         this.buttonWidget.setWidth(width);
-        this.buttonWidget.render(matrices, mouseX, mouseY, delta);
+        this.buttonWidget.render(graphics, mouseX, mouseY, delta);
     }
 }

@@ -24,13 +24,12 @@
 package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.impl.client.gui.widget.DynamicErrorFreeEntryListWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -133,16 +132,16 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
-        this.renderDirtBackground(matrices);
-        this.listWidget.render(matrices, int_1, int_2, float_1);
+    public void render(GuiGraphics graphics, int int_1, int int_2, float float_1) {
+        this.renderDirtBackground(graphics);
+        this.listWidget.render(graphics, int_1, int_2, float_1);
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
-            drawCenteredString(matrices, this.font, "Warnings during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
+            graphics.drawCenteredString(this.font, "Warnings during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
         } else {
-            drawCenteredString(matrices, this.font, "Errors during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
+            graphics.drawCenteredString(this.font, "Errors during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
         }
-        super.render(matrices, int_1, int_2, float_1);
-        this.buttonExit.render(matrices, int_1, int_2, float_1);
+        super.render(graphics, int_1, int_2, float_1);
+        this.buttonExit.render(graphics, int_1, int_2, float_1);
     }
     
     private static class StringEntryListWidget extends DynamicErrorFreeEntryListWidget<StringItem> {
@@ -150,7 +149,7 @@ public class WarningAndErrorScreen extends Screen {
         private int max = 80;
         
         public StringEntryListWidget(Minecraft client, int width, int height, int startY, int endY) {
-            super(client, width, height, startY, endY, GuiComponent.BACKGROUND_LOCATION);
+            super(client, width, height, startY, endY, Screen.BACKGROUND_LOCATION);
         }
         
         public void creditsClearEntries() {
@@ -191,7 +190,7 @@ public class WarningAndErrorScreen extends Screen {
     
     private static class EmptyItem extends StringItem {
         @Override
-        public void render(PoseStack matrixStack, int i, int i1, int i2, int i3, int i4, int i5, int i6, boolean b, float v) {
+        public void render(GuiGraphics graphics, int i, int i1, int i2, int i3, int i4, int i5, int i6, boolean b, float v) {
             
         }
         
@@ -219,8 +218,8 @@ public class WarningAndErrorScreen extends Screen {
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            Minecraft.getInstance().font.drawShadow(matrices, text, x + 5, y, -1);
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+            graphics.drawString(Minecraft.getInstance().font, text, x + 5, y, -1);
         }
         
         @Override
@@ -263,15 +262,15 @@ public class WarningAndErrorScreen extends Screen {
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
-                WarningAndErrorScreen.this.renderTooltip(matrices, Component.literal("Click to open link."), mouseX, mouseY);
-                Minecraft.getInstance().font.drawShadow(matrices, characterVisitor -> {
+                graphics.renderTooltip(font, Component.literal("Click to open link."), mouseX, mouseY);
+                graphics.drawString(Minecraft.getInstance().font, characterVisitor -> {
                     return text.accept((charIndex, style, codePoint) -> characterVisitor.accept(charIndex, style.applyFormat(ChatFormatting.UNDERLINE), codePoint));
                 }, x + 5, y, 0xff1fc3ff);
             } else {
-                Minecraft.getInstance().font.drawShadow(matrices, text, x + 5, y, 0xff1fc3ff);
+                graphics.drawString(Minecraft.getInstance().font, text, x + 5, y, 0xff1fc3ff);
             }
         }
         

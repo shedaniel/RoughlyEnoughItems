@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.gui;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -63,6 +62,7 @@ import me.shedaniel.rei.impl.client.gui.widget.hint.HintsContainerWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import me.shedaniel.rei.impl.common.util.RectangleUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -220,7 +220,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (shouldReload || !calculateOverlayBounds().equals(bounds)) {
             init();
             getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
@@ -237,11 +237,11 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
         }
         if (OverlaySearchField.isHighlighting) {
-            EntryHighlighter.render(matrices);
+            EntryHighlighter.render(graphics);
         }
         if (!hasSpace()) return;
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        this.renderWidgets(matrices, mouseX, mouseY, delta);
+        this.renderWidgets(graphics, mouseX, mouseY, delta);
         if (ConfigObject.getInstance().areClickableRecipeArrowsEnabled()) {
             Screen screen = Minecraft.getInstance().screen;
             ClickArea.ClickAreaContext<Screen> context = createClickAreaContext(mouseX, mouseY, screen);
@@ -285,7 +285,8 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     
     private static Rectangle avoidButtons(Rectangle bounds) {
         int buttonsHeight = 2;
-        if (REIRuntime.getInstance().getContextualSearchFieldLocation() == SearchFieldLocation.TOP_SIDE) buttonsHeight += 24;
+        if (REIRuntime.getInstance().getContextualSearchFieldLocation() == SearchFieldLocation.TOP_SIDE)
+            buttonsHeight += 24;
         if (!ConfigObject.getInstance().isEntryListWidgetScrolled()) buttonsHeight += 22;
         Rectangle area = REIRuntime.getInstance().calculateEntryListArea(bounds).clone();
         area.height = buttonsHeight;
@@ -293,30 +294,30 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
                 .filter(zone -> zone.intersects(area)));
     }
     
-    public void lateRender(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void lateRender(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (REIRuntime.getInstance().isOverlayVisible() && hasSpace()) {
             for (Widget widget : widgets) {
                 if (widget instanceof LateRenderable && widget != menuHolder.widget())
-                    widget.render(matrices, mouseX, mouseY, delta);
+                    widget.render(graphics, mouseX, mouseY, delta);
                 else if (widget instanceof OverlaySearchField field)
-                    field.laterRender(matrices, mouseX, mouseY, delta);
+                    field.laterRender(graphics, mouseX, mouseY, delta);
             }
-            matrices.pushPose();
-            matrices.translate(0, 0, 500);
-            menuHolder.lateRender(matrices, mouseX, mouseY, delta);
-            matrices.popPose();
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, 0, 500);
+            menuHolder.lateRender(graphics, mouseX, mouseY, delta);
+            graphics.pose().popPose();
             if (choosePageWidget != null) {
-                matrices.pushPose();
-                matrices.translate(0, 0, 500);
-                fillGradient(matrices, 0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight(), -1072689136, -804253680);
-                matrices.popPose();
-                choosePageWidget.render(matrices, mouseX, mouseY, delta);
+                graphics.pose().pushPose();
+                graphics.pose().translate(0, 0, 500);
+                graphics.fillGradient(0, 0, window.getGuiScaledWidth(), window.getGuiScaledHeight(), -1072689136, -804253680);
+                graphics.pose().popPose();
+                choosePageWidget.render(graphics, mouseX, mouseY, delta);
             }
         }
         if (choosePageWidget == null) {
             TOOLTIPS.stream().filter(Objects::nonNull)
                     .reduce((tooltip, tooltip2) -> tooltip2)
-                    .ifPresent(tooltip -> renderTooltip(matrices, tooltip));
+                    .ifPresent(tooltip -> renderTooltip(graphics, tooltip));
         }
         TOOLTIPS.clear();
         if (REIRuntime.getInstance().isOverlayVisible()) {
@@ -324,11 +325,11 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         }
     }
     
-    public void renderTooltip(PoseStack matrices, Tooltip tooltip) {
-        renderTooltipInner(minecraft.screen, matrices, tooltip, tooltip.getX(), tooltip.getY());
+    public void renderTooltip(GuiGraphics graphics, Tooltip tooltip) {
+        renderTooltipInner(minecraft.screen, graphics, tooltip, tooltip.getX(), tooltip.getY());
     }
     
-    protected abstract void renderTooltipInner(Screen screen, PoseStack matrices, Tooltip tooltip, int mouseX, int mouseY);
+    protected abstract void renderTooltipInner(Screen screen, GuiGraphics graphics, Tooltip tooltip, int mouseX, int mouseY);
     
     public void addTooltip(@Nullable Tooltip tooltip) {
         if (tooltip != null)
@@ -339,12 +340,12 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         TOOLTIPS.clear();
     }
     
-    public void renderWidgets(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void renderWidgets(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (!REIRuntime.getInstance().isOverlayVisible())
             return;
         for (Widget widget : widgets) {
             if (!(widget instanceof LateRenderable))
-                widget.render(matrices, mouseX, mouseY, delta);
+                widget.render(graphics, mouseX, mouseY, delta);
         }
     }
     
@@ -365,9 +366,9 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         }
         for (Widget widget : widgets)
             if (widget != getEntryListWidget() && (favoritesListWidget == null || widget != favoritesListWidget)
-                && widget != menuHolder.widget()
-                && widget != hintsWidget
-                && widget.mouseScrolled(mouseX, mouseY, amount))
+                    && widget != menuHolder.widget()
+                    && widget != hintsWidget
+                    && widget.mouseScrolled(mouseX, mouseY, amount))
                 return true;
         return false;
     }

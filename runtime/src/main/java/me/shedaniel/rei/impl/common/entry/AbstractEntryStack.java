@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.common.entry;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
@@ -37,10 +36,9 @@ import me.shedaniel.rei.api.common.entry.settings.EntrySettingsAdapterRegistry;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -57,20 +55,6 @@ import java.util.stream.Stream;
 public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
     private static final Short2ObjectMap<Object> EMPTY_SETTINGS = Short2ObjectMaps.emptyMap();
     private Short2ObjectMap<Object> settings = null;
-    @Environment(EnvType.CLIENT)
-    private int blitOffset;
-    
-    @Override
-    @Environment(EnvType.CLIENT)
-    public int getZ() {
-        return blitOffset;
-    }
-    
-    @Override
-    @Environment(EnvType.CLIENT)
-    public void setZ(int z) {
-        this.blitOffset = z;
-    }
     
     @Override
     public <T> EntryStack<A> setting(Settings<T> settings, T value) {
@@ -194,9 +178,9 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
     }
     
     @Override
-    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
         try {
-            this.getRenderer().render(this, matrices, bounds, mouseX, mouseY, delta);
+            this.getRenderer().render(this, graphics, bounds, mouseX, mouseY, delta);
         } catch (Throwable throwable) {
             CrashReport report = CrashReportUtils.essential(throwable, "Rendering entry");
             CrashReportUtils.renderer(report, this);

@@ -23,24 +23,23 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.region;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.joml.Matrix4f;
 
-public class RegionRenderingDebugger extends GuiComponent {
+public class RegionRenderingDebugger {
     public boolean debugTime;
     private double lastAverageDebugTime, averageDebugTime, lastTotalDebugTime, totalDebugTime, totalDebugTimeDelta;
     public MutableInt size = new MutableInt();
     public MutableLong time = new MutableLong();
     
-    public void render(PoseStack matrices, int x, int y, float delta) {
+    public void render(GuiGraphics graphics, int x, int y, float delta) {
         long totalTimeStart = debugTime ? System.nanoTime() : 0;
         Minecraft minecraft = Minecraft.getInstance();
         Font font = minecraft.font;
@@ -62,14 +61,14 @@ public class RegionRenderingDebugger extends GuiComponent {
             }
             Component debugText = Component.literal(String.format("%d entries, avg. %.0fns, ttl. %.2fms, %s fps", size.getValue(), lastAverageDebugTime, lastTotalDebugTime, minecraft.fpsString.split(" ")[0]));
             int stringWidth = font.width(debugText);
-            fillGradient(matrices, Math.min(x, minecraft.screen.width - stringWidth - 2), y, x + stringWidth + 2, y + font.lineHeight + 2, -16777216, -16777216);
+            graphics.fillGradient(Math.min(x, minecraft.screen.width - stringWidth - 2), y, x + stringWidth + 2, y + font.lineHeight + 2, -16777216, -16777216);
             MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-            matrices.pushPose();
-            matrices.translate(0.0D, 0.0D, 500.0D);
-            Matrix4f matrix = matrices.last().pose();
+            graphics.pose().pushPose();
+            graphics.pose().translate(0.0D, 0.0D, 500.0D);
+            Matrix4f matrix = graphics.pose().last().pose();
             font.drawInBatch(debugText.getVisualOrderText(), Math.min(x + 2, minecraft.screen.width - stringWidth), y + 2, -1, false, matrix, immediate, Font.DisplayMode.NORMAL, 0, 15728880);
             immediate.endBatch();
-            matrices.popPose();
+            graphics.pose().popPose();
         }
         
         this.size.setValue(0);

@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.gui.widget.search;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
 import com.mojang.datafixers.util.Pair;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -51,7 +50,7 @@ import me.shedaniel.rei.impl.client.search.argument.type.ArgumentTypesRegistry;
 import me.shedaniel.rei.impl.client.search.argument.type.TextArgumentType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -61,7 +60,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.ApiStatus;
-import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -146,14 +144,14 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         }
     }
     
-    public void laterRender(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void laterRender(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         progress.update(delta);
         RenderSystem.disableDepthTest();
-        if (isMain) drawHint(matrices, mouseX, mouseY);
+        if (isMain) drawHint(graphics, mouseX, mouseY);
         RenderSystem.enableDepthTest();
     }
     
-    private void drawHint(PoseStack poses, int mouseX, int mouseY) {
+    private void drawHint(GuiGraphics graphics, int mouseX, int mouseY) {
         boolean mouseDown = GLFW.glfwGetMouseButton(Minecraft.getInstance().getWindow().getWindow(), GLFW.GLFW_MOUSE_BUTTON_LEFT) != 0;
         boolean clicking = false;
         if (mouseDown != previouslyClicking) {
@@ -196,40 +194,35 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         int y = getBounds().getY() + (top ? getBounds().getHeight() : -height);
         if (new Rectangle(x - 1, y - 1, width + 2, height + 2).contains(mouseX, mouseY))
             ScreenOverlayImpl.getInstance().clearTooltips();
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        Matrix4f pose = poses.last().pose();
         int background = 0xf0100010;
         int color1 = color.getColor();
         int color2 = color.darker(2).getColor();
-        if (!top) fillGradient(pose, bufferBuilder, x, y - 1, x + width, y, 400, background, background);
-        if (top) fillGradient(pose, bufferBuilder, x, y + height, x + width, y + height + 1, 400, background, background);
-        fillGradient(pose, bufferBuilder, x, y, x + width, y + height, 400, background, background);
-        fillGradient(pose, bufferBuilder, x - 1, y, x, y + height, 400, background, background);
-        fillGradient(pose, bufferBuilder, x + width, y, x + width + 1, y + height, 400, background, background);
-        fillGradient(pose, bufferBuilder, x, y + 1, x + 1, y + height - 1, 400, color1, color2);
-        fillGradient(pose, bufferBuilder, x + width - 1, y + 1, x + width, y + height - 1, 400, color1, color2);
-        if (!top) fillGradient(pose, bufferBuilder, x, y, x + width, y + 1, 400, color1, color1);
-        if (top) fillGradient(pose, bufferBuilder, x, y + height - 1, x + width, y + height, 400, color2, color2);
+        if (!top) graphics.fillGradient(x, y - 1, x + width, y, 400, background, background);
+        if (top)
+            graphics.fillGradient(x, y + height, x + width, y + height + 1, 400, background, background);
+        graphics.fillGradient(x, y, x + width, y + height, 400, background, background);
+        graphics.fillGradient(x - 1, y, x, y + height, 400, background, background);
+        graphics.fillGradient(x + width, y, x + width + 1, y + height, 400, background, background);
+        graphics.fillGradient(x, y + 1, x + 1, y + height - 1, 400, color1, color2);
+        graphics.fillGradient(x + width - 1, y + 1, x + width, y + height - 1, 400, color1, color2);
+        if (!top) graphics.fillGradient(x, y, x + width, y + 1, 400, color1, color1);
+        if (top) graphics.fillGradient(x, y + height - 1, x + width, y + height, 400, color2, color2);
         
         if (hasProgress) {
             int progressWidth = (int) Math.round(width * this.progress.doubleValue());
-            fillGradient(pose, bufferBuilder, x + 1, y + height - 3, x + progressWidth - 1, y + height - 1, 400, 0xffffffff, 0xffffffff);
+            graphics.fillGradient(x + 1, y + height - 3, x + progressWidth - 1, y + height - 1, 400, 0xffffffff, 0xffffffff);
         }
         
-        BufferUploader.drawWithShader(bufferBuilder.end());
-        poses.pushPose();
-        poses.translate(0.0D, 0.0D, 450.0D);
+        graphics.pose().pushPose();
+        graphics.pose().translate(0.0D, 0.0D, 450.0D);
         for (int i = 0; i < sequences.size(); i++) {
             Pair<HintProvider, FormattedCharSequence> pair = sequences.get(i);
-            int lineWidth = font.drawShadow(poses, pair.getSecond(), x + 3, y + 3 + font.lineHeight * i, -1);
+            int lineWidth = graphics.drawString(font, pair.getSecond(), x + 3, y + 3 + font.lineHeight * i, -1);
             if (new Rectangle(x + 3, y + 3 + font.lineHeight * i, lineWidth, font.lineHeight).contains(mouseX, mouseY)) {
                 Tooltip tooltip = pair.getFirst().provideTooltip(new Point(mouseX, mouseY));
                 if (tooltip != null) {
                     ScreenOverlayImpl.getInstance().clearTooltips();
-                    ScreenOverlayImpl.getInstance().renderTooltip(poses, tooltip);
+                    ScreenOverlayImpl.getInstance().renderTooltip(graphics, tooltip);
                 }
             }
         }
@@ -242,8 +235,8 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
             int y2 = y1 + 16;
             Rectangle bounds = new Rectangle(x1, y1, x2 - x1 - 4, y2 - y1);
             int buttonColor = bounds.contains(mouseX, mouseY) ? 0x8f8f8f8f : 0x66666666;
-            fillGradient(poses, x1, y1, x2 - 4, y2, buttonColor, buttonColor);
-            font.drawShadow(poses, button.name(), (x1 + x2 - 4 - font.width(button.name())) / 2, y1 + 4, -1);
+            graphics.fillGradient(x1, y1, x2 - 4, y2, buttonColor, buttonColor);
+            graphics.drawString(font, button.name(), (x1 + x2 - 4 - font.width(button.name())) / 2, y1 + 4, -1);
             
             if (bounds.contains(mouseX, mouseY) && clicking) {
                 Widgets.produceClickSound();
@@ -251,22 +244,22 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
             }
         }
         
-        poses.popPose();
+        graphics.pose().popPose();
     }
     
     @Override
-    protected void renderSuggestion(PoseStack matrices, int x, int y) {
+    protected void renderSuggestion(GuiGraphics graphics, int x, int y) {
         int color;
         if (containsMouse(PointHelper.ofMouse()) || isFocused()) {
             color = 0xddeaeaea;
         } else {
             color = -6250336;
         }
-        this.font.drawShadow(matrices, this.font.plainSubstrByWidth(this.getSuggestion(), this.getWidth()), x, y, color);
+        graphics.drawString(this.font, this.font.plainSubstrByWidth(this.getSuggestion(), this.getWidth()), x, y, color);
     }
     
     @Override
-    public void renderBorder(PoseStack matrices) {
+    public void renderBorder(GuiGraphics graphics) {
         isHighlighting = isHighlighting && ConfigObject.getInstance().isInventoryHighlightingAllowed();
         int borderColor;
         if (isMain && isHighlighting) {
@@ -274,12 +267,12 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         } else if (isMain && ScreenOverlayImpl.getEntryListWidget().isEmpty() && !getText().isEmpty()) {
             borderColor = 0xffff5555;
         } else {
-            super.renderBorder(matrices);
+            super.renderBorder(graphics);
             return;
         }
-        fill(matrices, this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, 0xff000000);
-        fill(matrices, this.getBounds().x, this.getBounds().y, this.getBounds().x + this.getBounds().width, this.getBounds().y + this.getBounds().height, borderColor);
-        fill(matrices, this.getBounds().x + 1, this.getBounds().y + 1, this.getBounds().x + this.getBounds().width - 1, this.getBounds().y + this.getBounds().height - 1, 0xff000000);
+        graphics.fill(this.getBounds().x - 1, this.getBounds().y - 1, this.getBounds().x + this.getBounds().width + 1, this.getBounds().y + this.getBounds().height + 1, 0xff000000);
+        graphics.fill(this.getBounds().x, this.getBounds().y, this.getBounds().x + this.getBounds().width, this.getBounds().y + this.getBounds().height, borderColor);
+        graphics.fill(this.getBounds().x + 1, this.getBounds().y + 1, this.getBounds().x + this.getBounds().width - 1, this.getBounds().y + this.getBounds().height - 1, 0xff000000);
     }
     
     public int getManhattanDistance(Point point1, Point point2) {
@@ -363,10 +356,10 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         RenderSystem.disableDepthTest();
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
-        super.render(matrices, mouseX, mouseY, delta);
+        super.render(graphics, mouseX, mouseY, delta);
         RenderSystem.enableDepthTest();
     }
 }

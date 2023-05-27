@@ -24,8 +24,6 @@
 package me.shedaniel.rei.impl.client.config.entries;
 
 import com.google.common.base.Suppliers;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
@@ -41,6 +39,7 @@ import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.FilteringLogic;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -76,7 +75,8 @@ public class FilteringRulesScreen extends Screen {
             addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
-            }, Supplier::get) {});
+            }, Supplier::get) {
+            });
         }
         {
             Component addText = Component.literal(" + ");
@@ -84,7 +84,8 @@ public class FilteringRulesScreen extends Screen {
                 FilteringAddRuleScreen screen = new FilteringAddRuleScreen(entry);
                 screen.parent = this;
                 minecraft.setScreen(screen);
-            }, Supplier::get) {});
+            }, Supplier::get) {
+            });
         }
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
         for (int i = entry.rules.size() - 1; i >= 0; i--) {
@@ -100,10 +101,10 @@ public class FilteringRulesScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        this.rulesList.render(matrices, mouseX, mouseY, delta);
-        super.render(matrices, mouseX, mouseY, delta);
-        this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        this.rulesList.render(graphics, mouseX, mouseY, delta);
+        super.render(graphics, mouseX, mouseY, delta);
+        graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
     }
     
     public static class RulesList extends DynamicElementListWidget<RuleEntry> {
@@ -179,10 +180,9 @@ public class FilteringRulesScreen extends Screen {
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(Minecraft.getInstance().screen));
             }, Supplier::get) {
                 @Override
-                public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-                    super.render(matrices, mouseX, mouseY, delta);
-                    RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
-                    blit(matrices, getX() + 3, getY() + 3, 0, 0, 14, 14);
+                public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+                    super.render(graphics, mouseX, mouseY, delta);
+                    graphics.blit(InternalTextures.CHEST_GUI_TEXTURE, getX() + 3, getY() + 3, 0, 0, 14, 14);
                 }
             };
             {
@@ -192,23 +192,24 @@ public class FilteringRulesScreen extends Screen {
                     entry.edited = true;
                     entry.rules.remove(rule);
                     screen.init(Minecraft.getInstance(), screen.width, screen.height);
-                }, Supplier::get) {};
+                }, Supplier::get) {
+                };
             }
             configureButton.active = this.screenFunction != null;
             deleteButton.active = !rule.getType().isSingular();
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
             Minecraft client = Minecraft.getInstance();
             {
                 Component title = ((FilteringRuleType<FilteringRule<?>>) getRule().getType()).getTitle(getRule());
                 int i = client.font.width(title);
                 if (i > entryWidth - 28) {
                     FormattedText titleTrimmed = FormattedText.composite(client.font.substrByWidth(title, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    client.font.drawShadow(matrices, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(titleTrimmed), x + 2, y + 1, 16777215);
                 } else {
-                    client.font.drawShadow(matrices, title.getVisualOrderText(), x + 2, y + 1, 16777215);
+                    graphics.drawString(client.font, title.getVisualOrderText(), x + 2, y + 1, 16777215);
                 }
             }
             {
@@ -216,17 +217,17 @@ public class FilteringRulesScreen extends Screen {
                 int i = client.font.width(subtitle);
                 if (i > entryWidth - 28) {
                     FormattedText subtitleTrimmed = FormattedText.composite(client.font.substrByWidth(subtitle, entryWidth - 28 - client.font.width("...")), FormattedText.of("..."));
-                    client.font.drawShadow(matrices, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, Language.getInstance().getVisualOrder(subtitleTrimmed), x + 2, y + 12, 8421504);
                 } else {
-                    client.font.drawShadow(matrices, subtitle.getVisualOrderText(), x + 2, y + 12, 8421504);
+                    graphics.drawString(client.font, subtitle.getVisualOrderText(), x + 2, y + 12, 8421504);
                 }
             }
             configureButton.setX(x + entryWidth - 25);
             configureButton.setY(y + 1);
-            configureButton.render(matrices, mouseX, mouseY, delta);
+            configureButton.render(graphics, mouseX, mouseY, delta);
             deleteButton.setX(x + entryWidth - 27 - deleteButton.getWidth());
             deleteButton.setY(y + 1);
-            deleteButton.render(matrices, mouseX, mouseY, delta);
+            deleteButton.render(graphics, mouseX, mouseY, delta);
         }
         
         @Override

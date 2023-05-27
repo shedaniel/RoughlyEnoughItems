@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
@@ -52,9 +52,9 @@ public final class TexturedDrawableConsumer implements DrawableConsumer {
     }
     
     @Override
-    public void render(GuiComponent helper, PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         RenderSystem.setShaderTexture(0, identifier);
-        innerBlit(matrices.last().pose(), x, x + width, y, y + height, 0, uWidth, vHeight, u, v, textureWidth, textureHeight);
+        innerBlit(graphics.pose().last().pose(), x, x + width, y, y + height, 0, uWidth, vHeight, u, v, textureWidth, textureHeight);
     }
     
     private static void innerBlit(Matrix4f matrix, int xStart, int xEnd, int yStart, int yEnd, int z, int width, int height, float u, float v, int texWidth, int texHeight) {

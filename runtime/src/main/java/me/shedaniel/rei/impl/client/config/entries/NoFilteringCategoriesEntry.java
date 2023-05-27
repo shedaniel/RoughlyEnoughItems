@@ -25,10 +25,10 @@ package me.shedaniel.rei.impl.client.config.entries;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -47,7 +47,9 @@ public class NoFilteringCategoriesEntry extends AbstractConfigListEntry<Map<Cate
     private Consumer<Map<CategoryIdentifier<?>, Boolean>> saveConsumer;
     private Map<CategoryIdentifier<?>, Boolean> defaultValue;
     private Map<CategoryIdentifier<?>, Boolean> configFiltered;
-    private final AbstractWidget buttonWidget = new Button(0, 0, 150, 20, Component.translatable("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {}, Supplier::get) {};
+    private final AbstractWidget buttonWidget = new Button(0, 0, 150, 20, Component.translatable("config.roughlyenoughitems.filteredEntries.loadWorldFirst"), button -> {
+    }, Supplier::get) {
+    };
     private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public NoFilteringCategoriesEntry(Component fieldName, Map<CategoryIdentifier<?>, Boolean> configFiltered, Map<CategoryIdentifier<?>, Boolean> defaultValue, Consumer<Map<CategoryIdentifier<?>, Boolean>> saveConsumer) {
@@ -73,22 +75,22 @@ public class NoFilteringCategoriesEntry extends AbstractConfigListEntry<Map<Cate
     }
     
     @Override
-    public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-        super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
+    public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        super.render(graphics, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = false;
         this.buttonWidget.setY(y);
         
         Component displayedFieldName = this.getDisplayedFieldName();
         if (Minecraft.getInstance().font.isBidirectional()) {
-            Minecraft.getInstance().font.drawShadow(matrices, displayedFieldName.getVisualOrderText(), (float) (window.getGuiScaledWidth() - x - Minecraft.getInstance().font.width(displayedFieldName)), (float) (y + 6), 16777215);
+            graphics.drawString(Minecraft.getInstance().font, displayedFieldName.getVisualOrderText(), (window.getGuiScaledWidth() - x - Minecraft.getInstance().font.width(displayedFieldName)), y + 6, 16777215);
             this.buttonWidget.setX(x + 2);
         } else {
-            Minecraft.getInstance().font.drawShadow(matrices, displayedFieldName.getVisualOrderText(), (float) x, (float) (y + 6), this.getPreferredTextColor());
+            graphics.drawString(Minecraft.getInstance().font, displayedFieldName.getVisualOrderText(), x, y + 6, this.getPreferredTextColor());
             this.buttonWidget.setX(x + entryWidth - 150);
         }
         
-        this.buttonWidget.render(matrices, mouseX, mouseY, delta);
+        this.buttonWidget.render(graphics, mouseX, mouseY, delta);
     }
     
     @Override

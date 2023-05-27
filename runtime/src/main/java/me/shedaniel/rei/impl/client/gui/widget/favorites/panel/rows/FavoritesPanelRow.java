@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.favorites.panel.rows;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
+import net.minecraft.client.gui.GuiGraphics;
 
 public abstract class FavoritesPanelRow extends AbstractContainerEventHandler {
     public abstract int getRowHeight();
     
-    public abstract void render(PoseStack matrices, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta);
+    public abstract void render(GuiGraphics graphics, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta);
 }

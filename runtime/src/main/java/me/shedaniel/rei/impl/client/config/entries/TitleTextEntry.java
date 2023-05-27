@@ -23,9 +23,9 @@
 
 package me.shedaniel.rei.impl.client.config.entries;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
@@ -60,13 +60,13 @@ public class TitleTextEntry extends AbstractConfigListEntry<Unit> {
     }
     
     @Override
-    public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-        super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
-        matrices.pushPose();
-        matrices.translate(x + entryWidth / 2F - Minecraft.getInstance().font.width(text) * 1.5F / 2F, y + 5, 1.0F);
-        matrices.scale(1.5F, 1.5F, 1.0F);
-        Minecraft.getInstance().font.drawShadow(matrices, text, 0.0F, 0.0F, -1);
-        matrices.popPose();
+    public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        super.render(graphics, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
+        graphics.pose().pushPose();
+        graphics.pose().translate(x + entryWidth / 2F - Minecraft.getInstance().font.width(text) * 1.5F / 2F, y + 5, 1.0F);
+        graphics.pose().scale(1.5F, 1.5F, 1.0F);
+        graphics.drawString(Minecraft.getInstance().font, text, 0, 0, -1);
+        graphics.pose().popPose();
     }
     
     @Override

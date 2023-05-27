@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.impl.client.gui.screen;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
@@ -57,23 +57,23 @@ public class ConfigReloadingScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderDirtBackground(matrices);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        this.renderDirtBackground(graphics);
         if (!predicate.getAsBoolean()) {
             parent.run();
             return;
         }
-        drawCenteredString(matrices, this.font, title, this.width / 2, this.height / 2 - 50, 0xffffff);
+        graphics.drawCenteredString(this.font, title, this.width / 2, this.height / 2 - 50, 0xffffff);
         String text = switch ((int) (Util.getMillis() / 300L % 4L)) {
             case 1, 3 -> "o O o";
             case 2 -> "o o O";
             default -> "O o o";
         };
-        drawCenteredString(matrices, this.font, text, this.width / 2, this.height / 2 - 50 + 9, 0x808080);
+        graphics.drawCenteredString(this.font, text, this.width / 2, this.height / 2 - 50 + 9, 0x808080);
         Component subtitle = this.subtitle.get();
         if (subtitle != null) {
-            drawCenteredString(matrices, this.font, subtitle, this.width / 2, this.height / 2 - 50 + 9 + 9, 0x808080);
+            graphics.drawCenteredString(this.font, subtitle, this.width / 2, this.height / 2 - 50 + 9 + 9, 0x808080);
         }
-        super.render(matrices, mouseX, mouseY, delta);
+        super.render(graphics, mouseX, mouseY, delta);
     }
 }

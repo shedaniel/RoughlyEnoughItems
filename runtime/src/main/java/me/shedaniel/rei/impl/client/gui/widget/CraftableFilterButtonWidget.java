@@ -84,11 +84,11 @@ public class CraftableFilterButtonWidget {
                 })
                 .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y))
                 .tooltipLineSupplier(button -> Component.translatable(ConfigManager.getInstance().isCraftableOnlyEnabled() ? "text.rei.showing_craftable" : "text.rei.showing_all"));
-        Widget overlayWidget = Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            matrices.pushPose();
-            matrices.translate(bounds.x + 2, bounds.y + 2, 10);
-            itemRenderer.renderGuiItem(matrices, icon, 0, 0);
-            matrices.popPose();
+        Widget overlayWidget = Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
+            graphics.pose().pushPose();
+            graphics.pose().translate(bounds.x + 2, bounds.y + 2, 10);
+            graphics.renderItem(icon, 0, 0);
+            graphics.pose().popPose();
         });
         return Widgets.concat(filterButton, overlayWidget);
     }

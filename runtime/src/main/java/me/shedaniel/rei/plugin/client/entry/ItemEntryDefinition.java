@@ -34,7 +34,6 @@ import dev.architectury.utils.EnvExecutor;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.entry.renderer.AbstractEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -51,6 +50,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -243,7 +243,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     }
     
     @Environment(EnvType.CLIENT)
-    public class ItemEntryRenderer extends AbstractEntryRenderer<ItemStack> implements BatchedEntryRenderer<ItemStack, BakedModel> {
+    public class ItemEntryRenderer implements BatchedEntryRenderer<ItemStack, BakedModel> {
         private static final float SCALE = 20.0F;
         public static final int ITEM_LIGHT = 0xf000f0;
         
@@ -254,28 +254,28 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         }
         
         @Override
-        public void render(EntryStack<ItemStack> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        public void render(EntryStack<ItemStack> entry, GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
             BakedModel model = getExtraData(entry);
             setupGL(entry, model);
             if (!entry.isEmpty()) {
                 ItemStack value = entry.getValue();
-                matrices.pushPose();
-                matrices.translate(bounds.getCenterX(), bounds.getCenterY(), entry.getZ());
-                matrices.mulPoseMatrix(new Matrix4f().scaling(1.0F, -1.0F, 1.0F));
-                matrices.scale(bounds.getWidth(), bounds.getHeight(), (bounds.getWidth() + bounds.getHeight()) / 2.0F);
+                graphics.pose().pushPose();
+                graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY(), 0);
+                graphics.pose().mulPoseMatrix(new Matrix4f().scaling(1.0F, -1.0F, 1.0F));
+                graphics.pose().scale(bounds.getWidth(), bounds.getHeight(), (bounds.getWidth() + bounds.getHeight()) / 2.0F);
                 MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-                Minecraft.getInstance().getItemRenderer().render(value, ItemDisplayContext.GUI, false, matrices, immediate,
+                Minecraft.getInstance().getItemRenderer().render(value, ItemDisplayContext.GUI, false, graphics.pose(), immediate,
                         ITEM_LIGHT, OverlayTexture.NO_OVERLAY, model);
                 immediate.endBatch();
-                matrices.popPose();
+                graphics.pose().popPose();
             }
             PoseStack modelViewStack = RenderSystem.getModelViewStack();
             modelViewStack.pushPose();
-            modelViewStack.mulPoseMatrix(matrices.last().pose());
+            modelViewStack.mulPoseMatrix(graphics.pose().last().pose());
             modelViewStack.translate(bounds.x, bounds.y, 0);
             modelViewStack.scale(bounds.width / 16f, (bounds.getWidth() + bounds.getHeight()) / 2f / 16f, 1.0F);
             RenderSystem.applyModelViewMatrix();
-            renderOverlay(new PoseStack(), entry, bounds);
+            renderOverlay(new GuiGraphics(Minecraft.getInstance(), graphics.bufferSource()), entry, bounds);
             modelViewStack.popPose();
             endGL(entry, model);
             RenderSystem.applyModelViewMatrix();
@@ -287,7 +287,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         }
         
         @Override
-        public void startBatch(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, float delta) {
+        public void startBatch(EntryStack<ItemStack> entry, BakedModel model, GuiGraphics graphics, float delta) {
             setupGL(entry, model);
             PoseStack modelViewStack = RenderSystem.getModelViewStack();
             modelViewStack.pushPose();
@@ -306,46 +306,46 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         }
         
         @Override
-        public void renderBase(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        public void renderBase(EntryStack<ItemStack> entry, BakedModel model, GuiGraphics graphics, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
             if (!entry.isEmpty()) {
                 ItemStack value = entry.getValue();
-                matrices.pushPose();
-                matrices.translate(bounds.getCenterX() / SCALE, bounds.getCenterY() / -SCALE, entry.getZ());
-                matrices.scale(bounds.getWidth() / SCALE, (bounds.getWidth() + bounds.getHeight()) / 2f / SCALE, 1.0F);
-                Minecraft.getInstance().getItemRenderer().render(value, ItemDisplayContext.GUI, false, matrices, immediate,
+                graphics.pose().pushPose();
+                graphics.pose().translate(bounds.getCenterX() / SCALE, bounds.getCenterY() / -SCALE, 0);
+                graphics.pose().scale(bounds.getWidth() / SCALE, (bounds.getWidth() + bounds.getHeight()) / 2f / SCALE, 1.0F);
+                Minecraft.getInstance().getItemRenderer().render(value, ItemDisplayContext.GUI, false, graphics.pose(), immediate,
                         ITEM_LIGHT, OverlayTexture.NO_OVERLAY, model);
-                matrices.popPose();
+                graphics.pose().popPose();
             }
         }
         
         @Override
-        public void afterBase(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, float delta) {
+        public void afterBase(EntryStack<ItemStack> entry, BakedModel model, GuiGraphics graphics, float delta) {
             endGL(entry, model);
             RenderSystem.getModelViewStack().popPose();
             RenderSystem.applyModelViewMatrix();
         }
         
         @Override
-        public void renderOverlay(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        public void renderOverlay(EntryStack<ItemStack> entry, BakedModel model, GuiGraphics graphics, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
             PoseStack modelViewStack = RenderSystem.getModelViewStack();
             modelViewStack.pushPose();
-            modelViewStack.mulPoseMatrix(matrices.last().pose());
+            modelViewStack.mulPoseMatrix(graphics.pose().last().pose());
             modelViewStack.translate(bounds.x, bounds.y, 0);
             modelViewStack.scale(bounds.width / 16f, (bounds.getWidth() + bounds.getHeight()) / 2f / 16f, 1.0F);
             RenderSystem.applyModelViewMatrix();
-            renderOverlay(new PoseStack(), entry, bounds);
+            renderOverlay(new GuiGraphics(Minecraft.getInstance(), graphics.bufferSource()), entry, bounds);
             modelViewStack.popPose();
             RenderSystem.applyModelViewMatrix();
         }
         
-        public void renderOverlay(PoseStack matrices, EntryStack<ItemStack> entry, Rectangle bounds) {
+        public void renderOverlay(GuiGraphics graphics, EntryStack<ItemStack> entry, Rectangle bounds) {
             if (!entry.isEmpty()) {
-                Minecraft.getInstance().getItemRenderer().renderGuiItemDecorations(matrices, Minecraft.getInstance().font, entry.getValue(), 0, 0, null);
+                graphics.renderItemDecorations(Minecraft.getInstance().font, entry.getValue(), 0, 0, null);
             }
         }
         
         @Override
-        public void endBatch(EntryStack<ItemStack> entry, BakedModel model, PoseStack matrices, float delta) {
+        public void endBatch(EntryStack<ItemStack> entry, BakedModel model, GuiGraphics graphics, float delta) {
         }
         
         public void endGL(EntryStack<ItemStack> entry, BakedModel model) {

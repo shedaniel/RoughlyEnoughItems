@@ -24,8 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.platform.Platform;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
@@ -47,6 +45,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -177,52 +176,58 @@ public class UncertainDisplayViewingScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack matrices, int int_1, int int_2, float float_1) {
+    public void render(GuiGraphics graphics, int int_1, int int_2, float float_1) {
         scroll.update(float_1);
         if (this.minecraft.level != null) {
-            renderBackground(matrices);
+            renderBackground(graphics);
         } else {
-            this.fillGradient(matrices, 0, 0, this.width, this.height, -16777216, -16777216);
+            graphics.fillGradient(0, 0, this.width, this.height, -16777216, -16777216);
         }
         if (scroll.target() == 0) {
-            drawCenteredString(matrices, this.font, Component.translatable("text.rei.recipe_screen_type.selection"), this.width / 2, 20, 16777215);
+            graphics.drawCenteredString(this.font, Component.translatable("text.rei.recipe_screen_type.selection"), this.width / 2, 20, 16777215);
         } else {
-            drawCenteredString(matrices, this.font, Component.translatable("text.rei.jei_compat"), this.width / 2, 20, 16777215);
+            graphics.drawCenteredString(this.font, Component.translatable("text.rei.jei_compat"), this.width / 2, 20, 16777215);
         }
         ScissorsHandler.INSTANCE.scissor(new Rectangle(0, 20 + font.lineHeight + 2, width, height - 42));
         if (showTips) {
-            float i = 32 - (scroll.floatValue() / 200f * height);
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, 32 - (scroll.floatValue() / 200f * height), 0);
+            int i = 0;
             for (FormattedCharSequence s : this.font.split(Component.translatable("text.rei.recipe_screen_type.selection.sub").withStyle(ChatFormatting.GRAY), width - 30)) {
-                font.drawShadow(matrices, s, width / 2 - font.width(s) / 2, i, -1);
+                graphics.drawString(font, s, width / 2 - font.width(s) / 2, i, -1);
                 i += 10;
             }
+            graphics.pose().popPose();
             if (allModsUsingJEI != null) {
-                i = 32 + height - (scroll.floatValue() / 200f * height);
+                graphics.pose().pushPose();
+                graphics.pose().translate(0, 32 + height - (scroll.floatValue() / 200f * height), 0);
+                i = 0;
                 for (FormattedCharSequence s : this.font.split(Component.translatable("text.rei.jei_compat.sub", Component.translatable("text.rei.jei_compat.sub.stability"),
                         Component.literal(String.join(", ", allModsUsingJEI))).withStyle(ChatFormatting.GRAY), width - 30)) {
-                    font.drawShadow(matrices, s, width / 2 - font.width(s) / 2, i, -1);
+                    graphics.drawString(font, s, width / 2 - font.width(s) / 2, i, -1);
                     i += 10;
                 }
+                graphics.pose().popPose();
             }
         }
-        super.render(matrices, int_1, int_2, float_1);
+        super.render(graphics, int_1, int_2, float_1);
         for (Widget widget : widgets) {
-            widget.render(matrices, int_1, int_2, float_1);
+            widget.render(graphics, int_1, int_2, float_1);
         }
         if (isSet) {
-            matrices.pushPose();
-            matrices.translate(0, -(scroll.floatValue() / 200f * height), 0);
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, -(scroll.floatValue() / 200f * height), 0);
             updateFramePosition(float_1);
             int x = (int) (width / 2 - 205 + (210 * frame));
             int y = height / 2 - 112 / 2 - 10;
-            fillGradient(matrices, x - 2, y - 4, x - 6 + 208, y - 4 + 2, -1778384897, -1778384897);
-            fillGradient(matrices, x - 2, y - 4 + 126 - 2, x - 6 + 208, y - 4 + 126, -1778384897, -1778384897);
-            fillGradient(matrices, x - 4, y - 4, x - 4 + 2, y - 4 + 126, -1778384897, -1778384897);
-            fillGradient(matrices, x - 4 + 208 - 2, y - 4, x - 4 + 208, y - 4 + 126, -1778384897, -1778384897);
-            matrices.popPose();
+            graphics.fillGradient(x - 2, y - 4, x - 6 + 208, y - 4 + 2, -1778384897, -1778384897);
+            graphics.fillGradient(x - 2, y - 4 + 126 - 2, x - 6 + 208, y - 4 + 126, -1778384897, -1778384897);
+            graphics.fillGradient(x - 4, y - 4, x - 4 + 2, y - 4 + 126, -1778384897, -1778384897);
+            graphics.fillGradient(x - 4 + 208 - 2, y - 4, x - 4 + 208, y - 4 + 126, -1778384897, -1778384897);
+            graphics.pose().popPose();
         }
         ScissorsHandler.INSTANCE.removeLastScissor();
-        button.render(matrices, int_1, int_2, float_1);
+        button.render(graphics, int_1, int_2, float_1);
     }
     
     private void updateFramePosition(float delta) {
@@ -269,9 +274,8 @@ public class UncertainDisplayViewingScreen extends Screen {
         }
         
         @Override
-        public void render(PoseStack matrices, int i, int i1, float delta) {
-            RenderSystem.setShaderTexture(0, type == DisplayScreenType.ORIGINAL ? DEFAULT : COMPOSITE);
-            blit(matrices, bounds.x + (type == DisplayScreenType.ORIGINAL ? 8 : 4), bounds.y + 4, bounds.width - 8, bounds.height - 8, 113, type == DisplayScreenType.ORIGINAL ? 16 : 27, 854 - 113 * 2, 480 - 27 * 2, 854, 480);
+        public void render(GuiGraphics graphics, int i, int i1, float delta) {
+            graphics.blit(type == DisplayScreenType.ORIGINAL ? DEFAULT : COMPOSITE, bounds.x + (type == DisplayScreenType.ORIGINAL ? 8 : 4), bounds.y + 4, bounds.width - 8, bounds.height - 8, 113, type == DisplayScreenType.ORIGINAL ? 16 : 27, 854 - 113 * 2, 480 - 27 * 2, 854, 480);
         }
         
         @Override

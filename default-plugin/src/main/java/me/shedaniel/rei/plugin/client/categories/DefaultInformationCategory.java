@@ -31,7 +31,6 @@ import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
@@ -45,6 +44,7 @@ import me.shedaniel.rei.plugin.common.displays.DefaultInformationDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
@@ -89,23 +89,23 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
             }
             
             @Override
-            public void render(PoseStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
-                Minecraft.getInstance().font.draw(matrices, name, rectangle.x + 5, rectangle.y + 6, -1);
+            public void render(GuiGraphics graphics, Rectangle rectangle, int mouseX, int mouseY, float delta) {
+                graphics.drawString(Minecraft.getInstance().font, name, rectangle.x + 5, rectangle.y + 6, -1, false);
             }
         };
     }
     
     @Override
     public Renderer getIcon() {
-        return new AbstractRenderer() {
+        return new Renderer() {
             @Override
-            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+            public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 RenderSystem.setShaderTexture(0, REIRuntime.getInstance().getDefaultDisplayTexture());
-                matrices.pushPose();
-                matrices.translate(-1.2f, -1, 0);
-                Matrix4f matrix = matrices.last().pose();
+                graphics.pose().pushPose();
+                graphics.pose().translate(-1.2f, -1, 0);
+                Matrix4f matrix = graphics.pose().last().pose();
                 DefaultInformationCategory.innerBlit(matrix, bounds.getCenterX() - 8, bounds.getCenterX() + 8, bounds.getCenterY() - 8, bounds.getCenterY() + 8, 0, 116f / 256f, (116f + 16f) / 256f, 0f, 16f / 256f);
-                matrices.popPose();
+                graphics.pose().popPose();
             }
         };
     }
@@ -189,28 +189,28 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
         }
         
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             scrolling.updatePosition(delta);
             Rectangle innerBounds = scrolling.getScissorBounds();
-            try (CloseableScissors scissors = scissor(matrices, innerBounds)) {
+            try (CloseableScissors scissors = scissor(graphics, innerBounds)) {
                 int currentY = -scrolling.scrollAmountInt() + innerBounds.y;
                 for (FormattedCharSequence text : texts) {
                     if (text != null && currentY + font.lineHeight >= innerBounds.y && currentY <= innerBounds.getMaxY()) {
-                        font.draw(matrices, text, innerBounds.x + 2, currentY + 2, REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF090909);
+                        graphics.drawString(font, text, innerBounds.x + 2, currentY + 2, REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF090909, false);
                     }
                     currentY += text == null ? 4 : font.lineHeight;
                 }
             }
             if (scrolling.hasScrollBar()) {
                 if (scrolling.scrollAmount() > 8) {
-                    fillGradient(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.y + 16, 0xFFC6C6C6, 0x00C6C6C6);
+                    graphics.fillGradient(innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.y + 16, 0xFFC6C6C6, 0x00C6C6C6);
                 }
                 if (scrolling.getMaxScroll() - scrolling.scrollAmount() > 8) {
-                    fillGradient(matrices, innerBounds.x, innerBounds.getMaxY() - 16, innerBounds.getMaxX(), innerBounds.getMaxY(), 0x00C6C6C6, 0xFFC6C6C6);
+                    graphics.fillGradient(innerBounds.x, innerBounds.getMaxY() - 16, innerBounds.getMaxX(), innerBounds.getMaxY(), 0x00C6C6C6, 0xFFC6C6C6);
                 }
             }
-            try (CloseableScissors scissors = scissor(matrices, scrolling.getBounds())) {
-                scrolling.renderScrollBar(0, 1, 1f);
+            try (CloseableScissors scissors = scissor(graphics, scrolling.getBounds())) {
+                scrolling.renderScrollBar(graphics, 0, 1, 1f);
             }
         }
         

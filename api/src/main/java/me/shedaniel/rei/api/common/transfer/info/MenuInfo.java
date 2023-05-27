@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.api.common.transfer.info;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import me.shedaniel.math.Rectangle;
@@ -42,7 +41,7 @@ import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -174,7 +173,7 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> {
      * @param inputs         the list of inputs
      * @param missing        the list of missing stacks
      * @param missingIndices the indices of the missing stacks
-     * @param matrices       the rendering transforming matrices
+     * @param graphics       the rendering transforming context
      * @param mouseX         the mouse x position
      * @param mouseY         the mouse y position
      * @param delta          the delta frame time
@@ -182,17 +181,17 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> {
      * @param bounds         the bounds of the display
      */
     @Environment(EnvType.CLIENT)
-    default void renderMissingInput(MenuInfoContext<T, ?, D> context, List<InputIngredient<ItemStack>> inputs, List<InputIngredient<ItemStack>> missing, IntSet missingIndices, PoseStack matrices, int mouseX, int mouseY,
-            float delta, List<Widget> widgets, Rectangle bounds) {
+    default void renderMissingInput(MenuInfoContext<T, ?, D> context, List<InputIngredient<ItemStack>> inputs, List<InputIngredient<ItemStack>> missing, IntSet missingIndices, GuiGraphics graphics, int mouseX, int mouseY,
+                                    float delta, List<Widget> widgets, Rectangle bounds) {
         int i = 0;
         for (Widget widget : widgets) {
             if (widget instanceof Slot && ((Slot) widget).getNoticeMark() == Slot.INPUT) {
                 if (missingIndices.contains(i++)) {
-                    matrices.pushPose();
-                    matrices.translate(0, 0, 50);
+                    graphics.pose().pushPose();
+                    graphics.pose().translate(0, 0, 50);
                     Rectangle innerBounds = ((Slot) widget).getInnerBounds();
-                    GuiComponent.fill(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), 0x40ff0000);
-                    matrices.popPose();
+                    graphics.fill(innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), 0x40ff0000);
+                    graphics.pose().popPose();
                 }
             }
         }
@@ -205,7 +204,7 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> {
      * @param context        the context of the transfer
      * @param inputs         the list of inputs
      * @param missingIndices the indices of the missing stacks
-     * @param matrices       the rendering transforming matrices
+     * @param graphics       the rendering transforming context
      * @param mouseX         the mouse x position
      * @param mouseY         the mouse y position
      * @param delta          the delta frame time
@@ -215,7 +214,7 @@ public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> {
     @Environment(EnvType.CLIENT)
     @Deprecated
     @ApiStatus.ScheduledForRemoval
-    default void renderMissingInput(MenuInfoContext<T, ?, D> context, List<List<ItemStack>> inputs, IntList missingIndices, PoseStack matrices, int mouseX, int mouseY,
+    default void renderMissingInput(MenuInfoContext<T, ?, D> context, List<List<ItemStack>> inputs, IntList missingIndices, GuiGraphics graphics, int mouseX, int mouseY,
             float delta, List<Widget> widgets, Rectangle bounds) {
     }
 }

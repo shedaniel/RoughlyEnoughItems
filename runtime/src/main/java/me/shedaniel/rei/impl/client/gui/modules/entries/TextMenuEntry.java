@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.impl.client.gui.modules.entries;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 
@@ -63,8 +63,8 @@ public class TextMenuEntry extends AbstractMenuEntry {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        font.draw(matrices, lastText = text.get(), getX() + 2, getY() + 2, 8947848);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        graphics.drawString(font, lastText = text.get(), getX() + 2, getY() + 2, 8947848, false);
         this.lastTextWidth = Math.max(0, font.width(lastText));
     }
 }

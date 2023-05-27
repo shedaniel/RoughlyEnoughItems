@@ -23,8 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.utils.value.IntValue;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -33,7 +31,7 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -41,7 +39,7 @@ import net.minecraft.util.Mth;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TabContainerWidget extends GuiComponent {
+public class TabContainerWidget {
     private final Rectangle bounds = new Rectangle();
     private final List<Widget> widgets = new ArrayList<>();
     private final NumberAnimator<Double> scrollAnimator = ValueAnimator.ofDouble();
@@ -114,29 +112,25 @@ public class TabContainerWidget extends GuiComponent {
                     })
                     .tooltipLine(Component.translatable("text.rei.next_page")));
             
-            this.widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+            this.widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
                 Rectangle tabLeftBounds = tabLeft.getBounds();
                 Rectangle tabRightBounds = tabRight.getBounds();
                 if (isCompactTabButtons) {
-                    matrices.pushPose();
-                    matrices.translate(0, 0.5, 0);
-                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_SMALL_TEXTURE);
-                    blit(matrices, tabLeftBounds.x + 2, tabLeftBounds.y + 2, 0, 0, 6, 6, 6, 6);
-                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_SMALL_TEXTURE);
-                    blit(matrices, tabRightBounds.x + 2, tabRightBounds.y + 2, 0, 0, 6, 6, 6, 6);
-                    matrices.popPose();
+                    graphics.pose().pushPose();
+                    graphics.pose().translate(0, 0.5, 0);
+                    graphics.blit(InternalTextures.ARROW_LEFT_SMALL_TEXTURE, tabLeftBounds.x + 2, tabLeftBounds.y + 2, 0, 0, 6, 6, 6, 6);
+                    graphics.blit(InternalTextures.ARROW_RIGHT_SMALL_TEXTURE, tabRightBounds.x + 2, tabRightBounds.y + 2, 0, 0, 6, 6, 6, 6);
+                    graphics.pose().popPose();
                 } else {
-                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_TEXTURE);
-                    blit(matrices, tabLeftBounds.x + 4, tabLeftBounds.y + 4, 0, 0, 8, 8, 8, 8);
-                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_TEXTURE);
-                    blit(matrices, tabRightBounds.x + 4, tabRightBounds.y + 4, 0, 0, 8, 8, 8, 8);
+                    graphics.blit(InternalTextures.ARROW_LEFT_TEXTURE, tabLeftBounds.x + 4, tabLeftBounds.y + 4, 0, 0, 8, 8, 8, 8);
+                    graphics.blit(InternalTextures.ARROW_RIGHT_TEXTURE, tabRightBounds.x + 4, tabRightBounds.y + 4, 0, 0, 8, 8, 8, 8);
                 }
             }), 0, 0, 1));
         }
         
         this.widgets.add(new Widget() {
             @Override
-            public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+            public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
                 scrollAnimator.update(delta);
                 int absLeft = bounds.x + bounds.width / 2 - tabsPerPage() * tabSize / 2;
                 int absRight = bounds.x + bounds.width / 2 + tabsPerPage() * tabSize / 2;
@@ -218,9 +212,9 @@ public class TabContainerWidget extends GuiComponent {
             tab.setRenderer(category, category.getIcon(), category.getTitle(), tabIndex == selectedCategory.getAsInt());
             this.widgets.add(new DelegateWidget(tab) {
                 @Override
-                public void render(PoseStack poseStack, int mouseX, int mouseY, float delta) {
-                    try (CloseableScissors scissors = Widget.scissor(poseStack, new Rectangle(scissorsBounds.x, scissorsBounds.y, scissorsBounds.width, scissorsBounds.height + 4))) {
-                        super.render(poseStack, mouseX, mouseY, delta);
+                public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+                    try (CloseableScissors scissors = Widget.scissor(graphics, new Rectangle(scissorsBounds.x, scissorsBounds.y, scissorsBounds.width, scissorsBounds.height + 4))) {
+                        super.render(graphics, mouseX, mouseY, delta);
                     }
                 }
             });

@@ -24,14 +24,12 @@
 package me.shedaniel.rei.impl.client.gui.error;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicEntryListWidget;
 import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -61,7 +59,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
     private boolean inFocus;
     
     public ErrorsEntryListWidget(Minecraft client, int width, int height, int startY, int endY) {
-        super(client, width, height, startY, endY, GuiComponent.BACKGROUND_LOCATION);
+        super(client, width, height, startY, endY, Screen.BACKGROUND_LOCATION);
     }
     
     public void _clearItems() {
@@ -110,7 +108,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         }
         
         @Override
-        public void render(PoseStack poseStack, int i, int i1, int i2, int i3, int i4, int i5, int i6, boolean b, float v) {
+        public void render(GuiGraphics graphics, int i, int i1, int i2, int i3, int i4, int i5, int i6, boolean b, float v) {
         }
         
         @Override
@@ -134,8 +132,8 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            getEntry().render(matrices, index, y, x + indent, entryWidth - indent, entryHeight, mouseX, mouseY, isSelected, delta);
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+            getEntry().render(graphics, index, y, x + indent, entryWidth - indent, entryHeight, mouseX, mouseY, isSelected, delta);
         }
         
         @Override
@@ -202,15 +200,15 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             Vector4f mouse = transformMouse(mouseX, mouseY);
-            matrices.pushPose();
-            matrices.last().pose().mul(transform);
+            graphics.pose().pushPose();
+            graphics.pose().last().pose().mul(transform);
             
             Vector4f pos = new Vector4f(x, y, 0, 1);
             pos.mul(new Matrix4f().scale(1 / scale, 1 / scale, 1 / scale));
-            getEntry().render(matrices, index, Math.round(pos.y()), Math.round(pos.x()), Math.round(entryWidth / scale), Math.round(entryHeight / scale), (int) mouse.x(), (int) mouse.y(), isSelected, delta);
-            matrices.popPose();
+            getEntry().render(graphics, index, Math.round(pos.y()), Math.round(pos.x()), Math.round(entryWidth / scale), Math.round(entryHeight / scale), (int) mouse.x(), (int) mouse.y(), isSelected, delta);
+            graphics.pose().popPose();
         }
         
         @Override
@@ -298,7 +296,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             if (this.width != entryWidth - 6) {
                 this.width = entryWidth - 6;
                 this.textSplit = text.getString().trim().isEmpty() ? Collections.singletonList(text.getVisualOrderText()) : Minecraft.getInstance().font.split(text, width);
@@ -307,7 +305,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
             this.savedY = y;
             int yy = y;
             for (FormattedCharSequence textSp : textSplit) {
-                Minecraft.getInstance().font.drawShadow(matrices, textSp, x + 5, yy, -1);
+                graphics.drawString(Minecraft.getInstance().font, textSp, x + 5, yy, -1);
                 yy += 12;
             }
             
@@ -318,7 +316,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
                     HoverEvent hoverEvent = style.getHoverEvent();
                     Component component = hoverEvent.getValue(HoverEvent.Action.SHOW_TEXT);
                     if (component != null) {
-                        screen.renderTooltip(matrices, Minecraft.getInstance().font.split(component, Math.max(this.width / 2, 200)), x, y);
+                        graphics.renderTooltip(Minecraft.getInstance().font, Minecraft.getInstance().font.split(component, Math.max(this.width / 2, 200)), x, y);
                     }
                 }
             }
@@ -376,11 +374,11 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             if (this.width != entryWidth) {
                 this.width = entryWidth;
             }
-            ErrorsEntryListWidget.fill(matrices, x + 2, y + 2, x + width - 6 - 2, y + 3, 0xFF777777);
+            graphics.fill(x + 2, y + 2, x + width - 6 - 2, y + 3, 0xFF777777);
         }
         
         @Override
@@ -404,13 +402,12 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            RenderSystem.setShaderTexture(0, id);
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             NativeImage image = texture.getPixels();
             width = (entryWidth - 6) / 2;
             this.height = (int) ((double) width * ((double) image.getHeight() / (double) image.getWidth()));
-            ErrorsEntryListWidget.fill(matrices, x, y, x + width, y + height + 2, 0xFFFFFFFF);
-            ErrorsEntryListWidget.innerBlit(matrices.last().pose(), x + 1, x + width - 1, y + 1, y + height + 1, 0, 0, 1, 0, 1);
+            graphics.fill(x, y, x + width, y + height + 2, 0xFFFFFFFF);
+            graphics.innerBlit(id, x + 1, x + width - 1, y + 1, y + height + 1, 0, 0, 1, 0, 1);
         }
         
         @Override
@@ -432,22 +429,22 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
-                Minecraft.getInstance().screen.renderTooltip(matrices, Component.literal("Click to open link."), mouseX, mouseY);
+                graphics.renderTooltip(Minecraft.getInstance().font, Component.literal("Click to open link."), mouseX, mouseY);
                 int yy = y;
                 for (FormattedCharSequence textSp : textSplit) {
                     FormattedCharSequence underlined = characterVisitor -> {
                         return textSp.accept((charIndex, style, codePoint) -> characterVisitor.accept(charIndex, style.applyFormat(ChatFormatting.UNDERLINE), codePoint));
                     };
-                    Minecraft.getInstance().font.drawShadow(matrices, underlined, x + 5, yy, 0xff1fc3ff);
+                    graphics.drawString(Minecraft.getInstance().font, underlined, x + 5, yy, 0xff1fc3ff);
                     yy += 12;
                 }
             } else {
                 int yy = y;
                 for (FormattedCharSequence textSp : textSplit) {
-                    Minecraft.getInstance().font.drawShadow(matrices, textSp, x + 5, yy, 0xff1fc3ff);
+                    graphics.drawString(Minecraft.getInstance().font, textSp, x + 5, yy, 0xff1fc3ff);
                     yy += 12;
                 }
             }

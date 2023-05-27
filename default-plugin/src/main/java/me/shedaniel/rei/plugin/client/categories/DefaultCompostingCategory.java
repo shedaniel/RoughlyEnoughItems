@@ -41,6 +41,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -78,8 +79,8 @@ public class DefaultCompostingCategory implements DisplayCategory<DefaultCompost
             }
             
             @Override
-            public void render(PoseStack matrices, Rectangle rectangle, int mouseX, int mouseY, float delta) {
-                Minecraft.getInstance().font.draw(matrices, text.getVisualOrderText(), rectangle.x + 5, rectangle.y + 6, -1);
+            public void render(GuiGraphics graphics, Rectangle rectangle, int mouseX, int mouseY, float delta) {
+                graphics.drawString(Minecraft.getInstance().font, text.getVisualOrderText(), rectangle.x + 5, rectangle.y + 6, -1, false);
             }
         };
     }

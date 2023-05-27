@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
@@ -46,7 +45,6 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
 import me.shedaniel.rei.impl.client.gui.modules.entries.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -87,12 +85,11 @@ public class ConfigButtonWidget {
                 })
                 .focusable(false)
                 .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y));
-        Widget overlayWidget = Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            matrices.pushPose();
-            matrices.translate(0, 0, 1);
-            RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
-            GuiComponent.blit(matrices, bounds.x + 3, bounds.y + 3, 0, 0, 14, 14);
-            matrices.popPose();
+        Widget overlayWidget = Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, 0, 1);
+            graphics.blit(InternalTextures.CHEST_GUI_TEXTURE, bounds.x + 3, bounds.y + 3, 0, 0, 14, 14);
+            graphics.pose().popPose();
         });
         return Widgets.concat(configButton, overlayWidget);
     }

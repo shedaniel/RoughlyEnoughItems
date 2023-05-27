@@ -23,11 +23,11 @@
 
 package me.shedaniel.rei.api.client.entry.renderer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class ForwardingEntryRenderer<T> implements EntryRenderer<T> {
@@ -38,8 +38,8 @@ public abstract class ForwardingEntryRenderer<T> implements EntryRenderer<T> {
     }
     
     @Override
-    public void render(EntryStack<T> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-        this.next.render(entry, matrices, bounds, mouseX, mouseY, delta);
+    public void render(EntryStack<T> entry, GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        this.next.render(entry, graphics, bounds, mouseX, mouseY, delta);
     }
     
     @Override

@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -38,6 +37,7 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.Nullable;
 
@@ -138,13 +138,13 @@ public class DisplayCompositeWidget extends DelegateWidgetWithBounds implements 
         }
         
         @Override
-        public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-            matrices.pushPose();
-            matrices.translate(bounds.getX(), bounds.getY(), 0);
-            matrices.scale(bounds.width / (float) this.bounds.getWidth(), bounds.height / (float) this.bounds.getHeight(), 1);
-            matrices.translate(-this.bounds.getX(), -this.bounds.getY(), 0);
-            widget.render(matrices, -1000, -1000, delta);
-            matrices.popPose();
+        public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
+            graphics.pose().pushPose();
+            graphics.pose().translate(bounds.getX(), bounds.getY(), 0);
+            graphics.pose().scale(bounds.width / (float) this.bounds.getWidth(), bounds.height / (float) this.bounds.getHeight(), 1);
+            graphics.pose().translate(-this.bounds.getX(), -this.bounds.getY(), 0);
+            widget.render(graphics, -1000, -1000, delta);
+            graphics.pose().popPose();
         }
         
         @Override

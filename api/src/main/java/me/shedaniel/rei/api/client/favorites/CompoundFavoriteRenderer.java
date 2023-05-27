@@ -23,16 +23,15 @@
 
 package me.shedaniel.rei.api.client.favorites;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.client.gui.GuiGraphics;
 import org.joml.Vector4f;
 
 import java.util.List;
@@ -40,7 +39,7 @@ import java.util.function.IntFunction;
 import java.util.function.IntSupplier;
 
 @Environment(EnvType.CLIENT)
-public class CompoundFavoriteRenderer extends AbstractRenderer {
+public class CompoundFavoriteRenderer implements Renderer {
     protected NumberAnimator<Double> offset = ValueAnimator.ofDouble();
     protected Rectangle scissorArea = new Rectangle();
     protected long nextSwitch = -1;
@@ -89,21 +88,21 @@ public class CompoundFavoriteRenderer extends AbstractRenderer {
     }
     
     @Override
-    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
         updateAnimator(delta);
         Vector4f vector4f = new Vector4f(bounds.x, bounds.y, 0, 1.0F);
-        matrices.last().pose().transform(vector4f);
+        graphics.pose().last().pose().transform(vector4f);
         Vector4f vector4f2 = new Vector4f(bounds.getMaxX(), bounds.getMaxY(), 0, 1.0F);
-        matrices.last().pose().transform(vector4f2);
+        graphics.pose().last().pose().transform(vector4f2);
         scissorArea.setBounds((int) vector4f.x(), (int) vector4f.y(), (int) vector4f2.x() - (int) vector4f.x(), (int) vector4f2.y() - (int) vector4f.y());
         ScissorsHandler.INSTANCE.scissor(scissorArea);
-        matrices.pushPose();
-        matrices.translate(0, this.offset.floatValue() * -bounds.getHeight(), 0);
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, this.offset.floatValue() * -bounds.getHeight(), 0);
         for (int i = 0; i < count; i++) {
-            renderers.apply(i).render(matrices, bounds, mouseX, mouseY, delta);
-            matrices.translate(0, bounds.height, 0);
+            renderers.apply(i).render(graphics, bounds, mouseX, mouseY, delta);
+            graphics.pose().translate(0, bounds.height, 0);
         }
-        matrices.popPose();
+        graphics.pose().popPose();
         ScissorsHandler.INSTANCE.removeLastScissor();
     }
     

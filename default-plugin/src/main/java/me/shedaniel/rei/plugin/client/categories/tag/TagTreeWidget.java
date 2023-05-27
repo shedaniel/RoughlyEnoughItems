@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.plugin.client.categories.tag;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.core.Holder;
 
@@ -75,24 +75,24 @@ public class TagTreeWidget<S, T> extends WidgetWithBounds {
     }
     
     @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.rootWidget.getBounds().setLocation(getBounds().getCenterX() - this.rootWidget.getBounds().getWidth() / 2,
                 getBounds().y);
-        this.rootWidget.render(poses, mouseX, mouseY, delta);
+        this.rootWidget.render(graphics, mouseX, mouseY, delta);
         if (childWidgets.isEmpty()) return;
-        vLine(poses, rootWidget.getBounds().getCenterX(), rootWidget.getBounds().getMaxY(), rootWidget.getBounds().getMaxY() + 6, 0xFFFFFFFF);
+        graphics.vLine(rootWidget.getBounds().getCenterX(), rootWidget.getBounds().getMaxY(), rootWidget.getBounds().getMaxY() + 6, 0xFFFFFFFF);
         int childrenTotalWidth = childWidgets.stream().map(WidgetWithBounds::getBounds).mapToInt(value -> value.width + 6).sum() - 6;
-        hLine(poses, rootWidget.getBounds().getCenterX() - childrenTotalWidth / 2 + childWidgets.get(0).getBounds().width / 2,
+        graphics.hLine(rootWidget.getBounds().getCenterX() - childrenTotalWidth / 2 + childWidgets.get(0).getBounds().width / 2,
                 rootWidget.getBounds().getCenterX() + childrenTotalWidth / 2 - childWidgets.get(childWidgets.size() - 1).getBounds().width / 2,
                 rootWidget.getBounds().getMaxY() + 6, 0xFFFFFFFF);
         int x = 0;
         for (TagTreeWidget<S, T> childWidget : this.childWidgets) {
-            vLine(poses, getBounds().getCenterX() - childrenTotalWidth / 2 + x + childWidget.getBounds().width / 2,
+            graphics.vLine(getBounds().getCenterX() - childrenTotalWidth / 2 + x + childWidget.getBounds().width / 2,
                     rootWidget.getBounds().getMaxY() + 6, rootWidget.getBounds().getMaxY() + 16, 0xFFFFFFFF);
             childWidget.getBounds().setLocation(getBounds().getCenterX() - childrenTotalWidth / 2 + x,
                     this.rootWidget.getBounds().getMaxY() + 16);
-            if (this.overflowBounds.intersects(MatrixUtils.transform(poses.last().pose(), childWidget.getBounds()))) {
-                childWidget.render(poses, mouseX, mouseY, delta);
+            if (this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose().last().pose(), childWidget.getBounds()))) {
+                childWidget.render(graphics, mouseX, mouseY, delta);
             }
             x += childWidget.getBounds().width + 6;
         }

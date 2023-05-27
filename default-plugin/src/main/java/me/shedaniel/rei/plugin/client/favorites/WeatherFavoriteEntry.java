@@ -23,8 +23,6 @@
 
 package me.shedaniel.rei.plugin.client.favorites;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import me.shedaniel.math.Rectangle;
@@ -34,12 +32,12 @@ import me.shedaniel.rei.api.client.favorites.CompoundFavoriteRenderer;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
-import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.resources.language.I18n;
@@ -112,22 +110,21 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
     
     private static Renderer getRenderer(int id) {
         Weather weather = Weather.byId(id);
-        return new AbstractRenderer() {
+        return new Renderer() {
             @Override
-            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+            public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
                 int color = bounds.contains(mouseX, mouseY) ? 0xFFEEEEEE : 0xFFAAAAAA;
                 if (bounds.width > 4 && bounds.height > 4) {
-                    matrices.pushPose();
-                    matrices.translate(bounds.getCenterX(), bounds.getCenterY(), 0);
-                    matrices.scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f, 1);
-                    renderWeatherIcon(matrices, weather, 0, 0, color);
-                    matrices.popPose();
+                    graphics.pose().pushPose();
+                    graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY(), 0);
+                    graphics.pose().scale(bounds.getWidth() / 18f, bounds.getHeight() / 18f, 1);
+                    renderWeatherIcon(graphics, weather, 0, 0, color);
+                    graphics.pose().popPose();
                 }
             }
             
-            private void renderWeatherIcon(PoseStack matrices, Weather type, int centerX, int centerY, int color) {
-                RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
-                blit(matrices, centerX - 7, centerY - 7, type.getId() * 14, 14, 14, 14, 256, 256);
+            private void renderWeatherIcon(GuiGraphics graphics, Weather type, int centerX, int centerY, int color) {
+                graphics.blit(CHEST_GUI_TEXTURE, centerX - 7, centerY - 7, type.getId() * 14, 14, 14, 14, 256, 256);
             }
             
             @Override
@@ -299,14 +296,14 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
         }
         
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             if (selected) {
-                fill(matrices, x, y, x + width, y + 12, -12237499);
+                graphics.fill(x, y, x + width, y + 12, -12237499);
             }
             if (selected && containsMouse) {
                 REIRuntime.getInstance().queueTooltip(Tooltip.create(Component.translatable("text.rei.weather_button.tooltip.entry", text)));
             }
-            font.draw(matrices, text, x + 2, y + 2, selected ? 16777215 : 8947848);
+            graphics.drawString(font, text, x + 2, y + 2, selected ? 16777215 : 8947848, false);
         }
         
         @Override

@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -33,8 +32,8 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
 import java.util.List;
@@ -72,11 +71,11 @@ public class DisplayTooltipComponent implements TooltipComponent, ClientTooltipC
     }
     
     @Override
-    public void renderImage(Font font, int x, int y, PoseStack matrices, ItemRenderer itemRenderer) {
-        matrices.pushPose();
-        matrices.translate(x + 2, y + 2, 0);
-        matrices.translate(-this.bounds.getX(), -this.bounds.getY(), 0);
-        widget.render(matrices, -1000, -1000, 0);
-        matrices.popPose();
+    public void renderImage(Font font, int x, int y, GuiGraphics graphics) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(x + 2, y + 2, 0);
+        graphics.pose().translate(-this.bounds.getX(), -this.bounds.getY(), 0);
+        widget.render(graphics, -1000, -1000, 0);
+        graphics.pose().popPose();
     }
 }

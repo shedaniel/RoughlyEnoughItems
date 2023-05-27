@@ -46,7 +46,7 @@ import java.util.function.Supplier;
  */
 public abstract class BasicDisplay implements Display {
     protected static final Supplier<RegistryAccess> REGISTRY_ACCESS =
-            EnvExecutor.getEnvSpecific(() -> () -> () -> GameInstance.getClient().player.level.registryAccess(),
+            EnvExecutor.getEnvSpecific(() -> () -> () -> GameInstance.getClient().player.level().registryAccess(),
                     () -> () -> () -> GameInstance.getServer().registryAccess());
     protected List<EntryIngredient> inputs;
     protected List<EntryIngredient> outputs;
@@ -110,7 +110,8 @@ public abstract class BasicDisplay implements Display {
          * @return the serializer
          */
         public static <P extends BasicDisplay> Serializer<P> ofSimple(SimpleConstructor<P> constructor) {
-            return new Serializer<>(constructor, (p, tag) -> {});
+            return new Serializer<>(constructor, (p, tag) -> {
+            });
         }
         
         /**
@@ -121,7 +122,8 @@ public abstract class BasicDisplay implements Display {
          * @return the serializer
          */
         public static <P extends BasicDisplay> Serializer<P> ofRecipeLess(RecipeLessConstructor<P> constructor) {
-            return new Serializer<>(constructor, (p, tag) -> {});
+            return new Serializer<>(constructor, (p, tag) -> {
+            });
         }
         
         /**
@@ -132,7 +134,8 @@ public abstract class BasicDisplay implements Display {
          * @return the serializer
          */
         public static <P extends BasicDisplay> Serializer<P> ofSimpleRecipeLess(SimpleRecipeLessConstructor<P> constructor) {
-            return new Serializer<>(constructor, (p, tag) -> {});
+            return new Serializer<>(constructor, (p, tag) -> {
+            });
         }
         
         /**
@@ -143,11 +146,13 @@ public abstract class BasicDisplay implements Display {
          * @return the serializer
          */
         public static <P extends BasicDisplay> Serializer<P> of(Constructor<P> constructor) {
-            return new Serializer<>(constructor, (p, tag) -> {});
+            return new Serializer<>(constructor, (p, tag) -> {
+            });
         }
         
         private Serializer(Constructor<P> constructor) {
-            this(constructor, (p, tag) -> {});
+            this(constructor, (p, tag) -> {
+            });
         }
         
         /**

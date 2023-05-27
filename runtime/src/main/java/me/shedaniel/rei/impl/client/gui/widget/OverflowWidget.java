@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
@@ -32,6 +31,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import net.minecraft.client.gui.GuiGraphics;
 import org.joml.Matrix4f;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -63,7 +63,7 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     }
     
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         Rectangle widgetBounds = ((WidgetWithBounds) delegate()).getBounds();
         this.scale.update(delta);
         this.scale.setTarget(ScrollingContainer.handleBounceBack(this.scale.target() - 0.78,
@@ -86,13 +86,13 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
                 ScrollingContainer.handleBounceBack(this.velocity.target().y, 0, delta, .0001)
         ), 20);
         
-        try (CloseableScissors scissors = scissor(poseStack, this.bounds)) {
+        try (CloseableScissors scissors = scissor(graphics, this.bounds)) {
             boolean containsMouse = this.bounds.contains(mouseX, mouseY);
             
             if (containsMouse) {
-                super.render(poseStack, mouseX, mouseY, delta);
+                super.render(graphics, mouseX, mouseY, delta);
             } else {
-                super.render(poseStack, Integer.MAX_VALUE, Integer.MAX_VALUE, delta);
+                super.render(graphics, Integer.MAX_VALUE, Integer.MAX_VALUE, delta);
             }
         }
     }

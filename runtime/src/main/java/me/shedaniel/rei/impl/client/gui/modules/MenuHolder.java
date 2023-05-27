@@ -24,12 +24,12 @@
 package me.shedaniel.rei.impl.client.gui.modules;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -58,7 +58,8 @@ public class MenuHolder implements MenuAccess {
     }
     
     private void proceedOpenMenu(UUID uuid, Runnable runnable) {
-        proceedOpenMenuOrElse(uuid, runnable, menu -> {});
+        proceedOpenMenuOrElse(uuid, runnable, menu -> {
+        });
     }
     
     private void proceedOpenMenuOrElse(UUID uuid, Runnable runnable, Consumer<OverlayMenu> orElse) {
@@ -102,7 +103,7 @@ public class MenuHolder implements MenuAccess {
         return menu != null ? menu.wrappedMenu : null;
     }
     
-    public void lateRender(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void lateRender(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (menu != null) {
             if (!menu.inBounds.test(PointHelper.ofMouse())) {
                 close();
@@ -110,7 +111,7 @@ public class MenuHolder implements MenuAccess {
                 if (menu.wrappedMenu.containsMouse(mouseX, mouseY)) {
                     ScreenOverlayImpl.getInstance().clearTooltips();
                 }
-                menu.wrappedMenu.render(matrices, mouseX, mouseY, delta);
+                menu.wrappedMenu.render(graphics, mouseX, mouseY, delta);
             }
         }
     }

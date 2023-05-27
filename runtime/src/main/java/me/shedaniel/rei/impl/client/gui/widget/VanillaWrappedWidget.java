@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -43,16 +43,14 @@ public class VanillaWrappedWidget extends Widget {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (element instanceof Widget widget) {
-            widget.setZ(getZ());
-            widget.render(matrices, mouseX, mouseY, delta);
+            widget.render(graphics, mouseX, mouseY, delta);
         } else {
-            matrices.pushPose();
-            matrices.translate(0, 0, getZ());
+            graphics.pose().pushPose();
             if (element instanceof Renderable widget)
-                widget.render(matrices, mouseX, mouseY, delta);
-            matrices.popPose();
+                widget.render(graphics, mouseX, mouseY, delta);
+            graphics.pose().popPose();
         }
     }
     

@@ -23,9 +23,9 @@
 
 package me.shedaniel.rei.api.client.gui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.REIRuntime;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import org.jetbrains.annotations.Nullable;
@@ -99,14 +99,14 @@ public abstract class Label extends WidgetWithBounds {
      * @return the consumer before render, null if not set.
      */
     @Nullable
-    public abstract BiConsumer<PoseStack, Label> getOnRender();
+    public abstract BiConsumer<GuiGraphics, Label> getOnRender();
     
     /**
      * Sets the consumer before render.
      *
      * @param onRender the consumer before render.
      */
-    public abstract void setOnRender(@Nullable BiConsumer<PoseStack, Label> onRender);
+    public abstract void setOnRender(@Nullable BiConsumer<GuiGraphics, Label> onRender);
     
     /**
      * Sets the consumer before render.
@@ -114,7 +114,7 @@ public abstract class Label extends WidgetWithBounds {
      * @param onRender the consumer before render.
      * @return the label itself.
      */
-    public final Label onRender(@Nullable BiConsumer<PoseStack, Label> onRender) {
+    public final Label onRender(@Nullable BiConsumer<GuiGraphics, Label> onRender) {
         setOnRender(onRender);
         return this;
     }

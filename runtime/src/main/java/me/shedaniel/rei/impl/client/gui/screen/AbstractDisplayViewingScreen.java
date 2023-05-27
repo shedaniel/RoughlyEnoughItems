@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.datafixers.util.Pair;
 import dev.architectury.fluid.FluidStack;
@@ -56,11 +55,11 @@ import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -334,12 +333,12 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             }
             
             @Override
-            public void renderImage(Font font, int x, int y, PoseStack poses, ItemRenderer renderer) {
+            public void renderImage(Font font, int x, int y, GuiGraphics graphics) {
                 int entrySize = EntryListWidget.entrySize();
                 int w = Math.max(1, MAX_WIDTH / entrySize);
                 int i = 0;
-                poses.pushPose();
-                poses.translate(0, 0, 50);
+                graphics.pose().pushPose();
+                graphics.pose().translate(0, 0, 50);
                 for (EntryStack<?> entry : widget.getEntries()) {
                     int x1 = x + (i % w) * entrySize;
                     int y1 = y + 13 + (i / w) * entrySize;
@@ -347,14 +346,14 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                     if (i / w > 5) {
                         MultiBufferSource.BufferSource source = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
                         Component text = Component.literal("+" + (widget.getEntries().size() - w * 6 + 1)).withStyle(ChatFormatting.GRAY);
-                        font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, poses.last().pose(), source, Font.DisplayMode.NORMAL, 0, 15728880);
+                        font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, graphics.pose().last().pose(), source, Font.DisplayMode.NORMAL, 0, 15728880);
                         source.endBatch();
                         break;
                     } else {
-                        entry.render(poses, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
+                        entry.render(graphics, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
                     }
                 }
-                poses.popPose();
+                graphics.pose().popPose();
             }
             
             @Override

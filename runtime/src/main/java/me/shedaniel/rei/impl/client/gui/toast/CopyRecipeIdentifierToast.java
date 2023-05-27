@@ -24,8 +24,8 @@
 package me.shedaniel.rei.impl.client.gui.toast;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -50,15 +50,14 @@ public class CopyRecipeIdentifierToast implements Toast {
     }
     
     @Override
-    public Visibility render(PoseStack matrices, ToastComponent toastManager, long var2) {
-        RenderSystem.setShaderTexture(0, TEXTURE);
+    public Visibility render(GuiGraphics graphics, ToastComponent toastManager, long var2) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        toastManager.blit(matrices, 0, 0, 0, 0, 160, 32);
+        graphics.blit(TEXTURE, 0, 0, 0, 0, 160, 32);
         if (this.subtitle == null) {
-            toastManager.getMinecraft().font.draw(matrices, this.title, 18.0F, 12.0F, 11141120);
+            graphics.drawString(toastManager.getMinecraft().font, this.title, 18, 12, 11141120, false);
         } else {
-            toastManager.getMinecraft().font.draw(matrices, this.title, 18.0F, 7.0F, 11141120);
-            toastManager.getMinecraft().font.draw(matrices, this.subtitle, 18.0F, 18.0F, -16777216);
+            graphics.drawString(toastManager.getMinecraft().font, this.title, 18, 7, 11141120, false);
+            graphics.drawString(toastManager.getMinecraft().font, this.subtitle, 18, 18, -16777216, false);
         }
         
         return var2 - this.startTime < 5000L ? Visibility.SHOW : Visibility.HIDE;

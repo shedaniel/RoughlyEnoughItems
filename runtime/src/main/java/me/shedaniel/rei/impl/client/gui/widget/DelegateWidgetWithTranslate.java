@@ -23,12 +23,12 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Transformation;
 import me.shedaniel.rei.api.client.gui.widgets.DelegateWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
+import net.minecraft.client.gui.GuiGraphics;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
@@ -51,12 +51,12 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     }
     
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float delta) {
-        poseStack.pushPose();
-        poseStack.last().pose().mul(translate());
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        graphics.pose().pushPose();
+        graphics.pose().last().pose().mul(translate());
         Vector4f mouse = transformMouse(mouseX, mouseY);
-        super.render(poseStack, (int) mouse.x(), (int) mouse.y(), delta);
-        poseStack.popPose();
+        super.render(graphics, (int) mouse.x(), (int) mouse.y(), delta);
+        graphics.pose().popPose();
     }
     
     private Vector4f transformMouse(double mouseX, double mouseY) {

@@ -92,7 +92,7 @@ public final class Widgets {
     }
     
     public static Widget createTooltip(Function<Point, @Nullable Tooltip> tooltipSupplier) {
-        return createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+        return createDrawableWidget((matrices, mouseX, mouseY, delta) -> {
             Point mouse = new Point(mouseX, mouseY);
             Tooltip tooltip = tooltipSupplier.apply(mouse);
             if (tooltip != null) {

@@ -24,7 +24,6 @@
 package me.shedaniel.rei.plugin.client.categories;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
@@ -39,6 +38,7 @@ import me.shedaniel.rei.plugin.common.displays.brewing.DefaultBrewingDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -67,11 +67,11 @@ public class DefaultBrewingCategory implements DisplayCategory<DefaultBrewingDis
         Point startPoint = new Point(bounds.getCenterX() - 52, bounds.getCenterY() - 29);
         List<Widget> widgets = Lists.newArrayList();
         widgets.add(Widgets.createRecipeBase(bounds));
-        widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            RenderSystem.setShaderTexture(0, REIRuntime.getInstance().getDefaultDisplayTexture());
-            helper.blit(matrices, startPoint.x, startPoint.y, 0, 108, 103, 59);
+        widgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
+            ResourceLocation texture = REIRuntime.getInstance().getDefaultDisplayTexture();
+            graphics.blit(texture, startPoint.x, startPoint.y, 0, 108, 103, 59);
             int width = Mth.ceil(System.currentTimeMillis() / 250d % 18d);
-            helper.blit(matrices, startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
+            graphics.blit(texture, startPoint.x + 44, startPoint.y + 28, 103, 163, width, 4);
         }));
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 1, startPoint.y + 1)).entry(EntryStacks.of(Items.BLAZE_POWDER)).disableBackground().markInput());
         widgets.add(Widgets.createSlot(new Point(startPoint.x + 40, startPoint.y + 1)).entries(display.getInputEntries().get(0)).disableBackground().markInput());

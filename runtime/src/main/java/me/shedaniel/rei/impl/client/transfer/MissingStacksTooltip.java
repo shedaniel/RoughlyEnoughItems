@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.transfer;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.SimpleDisplayRenderer;
@@ -32,9 +31,9 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -70,12 +69,12 @@ public class MissingStacksTooltip implements ClientTooltipComponent, TooltipComp
     }
     
     @Override
-    public void renderImage(Font font, int x, int y, PoseStack poses, ItemRenderer renderer) {
+    public void renderImage(Font font, int x, int y, GuiGraphics graphics) {
         int entrySize = EntryListWidget.entrySize();
         int w = Math.max(1, MAX_WIDTH / entrySize);
         int i = 0;
-        poses.pushPose();
-        poses.translate(0, 0, 50);
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 50);
         for (EntryIngredient entry : stacks) {
             int x1 = x + (i % w) * entrySize;
             int y1 = y + 13 + (i / w) * entrySize;
@@ -83,7 +82,7 @@ public class MissingStacksTooltip implements ClientTooltipComponent, TooltipComp
             if (i / w > 5) {
                 MultiBufferSource.BufferSource source = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
                 Component text = Component.literal("+" + (stacks.size() - w * 6 + 1)).withStyle(ChatFormatting.GRAY);
-                font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, poses.last().pose(), source, Font.DisplayMode.NORMAL, 0, 15728880);
+                font.drawInBatch(text, x1 + entrySize / 2 - font.width(text) / 2, y1 + entrySize / 2 - 1, -1, true, graphics.pose().last().pose(), source, Font.DisplayMode.NORMAL, 0, 15728880);
                 source.endBatch();
                 break;
             } else {
@@ -91,10 +90,10 @@ public class MissingStacksTooltip implements ClientTooltipComponent, TooltipComp
                 if (entry.isEmpty()) stack = EntryStack.empty();
                 else if (entry.size() == 1) stack = entry.get(0);
                 else stack = entry.get(Mth.floor((System.currentTimeMillis() / 1000 % (double) entry.size())));
-                stack.render(poses, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
+                stack.render(graphics, new Rectangle(x1, y1, entrySize, entrySize), -1000, -1000, 0);
             }
         }
-        poses.popPose();
+        graphics.pose().popPose();
     }
     
     @Override

@@ -24,10 +24,13 @@
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.DrawableConsumer;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import org.joml.Matrix4f;
 
@@ -41,7 +44,7 @@ public final class FillRectangleDrawableConsumer implements DrawableConsumer {
     }
     
     @Override
-    public void render(GuiComponent helper, PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         float a = (color >> 24 & 255) / 255.0F;
         float r = (color >> 16 & 255) / 255.0F;
         float g = (color >> 8 & 255) / 255.0F;
@@ -51,7 +54,7 @@ public final class FillRectangleDrawableConsumer implements DrawableConsumer {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        Matrix4f pose = matrices.last().pose();
+        Matrix4f pose = graphics.pose().last().pose();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
         bufferBuilder.vertex(pose, rectangle.getMaxX(), rectangle.getMinY(), 0).color(r, g, b, a).endVertex();
         bufferBuilder.vertex(pose, rectangle.getMinX(), rectangle.getMinY(), 0).color(r, g, b, a).endVertex();

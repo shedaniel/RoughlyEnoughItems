@@ -23,14 +23,14 @@
 
 package me.shedaniel.rei.impl.client.gui.credits;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -47,7 +47,7 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
     private boolean inFocus;
     
     public CreditsEntryListWidget(Minecraft client, int width, int height, int startY, int endY) {
-        super(client, width, height, startY, endY, GuiComponent.BACKGROUND_LOCATION);
+        super(client, width, height, startY, endY, Screen.BACKGROUND_LOCATION);
     }
     
     public void creditsClearEntries() {
@@ -96,8 +96,8 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            Minecraft.getInstance().font.drawShadow(matrices, text.getVisualOrderText(), x + 5, y + 5, -1);
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+            graphics.drawString(Minecraft.getInstance().font, text.getVisualOrderText(), x + 5, y + 5, -1);
         }
         
         @Override
@@ -118,11 +118,11 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-            Minecraft.getInstance().font.drawShadow(matrices, language.getVisualOrderText(), x + 5, y + 5, -1);
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+            graphics.drawString(Minecraft.getInstance().font, language.getVisualOrderText(), x + 5, y + 5, -1);
             int yy = y + 5;
             for (FormattedCharSequence translator : translators) {
-                Minecraft.getInstance().font.drawShadow(matrices, translator, x + 5 + maxWidth, yy, -1);
+                graphics.drawString(Minecraft.getInstance().font, translator, x + 5 + maxWidth, yy, -1);
                 yy += 12;
             }
         }
@@ -148,24 +148,24 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
         }
         
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
             contains = mouseX >= x && mouseX <= x + entryWidth && mouseY >= y && mouseY <= y + entryHeight;
             if (contains) {
-                Minecraft.getInstance().screen.renderTooltip(matrices, Component.literal("Click to open link."), mouseX, mouseY);
+                graphics.renderTooltip(Minecraft.getInstance().font, Component.literal("Click to open link."), mouseX, mouseY);
                 int yy = y;
                 for (FormattedCharSequence textSp : textSplit) {
                     FormattedCharSequence underlined = characterVisitor -> {
                         return textSp.accept((charIndex, style, codePoint) -> characterVisitor.accept(charIndex, style.applyFormat(ChatFormatting.UNDERLINE), codePoint));
                     };
                     if (rainbow) underlined = TextTransformations.applyRainbow(underlined, x + 5, yy);
-                    Minecraft.getInstance().font.drawShadow(matrices, underlined, x + 5, yy, 0xff1fc3ff);
+                    graphics.drawString(Minecraft.getInstance().font, underlined, x + 5, yy, 0xff1fc3ff);
                     yy += 12;
                 }
             } else {
                 int yy = y;
                 for (FormattedCharSequence textSp : textSplit) {
                     if (rainbow) textSp = TextTransformations.applyRainbow(textSp, x + 5, yy);
-                    Minecraft.getInstance().font.drawShadow(matrices, textSp, x + 5, yy, 0xff1fc3ff);
+                    graphics.drawString(Minecraft.getInstance().font, textSp, x + 5, yy, 0xff1fc3ff);
                     yy += 12;
                 }
             }

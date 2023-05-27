@@ -37,6 +37,7 @@ import me.shedaniel.rei.impl.client.gui.toast.ExportRecipeIdentifierToast;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
@@ -92,9 +93,9 @@ public final class RecipeDisplayExporter {
         poseStack.translate(0.0D, 0.0D, -2000.0D);
         RenderSystem.applyModelViewMatrix();
         Lighting.setupFor3DItems();
-        PoseStack matrices = new PoseStack();
+        GuiGraphics graphics = new GuiGraphics(client, client.renderBuffers().bufferSource());
         for (Widget widget : widgets) {
-            widget.render(matrices, -1, -1, 0);
+            widget.render(graphics, -1, -1, 0);
         }
         
         NativeImage nativeImage = new NativeImage(renderTarget.width, renderTarget.height, false);

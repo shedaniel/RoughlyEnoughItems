@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Point;
@@ -44,6 +43,7 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
@@ -106,23 +106,23 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (bounds.getMaxX() < 0 || opacity == 0) return;
         if (renderer != null) {
-            try (CloseableScissors scissors = Widget.scissor(matrices, new Rectangle(bounds.x, bounds.y + 2, bounds.width, (selected ? bounds.height + 2 : bounds.height - 2)))) {
+            try (CloseableScissors scissors = Widget.scissor(graphics, new Rectangle(bounds.x, bounds.y + 2, bounds.width, (selected ? bounds.height + 2 : bounds.height - 2)))) {
                 darkBackgroundAlpha.update(delta);
                 RenderSystem.enableBlend();
                 RenderSystem.blendFuncSeparate(770, 771, 1, 0);
                 RenderSystem.blendFunc(770, 771);
-                RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, opacity);
-                this.blit(matrices, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 2));
-                RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE_DARK);
+                graphics.blit(InternalTextures.CHEST_GUI_TEXTURE, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 2));
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value() * opacity);
-                this.blit(matrices, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 2));
+                graphics.blit(InternalTextures.CHEST_GUI_TEXTURE_DARK, bounds.x, bounds.y + 2, u + (selected ? bounds.width : 0), v, bounds.width, (selected ? bounds.height + 2 : bounds.height - 2));
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, opacity);
-                renderer.setZ(100);
-                renderer.render(matrices, new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 5, 16, 16), mouseX, mouseY, delta);
+                graphics.pose().pushPose();
+                graphics.pose().translate(0, 0, 100);
+                renderer.render(graphics, new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 5, 16, 16), mouseX, mouseY, delta);
+                graphics.pose().popPose();
             }
             if (containsMouse(mouseX, mouseY)) {
                 drawTooltip();

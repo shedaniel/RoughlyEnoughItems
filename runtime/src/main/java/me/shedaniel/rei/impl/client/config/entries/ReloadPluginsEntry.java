@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.config.entries;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
@@ -33,6 +32,7 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.impl.client.gui.screen.ConfigReloadingScreen;
 import me.shedaniel.rei.impl.client.search.argument.Argument;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -54,18 +54,19 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
         RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
     }, Supplier::get) {
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             if (PluginManager.areAnyReloading()) {
                 Screen screen = Minecraft.getInstance().screen;
                 Minecraft.getInstance().setScreen(new ConfigReloadingScreen(Component.translatable("text.rei.config.is.reloading"), PluginManager::areAnyReloading, () -> Minecraft.getInstance().setScreen(screen)));
             } else {
-                super.render(matrices, mouseX, mouseY, delta);
+                super.render(graphics, mouseX, mouseY, delta);
             }
         }
     };
     private AbstractWidget reloadSearchButton = new Button(0, 0, 0, 20, Component.empty(), button -> {
         Argument.resetCache(true);
-    }, Supplier::get) {};
+    }, Supplier::get) {
+    };
     private List<AbstractWidget> children = ImmutableList.of(reloadPluginsButton, reloadSearchButton);
     
     public ReloadPluginsEntry(int width) {
@@ -91,19 +92,19 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
     }
     
     @Override
-    public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-        super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
+    public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        super.render(graphics, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
         this.reloadPluginsButton.active = this.isEditable();
         this.reloadPluginsButton.setY(y);
         this.reloadPluginsButton.setWidth(width / 2 - 2);
         this.reloadPluginsButton.setX(x + entryWidth / 2 - width / 2);
-        this.reloadPluginsButton.render(matrices, mouseX, mouseY, delta);
+        this.reloadPluginsButton.render(graphics, mouseX, mouseY, delta);
         this.reloadSearchButton.active = this.isEditable() && Argument.hasCache();
         this.reloadSearchButton.setY(y);
         this.reloadSearchButton.setWidth(width / 2 - 2);
         this.reloadSearchButton.setX(x + entryWidth / 2 + 2);
-        this.reloadSearchButton.render(matrices, mouseX, mouseY, delta);
+        this.reloadSearchButton.render(graphics, mouseX, mouseY, delta);
     }
     
     @Override

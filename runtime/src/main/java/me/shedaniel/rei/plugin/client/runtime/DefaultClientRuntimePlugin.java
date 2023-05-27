@@ -23,8 +23,6 @@
 
 package me.shedaniel.rei.plugin.client.runtime;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import dev.architectury.platform.Platform;
@@ -34,7 +32,6 @@ import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
-import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProviderWidget;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitorWidget;
@@ -68,6 +65,7 @@ import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -99,13 +97,12 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
     @Override
     public void registerEntries(EntryRegistry registry) {
         if (ClientHelperImpl.getInstance().isAprilFools.get()) {
-            registry.addEntry(ClientEntryStacks.of(new AbstractRenderer() {
+            registry.addEntry(ClientEntryStacks.of(new Renderer() {
                 private ResourceLocation id = new ResourceLocation("roughlyenoughitems", "textures/gui/kirb.png");
                 
                 @Override
-                public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                    RenderSystem.setShaderTexture(0, id);
-                    innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), getZ(), 0, 1, 0, 1);
+                public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                    graphics.innerBlit(id, bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), 0, 0, 1, 0, 1);
                 }
                 
                 @Override

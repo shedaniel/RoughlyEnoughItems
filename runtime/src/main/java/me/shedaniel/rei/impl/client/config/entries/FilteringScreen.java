@@ -26,7 +26,10 @@ package me.shedaniel.rei.impl.client.config.entries;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
@@ -47,6 +50,7 @@ import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -202,11 +206,11 @@ public class FilteringScreen extends Screen {
         this.searchField.setResponder(this::updateSearch);
     }
     
-    protected void renderHoleBackground(PoseStack matrices, int y1, int y2, int tint, int alpha1, int alpha2) {
+    protected void renderHoleBackground(GuiGraphics graphics, int y1, int y2, int tint, int alpha1, int alpha2) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.getBuilder();
         RenderSystem.setShaderTexture(0, BACKGROUND_LOCATION);
-        Matrix4f matrix = matrices.last().pose();
+        Matrix4f matrix = graphics.pose().last().pose();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         float float_1 = 32.0F;
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
@@ -219,8 +223,8 @@ public class FilteringScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        renderHoleBackground(matrices, 0, height, 32, 255, 255);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        renderHoleBackground(graphics, 0, height, 32, 255, 255);
         updateSelectionCache();
         Rectangle bounds = getBounds();
         tooltip = null;
@@ -243,17 +247,17 @@ public class FilteringScreen extends Screen {
             manager.add(entry);
             nextIndex++;
         }
-        manager.render(matrices, mouseX, mouseY, delta);
+        manager.render(graphics, mouseX, mouseY, delta);
         updatePosition(delta);
-        scrolling.renderScrollBar(0, 1.0F, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8F : 1F);
-        matrices.pushPose();
-        matrices.translate(0, 0, 300);
-        this.searchField.laterRender(matrices, mouseX, mouseY, delta);
-        this.selectAllButton.render(matrices, mouseX, mouseY, delta);
-        this.selectNoneButton.render(matrices, mouseX, mouseY, delta);
-        this.hideButton.render(matrices, mouseX, mouseY, delta);
-        this.showButton.render(matrices, mouseX, mouseY, delta);
-        matrices.popPose();
+        scrolling.renderScrollBar(graphics, 0, 1.0F, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8F : 1F);
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 300);
+        this.searchField.laterRender(graphics, mouseX, mouseY, delta);
+        this.selectAllButton.render(graphics, mouseX, mouseY, delta);
+        this.selectNoneButton.render(graphics, mouseX, mouseY, delta);
+        this.hideButton.render(graphics, mouseX, mouseY, delta);
+        this.showButton.render(graphics, mouseX, mouseY, delta);
+        graphics.pose().popPose();
         
         ScissorsHandler.INSTANCE.removeLastScissor();
         Tesselator tesselator = Tesselator.getInstance();
@@ -261,7 +265,7 @@ public class FilteringScreen extends Screen {
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 0, 1);
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        Matrix4f matrix = matrices.last().pose();
+        Matrix4f matrix = graphics.pose().last().pose();
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
         buffer.vertex(matrix, 0, bounds.y + 4, 0.0F).uv(0.0F, 1.0F).color(0, 0, 0, 0).endVertex();
         buffer.vertex(matrix, width, bounds.y + 4, 0.0F).uv(1.0F, 1.0F).color(0, 0, 0, 0).endVertex();
@@ -269,17 +273,17 @@ public class FilteringScreen extends Screen {
         buffer.vertex(matrix, 0, bounds.y, 0.0F).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
         tesselator.end();
         RenderSystem.disableBlend();
-        renderHoleBackground(matrices, 0, bounds.y, 64, 255, 255);
+        renderHoleBackground(graphics, 0, bounds.y, 64, 255, 255);
         
-        this.backButton.render(matrices, mouseX, mouseY, delta);
+        this.backButton.render(graphics, mouseX, mouseY, delta);
         
         if (tooltip != null) {
-            ((ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().get()).renderTooltip(matrices, tooltip);
+            ((ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().get()).renderTooltip(graphics, tooltip);
         }
         
-        this.font.drawShadow(matrices, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
+        graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
         Component hint = Component.translatable("config.roughlyenoughitems.filteringRulesScreen.hint").withStyle(ChatFormatting.YELLOW);
-        this.font.drawShadow(matrices, hint, this.width - this.font.width(hint) - 15, 12.0F, -1);
+        graphics.drawString(this.font, hint, this.width - this.font.width(hint) - 15, 12, -1);
     }
     
     private Predicate<Rectangle> getSelection() {
@@ -470,11 +474,11 @@ public class FilteringScreen extends Screen {
         }
         
         @Override
-        protected void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        protected void drawExtra(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             if (isSelected()) {
                 Rectangle bounds = getBounds();
                 RenderSystem.disableDepthTest();
-                fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0x896b70fa, 0x896b70fa);
+                graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0x896b70fa, 0x896b70fa);
                 RenderSystem.enableDepthTest();
             }
         }
@@ -492,17 +496,17 @@ public class FilteringScreen extends Screen {
         }
         
         @Override
-        protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        protected void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             if (isFiltered()) {
                 Rectangle bounds = getBounds();
                 RenderSystem.disableDepthTest();
-                fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0xffff0000, 0xffff0000);
+                graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0xffff0000, 0xffff0000);
                 RenderSystem.enableDepthTest();
             }
         }
         
         @Override
-        protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        protected void queueTooltip(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             if (searchField.containsMouse(mouseX, mouseY))
                 return;
             Tooltip tooltip = getCurrentTooltip(TooltipContext.of(new Point(mouseX, mouseY)));

@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.favorites.panel;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -31,6 +30,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.MultiBufferSource;
 
@@ -50,7 +50,7 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.bounds.setBounds(updateArea(parent.favoritesBounds));
         boolean hovered = containsMouse(mouseX, mouseY);
         switch (ConfigObject.getInstance().getFavoriteAddWidgetMode()) {
@@ -66,10 +66,10 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
         }
         this.alpha.update(delta);
         int buttonColor = 0xFFFFFF | (Math.round(0x74 * alpha.floatValue()) << 24);
-        fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), buttonColor, buttonColor);
+        graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), buttonColor, buttonColor);
         if (isVisible()) {
             MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-            renderButtonText(matrices, bufferSource);
+            renderButtonText(graphics, bufferSource);
             bufferSource.endBatch();
         }
         if (hovered) {
@@ -79,7 +79,7 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
     
     protected abstract boolean isAvailable(int mouseX, int mouseY);
     
-    protected abstract void renderButtonText(PoseStack matrices, MultiBufferSource.BufferSource bufferSource);
+    protected abstract void renderButtonText(GuiGraphics graphics, MultiBufferSource.BufferSource bufferSource);
     
     @Override
     public Rectangle getBounds() {

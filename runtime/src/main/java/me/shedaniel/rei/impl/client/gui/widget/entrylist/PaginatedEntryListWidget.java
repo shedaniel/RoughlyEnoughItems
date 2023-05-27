@@ -24,8 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -49,6 +47,7 @@ import me.shedaniel.rei.impl.client.gui.widget.DefaultDisplayChoosePageWidget;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -73,7 +72,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
     }
     
     @Override
-    protected void renderEntries(boolean fastEntryRendering, PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void renderEntries(boolean fastEntryRendering, GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.leftButton.setEnabled(getTotalPages() > 1);
         this.rightButton.setEnabled(getTotalPages() > 1);
         
@@ -87,7 +86,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                 if (entry.our == null) {
                     CachedEntryListRender.Sprite sprite = CachedEntryListRender.get(entry.getCurrentEntry());
                     if (sprite != null) {
-                        CachingEntryRenderer renderer = new CachingEntryRenderer(sprite, this::getZ);
+                        CachingEntryRenderer renderer = new CachingEntryRenderer(sprite);
                         entry.our = ClientEntryStacks.setRenderer(entry.getCurrentEntry().copy().cast(), stack -> renderer);
                     }
                 }
@@ -107,12 +106,12 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
         } else {
             manager.addAllSlow(entries);
         }
-        manager.render(debugger.debugTime, debugger.size, debugger.time, matrices, mouseX, mouseY, delta);
+        manager.render(debugger.debugTime, debugger.size, debugger.time, graphics, mouseX, mouseY, delta);
         
-        new CollapsedEntriesBorderRenderer().render(matrices, entries, collapsedStackIndices);
+        new CollapsedEntriesBorderRenderer().render(graphics, entries, collapsedStackIndices);
         
         for (Widget widget : additionalWidgets) {
-            widget.render(matrices, mouseX, mouseY, delta);
+            widget.render(graphics, mouseX, mouseY, delta);
         }
     }
     
@@ -208,15 +207,14 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                 .tooltipLine(Component.translatable("text.rei.previous_page"))
                 .focusable(false);
         this.additionalWidgets.add(leftButton);
-        this.additionalWidgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_TEXTURE);
+        this.additionalWidgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             Rectangle bounds = leftButton.getBounds();
-            matrices.pushPose();
-            matrices.translate(0, 0, 1);
-            blit(matrices, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
-            matrices.popPose();
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, 0, 1);
+            graphics.blit(InternalTextures.ARROW_LEFT_TEXTURE, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
+            graphics.pose().popPose();
         }));
-        this.changelogButton = Widgets.createButton(new Rectangle(overlayBounds.getMaxX() - 18 - 18, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), Component.translatable(""))
+        this.changelogButton = Widgets.createButton(new Rectangle(overlayBounds.getMaxX() - 18 - 18, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), Component.empty())
                 .onClick(button -> {
                     ChangelogLoader.show();
                 })
@@ -224,13 +222,12 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                 .tooltipLine(Component.translatable("text.rei.changelog.title"))
                 .focusable(false);
         this.additionalWidgets.add(changelogButton);
-        this.additionalWidgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
+        this.additionalWidgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             Rectangle bounds = changelogButton.getBounds();
-            matrices.pushPose();
-            matrices.translate(0.5f, 0, 1);
-            blit(matrices, bounds.x + 1, bounds.y + 2, !ChangelogLoader.hasVisited() ? 28 : 14, 0, 14, 14);
-            matrices.popPose();
+            graphics.pose().pushPose();
+            graphics.pose().translate(0.5f, 0, 1);
+            graphics.blit(InternalTextures.CHEST_GUI_TEXTURE, bounds.x + 1, bounds.y + 2, !ChangelogLoader.hasVisited() ? 28 : 14, 0, 14, 14);
+            graphics.pose().popPose();
         }));
         this.rightButton = Widgets.createButton(new Rectangle(overlayBounds.getMaxX() - 18, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), Component.literal(""))
                 .onClick(button -> {
@@ -243,13 +240,12 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                 .tooltipLine(Component.translatable("text.rei.next_page"))
                 .focusable(false);
         this.additionalWidgets.add(rightButton);
-        this.additionalWidgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_TEXTURE);
+        this.additionalWidgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             Rectangle bounds = rightButton.getBounds();
-            matrices.pushPose();
-            matrices.translate(0, 0, 1);
-            blit(matrices, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
-            matrices.popPose();
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, 0, 1);
+            graphics.blit(InternalTextures.ARROW_RIGHT_TEXTURE, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
+            graphics.pose().popPose();
         }));
         this.additionalWidgets.add(Widgets.createClickableLabel(new Point(overlayBounds.x + ((overlayBounds.width - 18) / 2), overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), Component.empty(), label -> {
             if (!Screen.hasShiftDown()) {

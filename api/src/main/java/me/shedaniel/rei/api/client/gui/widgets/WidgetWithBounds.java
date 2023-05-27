@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.api.client.gui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
+import net.minecraft.client.gui.GuiGraphics;
 
 public abstract class WidgetWithBounds extends Widget {
     public abstract Rectangle getBounds();
@@ -36,10 +36,10 @@ public abstract class WidgetWithBounds extends Widget {
     
     @Deprecated
     @Override
-    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
         Rectangle clone = getBounds().clone();
         getBounds().setBounds(bounds);
-        render(matrices, mouseX, mouseY, delta);
+        render(graphics, mouseX, mouseY, delta);
         getBounds().setBounds(clone);
     }
 }

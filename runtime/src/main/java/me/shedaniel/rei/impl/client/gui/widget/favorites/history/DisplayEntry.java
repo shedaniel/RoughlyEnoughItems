@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.widget.favorites.history;
 
 import com.google.common.base.Suppliers;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Dimension;
@@ -38,6 +37,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -145,7 +145,7 @@ public class DisplayEntry extends WidgetWithBounds {
     }
     
     @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         boolean stable = isStable();
         this.bounds.update(delta);
         FloatingRectangle target = this.bounds.target();
@@ -159,27 +159,27 @@ public class DisplayEntry extends WidgetWithBounds {
             return;
         }
         
-        poses.pushPose();
+        graphics.pose().pushPose();
         if (!stable || !target.equals(bounds)) {
-            poses.translate(0, 0, 600);
+            graphics.pose().translate(0, 0, 600);
         }
-        poses.translate(xOffset(), yOffset(), 0);
-        poses.scale(xScale(), yScale(), 1.0F);
+        graphics.pose().translate(xOffset(), yOffset(), 0);
+        graphics.pose().scale(xScale(), yScale(), 1.0F);
         
         for (Widget widget : widgets.get()) {
-            widget.render(poses, transformMouseX(mouseX), transformMouseY(mouseY), delta);
+            widget.render(graphics, transformMouseX(mouseX), transformMouseY(mouseY), delta);
         }
-        poses.popPose();
+        graphics.pose().popPose();
         
         {
-            poses.pushPose();
+            graphics.pose().pushPose();
             if (stable && target.equals(bounds)) {
-                poses.translate(this.xOffset, 0, 200);
+                graphics.pose().translate(this.xOffset, 0, 200);
             } else {
-                poses.translate(0, 0, 800);
+                graphics.pose().translate(0, 0, 800);
             }
             Vector4f mouse = new Vector4f((float) mouseX, (float) mouseY, 0, 1);
-            poses.last().pose().transform(mouse);
+            graphics.pose().last().pose().transform(mouse);
             
             AutoCraftingEvaluator.AutoCraftingResult result = this.autoCraftingResult.get();
             
@@ -189,26 +189,26 @@ public class DisplayEntry extends WidgetWithBounds {
             
             if (result.hasApplicable) {
                 plusButton.setText(Component.literal("+"));
-                plusButton.render(poses, Math.round(mouse.x()), Math.round(mouse.y()), delta);
-                poses.popPose();
+                plusButton.render(graphics, Math.round(mouse.x()), Math.round(mouse.y()), delta);
+                graphics.pose().popPose();
                 
                 if (plusButton.containsMouse(Math.round(mouse.x()), Math.round(mouse.y()))) {
                     result.tooltipRenderer.accept(new Point(mouseX, mouseY), Tooltip::queue);
                 }
                 
                 if (result.renderer != null) {
-                    poses.pushPose();
+                    graphics.pose().pushPose();
                     if (!stable || !target.equals(bounds)) {
-                        poses.translate(0, 0, 600);
+                        graphics.pose().translate(0, 0, 600);
                     }
-                    poses.translate(xOffset(), yOffset(), 0);
-                    poses.scale(xScale(), yScale(), 1.0F);
+                    graphics.pose().translate(xOffset(), yOffset(), 0);
+                    graphics.pose().scale(xScale(), yScale(), 1.0F);
                     
-                    result.renderer.render(poses, mouseX, mouseY, delta, widgets.get(), getBounds(), display);
-                    poses.popPose();
+                    result.renderer.render(graphics, mouseX, mouseY, delta, widgets.get(), getBounds(), display);
+                    graphics.pose().popPose();
                 }
             } else {
-                poses.popPose();
+                graphics.pose().popPose();
             }
         }
     }

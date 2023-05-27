@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueProvider;
 import me.shedaniel.math.Color;
@@ -34,7 +33,7 @@ import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -42,7 +41,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.Collections;
 import java.util.List;
@@ -64,7 +62,7 @@ public class ButtonWidget extends Button {
     @Nullable
     private Consumer<Button> onClick;
     @Nullable
-    private BiConsumer<PoseStack, Button> onRender;
+    private BiConsumer<GuiGraphics, Button> onRender;
     private boolean focusable = false;
     private boolean focused = false;
     @Nullable
@@ -136,12 +134,12 @@ public class ButtonWidget extends Button {
     
     @Nullable
     @Override
-    public final BiConsumer<PoseStack, Button> getOnRender() {
+    public final BiConsumer<GuiGraphics, Button> getOnRender() {
         return onRender;
     }
     
     @Override
-    public final void setOnRender(BiConsumer<PoseStack, Button> onRender) {
+    public final void setOnRender(BiConsumer<GuiGraphics, Button> onRender) {
         this.onRender = onRender;
     }
     
@@ -203,18 +201,18 @@ public class ButtonWidget extends Button {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         darkBackground.update(delta);
         alpha.update(delta);
         if (onRender != null) {
-            onRender.accept(matrices, this);
+            onRender.accept(graphics, this);
         }
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;
         int alphaAsInt = (int) (alpha.value() * 255);
-        renderBackground(matrices, x, y, width, height, this.getTextureId(new Point(mouseX, mouseY)), false, Color.ofTransparent(0xFFFFFF | (alphaAsInt << 24)));
+        renderBackground(graphics, x, y, width, height, this.getTextureId(new Point(mouseX, mouseY)), false, Color.ofTransparent(0xFFFFFF | (alphaAsInt << 24)));
         Color darkBackgroundColor = darkBackground.value();
         darkBackgroundColor = Color.ofRGBA(darkBackgroundColor.getRed(), darkBackgroundColor.getGreen(), darkBackgroundColor.getBlue(), (int) Math.round(darkBackgroundColor.getAlpha() * alpha.value()));
-        renderBackground(matrices, x, y, width, height, this.getTextureId(new Point(mouseX, mouseY)), true, darkBackgroundColor);
+        renderBackground(graphics, x, y, width, height, this.getTextureId(new Point(mouseX, mouseY)), true, darkBackgroundColor);
         
         int color = 0xe0e0e0;
         if (!this.enabled) {
@@ -224,11 +222,11 @@ public class ButtonWidget extends Button {
         }
         
         if (tint != null) {
-            fillGradient(matrices, x + 1, y + 1, x + width - 1, y + height - 1, tint, tint);
+            graphics.fillGradient(x + 1, y + 1, x + width - 1, y + height - 1, tint, tint);
         }
         
         if (alphaAsInt > 10) {
-            drawCenteredString(matrices, font, getText(), x + width / 2, y + (height - 8) / 2, color | (alphaAsInt << 24));
+            graphics.drawCenteredString(font, getText(), x + width / 2, y + (height - 8) / 2, color | (alphaAsInt << 24));
         }
         
         Component[] tooltip = getTooltip();
@@ -302,34 +300,33 @@ public class ButtonWidget extends Button {
         return 1;
     }
     
-    protected void renderBackground(PoseStack matrices, int x, int y, int width, int height, int textureOffset) {
-        renderBackground(matrices, x, y, width, height, textureOffset, REIRuntime.getInstance().isDarkThemeEnabled(), Color.ofTransparent(0xFFFFFFFF));
+    protected void renderBackground(GuiGraphics graphics, int x, int y, int width, int height, int textureOffset) {
+        renderBackground(graphics, x, y, width, height, textureOffset, REIRuntime.getInstance().isDarkThemeEnabled(), Color.ofTransparent(0xFFFFFFFF));
     }
     
-    protected void renderBackground(PoseStack matrices, int x, int y, int width, int height, int textureOffset, boolean dark, Color color) {
-        RenderSystem.setShaderTexture(0, dark ? BUTTON_LOCATION_DARK : BUTTON_LOCATION);
+    protected void renderBackground(GuiGraphics graphics, int x, int y, int width, int height, int textureOffset, boolean dark, Color color) {
         RenderSystem.setShaderColor(color.getRed() / 255F, color.getGreen() / 255F, color.getBlue() / 255F, color.getAlpha() / 255F);
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
         RenderSystem.blendFunc(770, 771);
+        ResourceLocation texture = dark ? BUTTON_LOCATION_DARK : BUTTON_LOCATION;
         
         // 9 Patch Texture
         
         // Four Corners
-        blit(matrices, x, y, getZ(), 0, textureOffset * 80, 8, 8, 256, 512);
-        blit(matrices, x + width - 8, y, getZ(), 248, textureOffset * 80, 8, 8, 256, 512);
-        blit(matrices, x, y + height - 8, getZ(), 0, textureOffset * 80 + 72, 8, 8, 256, 512);
-        blit(matrices, x + width - 8, y + height - 8, getZ(), 248, textureOffset * 80 + 72, 8, 8, 256, 512);
+        graphics.blit(texture, x, y, 0, 0, textureOffset * 80, 8, 8, 256, 512);
+        graphics.blit(texture, x + width - 8, y, 0, 248, textureOffset * 80, 8, 8, 256, 512);
+        graphics.blit(texture, x, y + height - 8, 0, 0, textureOffset * 80 + 72, 8, 8, 256, 512);
+        graphics.blit(texture, x + width - 8, y + height - 8, 0, 248, textureOffset * 80 + 72, 8, 8, 256, 512);
         
-        Matrix4f matrix = matrices.last().pose();
         // Sides
-        GuiComponent.innerBlit(matrix, x + 8, x + width - 8, y, y + 8, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80) / 512f, (textureOffset * 80 + 8) / 512f);
-        GuiComponent.innerBlit(matrix, x + 8, x + width - 8, y + height - 8, y + height, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80 + 72) / 512f, (textureOffset * 80 + 80) / 512f);
-        GuiComponent.innerBlit(matrix, x, x + 8, y + 8, y + height - 8, getZ(), (0) / 256f, (8) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
-        GuiComponent.innerBlit(matrix, x + width - 8, x + width, y + 8, y + height - 8, getZ(), (248) / 256f, (256) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
+        graphics.innerBlit(texture, x + 8, x + width - 8, y, y + 8, 0, (8) / 256f, (248) / 256f, (textureOffset * 80) / 512f, (textureOffset * 80 + 8) / 512f);
+        graphics.innerBlit(texture, x + 8, x + width - 8, y + height - 8, y + height, 0, (8) / 256f, (248) / 256f, (textureOffset * 80 + 72) / 512f, (textureOffset * 80 + 80) / 512f);
+        graphics.innerBlit(texture, x, x + 8, y + 8, y + height - 8, 0, (0) / 256f, (8) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
+        graphics.innerBlit(texture, x + width - 8, x + width, y + 8, y + height - 8, 0, (248) / 256f, (256) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
         
         // Center
-        GuiComponent.innerBlit(matrix, x + 8, x + width - 8, y + 8, y + height - 8, getZ(), (8) / 256f, (248) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
+        graphics.innerBlit(texture, x + 8, x + width - 8, y + 8, y + height - 8, 0, (8) / 256f, (248) / 256f, (textureOffset * 80 + 8) / 512f, (textureOffset * 80 + 72) / 512f);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 }

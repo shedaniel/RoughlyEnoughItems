@@ -25,11 +25,11 @@ package me.shedaniel.rei.impl.client.config.entries;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.impl.client.config.addon.ConfigAddonsScreen;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -47,14 +47,15 @@ public class ConfigAddonsEntry extends AbstractConfigListEntry<Unit> {
     private int width;
     private AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.empty(), button -> {
         Minecraft.getInstance().setScreen(new ConfigAddonsScreen(Minecraft.getInstance().screen));
-    }, Supplier::get) {};
+    }, Supplier::get) {
+    };
     private List<AbstractWidget> children = ImmutableList.of(buttonWidget);
     
     public ConfigAddonsEntry(int width) {
         super(Component.empty(), false);
         this.width = width;
         this.buttonWidget.setMessage(REIRuntime.getInstance().getPreviousContainerScreen() != null && Minecraft.getInstance().getConnection() != null
-                                     && Minecraft.getInstance().getConnection().getRecipeManager() != null ? Component.translatable("text.rei.addons")
+                && Minecraft.getInstance().getConnection().getRecipeManager() != null ? Component.translatable("text.rei.addons")
                 : Component.translatable("config.roughlyenoughitems.filteredEntries.loadWorldFirst"));
     }
     
@@ -73,15 +74,15 @@ public class ConfigAddonsEntry extends AbstractConfigListEntry<Unit> {
     }
     
     @Override
-    public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-        super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
+    public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
+        super.render(graphics, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
         Window window = Minecraft.getInstance().getWindow();
         this.buttonWidget.active = REIRuntime.getInstance().getPreviousContainerScreen() != null && Minecraft.getInstance().getConnection() != null
                                    && Minecraft.getInstance().getConnection().getRecipeManager() != null && this.isEditable();
         this.buttonWidget.setY(y);
         this.buttonWidget.setX(x + entryWidth / 2 - width / 2);
         this.buttonWidget.setWidth(width);
-        this.buttonWidget.render(matrices, mouseX, mouseY, delta);
+        this.buttonWidget.render(graphics, mouseX, mouseY, delta);
     }
     
     @Override

@@ -24,13 +24,11 @@
 package me.shedaniel.rei.plugin.client.categories.tag;
 
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingRectangle;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.gui.AbstractRenderer;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
@@ -45,6 +43,7 @@ import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -99,7 +98,7 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
                     }
                 }, 1400);
         
-        widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+        widgets.add(Widgets.createDrawableWidget((matrices, mouseX, mouseY, delta) -> {
             innerBounds.setBounds(recipeBounds.x + 6 + 14, recipeBounds.y + 6, recipeBounds.width - 12 - 14, recipeBounds.height - 12);
             overflowBounds.setBounds(innerBounds.x + 1, innerBounds.y + 1, innerBounds.width - 2, innerBounds.height - 2);
             expandButtonBounds.setBounds(recipeBounds.x + 5, recipeBounds.y + 6, 13, 13);
@@ -134,14 +133,17 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
                 Function<Holder<?>, EntryStack<?>> mapper = holder -> {
                     EntryStack<?> stack = ((Function<Holder<?>, EntryStack<?>>) displayMapper).apply(holder);
                     if (stack.isEmpty()) {
-                        return ClientEntryStacks.of(new AbstractRenderer() {
+                        return ClientEntryStacks.of(new Renderer() {
                             @Override
-                            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                            public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
                                 Minecraft instance = Minecraft.getInstance();
                                 Font font = instance.font;
                                 String text = "?";
                                 int width = font.width(text);
-                                font.draw(matrices, text, bounds.getCenterX() - width / 2f + 0.2f, bounds.getCenterY() - font.lineHeight / 2f + 1f, REIRuntime.getInstance().isDarkThemeEnabled() ? -4473925 : -12566464);
+                                graphics.pose().pushPose();
+                                graphics.pose().translate(bounds.getCenterX() - width / 2f + 0.2f, bounds.getCenterY() - font.lineHeight / 2f + 1f, 0);
+                                graphics.drawString(font, text, 0, 0, REIRuntime.getInstance().isDarkThemeEnabled() ? -4473925 : -12566464, false);
+                                graphics.pose().popPose();
                             }
                             
                             @Override

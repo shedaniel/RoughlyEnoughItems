@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.google.common.base.Suppliers;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -42,6 +41,7 @@ import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
@@ -74,7 +74,7 @@ public final class InternalWidgets {
             );
             
             @Override
-            public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+            public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
                 AutoCraftingEvaluator.AutoCraftingResult result = this.result.get();
                 
                 autoCraftingButton.setEnabled(result.successful);
@@ -87,10 +87,10 @@ public final class InternalWidgets {
                 }
                 
                 if (result.hasApplicable && (containsMouse(mouseX, mouseY) || autoCraftingButton.isFocused()) && result.renderer != null) {
-                    result.renderer.render(poses, mouseX, mouseY, delta, setupDisplay, displayBounds, displaySupplier.get());
+                    result.renderer.render(graphics, mouseX, mouseY, delta, setupDisplay, displayBounds, displaySupplier.get());
                 }
                 
-                this.widget.render(poses, mouseX, mouseY, delta);
+                this.widget.render(graphics, mouseX, mouseY, delta);
                 
                 if (!autoCraftingButton.isFocused() && containsMouse(mouseX, mouseY)) {
                     tryTooltip(result, new Point(mouseX, mouseY));

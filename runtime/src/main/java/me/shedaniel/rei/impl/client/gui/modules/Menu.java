@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.modules;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
@@ -37,6 +36,7 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.entries.SubMenuEntry;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
@@ -135,11 +135,11 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         Rectangle bounds = getBounds();
         Rectangle innerBounds = getInnerBounds();
-        fill(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), containsMouse(mouseX, mouseY) ? (REIRuntime.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
-        fill(matrices, innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), -16777216);
+        graphics.fill(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), containsMouse(mouseX, mouseY) ? (REIRuntime.getInstance().isDarkThemeEnabled() ? -17587 : -1) : -6250336);
+        graphics.fill(innerBounds.x, innerBounds.y, innerBounds.getMaxX(), innerBounds.getMaxY(), -16777216);
         boolean contains = innerBounds.contains(mouseX, mouseY);
         FavoriteMenuEntry focused = getFocused() instanceof FavoriteMenuEntry menuEntry ? menuEntry : null;
         int currentY = innerBounds.y - scrolling.scrollAmountInt();
@@ -157,13 +157,13 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
             boolean containsMouse = contains && mouseY >= currentY && mouseY < currentY + child.getEntryHeight();
             child.updateInformation(innerBounds.x, currentY, focused == child || containsMouse, containsMouse, rendering, getMaxEntryWidth());
             if (rendering) {
-                child.render(matrices, mouseX, mouseY, delta);
+                child.render(graphics, mouseX, mouseY, delta);
             }
             currentY += child.getEntryHeight();
         }
         ScissorsHandler.INSTANCE.removeLastScissor();
         setFocused(focused);
-        scrolling.renderScrollBar(0, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+        scrolling.renderScrollBar(graphics, 0, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
         scrolling.updatePosition(delta);
     }
     

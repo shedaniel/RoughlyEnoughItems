@@ -25,8 +25,6 @@ package me.shedaniel.rei.impl.client.gui.modules.entries;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
@@ -34,6 +32,7 @@ import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 
@@ -90,8 +89,8 @@ public class SubMenuEntry extends AbstractMenuEntry {
     }
     
     @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-        renderBackground(poses, getX(), getY(), getWidth(), getEntryHeight());
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        renderBackground(graphics, getX(), getY(), getWidth(), getEntryHeight());
         if (isSelected()) {
             if (!entries.isEmpty()) {
                 Menu menu = getChildMenu();
@@ -114,22 +113,21 @@ public class SubMenuEntry extends AbstractMenuEntry {
                 
                 List<Rectangle> areas = Lists.newArrayList(ScissorsHandler.INSTANCE.getScissorsAreas());
                 ScissorsHandler.INSTANCE.clearScissors();
-                menu.render(poses, mouseX, mouseY, delta);
+                menu.render(graphics, mouseX, mouseY, delta);
                 for (Rectangle area : areas) {
                     ScissorsHandler.INSTANCE.scissor(area);
                 }
             }
         }
-        font.draw(poses, text, getX() + 2, getY() + 2, isSelected() ? 16777215 : 8947848);
+        graphics.drawString(font, text, getX() + 2, getY() + 2, isSelected() ? 16777215 : 8947848, false);
         if (!entries.isEmpty()) {
-            RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
-            blit(poses, getX() + getWidth() - 15, getY() - 2, 0, 28, 18, 18);
+            graphics.blit(InternalTextures.CHEST_GUI_TEXTURE, getX() + getWidth() - 15, getY() - 2, 0, 28, 18, 18);
         }
     }
     
-    protected void renderBackground(PoseStack poses, int x, int y, int width, int height) {
+    protected void renderBackground(GuiGraphics graphics, int x, int y, int width, int height) {
         if (isSelected()) {
-            fill(poses, x, y, x + width, y + height, -12237499);
+            graphics.fill(x, y, x + width, y + height, -12237499);
         }
     }
     

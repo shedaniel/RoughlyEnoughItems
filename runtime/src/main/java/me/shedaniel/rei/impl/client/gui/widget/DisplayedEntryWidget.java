@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -34,6 +33,7 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.item.ItemStack;
 
@@ -47,17 +47,17 @@ public abstract class DisplayedEntryWidget extends EntryWidget {
     }
     
     @Override
-    protected void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void drawHighlighted(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (!getCurrentEntry().isEmpty())
-            super.drawHighlighted(matrices, mouseX, mouseY, delta);
+            super.drawHighlighted(graphics, mouseX, mouseY, delta);
     }
     
     @Override
-    public void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void queueTooltip(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && !minecraft.player.containerMenu.getCarried().isEmpty()) {
             return;
         }
-        super.queueTooltip(matrices, mouseX, mouseY, delta);
+        super.queueTooltip(graphics, mouseX, mouseY, delta);
     }
     
     @Override

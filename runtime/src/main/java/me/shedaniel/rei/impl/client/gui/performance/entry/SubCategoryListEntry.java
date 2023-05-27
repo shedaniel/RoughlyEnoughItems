@@ -25,13 +25,13 @@ package me.shedaniel.rei.impl.client.gui.performance.entry;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.Expandable;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.impl.client.gui.performance.PerformanceScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -76,15 +76,14 @@ public class SubCategoryListEntry extends PerformanceScreen.PerformanceEntry imp
     }
     
     @Override
-    public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-        RenderSystem.setShaderTexture(0, CONFIG_TEX);
+    public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         this.widget.rectangle.x = x + 3;
         this.widget.rectangle.y = y;
         this.widget.rectangle.width = entryWidth - 6;
         this.widget.rectangle.height = 24;
-        this.blit(matrices, x + 3, y + 5, 24, (this.widget.rectangle.contains(mouseX, mouseY) ? 18 : 0) + (this.expanded ? 9 : 0), 9, 9);
-        Minecraft.getInstance().font.drawShadow(matrices, this.name.getVisualOrderText(), (float) x + 3 + 15, (float) (y + 6), this.widget.rectangle.contains(mouseX, mouseY) ? -1638890 : -1);
+        graphics.blit(CONFIG_TEX, x + 3, y + 5, 24, (this.widget.rectangle.contains(mouseX, mouseY) ? 18 : 0) + (this.expanded ? 9 : 0), 9, 9);
+        graphics.drawString(Minecraft.getInstance().font, this.name.getVisualOrderText(), x + 3 + 15, y + 6, this.widget.rectangle.contains(mouseX, mouseY) ? -1638890 : -1);
         
         for (PerformanceScreen.PerformanceEntry performanceEntry : this.entries) {
             performanceEntry.setParent(this.getParent());
@@ -96,11 +95,11 @@ public class SubCategoryListEntry extends PerformanceScreen.PerformanceEntry imp
             PerformanceScreen.PerformanceEntry entry;
             for (Iterator<PerformanceScreen.PerformanceEntry> iterator = this.entries.iterator(); iterator.hasNext(); yy += entry.getItemHeight()) {
                 entry = iterator.next();
-                entry.render(matrices, -1, yy, x + 3 + 15, entryWidth - 15 - 3, entry.getItemHeight(), mouseX, mouseY, isHovered && this.getFocused() == entry, delta);
+                entry.render(graphics, -1, yy, x + 3 + 15, entryWidth - 15 - 3, entry.getItemHeight(), mouseX, mouseY, isHovered && this.getFocused() == entry, delta);
             }
         }
         FormattedCharSequence timeText = PerformanceScreen.formatTime(totalTime, true);
-        Minecraft.getInstance().font.drawShadow(matrices, timeText, (float) x + entryWidth - 6 - 4 - Minecraft.getInstance().font.width(timeText), (float) (y + 6), -1);
+        graphics.drawString(Minecraft.getInstance().font, timeText, x + entryWidth - 6 - 4 - Minecraft.getInstance().font.width(timeText), y + 6, -1);
     }
     
     @Override

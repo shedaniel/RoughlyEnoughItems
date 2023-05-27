@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.dragging;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingRectangle;
@@ -41,6 +40,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.impl.client.gui.widget.LateRenderable;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.world.phys.Vec2;
@@ -65,7 +65,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         Integer hash = null;
         
         if (entry != null) {
@@ -83,16 +83,16 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
             }
             
             if (entry.dragging) {
-                matrices.pushPose();
-                matrices.translate(0, 0, 600);
+                graphics.pose().pushPose();
+                graphics.pose().translate(0, 0, 600);
                 entry.bounds.update(delta);
                 int width = entry.component.getWidth();
                 int height = entry.component.getHeight();
                 Vec2 mouseStartOffset = entry.mouseStartOffset;
                 entry.bounds.setTo(new FloatingRectangle(mouseX - width / 2 - mouseStartOffset.x, mouseY - height / 2 - mouseStartOffset.y, width, height),
                         30);
-                entry.component.render(matrices, entry.bounds.value().getBounds(), mouseX, mouseY, delta);
-                matrices.popPose();
+                entry.component.render(graphics, entry.bounds.value().getBounds(), mouseX, mouseY, delta);
+                graphics.pose().popPose();
                 
                 VoxelShape shape = entry.getBoundsProvider().bounds();
                 ShapeBounds shapeBounds = new ShapeBounds(shape);
@@ -121,10 +121,10 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
                     iterator.remove();
                 } else {
                     bounds.shape.forAllBoxes((x1, y1, z1, x2, y2, z2) -> {
-                        matrices.pushPose();
-                        matrices.translate(0, 0, 500);
-                        fillGradient(matrices, (int) x1, (int) y1, (int) x2, (int) y2, 0xfdff6b | (bounds.alpha.intValue() << 24), 0xfdff6b | (bounds.alpha.intValue() << 24));
-                        matrices.popPose();
+                        graphics.pose().pushPose();
+                        graphics.pose().translate(0, 0, 500);
+                        graphics.fillGradient((int) x1, (int) y1, (int) x2, (int) y2, 0xfdff6b | (bounds.alpha.intValue() << 24), 0xfdff6b | (bounds.alpha.intValue() << 24));
+                        graphics.pose().popPose();
                     });
                 }
             }
@@ -139,10 +139,10 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
             if (value.width < 2 || value.height < 2 || (Math.abs(value.x - target.x) <= 1.3 && Math.abs(value.y - target.y) <= 1.3 && Math.abs(value.width - target.width) <= 1 && Math.abs(value.height - target.height) <= 1)) {
                 iterator.remove();
             } else {
-                matrices.pushPose();
-                matrices.translate(0, 0, 600);
-                renderBackEntry.component.render(matrices, value.getBounds(), mouseX, mouseY, delta);
-                matrices.popPose();
+                graphics.pose().pushPose();
+                graphics.pose().translate(0, 0, 600);
+                renderBackEntry.component.render(graphics, value.getBounds(), mouseX, mouseY, delta);
+                graphics.pose().popPose();
             }
         }
     }

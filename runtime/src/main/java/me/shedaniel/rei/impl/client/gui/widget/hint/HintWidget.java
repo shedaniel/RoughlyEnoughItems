@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.widget.hint;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -38,14 +37,13 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
-import org.joml.Matrix4f;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -114,38 +112,32 @@ public class HintWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.scroll.setTarget(ScrollingContainer.handleBounceBack(scroll.target(), this.contentHeight - (this.bounds.height - 8 - 9) - 9, delta, .08));
         this.scroll.update(delta);
         
         RenderSystem.disableDepthTest();
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tesselator.getBuilder();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        poses.pushPose();
-        poses.translate(0, 0, 450);
-        Matrix4f pose = poses.last().pose();
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 450);
         int background = 0xf0100010;
         int color1 = 0x505000ff;
         int color2 = color1;
         int x = this.bounds.x, y = this.bounds.y, width = this.bounds.width, height = this.bounds.height;
-        fillGradient(pose, bufferBuilder, x, y - 1, x + width, y, 400, background, background);
-        fillGradient(pose, bufferBuilder, x, y + height, x + width, y + height + 1, 400, background, background);
-        fillGradient(pose, bufferBuilder, x, y, x + width, y + height, 400, background, background);
-        fillGradient(pose, bufferBuilder, x - 1, y, x, y + height, 400, background, background);
-        fillGradient(pose, bufferBuilder, x + width, y, x + width + 1, y + height, 400, background, background);
-        fillGradient(pose, bufferBuilder, x, y + 1, x + 1, y + height - 1, 400, color1, color2);
-        fillGradient(pose, bufferBuilder, x + width - 1, y + 1, x + width, y + height - 1, 400, color1, color2);
-        fillGradient(pose, bufferBuilder, x, y, x + width, y + 1, 400, color1, color1);
-        fillGradient(pose, bufferBuilder, x, y + height - 1, x + width, y + height, 400, color2, color2);
-        BufferUploader.drawWithShader(bufferBuilder.end());
+        graphics.fillGradient(x, y - 1, x + width, y, 400, background, background);
+        graphics.fillGradient(x, y + height, x + width, y + height + 1, 400, background, background);
+        graphics.fillGradient(x, y, x + width, y + height, 400, background, background);
+        graphics.fillGradient(x - 1, y, x, y + height, 400, background, background);
+        graphics.fillGradient(x + width, y, x + width + 1, y + height, 400, background, background);
+        graphics.fillGradient(x, y + 1, x + 1, y + height - 1, 400, color1, color2);
+        graphics.fillGradient(x + width - 1, y + 1, x + width, y + height - 1, 400, color1, color2);
+        graphics.fillGradient(x, y, x + width, y + 1, 400, color1, color1);
+        graphics.fillGradient(x, y + height - 1, x + width, y + height, 400, color2, color2);
         int lineY = y + 4;
         
-        try (CloseableScissors scissors = Widget.scissor(pose, new Rectangle(x + 4, y + 4, width - 8, height - 8 - 9 - 2))) {
+        try (CloseableScissors scissors = Widget.scissor(graphics, new Rectangle(x + 4, y + 4, width - 8, height - 8 - 9 - 2))) {
             for (List<FormattedCharSequence> block : wrapped) {
                 for (FormattedCharSequence line : block) {
-                    font.drawShadow(poses, line, x + 4, lineY - scroll.intValue(), 0xFFFFFFFF);
+                    graphics.drawString(font, line, x + 4, lineY - scroll.intValue(), 0xFFFFFFFF);
                     lineY += 9;
                 }
                 
@@ -160,9 +152,9 @@ public class HintWidget extends WidgetWithBounds {
         if (this.okayBounds.contains(mouseX, mouseY)) {
             okay = okay.withStyle(ChatFormatting.UNDERLINE);
         }
-        font.drawShadow(poses, okay, this.okayBounds.x, this.okayBounds.y, 0xFF999999);
+        graphics.drawString(font, okay, this.okayBounds.x, this.okayBounds.y, 0xFF999999);
         
-        poses.popPose();
+        graphics.pose().popPose();
         RenderSystem.enableDepthTest();
         
         if (this.bounds.contains(mouseX, mouseY)) {

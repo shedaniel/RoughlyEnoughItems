@@ -28,6 +28,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -69,7 +70,8 @@ public class SpriteRenderer {
         private Matrix3f normal;
         private RenderType layer;
         
-        private RenderPass() {}
+        private RenderPass() {
+        }
         
         public RenderPass setup(MultiBufferSource consumers, RenderType type) {
             this.consumers = consumers;
@@ -86,10 +88,10 @@ public class SpriteRenderer {
             return this;
         }
         
-        public RenderPass setup(MultiBufferSource consumers, PoseStack matrices, RenderType type) {
+        public RenderPass setup(MultiBufferSource consumers, GuiGraphics graphics, RenderType type) {
             this.consumers = consumers;
             this.consumer = consumers.getBuffer(type);
-            this.matrices = matrices;
+            this.matrices = graphics.pose();
             this.layer = type;
             
             return this;

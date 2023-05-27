@@ -23,9 +23,9 @@
 
 package me.shedaniel.rei.impl.client.gui.error;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.impl.client.gui.error.ErrorsEntryListWidget.TextEntry;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
@@ -108,11 +108,11 @@ public class ErrorsScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        this.renderDirtBackground(matrices);
-        this.listWidget.render(matrices, mouseX, mouseY, delta);
-        drawCenteredString(matrices, this.font, getTitle(), this.width / 2, 16, 16777215);
-        super.render(matrices, mouseX, mouseY, delta);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        this.renderDirtBackground(graphics);
+        this.listWidget.render(graphics, mouseX, mouseY, delta);
+        graphics.drawCenteredString(this.font, getTitle(), this.width / 2, 16, 16777215);
+        super.render(graphics, mouseX, mouseY, delta);
     }
     
 }

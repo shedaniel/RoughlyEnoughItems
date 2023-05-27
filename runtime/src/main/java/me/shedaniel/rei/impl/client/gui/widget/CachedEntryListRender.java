@@ -44,6 +44,7 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
@@ -155,15 +156,15 @@ public class CachedEntryListRender {
         RenderSystem.applyModelViewMatrix();
         
         Lighting.setupFor3DItems();
-        PoseStack matrices = new PoseStack();
         Rectangle bounds = new Rectangle();
+        GuiGraphics graphics = new GuiGraphics(minecraft, minecraft.renderBuffers().bufferSource());
         
         int index = 0;
         for (EntryStack<?> stack : list) {
             int x = index % side;
             int y = index / side;
             bounds.setBounds(x * RESOLUTION, y * RESOLUTION, RESOLUTION, RESOLUTION);
-            ((EntryRenderer<Object>) stack.getDefinition().getRenderer()).render((EntryStack<Object>) stack, matrices, bounds, -1, -1, 0);
+            ((EntryRenderer<Object>) stack.getDefinition().getRenderer()).render((EntryStack<Object>) stack, graphics, bounds, -1, -1, 0);
             hash.put(EntryStacks.hashExact(stack), pack(x, y));
             index++;
         }

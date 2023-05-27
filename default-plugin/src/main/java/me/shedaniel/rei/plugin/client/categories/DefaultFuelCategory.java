@@ -24,7 +24,6 @@
 package me.shedaniel.rei.plugin.client.categories;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.DisplayRenderer;
@@ -38,6 +37,7 @@ import me.shedaniel.rei.plugin.common.displays.DefaultFuelDisplay;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
@@ -103,11 +103,13 @@ public class DefaultFuelCategory implements DisplayCategory<DefaultFuelDisplay> 
             }
             
             @Override
-            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                slot.setZ(getZ() + 50);
+            public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                graphics.pose().pushPose();
+                graphics.pose().translate(0, 0, 50);
                 slot.getBounds().setLocation(bounds.x + 4, bounds.y + 2);
-                slot.render(matrices, mouseX, mouseY, delta);
-                Minecraft.getInstance().font.drawShadow(matrices, text.getVisualOrderText(), bounds.x + 25, bounds.y + 8, -1);
+                slot.render(graphics, mouseX, mouseY, delta);
+                graphics.pose().popPose();
+                graphics.drawString(Minecraft.getInstance().font, text.getVisualOrderText(), bounds.x + 25, bounds.y + 8, -1);
             }
         };
     }

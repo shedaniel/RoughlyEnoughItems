@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.impl.client.gui.modules.entries;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.impl.client.gui.modules.AbstractMenuEntry;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 
 import java.util.Collections;
@@ -53,6 +53,6 @@ public class EmptyMenuEntry extends AbstractMenuEntry {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
     }
 }

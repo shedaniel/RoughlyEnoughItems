@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.api.client.gui.drag.component;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
+import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -74,10 +74,10 @@ public interface DraggableComponent<T> extends Supplier<T> {
     default void release(DraggedAcceptorResult result) {
     }
     
-    default void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    default void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
     }
     
-    default void render(PoseStack matrices, Point position, int mouseX, int mouseY, float delta) {
-        render(matrices, new Rectangle(position.x - getWidth() / 2, position.y - getHeight() / 2, getWidth(), getHeight()), mouseX, mouseY, delta);
+    default void render(GuiGraphics graphics, Point position, int mouseX, int mouseY, float delta) {
+        render(graphics, new Rectangle(position.x - getWidth() / 2, position.y - getHeight() / 2, getWidth(), getHeight()), mouseX, mouseY, delta);
     }
 }

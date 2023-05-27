@@ -23,11 +23,11 @@
 
 package me.shedaniel.rei.api.client.gui.drag;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import net.minecraft.client.gui.GuiGraphics;
 
 public interface DraggableStack extends DraggableComponent<EntryStack<?>> {
     static DraggableStack from(DraggableComponent<EntryStack<?>> component) {
@@ -48,13 +48,13 @@ public interface DraggableStack extends DraggableComponent<EntryStack<?>> {
             }
             
             @Override
-            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                component.render(matrices, bounds, mouseX, mouseY, delta);
+            public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                component.render(graphics, bounds, mouseX, mouseY, delta);
             }
             
             @Override
-            public void render(PoseStack matrices, Point position, int mouseX, int mouseY, float delta) {
-                component.render(matrices, position, mouseX, mouseY, delta);
+            public void render(GuiGraphics graphics, Point position, int mouseX, int mouseY, float delta) {
+                component.render(graphics, position, mouseX, mouseY, delta);
             }
         };
     }
@@ -82,7 +82,7 @@ public interface DraggableStack extends DraggableComponent<EntryStack<?>> {
     }
     
     @Override
-    default void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-        getStack().render(matrices, bounds, mouseX, mouseY, delta);
+    default void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        getStack().render(graphics, bounds, mouseX, mouseY, delta);
     }
 }

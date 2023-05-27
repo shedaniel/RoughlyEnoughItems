@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 
 import java.util.Collections;
@@ -44,8 +44,8 @@ public class RendererWrappedWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        renderer.render(matrices, getBounds(), mouseX, mouseY, delta);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        renderer.render(graphics, getBounds(), mouseX, mouseY, delta);
     }
     
     @Override
@@ -53,16 +53,6 @@ public class RendererWrappedWidget extends WidgetWithBounds {
         if (renderer instanceof GuiEventListener listener)
             return Collections.singletonList(listener);
         return Collections.emptyList();
-    }
-    
-    @Override
-    public void setZ(int z) {
-        renderer.setZ(z);
-    }
-    
-    @Override
-    public int getZ() {
-        return renderer.getZ();
     }
     
     @Override

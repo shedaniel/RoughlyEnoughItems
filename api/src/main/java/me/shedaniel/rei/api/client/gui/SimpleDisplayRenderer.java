@@ -24,8 +24,6 @@
 package me.shedaniel.rei.api.client.gui;
 
 import com.google.common.base.Predicates;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import me.shedaniel.math.Point;
@@ -36,6 +34,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -116,14 +115,15 @@ public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHold
     }
     
     @Override
-    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
         int xx = bounds.x + 4, yy = bounds.y + 2;
         int j = 0;
         int itemsPerLine = getItemsPerLine();
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 50);
         for (Slot entryWidget : inputWidgets) {
-            entryWidget.setZ(getZ() + 50);
             entryWidget.getBounds().setLocation(xx, yy);
-            entryWidget.render(matrices, mouseX, mouseY, delta);
+            entryWidget.render(graphics, mouseX, mouseY, delta);
             xx += 18;
             j++;
             if (j >= getItemsPerLine() - 2) {
@@ -132,18 +132,20 @@ public class SimpleDisplayRenderer extends DisplayRenderer implements WidgetHold
                 j = 0;
             }
         }
+        graphics.pose().popPose();
         xx = bounds.x + 4 + 18 * (getItemsPerLine() - 2);
         yy = bounds.y + getHeight() / 2 - 8;
-        RenderSystem.setShaderTexture(0, CHEST_GUI_TEXTURE);
-        blit(matrices, xx, yy, 0, 28, 18, 18);
+        graphics.blit(CHEST_GUI_TEXTURE, xx, yy, 0, 28, 18, 18);
         xx += 18;
         yy += outputWidgets.size() * -9 + 9;
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 50);
         for (Slot outputWidget : outputWidgets) {
-            outputWidget.setZ(getZ() + 50);
             outputWidget.getBounds().setLocation(xx, yy);
-            outputWidget.render(matrices, mouseX, mouseY, delta);
+            outputWidget.render(graphics, mouseX, mouseY, delta);
             yy += 18;
         }
+        graphics.pose().popPose();
     }
     
     @Nullable

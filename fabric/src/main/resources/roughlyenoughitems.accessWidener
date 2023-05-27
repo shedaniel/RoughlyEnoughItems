@@ -20,8 +20,7 @@ accessible    field  net/minecraft/world/item/alchemy/PotionBrewing             
 accessible    field  net/minecraft/world/item/alchemy/PotionBrewing$Mix                        from                    Ljava/lang/Object;
 accessible    field  net/minecraft/world/item/alchemy/PotionBrewing$Mix                        ingredient              Lnet/minecraft/world/item/crafting/Ingredient;
 accessible    field  net/minecraft/world/item/alchemy/PotionBrewing$Mix                        to                      Ljava/lang/Object;
-accessible    method net/minecraft/client/gui/GuiComponent                                     innerBlit               (Lorg/joml/Matrix4f;IIIIIFFFF)V
-accessible    method net/minecraft/client/gui/screens/Screen                                   addWidget               (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
+accessible    method net/minecraft/client/gui/GuiGraphics                                      innerBlit               (Lnet/minecraft/resources/ResourceLocation;IIIIIFFFF)V
 accessible    method net/minecraft/client/gui/screens/Screen                                   init                    ()V
 accessible    method net/minecraft/client/gui/screens/Screen                                   insertText              (Ljava/lang/String;Z)V
 accessible    method net/minecraft/client/gui/screens/Screen                                   isValidCharacterForName (Ljava/lang/String;CI)Z
@@ -31,7 +30,7 @@ extendable    method net/minecraft/client/gui/screens/Screen                    
 accessible    method net/minecraft/client/gui/screens/Screen                                   addRenderableWidget     (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
 accessible    method net/minecraft/client/gui/screens/Screen                                   addRenderableOnly       (Lnet/minecraft/client/gui/components/Renderable;)Lnet/minecraft/client/gui/components/Renderable;
 accessible    method net/minecraft/client/gui/screens/Screen                                   addWidget               (Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;
-accessible    method net/minecraft/client/gui/screens/Screen                                   renderTooltipInternal   (Lcom/mojang/blaze3d/vertex/PoseStack;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;)V
+accessible    method net/minecraft/client/gui/GuiGraphics                                      renderTooltipInternal   (Lnet/minecraft/client/gui/Font;Ljava/util/List;IILnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipPositioner;)V
 accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;Lcom/mojang/blaze3d/vertex/VertexFormat;Lcom/mojang/blaze3d/vertex/VertexFormat$Mode;ILnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
 accessible field net/minecraft/tags/TagEntry tag Z
 accessible field net/minecraft/tags/TagEntry id Lnet/minecraft/resources/ResourceLocation;

@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.favorites.panel.rows;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.Component;
 
@@ -48,11 +48,11 @@ public class FavoritesPanelSectionRow extends FavoritesPanelRow {
     }
     
     @Override
-    public void render(PoseStack matrices, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
         if (innerBounds.contains(mouseX, mouseY) && mouseX >= x && mouseY >= y && mouseX <= x + rowWidth && mouseY <= y + rowHeight) {
             Tooltip.create(sectionText).queue();
         }
-        Minecraft.getInstance().font.draw(matrices, styledText, x, y + 1, 0xFFFFFFFF);
+        graphics.drawString(Minecraft.getInstance().font, styledText, x, y + 1, 0xFFFFFFFF, false);
     }
     
     @Override

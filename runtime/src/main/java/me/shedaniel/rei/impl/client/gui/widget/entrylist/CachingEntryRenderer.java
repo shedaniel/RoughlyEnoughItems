@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
@@ -32,21 +31,17 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
-import java.util.function.IntSupplier;
-
 public class CachingEntryRenderer implements BatchedEntryRenderer<Object, CachedEntryListRender.Sprite> {
     private final CachedEntryListRender.Sprite sprite;
-    private final IntSupplier blitOffset;
     
-    public CachingEntryRenderer(CachedEntryListRender.Sprite sprite, IntSupplier blitOffset) {
+    public CachingEntryRenderer(CachedEntryListRender.Sprite sprite) {
         this.sprite = sprite;
-        this.blitOffset = blitOffset;
     }
     
     @Override
@@ -60,38 +55,36 @@ public class CachingEntryRenderer implements BatchedEntryRenderer<Object, Cached
     }
     
     @Override
-    public void startBatch(EntryStack<Object> entry, CachedEntryListRender.Sprite extraData, PoseStack matrices, float delta) {
+    public void startBatch(EntryStack<Object> entry, CachedEntryListRender.Sprite extraData, GuiGraphics graphics, float delta) {
         RenderSystem.setShaderTexture(0, CachedEntryListRender.cachedTextureLocation);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
     }
     
     @Override
-    public void renderBase(EntryStack<Object> entry, CachedEntryListRender.Sprite extraData, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void renderBase(EntryStack<Object> entry, CachedEntryListRender.Sprite extraData, GuiGraphics graphics, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
         VertexConsumer consumer = immediate.getBuffer(CachedEntryListRender.renderType.get());
-        Matrix4f pose = matrices.last().pose();
-        int blitOffset = this.blitOffset.getAsInt();
-        consumer.vertex(pose, bounds.x, bounds.getMaxY(), blitOffset).uv(extraData.u0, extraData.v1).endVertex();
-        consumer.vertex(pose, bounds.getMaxX(), bounds.getMaxY(), blitOffset).uv(extraData.u1, extraData.v1).endVertex();
-        consumer.vertex(pose, bounds.getMaxX(), bounds.y, blitOffset).uv(extraData.u1, extraData.v0).endVertex();
-        consumer.vertex(pose, bounds.x, bounds.y, blitOffset).uv(extraData.u0, extraData.v0).endVertex();
+        Matrix4f pose = graphics.pose().last().pose();
+        consumer.vertex(pose, bounds.x, bounds.getMaxY(), 0).uv(extraData.u0, extraData.v1).endVertex();
+        consumer.vertex(pose, bounds.getMaxX(), bounds.getMaxY(), 0).uv(extraData.u1, extraData.v1).endVertex();
+        consumer.vertex(pose, bounds.getMaxX(), bounds.y, 0).uv(extraData.u1, extraData.v0).endVertex();
+        consumer.vertex(pose, bounds.x, bounds.y, 0).uv(extraData.u0, extraData.v0).endVertex();
     }
     
     @Override
-    public void afterBase(EntryStack<Object> entry, CachedEntryListRender.Sprite extraData, PoseStack matrices, float delta) {
+    public void afterBase(EntryStack<Object> entry, CachedEntryListRender.Sprite extraData, GuiGraphics graphics, float delta) {
     }
     
     @Override
-    public void renderOverlay(EntryStack<Object> entry, CachedEntryListRender.Sprite extraData, PoseStack matrices, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void renderOverlay(EntryStack<Object> entry, CachedEntryListRender.Sprite extraData, GuiGraphics graphics, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
     }
     
     @Override
-    public void endBatch(EntryStack<Object> entry, CachedEntryListRender.Sprite extraData, PoseStack matrices, float delta) {
+    public void endBatch(EntryStack<Object> entry, CachedEntryListRender.Sprite extraData, GuiGraphics graphics, float delta) {
     }
     
     @Override
-    public void render(EntryStack<Object> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-        RenderSystem.setShaderTexture(0, CachedEntryListRender.cachedTextureLocation);
-        GuiComponent.innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), this.blitOffset.getAsInt(), sprite.u0, sprite.u1, sprite.v0, sprite.v1);
+    public void render(EntryStack<Object> entry, GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        graphics.innerBlit(CachedEntryListRender.cachedTextureLocation, bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), 0, sprite.u0, sprite.u1, sprite.v0, sprite.v1);
     }
     
     @Override

@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.common.entry.type.types;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -33,6 +32,7 @@ import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -44,7 +44,7 @@ public class EmptyEntryDefinition {
     @Environment(EnvType.CLIENT)
     public static class EmptyRenderer implements EntryRenderer<Unit> {
         @Override
-        public void render(EntryStack<Unit> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        public void render(EntryStack<Unit> entry, GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
             
         }
         

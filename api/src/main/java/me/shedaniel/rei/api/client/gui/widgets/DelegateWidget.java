@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.api.client.gui.widgets;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,8 +44,8 @@ public class DelegateWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float delta) {
-        delegate().render(poseStack, mouseX, mouseY, delta);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        delegate().render(graphics, mouseX, mouseY, delta);
     }
     
     @Override
@@ -56,16 +56,6 @@ public class DelegateWidget extends WidgetWithBounds {
     @Override
     public Rectangle getBounds() {
         return delegate() instanceof WidgetWithBounds withBounds ? withBounds.getBounds() : EMPTY;
-    }
-    
-    @Override
-    public void setZ(int z) {
-        delegate().setZ(z);
-    }
-    
-    @Override
-    public int getZ() {
-        return delegate().getZ();
     }
     
     @Nullable

@@ -32,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.OverrideOnly
 @Environment(EnvType.CLIENT)
-public abstract class DisplayRenderer extends AbstractRenderer {
+public abstract class DisplayRenderer implements Renderer {
     public abstract int getHeight();
     
     public final int getWidth() {

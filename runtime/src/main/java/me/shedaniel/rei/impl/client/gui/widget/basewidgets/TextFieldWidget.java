@@ -24,7 +24,10 @@
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import me.shedaniel.clothconfig2.api.TickableWidget;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
@@ -33,6 +36,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.gui.ComponentPath;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.FocusNavigationEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -398,19 +402,19 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
         }
     }
     
-    public void renderBorder(PoseStack matrices) {
+    public void renderBorder(GuiGraphics graphics) {
         if (this.hasBorder()) {
             int borderColor = containsMouse(mouse()) || focused ? 0xffffffff : 0xffa0a0a0;
-            fill(matrices, this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, 0xff000000);
-            fill(matrices, this.bounds.x, this.bounds.y, this.bounds.x + this.bounds.width, this.bounds.y + this.bounds.height, borderColor);
-            fill(matrices, this.bounds.x + 1, this.bounds.y + 1, this.bounds.x + this.bounds.width - 1, this.bounds.y + this.bounds.height - 1, 0xff000000);
+            graphics.fill(this.bounds.x - 1, this.bounds.y - 1, this.bounds.x + this.bounds.width + 1, this.bounds.y + this.bounds.height + 1, 0xff000000);
+            graphics.fill(this.bounds.x, this.bounds.y, this.bounds.x + this.bounds.width, this.bounds.y + this.bounds.height, borderColor);
+            graphics.fill(this.bounds.x + 1, this.bounds.y + 1, this.bounds.x + this.bounds.width - 1, this.bounds.y + this.bounds.height - 1, 0xff000000);
         }
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (this.isVisible()) {
-            this.renderBorder(matrices);
+            this.renderBorder(graphics);
             
             int color = this.editable ? this.editableColor : this.notEditableColor;
             int int_4 = this.cursorPos - this.firstCharacterIndex;
@@ -425,7 +429,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
             
             if (!textClipped.isEmpty()) {
                 String string_2 = boolean_1 ? textClipped.substring(0, int_4) : textClipped;
-                int_8 = this.font.drawShadow(matrices, this.formatter.format(this, string_2, this.firstCharacterIndex), (float) x, (float) y, color);
+                int_8 = graphics.drawString(this.font, this.formatter.format(this, string_2, this.firstCharacterIndex), x, y, color);
             }
             
             boolean isCursorInsideText = this.cursorPos < this.text.length() || this.text.length() >= this.getMaxLength();
@@ -438,31 +442,31 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
             selectionLeft--;
             
             if (!textClipped.isEmpty() && boolean_1 && int_4 < textClipped.length()) {
-                this.font.drawShadow(matrices, this.formatter.format(this, textClipped.substring(int_4), this.cursorPos), (float) int_8, (float) y, color);
+                graphics.drawString(this.font, this.formatter.format(this, textClipped.substring(int_4), this.cursorPos), int_8, y, color);
             }
             
             if (!isCursorInsideText && text.isEmpty() && this.suggestion != null) {
-                renderSuggestion(matrices, x, y);
+                renderSuggestion(graphics, x, y);
             }
             
             if (boolean_2) {
-                fill(matrices, selectionLeft + 1, y, selectionLeft + 2, y + 9, ((0xFF) << 24) | ((((color >> 16 & 255) / 4) & 0xFF) << 16) | ((((color >> 8 & 255) / 4) & 0xFF) << 8) | ((((color & 255) / 4) & 0xFF)));
-                fill(matrices, selectionLeft, y - 1, selectionLeft + 1, y + 8, ((0xFF) << 24) | color);
+                graphics.fill(selectionLeft + 1, y, selectionLeft + 2, y + 9, ((0xFF) << 24) | ((((color >> 16 & 255) / 4) & 0xFF) << 16) | ((((color >> 8 & 255) / 4) & 0xFF) << 8) | ((((color & 255) / 4) & 0xFF)));
+                graphics.fill(selectionLeft, y - 1, selectionLeft + 1, y + 8, ((0xFF) << 24) | color);
             }
             
             // Render selection overlay
             if (int_5 != int_4) {
                 int selectionRight = x + this.font.width(textClipped.substring(0, int_5));
-                this.renderSelection(matrices, selectionLeft, y - 1, selectionRight - 1, y + 9, color);
+                this.renderSelection(graphics, selectionLeft, y - 1, selectionRight - 1, y + 9, color);
             }
         }
     }
     
-    protected void renderSuggestion(PoseStack matrices, int x, int y) {
-        this.font.drawShadow(matrices, this.font.plainSubstrByWidth(this.suggestion, this.getWidth()), x, y, -8355712);
+    protected void renderSuggestion(GuiGraphics graphics, int x, int y) {
+        graphics.drawString(this.font, this.font.plainSubstrByWidth(this.suggestion, this.getWidth()), x, y, -8355712);
     }
     
-    protected void renderSelection(PoseStack matrices, int x1, int y1, int x2, int y2, int color) {
+    protected void renderSelection(GuiGraphics graphics, int x1, int y1, int x2, int y2, int color) {
         int tmp;
         if (x1 < x2) {
             tmp = x1;
@@ -491,13 +495,13 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
         BufferBuilder buffer = tesselator.getBuilder();
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 1, 0);
-        Matrix4f matrix = matrices.last().pose();
+        Matrix4f matrix = graphics.pose().last().pose();
         RenderSystem.setShader(GameRenderer::getPositionColorShader);
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        buffer.vertex(matrix, x1, y2, getZ() + 50f).color(r, g, b, 120).endVertex();
-        buffer.vertex(matrix, x2, y2, getZ() + 50f).color(r, g, b, 120).endVertex();
-        buffer.vertex(matrix, x2, y1, getZ() + 50f).color(r, g, b, 120).endVertex();
-        buffer.vertex(matrix, x1, y1, getZ() + 50f).color(r, g, b, 120).endVertex();
+        buffer.vertex(matrix, x1, y2, 50f).color(r, g, b, 120).endVertex();
+        buffer.vertex(matrix, x2, y2, 50f).color(r, g, b, 120).endVertex();
+        buffer.vertex(matrix, x2, y1, 50f).color(r, g, b, 120).endVertex();
+        buffer.vertex(matrix, x1, y1, 50f).color(r, g, b, 120).endVertex();
         tesselator.end();
         RenderSystem.disableBlend();
     }

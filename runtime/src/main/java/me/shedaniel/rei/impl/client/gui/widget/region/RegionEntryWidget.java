@@ -34,6 +34,7 @@ import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.modules.MenuAccess;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
+import net.minecraft.client.gui.GuiGraphics;
 import org.joml.Vector4f;
 
 import java.util.Collection;
@@ -66,7 +67,7 @@ public class RegionEntryWidget<T extends RegionEntry<T>> extends DisplayedEntryW
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         Optional<ScreenOverlay> overlayOptional = REIRuntime.getInstance().getOverlay();
         Optional<Supplier<Collection<FavoriteMenuEntry>>> menuEntries = entry.getEntry().getMenuEntries();
         FloatingPoint value = entry.pos.value();
@@ -79,8 +80,8 @@ public class RegionEntryWidget<T extends RegionEntry<T>> extends DisplayedEntryW
             access.openOrClose(uuid, getBounds(), menuEntries.get());
         }
         Vector4f vector4f = new Vector4f(mouseX, mouseY, 0, 1.0F);
-        matrices.last().pose().transform(vector4f);
-        super.render(matrices, (int) vector4f.x(), (int) vector4f.y(), delta);
+        graphics.pose().last().pose().transform(vector4f);
+        super.render(graphics, (int) vector4f.x(), (int) vector4f.y(), delta);
     }
     
     @Override

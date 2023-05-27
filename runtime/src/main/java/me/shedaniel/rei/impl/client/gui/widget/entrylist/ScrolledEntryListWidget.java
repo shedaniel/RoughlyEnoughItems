@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -38,10 +37,13 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
@@ -61,7 +63,7 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
     };
     
     @Override
-    protected void renderEntries(boolean fastEntryRendering, PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void renderEntries(boolean fastEntryRendering, GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         ScissorsHandler.INSTANCE.scissor(bounds);
         
         int entrySize = entrySize();
@@ -114,14 +116,14 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
             }
         }
         
-        helper.render(debugger.debugTime, debugger.size, debugger.time, matrices, mouseX, mouseY, delta);
-    
-        new CollapsedEntriesBorderRenderer().render(matrices, helper, collapsedStackIndices);
+        helper.render(debugger.debugTime, debugger.size, debugger.time, graphics, mouseX, mouseY, delta);
+        
+        new CollapsedEntriesBorderRenderer().render(graphics, helper, collapsedStackIndices);
         
         scrolling.updatePosition(delta);
         ScissorsHandler.INSTANCE.removeLastScissor();
         if (scrolling.getMaxScroll() > 0) {
-            scrolling.renderScrollBar(0, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+            scrolling.renderScrollBar(graphics, 0, 1, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
         }
     }
     

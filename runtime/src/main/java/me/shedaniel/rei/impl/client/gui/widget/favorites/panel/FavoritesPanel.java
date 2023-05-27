@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.favorites.panel;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
@@ -40,6 +39,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.rows.*;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.Nullable;
 
@@ -84,24 +84,24 @@ public class FavoritesPanel extends WidgetWithBounds {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.bounds.setBounds(updatePanelArea(parent.favoritesBounds));
         this.innerBounds.setBounds(bounds.x + 4, bounds.y + 4, bounds.width - 8, bounds.height - 20);
         this.expendState.update(delta);
         int buttonColor = 0xFFFFFF | (Math.round(0x34 * Math.min((float) expendState.progress() * 2, 1)) << 24);
-        fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), buttonColor, buttonColor);
+        graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), buttonColor, buttonColor);
         scroller.updatePosition(delta);
         
         if (expendState.value()) {
             ScissorsHandler.INSTANCE.scissor(innerBounds);
-            matrices.pushPose();
-            matrices.translate(0, -scroller.scrollAmount(), 0);
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, -scroller.scrollAmount(), 0);
             int y = innerBounds.y;
             for (FavoritesPanelRow row : rows.get()) {
-                row.render(matrices, innerBounds, innerBounds.x, y, innerBounds.width, row.getRowHeight(), mouseX, mouseY + scroller.scrollAmountInt(), delta);
+                row.render(graphics, innerBounds, innerBounds.x, y, innerBounds.width, row.getRowHeight(), mouseX, mouseY + scroller.scrollAmountInt(), delta);
                 y += row.getRowHeight();
             }
-            matrices.popPose();
+            graphics.pose().popPose();
             ScissorsHandler.INSTANCE.removeLastScissor();
         }
     }

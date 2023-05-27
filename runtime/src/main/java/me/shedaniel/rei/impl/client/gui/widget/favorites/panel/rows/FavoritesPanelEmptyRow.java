@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.favorites.panel.rows;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 
 import java.util.Collections;
@@ -43,7 +43,7 @@ public class FavoritesPanelEmptyRow extends FavoritesPanelRow {
     }
     
     @Override
-    public void render(PoseStack matrices, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, Rectangle innerBounds, int x, int y, int rowWidth, int rowHeight, int mouseX, int mouseY, float delta) {
     }
     
     @Override

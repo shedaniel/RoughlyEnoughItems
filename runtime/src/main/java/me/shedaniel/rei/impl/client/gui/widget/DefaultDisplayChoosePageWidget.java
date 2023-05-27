@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
@@ -36,6 +35,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.TextFieldWidget;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
@@ -119,11 +119,11 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
             }
             
             @Override
-            public void render(PoseStack matrices, int i, int i1, float v) {
-                font.draw(matrices, text.getVisualOrderText(), bounds.x + 5, bounds.y + 5, REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
+            public void render(GuiGraphics graphics, int i, int i1, float v) {
+                graphics.drawString(font, text.getVisualOrderText(), bounds.x + 5, bounds.y + 5, REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040, false);
                 String endString = String.format(" /%d", maxPage);
                 int width = font.width(endString);
-                font.draw(matrices, endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040);
+                graphics.drawString(font, endString, bounds.x + bounds.width - 5 - width, bounds.y + 22, REIRuntime.getInstance().isDarkThemeEnabled() ? 0xFFBBBBBB : 0xFF404040, false);
             }
         });
         String endString = String.format(" /%d", maxPage);
@@ -162,13 +162,13 @@ public class DefaultDisplayChoosePageWidget extends DraggableWidget {
     }
     
     @Override
-    public void render(PoseStack matrices, int i, int i1, float v) {
-        matrices.pushPose();
-        matrices.translate(0, 0, 800);
+    public void render(GuiGraphics graphics, int i, int i1, float v) {
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 800);
         for (Widget widget : widgets) {
-            widget.render(matrices, i, i1, v);
+            widget.render(graphics, i, i1, v);
         }
-        matrices.popPose();
+        graphics.pose().popPose();
     }
     
     @Override

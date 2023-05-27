@@ -24,13 +24,13 @@
 package me.shedaniel.rei.plugin.client.categories.tag;
 
 import com.google.common.base.Predicates;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -81,19 +81,19 @@ public class ValueTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
     }
     
     @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         Rectangle bounds = getBounds();
-        if (this.overflowBounds.intersects(MatrixUtils.transform(poses.last().pose(), bounds))) {
-            poses.pushPose();
-            poses.translate(bounds.x, bounds.y, 0);
+        if (this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose().last().pose(), bounds))) {
+            graphics.pose().pushPose();
+            graphics.pose().translate(bounds.x, bounds.y, 0);
             Point mouse = new Point(mouseX - bounds.x, mouseY - bounds.y);
             for (Widget widget : this.widgets) {
                 if (!(widget instanceof WidgetWithBounds withBounds) ||
-                    this.overflowBounds.intersects(MatrixUtils.transform(poses.last().pose(), withBounds.getBounds()))) {
-                    widget.render(poses, mouse.x, mouse.y, delta);
+                        this.overflowBounds.intersects(MatrixUtils.transform(graphics.pose().last().pose(), withBounds.getBounds()))) {
+                    widget.render(graphics, mouse.x, mouse.y, delta);
                 }
             }
-            poses.popPose();
+            graphics.pose().popPose();
         }
     }
     

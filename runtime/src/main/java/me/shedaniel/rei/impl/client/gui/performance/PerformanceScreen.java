@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.performance;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
@@ -34,7 +33,7 @@ import me.shedaniel.rei.impl.client.gui.performance.entry.SubCategoryListEntry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -167,18 +166,18 @@ public class PerformanceScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-        renderDirtBackground(poses);
-        list.render(poses, mouseX, mouseY, delta);
-        this.font.drawShadow(poses, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
-        super.render(poses, mouseX, mouseY, delta);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        renderDirtBackground(graphics);
+        list.render(graphics, mouseX, mouseY, delta);
+        graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
+        super.render(graphics, mouseX, mouseY, delta);
     }
     
     public static abstract class PerformanceEntry extends DynamicElementListWidget.ElementEntry<PerformanceEntry> {
     }
     
     private class PerformanceEntryListWidget extends DynamicElementListWidget<PerformanceEntry> {
-        public PerformanceEntryListWidget() {super(PerformanceScreen.this.minecraft, PerformanceScreen.this.width, PerformanceScreen.this.height, 30, PerformanceScreen.this.height, GuiComponent.BACKGROUND_LOCATION);}
+        public PerformanceEntryListWidget() {super(PerformanceScreen.this.minecraft, PerformanceScreen.this.width, PerformanceScreen.this.height, 30, PerformanceScreen.this.height, Screen.BACKGROUND_LOCATION);}
         
         @Override
         public int getItemWidth() {

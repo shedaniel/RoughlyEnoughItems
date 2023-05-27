@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.gui.widget;
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -66,6 +65,7 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -322,11 +322,12 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             for (Map.Entry<CategoryIdentifier<?>, List<Display>> entry : displayRegistry.getAll().entrySet()) {
                 Optional<? extends CategoryRegistry.CategoryConfiguration<?>> configuration;
                 if ((configuration = categoryRegistry.tryGet(entry.getKey())).isEmpty()
-                    || categoryRegistry.isCategoryInvisible(configuration.get().getCategory())) continue;
-                if (!filteringQuickCraftCategories.getOrDefault(entry.getKey(), configuration.get().isQuickCraftingEnabledByDefault())) continue;
+                        || categoryRegistry.isCategoryInvisible(configuration.get().getCategory())) continue;
+                if (!filteringQuickCraftCategories.getOrDefault(entry.getKey(), configuration.get().isQuickCraftingEnabledByDefault()))
+                    continue;
                 for (Display display : entry.getValue()) {
                     if ((!ConfigObject.getInstance().shouldFilterDisplays() || displayRegistry.isDisplayVisible(display))
-                        && ViewsImpl.isRecipesFor(getEntries(), display)) {
+                            && ViewsImpl.isRecipesFor(getEntries(), display)) {
                         AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
                         if (result.successful) {
                             this.display = display;
@@ -371,18 +372,18 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        drawBackground(matrices, mouseX, mouseY, delta);
-        drawCurrentEntry(matrices, mouseX, mouseY, delta);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        drawBackground(graphics, mouseX, mouseY, delta);
+        drawCurrentEntry(graphics, mouseX, mouseY, delta);
         
         boolean highlighted = containsMouse(mouseX, mouseY);
         if (hasTooltips() && highlighted) {
-            queueTooltip(matrices, mouseX, mouseY, delta);
+            queueTooltip(graphics, mouseX, mouseY, delta);
         }
         if (hasHighlight() && highlighted) {
-            drawHighlighted(matrices, mouseX, mouseY, delta);
+            drawHighlighted(graphics, mouseX, mouseY, delta);
         }
-        drawExtra(matrices, mouseX, mouseY, delta);
+        drawExtra(graphics, mouseX, mouseY, delta);
     }
     
     public final boolean hasTooltips() {
@@ -397,38 +398,39 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
             .asFloat();
     
-    protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (background) {
             darkBackgroundAlpha.update(delta);
             RenderSystem.enableBlend();
             RenderSystem.blendFuncSeparate(770, 771, 1, 0);
             RenderSystem.blendFunc(770, 771);
-            RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
+            graphics.blit(InternalTextures.CHEST_GUI_TEXTURE, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
             if (darkBackgroundAlpha.value() > 0.0F) {
-                RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE_DARK);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, darkBackgroundAlpha.value());
-                blit(matrices, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
+                graphics.blit(InternalTextures.CHEST_GUI_TEXTURE_DARK, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             }
         }
     }
     
-    protected void drawCurrentEntry(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void drawCurrentEntry(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         EntryStack<?> entry = getCurrentEntry();
-        entry.setZ(100);
-        entry.render(matrices, getInnerBounds(), mouseX, mouseY, delta);
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 100);
+        entry.render(graphics, getInnerBounds(), mouseX, mouseY, delta);
+        graphics.pose().popPose();
     }
     
-    protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void queueTooltip(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         Tooltip tooltip = getCurrentTooltip(TooltipContext.ofMouse());
         if (tooltip != null) {
             tooltip.queue();
         }
     }
     
-    protected void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {}
+    protected void drawExtra(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+    }
     
     @Override
     @Nullable
@@ -513,14 +515,14 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
             .asFloat();
     
-    protected void drawHighlighted(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    protected void drawHighlighted(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         darkHighlightedAlpha.update(delta);
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
         Rectangle bounds = getInnerBounds();
-        fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0x80ffffff, 0x80ffffff);
+        graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0x80ffffff, 0x80ffffff);
         int darkColor = 0x111111 | ((int) (90 * darkHighlightedAlpha.value()) << 24);
-        fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), darkColor, darkColor);
+        graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), darkColor, darkColor);
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.enableDepthTest();
     }
@@ -720,10 +722,10 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     @Override
     @Deprecated
-    public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
         Rectangle clone = getBounds().clone();
         getBounds().setBounds(bounds.x - 1, bounds.y - 1, bounds.width + 2, bounds.height + 2);
-        render(matrices, mouseX, mouseY, delta);
+        render(graphics, mouseX, mouseY, delta);
         getBounds().setBounds(clone);
     }
     
