@@ -36,7 +36,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.apache.commons.lang3.tuple.Pair;
@@ -145,10 +145,10 @@ public class PluginDetectorImpl implements PluginDetector {
         return () -> () -> {
             loadPlugin(REIClientPlugin.class, ((PluginView<REIClientPlugin>) PluginManager.getClientInstance())::registerPlugin);
             Supplier<Method> method = Suppliers.memoize(() -> {
-                String methodName = FabricLoader.getInstance().isDevelopmentEnvironment() ? FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary", "net.minecraft.class_437", "method_32635", "(Ljava/util/List;Lnet/minecraft/class_5632;)V")
-                        : "method_32635";
+                String methodName = FabricLoader.getInstance().isDevelopmentEnvironment() ? FabricLoader.getInstance().getMappingResolver().mapMethodName("intermediary", "net.minecraft.class_332", "method_51442", "(Ljava/util/List;Lnet/minecraft/class_5632;)V")
+                        : "method_51442";
                 try {
-                    Method declaredMethod = Screen.class.getDeclaredMethod(methodName, List.class, TooltipComponent.class);
+                    Method declaredMethod = GuiGraphics.class.getDeclaredMethod(methodName, List.class, TooltipComponent.class);
                     if (declaredMethod != null) declaredMethod.setAccessible(true);
                     return declaredMethod;
                 } catch (NoSuchMethodException e) {
