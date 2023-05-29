@@ -64,6 +64,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -216,7 +217,11 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     
     @Override
     public Stream<? extends TagKey<?>> getTagsFor(EntryStack<ItemStack> entry, ItemStack value) {
-        return value.getTags();
+        Stream<? extends TagKey<?>> tags = value.getTags();
+        if (value.getItem() instanceof BlockItem blockItem) {
+            tags = Stream.concat(tags, blockItem.getBlock().builtInRegistryHolder().tags());
+        }
+        return tags;
     }
     
     @Environment(EnvType.CLIENT)
