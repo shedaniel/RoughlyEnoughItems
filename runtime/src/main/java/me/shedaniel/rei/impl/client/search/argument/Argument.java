@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class Argument<T, R> {
-    private static final Object NO_CACHE = new Object();
+    public static final Object NO_CACHE = new Object();
     private static final AtomicReference<String> LAST_LANGUAGE = new AtomicReference<>();
     public static ArgumentCache cache = new ArgumentCache();
     private final ArgumentType<T, R> argumentType;
@@ -81,13 +81,13 @@ public class Argument<T, R> {
         Collection<HashedEntryStackWrapper> stacks = new AbstractCollection<>() {
             @Override
             public Iterator<HashedEntryStackWrapper> iterator() {
-                return Iterators.transform(((EntryRegistryImpl) EntryRegistry.getInstance()).getPreFilteredComplexList().iterator(),
+                return Iterators.transform(((EntryRegistryImpl) EntryRegistry.getInstance()).getComplexList().iterator(),
                         HashedEntryStackWrapper::normalize);
             }
             
             @Override
             public int size() {
-                return EntryRegistry.getInstance().getPreFilteredList().size();
+                return ((EntryRegistryImpl) EntryRegistry.getInstance()).getComplexList().size();
             }
         };
         if (cache) {
