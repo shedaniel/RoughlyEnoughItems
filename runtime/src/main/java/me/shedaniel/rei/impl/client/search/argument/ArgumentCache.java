@@ -120,7 +120,7 @@ public class ArgumentCache {
         }
         
         try {
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(30, TimeUnit.SECONDS);
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(90, TimeUnit.SECONDS);
         } catch (ExecutionException | TimeoutException e) {
             e.printStackTrace();
         } catch (InterruptedException ignore) {
