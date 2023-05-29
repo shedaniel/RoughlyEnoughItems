@@ -55,6 +55,7 @@ public final class ThreadCreator {
         return new ForkJoinPool(poolSize, pool -> {
             ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
             worker.setName(group().getName() + "-" + worker.getPoolIndex());
+            worker.setContextClassLoader(getClass().getClassLoader());
             return worker;
         }, ($, exception) -> {
             if (!(exception instanceof InterruptedException) && !(exception instanceof CancellationException) && !(exception instanceof ThreadDeath)) {
