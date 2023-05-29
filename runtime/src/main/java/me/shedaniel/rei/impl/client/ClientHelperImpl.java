@@ -135,10 +135,11 @@ public class ClientHelperImpl implements ClientHelper {
     @Override
     public void appendModIdToTooltips(Tooltip components, String modId) {
         final String modName = ClientHelper.getInstance().getModFromModId(modId);
+        int i = 0;
         Iterator<Tooltip.Entry> iterator = components.entries().iterator();
         while (iterator.hasNext()) {
             Tooltip.Entry entry = iterator.next();
-            if (entry.isText() && FormattingUtils.stripFormatting(entry.getAsText().getString()).equalsIgnoreCase(modName)) {
+            if (entry.isText() && i++ != 0 && FormattingUtils.stripFormatting(entry.getAsText().getString()).equalsIgnoreCase(modName)) {
                 iterator.remove();
             }
         }
