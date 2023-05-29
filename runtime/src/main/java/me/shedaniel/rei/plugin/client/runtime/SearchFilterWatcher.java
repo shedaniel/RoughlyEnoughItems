@@ -32,7 +32,6 @@ import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListSearchManager;
 import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -54,8 +53,8 @@ public class SearchFilterWatcher implements HintProvider {
                 if (steps.startTime == 0 || steps.totalPartitions == 0) return Collections.emptyList();
                 if (Util.getEpochMillis() - steps.startTime < 1000) return Collections.emptyList();
                 lastProcess = steps.partitionsDone.get() / (double) steps.totalPartitions;
-                return ImmutableList.of(new TranslatableComponent("text.rei.searching"),
-                        new TranslatableComponent("text.rei.searching.step", Math.round(lastProcess * 100)));
+                return ImmutableList.of(Component.translatable("text.rei.searching"),
+                        Component.translatable("text.rei.searching.step", Math.round(lastProcess * 100)));
             }
         } catch (NullPointerException ignored) {
         }
