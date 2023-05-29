@@ -23,8 +23,6 @@
 
 package me.shedaniel.rei.impl.client.config.entries;
 
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
@@ -271,8 +269,8 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         
         @Override
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-            RenderSystem.setShaderTexture(0, CONFIG_TEX);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            Minecraft.getInstance().getTextureManager().bind(CONFIG_TEX);
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             this.widget.rectangle.x = x + 3;
             this.widget.rectangle.y = y;
             this.widget.rectangle.width = entryWidth - 6;
@@ -334,11 +332,6 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         @Override
         public List<? extends GuiEventListener> children() {
             return children;
-        }
-        
-        @Override
-        public List<? extends NarratableEntry> narratables() {
-            return Collections.emptyList();
         }
         
         public class CategoryLabelWidget implements GuiEventListener {

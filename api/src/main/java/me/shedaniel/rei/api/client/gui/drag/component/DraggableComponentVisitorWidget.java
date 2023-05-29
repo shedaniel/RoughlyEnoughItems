@@ -85,7 +85,7 @@ public interface DraggableComponentVisitorWidget {
     }
     
     static DraggableComponentVisitor<Screen> toVisitor(DraggableComponentVisitorWidget widget, double priority) {
-        return new DraggableComponentVisitor<>() {
+        return new DraggableComponentVisitor<Screen>() {
             @Override
             public DraggedAcceptorResult acceptDragged(DraggingContext<Screen> context, DraggableComponent<?> component) {
                 return widget.acceptDragged(context, component);

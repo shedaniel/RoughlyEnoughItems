@@ -153,7 +153,7 @@ public class CategoryRegistryImpl implements CategoryRegistry {
         
         @Override
         public Optional<ButtonArea> getPlusButtonArea() {
-            return Optional.of(bounds -> Objects.requireNonNullElseGet(this.plusButtonArea.get(bounds), () -> ButtonArea.defaultArea().get(bounds)));
+            return Optional.of(bounds -> MoreObjects.firstNonNull(this.plusButtonArea.get(bounds), ButtonArea.defaultArea().get(bounds)));
         }
         
         @Override

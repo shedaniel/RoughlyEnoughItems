@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.fabric;
 
-import dev.architectury.platform.Platform;
-import dev.architectury.utils.Env;
+import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.rei.RoughlyEnoughItemsInitializer;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
@@ -33,17 +33,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -76,7 +69,7 @@ public class PluginDetectorImpl {
             String name = pair.getRight();
             try {
                 if (deprecatedEntrypoints.contains(name)) {
-                    RoughlyEnoughItemsState.LOGGER.warn("The entrypoint used by %s, \"%s\" is deprecated and will be removed in a future version of Roughly Enough Items. Please use \"rei_server\", \"rei_client\" or \"rei_common\" instead.".formatted(container.getProvider().getMetadata().getName(), name));
+                    RoughlyEnoughItemsState.LOGGER.warn("The entrypoint used by %s, \"%s\" is deprecated and will be removed in a future version of Roughly Enough Items. Please use \"rei_server\", \"rei_client\" or \"rei_common\" instead.", container.getProvider().getMetadata().getName(), name);
                 }
                 
                 REIPluginProvider<P> plugin = container.getEntrypoint();
@@ -102,7 +95,7 @@ public class PluginDetectorImpl {
                 Throwable throwable = t;
                 while (throwable != null) {
                     if (throwable.getMessage() != null && throwable.getMessage().contains("environment type SERVER") && !RoughlyEnoughItemsInitializer.isClient()) {
-                        RoughlyEnoughItemsState.LOGGER.warn("Rerached side issue when loading REI plugin by %s. Please use \"rei_server\", \"rei_client\" or \"rei_common\" instead.".formatted(container.getProvider().getMetadata().getName()));
+                        RoughlyEnoughItemsState.LOGGER.warn("Rerached side issue when loading REI plugin by %s. Please use \"rei_server\", \"rei_client\" or \"rei_common\" instead.", container.getProvider().getMetadata().getName());
                         continue out;
                     }
                     throwable = throwable.getCause();

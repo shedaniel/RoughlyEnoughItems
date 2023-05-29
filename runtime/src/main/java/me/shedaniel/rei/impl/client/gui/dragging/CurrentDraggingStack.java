@@ -172,7 +172,7 @@ public class CurrentDraggingStack extends Widget implements LateRenderable, Drag
     
     private boolean drop() {
         if (entry != null && entry.dragging) {
-            DraggedAcceptorResult result = visitor.acceptDraggedWithResult(this, entry.component);
+            DraggedAcceptorResult result = visitor.acceptDragged(this, entry.component);
             entry.component.release(result);
             entry = null;
             return true;

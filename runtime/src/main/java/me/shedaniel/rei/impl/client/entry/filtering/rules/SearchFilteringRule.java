@@ -45,7 +45,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -224,11 +223,6 @@ public class SearchFilteringRule extends AbstractFilteringRule<SearchFilteringRu
         @Override
         public int getItemHeight() {
             return totalHeight;
-        }
-    
-        @Override
-        public List<? extends NarratableEntry> narratables() {
-            return Lists.newArrayList();
         }
     
         @Override

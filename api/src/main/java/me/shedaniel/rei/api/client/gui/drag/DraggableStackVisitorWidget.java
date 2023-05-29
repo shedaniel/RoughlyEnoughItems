@@ -99,7 +99,7 @@ public interface DraggableStackVisitorWidget extends DraggableComponentVisitorWi
     @Override
     default DraggedAcceptorResult acceptDragged(DraggingContext<Screen> context, DraggableComponent<?> component) {
         return component.<EntryStack<?>>getIf()
-                .map(comp -> acceptDraggedStack(context, DraggableStack.from(comp)))
+                .map(comp -> acceptDraggedStackWithResult(context, DraggableStack.from(comp)))
                 .orElse(DraggedAcceptorResult.PASS);
     }
     

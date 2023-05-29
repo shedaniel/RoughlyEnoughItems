@@ -138,11 +138,11 @@ public interface ScreenRegistry extends Reloadable<REIClientPlugin> {
     }
     
     @ApiStatus.ScheduledForRemoval
-    @Deprecated(forRemoval = true)
+    @Deprecated
     Iterable<DraggableStackProvider<Screen>> getDraggableProviders();
     
     @ApiStatus.ScheduledForRemoval
-    @Deprecated(forRemoval = true)
+    @Deprecated
     Iterable<DraggableStackVisitor<Screen>> getDraggableVisitors();
     
     Iterable<DraggableComponentProvider<Screen, Object>> getDraggableComponentProviders();

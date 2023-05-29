@@ -23,6 +23,8 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.favorites.history;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector4f;
 import me.shedaniel.clothconfig2.api.LazyResettable;
@@ -212,8 +214,8 @@ public class DisplayEntry extends WidgetWithBounds {
             }
             
             ClientHelperImpl.getInstance()
-                    .openDisplayViewingScreen(Map.of(CategoryRegistry.getInstance().get(display.getCategoryIdentifier()).getCategory(), List.of(display)),
-                            null, List.of(), List.of());
+                    .openDisplayViewingScreen(ImmutableMap.of(CategoryRegistry.getInstance().get(display.getCategoryIdentifier()).getCategory(), Collections.singletonList(display)),
+                            null, Collections.emptyList(), Collections.emptyList());
             Widgets.produceClickSound();
             return true;
         }

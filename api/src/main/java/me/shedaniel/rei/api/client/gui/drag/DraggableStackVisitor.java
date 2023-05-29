@@ -117,7 +117,7 @@ public interface DraggableStackVisitor<T extends Screen> extends DraggableCompon
     @Override
     default DraggedAcceptorResult acceptDragged(DraggingContext<T> context, DraggableComponent<?> component) {
         return component.<EntryStack<?>>getIf()
-                .map(comp -> acceptDraggedStack(context, DraggableStack.from(comp)))
+                .map(comp -> acceptDraggedStackWithResult(context, DraggableStack.from(comp)))
                 .orElse(DraggedAcceptorResult.PASS);
     }
     

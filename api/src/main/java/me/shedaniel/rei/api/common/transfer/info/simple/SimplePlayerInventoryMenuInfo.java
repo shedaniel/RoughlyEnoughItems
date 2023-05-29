@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -97,7 +98,8 @@ public interface SimplePlayerInventoryMenuInfo<T extends AbstractContainerMenu, 
                 .collect(Collectors.toList());
     }
     
-    @Deprecated(forRemoval = true)
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     default void populateRecipeFinder(T menu, RecipeFinder finder) {}
     
     default void populateRecipeFinder(MenuInfoContext<T, ?, D> context, RecipeFinder finder) {

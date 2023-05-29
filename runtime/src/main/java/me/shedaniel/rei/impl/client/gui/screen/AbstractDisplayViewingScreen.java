@@ -205,8 +205,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
                 collection = tags.getFluids();
                 objects = CollectionUtils.map(widget.getEntries(), stack -> stack.<FluidStack>castValue().getFluid());
             } else continue;
-            TagKey<?> firstOrNull = CollectionUtils.findFirstOrNull(collection::iterator,
-                    key -> CollectionUtils.allMatch(objects, holder -> ((Holder<Object>) holder).is((TagKey<Object>) key)));
+            Map.Entry<ResourceLocation, ? extends Tag<?>> firstOrNull = CollectionUtils.findFirstOrNull(collection.getAllTags().entrySet(), entry -> entry.getValue().getValues().equals(objects));
             if (firstOrNull != null) {
                 widget.tagMatch = firstOrNull.getKey();
             }

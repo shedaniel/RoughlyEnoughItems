@@ -94,7 +94,24 @@ public class FilteringScreen extends Screen {
     private List<FilteringListEntry> entries = Collections.emptyList();
     private List<GuiEventListener> elements = Collections.emptyList();
     
-    private record PointPair(Point firstPoint, @Nullable Point secondPoint) {}
+    private static class PointPair {
+        private final Point firstPoint;
+        @Nullable
+        private final Point secondPoint;
+        
+        public PointPair(Point firstPoint, @Nullable Point secondPoint) {
+            this.firstPoint = firstPoint;
+            this.secondPoint = secondPoint;
+        }
+        
+        public Point firstPoint() {
+            return firstPoint;
+        }
+        
+        public Point secondPoint() {
+            return secondPoint;
+        }
+    }
     
     private List<PointPair> points = new ArrayList<>();
     

@@ -57,9 +57,9 @@ public class DefaultClientPluginImpl {
         Set<Potion> potions = Sets.newLinkedHashSet();
         for (Ingredient container : PotionBrewing.ALLOWED_CONTAINERS) {
             for (PotionBrewing.Mix<Potion> mix : PotionBrewing.POTION_MIXES) {
-                IRegistryDelegate<Potion> from = mix.f_43532_;
+                IRegistryDelegate<Potion> from = mix.field_185198_a;
                 Ingredient ingredient = mix.ingredient;
-                IRegistryDelegate<Potion> to = mix.f_43534_;
+                IRegistryDelegate<Potion> to = mix.field_185200_c;
                 Ingredient base = Ingredient.of(Arrays.stream(container.getItems())
                         .map(ItemStack::copy)
                         .map(stack -> PotionUtils.setPotion(stack, from.get())));
@@ -74,9 +74,9 @@ public class DefaultClientPluginImpl {
         }
         for (Potion potion : potions) {
             for (PotionBrewing.Mix<Item> mix : PotionBrewing.CONTAINER_MIXES) {
-                IRegistryDelegate<Item> from = mix.f_43532_;
+                IRegistryDelegate<Item> from = mix.field_185198_a;
                 Ingredient ingredient = mix.ingredient;
-                IRegistryDelegate<Item> to = mix.f_43534_;
+                IRegistryDelegate<Item> to = mix.field_185200_c;
                 Ingredient base = Ingredient.of(PotionUtils.setPotion(new ItemStack(from.get()), potion));
                 ItemStack output = PotionUtils.setPotion(new ItemStack(to.get()), potion);
                 clientPlugin.registerBrewingRecipe(base, ingredient, output);

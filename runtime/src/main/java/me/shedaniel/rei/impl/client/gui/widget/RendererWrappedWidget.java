@@ -50,8 +50,8 @@ public class RendererWrappedWidget extends WidgetWithBounds {
     
     @Override
     public List<? extends GuiEventListener> children() {
-        if (renderer instanceof GuiEventListener listener)
-            return Collections.singletonList(listener);
+        if (renderer instanceof GuiEventListener)
+            return Collections.singletonList((GuiEventListener) renderer);
         return Collections.emptyList();
     }
     

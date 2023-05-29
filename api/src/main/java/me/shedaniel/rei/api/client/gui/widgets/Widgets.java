@@ -52,7 +52,8 @@ import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
 public final class Widgets {
-    private Widgets() {}
+    private Widgets() {
+    }
     
     public static Widget createDrawableWidget(DrawableConsumer drawable) {
         return ClientInternals.getWidgetsProvider().createDrawableWidget(drawable);
@@ -123,15 +124,19 @@ public final class Widgets {
     }
     
     public static WidgetWithBounds wrapRenderer(Rectangle bounds, Renderer renderer) {
+        return wrapRenderer(() -> bounds, renderer);
+    }
+    
+    public static WidgetWithBounds wrapRenderer(Supplier<Rectangle> bounds, Renderer renderer) {
         if (renderer instanceof Widget)
-            return wrapWidgetWithBounds(((Widget) renderer), bounds);
+            return wrapWidgetWithBoundsSupplier((Widget) renderer, bounds);
         return ClientInternals.getWidgetsProvider().wrapRenderer(bounds, renderer);
     }
     
     /**
      * @deprecated Use {@link #withBounds(Widget)} instead.
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated
     @ApiStatus.ScheduledForRemoval
     public static WidgetWithBounds wrapWidgetWithBounds(Widget widget) {
         return withBounds(widget);
@@ -140,7 +145,7 @@ public final class Widgets {
     /**
      * @deprecated Use {@link #withBounds(Widget, Rectangle)} instead.
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated
     @ApiStatus.ScheduledForRemoval
     public static WidgetWithBounds wrapWidgetWithBounds(Widget widget, Rectangle bounds) {
         return withBounds(widget, bounds);
@@ -149,7 +154,7 @@ public final class Widgets {
     /**
      * @deprecated Use {@link #withBounds(Widget, Supplier)} instead.
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated
     @ApiStatus.ScheduledForRemoval
     public static WidgetWithBounds wrapWidgetWithBoundsSupplier(Widget widget, Supplier<Rectangle> bounds) {
         return withBounds(widget, bounds);
@@ -164,8 +169,8 @@ public final class Widgets {
     }
     
     public static WidgetWithBounds withBounds(Widget widget, Supplier<Rectangle> bounds) {
-        if (widget instanceof WidgetWithBounds withBounds)
-            return withBounds;
+        if (widget instanceof WidgetWithBounds)
+            return (WidgetWithBounds) widget;
         if (bounds == null)
             return new DelegateWidget(widget);
         return new DelegateWidgetWithBounds(widget, bounds);

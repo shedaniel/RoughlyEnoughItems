@@ -28,7 +28,6 @@ import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
@@ -77,11 +76,6 @@ public class TitleTextEntry extends AbstractConfigListEntry<Unit> {
     
     @Override
     public List<? extends GuiEventListener> children() {
-        return Collections.emptyList();
-    }
-    
-    @Override
-    public List<? extends NarratableEntry> narratables() {
         return Collections.emptyList();
     }
 }

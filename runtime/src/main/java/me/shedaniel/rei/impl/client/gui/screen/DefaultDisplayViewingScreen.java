@@ -29,8 +29,8 @@ import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Matrix4f;
-import it.unimi.dsi.fastutil.Pair;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Color;
@@ -449,7 +449,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
         for (Map.Entry<Rectangle, Pair<DisplaySpec, List<Widget>>> entry : recipeBounds.entrySet()) {
             Rectangle bounds = entry.getKey();
             if (bounds.contains(PointHelper.ofMouse())) {
-                RecipeDisplayExporter.exportRecipeDisplay(bounds, entry.getValue().left(), entry.getValue().right(), true);
+                RecipeDisplayExporter.exportRecipeDisplay(bounds, entry.getValue().getFirst(), entry.getValue().getSecond(), true);
                 return true;
             }
         }

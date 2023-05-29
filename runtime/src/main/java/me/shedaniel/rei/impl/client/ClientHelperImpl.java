@@ -65,6 +65,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.LazyLoadedValue;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
@@ -235,7 +236,7 @@ public class ClientHelperImpl implements ClientHelper {
             return Long2LongMaps.EMPTY_MAP;
         }
         Long2LongOpenHashMap map = new Long2LongOpenHashMap();
-        for (NonNullList<ItemStack> compartment : Minecraft.getInstance().player.getInventory().compartments) {
+        for (NonNullList<ItemStack> compartment : Minecraft.getInstance().player.inventory.compartments) {
             for (ItemStack stack : compartment) {
                 long hash = definition.hash(null, stack, ComparisonContext.FUZZY);
                 long newCount = map.getOrDefault(hash, 0) + Math.max(0, stack.getCount());

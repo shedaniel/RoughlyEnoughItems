@@ -109,7 +109,7 @@ public interface ConfigObject {
     
     boolean doesRegisterRecipesInAnotherThread();
     
-    @Deprecated(forRemoval = true)
+    @Deprecated
     @ApiStatus.ScheduledForRemoval
     boolean doesSnapToRows();
     

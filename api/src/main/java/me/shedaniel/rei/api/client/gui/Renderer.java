@@ -33,6 +33,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 public interface Renderer {
@@ -41,7 +42,8 @@ public interface Renderer {
     
     @Nullable
     @Environment(EnvType.CLIENT)
-    @Deprecated(forRemoval = true)
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     default Tooltip getTooltip(Point mouse) {
         return null;
     }

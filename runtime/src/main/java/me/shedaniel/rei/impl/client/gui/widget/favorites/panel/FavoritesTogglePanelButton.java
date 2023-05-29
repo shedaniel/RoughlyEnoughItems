@@ -57,7 +57,7 @@ public class FavoritesTogglePanelButton extends FadingFavoritesPanelButton {
     @Override
     protected boolean isAvailable(int mouseX, int mouseY) {
         boolean expended = parent.favoritePanel.expendState.value();
-        return parent.fullBounds.contains(mouseX, mouseY) || REIRuntime.getInstance().getOverlay().orElseThrow().getEntryList().containsMouse(new Point(mouseX, mouseY)) || expended;
+        return parent.fullBounds.contains(mouseX, mouseY) || REIRuntime.getInstance().getOverlay().orElseThrow(NullPointerException::new).getEntryList().containsMouse(new Point(mouseX, mouseY)) || expended;
     }
     
     @Override

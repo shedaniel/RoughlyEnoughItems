@@ -381,7 +381,7 @@ public class ViewsImpl implements Views {
                     }
                     
                     InfoContext context = new InfoContext(display);
-                Iterable<SlotAccessor> inputSlots = info != null ? Iterables.concat(info.getInputSlots(context), info.getInventorySlots(context.withDisplay(display))) : Collections.emptySet();
+                Iterable<SlotAccessor> inputSlots = info != null ? Iterables.concat(info.getInputSlots(context), info.getInventorySlots(context)) : Collections.emptySet();
                     int slotsCraftable = 0;
                     boolean containsNonEmpty = false;
                     List<EntryIngredient> requiredInput = display.getRequiredEntries();

@@ -54,7 +54,8 @@ public interface EntryRenderer<T> extends EntryRendererProvider<T> {
     
     @Nullable
     @Environment(EnvType.CLIENT)
-    @Deprecated(forRemoval = true, since = "8.3")
+    @Deprecated
+    @ApiStatus.ScheduledForRemoval
     default Tooltip getTooltip(EntryStack<T> entry, Point mouse) {
         return null;
     }

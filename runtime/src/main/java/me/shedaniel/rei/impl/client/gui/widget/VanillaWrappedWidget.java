@@ -44,10 +44,10 @@ public class VanillaWrappedWidget extends Widget {
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        if (element instanceof GuiComponent component)
-            component.setBlitOffset(getZ());
-        if (element instanceof net.minecraft.client.gui.components.Widget widget)
-            widget.render(matrices, mouseX, mouseY, delta);
+        if (element instanceof GuiComponent)
+            ((GuiComponent) element).setBlitOffset(getZ());
+        if (element instanceof net.minecraft.client.gui.components.Widget)
+            ((net.minecraft.client.gui.components.Widget) element).render(matrices, mouseX, mouseY, delta);
     }
     
     @Override
@@ -65,8 +65,8 @@ public class VanillaWrappedWidget extends Widget {
     public void setFocused(@Nullable GuiEventListener guiEventListener) {
         if (guiEventListener == element) {
             super.setFocused(element);
-        } else if (element instanceof ContainerEventHandler handler) {
-            handler.setFocused(guiEventListener);
+        } else if (element instanceof ContainerEventHandler) {
+            ((ContainerEventHandler) element).setFocused(guiEventListener);
         }
     }
     

@@ -89,8 +89,8 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
         support.register(entry -> {
             ItemStack stack = entry.getValue();
             Item item = stack.getItem();
-            if (item instanceof BucketItem bucketItem) {
-                Fluid fluid = getFluidFromBucket(bucketItem);
+            if (item instanceof BucketItem) {
+                Fluid fluid = getFluidFromBucket((BucketItem) item);
                 if (fluid != null) {
                     return CompoundEventResult.interruptTrue(Stream.of(EntryStacks.of(fluid, FluidStackHooks.bucketAmount())));
                 }

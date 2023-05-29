@@ -150,8 +150,8 @@ public class FavoritesPanel extends WidgetWithBounds {
     @Nullable
     public DraggableStack getHoveredStack(double mouseX, double mouseY) {
         for (FavoritesPanelRow row : rows.get()) {
-            if (row instanceof FavoritesPanelEntriesRow entriesRow) {
-                DraggableStack hoveredStack = entriesRow.getHoveredStack(mouseX, mouseY);
+            if (row instanceof FavoritesPanelEntriesRow) {
+                DraggableStack hoveredStack = ((FavoritesPanelEntriesRow) row).getHoveredStack(mouseX, mouseY);
                 
                 if (hoveredStack != null) {
                     return hoveredStack;
@@ -165,8 +165,8 @@ public class FavoritesPanel extends WidgetWithBounds {
     @Nullable
     public EntryStack<?> getFocusedStack(Point mouse) {
         for (FavoritesPanelRow row : rows.get()) {
-            if (row instanceof FavoritesPanelEntriesRow entriesRow) {
-                EntryStack<?> focusedStack = entriesRow.getFocusedStack(mouse);
+            if (row instanceof FavoritesPanelEntriesRow) {
+                EntryStack<?> focusedStack = ((FavoritesPanelEntriesRow) row).getFocusedStack(mouse);
                 
                 if (focusedStack != null) {
                     return focusedStack;
