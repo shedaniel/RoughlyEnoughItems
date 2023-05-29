@@ -35,8 +35,8 @@ import java.util.Objects;
 @Environment(EnvType.CLIENT)
 public class HashedEntryStackWrapper {
     private final EntryStack<?> stack;
-    private long hash;
-    private int hashInt;
+    private final long hash;
+    private final int hashInt;
     
     public HashedEntryStackWrapper(EntryStack<?> stack) {
         this.stack = Objects.requireNonNull(stack);
@@ -70,5 +70,13 @@ public class HashedEntryStackWrapper {
     
     public long hashExact() {
         return hash;
+    }
+    
+    public HashedEntryStackWrapper normalize() {
+        EntryStack<?> normalized = stack.normalize();
+        long hashExact = EntryStacks.hashExact(normalized);
+        if (hashExact == hash)
+            return this;
+        return new HashedEntryStackWrapper(normalized, hashExact);
     }
 }

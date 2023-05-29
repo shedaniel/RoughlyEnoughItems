@@ -30,10 +30,8 @@ import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.impl.client.search.argument.Argument;
-import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
 import me.shedaniel.rei.impl.client.util.ThreadCreator;
-import org.jetbrains.annotations.Nullable;
+import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -46,32 +44,26 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 public class AsyncSearchManager {
-    private static final ExecutorService EXECUTOR_SERVICE = new ThreadCreator("REI-AsyncSearchManager").asService();
-    private final Supplier<List<EntryStack<?>>> stacksProvider;
-    private final Supplier<Predicate<EntryStack<?>>> additionalPredicateSupplier;
-    private final UnaryOperator<EntryStack<?>> transformer;
-    private ExecutorTuple executor;
-    private SearchFilter filter;
-    private Map.Entry<List<EntryStack<?>>, SearchFilter> last;
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadCreator("REI-AsyncSearchManager").asService(Math.min(3, Runtime.getRuntime().availableProcessors()));
+    private final Supplier<List<HashedEntryStackWrapper>> stacksProvider;
+    private final Supplier<Predicate<HashedEntryStackWrapper>> additionalPredicateSupplier;
+    private final UnaryOperator<HashedEntryStackWrapper> transformer;
+    private volatile ExecutorTuple executor;
+    private volatile Map.Entry<List<HashedEntryStackWrapper>, SearchFilter> last;
+    public volatile SearchFilter filter;
     
-    public AsyncSearchManager(Supplier<List<EntryStack<?>>> stacksProvider, Supplier<Predicate<EntryStack<?>>> additionalPredicateSupplier, UnaryOperator<EntryStack<?>> transformer) {
+    public AsyncSearchManager(Supplier<List<HashedEntryStackWrapper>> stacksProvider, Supplier<Predicate<HashedEntryStackWrapper>> additionalPredicateSupplier, UnaryOperator<HashedEntryStackWrapper> transformer) {
         this.stacksProvider = stacksProvider;
         this.additionalPredicateSupplier = additionalPredicateSupplier;
         this.transformer = transformer;
     }
     
     public void markDirty() {
-        synchronized (AsyncSearchManager.this) {
-            this.last = null;
-        }
+        this.last = null;
     }
     
-    @Nullable
-    public SearchFilter filter() {
-        return this.filter;
-    }
-    
-    private record ExecutorTuple(SearchFilter filter, CompletableFuture<Map.Entry<List<EntryStack<?>>, SearchFilter>> future) {
+    private record ExecutorTuple(SearchFilter filter,
+                                 CompletableFuture<Map.Entry<List<HashedEntryStackWrapper>, SearchFilter>> future) {
     }
     
     public void updateFilter(String filter) {
@@ -85,12 +77,10 @@ public class AsyncSearchManager {
     }
     
     public boolean isDirty() {
-        synchronized (AsyncSearchManager.this) {
-            return this.last == null || this.last.getValue() != this.filter;
-        }
+        return this.last == null || this.last.getValue() != this.filter;
     }
     
-    public Future<?> getAsync(BiConsumer<List<EntryStack<?>>, SearchFilter> consumer) {
+    public Future<?> getAsync(BiConsumer<List<HashedEntryStackWrapper>, SearchFilter> consumer) {
         if (this.executor == null || this.executor.filter() != filter || isDirty()) {
             if (this.executor != null) {
                 this.executor.future().cancel(Platform.isFabric());
@@ -107,7 +97,7 @@ public class AsyncSearchManager {
         }, EXECUTOR_SERVICE))).future();
     }
     
-    public List<EntryStack<?>> getNow() {
+    public List<HashedEntryStackWrapper> getNow() {
         try {
             return get(Runnable::run).get().getKey();
         } catch (ExecutionException e) {
@@ -117,18 +107,14 @@ public class AsyncSearchManager {
         }
     }
     
-    public CompletableFuture<Map.Entry<List<EntryStack<?>>, SearchFilter>> get(Executor executor) {
+    public CompletableFuture<Map.Entry<List<HashedEntryStackWrapper>, SearchFilter>> get(Executor executor) {
         if (isDirty()) {
-            Map.Entry<List<EntryStack<?>>, SearchFilter> last;
-            synchronized (AsyncSearchManager.this) {
-                last = this.last;
-            }
+            Map.Entry<List<HashedEntryStackWrapper>, SearchFilter> last;
+            last = this.last;
             return get(this.filter, this.additionalPredicateSupplier.get(), this.transformer,
                     this.stacksProvider.get(), last, this, executor)
                     .thenApply(entry -> {
-                        synchronized (AsyncSearchManager.this) {
-                            this.last = entry;
-                        }
+                        this.last = entry;
                         return entry;
                     });
         }
@@ -136,39 +122,20 @@ public class AsyncSearchManager {
         return CompletableFuture.completedFuture(last);
     }
     
-    public static CompletableFuture<Map.Entry<List<EntryStack<?>>, SearchFilter>> get(SearchFilter filter, Predicate<EntryStack<?>> additionalPredicate,
-            UnaryOperator<EntryStack<?>> transformer, List<EntryStack<?>> stacks, Map.Entry<List<EntryStack<?>>, SearchFilter> last,
+    public static CompletableFuture<Map.Entry<List<HashedEntryStackWrapper>, SearchFilter>> get(SearchFilter filter, Predicate<HashedEntryStackWrapper> additionalPredicate,
+            UnaryOperator<HashedEntryStackWrapper> transformer, List<HashedEntryStackWrapper> stacks, Map.Entry<List<HashedEntryStackWrapper>, SearchFilter> last,
             AsyncSearchManager manager, Executor executor) {
         int searchPartitionSize = ConfigObject.getInstance().getAsyncSearchPartitionSize();
         boolean shouldAsync = ConfigObject.getInstance().shouldAsyncSearch() && stacks.size() > searchPartitionSize * 4;
         
         if (!stacks.isEmpty()) {
-            CompletableFuture<Void> preparationFuture = CompletableFuture.completedFuture(null);
-            
-            if (last == null || last.getValue() != filter) {
-                Runnable prepare = () -> {
-                    if (manager.filter == filter) {
-                        List<ArgumentType<?, ?>> argumentTypes = ((SearchProviderImpl.SearchFilterImpl) filter).getArgumentTypes();
-                        Argument.prepareFilter(stacks, argumentTypes, () -> manager.filter() != null && manager.filter() == filter, executor);
-                    } else {
-                        throw new CancellationException();
-                    }
-                };
-                if (shouldAsync) {
-                    preparationFuture = CompletableFuture.runAsync(prepare, executor);
-                } else {
-                    prepare.run();
-                    preparationFuture = CompletableFuture.completedFuture(null);
-                }
-            }
-            
             if (shouldAsync) {
-                List<CompletableFuture<List<EntryStack<?>>>> futures = Lists.newArrayList();
-                for (Iterable<EntryStack<?>> partitionStacks : CollectionUtils.partition(stacks, Math.max(searchPartitionSize, stacks.size() * 3 / Runtime.getRuntime().availableProcessors()))) {
+                List<CompletableFuture<List<HashedEntryStackWrapper>>> futures = Lists.newArrayList();
+                for (Iterable<HashedEntryStackWrapper> partitionStacks : CollectionUtils.partition(stacks, Math.max(searchPartitionSize, stacks.size() * 3 / Runtime.getRuntime().availableProcessors()))) {
                     futures.add(CompletableFuture.supplyAsync(() -> {
-                        List<EntryStack<?>> filtered = Lists.newArrayList();
-                        for (EntryStack<?> stack : partitionStacks) {
-                            if (stack != null && filter.test(stack) && additionalPredicate.test(stack)) {
+                        List<HashedEntryStackWrapper> filtered = Lists.newArrayList();
+                        for (HashedEntryStackWrapper stack : partitionStacks) {
+                            if (stack != null && filter.test(stack.unwrap(), stack.hashExact()) && additionalPredicate.test(stack)) {
                                 filtered.add(transformer.apply(stack));
                             }
                             if (manager.filter != filter) throw new CancellationException();
@@ -176,19 +143,16 @@ public class AsyncSearchManager {
                         return filtered;
                     }, executor));
                 }
-                return preparationFuture.thenCompose($ -> CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                                .orTimeout(30, TimeUnit.SECONDS))
+                return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                        .orTimeout(90, TimeUnit.SECONDS)
                         .thenApplyAsync($ -> {
-                            List<EntryStack<?>> list = new ArrayList<>();
+                            List<HashedEntryStackWrapper> list = new ArrayList<>();
                             
-                            if (manager.filter == filter) {
-                                for (CompletableFuture<List<EntryStack<?>>> future : futures) {
-                                    List<EntryStack<?>> now = future.getNow(null);
-                                    if (now != null) list.addAll(now);
-                                }
-                            } else {
-                                throw new CancellationException();
+                            for (CompletableFuture<List<HashedEntryStackWrapper>> future : futures) {
+                                List<HashedEntryStackWrapper> now = future.getNow(null);
+                                if (now != null) list.addAll(now);
                             }
+                            if (manager.filter != filter) throw new CancellationException();
                             
                             return list;
                         }, executor)
@@ -196,10 +160,10 @@ public class AsyncSearchManager {
                             return new AbstractMap.SimpleImmutableEntry<>(result, filter);
                         });
             } else {
-                List<EntryStack<?>> list = new ArrayList<>();
+                List<HashedEntryStackWrapper> list = new ArrayList<>();
                 
-                for (EntryStack<?> stack : stacks) {
-                    if (filter.test(stack) && additionalPredicate.test(stack)) {
+                for (HashedEntryStackWrapper stack : stacks) {
+                    if (filter.test(stack.unwrap(), stack.hashExact()) && additionalPredicate.test(stack)) {
                         list.add(transformer.apply(stack));
                     }
                     if (manager.filter != filter) throw new CancellationException();
