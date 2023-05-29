@@ -28,7 +28,6 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @ApiStatus.Internal
@@ -61,17 +60,13 @@ public class CompoundArgument extends ForwardingList<AlternativeArgument> {
     }
     
     public static class Builder {
-        private List<AlternativeArgument> arguments;
+        private List<AlternativeArgument.Builder> arguments;
         
-        public <T, R> Builder add(Argument<T, R> argument) {
-            return add(new AlternativeArgument(Collections.singletonList(argument)));
+        public <T, R> Builder add(Argument.Builder<T, R> argument) {
+            return add(new AlternativeArgument.Builder().add(argument));
         }
         
-        public Builder add(AlternativeArgument.Builder builder) {
-            return add(builder.build());
-        }
-        
-        public Builder add(AlternativeArgument argument) {
+        public Builder add(AlternativeArgument.Builder argument) {
             if (arguments == null) {
                 this.arguments = new ArrayList<>();
             }
@@ -82,7 +77,8 @@ public class CompoundArgument extends ForwardingList<AlternativeArgument> {
         
         public CompoundArgument build() {
             if (arguments == null) return CompoundArgument.ALWAYS;
-            return CompoundArgument.of(arguments.toArray(new AlternativeArgument[0]));
+            return CompoundArgument.of(arguments.stream().map(AlternativeArgument.Builder::build)
+                    .toArray(AlternativeArgument[]::new));
         }
     }
 }
