@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.client.search.argument;
 
 import com.google.common.collect.ForwardingList;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -50,9 +51,9 @@ public class AlternativeArgument extends ForwardingList<Argument<?, ?>> {
     }
     
     public static class Builder {
-        private List<Argument<?, ?>> arguments;
+        private List<Argument.Builder<?, ?>> arguments;
         
-        public <T, R> Builder add(Argument<T, R> argument) {
+        public <T, R> Builder add(Argument.Builder<T, R> argument) {
             if (arguments == null) {
                 this.arguments = new ArrayList<>();
             }
@@ -67,8 +68,8 @@ public class AlternativeArgument extends ForwardingList<Argument<?, ?>> {
         
         public AlternativeArgument build() {
             if (arguments == null) return AlternativeArgument.EMPTY;
-            if (arguments.size() == 1) return new AlternativeArgument(Collections.singletonList(arguments.get(0)));
-            return new AlternativeArgument(arguments);
+            if (arguments.size() == 1) return new AlternativeArgument(List.of(arguments.get(0).build()));
+            return new AlternativeArgument(CollectionUtils.map(arguments, Argument.Builder::build));
         }
     }
 }

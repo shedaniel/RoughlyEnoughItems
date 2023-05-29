@@ -30,6 +30,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.client.gui.hints.HintProvider;
 import me.shedaniel.rei.impl.client.search.argument.Argument;
+import me.shedaniel.rei.impl.client.search.argument.ArgumentCache;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -47,14 +48,15 @@ public class SearchFilterPrepareWatcher implements HintProvider {
     public List<Component> provide() {
         lastProcess = null;
         try {
-            if (Argument.prepareStage != null && Argument.currentStages != null && Argument.prepareStacks != null && Argument.prepareStacks.size() > 100
-                && Argument.prepareStart != null) {
-                if (Util.getEpochMillis() - Argument.prepareStart < 100) return Collections.emptyList();
-            int prepareStageCurrent = Argument.prepareStage.getLeft();
-            int prepareStageTotal = Argument.prepareStage.getRight();
-            MutablePair<Integer, Integer> currentStage = Iterables.get(Arrays.asList(Argument.currentStages), prepareStageCurrent - 1, null);
-            int currentStageCurrent = currentStage == null ? 0 : currentStage.getLeft();
-            int currentStageTotal = currentStage == null ? 0 : currentStage.getRight();
+            ArgumentCache cache = Argument.cache;
+            if (cache.currentStep != null && cache.prepareStacks != null && cache.prepareStacks.size() > 100
+                    && cache.prepareStart != null) {
+                if (Util.getEpochMillis() - cache.prepareStart < 100) return Collections.emptyList();
+                int prepareStageCurrent = cache.currentStep.step;
+                int prepareStageTotal = cache.currentStep.totalSteps;
+                ArgumentCache.CurrentStep.Step currentStage = ArrayUtils.get(cache.currentStep.steps, prepareStageCurrent - 1);
+                int currentStageCurrent = currentStage == null ? 0 : currentStage.stacks;
+                int currentStageTotal = currentStage == null ? 0 : currentStage.totalStacks;
                 double prepareStageProgress = prepareStageTotal == 0 ? 0 : prepareStageCurrent / (double) prepareStageTotal;
                 double currentStageProgress = currentStageTotal == 0 ? 0 : currentStageCurrent / (double) currentStageTotal;
                 double lastProcess = prepareStageTotal == 0 ? 0 : Math.max(0, prepareStageProgress - (1 - currentStageProgress) / prepareStageTotal);

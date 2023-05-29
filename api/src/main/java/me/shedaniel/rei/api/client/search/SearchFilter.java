@@ -26,6 +26,7 @@ package me.shedaniel.rei.api.client.search;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 import java.util.function.Predicate;
@@ -79,5 +80,10 @@ public interface SearchFilter extends Predicate<EntryStack<?>> {
      * @param stacks the stacks to prepare
      */
     default void prepareFilter(Collection<EntryStack<?>> stacks) {
+    }
+    
+    @ApiStatus.Experimental
+    default boolean test(EntryStack<?> stack, long hashExact) {
+        return this.test(stack);
     }
 }
