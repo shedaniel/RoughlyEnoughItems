@@ -231,6 +231,7 @@ public abstract class AbstractEntryStack<A> implements EntryStack<A>, Renderer {
             }
             return tooltip.getValue();
         } catch (Throwable throwable) {
+            if (context.isSearch()) throw throwable;
             CrashReport report = CrashReportUtils.essential(throwable, "Getting tooltips");
             CrashReportUtils.renderer(report, this);
             throw CrashReportUtils.throwReport(report);

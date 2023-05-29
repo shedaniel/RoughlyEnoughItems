@@ -54,7 +54,7 @@ public final class ThreadCreator {
     public ExecutorService asService(int poolSize) {
         return new ForkJoinPool(poolSize, pool -> {
             ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
-            worker.setName(group().getName() + "-" + worker.getPoolIndex());
+            worker.setName(group().getName() + "-" + threadId().getAndIncrement());
             worker.setContextClassLoader(getClass().getClassLoader());
             return worker;
         }, ($, exception) -> {

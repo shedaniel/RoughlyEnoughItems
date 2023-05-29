@@ -34,11 +34,8 @@ import me.shedaniel.rei.impl.client.search.argument.AlternativeArgument;
 import me.shedaniel.rei.impl.client.search.argument.Argument;
 import me.shedaniel.rei.impl.client.search.argument.CompoundArgument;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
-import me.shedaniel.rei.impl.client.util.CrashReportUtils;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
 
 import java.util.Collection;
 import java.util.List;
@@ -72,7 +69,7 @@ public class SearchProviderImpl implements SearchProvider {
                     .map(Argument::getArgument)
                     .distinct()
                     .collect(Collectors.toList()));
-            InternalLogger.getInstance().debug("Created search filter with %s using %s", filter, inputMethod.getName().getString());
+            InternalLogger.getInstance().debug("Created search filter with \"%s\" using %s", filter, inputMethod.getName().getString());
         }
         
         @Override
@@ -80,14 +77,7 @@ public class SearchProviderImpl implements SearchProvider {
             try {
                 return Argument.matches(stack, hashExact, arguments.get(), inputMethod);
             } catch (Throwable throwable) {
-                CrashReport report = CrashReportUtils.essential(throwable, "Testing entry with search filter");
-                CrashReportCategory category = report.addCategory("Search entry details");
-                try {
-                    stack.fillCrashReport(report, category);
-                } catch (Throwable throwable1) {
-                    category.setDetailError("Filling Report", throwable1);
-                }
-                throw CrashReportUtils.throwReport(report);
+                throw new RuntimeException("Failed to test search filter: \"" + filter + "\" with stack [" + stack.getType().getIdentifier() + "@" + stack.getIdentifier() + "!" + stack.getValue() + "]", throwable);
             }
         }
         
