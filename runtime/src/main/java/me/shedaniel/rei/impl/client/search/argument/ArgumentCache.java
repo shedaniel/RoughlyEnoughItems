@@ -134,10 +134,10 @@ public class ArgumentCache {
         Long2ObjectMap<Object> out = new Long2ObjectArrayMap<>(stacks.size() + 1);
         for (HashedEntryStackWrapper stack : stacks) {
             if (cacheMap.get(stack.hashExact()) == null) {
-                Object data = argumentType.cacheData(stack.unwrap());
-                
-                if (data != null) {
-                    out.put(stack.hashExact(), data);
+                try {
+                    Object data = argumentType.cacheData(stack.unwrap());
+                    out.put(stack.hashExact(), data == null ? Argument.NO_CACHE : data);
+                } catch (Throwable ignored) {
                 }
             }
         }

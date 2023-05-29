@@ -177,6 +177,10 @@ public class EntryListSearchManager {
         return list;
     }
     
+    public AsyncSearchManager getSearchManager() {
+        return searchManager;
+    }
+    
     public boolean matches(EntryStack<?> stack) {
         return searchManager.matches(stack);
     }
