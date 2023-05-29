@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.plugin.client.categories.tag;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
@@ -33,11 +32,11 @@ import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagCollection;
 
 import java.util.Collections;
 import java.util.List;
@@ -50,7 +49,7 @@ public class ReferenceTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
     private final Slot slot;
     private final List<? extends GuiEventListener> children;
     
-    public ReferenceTagNodeWidget(TagNode<S> node, Function<Holder<S>, EntryStack<T>> mapper, Rectangle overflowBounds) {
+    public ReferenceTagNodeWidget(TagCollection<S> tagCollection, TagNode<S> node, Function<S, EntryStack<T>> mapper, Rectangle overflowBounds) {
         this.node = node;
         this.overflowBounds = overflowBounds;
         this.bounds = new Rectangle(0, 0, 24, 23);
@@ -58,7 +57,7 @@ public class ReferenceTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
                 .disableBackground()
                 .disableHighlight()
                 .disableTooltips()
-                .entries(EntryIngredients.ofTag(node.getReference(), mapper));
+                .entries(EntryIngredients.ofTag(tagCollection, node.getReference(), mapper));
         this.children = Collections.singletonList(this.slot);
     }
     
@@ -70,13 +69,12 @@ public class ReferenceTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
     @Override
     public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
         if (this.overflowBounds.intersects(MatrixUtils.transform(poses.last().pose(), getBounds()))) {
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderTexture(0, new ResourceLocation("textures/gui/advancements/widgets.png"));
+            Minecraft.getInstance().getTextureManager().bind(new ResourceLocation("textures/gui/advancements/widgets.png"));
             this.blit(poses, bounds.x, bounds.y, 1, 128 + 27, 24, 24);
             this.slot.getBounds().setLocation(bounds.getCenterX() - this.slot.getBounds().getWidth() / 2, bounds.y + (bounds.height - this.slot.getBounds().getHeight()) / 2 + 1);
             this.slot.render(poses, mouseX, mouseY, delta);
             if (this.containsMouse(mouseX, mouseY)) {
-                Tooltip.create(new TextComponent("#" + this.node.getReference().location().toString())).queue();
+                Tooltip.create(new TextComponent("#" + this.node.getReference().toString())).queue();
             }
         }
     }

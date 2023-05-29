@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.common.entry.type;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.AbstractIterator;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.longs.*;
@@ -61,7 +62,7 @@ public class PreFilteredEntryList implements FilteredEntryList {
     @Override
     public void addEntryAfter(@Nullable EntryStack<?> afterEntry, EntryStack<?> stack, long stackHashExact) {
         if (!registry.isReloading()) {
-            refreshFilteringFor(null, List.of(stack), LongList.of(stackHashExact));
+            refreshFilteringFor(null, ImmutableList.of(stack), LongLists.singleton(stackHashExact));
         }
     }
     
@@ -75,7 +76,7 @@ public class PreFilteredEntryList implements FilteredEntryList {
     @Override
     public void removeEntry(EntryStack<?> stack, long hashExact) {
         if (!registry.isReloading()) {
-            removeFilteringFor(List.of(stack), LongList.of(hashExact));
+            removeFilteringFor(ImmutableList.of(stack), LongLists.singleton(hashExact));
         }
     }
     
@@ -154,7 +155,7 @@ public class PreFilteredEntryList implements FilteredEntryList {
                     shown.removeAll(hashes);
                     mod++;
                 }
-                Map<FilteringContextType, Set<HashedEntryStackWrapper>> map = FilteringLogic.hidden(List.of(rule), log, true, stacks);
+                Map<FilteringContextType, Set<HashedEntryStackWrapper>> map = FilteringLogic.hidden(ImmutableList.of(rule), log, true, stacks);
                 Set<HashedEntryStackWrapper> hiddenWrappers = map.get(FilteringContextType.HIDDEN);
                 Set<HashedEntryStackWrapper> shownWrappers = map.get(FilteringContextType.SHOWN);
                 for (HashedEntryStackWrapper stack : hiddenWrappers) {
@@ -256,7 +257,7 @@ public class PreFilteredEntryList implements FilteredEntryList {
             }
             
             Iterator<HashedEntryStackWrapper> iterator = list.collectHashed().iterator();
-            return new AbstractIterator<>() {
+            return new AbstractIterator<HashedEntryStackWrapper>() {
                 @Nullable
                 @Override
                 protected HashedEntryStackWrapper computeNext() {
@@ -299,9 +300,47 @@ public class PreFilteredEntryList implements FilteredEntryList {
         return !stack.isEmpty() && cached.getOrDefault(hashExact, true);
     }
     
-    private record DataPair(LongSet hidden, LongSet shown) {
-        private DataPair() {
-            this(new LongOpenHashSet(), new LongOpenHashSet());
+    private static final class DataPair {
+        private final LongSet hidden;
+        private final LongSet shown;
+        
+        private DataPair(LongSet hidden, LongSet shown) {
+            this.hidden = hidden;
+            this.shown = shown;
         }
+        
+        private DataPair() {
+                this(new LongOpenHashSet(), new LongOpenHashSet());
+            }
+        
+        public LongSet hidden() {
+            return hidden;
+        }
+        
+        public LongSet shown() {
+            return shown;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            DataPair that = (DataPair) obj;
+            return Objects.equals(this.hidden, that.hidden) &&
+                    Objects.equals(this.shown, that.shown);
+        }
+        
+        @Override
+        public int hashCode() {
+            return Objects.hash(hidden, shown);
+        }
+        
+        @Override
+        public String toString() {
+            return "DataPair[" +
+                    "hidden=" + hidden + ", " +
+                    "shown=" + shown + ']';
+        }
+        
     }
 }

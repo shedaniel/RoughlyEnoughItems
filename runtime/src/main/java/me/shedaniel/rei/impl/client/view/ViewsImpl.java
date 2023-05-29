@@ -347,7 +347,7 @@ public class ViewsImpl implements Views {
     }
     
     private static <T extends Display> DynamicDisplayGenerator<T> wrapForError(DynamicDisplayGenerator<T> generator) {
-        return new DynamicDisplayGenerator<>() {
+        return new DynamicDisplayGenerator<T>() {
             @Override
             public Optional<List<T>> getRecipeFor(EntryStack<?> entry) {
                 try {

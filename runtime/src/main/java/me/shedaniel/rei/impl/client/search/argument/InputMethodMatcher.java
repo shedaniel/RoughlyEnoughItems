@@ -23,6 +23,8 @@
 
 package me.shedaniel.rei.impl.client.search.argument;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableTable;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.api.client.search.method.CharacterUnpackingInputMethod;
 import me.shedaniel.rei.api.client.search.method.CharacterUnpackingInputMethod.ExpendedChar;
@@ -79,7 +81,7 @@ public class InputMethodMatcher {
         IndexSet active = IndexSet.ZERO;
         IndexSet ret = new IndexSet();
         for (IntList phoneme : phonemes.phonemes()) {
-            active = matchPhoneme(List.of(phoneme), str, active, start, partial);
+            active = matchPhoneme(ImmutableList.of(phoneme), str, active, start, partial);
             if (active.isEmpty()) return ret;
             ret.merge(active);
         }

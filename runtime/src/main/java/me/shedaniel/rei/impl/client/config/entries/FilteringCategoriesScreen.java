@@ -31,7 +31,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.locale.Language;
@@ -60,7 +59,7 @@ public class FilteringCategoriesScreen extends Screen {
         super.init();
         {
             Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));
-            addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+            addButton(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
             }));
@@ -237,11 +236,6 @@ public class FilteringCategoriesScreen extends Screen {
         
         @Override
         public List<? extends GuiEventListener> children() {
-            return Collections.singletonList(toggleButton);
-        }
-        
-        @Override
-        public List<? extends NarratableEntry> narratables() {
             return Collections.singletonList(toggleButton);
         }
     }

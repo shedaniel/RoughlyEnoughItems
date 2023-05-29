@@ -27,17 +27,13 @@ import com.google.common.collect.Iterators;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
-import me.shedaniel.rei.api.common.entry.EntryIngredient;
-import me.shedaniel.rei.impl.ClientInternals;
 import me.shedaniel.rei.impl.common.InternalLogger;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
 
 @ApiStatus.Internal
 public class TransferHandlerRegistryImpl implements TransferHandlerRegistry {
@@ -71,6 +67,5 @@ public class TransferHandlerRegistryImpl implements TransferHandlerRegistry {
     }
     
     static {
-        ClientInternals.attachInstance((Function<List<EntryIngredient>, TooltipComponent>) MissingStacksTooltip::new, "missingTooltip");
     }
 }

@@ -25,22 +25,24 @@ package me.shedaniel.rei.api.common.util;
 
 import com.google.common.collect.ImmutableList;
 import me.shedaniel.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.hooks.TagHooks;
+import me.shedaniel.architectury.mixin.FluidTagsAccessor;
 import me.shedaniel.architectury.utils.Fraction;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
 import me.shedaniel.rei.api.common.entry.type.EntryType;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.tags.TagKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagCollection;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 
 import java.util.ArrayList;
@@ -50,7 +52,8 @@ import java.util.List;
 import java.util.function.Function;
 
 public final class EntryIngredients {
-    private EntryIngredients() {}
+    private EntryIngredients() {
+    }
     
     public static EntryIngredient of(ItemLike stack) {
         return EntryIngredient.of(EntryStacks.of(stack));
@@ -140,12 +143,12 @@ public final class EntryIngredients {
         return ImmutableList.copyOf(result);
     }
     
-    public static <S, T> EntryIngredient ofTag(TagKey<S> tagKey, Function<Holder<S>, EntryStack<T>> mapper) {
-        Registry<S> registry = ((Registry<Registry<S>>) Registry.REGISTRY).get((ResourceKey<Registry<S>>) tagKey.registry());
-        HolderSet.Named<S> holders = registry.getTag(tagKey).orElse(null);
+    public static <S, T> EntryIngredient ofTag(TagCollection<S> tagCollection, ResourceLocation tagKey, Function<S, EntryStack<T>> mapper) {
+        net.minecraft.tags.Tag.Named<S> holders = TagHooks.getOptional(tagKey, () -> tagCollection);
         if (holders == null) return EntryIngredient.empty();
-        EntryIngredient.Builder result = EntryIngredient.builder(holders.size());
-        for (Holder<S> holder : holders) {
+        List<S> values = holders.getValues();
+        EntryIngredient.Builder result = EntryIngredient.builder(values.size());
+        for (S holder : values) {
             EntryStack<T> stack = mapper.apply(holder);
             if (!stack.isEmpty()) {
                 result.add(stack);
@@ -154,29 +157,50 @@ public final class EntryIngredients {
         return result.build();
     }
     
-    public static <S, T> List<EntryIngredient> ofTags(Iterable<TagKey<S>> tagKeys, Function<Holder<S>, EntryStack<T>> mapper) {
-        if (tagKeys instanceof Collection collection && collection.isEmpty()) return Collections.emptyList();
+    public static <S, T> List<EntryIngredient> ofTags(TagCollection<S> tagCollection, Iterable<ResourceLocation> tagKeys, Function<S, EntryStack<T>> mapper) {
+        if (tagKeys instanceof Collection && ((Collection<ResourceLocation>) tagKeys).isEmpty())
+            return Collections.emptyList();
         ImmutableList.Builder<EntryIngredient> ingredients = ImmutableList.builder();
-        for (TagKey<S> tagKey : tagKeys) {
-            ingredients.add(ofTag(tagKey, mapper));
+        for (ResourceLocation tagKey : tagKeys) {
+            ingredients.add(ofTag(tagCollection, tagKey, mapper));
         }
         return ingredients.build();
     }
     
-    public static <T extends ItemLike> EntryIngredient ofItemTag(TagKey<T> tagKey) {
-        return ofTag(tagKey, holder -> EntryStacks.of(holder.value()));
+    public static EntryIngredient ofItemTag(ResourceLocation tagKey) {
+        return ofTag(ItemTags.getAllTags(), tagKey, EntryStacks::of);
     }
     
-    public static EntryIngredient ofFluidTag(TagKey<Fluid> tagKey) {
-        return ofTag(tagKey, holder -> EntryStacks.of(holder.value()));
+    public static EntryIngredient ofItemTag(net.minecraft.tags.Tag.Named<? extends ItemLike> tagKey) {
+        return ofItemTag(tagKey.getName());
     }
     
-    public static <T extends ItemLike> List<EntryIngredient> ofItemTags(Iterable<TagKey<T>> tagKey) {
-        return ofTags(tagKey, holder -> EntryStacks.of(holder.value()));
+    public static EntryIngredient ofBlockTag(ResourceLocation tagKey) {
+        return ofTag(BlockTags.getAllTags(), tagKey, EntryStacks::of);
     }
     
-    public static List<EntryIngredient> ofFluidTags(Iterable<TagKey<Fluid>> tagKey) {
-        return ofTags(tagKey, holder -> EntryStacks.of(holder.value()));
+    public static EntryIngredient ofBlockTag(net.minecraft.tags.Tag.Named<? extends Block> tagKey) {
+        return ofBlockTag(tagKey.getName());
+    }
+    
+    public static EntryIngredient ofFluidTag(ResourceLocation tagKey) {
+        return ofTag(FluidTagsAccessor.getHelper().getAllTags(), tagKey, EntryStacks::of);
+    }
+    
+    public static EntryIngredient ofFluidTag(net.minecraft.tags.Tag.Named<? extends Fluid> tagKey) {
+        return ofFluidTag(tagKey.getName());
+    }
+    
+    public static List<EntryIngredient> ofItemTags(Iterable<ResourceLocation> tagKey) {
+        return ofTags(ItemTags.getAllTags(), tagKey, EntryStacks::of);
+    }
+    
+    public static List<EntryIngredient> ofBlockTags(Iterable<ResourceLocation> tagKey) {
+        return ofTags(BlockTags.getAllTags(), tagKey, EntryStacks::of);
+    }
+    
+    public static List<EntryIngredient> ofFluidTags(Iterable<ResourceLocation> tagKey) {
+        return ofTags(FluidTagsAccessor.getHelper().getAllTags(), tagKey, EntryStacks::of);
     }
     
     public static <T> boolean testFuzzy(EntryIngredient ingredient, EntryStack<T> stack) {

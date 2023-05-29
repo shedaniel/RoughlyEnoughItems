@@ -27,7 +27,6 @@ import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.plugin.client.BuiltinClientPlugin;
 import me.shedaniel.rei.plugin.client.DefaultClientPlugin;
-import net.minecraft.core.Holder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
@@ -60,9 +59,9 @@ public class DefaultClientPluginImpl extends DefaultClientPlugin {
         Set<Potion> potions = Sets.newLinkedHashSet();
         for (Ingredient container : PotionBrewing.ALLOWED_CONTAINERS) {
             for (PotionBrewing.Mix<Potion> mix : PotionBrewing.POTION_MIXES) {
-                IRegistryDelegate<Potion> from = mix.field_185198_a;
+                IRegistryDelegate<Potion> from = mix.from;
                 Ingredient ingredient = mix.ingredient;
-                IRegistryDelegate<Potion> to = mix.field_185200_c;
+                IRegistryDelegate<Potion> to = mix.to;
                 Ingredient base = Ingredient.of(Arrays.stream(container.getItems())
                         .map(ItemStack::copy)
                         .map(stack -> PotionUtils.setPotion(stack, from.get())));
@@ -77,9 +76,9 @@ public class DefaultClientPluginImpl extends DefaultClientPlugin {
         }
         for (Potion potion : potions) {
             for (PotionBrewing.Mix<Item> mix : PotionBrewing.CONTAINER_MIXES) {
-                IRegistryDelegate<Item> from = mix.field_185198_a;
+                IRegistryDelegate<Item> from = mix.from;
                 Ingredient ingredient = mix.ingredient;
-                IRegistryDelegate<Item> to = mix.field_185200_c;
+                IRegistryDelegate<Item> to = mix.to;
                 Ingredient base = Ingredient.of(PotionUtils.setPotion(new ItemStack(from.get()), potion));
                 ItemStack output = PotionUtils.setPotion(new ItemStack(to.get()), potion);
                 clientPlugin.registerBrewingRecipe(base, ingredient, output);

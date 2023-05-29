@@ -23,7 +23,8 @@
 
 package me.shedaniel.rei.plugin.common.displays.tag;
 
-import dev.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.fluid.FluidStack;
+import me.shedaniel.architectury.mixin.FluidTagsAccessor;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
@@ -32,11 +33,14 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
-import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagCollection;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -46,30 +50,44 @@ import java.util.function.Function;
 
 @ApiStatus.Experimental
 public class DefaultTagDisplay<S, T> implements Display {
-    private final TagKey<S> key;
-    private final Function<Holder<S>, EntryStack<T>> mapper;
+    private final TagCollection<S> tagCollection;
+    private final String tagCollectionId;
+    private final ResourceLocation key;
+    private final Registry<S> registry;
+    private final Function<S, EntryStack<T>> mapper;
     private final List<EntryIngredient> ingredients;
     
-    public DefaultTagDisplay(TagKey<S> key, Function<Holder<S>, EntryStack<T>> mapper) {
+    public DefaultTagDisplay(TagCollection<S> tagCollection, String tagCollectionId, ResourceLocation key, Registry<S> registry, Function<S, EntryStack<T>> mapper) {
+        this.tagCollection = tagCollection;
+        this.tagCollectionId = tagCollectionId;
         this.key = key;
+        this.registry = registry;
         this.mapper = mapper;
-        this.ingredients = CollectionUtils.map(EntryIngredients.ofTag(key, mapper), EntryIngredient::of);
+        this.ingredients = CollectionUtils.map(EntryIngredients.ofTag(tagCollection, key, mapper), EntryIngredient::of);
     }
     
-    public static DefaultTagDisplay<ItemLike, ItemStack> ofItems(TagKey<ItemLike> key) {
-        return new DefaultTagDisplay<>(key, DefaultTagDisplay::extractItem);
+    public static DefaultTagDisplay<Item, ItemStack> ofItems(ResourceLocation key) {
+        return new DefaultTagDisplay<>(ItemTags.getAllTags(), "items", key, Registry.ITEM, DefaultTagDisplay::extractItem);
     }
     
-    public static DefaultTagDisplay<Fluid, FluidStack> ofFluids(TagKey<Fluid> key) {
-        return new DefaultTagDisplay<>(key, DefaultTagDisplay::extractFluid);
+    public static DefaultTagDisplay<Block, ItemStack> ofBlocks(ResourceLocation key) {
+        return new DefaultTagDisplay<>(BlockTags.getAllTags(), "blocks", key, Registry.BLOCK, DefaultTagDisplay::extractBlock);
     }
     
-    private static EntryStack<ItemStack> extractItem(Holder<ItemLike> holder) {
-        return EntryStacks.of(holder.value());
+    public static DefaultTagDisplay<Fluid, FluidStack> ofFluids(ResourceLocation key) {
+        return new DefaultTagDisplay<>(FluidTagsAccessor.getHelper().getAllTags(), "fluids", key, Registry.FLUID, DefaultTagDisplay::extractFluid);
     }
     
-    private static EntryStack<FluidStack> extractFluid(Holder<Fluid> holder) {
-        return EntryStacks.of(holder.value());
+    private static EntryStack<ItemStack> extractItem(Item holder) {
+        return EntryStacks.of(holder);
+    }
+    
+    private static EntryStack<ItemStack> extractBlock(Block holder) {
+        return EntryStacks.of(holder);
+    }
+    
+    private static EntryStack<FluidStack> extractFluid(Fluid holder) {
+        return EntryStacks.of(holder);
     }
     
     @Override
@@ -89,14 +107,26 @@ public class DefaultTagDisplay<S, T> implements Display {
     
     @Override
     public Optional<ResourceLocation> getDisplayLocation() {
-        return Optional.of(key.location());
+        return Optional.of(key);
     }
     
-    public TagKey<S> getKey() {
+    public String getTagCollectionId() {
+        return tagCollectionId;
+    }
+    
+    public TagCollection<S> getTagCollection() {
+        return tagCollection;
+    }
+    
+    public ResourceLocation getKey() {
         return key;
     }
     
-    public Function<Holder<S>, EntryStack<T>> getMapper() {
+    public Registry<S> getRegistry() {
+        return registry;
+    }
+    
+    public Function<S, EntryStack<T>> getMapper() {
         return mapper;
     }
 }

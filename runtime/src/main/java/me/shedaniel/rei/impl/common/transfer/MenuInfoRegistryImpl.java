@@ -59,7 +59,7 @@ public class MenuInfoRegistryImpl implements MenuInfoRegistry {
     
     @Override
     public <D extends Display> void registerGeneric(Predicate<CategoryIdentifier<?>> categoryPredicate, MenuInfoProvider<?, D> menuInfo) {
-        mapGeneric.computeIfAbsent(new Predicate<>() {
+        mapGeneric.computeIfAbsent(new Predicate<CategoryIdentifier<?>>() {
             @Override
             public boolean test(CategoryIdentifier<?> categoryIdentifier) {
                 return categoryPredicate.test(categoryIdentifier);

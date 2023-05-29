@@ -23,8 +23,9 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.math.Vector4f;
-import dev.architectury.utils.value.BooleanValue;
+import me.shedaniel.architectury.utils.BooleanValue;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigManager;
@@ -99,15 +100,15 @@ public class CraftableFilterButtonWidget {
     
     private static Collection<FavoriteMenuEntry> menuEntries(MenuAccess access) {
         ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
-        ArrayList<FavoriteMenuEntry> entries = new ArrayList<>(List.of(
+        ArrayList<FavoriteMenuEntry> entries = new ArrayList<>(ImmutableList.of(
                 new SubMenuEntry(new TranslatableComponent("text.rei.config.menu.search_field.position"), Arrays.stream(SearchFieldLocation.values())
                         .<FavoriteMenuEntry>map(location -> ToggleMenuEntry.of(new TextComponent(location.toString()),
                                         () -> config.getSearchFieldLocation() == location,
                                         bool -> config.setSearchFieldLocation(location))
                                 .withActive(() -> config.getSearchFieldLocation() != location)
                         )
-                        .toList())
-        ));
+                        .collect(Collectors.toList())))
+        );
         
         List<Map.Entry<ResourceLocation, InputMethod<?>>> applicableInputMethods = getApplicableInputMethods();
         if (applicableInputMethods.size() > 1) {
@@ -121,7 +122,7 @@ public class CraftableFilterButtonWidget {
         String languageCode = Minecraft.getInstance().options.languageCode;
         return InputMethodRegistry.getInstance().getAll().entrySet().stream()
                 .filter(entry -> CollectionUtils.anyMatch(entry.getValue().getMatchingLocales(), locale -> locale.code().equals(languageCode)))
-                .toList();
+                .collect(Collectors.toList());
     }
     
     public static List<FavoriteMenuEntry> createInputMethodEntries(MenuAccess access, List<Map.Entry<ResourceLocation, InputMethod<?>>> applicableInputMethods) {
@@ -160,7 +161,7 @@ public class CraftableFilterButtonWidget {
                                         service.shutdown();
                                     });
                                     ScreenOverlayImpl.getInstance().getHintsContainer().addHint(12, () -> new Point(getCraftableFilterBounds().getCenterX(), getCraftableFilterBounds().getCenterY()),
-                                            "text.rei.hint.input.methods", List.of(new TranslatableComponent("text.rei.hint.input.methods")));
+                                            "text.rei.hint.input.methods", ImmutableList.of(new TranslatableComponent("text.rei.hint.input.methods")));
                                 })
                         .withActive(() -> !Objects.equals(config.getInputMethodId(), pair.getKey()))
                         .withTooltip(() -> Tooltip.create(Widget.mouse(), pair.getValue().getDescription()))

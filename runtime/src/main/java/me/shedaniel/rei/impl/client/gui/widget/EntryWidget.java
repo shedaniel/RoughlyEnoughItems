@@ -69,9 +69,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -81,7 +81,6 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -108,7 +107,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     private long lastCheckTime = -1;
     private long lastCheckedTime = -1;
     private Display display;
-    private Supplier<DisplayTooltipComponent> displayTooltipComponent;
     
     public EntryWidget(Point point) {
         this(new Rectangle(point.x - 1, point.y - 1, 18, 18));
@@ -323,7 +321,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             Map<CategoryIdentifier<?>, Boolean> filteringQuickCraftCategories = ConfigObject.getInstance().getFilteringQuickCraftCategories();
             for (Map.Entry<CategoryIdentifier<?>, List<Display>> entry : displayRegistry.getAll().entrySet()) {
                 Optional<? extends CategoryRegistry.CategoryConfiguration<?>> configuration;
-                if ((configuration = categoryRegistry.tryGet(entry.getKey())).isEmpty()
+                if (!(configuration = categoryRegistry.tryGet(entry.getKey())).isPresent()
                     || categoryRegistry.isCategoryInvisible(configuration.get().getCategory())) continue;
                 if (!filteringQuickCraftCategories.getOrDefault(entry.getKey(), configuration.get().isQuickCraftingEnabledByDefault())) continue;
                 for (Display display : entry.getValue()) {
@@ -332,7 +330,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                         AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
                         if (result.successful) {
                             this.display = display;
-                            this.displayTooltipComponent = Suppliers.memoize(() -> new DisplayTooltipComponent(display));
                             return result.successfulHandler;
                         }
                     }
@@ -340,7 +337,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             }
         } catch (ConcurrentModificationException ignored) {
             display = null;
-            displayTooltipComponent = null;
             lastCheckTime = -1;
         }
         
@@ -361,7 +357,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             }
             
             display = null;
-            displayTooltipComponent = null;
             lastCheckTime = -1;
         }
         
@@ -455,7 +450,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
             
             if (exists) {
                 tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
-                tooltip.add((ClientTooltipComponent) displayTooltipComponent.get());
             }
         }
         
@@ -476,16 +470,14 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 }
             }
             
-            if (!tooltip.entries().isEmpty() && ConfigObject.getInstance().doDisplayIMEHints()) {
-                Tooltip.Entry entry = tooltip.entries().get(0);
+            if (!tooltip.getText().isEmpty() && ConfigObject.getInstance().doDisplayIMEHints()) {
+                Component entry = tooltip.getText().get(0);
                 
-                if (entry.isText()) {
-                    String name = FormattingUtils.stripFormatting(entry.getAsText().getString());
-                    InputMethod<?> active = InputMethod.active();
-                    String suggested = active.suggestInputString(name);
-                    if (suggested != null) {
-                        tooltip.entries().add(1, Tooltip.entry(new TextComponent(suggested).withStyle(ChatFormatting.GRAY)));
-                    }
+                String name = FormattingUtils.stripFormatting(entry.getString());
+                InputMethod<?> active = InputMethod.active();
+                String suggested = active.suggestInputString(name);
+                if (suggested != null) {
+                    tooltip.getText().add(1, new TextComponent(suggested).withStyle(ChatFormatting.GRAY));
                 }
             }
         }

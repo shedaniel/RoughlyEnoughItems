@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -108,7 +109,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         
         ScreenOverlayImpl overlay = ScreenOverlayImpl.getInstance();
         Rectangle overlayBounds = overlay.bounds;
-        entryListWidget.updateArea(Objects.requireNonNullElse(overlayBounds, new Rectangle()), REIRuntimeImpl.getSearchField() == null ? "" : REIRuntimeImpl.getSearchField().getText());
+        entryListWidget.updateArea(MoreObjects.firstNonNull(overlayBounds, new Rectangle()), REIRuntimeImpl.getSearchField() == null ? "" : REIRuntimeImpl.getSearchField().getText());
         entryListWidget.updateEntriesPosition();
         
         return entryListWidget;
@@ -120,7 +121,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     public static ScreenOverlayImpl getInstance() {
-        return (ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().orElseThrow();
+        return (ScreenOverlayImpl) REIRuntime.getInstance().getOverlay().orElseThrow(NullPointerException::new);
     }
     
     public void tick() {
@@ -194,11 +195,16 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (ConfigObject.getInstance().isCraftableFilterEnabled()) widthRemoved += 22;
         if (ConfigObject.getInstance().isLowerConfigButton()) widthRemoved += 22;
         SearchFieldLocation searchFieldLocation = REIRuntime.getInstance().getContextualSearchFieldLocation();
-        return switch (searchFieldLocation) {
-            case TOP_SIDE -> getTopSideSearchFieldArea(widthRemoved);
-            case BOTTOM_SIDE -> getBottomSideSearchFieldArea(widthRemoved);
-            case CENTER -> getCenterSearchFieldArea(widthRemoved);
-        };
+        switch (searchFieldLocation) {
+            case TOP_SIDE:
+                return getTopSideSearchFieldArea(widthRemoved);
+            case BOTTOM_SIDE:
+                return getBottomSideSearchFieldArea(widthRemoved);
+            case CENTER:
+                return getCenterSearchFieldArea(widthRemoved);
+            default:
+                throw new IllegalArgumentException();
+        }
     }
     
     private Rectangle getTopSideSearchFieldArea(int widthRemoved) {
@@ -253,7 +259,7 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     private ClickArea.ClickAreaContext<Screen> createClickAreaContext(double mouseX, double mouseY, Screen screen) {
-        return new ClickArea.ClickAreaContext<>() {
+        return new ClickArea.ClickAreaContext<Screen>() {
             @Override
             public Screen getScreen() {
                 return screen;
@@ -298,8 +304,10 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             for (Widget widget : widgets) {
                 if (widget instanceof LateRenderable && widget != menuHolder.widget())
                     widget.render(matrices, mouseX, mouseY, delta);
-                else if (widget instanceof OverlaySearchField field)
+                else if (widget instanceof OverlaySearchField) {
+                    OverlaySearchField field = (OverlaySearchField) widget;
                     field.laterRender(matrices, mouseX, mouseY, delta);
+                }
             }
             matrices.pushPose();
             matrices.translate(0, 0, 500);

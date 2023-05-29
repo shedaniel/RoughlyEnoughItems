@@ -24,7 +24,7 @@
 package me.shedaniel.rei.plugin.test;
 
 import com.google.common.collect.ImmutableList;
-import dev.architectury.event.events.common.CommandRegistrationEvent;
+import me.shedaniel.architectury.event.events.CommandRegistrationEvent;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
 import me.shedaniel.rei.api.client.entry.filtering.base.BasicFilteringRule;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
@@ -35,6 +35,7 @@ import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
@@ -106,7 +107,7 @@ public class REITestPlugin implements REIClientPlugin {
             if (i++ % 10 != 0)
                 continue;
             registry.group(Registry.ITEM.getKey(item), new TextComponent(Registry.ITEM.getKey(item).toString()),
-                    stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(item));
+                    stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().getItem() == item);
         }
     }
     

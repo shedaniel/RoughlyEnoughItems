@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.common.entry;
 
 import me.shedaniel.architectury.platform.Platform;
-import dev.architectury.utils.Env;
+import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.common.entry.type.BuiltinEntryTypes;
 import me.shedaniel.rei.api.common.entry.type.EntryDefinition;

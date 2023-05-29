@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.search.method;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
@@ -59,7 +60,7 @@ public class InputMethodRegistryImpl implements InputMethodRegistry {
     
     @Override
     public InputMethod<?> getOrDefault(@Nullable ResourceLocation id) {
-        return Objects.requireNonNullElse(this.get(id), DefaultInputMethod.INSTANCE);
+        return MoreObjects.firstNonNull(this.get(id), DefaultInputMethod.INSTANCE);
     }
     
     @Override

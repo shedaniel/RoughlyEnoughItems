@@ -38,7 +38,6 @@ import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -90,7 +89,7 @@ public enum SearchFilteringRuleType implements FilteringRuleType<SearchFiltering
     @Override
     @Nullable
     public Function<Screen, Screen> createEntryScreen(SearchFilteringRule rule) {
-        return screen -> new FilteringRuleOptionsScreen<>(rule, screen) {
+        return screen -> new FilteringRuleOptionsScreen<SearchFilteringRule>(rule, screen) {
             TextFieldRuleEntry entry = null;
             BooleanRuleEntry show = null;
             List<EntryWidget> entryStacks = new ArrayList<>();
@@ -165,11 +164,6 @@ public enum SearchFilteringRuleType implements FilteringRuleType<SearchFiltering
         @Override
         public int getItemHeight() {
             return totalHeight;
-        }
-        
-        @Override
-        public List<? extends NarratableEntry> narratables() {
-            return Lists.newArrayList();
         }
         
         @Override

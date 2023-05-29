@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.widget.hint;
 
 import com.google.gson.Gson;
-import dev.architectury.platform.Platform;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.DelegateWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;

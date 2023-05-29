@@ -21,6 +21,7 @@
  * SOFTWARE.
  */
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.impl.Internals;
 import me.shedaniel.rei.impl.client.search.argument.InputMethodMatcher;
@@ -94,6 +95,6 @@ public class InputMethodTest {
     }
     
     boolean pinyinContains(String input, String substr) {
-        return InputMethodMatcher.contains(pinyinInputMethod, IntList.of(input.codePoints().toArray()), IntList.of(substr.codePoints().toArray()));
+        return InputMethodMatcher.contains(pinyinInputMethod, new IntArrayList(input.codePoints().toArray()), new IntArrayList(substr.codePoints().toArray()));
     }
 }

@@ -109,7 +109,7 @@ public class RoughlyEnoughItemsNetwork {
             int hotbarSlotId = buf.readVarInt();
             if (hotbarSlotId >= 0 && hotbarSlotId < 9) {
                 AbstractContainerMenu menu = player.containerMenu;
-                player.getInventory().items.set(hotbarSlotId, stack.copy());
+                player.inventory.items.set(hotbarSlotId, stack.copy());
                 menu.broadcastChanges();
                 NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.copy()).writeUtf(player.getScoreboardName(), 32767));
             } else {

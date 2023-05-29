@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.plugin.client.entry;
 
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
@@ -30,9 +31,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
+import me.shedaniel.architectury.hooks.ItemStackHooks;
 import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.architectury.utils.EnvExecutor;
-import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.renderer.AbstractEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
@@ -67,11 +68,10 @@ import net.minecraft.tags.TagContainer;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySerializer<ItemStack> {
     @Environment(EnvType.CLIENT)
@@ -218,8 +218,23 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     @Override
     public Collection<ResourceLocation> getTagsFor(TagContainer tagContainer, EntryStack<ItemStack> entry, ItemStack value) {
         TagCollection<Item> collection = tagContainer.getItems();
-        dwadada
-        return collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getItem());
+        Collection<ResourceLocation> itemTags = collection == null ? Collections.emptyList() : collection.getMatchingTags(value.getItem());
+        if (value.getItem() instanceof BlockItem) {
+            TagCollection<Block> blocks = tagContainer.getBlocks();
+            Collection<ResourceLocation> blockTags = blocks == null ? Collections.emptyList() : blocks.getMatchingTags(((BlockItem) value.getItem()).getBlock());
+            return new AbstractCollection<ResourceLocation>() {
+                @Override
+                public Iterator<ResourceLocation> iterator() {
+                    return Iterators.concat(itemTags.iterator(), blockTags.iterator());
+                }
+                
+                @Override
+                public int size() {
+                    return itemTags.size() + blockTags.size();
+                }
+            };
+        }
+        return itemTags;
     }
     
     @Environment(EnvType.CLIENT)

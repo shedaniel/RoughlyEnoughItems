@@ -29,7 +29,7 @@ import java.util.List;
  * @deprecated {@link FavoriteEntryType.Section#add(boolean, FavoriteEntry...)}
  */
 @FunctionalInterface
-@Deprecated(forRemoval = true)
+@Deprecated
 public interface SystemFavoriteEntryProvider<T extends FavoriteEntry> {
     List<T> provide();
     

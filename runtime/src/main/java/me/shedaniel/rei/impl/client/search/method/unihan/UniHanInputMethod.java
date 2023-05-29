@@ -23,8 +23,10 @@
 
 package me.shedaniel.rei.impl.client.search.method.unihan;
 
+import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.api.client.search.method.CharacterUnpackingInputMethod.ExpendedChar;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
@@ -78,7 +80,7 @@ public abstract class UniHanInputMethod implements InputMethod<IntList> {
     }
     
     protected List<ExpendedChar> asExpendedChars(String string) {
-        return List.of(new ExpendedChar(CollectionUtils.map(IntList.of(string.codePoints().toArray()), IntList::of)));
+        return ImmutableList.of(new ExpendedChar(CollectionUtils.map(new IntArrayList(string.codePoints().toArray()), IntArrayList::new)));
     }
     
     @Override

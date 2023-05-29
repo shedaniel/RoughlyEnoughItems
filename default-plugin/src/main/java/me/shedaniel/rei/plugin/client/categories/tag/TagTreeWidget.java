@@ -30,11 +30,12 @@ import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.core.Holder;
+import net.minecraft.tags.TagCollection;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TagTreeWidget<S, T> extends WidgetWithBounds {
@@ -45,13 +46,13 @@ public class TagTreeWidget<S, T> extends WidgetWithBounds {
     private final List<TagTreeWidget<S, T>> childWidgets;
     private final List<WidgetWithBounds> children;
     
-    public TagTreeWidget(TagNode<S> node, Function<Holder<S>, EntryStack<T>> mapper, Rectangle overflowBounds) {
+    public TagTreeWidget(TagCollection<S> tagCollection, TagNode<S> node, Function<S, EntryStack<T>> mapper, Rectangle overflowBounds) {
         this.node = node;
         this.overflowBounds = overflowBounds;
-        this.rootWidget = TagNodeWidget.create(node, mapper, overflowBounds);
+        this.rootWidget = TagNodeWidget.create(tagCollection, node, mapper, overflowBounds);
         this.childWidgets = new ArrayList<>();
         for (TagNode<S> childNode : node.children()) {
-            TagTreeWidget<S, T> childWidget = new TagTreeWidget<>(childNode, mapper, overflowBounds);
+            TagTreeWidget<S, T> childWidget = new TagTreeWidget<>(tagCollection, childNode, mapper, overflowBounds);
             childWidget.getBounds().y = rootWidget.getBounds().getMaxY() + 16;
             this.childWidgets.add(childWidget);
         }
@@ -61,7 +62,7 @@ public class TagTreeWidget<S, T> extends WidgetWithBounds {
             childWidget.getBounds().x = rootWidget.getBounds().getCenterX() - childrenTotalWidth / 2 + x;
             x += childWidget.getBounds().width + 6;
         }
-        this.children = Stream.concat(Stream.of(this.rootWidget), this.childWidgets.stream()).toList();
+        this.children = Stream.concat(Stream.of(this.rootWidget), this.childWidgets.stream()).collect(Collectors.toList());
         this.bounds = new Rectangle(this.children.stream()
                 .map(WidgetWithBounds::getBounds)
                 .reduce(Rectangle::union)

@@ -35,7 +35,7 @@ public class MatrixUtils {
     public static Matrix4f inverse(Matrix4f matrix) {
         Transformation transformation = new Transformation(matrix);
         Transformation inverse = transformation.inverse();
-        if (inverse != null) inverse.getScale(); // This has a side effect
+        if (inverse != null) inverse.getLeftRotation(); // This has a side effect
         return inverse == null ? Transformation.identity().getMatrix() : inverse.getMatrix();
     }
     

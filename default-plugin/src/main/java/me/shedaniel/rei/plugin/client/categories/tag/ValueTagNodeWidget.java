@@ -33,10 +33,9 @@ import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
@@ -48,9 +47,9 @@ public class ValueTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
     private final List<? extends GuiEventListener> children;
     private final Rectangle overflowBounds;
     
-    public ValueTagNodeWidget(TagNode<S> node, Function<Holder<S>, EntryStack<T>> mapper, Rectangle overflowBounds) {
+    public ValueTagNodeWidget(TagNode<S> node, Function<S, EntryStack<T>> mapper, Rectangle overflowBounds) {
         this.overflowBounds = overflowBounds;
-        HolderSet<S> holders = node.getValue();
+        Collection<S> holders = node.getValue();
         int width = Math.min(4, holders.size());
         int height = Math.max((int) Math.ceil(holders.size() * 1.0 / width), 1);
         this.bounds = new Rectangle(0, 0, 16 * width + 12, 16 * height + 12);
@@ -61,7 +60,7 @@ public class ValueTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
         this.widgets = new ArrayList<>();
         this.widgets.add(background);
         this.widgets.add(slotBackground);
-        for (Holder<S> holder : holders) {
+        for (S holder : holders) {
             int x = i % width;
             int y = i / width;
             Slot slot = Widgets.createSlot(new Rectangle(x * 16 + 5, y * 16 + 5, 18, 18))
@@ -88,8 +87,8 @@ public class ValueTagNodeWidget<S, T> extends TagNodeWidget<S, T> {
             poses.translate(bounds.x, bounds.y, 0);
             Point mouse = new Point(mouseX - bounds.x, mouseY - bounds.y);
             for (Widget widget : this.widgets) {
-                if (!(widget instanceof WidgetWithBounds withBounds) ||
-                    this.overflowBounds.intersects(MatrixUtils.transform(poses.last().pose(), withBounds.getBounds()))) {
+                if (!(widget instanceof WidgetWithBounds) ||
+                    this.overflowBounds.intersects(MatrixUtils.transform(poses.last().pose(), ((WidgetWithBounds) widget).getBounds()))) {
                     widget.render(poses, mouse.x, mouse.y, delta);
                 }
             }

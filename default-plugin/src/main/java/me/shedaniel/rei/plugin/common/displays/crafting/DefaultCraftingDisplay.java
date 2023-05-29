@@ -23,9 +23,8 @@
 
 package me.shedaniel.rei.plugin.common.displays.crafting;
 
-import dev.architectury.platform.Platform;
-import it.unimi.dsi.fastutil.ints.IntIntImmutablePair;
-import it.unimi.dsi.fastutil.ints.IntIntPair;
+import com.mojang.datafixers.util.Pair;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
 import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
@@ -68,7 +67,7 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     
     static {
         try {
-            Class.forName("me.shedaniel.rei.plugin.common.displays.crafting.%s.DefaultCraftingDisplayImpl".formatted(Platform.isForge() ? "forge" : "fabric"))
+            Class.forName(String.format("me.shedaniel.rei.plugin.common.displays.crafting.%s.DefaultCraftingDisplayImpl", Platform.isForge() ? "forge" : "fabric"))
                     .getDeclaredMethod("registerPlatformSizeProvider")
                     .invoke(null);
         } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
@@ -162,11 +161,14 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
         return BasicDisplay.Serializer.<DefaultCraftingDisplay<?>>of((input, output, location, tag) -> {
             if (tag.contains("REIRecipeType")) {
                 String type = tag.getString("REIRecipeType");
-                return switch (type) {
-                    case "Shapeless" -> DefaultCustomShapelessDisplay.simple(input, output, location);
-                    case "Shaped" -> DefaultCustomShapedDisplay.simple(input, output, tag.getInt("RecipeWidth"), tag.getInt("RecipeHeight"), location);
-                    default -> throw new IllegalArgumentException("Unknown recipe type: " + type);
-                };
+                switch (type) {
+                    case "Shapeless":
+                        return DefaultCustomShapelessDisplay.simple(input, output, location);
+                    case "Shaped":
+                        return DefaultCustomShapedDisplay.simple(input, output, tag.getInt("RecipeWidth"), tag.getInt("RecipeHeight"), location);
+                    default:
+                        throw new IllegalArgumentException("Unknown recipe type: " + type);
+                }
             } else {
                 return DefaultCustomDisplay.simple(input, output, location);
             }
@@ -195,7 +197,7 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
         int inputWidth = getInputWidth(craftingWidth, craftingHeight);
         int inputHeight = getInputHeight(craftingWidth, craftingHeight);
         
-        Map<IntIntPair, InputIngredient<EntryStack<?>>> grid = new HashMap<>();
+        Map<Pair<Integer, Integer>, InputIngredient<EntryStack<?>>> grid = new HashMap<>();
         
         List<EntryIngredient> inputEntries = getInputEntries();
         for (int i = 0; i < inputEntries.size(); i++) {
@@ -204,7 +206,7 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
                 continue;
             }
             int index = getSlotWithSize(inputWidth, i, craftingWidth);
-            grid.put(new IntIntImmutablePair(i % inputWidth, i / inputWidth), InputIngredient.of(index, stacks));
+            grid.put(new Pair<>(i % inputWidth, i / inputWidth), InputIngredient.of(index, stacks));
         }
         
         List<InputIngredient<EntryStack<?>>> list = new ArrayList<>(craftingWidth * craftingHeight);
@@ -214,7 +216,7 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
         
         for (int x = 0; x < craftingWidth; x++) {
             for (int y = 0; y < craftingHeight; y++) {
-                InputIngredient<EntryStack<?>> ingredient = grid.get(new IntIntImmutablePair(x, y));
+                InputIngredient<EntryStack<?>> ingredient = grid.get(new Pair<>(x, y));
                 if (ingredient != null) {
                     int index = craftingWidth * y + x;
                     list.set(index, ingredient);

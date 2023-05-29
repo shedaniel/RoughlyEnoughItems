@@ -28,6 +28,8 @@ import me.shedaniel.architectury.utils.Env;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.common.plugins.*;
+import me.shedaniel.rei.impl.init.PluginDetector;
+import me.shedaniel.rei.impl.init.PrimitivePlatformAdapter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
@@ -36,6 +38,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

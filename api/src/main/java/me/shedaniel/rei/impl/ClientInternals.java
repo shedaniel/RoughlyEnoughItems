@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl;
 
 import com.mojang.math.Matrix4f;
 import com.mojang.serialization.DataResult;
-import dev.architectury.utils.value.BooleanValue;
+import me.shedaniel.architectury.utils.BooleanValue;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
@@ -39,17 +39,16 @@ import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
-import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.data.models.blockstates.PropertyDispatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.TooltipFlag;
-import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,10 +73,9 @@ public final class ClientInternals {
     private static Function<CompoundTag, DataResult<FavoriteEntry>> favoriteEntryFromJson = (object) -> throwNotSetup();
     private static Function<Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
     private static BiFunction<@Nullable Point, Collection<Component>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
-    private static TriFunction<Point, @Nullable TooltipFlag, Boolean, TooltipContext> tooltipContextProvider = (point, texts, search) -> throwNotSetup();
+    private static PropertyDispatch.TriFunction<Point, @Nullable TooltipFlag, Boolean, TooltipContext> tooltipContextProvider = (point, texts, search) -> throwNotSetup();
     private static Supplier<List<String>> jeiCompatMods = ClientInternals::throwNotSetup;
     private static Supplier<Object> builtinClientPlugin = ClientInternals::throwNotSetup;
-    private static Function<List<EntryIngredient>, TooltipComponent> missingTooltip = (stacks) -> throwNotSetup();
     
     private static <T> T throwNotSetup() {
         throw new AssertionError("REI Internals have not been initialized!");
@@ -162,10 +160,6 @@ public final class ClientInternals {
     
     public static PluginManager<REIClientPlugin> getPluginManager() {
         return clientPluginManager.get();
-    }
-    
-    public static TooltipComponent createMissingTooltip(List<EntryIngredient> stacks) {
-        return missingTooltip.apply(stacks);
     }
     
     public static FilteringRuleTypeRegistry getFilteringRuleTypeRegistry() {

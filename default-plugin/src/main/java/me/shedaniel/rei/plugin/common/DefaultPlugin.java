@@ -23,11 +23,8 @@
 
 package me.shedaniel.rei.plugin.common;
 
-import dev.architectury.injectables.annotations.ExpectPlatform;
-import dev.architectury.injectables.annotations.PlatformOnly;
 import me.shedaniel.architectury.event.CompoundEventResult;
 import me.shedaniel.architectury.hooks.FluidStackHooks;
-import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.utils.NbtType;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
@@ -57,6 +54,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.function.Function;
@@ -74,13 +72,13 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
         Function<ItemStack, ListTag> enchantmentTag = stack -> {
             CompoundTag tag = stack.getTag();
             if (tag == null) return null;
-            if (!tag.contains("Enchantments", Tag.TAG_LIST)) {
-                if (tag.contains("StoredEnchantments", Tag.TAG_LIST)) {
-                    return tag.getList("StoredEnchantments", Tag.TAG_COMPOUND);
+            if (!tag.contains("Enchantments", NbtType.LIST)) {
+                if (tag.contains("StoredEnchantments", NbtType.LIST)) {
+                    return tag.getList("StoredEnchantments", NbtType.COMPOUND);
                 }
                 return null;
             }
-            return tag.getList("Enchantments", Tag.TAG_COMPOUND);
+            return tag.getList("Enchantments", NbtType.COMPOUND);
         };
         registry.register((context, stack) -> nbtHasher.hash(context, enchantmentTag.apply(stack)), Items.ENCHANTED_BOOK);
         registry.registerNbt(Items.POTION);
@@ -95,7 +93,8 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
             ItemStack stack = entry.getValue();
             Item item = stack.getItem();
             if (item instanceof BucketItem) {
-                Fluid fluid = FluidBucketHooks.getFluid((BucketItem) item);
+                // Fluid fluid = FluidBucketHooks.getFluid((BucketItem) item);
+                Fluid fluid = Fluids.WATER;
                 if (fluid != null) {
                     return CompoundEventResult.interruptTrue(Stream.of(EntryStacks.of(fluid, FluidStackHooks.bucketAmount())));
                 }

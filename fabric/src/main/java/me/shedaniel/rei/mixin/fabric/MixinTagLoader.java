@@ -28,7 +28,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectMaps;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
@@ -36,7 +35,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagKey;
 import net.minecraft.tags.TagLoader;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -51,53 +49,53 @@ import java.util.*;
 public class MixinTagLoader<T> {
     @Shadow @Final private String directory;
     
-    @Inject(method = "build", at = @At("HEAD"))
-    private void load(Map<ResourceLocation, Tag.Builder> map, CallbackInfoReturnable<Map<ResourceLocation, Tag<T>>> cir) {
-        TagNodes.RAW_TAG_DATA_MAP.put(directory, new HashMap<>());
-        TagNodes.CURRENT_TAG_DIR.set(directory);
-    }
-    
-    @Inject(method = "build", at = @At("RETURN"))
-    private void loadPost(Map<ResourceLocation, Tag.Builder> map, CallbackInfoReturnable<Map<ResourceLocation, Tag<T>>> cir) {
-        Map<Tag<T>, ResourceLocation> inverseMap = new HashMap<>(cir.getReturnValue().size());
-        for (Map.Entry<ResourceLocation, Tag<T>> entry : cir.getReturnValue().entrySet()) {
-            inverseMap.put(entry.getValue(), entry.getKey());
-        }
-        ResourceKey<? extends Registry<?>> resourceKey = TagNodes.TAG_DIR_MAP.get(directory);
-        if (resourceKey == null) return;
-        TagNodes.TAG_DATA_MAP.put(resourceKey, new HashMap<>());
-        Map<ResourceLocation, TagNodes.TagData> tagDataMap = TagNodes.TAG_DATA_MAP.get(resourceKey);
-        if (tagDataMap == null) return;
-        Registry<T> registry = ((Registry<Registry<T>>) Registry.REGISTRY).get((ResourceKey<Registry<T>>) resourceKey);
-        Stopwatch stopwatch = Stopwatch.createStarted();
-        
-        Iterator<Map.Entry<Tag<?>, TagNodes.RawTagData>> entryIterator = TagNodes.RAW_TAG_DATA_MAP.getOrDefault(directory, Collections.emptyMap())
-                .entrySet().iterator();
-        
-        if (!entryIterator.hasNext()) return;
-        
-        while (entryIterator.hasNext()) {
-            Map.Entry<Tag<?>, TagNodes.RawTagData> entry = entryIterator.next();
-            Tag<?> tag = entry.getKey();
-            entryIterator.remove();
-            
-            if (registry != null) {
-                ResourceLocation tagLoc = inverseMap.get(tag);
-                
-                if (tagLoc != null) {
-                    TagNodes.RawTagData rawTagData = entry.getValue();
-                    IntList elements = new IntArrayList();
-                    for (ResourceLocation element : rawTagData.otherElements()) {
-                        T t = registry.get(element);
-                        if (t != null) {
-                            elements.add(registry.getId(t));
-                        }
-                    }
-                    tagDataMap.put(tagLoc, new TagNodes.TagData(elements, rawTagData.otherTags()));
-                }
-            }
-        }
-        
-        InternalLogger.getInstance().debug("Processed %d tags in %s for %s", tagDataMap.size(), stopwatch.stop(), resourceKey.location());
-    }
+//    @Inject(method = "build", at = @At("HEAD"))
+//    private void load(Map<ResourceLocation, Tag.Builder> map, CallbackInfoReturnable<Map<ResourceLocation, Tag<T>>> cir) {
+//        TagNodes.RAW_TAG_DATA_MAP.put(directory, new HashMap<>());
+//        TagNodes.CURRENT_TAG_DIR.set(directory);
+//    }
+//    
+//    @Inject(method = "build", at = @At("RETURN"))
+//    private void loadPost(Map<ResourceLocation, Tag.Builder> map, CallbackInfoReturnable<Map<ResourceLocation, Tag<T>>> cir) {
+//        Map<Tag<T>, ResourceLocation> inverseMap = new HashMap<>(cir.getReturnValue().size());
+//        for (Map.Entry<ResourceLocation, Tag<T>> entry : cir.getReturnValue().entrySet()) {
+//            inverseMap.put(entry.getValue(), entry.getKey());
+//        }
+//        ResourceKey<? extends Registry<?>> resourceKey = TagNodes.TAG_DIR_MAP.get(directory);
+//        if (resourceKey == null) return;
+//        TagNodes.TAG_DATA_MAP.put(resourceKey, new HashMap<>());
+//        Map<ResourceLocation, TagNodes.TagData> tagDataMap = TagNodes.TAG_DATA_MAP.get(resourceKey);
+//        if (tagDataMap == null) return;
+//        Registry<T> registry = ((Registry<Registry<T>>) Registry.REGISTRY).get((ResourceKey<Registry<T>>) resourceKey);
+//        Stopwatch stopwatch = Stopwatch.createStarted();
+//        
+//        Iterator<Map.Entry<Tag<?>, TagNodes.RawTagData>> entryIterator = TagNodes.RAW_TAG_DATA_MAP.getOrDefault(directory, Collections.emptyMap())
+//                .entrySet().iterator();
+//        
+//        if (!entryIterator.hasNext()) return;
+//        
+//        while (entryIterator.hasNext()) {
+//            Map.Entry<Tag<?>, TagNodes.RawTagData> entry = entryIterator.next();
+//            Tag<?> tag = entry.getKey();
+//            entryIterator.remove();
+//            
+//            if (registry != null) {
+//                ResourceLocation tagLoc = inverseMap.get(tag);
+//                
+//                if (tagLoc != null) {
+//                    TagNodes.RawTagData rawTagData = entry.getValue();
+//                    IntList elements = new IntArrayList();
+//                    for (ResourceLocation element : rawTagData.otherElements()) {
+//                        T t = registry.get(element);
+//                        if (t != null) {
+//                            elements.add(registry.getId(t));
+//                        }
+//                    }
+//                    tagDataMap.put(tagLoc, new TagNodes.TagData(elements, rawTagData.otherTags()));
+//                }
+//            }
+//        }
+//        
+//        InternalLogger.getInstance().debug("Processed %d tags in %s for %s", tagDataMap.size(), stopwatch.stop(), resourceKey.location());
+//    }
 }

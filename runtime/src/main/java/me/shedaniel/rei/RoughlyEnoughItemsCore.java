@@ -24,7 +24,7 @@
 package me.shedaniel.rei;
 
 import com.google.common.collect.ImmutableList;
-import dev.architectury.platform.Mod;
+import me.shedaniel.architectury.platform.Mod;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.architectury.registry.ReloadListeners;
 import me.shedaniel.architectury.utils.Env;
@@ -70,6 +70,7 @@ import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class RoughlyEnoughItemsCore {
@@ -99,7 +100,7 @@ public class RoughlyEnoughItemsCore {
                 logger.info("Java: " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")");
                 logger.info("========================================");
                 logger.info("Mods:");
-                for (Mod mod : Platform.getMods().stream().sorted(Comparator.comparing(Mod::getModId)).toList()) {
+                for (Mod mod : Platform.getMods().stream().sorted(Comparator.comparing(Mod::getModId)).collect(Collectors.toList())) {
                     logger.info("- " + mod.getModId() + ": " + mod.getVersion());
                 }
                 logger.info("========================================");
@@ -185,6 +186,6 @@ public class RoughlyEnoughItemsCore {
     }
     
     public static PluginDetector getPluginDetector() {
-        return PLUGIN_DETECTOR_LOADER.findFirst().orElseThrow();
+        return PLUGIN_DETECTOR_LOADER.iterator().next();
     }
 }

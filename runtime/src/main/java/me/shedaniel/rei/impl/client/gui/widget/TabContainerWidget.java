@@ -23,10 +23,8 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import dev.architectury.utils.value.IntValue;
+import me.shedaniel.architectury.utils.IntValue;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
@@ -34,16 +32,15 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class TabContainerWidget extends GuiComponent {
@@ -125,15 +122,15 @@ public class TabContainerWidget extends GuiComponent {
                 if (isCompactTabButtons) {
                     matrices.pushPose();
                     matrices.translate(0, 0.5, 0);
-                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_SMALL_TEXTURE);
+                    Minecraft.getInstance().getTextureManager().bind(InternalTextures.ARROW_LEFT_SMALL_TEXTURE);
                     blit(matrices, tabLeftBounds.x + 2, tabLeftBounds.y + 2, 0, 0, 6, 6, 6, 6);
-                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_SMALL_TEXTURE);
+                    Minecraft.getInstance().getTextureManager().bind(InternalTextures.ARROW_RIGHT_SMALL_TEXTURE);
                     blit(matrices, tabRightBounds.x + 2, tabRightBounds.y + 2, 0, 0, 6, 6, 6, 6);
                     matrices.popPose();
                 } else {
-                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_TEXTURE);
+                    Minecraft.getInstance().getTextureManager().bind(InternalTextures.ARROW_LEFT_TEXTURE);
                     blit(matrices, tabLeftBounds.x + 4, tabLeftBounds.y + 4, 0, 0, 8, 8, 8, 8);
-                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_TEXTURE);
+                    Minecraft.getInstance().getTextureManager().bind(InternalTextures.ARROW_RIGHT_TEXTURE);
                     blit(matrices, tabRightBounds.x + 4, tabRightBounds.y + 4, 0, 0, 8, 8, 8, 8);
                 }
             }), 0, 0, 1));
@@ -186,7 +183,7 @@ public class TabContainerWidget extends GuiComponent {
             
             @Override
             public List<? extends GuiEventListener> children() {
-                return List.of();
+                return Collections.emptyList();
             }
             
             @Override

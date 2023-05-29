@@ -112,35 +112,47 @@ public class CollapsedEntriesBorderRenderer extends GuiComponent {
             int x2 = x1 + entrySize;
             int y2 = y1 + entrySize;
             int direction = (int) (l & RIGHT);
-            switch (direction) {
-                case 0 -> { // top
-                    int fStart = edgeSet.contains(shiftLongX(l, -entrySize)) || edgeSet.contains(withDirD(l, LEFT, false)) ? 0 : 1;
-                    int fEnd = edgeSet.contains(shiftLongX(l, entrySize)) || edgeSet.contains(withDirD(l, RIGHT, false)) ? 0 : 1;
-                    if (fStart == 1 && edgeSet.contains(getPackedLong(x - entrySize, y - entrySize, collapsedStackIndices, RIGHT, false))) fStart = -1;
-                    if (fEnd == 1 && edgeSet.contains(getPackedLong(x + entrySize, y - entrySize, collapsedStackIndices, LEFT, false))) fEnd = -1;
+            int fStart, fEnd;
+            switch (direction) {// top
+                case 0:
+                    fStart = edgeSet.contains(shiftLongX(l, -entrySize)) || edgeSet.contains(withDirD(l, LEFT, false)) ? 0 : 1;
+                    fEnd = edgeSet.contains(shiftLongX(l, entrySize)) || edgeSet.contains(withDirD(l, RIGHT, false)) ? 0 : 1;
+                    if (fStart == 1 && edgeSet.contains(getPackedLong(x - entrySize, y - entrySize, collapsedStackIndices, RIGHT, false)))
+                        fStart = -1;
+                    if (fEnd == 1 && edgeSet.contains(getPackedLong(x + entrySize, y - entrySize, collapsedStackIndices, LEFT, false)))
+                        fEnd = -1;
                     fillGradient(matrices, x1 + fStart, y1, x2 - fEnd, y1 + 1, 0x67FFFFFF, 0x67FFFFFF);
-                }
-                case 1 -> { // bottom
-                    int fStart = edgeSet.contains(shiftLongX(l, -entrySize)) || edgeSet.contains(withDirD(l, LEFT, false)) ? 0 : 1;
-                    int fEnd = edgeSet.contains(shiftLongX(l, entrySize)) || edgeSet.contains(withDirD(l, RIGHT, false)) ? 0 : 1;
-                    if (fStart == 1 && edgeSet.contains(getPackedLong(x - entrySize, y + entrySize, collapsedStackIndices, RIGHT, false))) fStart = -1;
-                    if (fEnd == 1 && edgeSet.contains(getPackedLong(x + entrySize, y + entrySize, collapsedStackIndices, LEFT, false))) fEnd = -1;
+                    break;
+// bottom
+                case 1:
+                    fStart = edgeSet.contains(shiftLongX(l, -entrySize)) || edgeSet.contains(withDirD(l, LEFT, false)) ? 0 : 1;
+                    fEnd = edgeSet.contains(shiftLongX(l, entrySize)) || edgeSet.contains(withDirD(l, RIGHT, false)) ? 0 : 1;
+                    if (fStart == 1 && edgeSet.contains(getPackedLong(x - entrySize, y + entrySize, collapsedStackIndices, RIGHT, false)))
+                        fStart = -1;
+                    if (fEnd == 1 && edgeSet.contains(getPackedLong(x + entrySize, y + entrySize, collapsedStackIndices, LEFT, false)))
+                        fEnd = -1;
                     fillGradient(matrices, x1 + fStart, y2 - 1, x2 - fEnd, y2, 0x67FFFFFF, 0x67FFFFFF);
-                }
-                case 2 -> { // left
-                    int fStart = edgeSet.contains(shiftLongY(l, -entrySize)) ? 0 : 1;
-                    int fEnd = edgeSet.contains(shiftLongY(l, entrySize)) ? 0 : 1;
-                    if (fStart == 1 && edgeSet.contains(getPackedLong(x - entrySize, y - entrySize, collapsedStackIndices, BOTTOM, false))) fStart = 0;
-                    if (fEnd == 1 && edgeSet.contains(getPackedLong(x - entrySize, y + entrySize, collapsedStackIndices, TOP, false))) fEnd = 0;
+                    break;
+// left
+                case 2:
+                    fStart = edgeSet.contains(shiftLongY(l, -entrySize)) ? 0 : 1;
+                    fEnd = edgeSet.contains(shiftLongY(l, entrySize)) ? 0 : 1;
+                    if (fStart == 1 && edgeSet.contains(getPackedLong(x - entrySize, y - entrySize, collapsedStackIndices, BOTTOM, false)))
+                        fStart = 0;
+                    if (fEnd == 1 && edgeSet.contains(getPackedLong(x - entrySize, y + entrySize, collapsedStackIndices, TOP, false)))
+                        fEnd = 0;
                     fillGradient(matrices, x1, y1 + fStart, x1 + 1, y2 - fEnd, 0x67FFFFFF, 0x67FFFFFF);
-                }
-                case 3 -> { // right
-                    int fStart = edgeSet.contains(shiftLongY(l, -entrySize)) ? 0 : 1;
-                    int fEnd = edgeSet.contains(shiftLongY(l, entrySize)) ? 0 : 1;
-                    if (fStart == 1 && edgeSet.contains(getPackedLong(x + entrySize, y - entrySize, collapsedStackIndices, BOTTOM, false))) fStart = 0;
-                    if (fEnd == 1 && edgeSet.contains(getPackedLong(x + entrySize, y + entrySize, collapsedStackIndices, TOP, false))) fEnd = 0;
+                    break;
+// right
+                case 3:
+                    fStart = edgeSet.contains(shiftLongY(l, -entrySize)) ? 0 : 1;
+                    fEnd = edgeSet.contains(shiftLongY(l, entrySize)) ? 0 : 1;
+                    if (fStart == 1 && edgeSet.contains(getPackedLong(x + entrySize, y - entrySize, collapsedStackIndices, BOTTOM, false)))
+                        fStart = 0;
+                    if (fEnd == 1 && edgeSet.contains(getPackedLong(x + entrySize, y + entrySize, collapsedStackIndices, TOP, false)))
+                        fEnd = 0;
                     fillGradient(matrices, x2 - 1, y1 + fStart, x2, y2 - fEnd, 0x67FFFFFF, 0x67FFFFFF);
-                }
+                    break;
             }
         }
     

@@ -55,7 +55,7 @@ public class DelegateWidget extends WidgetWithBounds {
     
     @Override
     public Rectangle getBounds() {
-        return delegate() instanceof WidgetWithBounds withBounds ? withBounds.getBounds() : EMPTY;
+        return delegate() instanceof WidgetWithBounds ? ((WidgetWithBounds) delegate()).getBounds() : EMPTY;
     }
     
     @Override

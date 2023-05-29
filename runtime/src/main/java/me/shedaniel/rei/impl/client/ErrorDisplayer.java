@@ -55,7 +55,7 @@ public class ErrorDisplayer {
     }
     
     public static void registerGuiInit(UnaryOperator<Screen> consumer) {
-        ErrorGuiInitializer initializer = ServiceLoader.load(ErrorGuiInitializer.class).findFirst().orElseThrow();
+        ErrorGuiInitializer initializer = ServiceLoader.load(ErrorGuiInitializer.class).iterator().next();
         initializer.registerGuiInit(consumer);
     }
     

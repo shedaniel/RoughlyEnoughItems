@@ -100,8 +100,8 @@ public class FilteringContextImpl implements FilteringContext {
     
     private Collection<EntryStack<?>> getStacksFacing(FilteringContextType type) {
         Set<HashedEntryStackWrapper> wrappers = this.stacks.get(type);
-        if (wrappers == null || wrappers.isEmpty()) return List.of();
-        return new AbstractSet<>() {
+        if (wrappers == null || wrappers.isEmpty()) return Collections.emptyList();
+        return new AbstractSet<EntryStack<?>>() {
             @Override
             public Iterator<EntryStack<?>> iterator() {
                 return Iterators.transform(wrappers.iterator(), HashedEntryStackWrapper::unwrap);
@@ -116,7 +116,7 @@ public class FilteringContextImpl implements FilteringContext {
     
     private LongCollection getHashesFacing(FilteringContextType type) {
         Set<HashedEntryStackWrapper> wrappers = this.stacks.get(type);
-        if (wrappers == null || wrappers.isEmpty()) return LongSets.emptySet();
+        if (wrappers == null || wrappers.isEmpty()) return LongSets.EMPTY_SET;
         return new AbstractLongSet() {
             @Override
             public LongIterator iterator() {

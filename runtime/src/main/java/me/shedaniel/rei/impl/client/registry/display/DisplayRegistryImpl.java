@@ -306,7 +306,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
         }
         
         for (CategoryIdentifier<?> identifier : displays.keySet()) {
-            if (CategoryRegistry.getInstance().tryGet(identifier).isEmpty()) {
+            if (!CategoryRegistry.getInstance().tryGet(identifier).isPresent()) {
                 InternalLogger.getInstance().error("Found displays registered for unknown registry", new IllegalStateException(identifier.toString()));
             }
         }

@@ -26,12 +26,12 @@ package me.shedaniel.rei.plugin.client;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import dev.architectury.event.EventResult;
-import dev.architectury.networking.NetworkManager;
-import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
+import me.shedaniel.architectury.event.EventResult;
+import me.shedaniel.architectury.mixin.FluidTagsAccessor;
+import me.shedaniel.architectury.networking.NetworkManager;
 import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
@@ -86,8 +86,6 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagCollection;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionBrewing;
@@ -213,7 +211,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     }
     
     private static EntryIngredient getTag(ResourceLocation tagId) {
-        return EntryIngredients.ofItemTag(TagKey.create(Registry.ITEM_REGISTRY, tagId));
+        return EntryIngredients.ofItemTag(tagId);
     }
     
     @Override
@@ -229,17 +227,6 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.registerRecipeFiller(UpgradeRecipe.class, RecipeType.SMITHING, DefaultSmithingDisplay::new);
         registry.registerFiller(AnvilRecipe.class, DefaultAnvilDisplay::new);
         registry.registerFiller(BrewingRecipe.class, DefaultBrewingDisplay::new);
-        registry.registerFiller(TagKey.class, tagKey -> {
-            if (tagKey.isFor(Registry.ITEM_REGISTRY)) {
-                return DefaultTagDisplay.ofItems(tagKey);
-            } else if (tagKey.isFor(Registry.BLOCK_REGISTRY)) {
-                return DefaultTagDisplay.ofItems(tagKey);
-            } else if (tagKey.isFor(Registry.FLUID_REGISTRY)) {
-                return DefaultTagDisplay.ofFluids(tagKey);
-            }
-            
-            return null;
-        });
         for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.getFuel().entrySet()) {
             registry.add(new DefaultFuelDisplay(Collections.singletonList(EntryIngredients.of(entry.getKey())), Collections.emptyList(), entry.getValue()));
         }
@@ -277,7 +264,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         DummyShovelItem.getPathBlocksMap().entrySet().stream().sorted(Comparator.comparing(b -> Registry.BLOCK.getKey(b.getKey()))).forEach(set -> {
             registry.add(new DefaultPathingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue().getBlock())));
         });
-        registry.add(new DefaultBeaconBaseDisplay(Collections.singletonList(EntryIngredients.ofItemTag(BlockTags.BEACON_BASE_BLOCKS)), Collections.emptyList()));
+        registry.add(new DefaultBeaconBaseDisplay(Collections.singletonList(EntryIngredients.ofBlockTag(BlockTags.BEACON_BASE_BLOCKS)), Collections.emptyList()));
         registry.add(new DefaultBeaconPaymentDisplay(Collections.singletonList(EntryIngredients.ofItemTag(ItemTags.BEACON_PAYMENT_ITEMS)), Collections.emptyList()));
         if (Platform.isFabric()) {
             Set<Potion> potions = Sets.newLinkedHashSet();
@@ -312,8 +299,14 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             registerForgePotions(registry, this);
         }
         
-        for (Registry<?> reg : Registry.REGISTRY) {
-            reg.getTags().forEach(tagPair -> registry.add(tagPair.getFirst()));
+        for (ResourceLocation tag : ItemTags.getAllTags().getAvailableTags()) {
+            registry.add(DefaultTagDisplay.ofItems(tag));
+        }
+        for (ResourceLocation tag : BlockTags.getAllTags().getAvailableTags()) {
+            registry.add(DefaultTagDisplay.ofBlocks(tag));
+        }
+        for (ResourceLocation tag : FluidTagsAccessor.getHelper().getAllTags().getAvailableTags()) {
+            registry.add(DefaultTagDisplay.ofFluids(tag));
         }
     }
     

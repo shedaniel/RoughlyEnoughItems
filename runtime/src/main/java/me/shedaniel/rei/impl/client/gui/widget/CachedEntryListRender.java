@@ -26,12 +26,14 @@ package me.shedaniel.rei.impl.client.gui.widget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import me.shedaniel.architectury.registry.ReloadListeners;
+import me.shedaniel.clothconfig2.api.LazyResettable;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
@@ -41,7 +43,6 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -49,6 +50,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
@@ -57,10 +59,9 @@ public class CachedEntryListRender {
     public static DynamicTexture cachedTexture;
     public static ResourceLocation cachedTextureLocation;
     public static Long2LongMap hash = new Long2LongOpenHashMap();
-    public static LazyResettable<RenderType> renderType = new LazyResettable<>(() -> RenderType.create("rei_cache", DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS, 256,
+    public static LazyResettable<RenderType> renderType = new LazyResettable<>(() -> RenderType.create("rei_cache", DefaultVertexFormat.POSITION_TEX, GL11.GL_QUADS, 256,
             RenderType.CompositeState.builder()
                     .setTextureState(new RenderStateShard.TextureStateShard(cachedTextureLocation, false, false))
-                    .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionTexShader))
                     .createCompositeState(false)));
     
     public static class Sprite {

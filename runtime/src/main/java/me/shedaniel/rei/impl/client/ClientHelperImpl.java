@@ -238,12 +238,12 @@ public class ClientHelperImpl implements ClientHelper {
             return false;
         EntryStack<ItemStack> entry = (EntryStack<ItemStack>) e;
         if (Minecraft.getInstance().player == null) return false;
-        if (Minecraft.getInstance().player.getInventory() == null) return false;
+        if (Minecraft.getInstance().player.inventory == null) return false;
         if (Minecraft.getInstance().gameMode != null && Minecraft.getInstance().screen instanceof CreativeModeInventoryScreen) {
             AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
             EntryStack<ItemStack> stack = entry.copy();
-            if (menu.getCarried().isEmpty()) {
-                Minecraft.getInstance().player.getInventory().setItem(hotbarSlotId, stack.getValue().copy());
+            if (Minecraft.getInstance().player.inventory.getCarried().isEmpty()) {
+                Minecraft.getInstance().player.inventory.setItem(hotbarSlotId, stack.getValue().copy());
                 Minecraft.getInstance().player.inventoryMenu.broadcastChanges();
                 return true;
             }
@@ -251,7 +251,7 @@ public class ClientHelperImpl implements ClientHelper {
         if (ClientHelperImpl.getInstance().canUseHotbarPackets()) {
             AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
             EntryStack<ItemStack> stack = entry.copy();
-            if (!menu.getCarried().isEmpty()) {
+            if (!Minecraft.getInstance().player.inventory.getCarried().isEmpty()) {
                 return false;
             }
             try {

@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.search.argument;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -108,7 +109,7 @@ public class ArgumentCache {
             for (Collection<HashedEntryStackWrapper> partitionStacks : CollectionUtils.partition(prepareStacks, searchPartitionSize)) {
                 futures.add(CompletableFuture.supplyAsync(() -> {
                             return cacheStacks(argumentType, cacheMap, partitionStacks);
-                        }, Objects.requireNonNullElse(executor, EXECUTOR_SERVICE))
+                        }, MoreObjects.firstNonNull(executor, EXECUTOR_SERVICE))
                         .whenComplete((map, throwable) -> {
                             if (map != null) {
                                 currentStage.stacks += map.size();

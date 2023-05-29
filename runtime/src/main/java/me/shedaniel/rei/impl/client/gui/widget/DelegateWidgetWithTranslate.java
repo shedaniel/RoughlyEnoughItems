@@ -128,6 +128,6 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     @Override
     public double getZRenderingPriority() {
         Transformation transformation = new Transformation(translate());
-        return transformation.getTranslation().z() + super.getZRenderingPriority();
+        return /*transformation.getTranslation().z() + */super.getZRenderingPriority();
     }
 }

@@ -65,11 +65,19 @@ public class ConfigReloadingScreen extends Screen {
             return;
         }
         drawCenteredString(matrices, this.font, title, this.width / 2, this.height / 2 - 50, 0xffffff);
-        String text = switch ((int) (Util.getMillis() / 300L % 4L)) {
-            case 1, 3 -> "o O o";
-            case 2 -> "o o O";
-            default -> "O o o";
-        };
+        String text;
+        switch ((int) (Util.getMillis() / 300L % 4L)) {
+            case 1:
+            case 3:
+                text = "o O o";
+                break;
+            case 2:
+                text = "o o O";
+                break;
+            default:
+                text = "O o o";
+                break;
+        }
         drawCenteredString(matrices, this.font, text, this.width / 2, this.height / 2 - 50 + 9, 0x808080);
         Component subtitle = this.subtitle.get();
         if (subtitle != null) {

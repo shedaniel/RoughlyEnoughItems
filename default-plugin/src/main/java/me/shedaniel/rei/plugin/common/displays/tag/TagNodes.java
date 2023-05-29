@@ -24,26 +24,24 @@
 package me.shedaniel.rei.plugin.common.displays.tag;
 
 import com.mojang.serialization.DataResult;
-import dev.architectury.event.events.client.ClientLifecycleEvent;
-import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.transformers.SplitPacketTransformer;
-import dev.architectury.utils.Env;
-import dev.architectury.utils.EnvExecutor;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import me.shedaniel.architectury.event.events.client.ClientLifecycleEvent;
+import me.shedaniel.architectury.networking.NetworkManager;
+import me.shedaniel.architectury.networking.transformers.SplitPacketTransformer;
+import me.shedaniel.architectury.utils.Env;
+import me.shedaniel.architectury.utils.EnvExecutor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.Tag;
-import net.minecraft.tags.TagKey;
+import net.minecraft.tags.TagCollection;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -59,13 +57,58 @@ public class TagNodes {
     public static final Map<String, ResourceKey<? extends Registry<?>>> TAG_DIR_MAP = new HashMap<>();
     public static final ThreadLocal<String> CURRENT_TAG_DIR = new ThreadLocal<>();
     public static final Map<String, Map<Tag<?>, RawTagData>> RAW_TAG_DATA_MAP = new ConcurrentHashMap<>();
-    public static final Map<ResourceKey<? extends Registry<?>>, Map<ResourceLocation, TagData>> TAG_DATA_MAP = new HashMap<>();
-    public static Map<ResourceKey<? extends Registry<?>>, Consumer<Consumer<DataResult<Map<ResourceLocation, TagData>>>>> requestedTags = new HashMap<>();
+    public static final Map<String, Map<ResourceLocation, TagData>> TAG_DATA_MAP = new HashMap<>();
+    public static Map<String, Consumer<Consumer<DataResult<Map<ResourceLocation, TagData>>>>> requestedTags = new HashMap<>();
     
-    public record RawTagData(List<ResourceLocation> otherElements, List<ResourceLocation> otherTags) {
+    public static final class RawTagData {
+        private final List<ResourceLocation> otherElements;
+        private final List<ResourceLocation> otherTags;
+        
+        public RawTagData(List<ResourceLocation> otherElements, List<ResourceLocation> otherTags) {
+            this.otherElements = otherElements;
+            this.otherTags = otherTags;
+        }
+        
+        public List<ResourceLocation> otherElements() {
+            return otherElements;
+        }
+        
+        public List<ResourceLocation> otherTags() {
+            return otherTags;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            RawTagData that = (RawTagData) obj;
+            return Objects.equals(this.otherElements, that.otherElements) &&
+                    Objects.equals(this.otherTags, that.otherTags);
+        }
+        
+        @Override
+        public int hashCode() {
+            return Objects.hash(otherElements, otherTags);
+        }
+        
+        @Override
+        public String toString() {
+            return "RawTagData[" +
+                    "otherElements=" + otherElements + ", " +
+                    "otherTags=" + otherTags + ']';
+        }
+        
     }
     
-    public record TagData(IntList otherElements, List<ResourceLocation> otherTags) {
+    public static final class TagData {
+        private final IntList otherElements;
+        private final List<ResourceLocation> otherTags;
+        
+        public TagData(IntList otherElements, List<ResourceLocation> otherTags) {
+            this.otherElements = otherElements;
+            this.otherTags = otherTags;
+        }
+        
         private static TagData fromNetwork(FriendlyByteBuf buf) {
             int count = buf.readVarInt();
             IntList otherElements = new IntArrayList(count + 1);
@@ -90,6 +133,36 @@ public class TagNodes {
                 writeResourceLocation(buf, tag);
             }
         }
+        
+        public IntList otherElements() {
+            return otherElements;
+        }
+        
+        public List<ResourceLocation> otherTags() {
+            return otherTags;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            TagData that = (TagData) obj;
+            return Objects.equals(this.otherElements, that.otherElements) &&
+                    Objects.equals(this.otherTags, that.otherTags);
+        }
+        
+        @Override
+        public int hashCode() {
+            return Objects.hash(otherElements, otherTags);
+        }
+        
+        @Override
+        public String toString() {
+            return "TagData[" +
+                    "otherElements=" + otherElements + ", " +
+                    "otherTags=" + otherTags + ']';
+        }
+        
     }
     
     private static void writeResourceLocation(FriendlyByteBuf buf, ResourceLocation location) {
@@ -105,7 +178,7 @@ public class TagNodes {
         
         NetworkManager.registerReceiver(NetworkManager.c2s(), REQUEST_TAGS_PACKET_C2S, Collections.singletonList(new SplitPacketTransformer()), (buf, context) -> {
             UUID uuid = buf.readUUID();
-            ResourceKey<? extends Registry<?>> resourceKey = ResourceKey.createRegistryKey(buf.readResourceLocation());
+            String resourceKey = buf.readUtf();
             FriendlyByteBuf newBuf = new FriendlyByteBuf(Unpooled.buffer());
             newBuf.writeUUID(uuid);
             Map<ResourceLocation, TagData> dataMap = TAG_DATA_MAP.getOrDefault(resourceKey, Collections.emptyMap());
@@ -119,7 +192,7 @@ public class TagNodes {
     }
     
     @Environment(EnvType.CLIENT)
-    public static void requestTagData(ResourceKey<? extends Registry<?>> resourceKey, Consumer<DataResult<Map<ResourceLocation, TagData>>> callback) {
+    public static void requestTagData(String resourceKey, Consumer<DataResult<Map<ResourceLocation, TagData>>> callback) {
         if (Minecraft.getInstance().getSingleplayerServer() != null) {
             callback.accept(DataResult.success(TAG_DATA_MAP.get(resourceKey)));
         } else if (!NetworkManager.canServerReceive(REQUEST_TAGS_PACKET_C2S)) {
@@ -131,7 +204,7 @@ public class TagNodes {
             FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
             UUID uuid = UUID.randomUUID();
             buf.writeUUID(uuid);
-            buf.writeResourceLocation(resourceKey.location());
+            buf.writeUtf(resourceKey);
             Client.nextUUID = uuid;
             Client.nextResourceKey = resourceKey;
             List<Consumer<DataResult<Map<ResourceLocation, TagData>>>> callbacks = new CopyOnWriteArrayList<>();
@@ -149,11 +222,11 @@ public class TagNodes {
     
     private static class Client {
         public static UUID nextUUID;
-        public static ResourceKey<? extends Registry<?>> nextResourceKey;
+        public static String nextResourceKey;
         public static Consumer<DataResult<Map<ResourceLocation, TagData>>> nextCallback;
         
         private static void init() {
-            ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(world -> {
+            ClientLifecycleEvent.CLIENT_WORLD_LOAD.register(world -> {
                 requestedTags.clear();
             });
             NetworkManager.registerReceiver(NetworkManager.s2c(), REQUEST_TAGS_PACKET_S2C, (buf, context) -> {
@@ -176,35 +249,34 @@ public class TagNodes {
         }
     }
     
-    public static <T> void create(TagKey<T> tagKey, Consumer<DataResult<TagNode<T>>> callback) {
-        Registry<T> registry = ((Registry<Registry<T>>) Registry.REGISTRY).get((ResourceKey<Registry<T>>) tagKey.registry());
-        requestTagData(tagKey.registry(), result -> {
-            callback.accept(result.flatMap(dataMap -> dataMap != null ? resolveTag(tagKey, registry, dataMap).orElse(DataResult.error("No tag data")) : DataResult.error("No tag data")));
+    public static <T> void create(String tagCollectionId, TagCollection<? extends T> tagCollection, Registry<? extends T> registry, ResourceLocation tagKey, Consumer<DataResult<TagNode<T>>> callback) {
+        requestTagData(tagCollectionId, result -> {
+            callback.accept(result.flatMap(dataMap -> dataMap != null ? resolveTag(tagKey, tagCollection, registry, dataMap).orElse(DataResult.error("No tag data")) : DataResult.error("No tag data")));
         });
     }
     
-    private static <T> Optional<DataResult<TagNode<T>>> resolveTag(TagKey<T> tagKey, Registry<T> registry, Map<ResourceLocation, TagData> tagDataMap) {
-        TagData tagData = tagDataMap.get(tagKey.location());
+    private static <T> Optional<DataResult<TagNode<T>>> resolveTag(ResourceLocation tagKey, TagCollection<? extends T> tagCollection, Registry<? extends T> registry, Map<ResourceLocation, TagData> tagDataMap) {
+        TagData tagData = tagDataMap.get(tagKey);
         if (tagData == null) return Optional.empty();
         
         TagNode<T> self = TagNode.ofReference(tagKey);
-        List<Holder<T>> holders = new ArrayList<>();
+        List<T> holders = new ArrayList<>();
         for (int element : tagData.otherElements()) {
-            Optional<Holder<T>> holder = registry.getHolder(element);
-            if (holder.isPresent()) {
-                holders.add(holder.get());
+            T holder = registry.byId(element);
+            if (holder != null) {
+                holders.add(holder);
             }
         }
         if (!holders.isEmpty()) {
-            self.addValuesChild(HolderSet.direct(holders));
+            self.addValuesChild(holders);
         }
         for (ResourceLocation childTagId : tagData.otherTags()) {
-            TagKey<T> childTagKey = TagKey.create(tagKey.registry(), childTagId);
-            if (registry.getTag(childTagKey).isPresent()) {
-                Optional<DataResult<TagNode<T>>> resultOptional = resolveTag(childTagKey, registry, tagDataMap);
+            if (tagCollection.getAvailableTags().contains(childTagId)) {
+                Optional<DataResult<TagNode<T>>> resultOptional = resolveTag(childTagId, tagCollection, registry, tagDataMap);
                 if (resultOptional.isPresent()) {
                     DataResult<TagNode<T>> result = resultOptional.get();
-                    if (result.error().isPresent()) return Optional.of(DataResult.error(result.error().get().message()));
+                    if (result.error().isPresent())
+                        return Optional.of(DataResult.error(result.error().get().message()));
                     self.addChild(result.result().get());
                 }
             }

@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Rectangle;
@@ -89,7 +90,7 @@ public class ConfigButtonWidget {
                 .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y));
         Widget overlayWidget = Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
             helper.setBlitOffset(helper.getBlitOffset() + 1);
-            RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
+            Minecraft.getInstance().getTextureManager().bind(InternalTextures.CHEST_GUI_TEXTURE);
             helper.blit(matrices, bounds.x + 3, bounds.y + 3, 0, 0, 14, 14);
             helper.setBlitOffset(helper.getBlitOffset() - 1);
         });
@@ -98,7 +99,7 @@ public class ConfigButtonWidget {
     
     private static Collection<FavoriteMenuEntry> menuEntries() {
         ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
-        return List.of(
+        return ImmutableList.of(
                 ToggleMenuEntry.of(new TranslatableComponent("text.rei.cheating"),
                         config::isCheating,
                         config::setCheating
@@ -128,22 +129,11 @@ public class ConfigButtonWidget {
                         config::isCraftableFilterEnabled,
                         config::setCraftableFilterEnabled
                 ),
-                new SubMenuEntry(new TranslatableComponent("text.rei.config.menu.display"), List.of(
+                new SubMenuEntry(new TranslatableComponent("text.rei.config.menu.display"), ImmutableList.of(
                         ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.remove_recipe_book"),
                                 config::doesDisableRecipeBook,
                                 disableRecipeBook -> {
                                     config.setDisableRecipeBook(disableRecipeBook);
-                                    Screen screen = Minecraft.getInstance().screen;
-                                    
-                                    if (screen != null) {
-                                        screen.init(Minecraft.getInstance(), screen.width, screen.height);
-                                    }
-                                }
-                        ),
-                        ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.display.left_side_mob_effects"),
-                                config::isLeftSideMobEffects,
-                                disableRecipeBook -> {
-                                    config.setLeftSideMobEffects(disableRecipeBook);
                                     Screen screen = Minecraft.getInstance().screen;
                                     
                                     if (screen != null) {

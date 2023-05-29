@@ -95,7 +95,4 @@ public final class TagArgumentType extends ArgumentType<Unit, String[]> {
     public Unit prepareSearchFilter(String searchText) {
         return Unit.INSTANCE;
     }
-    
-    private TagArgumentType() {
-    }
 }

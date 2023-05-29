@@ -35,7 +35,7 @@ dependencies {
     }
     //modRuntime("com.terraformersmc:modmenu:${modmenu_version}") { transitive false }
     modApi("me.shedaniel:architectury-fabric:${architectury_version}")
-    modApi("me.shedaniel:error-notifier-fabric:1.0.9")
+    modCompileOnly("me.shedaniel:error-notifier-fabric:1.0.9")
     include("me.shedaniel:error-notifier-fabric:1.0.9")
 
     depProjects.forEach {
@@ -135,7 +135,7 @@ unifiedPublishing {
             }
         }
 
-        if (false && (project.hasProperty("modrinth_key") || System.getenv("modrinth_key") != null) {
+        if (false && (project.hasProperty("modrinth_key") || System.getenv("modrinth_key") != null)) {
             modrinth {
                 token = project.hasProperty("modrinth_key") ? project.property("modrinth_key") : System.getenv("modrinth_key")
                 id = "nfn13YXA"

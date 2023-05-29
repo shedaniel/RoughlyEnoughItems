@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -40,9 +41,9 @@ import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -179,9 +180,9 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
             List<EntryStack<?>> ingredient = collapsedStack.getIngredient();
             if (ingredient.size() == 0) this.collapsedBounds = null;
             else if (ingredient.size() == 1) {
-                this.collapsedBounds = List.of(new FloatingRectangle(0, 0, 1, 1));
+                this.collapsedBounds = ImmutableList.of(new FloatingRectangle(0, 0, 1, 1));
             } else {
-                this.collapsedBounds = List.of(new FloatingRectangle(0.44, 0.56, 0.9, 0.8),
+                this.collapsedBounds = ImmutableList.of(new FloatingRectangle(0.44, 0.56, 0.9, 0.8),
                         new FloatingRectangle(0.56, 0.44, 0.9, 0.8));
             }
         }
@@ -193,7 +194,7 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
         if (this.collapsedStack != null) {
             if (!this.collapsedStack.isExpanded()) {
                 Tooltip tooltip = Tooltip.create(point, new TranslatableComponent("text.rei.collapsed.entry", collapsedStack.getName()));
-                tooltip.add((TooltipComponent) new CollapsedEntriesTooltip(collapsedStack));
+                tooltip.add(new TextComponent("+" + this.collapsedStack.getIngredient().size() + " entries").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
                 tooltip.add(new TranslatableComponent(Minecraft.ON_OSX ? "text.rei.collapsed.entry.hint.expand.macos" : "text.rei.collapsed.entry.hint.expand", collapsedStack.getName(), collapsedStack.getIngredient().size())
                         .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
                 ClientHelper.getInstance().appendModIdToTooltips(tooltip, collapsedStack.getModId());
@@ -203,8 +204,8 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
         
         Tooltip tooltip = super.getCurrentTooltip(point);
         if (tooltip != null && this.collapsedStack != null) {
-            tooltip.entries().add(Mth.clamp(tooltip.entries().size() - 1, 0, tooltip.entries().size() - 1), Tooltip.entry(new TranslatableComponent(Minecraft.ON_OSX ? "text.rei.collapsed.entry.hint.collapse.macos" : "text.rei.collapsed.entry.hint.collapse", collapsedStack.getName(), collapsedStack.getIngredient().size())
-                    .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)));
+            tooltip.getText().add(Mth.clamp(tooltip.getText().size() - 1, 0, tooltip.getText().size() - 1), new TranslatableComponent(Minecraft.ON_OSX ? "text.rei.collapsed.entry.hint.collapse.macos" : "text.rei.collapsed.entry.hint.collapse", collapsedStack.getName(), collapsedStack.getIngredient().size())
+                    .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
         }
         return tooltip;
     }

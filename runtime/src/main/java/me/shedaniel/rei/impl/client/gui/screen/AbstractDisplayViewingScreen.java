@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.architectury.fluid.FluidStack;
-import dev.architectury.utils.value.IntValue;
+import me.shedaniel.architectury.utils.IntValue;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
@@ -47,9 +47,9 @@ import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import me.shedaniel.rei.impl.client.gui.widget.TabContainerWidget;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -136,7 +136,7 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
     @Override
     public List<GuiEventListener> children() {
         List<? extends GuiEventListener> children = super.children();
-        children.sort(Comparator.comparingDouble(value -> value instanceof Widget widget ? widget.getZRenderingPriority() : 0).reversed());
+        children.sort(Comparator.comparingDouble(value -> value instanceof Widget ? ((Widget) value).getZRenderingPriority() : 0).reversed());
         return (List<GuiEventListener>) children;
     }
     
@@ -277,12 +277,6 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
             @Override
             public Tooltip apply(Tooltip tooltip) {
                 if (widget.getEntries().size() > 1) {
-                    for (Tooltip.Entry entry : tooltip.entries()) {
-                        if (entry.isTooltipComponent() && entry.getAsTooltipComponent() instanceof TooltipProcessor) {
-                            return tooltip;
-                        }
-                    }
-                    
                     tooltip.add(new TranslatableComponent("text.rei.tag_accept", widget.tagMatch.toString())
                             .withStyle(ChatFormatting.GRAY));
                 }

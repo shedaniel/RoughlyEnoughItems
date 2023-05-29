@@ -310,7 +310,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
         if (containsChecked(mouseX, mouseY, false)) {
             LocalPlayer player = minecraft.player;
             if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && player != null && player.containerMenu != null && !player.inventory.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {
-                EntryStack<?> stack = EntryStacks.of(minecraft.player.containerMenu.getCarried().copy());
+                EntryStack<?> stack = EntryStacks.of(minecraft.player.inventory.getCarried().copy());
                 if (stack.getType() != VanillaEntryTypes.ITEM) {
                     EntryStack<ItemStack> cheatsAs = stack.cheatsAs();
                     stack = cheatsAs.isEmpty() ? stack : cheatsAs;
@@ -318,7 +318,8 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
                 boolean canDelete = true;
                 
                 for (Widget child : children()) {
-                    if (child.containsMouse(mouseX, mouseY) && child instanceof EntryWidget widget) {
+                    if (child.containsMouse(mouseX, mouseY) && child instanceof EntryWidget) {
+                        EntryWidget widget = (EntryWidget) child;
                         if (widget.cancelDeleteItems(stack)) {
                             canDelete = false;
                             break;

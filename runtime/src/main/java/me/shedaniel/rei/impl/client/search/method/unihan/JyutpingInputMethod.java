@@ -23,7 +23,10 @@
 
 package me.shedaniel.rei.impl.client.search.method.unihan;
 
+import com.google.common.collect.ImmutableList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntLists;
 import me.shedaniel.rei.api.client.search.method.CharacterUnpackingInputMethod;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -40,14 +43,14 @@ public class JyutpingInputMethod extends UniHanInputMethod implements CharacterU
     
     @Override
     public Iterable<IntList> expendFilter(String filter) {
-        return Collections.singletonList(IntList.of(filter.codePoints().toArray()));
+        return Collections.singletonList(new IntArrayList(filter.codePoints().toArray()));
     }
     
     @Override
     public List<ExpendedChar> expendSourceChar(int codePoint) {
         List<ExpendedChar> sequences = dataMap.get(codePoint);
         if (sequences != null && !sequences.isEmpty()) return sequences;
-        return List.of(new ExpendedChar(List.of(IntList.of(codePoint))));
+        return ImmutableList.of(new ExpendedChar(ImmutableList.of(IntLists.singleton(codePoint))));
     }
     
     @Override

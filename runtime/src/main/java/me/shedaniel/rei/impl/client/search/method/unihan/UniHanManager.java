@@ -81,7 +81,7 @@ public class UniHanManager {
                 int percent = (int) (progress * 100);
                 if (percent > lastPercent) {
                     lastPercent = percent;
-                    InternalLogger.getInstance().debug("Downloading UniHan Progress: %d%%".formatted(percent));
+                    InternalLogger.getInstance().debug("Downloading UniHan Progress: %d%%",percent);
                 }
                 progressCallback.onProgress(progress);
                 bufferedStream.write(data, 0, x);

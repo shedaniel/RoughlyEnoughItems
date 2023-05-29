@@ -61,22 +61,26 @@ public class MixinTagBuilder<T> {
             List<ResourceLocation> otherTags = new ArrayList<>();
             
             for (Tag.BuilderEntry builderEntry : this.entries) {
-                if (builderEntry.entry() instanceof Tag.OptionalTagEntry tagEntry) {
+                if (builderEntry.getEntry() instanceof Tag.OptionalTagEntry) {
+                    Tag.OptionalTagEntry tagEntry = (Tag.OptionalTagEntry) builderEntry.getEntry();
                     Tag<T> apply = tagResolver.apply(tagEntry.id);
                     if (apply != null) {
                         otherTags.add(tagEntry.id);
                     }
-                } else if (builderEntry.entry() instanceof Tag.TagEntry tagEntry) {
+                } else if (builderEntry.getEntry() instanceof Tag.TagEntry) {
+                    Tag.TagEntry tagEntry = (Tag.TagEntry) builderEntry.getEntry();
                     Tag<T> apply = tagResolver.apply(tagEntry.id);
                     if (apply != null) {
                         otherTags.add(tagEntry.id);
                     }
-                } else if (builderEntry.entry() instanceof Tag.OptionalElementEntry tagEntry) {
+                } else if (builderEntry.getEntry() instanceof Tag.OptionalElementEntry) {
+                    Tag.OptionalElementEntry tagEntry = (Tag.OptionalElementEntry) builderEntry.getEntry();
                     T apply = valueResolver.apply(tagEntry.id);
                     if (apply != null) {
                         otherElements.add(tagEntry.id);
                     }
-                } else if (builderEntry.entry() instanceof Tag.ElementEntry tagEntry) {
+                } else if (builderEntry.getEntry() instanceof Tag.ElementEntry) {
+                    Tag.ElementEntry tagEntry = (Tag.ElementEntry) builderEntry.getEntry();
                     T apply = valueResolver.apply(tagEntry.id);
                     if (apply != null) {
                         otherElements.add(tagEntry.id);

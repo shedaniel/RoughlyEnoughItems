@@ -236,13 +236,13 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         Collections.reverse(plugins);
         InternalLogger.getInstance().debug("========================================");
         InternalLogger.getInstance().debug(name(pluginClass) + " starting pre-reload for " + stage + ".");
-        InternalLogger.getInstance().debug("Reloadables (%d):".formatted(reloadables.size()));
+        InternalLogger.getInstance().debug("Reloadables (%d):", reloadables.size());
         for (Reloadable<P> reloadable : reloadables) {
             InternalLogger.getInstance().debug(" - " + name(reloadable.getClass()));
         }
-        InternalLogger.getInstance().debug("Plugins (%d):".formatted(plugins.size()));
+        InternalLogger.getInstance().debug("Plugins (%d):", plugins.size());
         for (PluginWrapper<P> plugin : plugins) {
-            InternalLogger.getInstance().debug(" - (%.2f) ".formatted(plugin.getPriority()) + plugin.getPluginProviderName());
+            InternalLogger.getInstance().debug(" - (%.2f) %s", plugin.getPriority(), plugin.getPluginProviderName());
         }
         InternalLogger.getInstance().debug("========================================");
         this.forcedMainThread = false;
@@ -276,13 +276,13 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
         Collections.reverse(plugins);
         InternalLogger.getInstance().debug("========================================");
         InternalLogger.getInstance().debug(name(pluginClass) + " starting post-reload for " + stage + ".");
-        InternalLogger.getInstance().debug("Reloadables (%d):".formatted(reloadables.size()));
+        InternalLogger.getInstance().debug("Reloadables (%d):", reloadables.size());
         for (Reloadable<P> reloadable : reloadables) {
             InternalLogger.getInstance().debug(" - " + name(reloadable.getClass()));
         }
-        InternalLogger.getInstance().debug("Plugins (%d):".formatted(plugins.size()));
+        InternalLogger.getInstance().debug("Plugins (%d):", plugins.size());
         for (PluginWrapper<P> plugin : plugins) {
-            InternalLogger.getInstance().debug(" - (%.2f) ".formatted(plugin.getPriority()) + plugin.getPluginProviderName());
+            InternalLogger.getInstance().debug(" - (%.2f) %s", plugin.getPriority(), plugin.getPluginProviderName());
         }
         InternalLogger.getInstance().debug("========================================");
         this.reloadStopwatch.start();
@@ -329,16 +329,16 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
             Collections.reverse(plugins);
             
             // Pre Reload
-            String line = new String[]{"*", "=", "#", "@", "%", "~", "O", "-", "+"}[new Random().nextInt(9)].repeat(40);
+            String line = new String(new char[40]).replace("\0", new String[]{"*", "=", "#", "@", "%", "~", "O", "-", "+"}[new Random().nextInt(9)]);
             InternalLogger.getInstance().info(line);
             InternalLogger.getInstance().info(name(pluginClass) + " starting main-reload for " + stage + ".");
-            InternalLogger.getInstance().debug("Reloadables (%d):".formatted(reloadables.size()));
+            InternalLogger.getInstance().debug("Reloadables (%d):", reloadables.size());
             for (Reloadable<P> reloadable : reloadables) {
                 InternalLogger.getInstance().debug(" - " + name(reloadable.getClass()));
             }
-            InternalLogger.getInstance().info("Plugins (%d):".formatted(plugins.size()));
+            InternalLogger.getInstance().info("Plugins (%d):", plugins.size());
             for (PluginWrapper<P> plugin : plugins) {
-                InternalLogger.getInstance().info(" - (%.2f) ".formatted(plugin.getPriority()) + plugin.getPluginProviderName());
+                InternalLogger.getInstance().info(" - (%.2f) %S",plugin.getPriority(), plugin.getPluginProviderName());
             }
             InternalLogger.getInstance().info(line);
             

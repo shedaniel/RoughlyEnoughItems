@@ -1,8 +1,9 @@
 {
   "required": true,
-  "package": "me.shedaniel.rei.mixin.fabric",
+  "package": "me.shedaniel.rei.mixin.forge",
   "compatibilityLevel": "JAVA_8",
   "client": [
+    "MixinClientPacketListener"
   ],
   "mixins": [
   ],

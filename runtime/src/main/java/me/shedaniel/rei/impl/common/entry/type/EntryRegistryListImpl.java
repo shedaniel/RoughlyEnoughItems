@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.common.entry.type;
 
+import it.unimi.dsi.fastutil.Hash;
 import it.unimi.dsi.fastutil.longs.LongList;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
@@ -87,7 +88,7 @@ public class EntryRegistryListImpl implements EntryRegistryList {
     
     @Override
     public void addAll(List<EntryStack<?>> stacks, LongList hashes) {
-        hashedList.addAll(new AbstractList<>() {
+        hashedList.addAll(new AbstractList<HashedEntryStackWrapper>() {
             @Override
             public HashedEntryStackWrapper get(int index) {
                 return new HashedEntryStackWrapper(stacks.get(index), hashes.getLong(index));
@@ -102,7 +103,7 @@ public class EntryRegistryListImpl implements EntryRegistryList {
     
     @Override
     public void addAll(int index, List<EntryStack<?>> stacks, LongList hashes) {
-        hashedList.addAll(index, new AbstractList<>() {
+        hashedList.addAll(index, new AbstractList<HashedEntryStackWrapper>() {
             @Override
             public HashedEntryStackWrapper get(int index) {
                 return new HashedEntryStackWrapper(stacks.get(index), hashes.getLong(index));
@@ -135,7 +136,7 @@ public class EntryRegistryListImpl implements EntryRegistryList {
     }
     
     private static List<EntryStack<?>> createMappedList(List<HashedEntryStackWrapper> hashedList) {
-        return new AbstractList<>() {
+        return new AbstractList<EntryStack<?>>() {
             @Override
             public EntryStack<?> get(int index) {
                 return hashedList.get(index).unwrap();
@@ -177,7 +178,8 @@ public class EntryRegistryListImpl implements EntryRegistryList {
             
             @Override
             public int indexOf(Object o) {
-                if (o instanceof EntryStack<?> stack) {
+                if (o instanceof EntryStack<?>) {
+                    EntryStack<?> stack = (EntryStack<?>) o;
                     return hashedList.indexOf(new HashedEntryStackWrapper(stack));
                 } else {
                     return -1;
@@ -186,7 +188,8 @@ public class EntryRegistryListImpl implements EntryRegistryList {
             
             @Override
             public int lastIndexOf(Object o) {
-                if (o instanceof EntryStack<?> stack) {
+                if (o instanceof EntryStack<?>) {
+                    EntryStack<?> stack = (EntryStack<?>) o;
                     return hashedList.lastIndexOf(new HashedEntryStackWrapper(stack));
                 } else {
                     return -1;
@@ -195,7 +198,8 @@ public class EntryRegistryListImpl implements EntryRegistryList {
             
             @Override
             public boolean contains(Object o) {
-                if (o instanceof EntryStack<?> stack) {
+                if (o instanceof EntryStack<?>) {
+                    EntryStack<?> stack = (EntryStack<?>) o;
                     return hashedList.contains(new HashedEntryStackWrapper(stack));
                 } else {
                     return false;

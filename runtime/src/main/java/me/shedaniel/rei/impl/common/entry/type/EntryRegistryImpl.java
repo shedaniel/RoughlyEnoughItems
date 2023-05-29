@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.common.entry.type;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.longs.*;
 import me.shedaniel.rei.api.client.REIRuntime;
@@ -103,7 +104,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     public <Cache> void markFilteringRuleDirty(FilteringRule<Cache> cacheFilteringRule, Collection<EntryStack<?>> stacks, @Nullable LongCollection hashes) {
-        this.filteredList.refreshFilteringFor(Set.of(cacheFilteringRule), stacks, hashes);
+        this.filteredList.refreshFilteringFor(ImmutableSet.of(cacheFilteringRule), stacks, hashes);
     }
     
     @Override

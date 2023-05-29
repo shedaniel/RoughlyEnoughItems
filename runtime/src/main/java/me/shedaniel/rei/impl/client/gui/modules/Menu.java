@@ -102,8 +102,8 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
         }
         for (FavoriteMenuEntry entry : this.entries) {
             entry.closeMenu = ScreenOverlayImpl.getInstance().menuAccess()::close;
-            if (entry instanceof SubMenuEntry menuEntry) {
-                menuEntry.setParent(this);
+            if (entry instanceof SubMenuEntry) {
+                ((SubMenuEntry) entry).setParent(this);
             }
         }
     }

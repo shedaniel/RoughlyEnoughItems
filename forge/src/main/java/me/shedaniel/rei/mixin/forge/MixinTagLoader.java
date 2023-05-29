@@ -62,7 +62,7 @@ public class MixinTagLoader<T> {
         }
         ResourceKey<? extends Registry<?>> resourceKey = TagNodes.TAG_DIR_MAP.get(directory);
         if (resourceKey == null) return;
-        TagNodes.TAG_DATA_MAP.put(resourceKey, new HashMap<>());
+//        TagNodes.TAG_DATA_MAP.put(resourceKey, new HashMap<>());
         Map<ResourceLocation, TagNodes.TagData> tagDataMap = TagNodes.TAG_DATA_MAP.get(resourceKey);
         if (tagDataMap == null) return;
         Registry<T> registry = ((Registry<Registry<T>>) Registry.REGISTRY).get((ResourceKey<Registry<T>>) resourceKey);

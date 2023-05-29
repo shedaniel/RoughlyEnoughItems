@@ -389,7 +389,7 @@ public class CollectionUtils {
     }
     
     public static <T> Iterable<List<T>> partition(List<T> list, int size) {
-        return () -> new UnmodifiableIterator<>() {
+        return () -> new UnmodifiableIterator<List<T>>() {
             int i = 0;
             int partitionSize = Mth.ceil(list.size() / (float) size);
             
@@ -402,7 +402,7 @@ public class CollectionUtils {
             public List<T> next() {
                 int cursor = i++ * size;
                 int realSize = Math.min(list.size() - cursor, size);
-                return new AbstractList<>() {
+                return new AbstractList<T>() {
                     @Override
                     public T get(int index) {
                         if (index < 0 || index >= realSize)
@@ -443,7 +443,7 @@ public class CollectionUtils {
     }
     
     public static <T> Iterable<Iterator<T>> partitionIterator(Iterator<T> iterator, int iteratorSize, int size) {
-        return partitionCollection(new AbstractCollection<>() {
+        return partitionCollection(new AbstractCollection<T>() {
             
             @Override
             public Iterator<T> iterator() {
@@ -462,7 +462,7 @@ public class CollectionUtils {
             return Iterables.transform(partition((List<T>) collection, size), List::iterator);
         }
         
-        return () -> new Iterator<>() {
+        return () -> new Iterator<Iterator<T>>() {
             int i = 0;
             int partitionSize = Mth.ceil(collection.size() / (float) size);
             int advanced = 0;
@@ -490,7 +490,7 @@ public class CollectionUtils {
                     advanced = cursor;
                 }
                 
-                return new Iterator<>() {
+                return new Iterator<T>() {
                     @Override
                     public boolean hasNext() {
                         return iterator.hasNext() && advanced < cursor + realSize;
@@ -534,7 +534,7 @@ public class CollectionUtils {
         public E get(int ix) {
             int localIx = ix;
             for (List<? extends E> l : lists) {
-                if (localIx < 0) throw new IndexOutOfBoundsException(ix);
+                if (localIx < 0) throw new IndexOutOfBoundsException("Index out of range: " + ix);
                 if (localIx < l.size()) return l.get(localIx);
                 localIx -= l.size();
             }

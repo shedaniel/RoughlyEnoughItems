@@ -156,7 +156,9 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     @Nullable
     @Override
     public FluidStack add(FluidStack o1, FluidStack o2) {
-        return o1.copyWithAmount(o1.getAmount() + o2.getAmount());
+        FluidStack copy = o1.copy();
+        copy.setAmount(o1.getAmount().add(o2.getAmount()));
+        return copy;
     }
     
     @Override

@@ -24,7 +24,10 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListSearchManager;
 import net.minecraft.client.Minecraft;
@@ -36,27 +39,41 @@ public class EntryHighlighter extends GuiComponent {
     public static void render(PoseStack matrices) {
         RenderSystem.disableDepthTest();
         RenderSystem.colorMask(true, true, true, false);
-        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> containerScreen) {
+        if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?>) {
+            AbstractContainerScreen<?> containerScreen = (AbstractContainerScreen<?>) Minecraft.getInstance().screen;
             int x = containerScreen.leftPos, y = containerScreen.topPos;
+            RenderSystem.disableTexture();
+            RenderSystem.enableBlend();
+            RenderSystem.disableAlphaTest();
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.shadeModel(7425);
+            Tesselator tesselator = Tesselator.getInstance();
+            BufferBuilder bufferBuilder = tesselator.getBuilder();
+            bufferBuilder.begin(7, DefaultVertexFormat.POSITION_COLOR);
             for (Slot slot : containerScreen.getMenu().slots) {
                 if (!slot.hasItem() || !EntryListSearchManager.INSTANCE.matches(EntryStacks.of(slot.getItem()))) {
                     matrices.pushPose();
                     matrices.translate(0, 0, 500f);
-                    fillGradient(matrices, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0xdc202020, 0xdc202020, 0);
+                    GuiComponent.fillGradient(matrices.last().pose(), bufferBuilder, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0xdc202020, 0xdc202020, 0);
                     matrices.popPose();
                 } else {
                     matrices.pushPose();
                     matrices.translate(0, 0, 200f);
-                    fillGradient(matrices, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0x345fff3b, 0x345fff3b, 0);
-                
-                    fillGradient(matrices, x + slot.x - 1, y + slot.y - 1, x + slot.x, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b, 0);
-                    fillGradient(matrices, x + slot.x + 16, y + slot.y - 1, x + slot.x + 16 + 1, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b, 0);
-                    fillGradient(matrices, x + slot.x - 1, y + slot.y - 1, x + slot.x + 16, y + slot.y, 0xff5fff3b, 0xff5fff3b, 0);
-                    fillGradient(matrices, x + slot.x - 1, y + slot.y + 16, x + slot.x + 16, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b, 0);
-                
+                    GuiComponent.fillGradient(matrices.last().pose(), bufferBuilder, x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0x345fff3b, 0x345fff3b, 0);
+                    
+                    GuiComponent.fillGradient(matrices.last().pose(), bufferBuilder, x + slot.x - 1, y + slot.y - 1, x + slot.x, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b, 0);
+                    GuiComponent.fillGradient(matrices.last().pose(), bufferBuilder, x + slot.x + 16, y + slot.y - 1, x + slot.x + 16 + 1, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b, 0);
+                    GuiComponent.fillGradient(matrices.last().pose(), bufferBuilder, x + slot.x - 1, y + slot.y - 1, x + slot.x + 16, y + slot.y, 0xff5fff3b, 0xff5fff3b, 0);
+                    GuiComponent.fillGradient(matrices.last().pose(), bufferBuilder, x + slot.x - 1, y + slot.y + 16, x + slot.x + 16, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b, 0);
+                    
                     matrices.popPose();
                 }
             }
+            tesselator.end();
+            RenderSystem.shadeModel(7424);
+            RenderSystem.disableBlend();
+            RenderSystem.enableAlphaTest();
+            RenderSystem.enableTexture();
         }
         RenderSystem.colorMask(true, true, true, true);
         RenderSystem.enableDepthTest();

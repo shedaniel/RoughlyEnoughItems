@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.search.method;
 
+import com.google.common.collect.ImmutableList;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -46,7 +47,7 @@ public enum DefaultInputMethod implements InputMethod<String> {
     
     @Override
     public Iterable<String> expendFilter(String filter) {
-        return List.of(filter);
+        return ImmutableList.of(filter);
     }
     
     @Override

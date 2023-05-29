@@ -36,6 +36,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -72,7 +73,7 @@ public class FavoritesEntriesManager {
             if (widget != null) {
                 Supplier<Rectangle> buttonBounds = widget.togglePanelButton::getBounds;
                 ScreenOverlayImpl.getInstance().getHintsContainer().addHint(12, () -> new Point(buttonBounds.get().getCenterX(), buttonBounds.get().getCenterY()),
-                        "text.rei.hint.favorites.discover", List.of(new TranslatableComponent("text.rei.hint.favorites.discover")));
+                        "text.rei.hint.favorites.discover", Collections.singletonList(new TranslatableComponent("text.rei.hint.favorites.discover")));
             }
         }
         
@@ -85,7 +86,7 @@ public class FavoritesEntriesManager {
     
     public void add(FavoriteEntry entry) {
         ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
-        List<FavoriteEntry> defaultFavorites = getDefaultFavorites().toList();
+        List<FavoriteEntry> defaultFavorites = getDefaultFavorites().collect(Collectors.toList());
         
         config.getConfigFavoriteEntries().remove(entry);
         if (CollectionUtils.anyMatch(defaultFavorites, e -> e.equals(entry)) && !config.getHiddenFavoriteEntries().contains(entry)) {
@@ -129,7 +130,7 @@ public class FavoritesEntriesManager {
     }
     
     public List<FavoriteEntry> asListView() {
-        return new AbstractList<>() {
+        return new AbstractList<FavoriteEntry>() {
             @Override
             public FavoriteEntry get(int index) {
                 return getFavorites().get(index);

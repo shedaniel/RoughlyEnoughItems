@@ -23,13 +23,12 @@
 
 package me.shedaniel.rei.plugin.common.displays.tag;
 
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
-import net.minecraft.tags.TagKey;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -41,11 +40,11 @@ public abstract class TagNode<T> {
         this.children = new ArrayList<>();
     }
     
-    public static <T> TagNode<T> ofValues(HolderSet<T> value) {
+    public static <T> TagNode<T> ofValues(Collection<T> value) {
         return new ValuesTagNode<>(value);
     }
     
-    public static <T> TagNode<T> ofReference(TagKey<T> key) {
+    public static <T> TagNode<T> ofReference(ResourceLocation key) {
         return new ReferenceTagNode<>(key);
     }
     
@@ -57,11 +56,11 @@ public abstract class TagNode<T> {
         children.add(child);
     }
     
-    public void addValuesChild(HolderSet<T> child) {
+    public void addValuesChild(Collection<T> child) {
         children.add(ofValues(child));
     }
     
-    public void addReferenceChild(TagKey<T> child) {
+    public void addReferenceChild(ResourceLocation child) {
         children.add(ofReference(child));
     }
     
@@ -86,55 +85,55 @@ public abstract class TagNode<T> {
     protected abstract void asText(String prefix, StringBuilder builder);
     
     @Nullable
-    public HolderSet<T> getValue() {
+    public Collection<T> getValue() {
         return null;
     }
     
     @Nullable
-    public TagKey<T> getReference() {
+    public ResourceLocation getReference() {
         return null;
     }
     
     private static class ValuesTagNode<T> extends TagNode<T> {
-        private final HolderSet<T> value;
+        private final Collection<T> value;
         
-        public ValuesTagNode(HolderSet<T> value) {
+        public ValuesTagNode(Collection<T> value) {
             this.value = value;
         }
         
         @Override
-        public HolderSet<T> getValue() {
+        public Collection<T> getValue() {
             return value;
         }
         
         @Override
         protected void asText(String prefix, StringBuilder builder) {
-            for (Holder<T> holder : value) {
-                holder.unwrapKey().ifPresent(key -> {
-                    builder.append(prefix);
-                    builder.append(key.location().toString());
-                    builder.append('\n');
-                });
+            for (T holder : value) {
+//                holder.unwrapKey().ifPresent(key -> {
+//                    builder.append(prefix);
+//                    builder.append(key.location().toString());
+//                    builder.append('\n');
+//                });
             }
         }
     }
     
     private static class ReferenceTagNode<T> extends TagNode<T> {
-        private final TagKey<T> key;
+        private final ResourceLocation key;
         
-        public ReferenceTagNode(TagKey<T> key) {
+        public ReferenceTagNode(ResourceLocation key) {
             this.key = key;
         }
         
         @Override
-        public TagKey<T> getReference() {
+        public ResourceLocation getReference() {
             return key;
         }
         
         @Override
         protected void asText(String prefix, StringBuilder builder) {
             builder.append(prefix);
-            builder.append(key.location());
+            builder.append(key);
             builder.append('\n');
         }
     }

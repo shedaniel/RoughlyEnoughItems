@@ -212,10 +212,10 @@ public class PluginDetectorImpl implements PluginDetector {
     }
     
     private static <P extends me.shedaniel.rei.api.common.plugins.REIPlugin<P>> REIPluginProvider<P> wrapAndFilter(REIPluginProvider<?> provider, Class<P> clazz) {
-        return new REIPluginProvider<>() {
+        return new REIPluginProvider<P>() {
             @Override
             public Collection<P> provide() {
-                return new AbstractCollection<>() {
+                return new AbstractCollection<P>() {
                     @Override
                     public Iterator<P> iterator() {
                         return Iterables.filter(provider.provide(), clazz).iterator();

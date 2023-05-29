@@ -50,7 +50,7 @@ public interface SimpleGridMenuDisplay extends Display {
      * @return the input width of the input entries
      * @deprecated use {@link #getInputWidth(int, int)} instead
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated
     default int getInputWidth() {
         return getWidth();
     }
@@ -61,7 +61,7 @@ public interface SimpleGridMenuDisplay extends Display {
      * @return the input height of the input entries
      * @deprecated use {@link #getInputHeight(int, int)} instead
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated
     default int getInputHeight() {
         return getHeight();
     }

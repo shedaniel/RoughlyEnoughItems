@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.client.search.argument;
 
 import com.google.common.collect.ForwardingList;
+import com.google.common.collect.ImmutableList;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -68,7 +69,7 @@ public class AlternativeArgument extends ForwardingList<Argument<?, ?>> {
         
         public AlternativeArgument build() {
             if (arguments == null) return AlternativeArgument.EMPTY;
-            if (arguments.size() == 1) return new AlternativeArgument(List.of(arguments.get(0).build()));
+            if (arguments.size() == 1) return new AlternativeArgument(ImmutableList.of(arguments.get(0).build()));
             return new AlternativeArgument(CollectionUtils.map(arguments, Argument.Builder::build));
         }
     }

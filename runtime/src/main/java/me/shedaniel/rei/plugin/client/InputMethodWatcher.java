@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.plugin.client.runtime;
 
+import com.google.common.collect.ImmutableList;
 import me.shedaniel.math.Color;
 import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.config.ConfigManager;
@@ -71,7 +72,7 @@ public class InputMethodWatcher implements HintProvider {
                 }
             }
             if (match > 0) {
-                return List.of(new TranslatableComponent("text.rei.input.methods.hint"),
+                return ImmutableList.of(new TranslatableComponent("text.rei.input.methods.hint"),
                         new TextComponent(" "), component);
             }
         }
@@ -92,7 +93,7 @@ public class InputMethodWatcher implements HintProvider {
     
     @Override
     public List<HintButton> getButtons() {
-        return List.of(
+        return ImmutableList.of(
                 new HintButton(new TranslatableComponent("text.rei.hint.configure"), bounds -> {
                     MenuAccess access = ScreenOverlayImpl.getInstance().menuAccess();
                     access.openOrClose(CraftableFilterButtonWidget.FILTER_MENU_UUID, bounds.clone(),

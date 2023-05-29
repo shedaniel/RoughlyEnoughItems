@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
@@ -33,8 +32,8 @@ import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,8 +60,7 @@ public class CachingEntryRenderer implements BatchedEntryRenderer<Object, Cached
     
     @Override
     public void startBatch(EntryStack<Object> entry, CachedEntryListRender.Sprite extraData, PoseStack matrices, float delta) {
-        RenderSystem.setShaderTexture(0, CachedEntryListRender.cachedTextureLocation);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        Minecraft.getInstance().getTextureManager().bind(CachedEntryListRender.cachedTextureLocation);
     }
     
     @Override
@@ -90,7 +88,7 @@ public class CachingEntryRenderer implements BatchedEntryRenderer<Object, Cached
     
     @Override
     public void render(EntryStack<Object> entry, PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-        RenderSystem.setShaderTexture(0, CachedEntryListRender.cachedTextureLocation);
+        Minecraft.getInstance().getTextureManager().bind(CachedEntryListRender.cachedTextureLocation);
         GuiComponent.innerBlit(matrices.last().pose(), bounds.x, bounds.getMaxX(), bounds.y, bounds.getMaxY(), this.blitOffset.getAsInt(), sprite.u0, sprite.u1, sprite.v0, sprite.v1);
     }
     

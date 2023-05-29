@@ -75,9 +75,11 @@ public abstract class CollapsingEntryListWidget extends EntryListWidget {
         Int2ObjectMap<CollapsedStack> collapsedStackIndexed = new Int2ObjectOpenHashMap<>();
         
         for (Object obj : collapsedStacks) {
-            if (obj instanceof EntryStack<?> stack) {
+            if (obj instanceof EntryStack<?>) {
+                EntryStack<?> stack = (EntryStack<?>) obj;
                 stacks.add(stack);
-            } else if (obj instanceof CollapsedStack stack) {
+            } else if (obj instanceof CollapsedStack) {
+                CollapsedStack stack = (CollapsedStack) obj;
                 List<EntryStack<?>> ingredient = stack.getIngredient();
                 if (stack.isExpanded()) {
                     stacks.addAll(ingredient);

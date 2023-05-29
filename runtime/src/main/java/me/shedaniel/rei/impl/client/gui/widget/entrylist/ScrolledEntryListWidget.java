@@ -87,7 +87,8 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
                 Object stack = stacks.get(i++);
                 entry.clearStacks();
                 
-                if (stack instanceof EntryStack<?> entryStack) {
+                if (stack instanceof EntryStack<?>) {
+                    EntryStack<?> entryStack = (EntryStack<?>) stack;
                     if (!entryStack.isEmpty()) {
                         entry.entry(entryStack);
                         helper.add(entry);

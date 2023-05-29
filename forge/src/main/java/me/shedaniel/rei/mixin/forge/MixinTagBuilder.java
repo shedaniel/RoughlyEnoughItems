@@ -47,44 +47,44 @@ import java.util.function.Function;
 public class MixinTagBuilder<T> {
     @Shadow @Final private List<Tag.BuilderEntry> entries;
     
-    @Inject(method = "build", at = @At("RETURN"))
-    private void load(Function<ResourceLocation, Tag<T>> tagResolver, Function<ResourceLocation, T> valueResolver, CallbackInfoReturnable<Either<Collection<Tag.BuilderEntry>, Tag<T>>> cir) {
-        Tag<T> tag = cir.getReturnValue().right().orElse(null);
-        if (tag != null) {
-            String currentTagDirectory = TagNodes.CURRENT_TAG_DIR.get();
-            if (currentTagDirectory == null) return;
-            ResourceKey<? extends Registry<?>> resourceKey = TagNodes.TAG_DIR_MAP.get(currentTagDirectory);
-            if (resourceKey == null) return;
-            Map<Tag<?>, TagNodes.RawTagData> dataMap = TagNodes.RAW_TAG_DATA_MAP.get(currentTagDirectory);
-            if (dataMap == null) return;
-            List<ResourceLocation> otherElements = new ArrayList<>();
-            List<ResourceLocation> otherTags = new ArrayList<>();
-            
-            for (Tag.BuilderEntry builderEntry : this.entries) {
-                if (builderEntry.entry() instanceof Tag.OptionalTagEntry tagEntry) {
-                    Tag<T> apply = tagResolver.apply(tagEntry.id);
-                    if (apply != null) {
-                        otherTags.add(tagEntry.id);
-                    }
-                } else if (builderEntry.entry() instanceof Tag.TagEntry tagEntry) {
-                    Tag<T> apply = tagResolver.apply(tagEntry.id);
-                    if (apply != null) {
-                        otherTags.add(tagEntry.id);
-                    }
-                } else if (builderEntry.entry() instanceof Tag.OptionalElementEntry tagEntry) {
-                    T apply = valueResolver.apply(tagEntry.id);
-                    if (apply != null) {
-                        otherElements.add(tagEntry.id);
-                    }
-                } else if (builderEntry.entry() instanceof Tag.ElementEntry tagEntry) {
-                    T apply = valueResolver.apply(tagEntry.id);
-                    if (apply != null) {
-                        otherElements.add(tagEntry.id);
-                    }
-                }
-            }
-            
-            dataMap.put(tag, new TagNodes.RawTagData(CollectionUtils.distinctToList(otherElements), CollectionUtils.distinctToList(otherTags)));
-        }
-    }
+//    @Inject(method = "build", at = @At("RETURN"))
+//    private void load(Function<ResourceLocation, Tag<T>> tagResolver, Function<ResourceLocation, T> valueResolver, CallbackInfoReturnable<Either<Collection<Tag.BuilderEntry>, Tag<T>>> cir) {
+//        Tag<T> tag = cir.getReturnValue().right().orElse(null);
+//        if (tag != null) {
+//            String currentTagDirectory = TagNodes.CURRENT_TAG_DIR.get();
+//            if (currentTagDirectory == null) return;
+//            ResourceKey<? extends Registry<?>> resourceKey = TagNodes.TAG_DIR_MAP.get(currentTagDirectory);
+//            if (resourceKey == null) return;
+//            Map<Tag<?>, TagNodes.RawTagData> dataMap = TagNodes.RAW_TAG_DATA_MAP.get(currentTagDirectory);
+//            if (dataMap == null) return;
+//            List<ResourceLocation> otherElements = new ArrayList<>();
+//            List<ResourceLocation> otherTags = new ArrayList<>();
+//            
+//            for (Tag.BuilderEntry builderEntry : this.entries) {
+//                if (builderEntry.getEntry() instanceof Tag.OptionalTagEntry tagEntry) {
+//                    Tag<T> apply = tagResolver.apply(tagEntry.id);
+//                    if (apply != null) {
+//                        otherTags.add(tagEntry.id);
+//                    }
+//                } else if (builderEntry.getEntry() instanceof Tag.TagEntry tagEntry) {
+//                    Tag<T> apply = tagResolver.apply(tagEntry.id);
+//                    if (apply != null) {
+//                        otherTags.add(tagEntry.id);
+//                    }
+//                } else if (builderEntry.getEntry() instanceof Tag.OptionalElementEntry tagEntry) {
+//                    T apply = valueResolver.apply(tagEntry.id);
+//                    if (apply != null) {
+//                        otherElements.add(tagEntry.id);
+//                    }
+//                } else if (builderEntry.getEntry() instanceof Tag.ElementEntry tagEntry) {
+//                    T apply = valueResolver.apply(tagEntry.id);
+//                    if (apply != null) {
+//                        otherElements.add(tagEntry.id);
+//                    }
+//                }
+//            }
+//            
+//            dataMap.put(tag, new TagNodes.RawTagData(CollectionUtils.distinctToList(otherElements), CollectionUtils.distinctToList(otherTags)));
+//        }
+//    }
 }

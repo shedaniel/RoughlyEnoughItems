@@ -32,7 +32,6 @@ import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
@@ -59,7 +58,7 @@ public class ConfigAddonsScreen extends Screen {
         super.init();
         {
             Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));
-            addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
+            addButton(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
             }));
         }
@@ -145,7 +144,7 @@ public class ConfigAddonsScreen extends Screen {
                 @Override
                 protected void renderBg(PoseStack matrices, Minecraft client, int mouseX, int mouseY) {
                     super.renderBg(matrices, client, mouseX, mouseY);
-                    RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
+                    Minecraft.getInstance().getTextureManager().bind(InternalTextures.CHEST_GUI_TEXTURE);
                     blit(matrices, x + 3, y + 3, 0, 0, 14, 14);
                 }
             };
@@ -181,11 +180,6 @@ public class ConfigAddonsScreen extends Screen {
         
         @Override
         public List<? extends GuiEventListener> children() {
-            return Collections.singletonList(configureButton);
-        }
-        
-        @Override
-        public List<? extends NarratableEntry> narratables() {
             return Collections.singletonList(configureButton);
         }
     }

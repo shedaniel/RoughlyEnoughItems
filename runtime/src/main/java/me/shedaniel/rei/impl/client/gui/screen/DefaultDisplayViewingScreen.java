@@ -184,11 +184,11 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             Rectangle categoryNextBounds = categoryNext.getBounds();
             matrices.pushPose();
             matrices.translate(0.5, 0.5, 0);
-            RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_TEXTURE);
+            Minecraft.getInstance().getTextureManager().bind(InternalTextures.ARROW_LEFT_TEXTURE);
             blit(matrices, recipeBackBounds.x + 2, recipeBackBounds.y + 2, 0, 0, 8, 8, 8, 8);
             blit(matrices, categoryBackBounds.x + 2, categoryBackBounds.y + 2, 0, 0, 8, 8, 8, 8);
             matrices.translate(-0.5, 0, 0);
-            RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_TEXTURE);
+            Minecraft.getInstance().getTextureManager().bind(InternalTextures.ARROW_RIGHT_TEXTURE);
             blit(matrices, recipeNextBounds.x + 2, recipeNextBounds.y + 2, 0, 0, 8, 8, 8, 8);
             blit(matrices, categoryNextBounds.x + 2, categoryNextBounds.y + 2, 0, 0, 8, 8, 8, 8);
             matrices.popPose();

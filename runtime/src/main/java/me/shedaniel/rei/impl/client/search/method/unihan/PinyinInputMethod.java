@@ -23,11 +23,10 @@
 
 package me.shedaniel.rei.impl.client.search.method.unihan;
 
-import dev.architectury.platform.Platform;
-import dev.architectury.utils.value.BooleanValue;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.ints.IntList;
+import com.google.common.collect.ImmutableList;
+import it.unimi.dsi.fastutil.ints.*;
+import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.utils.BooleanValue;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.search.method.CharacterUnpackingInputMethod;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
@@ -49,7 +48,44 @@ public class PinyinInputMethod extends UniHanInputMethod implements CharacterUnp
     protected final Int2ObjectMap<ToneEntry> toneMap;
     protected final Set<IntList> fuzzySet = new HashSet<>();
     
-    protected record ToneEntry(int codepoint, int tone) {}
+    protected static final class ToneEntry {
+        private final int codepoint;
+        private final int tone;
+        
+        protected ToneEntry(int codepoint, int tone) {
+            this.codepoint = codepoint;
+            this.tone = tone;
+        }
+        
+        public int codepoint() {
+            return codepoint;
+        }
+        
+        public int tone() {
+            return tone;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            ToneEntry that = (ToneEntry) obj;
+            return this.codepoint == that.codepoint &&
+                    this.tone == that.tone;
+        }
+        
+        @Override
+        public int hashCode() {
+            return Objects.hash(codepoint, tone);
+        }
+        
+        @Override
+        public String toString() {
+            return "ToneEntry[" +
+                    "codepoint=" + codepoint + ", " +
+                    "tone=" + tone + ']';
+        }
+    }
     
     public PinyinInputMethod(UniHanManager manager) {
         super(manager);
@@ -93,7 +129,7 @@ public class PinyinInputMethod extends UniHanInputMethod implements CharacterUnp
     }
     
     private void addFuzzy(String original, String to) {
-        this.fuzzyMap.put(IntList.of(original.codePoints().toArray()), IntList.of(to.codePoints().toArray()));
+        this.fuzzyMap.put(new IntArrayList(original.codePoints().toArray()), new IntArrayList(to.codePoints().toArray()));
     }
     
     private void addTone(char c, String s) {
@@ -143,14 +179,14 @@ public class PinyinInputMethod extends UniHanInputMethod implements CharacterUnp
     
     @Override
     public Iterable<IntList> expendFilter(String filter) {
-        return Collections.singletonList(IntList.of(filter.codePoints().toArray()));
+        return Collections.singletonList(new IntArrayList(filter.codePoints().toArray()));
     }
     
     @Override
     public List<ExpendedChar> expendSourceChar(int codePoint) {
         List<ExpendedChar> sequences = dataMap.get(codePoint);
         if (sequences != null && !sequences.isEmpty()) return sequences;
-        return List.of(new ExpendedChar(List.of(IntList.of(codePoint))));
+        return ImmutableList.of(new ExpendedChar(ImmutableList.of(IntLists.singleton(codePoint))));
     }
     
     @Override
@@ -182,7 +218,7 @@ public class PinyinInputMethod extends UniHanInputMethod implements CharacterUnp
     public List<FavoriteMenuEntry> getOptionsMenuEntries() {
         List<FavoriteMenuEntry> innerEntries = new ArrayList<>();
         this.fuzzyMap.forEach((from, to) -> {
-            innerEntries.add(FavoriteMenuEntry.createToggle(new TextComponent("%s -> %s".formatted(new String(from.toIntArray(), 0, from.size()), new String(to.toIntArray(), 0, to.size()))),
+            innerEntries.add(FavoriteMenuEntry.createToggle(new TextComponent(String.format("%s -> %s", new String(from.toIntArray(), 0, from.size()), new String(to.toIntArray(), 0, to.size()))),
                     new BooleanValue() {
                         @Override
                         public boolean getAsBoolean() {
@@ -202,7 +238,7 @@ public class PinyinInputMethod extends UniHanInputMethod implements CharacterUnp
                         }
                     }));
         });
-        return List.of(FavoriteMenuEntry.createSubMenu(new TranslatableComponent("text.rei.input.methods.pinyin.fuzzy.matching"),
+        return ImmutableList.of(FavoriteMenuEntry.createSubMenu(new TranslatableComponent("text.rei.input.methods.pinyin.fuzzy.matching"),
                 innerEntries));
     }
     
@@ -244,7 +280,7 @@ public class PinyinInputMethod extends UniHanInputMethod implements CharacterUnp
             }
         }
         int length = 2;
-        if (builder.isEmpty()) {
+        if (builder.length() == 0) {
             List<IntList>[] expendSingles = this.expendSingles(codepoints[0]);
             codepoints[0] = expendSingles[0];
             if (expendSingles.length > 1) {
@@ -256,7 +292,7 @@ public class PinyinInputMethod extends UniHanInputMethod implements CharacterUnp
             codepoints[1] = this.expendFinals(builder.toString());
         }
         if (tone != -1) {
-            codepoints[++length - 1] = List.of(IntList.of(Character.forDigit(tone, 10)));
+            codepoints[++length - 1] = ImmutableList.of(IntLists.singleton(Character.forDigit(tone, 10)));
         }
         int combinations = 1;
         for (int i = 0; i < length; i++) {
@@ -288,11 +324,11 @@ public class PinyinInputMethod extends UniHanInputMethod implements CharacterUnp
     }
     
     protected List<IntList> expendSimple(String string) {
-        IntList codepoints = IntList.of(string.codePoints().toArray());
+        IntList codepoints = new IntArrayList(string.codePoints().toArray());
         if (this.fuzzySet.contains(codepoints)) {
-            return List.of(codepoints, this.fuzzyMap.get(codepoints));
+            return ImmutableList.of(codepoints, this.fuzzyMap.get(codepoints));
         }
-        return List.of(codepoints);
+        return ImmutableList.of(codepoints);
     }
     
     protected List<IntList> expendInitials(String string) {

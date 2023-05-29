@@ -26,7 +26,9 @@ package me.shedaniel.rei.impl.client.search.argument;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntLists;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import me.shedaniel.rei.api.client.gui.config.SearchMode;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
@@ -78,7 +80,7 @@ public class Argument<T, R> {
     public static void resetCache(boolean cache) {
         Argument.cache = new ArgumentCache();
         CollapsedEntriesCache.reset();
-        Collection<HashedEntryStackWrapper> stacks = new AbstractCollection<>() {
+        Collection<HashedEntryStackWrapper> stacks = new AbstractCollection<HashedEntryStackWrapper>() {
             @Override
             public Iterator<HashedEntryStackWrapper> iterator() {
                 return Iterators.transform(((EntryRegistryImpl) EntryRegistry.getInstance()).getPreFilteredComplexList().iterator(),
@@ -240,9 +242,10 @@ public class Argument<T, R> {
         @Override
         public boolean testString(String text) {
             if (matches) return true;
-            if (inputMethod instanceof CharacterUnpackingInputMethod im) {
+            if (inputMethod instanceof CharacterUnpackingInputMethod) {
+                CharacterUnpackingInputMethod im = (CharacterUnpackingInputMethod) inputMethod;
                 for (T filter : filters) {
-                    if (InputMethodMatcher.contains(im, IntList.of(text.codePoints().toArray()), (IntList) filter)) {
+                    if (InputMethodMatcher.contains(im, new IntArrayList(text.codePoints().toArray()), (IntList) filter)) {
                         return matches = true;
                     }
                 }

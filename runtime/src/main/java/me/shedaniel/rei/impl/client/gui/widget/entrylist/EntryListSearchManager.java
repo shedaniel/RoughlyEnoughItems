@@ -138,7 +138,7 @@ public class EntryListSearchManager {
                 return Iterators.transform(stacks.iterator(), HashedEntryStackWrapper::unwrap);
             }
         };
-        if (!isValid.getAsBoolean()) return List.of();
+        if (!isValid.getAsBoolean()) return Collections.emptyList();
         
         List</*EntryStack<?> | CollapsedStack*/ Object> list = new ArrayList<>(stacks.size() + 10);
         
@@ -177,7 +177,7 @@ public class EntryListSearchManager {
                 }
             }
             
-            if (i++ % 50 == 0 && !isValid.getAsBoolean()) return List.of();
+            if (i++ % 50 == 0 && !isValid.getAsBoolean()) return Collections.emptyList();
             
             if (!matchedAny) {
                 list.add(stack);

@@ -132,7 +132,7 @@ public interface REIClientPlugin extends REIPlugin<REIClientPlugin> {
      * @param registry the registry
      */
     @ApiStatus.OverrideOnly
-    @Deprecated(forRemoval = true)
+    @Deprecated
     default void registerSubsets(SubsetsRegistry registry) {
     }
     

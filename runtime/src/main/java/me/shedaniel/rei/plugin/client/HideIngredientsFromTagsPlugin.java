@@ -38,16 +38,15 @@ import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * A plugin to hide any ingredients from the <code>c:hidden_from_recipe_viewers</code> tag.
@@ -103,7 +102,44 @@ public class HideIngredientsFromTagsPlugin implements REIClientPlugin {
         
         private Cache cache;
         
-        private record Cache(EntryIngredient ingredient, LongSet hashes) {}
+        private static final class Cache {
+            private final EntryIngredient ingredient;
+            private final LongSet hashes;
+            
+            private Cache(EntryIngredient ingredient, LongSet hashes) {
+                this.ingredient = ingredient;
+                this.hashes = hashes;
+            }
+            
+            public EntryIngredient ingredient() {
+                return ingredient;
+            }
+            
+            public LongSet hashes() {
+                return hashes;
+            }
+            
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == this) return true;
+                if (obj == null || obj.getClass() != this.getClass()) return false;
+                Cache that = (Cache) obj;
+                return Objects.equals(this.ingredient, that.ingredient) &&
+                        Objects.equals(this.hashes, that.hashes);
+            }
+            
+            @Override
+            public int hashCode() {
+                return Objects.hash(ingredient, hashes);
+            }
+            
+            @Override
+            public String toString() {
+                return "Cache[" +
+                        "ingredient=" + ingredient + ", " +
+                        "hashes=" + hashes + ']';
+            }
+        }
         
         @Override
         public FilteringRuleType<? extends FilteringRule<HideTagsFilteringRule.Cache>> getType() {
@@ -114,9 +150,9 @@ public class HideIngredientsFromTagsPlugin implements REIClientPlugin {
         public Cache prepareCache(boolean async) {
             try {
                 EntryIngredient ingredient = EntryIngredient.builder()
-                        .addAll(EntryIngredients.ofItemTag(TagKey.create(Registry.ITEM_REGISTRY, HIDDEN_TAG)))
-                        .addAll(EntryIngredients.ofItemTag(TagKey.create(Registry.BLOCK_REGISTRY, HIDDEN_TAG)))
-                        .addAll(EntryIngredients.ofFluidTag(TagKey.create(Registry.FLUID_REGISTRY, HIDDEN_TAG)))
+                        .addAll(EntryIngredients.ofItemTag(HIDDEN_TAG))
+                        .addAll(EntryIngredients.ofBlockTag(HIDDEN_TAG))
+                        .addAll(EntryIngredients.ofFluidTag(HIDDEN_TAG))
                         .build();
                 LongSet hashes = new LongOpenHashSet();
                 for (EntryStack<?> stack : ingredient) {

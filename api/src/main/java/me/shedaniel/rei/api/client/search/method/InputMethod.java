@@ -32,7 +32,9 @@ import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -159,10 +161,47 @@ public interface InputMethod<T> {
      * @return the list of menu entries that will be used as options
      */
     default List<FavoriteMenuEntry> getOptionsMenuEntries() {
-        return List.of();
+        return Collections.emptyList();
     }
     
-    record Locale(String code, Component name) {}
+    static final class Locale {
+        private final String code;
+        private final Component name;
+        
+        public Locale(String code, Component name) {
+            this.code = code;
+            this.name = name;
+        }
+        
+        public String code() {
+            return code;
+        }
+        
+        public Component name() {
+            return name;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            Locale that = (Locale) obj;
+            return Objects.equals(this.code, that.code) &&
+                    Objects.equals(this.name, that.name);
+        }
+        
+        @Override
+        public int hashCode() {
+            return Objects.hash(code, name);
+        }
+        
+        @Override
+        public String toString() {
+            return "Locale[" +
+                    "code=" + code + ", " +
+                    "name=" + name + ']';
+        }
+    }
     
     @FunctionalInterface
     interface ProgressCallback {

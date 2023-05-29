@@ -49,10 +49,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -163,7 +160,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * @deprecated use {@link #saveStack()} instead
      */
     @Nullable
-    @Deprecated(forRemoval = true)
+    @Deprecated
     default CompoundTag save() {
         if (supportSaving()) {
             CompoundTag tag = getDefinition().getSerializer().save(this, getValue());
@@ -202,7 +199,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      */
     @Nullable
     @Environment(EnvType.CLIENT)
-    @Deprecated(forRemoval = true)
+    @Deprecated
     default Tooltip getTooltip(Point mouse, boolean appendModName) {
         return getTooltip(TooltipContext.of(mouse), appendModName);
     }

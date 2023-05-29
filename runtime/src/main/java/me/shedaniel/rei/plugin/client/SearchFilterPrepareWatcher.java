@@ -34,6 +34,7 @@ import me.shedaniel.rei.impl.client.search.argument.ArgumentCache;
 import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,7 +55,7 @@ public class SearchFilterPrepareWatcher implements HintProvider {
                 if (Util.getEpochMillis() - cache.prepareStart < 100) return Collections.emptyList();
                 int prepareStageCurrent = cache.currentStep.step;
                 int prepareStageTotal = cache.currentStep.totalSteps;
-                ArgumentCache.CurrentStep.Step currentStage = ArrayUtils.get(cache.currentStep.steps, prepareStageCurrent - 1);
+                ArgumentCache.CurrentStep.Step currentStage = prepareStageCurrent - 1 >= 0 && prepareStageCurrent - 1 < cache.currentStep.steps.length ? cache.currentStep.steps[prepareStageCurrent - 1] : null;
                 int currentStageCurrent = currentStage == null ? 0 : currentStage.stacks;
                 int currentStageTotal = currentStage == null ? 0 : currentStage.totalStacks;
                 double prepareStageProgress = prepareStageTotal == 0 ? 0 : prepareStageCurrent / (double) prepareStageTotal;

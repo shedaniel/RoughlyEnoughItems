@@ -49,6 +49,7 @@ import me.shedaniel.rei.impl.client.gui.widget.DefaultDisplayChoosePageWidget;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TextComponent;
@@ -56,6 +57,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
@@ -139,7 +141,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
         }
         page = Math.max(Math.min(page, getTotalPages() - 1), 0);
         int skip = Math.max(0, page * entries.size());
-        List</*EntryStack<?> | List<EntryStack<?>>*/ Object> subList = stacks.stream().skip(skip).limit(Math.max(0, entries.size() - Math.max(0, -page * entries.size()))).toList();
+        List</*EntryStack<?> | List<EntryStack<?>>*/ Object> subList = stacks.stream().skip(skip).limit(Math.max(0, entries.size() - Math.max(0, -page * entries.size()))).collect(Collectors.toList());
         Int2ObjectMap<CollapsedStack> indexedCollapsedStack = getCollapsedStackIndexed();
         Set<CollapsedStack> collapsedStacks = new LinkedHashSet<>();
         for (int i = 0; i < subList.size(); i++) {
@@ -148,7 +150,8 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             EntryListStackEntry entry = entries.get(i + Math.max(0, -page * entries.size()));
             entry.clearStacks();
             
-            if (stack instanceof EntryStack<?> entryStack) {
+            if (stack instanceof EntryStack<?>) {
+                EntryStack<?> entryStack = (EntryStack<?>) stack;
                 entry.entry(entryStack);
             } else {
                 entry.entries((List<EntryStack<?>>) stack);
@@ -212,7 +215,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
         this.additionalWidgets.add(leftButton);
         this.additionalWidgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
             helper.setBlitOffset(helper.getBlitOffset() + 1);
-            RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_TEXTURE);
+            Minecraft.getInstance().getTextureManager().bind(InternalTextures.ARROW_LEFT_TEXTURE);
             Rectangle bounds = leftButton.getBounds();
             matrices.pushPose();
             blit(matrices, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
@@ -229,7 +232,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
         this.additionalWidgets.add(changelogButton);
         this.additionalWidgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
             helper.setBlitOffset(helper.getBlitOffset() + 1);
-            RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
+            Minecraft.getInstance().getTextureManager().bind(InternalTextures.CHEST_GUI_TEXTURE);
             Rectangle bounds = changelogButton.getBounds();
             matrices.pushPose();
             matrices.translate(0.5f, 0, 0);
@@ -250,7 +253,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
         this.additionalWidgets.add(rightButton);
         this.additionalWidgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
             helper.setBlitOffset(helper.getBlitOffset() + 1);
-            RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_TEXTURE);
+            Minecraft.getInstance().getTextureManager().bind(InternalTextures.ARROW_RIGHT_TEXTURE);
             Rectangle bounds = rightButton.getBounds();
             matrices.pushPose();
             blit(matrices, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);

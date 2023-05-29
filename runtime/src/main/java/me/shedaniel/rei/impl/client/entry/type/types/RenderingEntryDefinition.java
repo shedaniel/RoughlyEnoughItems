@@ -51,15 +51,13 @@ public class RenderingEntryDefinition {
             }
             return super.asFormattedText(entry, value);
         }
-    
+        
         @Override
         public Component asFormattedText(EntryStack<Renderer> entry, Renderer value, TooltipContext context) {
             Tooltip tooltip = value.getTooltip(context);
             if (tooltip != null) {
-                for (Tooltip.Entry e : tooltip.entries()) {
-                    if (e.isText()) {
-                        return e.getAsText();
-                    }
+                for (Component e : tooltip.getText()) {
+                    return e;
                 }
             }
             return super.asFormattedText(entry, value, context);

@@ -29,7 +29,7 @@ public interface PrimitivePlatformAdapter {
     ServiceLoader<PrimitivePlatformAdapter> LOADER = ServiceLoader.load(PrimitivePlatformAdapter.class);
     
     static PrimitivePlatformAdapter get() {
-        return LOADER.findFirst().orElseThrow();
+        return LOADER.iterator().next();
     }
     
     boolean isClient();

@@ -29,6 +29,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @ApiStatus.Experimental
@@ -49,7 +50,7 @@ public interface CharacterUnpackingInputMethod extends InputMethod<IntList> {
             if (chars.isEmpty()) return ((char) c) + "";
             int i = Mth.floor((System.currentTimeMillis() / 1000L % (double) chars.size()));
             String result = chars.get(i).phonemes().stream()
-                    .flatMap(integers -> integers.intStream().mapToObj(value -> ((char) value) + ""))
+                    .flatMap(integers -> integers.stream().map(value -> ((char) value.intValue()) + ""))
                     .collect(Collectors.joining());
             if (result.codePointCount(0, result.length()) == 1 && result.codePointAt(0) == c) {
                 return result;
@@ -58,5 +59,34 @@ public interface CharacterUnpackingInputMethod extends InputMethod<IntList> {
         }).collect(Collectors.joining()).trim().replace("  ", " ");
     }
     
-    record ExpendedChar(List<IntList> phonemes) {}
+    static final class ExpendedChar {
+        private final List<IntList> phonemes;
+        
+        public ExpendedChar(List<IntList> phonemes) {
+            this.phonemes = phonemes;
+        }
+        
+        public List<IntList> phonemes() {
+            return phonemes;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            ExpendedChar that = (ExpendedChar) obj;
+            return Objects.equals(this.phonemes, that.phonemes);
+        }
+        
+        @Override
+        public int hashCode() {
+            return Objects.hash(phonemes);
+        }
+        
+        @Override
+        public String toString() {
+            return "ExpendedChar[" +
+                    "phonemes=" + phonemes + ']';
+        }
+    }
 }

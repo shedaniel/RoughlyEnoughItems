@@ -39,9 +39,9 @@ import java.util.concurrent.Executor;
 
 @Mixin(TagManager.class)
 public abstract class MixinTagManager<T> {
-    @Inject(method = "createLoader", at = @At("HEAD"))
-    private void load(ResourceManager resourceManager, Executor executor, RegistryAccess.RegistryEntry<T> registryEntry, CallbackInfoReturnable<CompletableFuture<TagManager.LoadResult<T>>> cir) {
-        ResourceKey<? extends Registry<T>> resourceKey = registryEntry.key();
-        TagNodes.TAG_DIR_MAP.put(TagManager.getTagDir(resourceKey), resourceKey);
-    }
+//    @Inject(method = "createLoader", at = @At("HEAD"))
+//    private void load(ResourceManager resourceManager, Executor executor, RegistryAccess.RegistryEntry<T> registryEntry, CallbackInfoReturnable<CompletableFuture<TagManager.LoadResult<T>>> cir) {
+//        ResourceKey<? extends Registry<T>> resourceKey = registryEntry.key();
+//        TagNodes.TAG_DIR_MAP.put(TagManager.getTagDir(resourceKey), resourceKey);
+//    }
 }

@@ -32,6 +32,8 @@ import org.jetbrains.annotations.ApiStatus;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * An immutable representation of a list of {@link EntryStack}.
@@ -154,7 +156,7 @@ public interface EntryIngredient extends List<EntryStack<?>> {
      * @see EntryStack#saveStack()
      * @deprecated use {@link #saveIngredient()} instead
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated
     ListTag save();
     
     /**
@@ -164,7 +166,7 @@ public interface EntryIngredient extends List<EntryStack<?>> {
      * @return the casted list of {@link EntryStack}
      * @deprecated use {@link #castAsList()} instead
      */
-    @Deprecated(forRemoval = true)
+    @Deprecated
     default <T> List<EntryStack<T>> cast() {
         return castAsList();
     }

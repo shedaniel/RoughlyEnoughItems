@@ -261,7 +261,7 @@ public class BatchedEntryRendererManager<T extends EntryWidget> implements Itera
     @Override
     public Iterator<T> iterator() {
         return Iterators.concat(toRender.iterator(), Iterators.concat(
-                CollectionUtils.<List<Object>, Iterator<T>>map(grouping.values(), entries -> new AbstractIterator<>() {
+                CollectionUtils.<List<Object>, Iterator<T>>map(grouping.values(), entries -> new AbstractIterator<T>() {
                     public int i = 0;
                     
                     @Override

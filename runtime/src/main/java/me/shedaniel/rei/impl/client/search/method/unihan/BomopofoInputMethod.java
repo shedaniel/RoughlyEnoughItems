@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.search.method.unihan;
 
+import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
@@ -74,7 +75,7 @@ public class BomopofoInputMethod extends PinyinInputMethod {
             {"un", "jp"}, {"uo", "ji"}, {"v", "m"}, {"van", "m0"}, {"vang", "m;"},
             {"ve", "m,"}, {"vn", "mp"}, {"w", "j"}, {"x", "v"}, {"y", "u"},
             {"z", "y"}, {"zh", "5"},
-    }).collect(Collectors.toMap(d -> IntList.of(d[0].codePoints().toArray()), d -> IntList.of(d[1].trim().codePoints().toArray())));
+    }).collect(Collectors.toMap(d -> new IntArrayList(d[0].codePoints().toArray()), d -> new IntArrayList(d[1].trim().codePoints().toArray())));
     
     public BomopofoInputMethod(UniHanManager manager) {
         super(manager);
@@ -92,7 +93,7 @@ public class BomopofoInputMethod extends PinyinInputMethod {
     
     @Override
     public List<FavoriteMenuEntry> getOptionsMenuEntries() {
-        return List.of();
+        return ImmutableList.of();
     }
     
     @Override
@@ -115,8 +116,8 @@ public class BomopofoInputMethod extends PinyinInputMethod {
         if (tone[0] != -1) {
             codepoints.add(Character.forDigit(tone[0], 10));
         }
-        List<IntList> phonemes = standard(codepoints).stream().map(str -> CONVERSION.getOrDefault(str, str)).toList();
-        return List.of(new ExpendedChar(phonemes));
+        List<IntList> phonemes = standard(codepoints).stream().map(str -> CONVERSION.getOrDefault(str, str)).collect(Collectors.toList());
+        return ImmutableList.of(new ExpendedChar(phonemes));
     }
     
     private static List<IntList> standard(IntList s) {

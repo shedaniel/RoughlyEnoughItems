@@ -47,6 +47,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @ApiStatus.Internal
 public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry {
@@ -155,6 +156,43 @@ public class FavoriteEntryTypeRegistryImpl implements FavoriteEntryType.Registry
             return CollectionUtils.filterAndMap(entries, CompoundEntry::defaultFavorited, CompoundEntry::entry);
         }
         
-        public record CompoundEntry(FavoriteEntry entry, boolean defaultFavorited) {}
+        public static final class CompoundEntry {
+            private final FavoriteEntry entry;
+            private final boolean defaultFavorited;
+            
+            public CompoundEntry(FavoriteEntry entry, boolean defaultFavorited) {
+                this.entry = entry;
+                this.defaultFavorited = defaultFavorited;
+            }
+            
+            public FavoriteEntry entry() {
+                return entry;
+            }
+            
+            public boolean defaultFavorited() {
+                return defaultFavorited;
+            }
+            
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == this) return true;
+                if (obj == null || obj.getClass() != this.getClass()) return false;
+                CompoundEntry that = (CompoundEntry) obj;
+                return Objects.equals(this.entry, that.entry) &&
+                        this.defaultFavorited == that.defaultFavorited;
+            }
+            
+            @Override
+            public int hashCode() {
+                return Objects.hash(entry, defaultFavorited);
+            }
+            
+            @Override
+            public String toString() {
+                return "CompoundEntry[" +
+                        "entry=" + entry + ", " +
+                        "defaultFavorited=" + defaultFavorited + ']';
+            }
+        }
     }
 }

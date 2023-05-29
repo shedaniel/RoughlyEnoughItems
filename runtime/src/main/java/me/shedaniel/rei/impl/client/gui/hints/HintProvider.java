@@ -33,6 +33,7 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 @Environment(EnvType.CLIENT)
@@ -51,5 +52,42 @@ public interface HintProvider {
     
     List<HintButton> getButtons();
     
-    record HintButton(Component name, Consumer<Rectangle> action) {}
+    final class HintButton {
+        private final Component name;
+        private final Consumer<Rectangle> action;
+        
+        public HintButton(Component name, Consumer<Rectangle> action) {
+            this.name = name;
+            this.action = action;
+        }
+        
+        public Component name() {
+            return name;
+        }
+        
+        public Consumer<Rectangle> action() {
+            return action;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            HintButton that = (HintButton) obj;
+            return Objects.equals(this.name, that.name) &&
+                    Objects.equals(this.action, that.action);
+        }
+        
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, action);
+        }
+        
+        @Override
+        public String toString() {
+            return "HintButton[" +
+                    "name=" + name + ", " +
+                    "action=" + action + ']';
+        }
+    }
 }

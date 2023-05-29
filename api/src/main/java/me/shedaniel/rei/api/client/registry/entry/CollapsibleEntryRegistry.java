@@ -30,7 +30,6 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Arrays;
@@ -40,7 +39,7 @@ import java.util.function.Predicate;
 /**
  * Registry for grouping and collapsing {@link EntryStack}s.
  * <p>
- * The easiest way to use this is to use the {@link me.shedaniel.rei.api.common.util.EntryIngredients#ofItemTag(TagKey)}
+ * The easiest way to use this is to use the {@link me.shedaniel.rei.api.common.util.EntryIngredients#ofItemTag(ResourceLocation)}
  * and collect tags together.
  */
 @ApiStatus.Experimental

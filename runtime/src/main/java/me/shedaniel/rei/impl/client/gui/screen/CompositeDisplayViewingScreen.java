@@ -300,7 +300,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         getOverlay().render(matrices, mouseX, mouseY, delta);
         super.render(matrices, mouseX, mouseY, delta);
         for (Widget widget : widgets) {
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             widget.render(matrices, mouseX, mouseY, delta);
         }
         matrices.pushPose();

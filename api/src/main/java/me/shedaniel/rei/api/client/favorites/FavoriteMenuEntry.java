@@ -23,7 +23,7 @@
 
 package me.shedaniel.rei.api.client.favorites;
 
-import dev.architectury.utils.value.BooleanValue;
+import me.shedaniel.architectury.utils.BooleanValue;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;

@@ -23,9 +23,9 @@
 
 package me.shedaniel.rei.mixin.forge;
 
-import dev.architectury.utils.GameInstance;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import me.shedaniel.architectury.utils.GameInstance;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.PacketEncoder;

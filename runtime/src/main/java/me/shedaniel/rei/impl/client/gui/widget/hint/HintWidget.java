@@ -46,8 +46,10 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import org.lwjgl.opengl.GL11;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
@@ -121,8 +123,7 @@ public class HintWidget extends WidgetWithBounds {
         RenderSystem.disableDepthTest();
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tesselator.getBuilder();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormat.POSITION_COLOR);
         poses.pushPose();
         poses.translate(0, 0, 450);
         Matrix4f pose = poses.last().pose();
@@ -173,7 +174,7 @@ public class HintWidget extends WidgetWithBounds {
     
     @Override
     public List<? extends GuiEventListener> children() {
-        return List.of();
+        return Collections.emptyList();
     }
     
     @Override

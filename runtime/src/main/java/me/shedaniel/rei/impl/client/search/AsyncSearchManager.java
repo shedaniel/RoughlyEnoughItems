@@ -24,7 +24,7 @@
 package me.shedaniel.rei.impl.client.search;
 
 import com.google.common.collect.Lists;
-import dev.architectury.platform.Platform;
+import me.shedaniel.architectury.platform.Platform;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
@@ -33,10 +33,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.util.ThreadCreator;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
@@ -62,8 +59,45 @@ public class AsyncSearchManager {
         this.last = null;
     }
     
-    private record ExecutorTuple(SearchFilter filter,
-                                 CompletableFuture<Map.Entry<List<HashedEntryStackWrapper>, SearchFilter>> future) {
+    private static final class ExecutorTuple {
+        private final SearchFilter filter;
+        private final CompletableFuture<Map.Entry<List<HashedEntryStackWrapper>, SearchFilter>> future;
+        
+        private ExecutorTuple(SearchFilter filter,
+                              CompletableFuture<Map.Entry<List<HashedEntryStackWrapper>, SearchFilter>> future) {
+            this.filter = filter;
+            this.future = future;
+        }
+        
+        public SearchFilter filter() {
+            return filter;
+        }
+        
+        public CompletableFuture<Map.Entry<List<HashedEntryStackWrapper>, SearchFilter>> future() {
+            return future;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            ExecutorTuple that = (ExecutorTuple) obj;
+            return Objects.equals(this.filter, that.filter) &&
+                    Objects.equals(this.future, that.future);
+        }
+        
+        @Override
+        public int hashCode() {
+            return Objects.hash(filter, future);
+        }
+        
+        @Override
+        public String toString() {
+            return "ExecutorTuple[" +
+                    "filter=" + filter + ", " +
+                    "future=" + future + ']';
+        }
+        
     }
     
     public void updateFilter(String filter) {
@@ -144,7 +178,6 @@ public class AsyncSearchManager {
                     }, executor));
                 }
                 return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                        .orTimeout(90, TimeUnit.SECONDS)
                         .thenApplyAsync($ -> {
                             List<HashedEntryStackWrapper> list = new ArrayList<>();
                             

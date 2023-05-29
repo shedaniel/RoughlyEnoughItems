@@ -23,7 +23,9 @@
 
 package me.shedaniel.rei.impl.client.config.entries;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Suppliers;
+import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
@@ -194,7 +196,7 @@ public class FilteringRulesScreen extends Screen {
         
         public DefaultRuleEntry(FilteringRule<?> rule, FilteringEntry entry, Function<Screen, Screen> screenFunction) {
             super(rule);
-            this.screenFunction = Objects.requireNonNullElseGet(screenFunction == null ? ((FilteringRuleType<FilteringRule<?>>) rule.getType()).createEntryScreen(rule) : screenFunction, () -> placeholderScreen(rule));
+            this.screenFunction = MoreObjects.firstNonNull(screenFunction == null ? ((FilteringRuleType<FilteringRule<?>>) rule.getType()).createEntryScreen(rule) : screenFunction, placeholderScreen(rule));
             configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
                 entry.edited = true;
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(Minecraft.getInstance().screen));
@@ -268,7 +270,7 @@ public class FilteringRulesScreen extends Screen {
                 Function<Boolean, Component> function = bool -> {
                     return new TranslatableComponent("rule.roughlyenoughitems.filtering.search.show." + bool);
                 };
-                Map<FilteringContextType, Set<HashedEntryStackWrapper>> stacks = FilteringLogic.hidden(List.of(r), false, false, EntryRegistry.getInstance().getEntryStacks().collect(Collectors.toList()));
+                Map<FilteringContextType, Set<HashedEntryStackWrapper>> stacks = FilteringLogic.hidden(ImmutableList.of(r), false, false, EntryRegistry.getInstance().getEntryStacks().collect(Collectors.toList()));
                 
                 entryConsumer.accept(new SubRulesEntry(rule, () -> function.apply(true),
                         Collections.singletonList(new SearchFilteringRuleType.EntryStacksRuleEntry(rule,

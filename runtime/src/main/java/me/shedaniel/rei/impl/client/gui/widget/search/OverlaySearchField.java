@@ -69,6 +69,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.OptionalDouble;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @ApiStatus.Internal
 public class OverlaySearchField extends TextFieldWidget implements TextFieldWidget.TextFormatter {
@@ -174,7 +175,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         List<HintProvider.HintButton> buttons = hints.stream().map(Pair::getFirst).distinct()
                 .map(HintProvider::getButtons)
                 .flatMap(List::stream)
-                .toList();
+                .collect(Collectors.toList());
         boolean hasProgress = progress.isPresent();
         if (!hasProgress) {
             this.progress.setAs(0);

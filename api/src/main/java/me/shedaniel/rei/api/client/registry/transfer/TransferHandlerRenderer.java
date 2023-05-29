@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.TransferDisplayCategory;
 import me.shedaniel.rei.api.common.display.Display;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 import java.util.Objects;

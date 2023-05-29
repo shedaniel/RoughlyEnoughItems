@@ -40,6 +40,7 @@ import me.shedaniel.rei.impl.client.util.ThreadCreator;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
@@ -110,7 +111,7 @@ public enum BasicFilteringRuleImpl implements BasicFilteringRule<Unit> {
         shownHashes.remove(hashExact);
         
         if (!isReloading()) {
-            markDirty(List.of(stack), null);
+            markDirty(Collections.singletonList(stack), null);
         }
         
         return this;
@@ -138,7 +139,7 @@ public enum BasicFilteringRuleImpl implements BasicFilteringRule<Unit> {
         hiddenHashes.remove(hashExact);
         
         if (!isReloading()) {
-            markDirty(List.of(stack), null);
+            markDirty(Collections.singletonList(stack), null);
         }
         
         return this;

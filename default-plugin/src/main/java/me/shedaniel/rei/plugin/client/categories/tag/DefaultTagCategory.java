@@ -46,7 +46,6 @@ import me.shedaniel.rei.plugin.common.displays.tag.TagNode;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -56,6 +55,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, ?>> {
@@ -123,7 +123,7 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
         TagNode<?>[] tagNode = new TagNode[]{null};
         widgets.add(Widgets.withTranslate(Widgets.delegateWithBounds(() -> delegate[0]), 0, 0, 20));
         
-        TagNodes.create(display.getKey(), dataResult -> {
+        TagNodes.create(display.getTagCollectionId(), display.getTagCollection(), display.getRegistry(), display.getKey(), dataResult -> {
             if (dataResult.error().isPresent()) {
                 delegate[0] = Widgets.withBounds(Widgets.concat(
                         Widgets.createLabel(new Point(innerBounds.getCenterX(), innerBounds.getCenterY() - 8), new TextComponent("Failed to resolve tags!")),
@@ -132,9 +132,9 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
             } else {
                 tagNode[0] = dataResult.result().get();
                 //noinspection rawtypes
-                Function<? extends Holder<?>, ? extends EntryStack<?>> displayMapper = display.getMapper();
-                Function<Holder<?>, EntryStack<?>> mapper = holder -> {
-                    EntryStack<?> stack = ((Function<Holder<?>, EntryStack<?>>) displayMapper).apply(holder);
+                Function<?, ? extends EntryStack<?>> displayMapper = display.getMapper();
+                Function<?, EntryStack<?>> mapper = value -> {
+                    EntryStack<?> stack = ((Function<Object, EntryStack<?>>) displayMapper).apply(value);
                     if (stack.isEmpty()) {
                         return ClientEntryStacks.of(new AbstractRenderer() {
                             @Override
@@ -149,13 +149,13 @@ public class DefaultTagCategory implements DisplayCategory<DefaultTagDisplay<?, 
                             @Override
                             @Nullable
                             public Tooltip getTooltip(TooltipContext context) {
-                                return Tooltip.create(context.getPoint(), new TextComponent(holder.unwrapKey().map(key -> key.location().toString()).orElse("null")));
+                                return Tooltip.create(context.getPoint(), new TextComponent(Optional.ofNullable(stack.getIdentifier()).map(ResourceLocation::toString).orElse("null")));
                             }
                         });
                     }
                     return stack;
                 };
-                delegate[0] = Widgets.overflowed(overflowBounds, Widgets.padded(16, new TagTreeWidget(tagNode[0], mapper, overflowBounds)));
+                delegate[0] = Widgets.overflowed(overflowBounds, Widgets.padded(16, new TagTreeWidget(display.getTagCollection(), tagNode[0], mapper, overflowBounds)));
             }
         });
         

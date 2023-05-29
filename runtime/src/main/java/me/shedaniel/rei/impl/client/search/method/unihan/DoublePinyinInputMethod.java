@@ -25,12 +25,15 @@ package me.shedaniel.rei.impl.client.search.method.unihan;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
-import dev.architectury.platform.Platform;
-import dev.architectury.utils.value.BooleanValue;
+import com.google.common.collect.ImmutableList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.ints.IntLists;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import me.shedaniel.architectury.platform.Platform;
+import me.shedaniel.architectury.utils.BooleanValue;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -115,19 +118,19 @@ public class DoublePinyinInputMethod extends PinyinInputMethod {
                         }
                     }));
         }
-        return List.of(FavoriteMenuEntry.createSubMenu(new TranslatableComponent("text.rei.input.methods.pinyin.double.scheme"),
+        return ImmutableList.of(FavoriteMenuEntry.createSubMenu(new TranslatableComponent("text.rei.input.methods.pinyin.double.scheme"),
                 innerEntries));
     }
     
     @Override
     protected List<IntList> expendSimple(String string) {
-        return List.of(this.converter.convert(string));
+        return ImmutableList.of(this.converter.convert(string));
     }
     
     @Override
     protected List<IntList>[] expendSingles(List<IntList> codepoint) {
         if (this.converter == Converters.SOUGOU || this.converter == Converters.MICROSOFT) {
-            return new List[]{List.of(IntList.of('o')), codepoint};
+            return new List[]{ImmutableList.of(IntLists.singleton('o')), codepoint};
         } else {
             return new List[]{codepoint, codepoint};
         }
@@ -155,8 +158,8 @@ public class DoublePinyinInputMethod extends PinyinInputMethod {
         @Override
         public IntList convert(String input) {
             int i = map.getOrDefault(input, -1);
-            if (i == -1) return IntList.of(input.codePoints().toArray());
-            return IntList.of(i);
+            if (i == -1) return new IntArrayList(input.codePoints().toArray());
+            return IntLists.singleton(i);
         }
     }
     

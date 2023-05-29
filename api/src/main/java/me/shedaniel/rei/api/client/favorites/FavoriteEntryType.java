@@ -89,7 +89,7 @@ public interface FavoriteEntryType<T extends FavoriteEntry> {
         /**
          * @deprecated {@link FavoriteEntryType.Section#add(boolean, FavoriteEntry...)}
          */
-        @Deprecated(forRemoval = true)
+        @Deprecated
         <A extends FavoriteEntry> void registerSystemFavorites(SystemFavoriteEntryProvider<A> provider);
     }
     
