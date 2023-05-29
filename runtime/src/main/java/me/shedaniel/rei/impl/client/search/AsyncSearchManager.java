@@ -144,7 +144,7 @@ public class AsyncSearchManager {
                     }, executor));
                 }
                 return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                        .orTimeout(30, TimeUnit.SECONDS)
+                        .orTimeout(90, TimeUnit.SECONDS)
                         .thenApplyAsync($ -> {
                             List<HashedEntryStackWrapper> list = new ArrayList<>();
                             
