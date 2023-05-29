@@ -43,24 +43,19 @@ import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Predicate;
 
 public class PreFilteredEntryList implements FilteredEntryList {
     private final EntryRegistry registry;
     private final EntryRegistryList list;
     private final Map<FilteringRule<?>, DataPair> filteringData = new HashMap<>();
     private final Long2BooleanMap cached = new Long2BooleanOpenHashMap();
-    private final List<EntryStack<?>> listView = new InternalListView();
+    private final List<HashedEntryStackWrapper> listView = new InternalListView();
+    private final List<EntryStack<?>> simpleListView = new InternalSimpleListView(listView);
     private long mod = 0;
     
     public PreFilteredEntryList(EntryRegistry registry, EntryRegistryList list) {
         this.registry = registry;
         this.list = list;
-    }
-    
-    private static <T> Predicate<T> not(Predicate<? super T> target) {
-        Objects.requireNonNull(target);
-        return (Predicate<T>) target.negate();
     }
     
     @Override
@@ -113,7 +108,7 @@ public class PreFilteredEntryList implements FilteredEntryList {
                 return stacks.size();
             }
         });
-        InternalLogger.getInstance().debug("Refiltered entries with %d rules in %s.", FilteringLogic.getRules().size(), stopwatch.stop().toString());
+        InternalLogger.getInstance().debug("Refiltered %d entries with %d rules in %s.", stacks.size(), FilteringLogic.getRules().size(), stopwatch.stop().toString());
     }
     
     private void queueSearchUpdate() {
@@ -127,6 +122,8 @@ public class PreFilteredEntryList implements FilteredEntryList {
     
     @Override
     public void refreshFilteringFor(boolean log, @Nullable Set<FilteringRule<?>> refilterRules, Collection<EntryStack<?>> stacks, @Nullable LongCollection hashes) {
+        this.mod++;
+        
         if (hashes == null) {
             hashes = new LongArrayList(stacks.size());
             for (EntryStack<?> stack : stacks) {
@@ -209,19 +206,26 @@ public class PreFilteredEntryList implements FilteredEntryList {
             long hash = hashIterator.nextLong();
             cached.remove(hash);
         }
+        
+        this.mod++;
     }
     
     @Override
     public List<EntryStack<?>> getList() {
+        return simpleListView;
+    }
+    
+    @Override
+    public List<HashedEntryStackWrapper> getComplexList() {
         return listView;
     }
     
-    private class InternalListView extends AbstractList<EntryStack<?>> {
+    private class InternalListView extends AbstractList<HashedEntryStackWrapper> {
         private long prevMod = -1;
-        private List<EntryStack<?>> stacks;
+        private List<HashedEntryStackWrapper> stacks;
         
         @Override
-        public EntryStack<?> get(int index) {
+        public HashedEntryStackWrapper get(int index) {
             if (prevMod == mod) {
                 return stacks.get(index);
             }
@@ -246,7 +250,7 @@ public class PreFilteredEntryList implements FilteredEntryList {
         }
         
         @Override
-        public Iterator<EntryStack<?>> iterator() {
+        public Iterator<HashedEntryStackWrapper> iterator() {
             if (prevMod == mod) {
                 return stacks.iterator();
             }
@@ -255,15 +259,38 @@ public class PreFilteredEntryList implements FilteredEntryList {
             return new AbstractIterator<>() {
                 @Nullable
                 @Override
-                protected EntryStack<?> computeNext() {
+                protected HashedEntryStackWrapper computeNext() {
                     while (iterator.hasNext()) {
                         HashedEntryStackWrapper wrapper = iterator.next();
-                        if (isFiltered(wrapper.unwrap(), wrapper.hashExact())) return wrapper.unwrap();
+                        if (isFiltered(wrapper.unwrap(), wrapper.hashExact())) return wrapper;
                     }
                     
                     return endOfData();
                 }
             };
+        }
+    }
+    
+    private static class InternalSimpleListView extends AbstractList<EntryStack<?>> {
+        private final List<HashedEntryStackWrapper> list;
+        
+        public InternalSimpleListView(List<HashedEntryStackWrapper> list) {
+            this.list = list;
+        }
+        
+        @Override
+        public EntryStack<?> get(int i) {
+            return list.get(i).unwrap();
+        }
+        
+        @Override
+        public int size() {
+            return list.size();
+        }
+        
+        @Override
+        public Iterator<EntryStack<?>> iterator() {
+            return Iterators.transform(list.iterator(), HashedEntryStackWrapper::unwrap);
         }
     }
     

@@ -23,37 +23,40 @@
 
 package me.shedaniel.rei.impl.common.entry.type.collapsed;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.common.InternalLogger;
+import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
-    private final List<Entry> entries = new ArrayList<>();
+    private final Map<ResourceLocation, Entry> entries = new LinkedHashMap<>();
     
     @Override
     public <T> void group(ResourceLocation id, Component name, List<? extends EntryStack<? extends T>> stacks) {
         Objects.requireNonNull(stacks, "stacks");
-        this.entries.add(new Entry(id.getNamespace(), name, new ListMatcher(stacks)));
+        Entry old = this.entries.put(id, new Entry(id, name, new ListMatcher(CollectionUtils.map(stacks, HashedEntryStackWrapper::new)), true));
         InternalLogger.getInstance().debug("Added collapsible entry group [%s] %s with %d entries", id, name.getString(), stacks.size());
+        if (old != null) {
+            InternalLogger.getInstance().warn("Overwritten collapsible entry group [%s] %s with %d entries", id, name.getString(), stacks.size());
+        }
     }
     
     @Override
     public void group(ResourceLocation id, Component name, Predicate<? extends EntryStack<?>> predicate) {
         Objects.requireNonNull(predicate, "predicate");
-        this.entries.add(new Entry(id.getNamespace(), name, (stack, hashExact) -> ((Predicate<EntryStack<?>>) predicate).test(stack)));
+        Entry old = this.entries.put(id, new Entry(id, name, (stack, hashExact) -> ((Predicate<EntryStack<?>>) predicate).test(stack), false));
         InternalLogger.getInstance().debug("Added collapsible entry group [%s] %s with dynamic predicate", id, name.getString());
+        if (old != null) {
+            InternalLogger.getInstance().warn("Overwritten collapsible entry group [%s] %s with dynamic predicate", id, name.getString());
+        }
     }
     
     @Override
@@ -63,8 +66,8 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
     
     @Override
     public void endReload() {
-        InternalLogger.getInstance().debug("Registered %d collapsible entry groups: ", entries.size(),
-                entries.stream().map(entry -> entry.getName().getString()).collect(Collectors.joining(", ")));
+        InternalLogger.getInstance().debug("Registered %d collapsible entry groups: %s", entries.values().size(),
+                entries.values().stream().map(entry -> entry.getName().getString()).collect(Collectors.joining(", ")));
     }
     
     @Override
@@ -72,24 +75,30 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
         plugin.registerCollapsibleEntries(this);
     }
     
-    public List<Entry> getEntries() {
-        return entries;
+    public Collection<Entry> getEntries() {
+        return entries.values();
     }
     
     public static class Entry {
-        private final String modId;
+        private final ResourceLocation id;
         private final Component name;
         private final Matcher matcher;
+        private boolean canCache;
         private boolean expanded;
         
-        public Entry(String modId, Component name, Matcher matcher) {
-            this.modId = modId;
+        public Entry(ResourceLocation id, Component name, Matcher matcher, boolean canCache) {
+            this.id = id;
             this.name = name;
             this.matcher = matcher;
+            this.canCache = canCache;
+        }
+        
+        public ResourceLocation getId() {
+            return id;
         }
         
         public String getModId() {
-            return modId;
+            return id.getNamespace();
         }
         
         public Component getName() {
@@ -98,6 +107,10 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
         
         public Matcher getMatcher() {
             return matcher;
+        }
+        
+        public boolean canCache() {
+            return canCache;
         }
         
         public boolean isExpanded() {
@@ -116,23 +129,15 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
     }
     
     private static class ListMatcher implements Matcher {
-        private final Long2ObjectMap<EntryStack<?>> stacks;
+        private final Set<HashedEntryStackWrapper> stacks;
         
-        public ListMatcher(List<? extends EntryStack<?>> stacks) {
-            this.stacks = new Long2ObjectOpenHashMap<>(stacks.size() + 1);
-            for (EntryStack<?> stack : stacks) {
-                this.stacks.put(EntryStacks.hashExact(stack), stack);
-            }
+        public ListMatcher(List<? extends HashedEntryStackWrapper> stacks) {
+            this.stacks = new HashSet<>(stacks);
         }
         
         @Override
         public boolean matches(EntryStack<?> stack, long hashExact) {
-            EntryStack<?> entryStack = stacks.get(hashExact);
-            
-            if (entryStack == null)
-                return false;
-            
-            return EntryStacks.equalsExact(entryStack, stack);
+            return this.stacks.contains(new HashedEntryStackWrapper(stack, hashExact));
         }
     }
 }

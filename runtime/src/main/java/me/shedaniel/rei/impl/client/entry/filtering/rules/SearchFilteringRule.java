@@ -73,7 +73,7 @@ public class SearchFilteringRule implements FilteringRule<Unit> {
         if (show) processList(context.getHiddenStacks(), completableFutures);
         else processList(context.getShownStacks(), completableFutures);
         try {
-            CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(10, TimeUnit.SECONDS);
+            CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).get(90, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             e.printStackTrace();
         }

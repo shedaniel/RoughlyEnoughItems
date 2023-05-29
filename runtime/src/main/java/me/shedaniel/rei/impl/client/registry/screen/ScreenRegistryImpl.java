@@ -63,9 +63,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Environment(EnvType.CLIENT)
 public class ScreenRegistryImpl implements ScreenRegistry {
     private Multimap<Class<? extends Screen>, ClickArea<?>> clickAreas = HashMultimap.create();
-    private List<DraggableComponentProvider<Screen, Object>> draggableProviders = new ArrayList<>();
-    private List<DraggableComponentVisitor<Screen>> draggableVisitors = new ArrayList<>();
-    private List<FocusedStackProvider> focusedStackProviders = new ArrayList<>();
+    private List<DraggableComponentProvider<Screen, Object>> draggableProviders = new CopyOnWriteArrayList<>();
+    private List<DraggableComponentVisitor<Screen>> draggableVisitors = new CopyOnWriteArrayList<>();
+    private List<FocusedStackProvider> focusedStackProviders = new CopyOnWriteArrayList<>();
     private List<OverlayDecider> deciders = new CopyOnWriteArrayList<>();
     private Map<Class<?>, List<OverlayDecider>> cache = new HashMap<>();
     private ExclusionZones exclusionZones = new ExclusionZonesImpl();

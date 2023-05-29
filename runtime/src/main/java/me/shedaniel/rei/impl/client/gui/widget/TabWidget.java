@@ -31,6 +31,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStackProviderWidget;
@@ -131,10 +132,14 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     }
     
     private void drawTooltip() {
-        if (this.minecraft.options.advancedItemTooltips)
-            Tooltip.create(categoryName, Component.literal(category.getIdentifier().toString()).withStyle(ChatFormatting.DARK_GRAY), ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
-        else
-            Tooltip.create(categoryName, ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier())).queue();
+        Tooltip tooltip = Tooltip.create(categoryName);
+        if (this.minecraft.options.advancedItemTooltips) {
+            tooltip.add(Component.literal(category.getIdentifier().toString()).withStyle(ChatFormatting.DARK_GRAY));
+        }
+        if (ConfigObject.getInstance().shouldAppendModNames()) {
+            tooltip.add(ClientHelper.getInstance().getFormattedModFromIdentifier(category.getIdentifier()));
+        }
+        tooltip.queue();
     }
     
     @Override
