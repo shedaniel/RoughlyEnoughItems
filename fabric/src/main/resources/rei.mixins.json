@@ -7,6 +7,7 @@
     "MixinClientPacketListener",
     "MixinEffectRenderingInventoryScreen",
     "MixinInputConstants",
+    "MixinInputConstantsKey",
     "MixinRecipeToast",
     "MixinScreen"
   ],
