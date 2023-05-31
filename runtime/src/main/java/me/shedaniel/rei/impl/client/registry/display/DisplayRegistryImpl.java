@@ -24,10 +24,6 @@
 package me.shedaniel.rei.impl.client.registry.display;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ForwardingMap;
-import com.google.common.collect.ForwardingMapEntry;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Sets;
 import dev.architectury.event.EventResult;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -43,9 +39,7 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.registry.RecipeManagerContextImpl;
 import net.minecraft.world.item.crafting.Recipe;
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -53,127 +47,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
 
 public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugin> implements DisplayRegistry {
-    private final WeakHashMap<Display, Object> displaysBase = new WeakHashMap<>();
-    private final Map<CategoryIdentifier<?>, DisplaysList> displays = new ConcurrentHashMap<>();
-    private final Map<CategoryIdentifier<?>, List<Display>> unmodifiableDisplays;
     private final Map<CategoryIdentifier<?>, List<DynamicDisplayGenerator<?>>> displayGenerators = new ConcurrentHashMap<>();
     private final List<DynamicDisplayGenerator<?>> globalDisplayGenerators = new ArrayList<>();
     private final List<DisplayVisibilityPredicate> visibilityPredicates = new ArrayList<>();
     private final List<DisplayFiller<?>> fillers = new ArrayList<>();
-    private final MutableInt displayCount = new MutableInt(0);
+    private final MutableLong lastAddWarning = new MutableLong(-1);
+    private DisplaysHolder displaysHolder = new DisplaysHolderImpl(false);
     
     public DisplayRegistryImpl() {
         super(RecipeManagerContextImpl.supplier());
-        
-        this.unmodifiableDisplays = new RemappingMap<>(Collections.unmodifiableMap(displays), list -> {
-            if (list == null) {
-                return null;
-            } else {
-                return ((DisplaysList) list).unmodifiableList;
-            }
-        }, key -> CategoryRegistry.getInstance().tryGet(key).isPresent());
-    }
-    
-    private static class RemappingMap<K, V> extends ForwardingMap<K, V> {
-        protected final Map<K, V> map;
-        protected final UnaryOperator<V> remapper;
-        protected final Predicate<K> keyPredicate;
-        
-        public RemappingMap(Map<K, V> map, UnaryOperator<V> remapper, Predicate<K> keyPredicate) {
-            this.map = map;
-            this.remapper = remapper;
-            this.keyPredicate = keyPredicate;
-        }
-        
-        @Override
-        @NotNull
-        protected Map<K, V> delegate() {
-            return map;
-        }
-        
-        @Override
-        public V get(Object key) {
-            if (keyPredicate.test((K) key)) {
-                return remapper.apply(super.get(key));
-            } else {
-                return null;
-            }
-        }
-        
-        @Override
-        public boolean containsKey(@Nullable Object key) {
-            return super.containsKey(key) && keyPredicate.test((K) key);
-        }
-        
-        @Override
-        public Set<K> keySet() {
-            return Sets.filter(super.keySet(), keyPredicate::test);
-        }
-        
-        @SuppressWarnings("UnstableApiUsage")
-        @Override
-        @NotNull
-        public Set<Entry<K, V>> entrySet() {
-            return this.new StandardEntrySet() {
-                @Override
-                public Iterator<Entry<K, V>> iterator() {
-                    return mapIterator(map.entrySet().iterator());
-                }
-            };
-        }
-        
-        @Override
-        public int size() {
-            return keySet().size();
-        }
-        
-        @Override
-        public Collection<V> values() {
-            return new AbstractCollection<V>() {
-                @Override
-                public Iterator<V> iterator() {
-                    return Iterators.transform(entrySet().iterator(), Entry::getValue);
-                }
-                
-                @Override
-                public int size() {
-                    return RemappingMap.this.size();
-                }
-            };
-        }
-        
-        private Iterator<Entry<K, V>> mapIterator(Iterator<Entry<K, V>> iterator) {
-            return Iterators.transform(Iterators.filter(iterator, entry -> this.keyPredicate.test(entry.getKey())),
-                    this::mapEntry);
-        }
-        
-        private Entry<K, V> mapEntry(Entry<K, V> entry) {
-            return new ForwardingMapEntry<>() {
-                @Override
-                @NotNull
-                protected Entry<K, V> delegate() {
-                    return entry;
-                }
-                
-                @Override
-                public V getValue() {
-                    return remapper.apply(entry.getValue());
-                }
-            };
-        }
-    }
-    
-    private static class DisplaysList extends ArrayList<Display> {
-        private final List<Display> unmodifiableList;
-        private final List<Display> synchronizedList;
-        
-        public DisplaysList() {
-            this.synchronizedList = Collections.synchronizedList(this);
-            this.unmodifiableList = Collections.unmodifiableList(synchronizedList);
-        }
     }
     
     @Override
@@ -183,10 +67,8 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     
     @Override
     public int displaySize() {
-        return displayCount.getValue();
+        return this.displaysHolder.size();
     }
-    
-    private MutableLong lastAddWarning = new MutableLong(-1);
     
     @Override
     public void add(Display display, @Nullable Object origin) {
@@ -199,19 +81,12 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
             }
         }
         
-        displays.computeIfAbsent(display.getCategoryIdentifier(), location -> new DisplaysList())
-                .add(display);
-        displayCount.increment();
-        if (origin != null) {
-            synchronized (displaysBase) {
-                displaysBase.put(display, origin);
-            }
-        }
+        this.displaysHolder.add(display, origin);
     }
     
     @Override
     public Map<CategoryIdentifier<?>, List<Display>> getAll() {
-        return unmodifiableDisplays;
+        return this.displaysHolder.get();
     }
     
     @Override
@@ -287,11 +162,10 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     @Override
     public void startReload() {
         super.startReload();
-        this.displays.clear();
+        this.displaysHolder = new DisplaysHolderImpl(true);
         this.displayGenerators.clear();
         this.visibilityPredicates.clear();
         this.fillers.clear();
-        this.displayCount.setValue(0);
     }
     
     @Override
@@ -304,13 +178,19 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
             }
         }
         
-        for (CategoryIdentifier<?> identifier : displays.keySet()) {
+        for (CategoryIdentifier<?> identifier : getAll().keySet()) {
             if (CategoryRegistry.getInstance().tryGet(identifier).isEmpty()) {
                 InternalLogger.getInstance().error("Found displays registered for unknown registry", new IllegalStateException(identifier.toString()));
             }
         }
         
-        InternalLogger.getInstance().debug("Registered %d displays", displayCount.getValue());
+        this.displaysHolder.endReload();
+        
+        InternalLogger.getInstance().debug("Registered %d displays", displaySize());
+    }
+    
+    public DisplaysHolder displaysHolder() {
+        return displaysHolder;
     }
     
     @Override
@@ -349,12 +229,13 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     @Override
     @Nullable
     public Object getDisplayOrigin(Display display) {
-        return displaysBase.get(display);
+        return this.displaysHolder.getDisplayOrigin(display);
     }
     
     private record DisplayFiller<D extends Display>(
             BiPredicate<Object, DisplayAdditionReasons> predicate,
             
             Function<Object, D> mappingFunction
-    ) {}
+    ) {
+    }
 }
