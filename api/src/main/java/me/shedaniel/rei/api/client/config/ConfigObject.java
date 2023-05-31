@@ -272,6 +272,9 @@ public interface ConfigObject {
     
     boolean doesCacheEntryRendering();
     
+    @ApiStatus.Experimental
+    boolean doesCacheDisplayLookup();
+    
     boolean doDebugRenderTimeRequired();
     
     boolean doMergeDisplayUnderOne();

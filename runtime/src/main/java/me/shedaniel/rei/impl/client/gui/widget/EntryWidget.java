@@ -60,6 +60,8 @@ import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.dragging.CurrentDraggingStack;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
+import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
+import me.shedaniel.rei.impl.client.registry.display.DisplaysHolder;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
@@ -319,22 +321,24 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         
         try {
             DisplayRegistry displayRegistry = DisplayRegistry.getInstance();
+            DisplaysHolder displaysHolder = ((DisplayRegistryImpl) displayRegistry).displaysHolder();
             CategoryRegistry categoryRegistry = CategoryRegistry.getInstance();
             Map<CategoryIdentifier<?>, Boolean> filteringQuickCraftCategories = ConfigObject.getInstance().getFilteringQuickCraftCategories();
-            for (Map.Entry<CategoryIdentifier<?>, List<Display>> entry : displayRegistry.getAll().entrySet()) {
+            boolean shouldFilterDisplays = ConfigObject.getInstance().shouldFilterDisplays();
+            
+            for (Display display : displaysHolder.getAllDisplaysByOutputs(getEntries())) {
+                CategoryIdentifier<?> categoryIdentifier = display.getCategoryIdentifier();
                 Optional<? extends CategoryRegistry.CategoryConfiguration<?>> configuration;
-                if ((configuration = categoryRegistry.tryGet(entry.getKey())).isEmpty()
-                    || categoryRegistry.isCategoryInvisible(configuration.get().getCategory())) continue;
-                if (!filteringQuickCraftCategories.getOrDefault(entry.getKey(), configuration.get().isQuickCraftingEnabledByDefault())) continue;
-                for (Display display : entry.getValue()) {
-                    if ((!ConfigObject.getInstance().shouldFilterDisplays() || displayRegistry.isDisplayVisible(display))
-                        && ViewsImpl.isRecipesFor(getEntries(), display)) {
-                        AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
-                        if (result.successful) {
-                            this.display = display;
-                            this.displayTooltipComponent = Suppliers.memoize(() -> new DisplayTooltipComponent(display));
-                            return result.successfulHandler;
-                        }
+                if ((configuration = categoryRegistry.tryGet(categoryIdentifier)).isEmpty()
+                        || categoryRegistry.isCategoryInvisible(configuration.get().getCategory())) continue;
+                if (!filteringQuickCraftCategories.getOrDefault(categoryIdentifier, configuration.get().isQuickCraftingEnabledByDefault()))
+                    continue;
+                if ((!shouldFilterDisplays || displayRegistry.isDisplayVisible(display))) {
+                    AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
+                    if (result.successful) {
+                        this.display = display;
+                        this.displayTooltipComponent = Suppliers.memoize(() -> new DisplayTooltipComponent(display));
+                        return result.successfulHandler;
                     }
                 }
             }
@@ -353,7 +357,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         }
         
         if (display != null) {
-            if (ViewsImpl.isRecipesFor(getEntries(), display)) {
+            if (ViewsImpl.isRecipesFor(null, getEntries(), display)) {
                 AutoCraftingEvaluator.AutoCraftingResult result = AutoCraftingEvaluator.evaluateAutoCrafting(false, false, display, null);
                 if (result.successful) {
                     return result.successfulHandler;
@@ -430,7 +434,8 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         }
     }
     
-    protected void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {}
+    protected void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    }
     
     @Override
     @Nullable

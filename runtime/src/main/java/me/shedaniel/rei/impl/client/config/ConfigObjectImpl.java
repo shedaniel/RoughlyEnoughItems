@@ -303,6 +303,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     @Override
+    public boolean doesCacheDisplayLookup() {
+        return advanced.miscellaneous.cachingDisplayLookup;
+    }
+    
+    @Override
     public boolean doDebugRenderTimeRequired() {
         return advanced.layout.debugRenderTimeRequired;
     }
@@ -726,6 +731,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             private boolean newFastEntryRendering = true;
             @ConfigEntry.Gui.PrefixText
             private boolean cachingFastEntryRendering = false;
+            private boolean cachingDisplayLookup = true;
         }
         
         public static class Filtering {
