@@ -85,8 +85,9 @@ public class HintsContainerWidget extends DelegateWidget {
                 if (!uuid.equals(this.config.UUID)) {
                     this.config = new HintsConfig();
                 }
-            } catch (IOException e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
+                this.config = new HintsConfig();
             }
         }
         this.config.UUID = uuid;
