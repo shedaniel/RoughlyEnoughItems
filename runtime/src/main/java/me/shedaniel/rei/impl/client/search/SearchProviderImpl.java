@@ -28,14 +28,14 @@ import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.search.argument.AlternativeArgument;
 import me.shedaniel.rei.impl.client.search.argument.Argument;
 import me.shedaniel.rei.impl.client.search.argument.CompoundArgument;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
-import me.shedaniel.rei.impl.client.util.CrashReportUtils;
 import me.shedaniel.rei.impl.common.InternalLogger;
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
+import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 
 import java.util.Collection;
 import java.util.List;
@@ -69,28 +69,26 @@ public class SearchProviderImpl implements SearchProvider {
                     .map(Argument::getArgument)
                     .distinct()
                     .collect(Collectors.toList()));
-            InternalLogger.getInstance().debug("Created search filter with %s using %s", filter, inputMethod.getName().getString());
+            InternalLogger.getInstance().debug("Created search filter with \"%s\" using %s", filter, inputMethod.getName().getString());
         }
         
         @Override
-        public boolean test(EntryStack<?> stack) {
+        public boolean test(EntryStack<?> stack, long hashExact) {
             try {
-                return Argument.matches(stack, arguments.get(), inputMethod);
+                return Argument.matches(stack, hashExact, arguments.get(), inputMethod);
             } catch (Throwable throwable) {
-                CrashReport report = CrashReportUtils.essential(throwable, "Testing entry with search filter");
-                CrashReportCategory category = report.addCategory("Search entry details");
-                try {
-                    stack.fillCrashReport(report, category);
-                } catch (Throwable throwable1) {
-                    category.setDetailError("Filling Report", throwable1);
-                }
-                throw CrashReportUtils.throwReport(report);
+                throw new RuntimeException("Failed to test search filter: \"" + filter + "\" with stack [" + stack.getType().getIdentifier() + "@" + stack.getIdentifier() + "!" + stack.getValue() + "]", throwable);
             }
         }
         
         @Override
+        public boolean test(EntryStack<?> stack) {
+            return this.test(stack, EntryStacks.hashExact(stack));
+        }
+        
+        @Override
         public void prepareFilter(Collection<EntryStack<?>> stacks) {
-            Argument.prepareFilter(stacks, argumentTypes.get());
+            Argument.cache.prepareFilter(CollectionUtils.map(stacks, HashedEntryStackWrapper::new), argumentTypes.get());
         }
         
         @Override

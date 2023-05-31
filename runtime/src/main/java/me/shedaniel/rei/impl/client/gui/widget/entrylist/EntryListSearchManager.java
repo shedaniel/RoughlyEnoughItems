@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.widget.entrylist;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.Iterators;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import me.shedaniel.rei.api.client.config.ConfigManager;
@@ -35,10 +36,14 @@ import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
+import me.shedaniel.rei.impl.client.search.collapsed.CollapsedEntriesCache;
 import me.shedaniel.rei.impl.common.InternalLogger;
+import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
+import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -47,12 +52,12 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 public class EntryListSearchManager {
-    private static final Comparator<? super EntryStack<?>> ENTRY_NAME_COMPARER = Comparator.comparing(stack -> stack.asFormatStrippedText().getString());
-    // private static final Comparator<? super EntryStack<?>> ENTRY_GROUP_COMPARER = VersionAdapter.INSTANCE.getEntryGroupComparator();
+    private static final Comparator<? super HashedEntryStackWrapper> ENTRY_NAME_COMPARER = Comparator.comparing(stack -> stack.unwrap().asFormatStrippedText().getString());
+    // private static final Comparator<? super HashedEntryStackWrapper> ENTRY_GROUP_COMPARER = VersionAdapter.INSTANCE.getEntryGroupComparator();
     
     public static final EntryListSearchManager INSTANCE = new EntryListSearchManager();
     
-    private AsyncSearchManager searchManager = new AsyncSearchManager(EntryRegistry.getInstance()::getPreFilteredList, () -> {
+    private final AsyncSearchManager searchManager = new AsyncSearchManager(((EntryRegistryImpl) EntryRegistry.getInstance())::getPreFilteredComplexList, () -> {
         boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled();
         LongSet workingItems = checkCraftable ? new LongOpenHashSet() : null;
         if (checkCraftable) {
@@ -60,8 +65,8 @@ public class EntryListSearchManager {
                 workingItems.add(EntryStacks.hashExact(stack));
             }
         }
-        return checkCraftable ? stack -> workingItems.contains(EntryStacks.hashExact(stack)) : stack -> true;
-    }, EntryStack::normalize);
+        return checkCraftable ? stack -> workingItems.contains(stack.hashExact()) : stack -> true;
+    }, HashedEntryStackWrapper::normalize);
     
     public void update(String searchTerm, boolean ignoreLastSearch, Consumer<List</*EntryStack<?> | CollapsedStack*/ Object>> update) {
         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -70,21 +75,21 @@ public class EntryListSearchManager {
         if (searchManager.isDirty()) {
             searchManager.getAsync((list, filter) -> {
                 if (!filter.getFilter().equals(searchTerm)) return;
-                if (searchManager.filter() == null || searchManager.filter() != filter) return;
+                if (searchManager.filter == null || searchManager.filter != filter) return;
                 InternalLogger.getInstance().log(ConfigObject.getInstance().doDebugSearchTimeRequired() ? Level.INFO : Level.TRACE, "Search \"%s\" Used [%s]: %s", filter.getFilter(), Thread.currentThread().toString(), stopwatch.toString());
-                List</*EntryStack<?> | CollapsedStack*/ Object> finalList = collapse(copyAndOrder(list), () -> searchManager.filter() != null && searchManager.filter() == filter);
+                List</*EntryStack<?> | CollapsedStack*/ Object> finalList = collapse(copyAndOrder(list), () -> searchManager.filter != null && searchManager.filter == filter);
                 
                 InternalLogger.getInstance().log(ConfigObject.getInstance().doDebugSearchTimeRequired() ? Level.INFO : Level.TRACE, "Search \"%s\" Used and Applied [%s]: %s", filter.getFilter(), Thread.currentThread().toString(), stopwatch.stop().toString());
                 
                 Minecraft.getInstance().submit(() -> {
-                    if (searchManager.filter() == null || searchManager.filter() != filter) return;
+                    if (searchManager.filter == null || searchManager.filter != filter) return;
                     update.accept(finalList);
                 });
             });
         }
     }
     
-    private List<EntryStack<?>> copyAndOrder(List<EntryStack<?>> list) {
+    private List<HashedEntryStackWrapper> copyAndOrder(List<HashedEntryStackWrapper> list) {
         list = new ArrayList<>(list);
         EntryPanelOrdering ordering = ConfigObject.getInstance().getItemListOrdering();
         if (ordering == EntryPanelOrdering.NAME)
@@ -98,7 +103,7 @@ public class EntryListSearchManager {
         return list;
     }
     
-    private List</*EntryStack<?> | CollapsedStack*/ Object> collapse(List<EntryStack<?>> stacks, BooleanSupplier isValid) {
+    private List</*EntryStack<?> | CollapsedStack*/ Object> collapse(List<HashedEntryStackWrapper> stacks, BooleanSupplier isValid) {
         CollapsibleEntryRegistryImpl collapsibleRegistry = (CollapsibleEntryRegistryImpl) CollapsibleEntryRegistry.getInstance();
         Map<CollapsibleEntryRegistryImpl.Entry, @Nullable CollapsedStack> entries = new HashMap<>();
         
@@ -106,20 +111,46 @@ public class EntryListSearchManager {
             entries.put(entry, null);
         }
         
+        if (entries.isEmpty()) return (List<Object>) (List<?>) new AbstractList<EntryStack<?>>() {
+            
+            @Override
+            public int size() {
+                return stacks.size();
+            }
+            
+            @Override
+            public EntryStack<?> get(int i) {
+                return stacks.get(i).unwrap();
+            }
+            
+            @Override
+            public Iterator<EntryStack<?>> iterator() {
+                return Iterators.transform(stacks.iterator(), HashedEntryStackWrapper::unwrap);
+            }
+        };
         if (!isValid.getAsBoolean()) return List.of();
         
-        List</*EntryStack<?> | CollapsedStack*/ Object> list = new ArrayList<>();
+        List</*EntryStack<?> | CollapsedStack*/ Object> list = new ArrayList<>(stacks.size() + 10);
         
         int i = 0;
         
-        for (EntryStack<?> stack : stacks) {
-            long hashExact = EntryStacks.hashExact(stack);
+        for (HashedEntryStackWrapper wrapper : stacks) {
+            long hashExact = wrapper.hashExact();
+            EntryStack<?> stack = wrapper.unwrap();
             boolean matchedAny = false;
+            Set<ResourceLocation> locations = CollapsedEntriesCache.getInstance().getEntries(hashExact);
             
             for (Map.Entry<CollapsibleEntryRegistryImpl.Entry, @Nullable CollapsedStack> mapEntry : entries.entrySet()) {
                 CollapsibleEntryRegistryImpl.Entry entry = mapEntry.getKey();
+                boolean matches;
                 
-                if (entry.getMatcher().matches(stack, hashExact)) {
+                if (!entry.canCache()) {
+                    matches = entry.getMatcher().matches(stack, hashExact);
+                } else {
+                    matches = locations != null && locations.contains(entry.getId());
+                }
+                
+                if (matches) {
                     CollapsedStack collapsed = mapEntry.getValue();
                     
                     if (collapsed == null) {
@@ -144,6 +175,10 @@ public class EntryListSearchManager {
         }
         
         return list;
+    }
+    
+    public AsyncSearchManager getSearchManager() {
+        return searchManager;
     }
     
     public boolean matches(EntryStack<?> stack) {

@@ -116,6 +116,14 @@ public class EntryRegistryImpl implements EntryRegistry {
         return Collections.unmodifiableList(filteredList.getList());
     }
     
+    public List<HashedEntryStackWrapper> getPreFilteredComplexList() {
+        return Collections.unmodifiableList(filteredList.getComplexList());
+    }
+    
+    public List<HashedEntryStackWrapper> getComplexList() {
+        return Collections.unmodifiableList(registryList.collectHashed());
+    }
+    
     @Override
     public void refilter() {
         List<HashedEntryStackWrapper> stacks = registryList.collectHashed();

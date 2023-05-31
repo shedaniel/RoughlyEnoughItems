@@ -449,7 +449,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                         }
                         ExportRecipeIdentifierToast.addToast(I18n.get("msg.rei.exported_recipe"), I18n.get("msg.rei.exported_recipe.desc"));
                     }
-                    minecraft.setScreen(DefaultDisplayViewingScreen.this);
+                    minecraft.setScreen(null);
                 }, Component.translatable("text.rei.ask_to_export", tab.categoryName),
                         Component.translatable("text.rei.ask_to_export.subtitle", categoryMap.getOrDefault(tab.category, Collections.emptyList()).size())));
             }

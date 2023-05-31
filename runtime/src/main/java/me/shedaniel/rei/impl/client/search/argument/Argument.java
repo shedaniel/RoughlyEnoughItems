@@ -26,92 +26,78 @@ package me.shedaniel.rei.impl.client.search.argument;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import it.unimi.dsi.fastutil.Pair;
-import it.unimi.dsi.fastutil.ints.IntIntMutablePair;
-import it.unimi.dsi.fastutil.ints.IntIntPair;
 import it.unimi.dsi.fastutil.ints.IntList;
-import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectMaps;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
-import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.SearchMode;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.method.CharacterUnpackingInputMethod;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.search.IntRange;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentTypesRegistry;
+import me.shedaniel.rei.impl.client.search.collapsed.CollapsedEntriesCache;
 import me.shedaniel.rei.impl.client.search.result.ArgumentApplicableResult;
-import me.shedaniel.rei.impl.client.util.ThreadCreator;
-import me.shedaniel.rei.impl.common.InternalLogger;
+import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Level;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BooleanSupplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class Argument<T, R> {
-    private static final ExecutorService EXECUTOR_SERVICE = new ThreadCreator("REI-ArgumentCache").asService();
-    private static final Short2ObjectMap<Long2ObjectMap<Object>> SEARCH_CACHE = Short2ObjectMaps.synchronize(new Short2ObjectOpenHashMap<>());
-    private static final Object NO_CACHE = new Object();
-    private static final AtomicReference<String> lastLanguage = new AtomicReference<>();
-    private ArgumentType<T, R> argumentType;
-    private String text;
-    private T filterData;
-    private boolean regular;
+    public static final Object NO_CACHE = new Object();
+    private static final AtomicReference<String> LAST_LANGUAGE = new AtomicReference<>();
+    public static ArgumentCache cache = new ArgumentCache();
+    private final ArgumentType<T, R> argumentType;
+    private final String text;
+    private final T filterData;
+    private final boolean regular;
     private final int start;
     private final int end;
     private static final Pattern SPLIT_PATTERN = Pattern.compile("(?:\"([^\"]*)\")|([^\\s]+)");
     
-    public Argument(ArgumentType<T, R> argumentType, String text, boolean regular, int start, int end, boolean lowercase) {
+    public Argument(ArgumentType<T, R> argumentType, String text, boolean regular, T filterData, int start, int end, boolean lowercase) {
         this.argumentType = argumentType;
         this.text = lowercase ? text.toLowerCase(Locale.ROOT) : text;
         this.regular = regular;
-        this.filterData = null;
+        this.filterData = filterData;
         this.start = start;
         this.end = end;
     }
     
     public static void resetCache(boolean cache) {
-        SEARCH_CACHE.clear();
+        Argument.cache = new ArgumentCache();
+        CollapsedEntriesCache.reset();
+        Collection<HashedEntryStackWrapper> stacks = new AbstractCollection<>() {
+            @Override
+            public Iterator<HashedEntryStackWrapper> iterator() {
+                return Iterators.transform(((EntryRegistryImpl) EntryRegistry.getInstance()).getComplexList().iterator(),
+                        HashedEntryStackWrapper::normalize);
+            }
+            
+            @Override
+            public int size() {
+                return ((EntryRegistryImpl) EntryRegistry.getInstance()).getComplexList().size();
+            }
+        };
         if (cache) {
-            Argument.prepareFilter(new AbstractCollection<>() {
-                @Override
-                public Iterator<EntryStack<?>> iterator() {
-                    return Iterators.transform(EntryRegistry.getInstance().getPreFilteredList().iterator(),
-                            EntryStack::normalize);
-                }
-                
-                @Override
-                public int size() {
-                    return EntryRegistry.getInstance().getPreFilteredList().size();
-                }
-            }, ArgumentTypesRegistry.ARGUMENT_TYPE_LIST, () -> true, EXECUTOR_SERVICE);
+            Argument.cache.prepareFilter(stacks, ArgumentTypesRegistry.ARGUMENT_TYPE_LIST, ArgumentCache.EXECUTOR_SERVICE);
         }
+        CollapsedEntriesCache.getInstance().prepare(stacks);
     }
     
     public static boolean hasCache() {
-        return !SEARCH_CACHE.isEmpty();
+        return !Argument.cache.isEmpty();
     }
     
     public int start() {
@@ -127,7 +113,7 @@ public class Argument<T, R> {
         
         void addSplitter(int index);
         
-        void addPart(Argument<?, ?> argument, boolean usingGrammar, Collection<IntRange> grammarRanges, int index);
+        void addPart(Argument.Builder<?, ?> argument, boolean usingGrammar, Collection<IntRange> grammarRanges, int index);
     }
     
     public static List<CompoundArgument> bakeArguments(String filter) {
@@ -165,19 +151,7 @@ public class Argument<T, R> {
                 sink.addSplitter(tokenStartIndex - 1);
             }
         }
-        prepareSearchFilter(compoundArguments);
         return compoundArguments;
-    }
-    
-    private static void prepareSearchFilter(List<CompoundArgument> compoundArguments) {
-        for (CompoundArgument arguments : compoundArguments) {
-            for (AlternativeArgument alternativeArgument : arguments) {
-                for (Argument<?, ?> argument : alternativeArgument) {
-                    //noinspection RedundantCast
-                    ((Argument<Object, Object>) argument).filterData = argument.argumentType.prepareSearchFilter(argument.getText());
-                }
-            }
-        }
     }
     
     private static void applyArgument(ArgumentType<?, ?> type, String filter, Matcher terms, int tokenStartIndex, AlternativeArgument.Builder alternativeBuilder, boolean forceGrammar, @Nullable ProcessedSink sink) {
@@ -187,7 +161,7 @@ public class Argument<T, R> {
         
         if (result.isApplicable()) {
             int group = terms.group(1) != null ? 1 : 2;
-            Argument<?, ?> argument = new Argument<>(type, result.getText(), !result.isInverted(),
+            Argument.Builder<?, ?> argument = new Argument.Builder<>(type, result.getText(), !result.isInverted(),
                     terms.start(group) + tokenStartIndex, terms.end(group) + tokenStartIndex, !result.shouldPreserveCasing());
             alternativeBuilder.add(argument);
             if (sink != null) {
@@ -202,17 +176,17 @@ public class Argument<T, R> {
         }
     }
     
-    public static boolean matches(EntryStack<?> stack, List<CompoundArgument> compoundArguments, InputMethod<?> inputMethod) {
+    public static boolean matches(EntryStack<?> stack, long hashExact, List<CompoundArgument> compoundArguments, InputMethod<?> inputMethod) {
         if (compoundArguments.isEmpty()) return true;
         String newLanguage = Minecraft.getInstance().options.languageCode;
-        if (!Objects.equals(lastLanguage.getAndSet(newLanguage), newLanguage)) {
+        if (!Objects.equals(LAST_LANGUAGE.getAndSet(newLanguage), newLanguage)) {
             resetCache(false);
         }
         
         a:
         for (CompoundArgument arguments : compoundArguments) {
             for (AlternativeArgument argument : arguments) {
-                if (!matches(stack, argument, inputMethod)) {
+                if (!matches(stack, hashExact, argument, inputMethod)) {
                     continue a;
                 }
             }
@@ -223,9 +197,8 @@ public class Argument<T, R> {
         return false;
     }
     
-    private static <T> boolean matches(EntryStack<?> stack, AlternativeArgument alternativeArgument, InputMethod<T> inputMethod) {
+    private static <T> boolean matches(EntryStack<?> stack, long hashExact, AlternativeArgument alternativeArgument, InputMethod<T> inputMethod) {
         if (alternativeArgument.isEmpty()) return true;
-        long hashExact = EntryStacks.hashExact(stack);
         ResultSinkImpl<T> sink = new ResultSinkImpl<>(inputMethod);
         
         for (Argument<?, ?> argument : alternativeArgument) {
@@ -238,17 +211,8 @@ public class Argument<T, R> {
         return false;
     }
     
-    private static Long2ObjectMap<Object> getSearchCache(ArgumentType<?, ?> argumentType) {
-        short argumentIndex = (short) argumentType.getIndex();
-        Long2ObjectMap<Object> map = SEARCH_CACHE.get(argumentIndex);
-        if (map == null) {
-            SEARCH_CACHE.put(argumentIndex, map = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>()));
-        }
-        return map;
-    }
-    
     private static <T, R, B> boolean matches(ArgumentType<T, B> argumentType, EntryStack<?> stack, long hashExact, R filterData, ResultSinkImpl<?> sink) {
-        Long2ObjectMap<Object> map = getSearchCache(argumentType);
+        Long2ObjectMap<Object> map = Argument.cache.getSearchCache(argumentType);
         Object value = map.get(hashExact);
         if (value == null) {
             value = argumentType.cacheData(stack);
@@ -293,112 +257,6 @@ public class Argument<T, R> {
         }
     }
     
-    public static Long prepareStart = null;
-    public static List<HashedEntryStackWrapper> prepareStacks = null;
-    public static IntIntPair prepareStage = null;
-    public static IntIntPair[] currentStages = null;
-    
-    public static void prepareFilter(Collection<EntryStack<?>> stacks, Collection<ArgumentType<?, ?>> argumentTypes) {
-        Argument.prepareFilter(stacks, argumentTypes, () -> true, null);
-    }
-    
-    public static void prepareFilter(Collection<EntryStack<?>> stacks, Collection<ArgumentType<?, ?>> argumentTypes, BooleanSupplier isValid, @Nullable Executor executor) {
-        if (prepareStage != null || currentStages != null) return;
-        try {
-            prepareStart = Util.getEpochMillis();
-            Long2ObjectMap<Object>[] caches = CollectionUtils.map(argumentTypes, Argument::getSearchCache).toArray(Long2ObjectMap[]::new);
-            prepareStacks = CollectionUtils.mapAndFilter(stacks, stack -> {
-                for (Long2ObjectMap<Object> cache : caches) {
-                    if (!cache.containsKey(stack.hashExact())) {
-                        return true;
-                    }
-                }
-                
-                return false;
-            }, HashedEntryStackWrapper::new);
-            if (prepareStacks.isEmpty() && !isValid.getAsBoolean()) {
-                return;
-            }
-            InternalLogger.getInstance().log(ConfigObject.getInstance().doDebugSearchTimeRequired() ? Level.INFO : Level.TRACE, "Preparing " + (prepareStacks.size() * argumentTypes.size()) + " stacks for search arguments");
-            prepareStage = new IntIntMutablePair(0, argumentTypes.size());
-            currentStages = new IntIntPair[argumentTypes.size()];
-            int searchPartitionSize = ConfigObject.getInstance().getAsyncSearchPartitionSize();
-            boolean async = ConfigObject.getInstance().shouldAsyncSearch() && prepareStacks.size() > searchPartitionSize * 4;
-            List<CompletableFuture<Long2ObjectMap<Object>>> futures = Lists.newArrayList();
-            List<Pair<ArgumentType<?, ?>, CompletableFuture<Long2ObjectMap<Object>>>> pairs = Lists.newArrayList();
-            
-            for (ArgumentType<?, ?> argumentType : argumentTypes) {
-                prepareStage.first(prepareStage.firstInt() + 1);
-                Long2ObjectMap<Object> map = getSearchCache(argumentType);
-                IntIntPair currentStage = currentStages[prepareStage.firstInt() - 1] = new IntIntMutablePair(0, prepareStacks.size());
-                if (!isValid.getAsBoolean()) return;
-                
-                if (async) {
-                    for (Collection<HashedEntryStackWrapper> partitionStacks : CollectionUtils.partition(prepareStacks, searchPartitionSize)) {
-                        CompletableFuture<Long2ObjectMap<Object>> future = CompletableFuture.supplyAsync(() -> {
-                            Long2ObjectMap<Object> out = new Long2ObjectArrayMap<>(searchPartitionSize + 1);
-                            int i = 0;
-                            for (HashedEntryStackWrapper stack : partitionStacks) {
-                                if (map.get(stack.hashExact()) == null) {
-                                    Object data = argumentType.cacheData(stack.unwrap());
-                                    
-                                    if (data != null) {
-                                        out.put(stack.hashExact(), data);
-                                    }
-                                }
-                                if (i++ % 40 == 0) if (!isValid.getAsBoolean()) return Long2ObjectMaps.emptyMap();
-                            }
-                            if (!isValid.getAsBoolean()) return Long2ObjectMaps.emptyMap();
-                            return out;
-                        }, Objects.requireNonNullElse(executor, EXECUTOR_SERVICE)).whenComplete((objectLong2ObjectMap, throwable) -> {
-                            currentStage.first(currentStage.firstInt() + partitionStacks.size());
-                        });
-                        futures.add(future);
-                        pairs.add(Pair.of(argumentType, future));
-                    }
-                } else {
-                    for (HashedEntryStackWrapper stack : prepareStacks) {
-                        currentStage.first(currentStage.firstInt() + 1);
-                        
-                        if (map.get(stack.hashExact()) == null) {
-                            Object data = argumentType.cacheData(stack.unwrap());
-                            
-                            if (data != null) {
-                                map.put(stack.hashExact(), data);
-                            }
-                        }
-                    }
-                }
-            }
-            
-            if (async) {
-                try {
-                    CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(30, TimeUnit.SECONDS);
-                } catch (ExecutionException | TimeoutException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException ignore) {
-                } finally {
-                    int sum = 0;
-                    for (Pair<ArgumentType<?, ?>, CompletableFuture<Long2ObjectMap<Object>>> pair : pairs) {
-                        Long2ObjectMap<Object> now = pair.second().getNow(null);
-                        if (now != null) {
-                            getSearchCache(pair.left()).putAll(now);
-                            sum += now.size();
-                        }
-                    }
-                    InternalLogger.getInstance().log(ConfigObject.getInstance().doDebugSearchTimeRequired() ? Level.INFO : Level.TRACE, "Prepared " + sum + " / " + (prepareStacks.size() * argumentTypes.size()) + " stacks for search arguments in " + (Util.getEpochMillis() - prepareStart) + "ms");
-                }
-            } else {
-                InternalLogger.getInstance().log(ConfigObject.getInstance().doDebugSearchTimeRequired() ? Level.INFO : Level.TRACE, "Prepared " + (prepareStacks.size() * argumentTypes.size()) + " stacks for search arguments in " + (Util.getEpochMillis() - prepareStart) + "ms");
-            }
-        } finally {
-            prepareStart = null;
-            prepareStacks = null;
-            prepareStage = null;
-            currentStages = null;
-        }
-    }
-    
     public ArgumentType<?, ?> getArgument() {
         return argumentType;
     }
@@ -416,4 +274,50 @@ public class Argument<T, R> {
         return String.format("Argument[%s]: name = %s, regular = %b", argumentType.getName(), text, regular);
     }
     
+    public static class Builder<T, R> {
+        private final ArgumentType<T, R> argumentType;
+        private final String text;
+        private final boolean regular;
+        private final int start;
+        private final int end;
+        private final boolean lowercase;
+        
+        public Builder(ArgumentType<T, R> argumentType, String text, boolean regular, int start, int end, boolean lowercase) {
+            this.argumentType = argumentType;
+            this.text = text;
+            this.regular = regular;
+            this.start = start;
+            this.end = end;
+            this.lowercase = lowercase;
+        }
+        
+        public Argument<T, R> build() {
+            return new Argument<>(argumentType, text, regular, argumentType.prepareSearchFilter(text),
+                    start, end, lowercase);
+        }
+        
+        public ArgumentType<T, R> getType() {
+            return argumentType;
+        }
+        
+        public int start() {
+            return start;
+        }
+        
+        public int end() {
+            return end;
+        }
+        
+        public String getText() {
+            return text;
+        }
+        
+        public boolean isRegular() {
+            return regular;
+        }
+        
+        public boolean isLowercase() {
+            return lowercase;
+        }
+    }
 }

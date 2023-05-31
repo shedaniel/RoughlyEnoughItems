@@ -25,7 +25,10 @@ package me.shedaniel.rei.impl.client.util;
 
 import me.shedaniel.rei.impl.common.InternalLogger;
 
-import java.util.concurrent.*;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinWorkerThread;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public final class ThreadCreator {
@@ -44,21 +47,20 @@ public final class ThreadCreator {
         return threadId;
     }
     
-    public Thread create(Runnable task) {
-        Thread thread = new Thread(this.group(), task, this.group().getName() + "-" + this.threadId().getAndIncrement());
-        thread.setDaemon(true);
-        thread.setUncaughtExceptionHandler(($, exception) -> {
+    public ExecutorService asService() {
+        return this.asService(Runtime.getRuntime().availableProcessors());
+    }
+    
+    public ExecutorService asService(int poolSize) {
+        return new ForkJoinPool(poolSize, pool -> {
+            ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
+            worker.setName(group().getName() + "-" + threadId().getAndIncrement());
+            worker.setContextClassLoader(getClass().getClassLoader());
+            return worker;
+        }, ($, exception) -> {
             if (!(exception instanceof InterruptedException) && !(exception instanceof CancellationException) && !(exception instanceof ThreadDeath)) {
                 InternalLogger.getInstance().throwException(exception);
             }
-        });
-        return thread;
-    }
-    
-    public ExecutorService asService() {
-        return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
-                10L, TimeUnit.SECONDS,
-                new SynchronousQueue<>(),
-                this::create);
+        }, true);
     }
 }
