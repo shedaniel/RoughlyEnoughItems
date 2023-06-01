@@ -27,6 +27,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.event.CompoundEventResult;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -38,6 +39,7 @@ import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProvider
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitor;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitorWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.*;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -45,6 +47,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.screen.AbstractDisplayViewingScreen;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
@@ -70,6 +73,7 @@ public class ScreenRegistryImpl implements ScreenRegistry {
     private List<OverlayDecider> deciders = new CopyOnWriteArrayList<>();
     private Map<Class<?>, List<OverlayDecider>> cache = new HashMap<>();
     private ExclusionZones exclusionZones = new ExclusionZonesImpl();
+    private OverlayRendererProvider lastRendererProvider = null;
     private final ThreadLocal<Class<? extends Screen>> tmpScreen = new ThreadLocal<>();
     
     @Override
@@ -256,12 +260,20 @@ public class ScreenRegistryImpl implements ScreenRegistry {
         draggableProviders.clear();
         draggableVisitors.clear();
         tmpScreen.remove();
+        if (this.lastRendererProvider != null) {
+            this.lastRendererProvider.onRemoved();
+        }
+        this.lastRendererProvider = null;
         
         registerDefault();
     }
     
     @Override
     public void endReload() {
+        if (this.lastRendererProvider != null) {
+            this.lastRendererProvider.onRemoved();
+        }
+        this.lastRendererProvider = null;
         InternalLogger.getInstance().debug("Registered %d overlay deciders and %d exclusion zones", deciders.size(), exclusionZones.getZonesCount());
     }
     
@@ -309,6 +321,22 @@ public class ScreenRegistryImpl implements ScreenRegistry {
                 return -10.0;
             }
         });
+        registerDecider(new OverlayDecider() {
+            @Override
+            public <R extends Screen> boolean isHandingScreen(Class<R> screen) {
+                return true;
+            }
+            
+            @Override
+            public OverlayRendererProvider getRendererProvider() {
+                return DefaultScreenOverlayRenderer.INSTANCE;
+            }
+            
+            @Override
+            public double getPriority() {
+                return -20.0;
+            }
+        });
         registerFocusedStack(new FocusedStackProvider() {
             @Override
             public CompoundEventResult<EntryStack<?>> provide(Screen screen, Point mouse) {
@@ -328,5 +356,56 @@ public class ScreenRegistryImpl implements ScreenRegistry {
                 Widgets.walk(context.getScreen().children(), DraggableComponentProviderWidget.class::isInstance)));
         registerDraggableComponentVisitor(DraggableComponentVisitorWidget.from(context ->
                 Widgets.walk(context.getScreen().children(), DraggableComponentVisitorWidget.class::isInstance)));
+    }
+    
+    public OverlayRendererProvider getLastRendererProvider(Screen screen) {
+        for (OverlayDecider decider : getDeciders(screen)) {
+            if (decider.isHandingScreen(screen.getClass())) {
+                OverlayRendererProvider provider = decider.getRendererProvider();
+                
+                if (provider != null) {
+                    return applyRendererProvider(provider);
+                }
+            }
+        }
+        
+        return applyRendererProvider(null);
+    }
+    
+    private OverlayRendererProvider applyRendererProvider(OverlayRendererProvider provider) {
+        if (provider != this.lastRendererProvider) {
+            if (this.lastRendererProvider != null) {
+                this.lastRendererProvider.onRemoved();
+            }
+            this.lastRendererProvider = provider;
+            if (this.lastRendererProvider != null) {
+                this.lastRendererProvider.onApplied(new OverlayRendererProvider.Sink() {
+                    @Override
+                    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+                        if (ScreenRegistryImpl.this.lastRendererProvider == provider) {
+                            ScreenOverlayImpl.getInstance().render(matrices, mouseX, mouseY, delta);
+                        } else {
+                            InternalLogger.getInstance().warn("Renderer provider %s still tries to render after being removed!", provider);
+                        }
+                    }
+                    
+                    @Override
+                    public void lateRender(PoseStack matrices, int mouseX, int mouseY, float delta) {
+                        if (ScreenRegistryImpl.this.lastRendererProvider == provider) {
+                            ScreenOverlayImpl.getInstance().lateRender(matrices, mouseX, mouseY, delta);
+                        } else {
+                            InternalLogger.getInstance().warn("Renderer provider %s still tries to render after being removed!", provider);
+                        }
+                    }
+                    
+                    @Override
+                    public ScreenOverlay getOverlay() {
+                        return ScreenOverlayImpl.getInstance();
+                    }
+                });
+            }
+        }
+        
+        return provider;
     }
 }

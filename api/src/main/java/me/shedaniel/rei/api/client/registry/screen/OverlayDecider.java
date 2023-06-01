@@ -89,6 +89,19 @@ public interface OverlayDecider extends Comparable<OverlayDecider> {
     }
     
     /**
+     * Returns the provider for rendering the overlay.
+     * Return {@code null} to pass the rendering to the next decider.
+     *
+     * @return the provider for rendering the overlay
+     * @see OverlayRendererProvider for more information
+     * @since 8.3
+     */
+    @ApiStatus.Experimental
+    default OverlayRendererProvider getRendererProvider() {
+        return null;
+    }
+    
+    /**
      * {@inheritDoc}
      */
     @Override
