@@ -88,9 +88,9 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
         InternalLogger.getInstance().debug("Recollecting custom collapsible entry groups");
         this.customEntries.clear();
         for (CollapsibleConfigManager.CustomGroup customEntry : CollapsibleConfigManager.getInstance().getConfig().customGroups) {
-            List<? extends EntryStack<?>> stacks = CollectionUtils.filterAndMap(customEntry.stacks, EntryStackProvider::isValid, EntryStackProvider::provide);
+            List<HashedEntryStackWrapper> stacks = CollectionUtils.filterAndMap(customEntry.stacks, EntryStackProvider::isValid, provider -> new HashedEntryStackWrapper(provider.provide()));
             Entry entry = new Entry(customEntry.id, new TextComponent(customEntry.name),
-                    new ListMatcher(stacks));
+                    new ListMatcher(stacks), false);
             this.customEntries.add(entry);
             InternalLogger.getInstance().debug("Added custom collapsible entry group [%s] %s with %d entries", entry.getId(), entry.getName().getString(), stacks.size());
         }

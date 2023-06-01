@@ -38,11 +38,9 @@ public interface FilteredEntryList extends EntryRegistryListener {
     
     void refreshFilteringFor(boolean log, @Nullable Set<FilteringRule<?>> refilterRules, Collection<EntryStack<?>> stacks, @Nullable LongCollection hashes);
     
-    List<HashedEntryStackWrapper> getList();
+    List<HNEntryStackWrapper> getList();
     
     List<EntryStack<?>> getUnwrappedList();
-    
-    List<HNEntryStackWrapper> getComplexList();
     
     boolean isFiltered(EntryStack<?> stack, long hashExact);
 }
