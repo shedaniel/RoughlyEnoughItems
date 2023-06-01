@@ -124,10 +124,6 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
             return id;
         }
         
-        public ResourceLocation getId() {
-            return id;
-        }
-        
         public String getModId() {
             return id.getNamespace();
         }
