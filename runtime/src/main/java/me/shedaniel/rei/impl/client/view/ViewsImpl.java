@@ -55,6 +55,8 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.gui.craftable.CraftableFilter;
 import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
+import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
+import me.shedaniel.rei.impl.client.registry.display.DisplaysHolder;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.display.DisplaySpec;
@@ -113,6 +115,7 @@ public class ViewsImpl implements Views {
         List<EntryStack<?>> recipesForStacksWildcard = CollectionUtils.flatMap(recipesForStacks, wildcardFunction);
         List<EntryStack<?>> usagesForStacksWildcard = CollectionUtils.flatMap(usagesForStacks, wildcardFunction);
         DisplayRegistry displayRegistry = DisplayRegistry.getInstance();
+        DisplaysHolder displaysHolder = ((DisplayRegistryImpl) displayRegistry).displaysHolder();
         
         Map<DisplayCategory<?>, List<Display>> result = Maps.newLinkedHashMap();
         for (CategoryRegistry.CategoryConfiguration<?> categoryConfiguration : CategoryRegistry.getInstance()) {
@@ -137,13 +140,13 @@ public class ViewsImpl implements Views {
             for (Display display : allRecipesFromCategory) {
                 if (processingVisibilityHandlers && !displayRegistry.isDisplayVisible(display)) continue;
                 if (!recipesForStacks.isEmpty()) {
-                    if (isRecipesFor(recipesForStacks, display)) {
+                    if (isRecipesFor(displaysHolder, recipesForStacks, display)) {
                         set.add(display);
                         continue;
                     }
                 }
                 if (!usagesForStacks.isEmpty()) {
-                    if (isUsagesFor(usagesForStacks, display)) {
+                    if (isUsagesFor(displaysHolder, usagesForStacks, display)) {
                         set.add(display);
                         continue;
                     }
@@ -153,13 +156,13 @@ public class ViewsImpl implements Views {
                 for (Display display : allRecipesFromCategory) {
                     if (processingVisibilityHandlers && !displayRegistry.isDisplayVisible(display)) continue;
                     if (!recipesForStacksWildcard.isEmpty()) {
-                        if (isRecipesFor(recipesForStacksWildcard, display)) {
+                        if (isRecipesFor(displaysHolder, recipesForStacksWildcard, display)) {
                             set.add(display);
                             continue;
                         }
                     }
                     if (!usagesForStacksWildcard.isEmpty()) {
-                        if (isUsagesFor(usagesForStacksWildcard, display)) {
+                        if (isUsagesFor(displaysHolder, usagesForStacksWildcard, display)) {
                             set.add(display);
                             continue;
                         }
@@ -290,11 +293,23 @@ public class ViewsImpl implements Views {
         return resultSpeced;
     }
     
-    public static boolean isRecipesFor(List<EntryStack<?>> stacks, Display display) {
+    public static boolean isRecipesFor(@Nullable DisplaysHolder displaysHolder, List<EntryStack<?>> stacks, Display display) {
+        if (displaysHolder != null && displaysHolder.isCached(display)) {
+            for (EntryStack<?> recipesFor : stacks) {
+                return displaysHolder.getDisplaysByOutput(recipesFor).contains(display);
+            }
+        }
+        
         return checkUsages(stacks, display, display.getOutputEntries());
     }
     
-    public static boolean isUsagesFor(List<EntryStack<?>> stacks, Display display) {
+    public static boolean isUsagesFor(@Nullable DisplaysHolder displaysHolder, List<EntryStack<?>> stacks, Display display) {
+        if (displaysHolder != null && displaysHolder.isCached(display)) {
+            for (EntryStack<?> recipesFor : stacks) {
+                return displaysHolder.getDisplaysByInput(recipesFor).contains(display);
+            }
+        }
+        
         return checkUsages(stacks, display, display.getInputEntries());
     }
     
