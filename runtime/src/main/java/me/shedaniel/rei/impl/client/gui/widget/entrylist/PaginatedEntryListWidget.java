@@ -41,7 +41,6 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.changelog.ChangelogLoader;
 import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.DefaultDisplayChoosePageWidget;
@@ -58,7 +57,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
-    private Button leftButton, rightButton, changelogButton;
+    private Button leftButton, rightButton;
     private List<Widget> additionalWidgets;
     private List</*EntryStack<?> | EntryIngredient*/ Object> stacks = new ArrayList<>();
     private Object2IntMap<CollapsedStack> collapsedStackIndices = new Object2IntOpenHashMap<>();
@@ -218,24 +217,6 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             matrices.popPose();
             helper.setBlitOffset(helper.getBlitOffset() - 1);
         }));
-        this.changelogButton = Widgets.createButton(new Rectangle(overlayBounds.getMaxX() - 18 - 18, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TextComponent(""))
-                .onClick(button -> {
-                    ChangelogLoader.show();
-                })
-                .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y))
-                .tooltipLine(new TranslatableComponent("text.rei.changelog.title"))
-                .focusable(false);
-        this.additionalWidgets.add(changelogButton);
-        this.additionalWidgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            helper.setBlitOffset(helper.getBlitOffset() + 1);
-            RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
-            Rectangle bounds = changelogButton.getBounds();
-            matrices.pushPose();
-            matrices.translate(0.5f, 0, 0);
-            helper.blit(matrices, bounds.x + 1, bounds.y + 2, !ChangelogLoader.hasVisited() ? 28 : 14, 0, 14, 14);
-            matrices.popPose();
-            helper.setBlitOffset(helper.getBlitOffset() - 1);
-        }));
         this.rightButton = Widgets.createButton(new Rectangle(overlayBounds.getMaxX() - 18, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), new TextComponent(""))
                 .onClick(button -> {
                     setPage(getPage() + 1);
@@ -256,7 +237,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             matrices.popPose();
             helper.setBlitOffset(helper.getBlitOffset() - 1);
         }));
-        this.additionalWidgets.add(Widgets.createClickableLabel(new Point(overlayBounds.x + ((overlayBounds.width - 18) / 2), overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), NarratorChatListener.NO_TITLE, label -> {
+        this.additionalWidgets.add(Widgets.createClickableLabel(new Point(overlayBounds.x + (overlayBounds.width / 2), overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), NarratorChatListener.NO_TITLE, label -> {
             if (!Screen.hasShiftDown()) {
                 setPage(0);
                 updateEntriesPosition();
