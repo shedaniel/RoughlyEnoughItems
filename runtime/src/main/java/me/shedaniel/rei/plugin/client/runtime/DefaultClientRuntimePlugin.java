@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.plugin.client.runtime;
 
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.DataResult;
@@ -67,6 +68,7 @@ import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayCompositeWidget;
+import me.shedaniel.rei.impl.client.gui.widget.DisplayTooltipComponent;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.search.method.DefaultInputMethod;
 import me.shedaniel.rei.impl.client.search.method.unihan.*;
@@ -78,6 +80,7 @@ import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -86,6 +89,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Environment(EnvType.CLIENT)
 @ApiStatus.Internal
@@ -325,6 +329,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
     
     private static class DisplayFavoriteEntry extends FavoriteEntry {
         private static final Function<EntryStack<?>, String> CANCEL_FLUID_AMOUNT = s -> null;
+        private final Supplier<DisplayTooltipComponent> tooltipComponent;
         private final Display display;
         private final UUID uuid;
         private final long hash;
@@ -333,6 +338,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
             this.display = display;
             this.uuid = uuid;
             this.hash = uuid.hashCode();
+            this.tooltipComponent = Suppliers.memoize(() -> new DisplayTooltipComponent(display));
         }
         
         @Override
@@ -371,6 +377,14 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                         slot.render(matrices, mouseX, mouseY, delta);
                         matrices.popPose();
                     }
+                }
+                
+                @Override
+                @Nullable
+                public Tooltip getTooltip(TooltipContext context) {
+                    Tooltip tooltip = Tooltip.create(context.getPoint());
+                    tooltip.add((ClientTooltipComponent) tooltipComponent.get());
+                    return tooltip;
                 }
             };
         }
