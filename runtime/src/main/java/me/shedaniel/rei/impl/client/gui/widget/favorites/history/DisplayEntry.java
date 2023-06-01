@@ -128,8 +128,8 @@ public class DisplayEntry extends WidgetWithBounds {
             throwable.printStackTrace();
             List<Widget> w = new ArrayList<>();
             w.add(Widgets.createRecipeBase(displayBounds).color(0xFFBB0000));
-            w.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() - 8), new TextComponent("Failed to initiate setupDisplay")));
-            w.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() + 1), new TextComponent("Check console for error")));
+            w.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() - 8), Component.literal("Failed to initiate setupDisplay")));
+            w.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() + 1), Component.literal("Check console for error")));
             return w;
         }
     }

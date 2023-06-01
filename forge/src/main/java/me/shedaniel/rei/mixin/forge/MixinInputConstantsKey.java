@@ -27,7 +27,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -43,7 +42,7 @@ public abstract class MixinInputConstantsKey {
     @Inject(method = "getDisplayName", at = @At("HEAD"), cancellable = true)
     private void getDisplayName(CallbackInfoReturnable<Component> cir) {
         if (isPatchingAsyncThreadCrash() && !RenderSystem.isOnRenderThread()) {
-            cir.setReturnValue(new TranslatableComponent(getName()));
+            cir.setReturnValue(Component.translatable(getName()));
         }
     }
     
