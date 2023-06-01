@@ -66,7 +66,6 @@ public class UncertainDisplayViewingScreen extends Screen {
     private BooleanConsumer callback;
     private Button button;
     private Screen parent;
-    private Widget slider;
     private boolean showTips;
     
     public UncertainDisplayViewingScreen(Screen parent, DisplayScreenType type, boolean showTips, BooleanConsumer callback) {
@@ -184,11 +183,6 @@ public class UncertainDisplayViewingScreen extends Screen {
             return true;
         }
         return super.keyPressed(int_1, int_2, int_3);
-    }
-    
-    @Override
-    public boolean mouseDragged(double d, double e, int i, double f, double g) {
-        return slider.mouseDragged(d, e, i, f, g) || super.mouseDragged(d, e, i, f, g);
     }
     
     public class ScreenTypeSelection extends WidgetWithBounds {

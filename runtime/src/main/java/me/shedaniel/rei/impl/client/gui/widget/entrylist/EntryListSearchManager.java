@@ -80,13 +80,13 @@ public class EntryListSearchManager {
         return checkCraftable ? stack -> workingItems.contains(stack.hashExact()) : stack -> true;
     }, HashedEntryStackWrapper::normalize);
     
-    private static List<EntryStack<?>> getAllEntriesContextually(SearchFilter filter) {
+    private static List<HashedEntryStackWrapper> getAllEntriesContextually(SearchFilter filter) {
         if (EntryRegistry.getInstance().isReloading()) return List.of();
         if (ConfigObject.getInstance().isHidingEntryPanelIfIdle() && filter.getFilter().isEmpty()) {
             return List.of();
         }
         
-        return EntryRegistry.getInstance().getPreFilteredList();
+        return ((EntryRegistryImpl) EntryRegistry.getInstance()).getPreFilteredComplexList();
     }
     
     public void update(String searchTerm, boolean ignoreLastSearch, Consumer<List</*EntryStack<?> | CollapsedStack*/ Object>> update) {
