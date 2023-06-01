@@ -322,6 +322,7 @@
   "config.roughlyenoughitems.miscellaneous.newFastEntryRendering": "Faster Entry Rendering:",
   "config.roughlyenoughitems.miscellaneous.cachingFastEntryRendering": "Caching Entry Rendering:",
   "config.roughlyenoughitems.miscellaneous.cachingFastEntryRendering.@PrefixText": "This option will improve performance for rendering entries for up to 5x, with an average of 2.5x performance gain. However, this will break enchantment glints and animated textures.",
+  "config.roughlyenoughitems.miscellaneous.cachingDisplayLookup": "Caching Display Lookup:",
   "config.roughlyenoughitems.itemCheatingMode": "Item Cheating Amount:",
   "config.roughlyenoughitems.itemCheatingMode.rei_like": "Normal",
   "config.roughlyenoughitems.itemCheatingMode.jei_like": "Inverted",

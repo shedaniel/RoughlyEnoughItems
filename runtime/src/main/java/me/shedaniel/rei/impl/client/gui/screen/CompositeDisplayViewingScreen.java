@@ -54,10 +54,7 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @ApiStatus.Internal
 public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen {
@@ -183,7 +180,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             ViewSearchBuilder.builder().addAllCategories().open();
         }).tooltip(Component.translatable("text.rei.view_all_categories")).noShadow().color(0xFF404040, 0xFFBBBBBB).hoveredColor(0xFF0041FF, 0xFFFFBD4D));
         
-        this.children().addAll(buttonList);
+        this.widgets.add(new ButtonListWidget(buttonList));
         this.children().addAll(widgets);
     }
     
@@ -270,6 +267,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
     
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        this.widgets.sort(Comparator.comparingDouble(Widget::getZRenderingPriority));
         if (ConfigObject.getInstance().isCompositeScrollBarPermanent()) {
             scrollBarAlphaFutureTime = System.currentTimeMillis();
             scrollBarAlphaFuture = 0;
@@ -294,32 +292,12 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         }
         scrolling.updatePosition(delta);
         renderBackground(matrices);
-        int yOffset = 0;
         getOverlay().render(matrices, mouseX, mouseY, delta);
         super.render(matrices, mouseX, mouseY, delta);
         for (Widget widget : widgets) {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             widget.render(matrices, mouseX, mouseY, delta);
         }
-        matrices.pushPose();
-        ScissorsHandler.INSTANCE.scissor(scrolling.getBounds());
-        for (Button button : buttonList) {
-            button.getBounds().y = scrollListBounds.y + 1 + yOffset - scrolling.scrollAmountInt();
-            if (button.getBounds().getMaxY() > scrollListBounds.getMinY() && button.getBounds().getMinY() < scrollListBounds.getMaxY()) {
-                button.render(matrices, mouseX, mouseY, delta);
-            }
-            yOffset += button.getBounds().height;
-        }
-        for (int i = 0; i < buttonList.size(); i++) {
-            if (buttonList.get(i).getBounds().getMaxY() > scrollListBounds.getMinY() && buttonList.get(i).getBounds().getMinY() < scrollListBounds.getMaxY()) {
-                displayRenderers.get(i).setZ(1);
-                displayRenderers.get(i).render(matrices, buttonList.get(i).getBounds(), mouseX, mouseY, delta);
-                Optional.ofNullable(displayRenderers.get(i).getTooltip(TooltipContext.of(new Point(mouseX, mouseY)))).ifPresent(Tooltip::queue);
-            }
-        }
-        scrolling.renderScrollBar(0, scrollBarAlpha, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
-        ScissorsHandler.INSTANCE.removeLastScissor();
-        matrices.popPose();
     }
     
     @Override
@@ -372,5 +350,42 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+    
+    private class ButtonListWidget extends Widget {
+        private final List<Button> buttonList;
+        
+        public ButtonListWidget(List<Button> buttonList) {
+            this.buttonList = buttonList;
+        }
+        
+        @Override
+        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+            int yOffset = 0;
+            matrices.pushPose();
+            ScissorsHandler.INSTANCE.scissor(scrolling.getBounds());
+            for (Button button : buttonList) {
+                button.getBounds().y = scrollListBounds.y + 1 + yOffset - scrolling.scrollAmountInt();
+                if (button.getBounds().getMaxY() > scrollListBounds.getMinY() && button.getBounds().getMinY() < scrollListBounds.getMaxY()) {
+                    button.render(matrices, mouseX, mouseY, delta);
+                }
+                yOffset += button.getBounds().height;
+            }
+            for (int i = 0; i < buttonList.size(); i++) {
+                if (buttonList.get(i).getBounds().getMaxY() > scrollListBounds.getMinY() && buttonList.get(i).getBounds().getMinY() < scrollListBounds.getMaxY()) {
+                    displayRenderers.get(i).setZ(1);
+                    displayRenderers.get(i).render(matrices, buttonList.get(i).getBounds(), mouseX, mouseY, delta);
+                    Optional.ofNullable(displayRenderers.get(i).getTooltip(TooltipContext.of(new Point(mouseX, mouseY)))).ifPresent(Tooltip::queue);
+                }
+            }
+            scrolling.renderScrollBar(0, scrollBarAlpha, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8f : 1f);
+            ScissorsHandler.INSTANCE.removeLastScissor();
+            matrices.popPose();
+        }
+        
+        @Override
+        public List<? extends GuiEventListener> children() {
+            return buttonList;
+        }
     }
 }
