@@ -281,6 +281,11 @@ public final class InternalWidgets {
         }
         
         @Override
+        public WidgetWithBounds wrapScissored(Rectangle bounds, Widget widget) {
+            return new ScissoredWidget(bounds, widget);
+        }
+        
+        @Override
         public WidgetWithBounds wrapPadded(int padLeft, int padRight, int padTop, int padBottom, WidgetWithBounds widget) {
             return new PaddedWidget(padLeft, padRight, padTop, padBottom, widget);
         }

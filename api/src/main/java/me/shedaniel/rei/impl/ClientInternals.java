@@ -232,6 +232,8 @@ public final class ClientInternals {
         
         WidgetWithBounds wrapOverflow(Rectangle bounds, WidgetWithBounds widget);
         
+        WidgetWithBounds wrapScissored(Rectangle bounds, Widget widget);
+        
         WidgetWithBounds wrapPadded(int padLeft, int padRight, int padTop, int padBottom, WidgetWithBounds widget);
     }
     
