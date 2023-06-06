@@ -314,6 +314,11 @@ public final class Widgets {
     }
     
     @ApiStatus.Experimental
+    public static WidgetWithBounds scissored(Rectangle bounds, Widget widget) {
+        return ClientInternals.getWidgetsProvider().wrapScissored(bounds, widget);
+    }
+    
+    @ApiStatus.Experimental
     public static WidgetWithBounds padded(int padding, WidgetWithBounds widget) {
         return padded(padding, padding, padding, padding, widget);
     }

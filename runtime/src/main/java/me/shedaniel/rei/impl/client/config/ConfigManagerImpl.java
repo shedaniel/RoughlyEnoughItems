@@ -73,6 +73,7 @@ import me.shedaniel.rei.impl.client.config.addon.ConfigAddonRegistryImpl;
 import me.shedaniel.rei.impl.client.config.collapsible.CollapsibleConfigManager;
 import me.shedaniel.rei.impl.client.config.entries.*;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
 import me.shedaniel.rei.impl.client.gui.performance.PerformanceScreen;
 import me.shedaniel.rei.impl.client.gui.screen.ConfigReloadingScreen;
@@ -355,6 +356,7 @@ public class ConfigManagerImpl implements ConfigManager {
     @SuppressWarnings("deprecation")
     @Override
     public Screen getConfigScreen(Screen parent) {
+        if (true) return new REIConfigScreen(parent);
         class EmptyEntry extends AbstractConfigListEntry<Object> {
             private final int height;
             
