@@ -6,21 +6,21 @@
             "modId": "fabric",
             "modName": "Fabric API",
             "versions": "*",
-            "url": "https://www.curseforge.com/minecraft/mc-mods/fabric-api/files/all/"
+            "url": "https://www.curseforge.com/minecraft/mc-mods/fabric-api/"
         },
         {
             "type": "depends",
             "modId": "architectury",
             "modName": "Architectury API",
             "versions": ">=9.0.7 <10.0.0",
-            "url": "https://www.curseforge.com/minecraft/mc-mods/architectury-api/files/all"
+            "url": "https://www.curseforge.com/minecraft/mc-mods/architectury-api/"
         },
         {
             "type": "depends",
             "modId": "cloth-config2",
             "modName": "Cloth Config",
             "versions": ">=11.0.0 <12.0.0",
-            "url": "https://www.curseforge.com/minecraft/mc-mods/cloth-config/files/all"
+            "url": "https://www.curseforge.com/minecraft/mc-mods/cloth-config/"
         }
     ]
 }
