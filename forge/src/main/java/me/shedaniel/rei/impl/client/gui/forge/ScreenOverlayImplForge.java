@@ -23,12 +23,14 @@
 
 package me.shedaniel.rei.impl.client.gui.forge;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
@@ -39,6 +41,7 @@ import net.minecraftforge.client.ForgeHooksClient;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ScreenOverlayImplForge extends ScreenOverlayImpl {
     @Override
@@ -47,7 +50,7 @@ public class ScreenOverlayImplForge extends ScreenOverlayImpl {
         EntryStack<?> stack = tooltip.getContextStack();
         ItemStack itemStack = stack.getType() == VanillaEntryTypes.ITEM ? stack.castValue() : ItemStack.EMPTY;
         List<Component> texts = CollectionUtils.filterAndMap(tooltip.entries(), Tooltip.Entry::isText, Tooltip.Entry::getAsText);
-        List<ClientTooltipComponent> components = ForgeHooksClient.gatherTooltipComponents(itemStack, texts, mouseX, screen.width, screen.height, null, screen.getMinecraft().font);
+        List<ClientTooltipComponent> components = ForgeHooksClient.gatherTooltipComponents(itemStack, texts, Optional.empty(), mouseX, screen.width, screen.height, screen.getMinecraft().font);
         components = new ArrayList<>(components);
         for (Tooltip.Entry entry : tooltip.entries()) {
             if (!entry.isText()) {
@@ -61,9 +64,13 @@ public class ScreenOverlayImplForge extends ScreenOverlayImpl {
                 components.add(1, ClientTooltipComponent.create(component));
             }
         }
-        screen.tooltipStack = itemStack;
-        screen.renderTooltipInternal(matrices, components, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE);
-        screen.tooltipStack = ItemStack.EMPTY;
+        Font font = Minecraft.getInstance().font;
+        if (!itemStack.isEmpty()) {
+            font = ForgeHooksClient.getTooltipFont(itemStack, font);
+        }
+        graphics.tooltipStack = itemStack;
+        graphics.renderTooltipInternal(font, components, mouseX, mouseY, DefaultTooltipPositioner.INSTANCE);
+        graphics.tooltipStack = ItemStack.EMPTY;
         graphics.pose().popPose();
     }
 }

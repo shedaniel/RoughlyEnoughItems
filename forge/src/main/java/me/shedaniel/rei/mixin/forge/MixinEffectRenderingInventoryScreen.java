@@ -56,7 +56,7 @@ public abstract class MixinEffectRenderingInventoryScreen extends AbstractContai
     
     @ModifyVariable(method = "renderEffects",
                     at = @At(value = "INVOKE",
-                             target = "Lnet/minecraft/client/gui/screens/inventory/EffectRenderingInventoryScreen;renderBackgrounds(Lcom/mojang/blaze3d/vertex/PoseStack;IILjava/lang/Iterable;Z)V",
+                             target = "Lnet/minecraft/client/gui/screens/inventory/EffectRenderingInventoryScreen;renderBackgrounds(Lnet/minecraft/client/gui/GuiGraphics;IILjava/lang/Iterable;Z)V",
                              ordinal = 0),
                     ordinal = 0) // 1st bool
     public boolean modifyBl(boolean bl) {

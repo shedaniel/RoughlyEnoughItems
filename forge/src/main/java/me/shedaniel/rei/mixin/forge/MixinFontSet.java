@@ -27,6 +27,8 @@ import com.mojang.blaze3d.font.GlyphInfo;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.IntList;
+import me.shedaniel.rei.impl.client.CodepointMapWrapper;
+import net.minecraft.client.gui.font.CodepointMap;
 import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.client.gui.font.FontTexture;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
@@ -45,15 +47,15 @@ import java.util.List;
 
 @Mixin(FontSet.class)
 public class MixinFontSet {
-    @Shadow @Mutable @Final private Int2ObjectMap<BakedGlyph> glyphs;
-    @Shadow @Mutable @Final private Int2ObjectMap<GlyphInfo> glyphInfos;
+    @Shadow @Mutable @Final private CodepointMap<BakedGlyph> glyphs;
+    @Shadow @Mutable @Final private CodepointMap<?> glyphInfos;
     @Shadow @Mutable @Final private Int2ObjectMap<IntList> glyphsByWidth;
     @Shadow @Mutable @Final private List<FontTexture> textures;
     
     @Inject(method = "<init>", at = @At("RETURN"))
     private void init(TextureManager textureManager, ResourceLocation id, CallbackInfo ci) {
-        this.glyphs = Int2ObjectMaps.synchronize(this.glyphs);
-        this.glyphInfos = Int2ObjectMaps.synchronize(this.glyphInfos);
+        this.glyphs = new CodepointMapWrapper<>(this.glyphs);
+        this.glyphInfos = new CodepointMapWrapper<>(this.glyphInfos);
         this.glyphsByWidth = Int2ObjectMaps.synchronize(this.glyphsByWidth);
         this.textures = Collections.synchronizedList(this.textures);
     }
