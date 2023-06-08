@@ -23,8 +23,8 @@
 
 package me.shedaniel.rei.api.client.registry.screen;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
+import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.ApiStatus;
 
 /**
@@ -51,23 +51,23 @@ public interface OverlayRendererProvider {
         /**
          * Renders the overlay.
          *
-         * @param matrices the matrices
+         * @param graphics the graphics context
          * @param mouseX   the mouse x
          * @param mouseY   the mouse y
          * @param delta    the delta
          */
-        void render(PoseStack matrices, int mouseX, int mouseY, float delta);
+        void render(GuiGraphics graphics, int mouseX, int mouseY, float delta);
         
         /**
          * Renders the overlay components that are supposed to be rendered last,
          * for example, menu entries, or tooltips.
          *
-         * @param matrices the matrices
+         * @param graphics the graphics context
          * @param mouseX   the mouse x
          * @param mouseY   the mouse y
          * @param delta    the delta
          */
-        void lateRender(PoseStack matrices, int mouseX, int mouseY, float delta);
+        void lateRender(GuiGraphics graphics, int mouseX, int mouseY, float delta);
         
         /**
          * Returns the overlay.

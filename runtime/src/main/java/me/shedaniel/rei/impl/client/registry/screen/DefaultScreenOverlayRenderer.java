@@ -50,23 +50,23 @@ public enum DefaultScreenOverlayRenderer implements OverlayRendererProvider {
         ClientGuiEvent.ContainerScreenRenderBackground renderContainerBg;
         ClientGuiEvent.ContainerScreenRenderForeground renderContainerFg;
         ClientGuiEvent.ScreenRenderPost renderPost;
-        ClientGuiEvent.RENDER_PRE.register(renderPre = (screen, matrices, mouseX, mouseY, delta) -> {
+        ClientGuiEvent.RENDER_PRE.register(renderPre = (screen, graphics, mouseX, mouseY, delta) -> {
             if (shouldReturn(screen))
                 return EventResult.pass();
             rendered[0] = 0;
             return EventResult.pass();
         });
-        ClientGuiEvent.RENDER_CONTAINER_BACKGROUND.register(renderContainerBg = (screen, matrices, mouseX, mouseY, delta) -> {
+        ClientGuiEvent.RENDER_CONTAINER_BACKGROUND.register(renderContainerBg = (screen, graphics, mouseX, mouseY, delta) -> {
             if (shouldReturn(screen))
                 return;
             rendered[0] = 1;
             resetFocused(screen);
             if (!(screen instanceof DisplayScreen)) {
-                sink.render(matrices, mouseX, mouseY, delta);
+                sink.render(graphics, mouseX, mouseY, delta);
             }
             resetFocused(screen);
         });
-        ClientGuiEvent.RENDER_CONTAINER_FOREGROUND.register(renderContainerFg = (screen, matrices, mouseX, mouseY, delta) -> {
+        ClientGuiEvent.RENDER_CONTAINER_FOREGROUND.register(renderContainerFg = (screen, graphics, mouseX, mouseY, delta) -> {
             if (shouldReturn(screen))
                 return;
             rendered[0] = 2;
@@ -75,12 +75,12 @@ public enum DefaultScreenOverlayRenderer implements OverlayRendererProvider {
             poseStack.pushPose();
             poseStack.translate(-screen.leftPos, -screen.topPos, 0.0);
             RenderSystem.applyModelViewMatrix();
-            sink.lateRender(matrices, mouseX, mouseY, delta);
+            sink.lateRender(graphics, mouseX, mouseY, delta);
             poseStack.popPose();
             RenderSystem.applyModelViewMatrix();
             resetFocused(screen);
         });
-        ClientGuiEvent.RENDER_POST.register(renderPost = (screen, matrices, mouseX, mouseY, delta) -> {
+        ClientGuiEvent.RENDER_POST.register(renderPost = (screen, graphics, mouseX, mouseY, delta) -> {
             if (shouldReturn(screen) || rendered[0] == 2)
                 return;
             if (screen instanceof AbstractContainerScreen) {
@@ -88,11 +88,11 @@ public enum DefaultScreenOverlayRenderer implements OverlayRendererProvider {
             }
             resetFocused(screen);
             if (rendered[0] == 0 && !(screen instanceof DisplayScreen)) {
-                sink.render(matrices, mouseX, mouseY, delta);
+                sink.render(graphics, mouseX, mouseY, delta);
             }
             rendered[0] = 1;
             if (rendered[0] == 1) {
-                sink.lateRender(matrices, mouseX, mouseY, delta);
+                sink.lateRender(graphics, mouseX, mouseY, delta);
             }
             resetFocused(screen);
         });

@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.registry.screen;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.event.CompoundEventResult;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -52,6 +51,7 @@ import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.InteractionResult;
@@ -370,18 +370,18 @@ public class ScreenRegistryImpl implements ScreenRegistry {
             if (this.lastRendererProvider != null) {
                 this.lastRendererProvider.onApplied(new OverlayRendererProvider.Sink() {
                     @Override
-                    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+                    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
                         if (ScreenRegistryImpl.this.lastRendererProvider == provider) {
-                            ScreenOverlayImpl.getInstance().render(matrices, mouseX, mouseY, delta);
+                            ScreenOverlayImpl.getInstance().render(graphics, mouseX, mouseY, delta);
                         } else {
                             InternalLogger.getInstance().warn("Renderer provider %s still tries to render after being removed!", provider);
                         }
                     }
                     
                     @Override
-                    public void lateRender(PoseStack matrices, int mouseX, int mouseY, float delta) {
+                    public void lateRender(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
                         if (ScreenRegistryImpl.this.lastRendererProvider == provider) {
-                            ScreenOverlayImpl.getInstance().lateRender(matrices, mouseX, mouseY, delta);
+                            ScreenOverlayImpl.getInstance().lateRender(graphics, mouseX, mouseY, delta);
                         } else {
                             InternalLogger.getInstance().warn("Renderer provider %s still tries to render after being removed!", provider);
                         }
