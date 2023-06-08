@@ -44,21 +44,3 @@ public class ConfigCategoryEntryWidget {
         ), bounds);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
