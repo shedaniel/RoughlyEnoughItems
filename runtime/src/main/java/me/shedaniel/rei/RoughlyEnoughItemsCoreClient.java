@@ -78,6 +78,7 @@ import me.shedaniel.rei.impl.client.registry.category.CategoryRegistryImpl;
 import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
 import me.shedaniel.rei.impl.client.registry.screen.ScreenRegistryImpl;
 import me.shedaniel.rei.impl.client.search.SearchProviderImpl;
+import me.shedaniel.rei.impl.client.search.SearchRuntime;
 import me.shedaniel.rei.impl.client.search.method.InputMethodRegistryImpl;
 import me.shedaniel.rei.impl.client.subsets.SubsetsRegistryImpl;
 import me.shedaniel.rei.impl.client.transfer.TransferHandlerRegistryImpl;
@@ -231,6 +232,7 @@ public class RoughlyEnoughItemsCoreClient {
                 new FavoriteEntryTypeRegistryImpl(),
                 new SubsetsRegistryImpl(),
                 new TransferHandlerRegistryImpl(),
+                new SearchRuntime(),
                 new REIRuntimeImpl(),
                 new ConfigAddonRegistryImpl()), "clientPluginManager");
     }
@@ -351,6 +353,7 @@ public class RoughlyEnoughItemsCoreClient {
                 }
                 
                 REIRuntimeImpl.getInstance().setPreviousScreen(screen);
+                ((ScreenRegistryImpl) ScreenRegistry.getInstance()).getLastRendererProvider(screen);
             }
             if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen) {
                 access.getRenderables().removeIf(widget -> widget instanceof ImageButton button && button.resourceLocation.equals(recipeButtonTex));
@@ -408,47 +411,6 @@ public class RoughlyEnoughItemsCoreClient {
                 return EventResult.interruptFalse();
             return EventResult.pass();
         });
-        int[] rendered = {0};
-        ClientGuiEvent.RENDER_PRE.register((screen, matrices, mouseX, mouseY, delta) -> {
-            if (shouldReturn(screen))
-                return EventResult.pass();
-            rendered[0] = 0;
-            return EventResult.pass();
-        });
-        ClientGuiEvent.RENDER_CONTAINER_BACKGROUND.register((screen, matrices, mouseX, mouseY, delta) -> {
-            if (shouldReturn(screen))
-                return;
-            rendered[0] = 1;
-            resetFocused(screen);
-            if (!(screen instanceof DisplayScreen)) {
-                getOverlay().render(matrices, mouseX, mouseY, delta);
-            }
-            resetFocused(screen);
-        });
-        ClientGuiEvent.RENDER_CONTAINER_FOREGROUND.register((screen, matrices, mouseX, mouseY, delta) -> {
-            if (shouldReturn(screen))
-                return;
-            rendered[0] = 2;
-            resetFocused(screen);
-            ((ScreenOverlayImpl) getOverlay()).lateRender(matrices, mouseX, mouseY, delta);
-            resetFocused(screen);
-        });
-        ClientGuiEvent.RENDER_POST.register((screen, matrices, mouseX, mouseY, delta) -> {
-            if (shouldReturn(screen) || rendered[0] == 2)
-                return;
-            if (screen instanceof AbstractContainerScreen) {
-                InternalLogger.getInstance().warn("Screen " + screen.getClass().getName() + " did not render background and foreground! This might cause rendering issues!");
-            }
-            resetFocused(screen);
-            if (rendered[0] == 0 && !(screen instanceof DisplayScreen)) {
-                getOverlay().render(matrices, mouseX, mouseY, delta);
-            }
-            rendered[0] = 1;
-            if (rendered[0] == 1) {
-                ((ScreenOverlayImpl) getOverlay()).lateRender(matrices, mouseX, mouseY, delta);
-            }
-            resetFocused(screen);
-        });
         ClientScreenInputEvent.MOUSE_DRAGGED_PRE.register((minecraftClient, screen, mouseX1, mouseY1, button, mouseX2, mouseY2) -> {
             if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
@@ -498,7 +460,7 @@ public class RoughlyEnoughItemsCoreClient {
         });
     }
     
-    private boolean resetFocused(Screen screen) {
+    public static boolean resetFocused(Screen screen) {
         if (screen.getFocused() instanceof ScreenOverlay || screen.getFocused() == screen) {
             screen.setFocused(null);
         }

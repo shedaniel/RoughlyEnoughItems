@@ -23,12 +23,10 @@
 
 package me.shedaniel.rei.api.common.util;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.collect.UnmodifiableIterator;
+import com.google.common.collect.*;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -549,5 +547,24 @@ public class CollectionUtils {
             }
             return size;
         }
+    }
+    
+    public static <T> Iterable<T> distinctReferenceOf(Iterable<T> iterable) {
+        return () -> new AbstractIterator<T>() {
+            private final Set<T> set = new ReferenceOpenHashSet<>();
+            private final Iterator<T> iterator = iterable.iterator();
+            
+            @Override
+            protected T computeNext() {
+                while (iterator.hasNext()) {
+                    T next = iterator.next();
+                    if (set.add(next)) {
+                        return next;
+                    }
+                }
+                
+                return endOfData();
+            }
+        };
     }
 }

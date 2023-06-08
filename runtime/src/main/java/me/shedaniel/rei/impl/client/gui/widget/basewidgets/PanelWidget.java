@@ -55,7 +55,7 @@ public final class PanelWidget extends Panel {
             .asFloat();
     
     public static boolean isRendering(Panel panel) {
-        return ConfigObject.getInstance().getRecipeScreenType() != DisplayScreenType.COMPOSITE;
+        return true;
     }
     
     public PanelWidget(Rectangle bounds) {

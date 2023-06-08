@@ -44,10 +44,7 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector4f;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -99,7 +96,7 @@ public class DisplayEntry extends WidgetWithBounds {
         CategoryRegistry.CategoryConfiguration<Display> configuration = CategoryRegistry.getInstance().get((CategoryIdentifier<Display>) display.getCategoryIdentifier());
         DisplayCategory<Display> category = configuration.getCategory();
         Rectangle displayBounds = new Rectangle(0, 0, category.getDisplayWidth(display), category.getDisplayHeight());
-        List<Widget> widgets = configuration.getView(display).setupDisplay(display, displayBounds);
+        List<Widget> widgets = setupDisplay(configuration, displayBounds);
         float scale = 1.0F;
         if (parentBounds.width * scale < displayBounds.width) {
             scale = Math.min(scale, parentBounds.width * scale / (float) displayBounds.width);
@@ -122,6 +119,19 @@ public class DisplayEntry extends WidgetWithBounds {
         }
         this.size.setSize(displayBounds.getSize());
         return widgets;
+    }
+    
+    private List<Widget> setupDisplay(CategoryRegistry.CategoryConfiguration<Display> configuration, Rectangle displayBounds) {
+        try {
+            return configuration.getView(display).setupDisplay(display, displayBounds);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            List<Widget> w = new ArrayList<>();
+            w.add(Widgets.createRecipeBase(displayBounds).color(0xFFBB0000));
+            w.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() - 8), Component.literal("Failed to initiate setupDisplay")));
+            w.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() + 1), Component.literal("Check console for error")));
+            return w;
+        }
     }
     
     @Override
