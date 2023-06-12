@@ -85,7 +85,7 @@ public class InputMethodWatcher implements HintProvider {
     
     @Override
     public Color getColor() {
-        return Color.ofTransparent(0x50ffadca);
+        return Color.ofTransparent(0xffffadca);
     }
     
     @Override

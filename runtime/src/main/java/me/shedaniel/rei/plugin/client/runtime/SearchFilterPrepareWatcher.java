@@ -81,7 +81,7 @@ public class SearchFilterPrepareWatcher implements HintProvider {
     
     @Override
     public Color getColor() {
-        return Color.ofTransparent(0x50de38ff);
+        return Color.ofTransparent(0xffde38ff);
     }
     
     @Override

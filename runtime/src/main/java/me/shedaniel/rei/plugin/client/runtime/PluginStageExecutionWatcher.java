@@ -220,7 +220,7 @@ public class PluginStageExecutionWatcher implements HintProvider {
     
     @Override
     public Color getColor() {
-        return Color.ofTransparent(0x50ff1500);
+        return Color.ofTransparent(0xffff1500);
     }
     
     @Override

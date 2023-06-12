@@ -41,17 +41,17 @@ public class EntryHighlighter {
                 if (!slot.hasItem() || !EntryListSearchManager.INSTANCE.matches(EntryStacks.of(slot.getItem()))) {
                     graphics.pose().pushPose();
                     graphics.pose().translate(0, 0, 500f);
-                    graphics.fillGradient(x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0xdc202020, 0xdc202020, 0);
+                    graphics.fillGradient(x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0xdc202020, 0xdc202020);
                     graphics.pose().popPose();
                 } else {
                     graphics.pose().pushPose();
                     graphics.pose().translate(0, 0, 200f);
-                    graphics.fillGradient(x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0x345fff3b, 0x345fff3b, 0);
+                    graphics.fillGradient(x + slot.x, y + slot.y, x + slot.x + 16, y + slot.y + 16, 0x345fff3b, 0x345fff3b);
                 
-                    graphics.fillGradient(x + slot.x - 1, y + slot.y - 1, x + slot.x, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b, 0);
-                    graphics.fillGradient(x + slot.x + 16, y + slot.y - 1, x + slot.x + 16 + 1, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b, 0);
-                    graphics.fillGradient(x + slot.x - 1, y + slot.y - 1, x + slot.x + 16, y + slot.y, 0xff5fff3b, 0xff5fff3b, 0);
-                    graphics.fillGradient(x + slot.x - 1, y + slot.y + 16, x + slot.x + 16, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b, 0);
+                    graphics.fillGradient(x + slot.x - 1, y + slot.y - 1, x + slot.x, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b);
+                    graphics.fillGradient(x + slot.x + 16, y + slot.y - 1, x + slot.x + 16 + 1, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b);
+                    graphics.fillGradient(x + slot.x - 1, y + slot.y - 1, x + slot.x + 16, y + slot.y, 0xff5fff3b, 0xff5fff3b);
+                    graphics.fillGradient(x + slot.x - 1, y + slot.y + 16, x + slot.x + 16, y + slot.y + 16 + 1, 0xff5fff3b, 0xff5fff3b);
                     
                     graphics.pose().popPose();
                 }

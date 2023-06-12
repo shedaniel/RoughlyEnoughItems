@@ -75,7 +75,7 @@ public class SearchFilterWatcher implements HintProvider {
     
     @Override
     public Color getColor() {
-        return Color.ofTransparent(0x5003fc24);
+        return Color.ofTransparent(0xff03fc24);
     }
     
     @Override

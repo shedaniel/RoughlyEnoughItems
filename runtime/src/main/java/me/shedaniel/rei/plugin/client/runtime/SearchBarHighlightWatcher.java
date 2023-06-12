@@ -49,7 +49,7 @@ public class SearchBarHighlightWatcher implements HintProvider {
     
     @Override
     public Color getColor() {
-        return Color.ofTransparent(0x50f7ed23);
+        return Color.ofTransparent(0xfff7ed23);
     }
     
     @Override
