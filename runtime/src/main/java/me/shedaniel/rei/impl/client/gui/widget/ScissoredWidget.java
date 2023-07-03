@@ -28,19 +28,28 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
 import me.shedaniel.rei.api.client.gui.widgets.DelegateWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+
+import java.util.function.Supplier;
 
 public class ScissoredWidget extends DelegateWidget {
-    private final Rectangle bounds;
+    private final Supplier<Rectangle> bounds;
     
     public ScissoredWidget(Rectangle bounds, Widget widget) {
         super(widget);
-        this.bounds = bounds;
+        this.bounds = () -> bounds;
+    }
+    
+    public ScissoredWidget(WidgetWithBounds widget) {
+        super(widget);
+        this.bounds = widget::getBounds;
     }
     
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float delta) {
-        try (CloseableScissors scissors = scissor(poseStack, this.bounds)) {
-            boolean containsMouse = this.bounds.contains(mouseX, mouseY);
+        try (CloseableScissors scissors = scissor(poseStack, this.bounds.get())) {
+            boolean containsMouse = this.delegate() instanceof WidgetWithBounds withBounds ? withBounds.containsMouse(mouseX, mouseY)
+                    : this.bounds.get().contains(mouseX, mouseY);
             
             if (containsMouse) {
                 super.render(poseStack, mouseX, mouseY, delta);
@@ -52,7 +61,7 @@ public class ScissoredWidget extends DelegateWidget {
     
     @Override
     public Rectangle getBounds() {
-        return bounds;
+        return bounds.get();
     }
     
     @Override

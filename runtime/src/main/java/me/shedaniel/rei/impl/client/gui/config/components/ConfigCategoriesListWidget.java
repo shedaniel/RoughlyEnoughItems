@@ -24,22 +24,25 @@
 package me.shedaniel.rei.impl.client.gui.config.components;
 
 import dev.architectury.utils.value.IntValue;
+import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
+import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionCategory;
 import me.shedaniel.rei.impl.client.gui.widget.ListWidget;
+import me.shedaniel.rei.impl.client.gui.widget.ScrollableViewWidget;
+import me.shedaniel.rei.impl.common.util.RectangleUtils;
 
 import java.util.List;
 
 public class ConfigCategoriesListWidget {
     public static Widget create(Rectangle bounds, List<OptionCategory> categories, IntValue selected) {
-        return ListWidget.builderOf(bounds, categories,
-                (index, entry) -> ConfigCategoryEntryWidget.create(entry))
-                .paddingHorizontal(3)
-                .paddingVertical(5)
+        WidgetWithBounds list = ListWidget.builderOf(RectangleUtils.inset(bounds, 3, 5), categories,
+                        (index, entry) -> ConfigCategoryEntryWidget.create(entry))
                 .gap(3)
                 .isSelectable((index, entry) -> true)
                 .selected(selected)
                 .build();
+        return ScrollableViewWidget.create(bounds, list, true);
     }
 }

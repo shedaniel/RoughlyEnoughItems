@@ -38,9 +38,10 @@ public class ConfigCategoryEntryWidget {
                 .leftAligned();
         Font font = Minecraft.getInstance().font;
         Rectangle bounds = new Rectangle(0, 0, label.getBounds().getMaxX(), 7 * 3);
-        return Widgets.withBounds(Widgets.concat(
+        return Widgets.concatWithBounds(
+                bounds,
                 label,
                 Widgets.createTexturedWidget(category.getIcon(), new Rectangle(3, 3, 16, 16), 0, 0, 1, 1, 1, 1)
-        ), bounds);
+        );
     }
 }

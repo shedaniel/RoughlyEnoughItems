@@ -47,8 +47,6 @@ public class ListWidget {
     
     public static abstract class AbstractBuilder<T extends WidgetWithBounds, SELF extends AbstractBuilder<T, SELF>> {
         protected final Rectangle bounds;
-        protected int paddingHorizontal = 0;
-        protected int paddingVertical = 0;
         protected IntValue selected = new IntValue() {
             private int value;
             
@@ -64,20 +62,9 @@ public class ListWidget {
         };
         protected int gap = 4;
         protected boolean calculateTotalHeightDynamically = false;
-        protected boolean background = true;
         
         protected AbstractBuilder(Rectangle bounds) {
             this.bounds = bounds;
-        }
-        
-        public SELF paddingHorizontal(int paddingHorizontal) {
-            this.paddingHorizontal = paddingHorizontal;
-            return (SELF) this;
-        }
-        
-        public SELF paddingVertical(int paddingVertical) {
-            this.paddingVertical = paddingVertical;
-            return (SELF) this;
         }
         
         public SELF selected(IntValue selected) {
@@ -97,11 +84,6 @@ public class ListWidget {
         
         public SELF calculateTotalHeightDynamically(boolean calculateTotalHeightDynamically) {
             this.calculateTotalHeightDynamically = calculateTotalHeightDynamically;
-            return (SELF) this;
-        }
-        
-        public SELF background(boolean background) {
-            this.background = background;
             return (SELF) this;
         }
         
@@ -126,8 +108,8 @@ public class ListWidget {
         
         @Override
         public WidgetWithBounds build() {
-            return ListWidget.create(bounds, entries, paddingHorizontal, paddingVertical, selected, gap, calculateTotalHeightDynamically,
-                    cellRenderer, isSelectable, background);
+            return ListWidget.create(bounds, entries, selected, gap, calculateTotalHeightDynamically,
+                    cellRenderer, isSelectable);
         }
     }
     
@@ -147,23 +129,22 @@ public class ListWidget {
         
         @Override
         public WidgetWithBounds build() {
-            return ListWidget.create(bounds, entries, paddingHorizontal, paddingVertical, selected, gap, calculateTotalHeightDynamically,
-                    isSelectable, background);
+            return ListWidget.create(bounds, entries, selected, gap, calculateTotalHeightDynamically,
+                    isSelectable);
         }
     }
     
-    public static <T> WidgetWithBounds create(Rectangle bounds, List<T> entries, int paddingHorizontal, int paddingVertical,
-                                              IntValue selected, int gap, boolean calculateTotalHeightDynamically, ListCellRenderer<T> cellRenderer,
-                                              ListEntryPredicate<T> isSelectable, boolean background) {
+    public static <T> WidgetWithBounds create(Rectangle bounds, List<T> entries, IntValue selected, int gap,
+                                              boolean calculateTotalHeightDynamically, ListCellRenderer<T> cellRenderer,
+                                              ListEntryPredicate<T> isSelectable) {
         int[] i = {0};
-        return create(bounds, CollectionUtils.map(entries, entry -> cellRenderer.create(i[0]++, entry)), paddingHorizontal, paddingVertical,
-                selected, gap, calculateTotalHeightDynamically, (index, entry) -> isSelectable.test(index, entries.get(index)), background);
+        return create(bounds, CollectionUtils.map(entries, entry -> cellRenderer.create(i[0]++, entry)),
+                selected, gap, calculateTotalHeightDynamically, (index, entry) -> isSelectable.test(index, entries.get(index)));
     }
     
-    public static <T extends WidgetWithBounds> WidgetWithBounds create(Rectangle bounds, List<T> entries, int paddingHorizontal, int paddingVertical,
-                                                                       IntValue selected, int gap, boolean calculateTotalHeightDynamically,
-                                                                       ListEntryPredicate<T> isSelectable, boolean background) {
-        int[] height = {collectTotalHeight(entries, gap) + paddingVertical * 2};
+    public static <T extends WidgetWithBounds> WidgetWithBounds create(Rectangle bounds, List<T> entries, IntValue selected, int gap,
+                                                                       boolean calculateTotalHeightDynamically, ListEntryPredicate<T> isSelectable) {
+        int[] height = {collectTotalHeight(entries, gap)};
         
         Rectangle innerBounds = bounds.clone();
         if (height[0] > bounds.getHeight()) {
@@ -171,22 +152,22 @@ public class ListWidget {
         }
         
         int[] i = {0};
-        List<CellWidget<T>> wrapped = CollectionUtils.map(entries, cell -> new CellWidget<>(innerBounds, paddingHorizontal, i[0]++, cell, selected, entries, isSelectable));
+        List<CellWidget<T>> wrapped = CollectionUtils.map(entries, cell -> new CellWidget<>(innerBounds, i[0]++, cell, selected, entries, isSelectable));
         Widget update = Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
             if (calculateTotalHeightDynamically) {
-                height[0] = collectTotalHeight(entries, gap) + paddingVertical * 2;
+                height[0] = collectTotalHeight(entries, gap);
                 innerBounds.width = height[0] > bounds.getHeight() ? bounds.width - 6 : bounds.width;
             }
             
-            int y = bounds.y + paddingVertical;
+            int y = bounds.y;
             for (CellWidget<T> cell : wrapped) {
-                cell.position.move(bounds.x + paddingHorizontal, y);
+                cell.position.move(bounds.x, y);
                 y += (calculateTotalHeightDynamically ? cell.getBounds().getHeight() : cell.height) + gap;
             }
             
             if (selected.getAsInt() != -1) {
                 CellWidget<T> cellWidget = wrapped.get(selected.getAsInt());
-                int x1 = innerBounds.x + paddingHorizontal, x2 = innerBounds.getMaxX() - paddingHorizontal;
+                int x1 = innerBounds.x, x2 = innerBounds.getMaxX();
                 boolean contains = new Rectangle(x1 - 1, cellWidget.position.y - 1, x2 - x1 + 2, cellWidget.getBounds().height + 2).contains(mouseX, mouseY);
                 GuiComponent.fill(matrices, x1 - 1, cellWidget.position.y - 1, x2 + 1,
                         cellWidget.position.y + cellWidget.getBounds().height + 1, contains ? 0xFFD0D0D0 : 0xFF8F8F8F);
@@ -197,13 +178,12 @@ public class ListWidget {
         List<Widget> innerWidgets = new ArrayList<>();
         innerWidgets.add(update);
         innerWidgets.addAll(wrapped);
-        return ScrollableViewWidget.create(bounds, Widgets.withBounds(Widgets.concat(innerWidgets),
-                () -> new Rectangle(bounds.x, bounds.y, bounds.width, height[0])), background);
+        return Widgets.concatWithBounds(() -> new Rectangle(bounds.x, bounds.y, bounds.width, height[0]),
+                innerWidgets);
     }
     
     private static class CellWidget<T> extends DelegateWidgetWithTranslate {
         private final Rectangle bounds;
-        private final int paddingHorizontal;
         private final int index;
         private final Point position = new Point();
         private final int height;
@@ -211,10 +191,9 @@ public class ListWidget {
         private final List<T> list;
         private final ListEntryPredicate<T> isSelectable;
         
-        public CellWidget(Rectangle bounds, int paddingHorizontal, int index, WidgetWithBounds widget, IntValue selected, List<T> list, ListEntryPredicate<T> isSelectable) {
+        public CellWidget(Rectangle bounds, int index, WidgetWithBounds widget, IntValue selected, List<T> list, ListEntryPredicate<T> isSelectable) {
             super(widget, Matrix4f::new);
             this.bounds = bounds;
-            this.paddingHorizontal = paddingHorizontal;
             this.index = index;
             this.height = widget.getBounds().getHeight();
             this.selected = selected;
@@ -232,7 +211,7 @@ public class ListWidget {
             boolean clicked = super.mouseClicked(mouseX, mouseY, button);
             Rectangle bounds = delegate().getBounds();
             
-            if (clicked || new Rectangle(position.x, position.y, this.bounds.width - paddingHorizontal * 2, bounds.height).contains(mouseX, mouseY)) {
+            if (clicked || new Rectangle(position.x, position.y, this.bounds.width, bounds.height).contains(mouseX, mouseY)) {
                 if (isSelectable.test(index, list.get(index))) {
                     selected.accept(index);
                     if (!clicked) {

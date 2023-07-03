@@ -39,7 +39,11 @@ import java.util.List;
 
 public class ScrollableViewWidget {
     public static WidgetWithBounds create(Rectangle bounds, WidgetWithBounds inner, boolean background) {
-        ScrollingContainer scrolling = new ScrollingContainer() {
+        return create(bounds, inner, new ScrollingContainer[1], background);
+    }
+    
+    public static WidgetWithBounds create(Rectangle bounds, WidgetWithBounds inner, ScrollingContainer[] scrollingRef, boolean background) {
+        scrollingRef[0] = new ScrollingContainer() {
             @Override
             public Rectangle getBounds() {
                 return bounds;
@@ -54,16 +58,16 @@ public class ScrollableViewWidget {
         List<Widget> widgets = new ArrayList<>();
         
         if (background) {
-            widgets.add(HoleWidget.create(bounds, scrolling::scrollAmountInt, 32));
+            widgets.add(HoleWidget.create(bounds, scrollingRef[0]::scrollAmountInt, 32));
         }
         
-        widgets.add(Widgets.scissored(scrolling.getScissorBounds(), Widgets.withTranslate(inner,
-                () -> Matrix4f.createTranslateMatrix(0, -scrolling.scrollAmountInt(), 0))));
+        widgets.add(Widgets.scissored(scrollingRef[0].getScissorBounds(), Widgets.withTranslate(inner,
+                () -> Matrix4f.createTranslateMatrix(0, -scrollingRef[0].scrollAmountInt(), 0))));
         widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            scrolling.updatePosition(delta);
-            scrolling.renderScrollBar();
+            scrollingRef[0].updatePosition(delta);
+            scrollingRef[0].renderScrollBar();
         }));
-        widgets.add(createScrollerWidget(bounds, scrolling));
+        widgets.add(createScrollerWidget(bounds, scrollingRef[0]));
         
         return Widgets.withBounds(Widgets.concat(widgets), bounds);
     }
