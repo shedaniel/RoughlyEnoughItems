@@ -61,7 +61,8 @@ import java.util.function.Supplier;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public final class InternalWidgets {
-    private InternalWidgets() {}
+    private InternalWidgets() {
+    }
     
     public static Widget createAutoCraftingButtonWidget(Rectangle displayBounds, Rectangle rectangle, Component text, Supplier<Display> displaySupplier, Supplier<Collection<ResourceLocation>> idsSupplier, List<Widget> setupDisplay, DisplayCategory<?> category) {
         Button autoCraftingButton = Widgets.createButton(rectangle, text)
@@ -160,6 +161,10 @@ public final class InternalWidgets {
     
     public static Widget concatWidgets(List<Widget> widgets) {
         return new MergedWidget(widgets);
+    }
+    
+    public static WidgetWithBounds concatWidgetsWithBounds(Supplier<Rectangle> bounds, List<Widget> widgets) {
+        return new MergedWidgetWithBounds(bounds, widgets);
     }
     
     private static class LateRenderableWidget extends DelegateWidget implements LateRenderable {
@@ -273,6 +278,11 @@ public final class InternalWidgets {
         }
         
         @Override
+        public WidgetWithBounds concatWidgetsWithBounds(Supplier<Rectangle> bounds, List<Widget> widgets) {
+            return InternalWidgets.concatWidgetsWithBounds(bounds, widgets);
+        }
+        
+        @Override
         public WidgetWithBounds noOp() {
             return NoOpWidget.INSTANCE;
         }
@@ -285,6 +295,11 @@ public final class InternalWidgets {
         @Override
         public WidgetWithBounds wrapScissored(Rectangle bounds, Widget widget) {
             return new ScissoredWidget(bounds, widget);
+        }
+        
+        @Override
+        public WidgetWithBounds wrapScissored(WidgetWithBounds widget) {
+            return new ScissoredWidget(widget);
         }
         
         @Override
