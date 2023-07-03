@@ -106,7 +106,7 @@ unifiedPublishing {
     project {
         displayName = "[Fabric $rootProject.supported_version] v$project.version"
         releaseType = "release"
-        gameVersions = []
+        gameVersions = ["1.20", "1.20.1"]
         gameLoaders = ["fabric"]
         changelog = rootProject.releaseChangelog
 
@@ -140,7 +140,6 @@ unifiedPublishing {
                 token = project.hasProperty("modrinth_key") ? project.property("modrinth_key") : System.getenv("modrinth_key")
                 id = "nfn13YXA"
                 version = "$project.version+$project.name"
-                gameVersions.addAll project.minecraft_version
             }
         }
     }
