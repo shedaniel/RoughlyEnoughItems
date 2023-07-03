@@ -116,9 +116,7 @@ public class HintWidget extends WidgetWithBounds {
         this.scroll.setTarget(ScrollingContainer.handleBounceBack(scroll.target(), this.contentHeight - (this.bounds.height - 8 - 9) - 9, delta, .08));
         this.scroll.update(delta);
         
-        RenderSystem.disableDepthTest();
         graphics.pose().pushPose();
-        graphics.pose().translate(0, 0, 450);
         int background = 0xf0100010;
         int color1 = 0x505000ff;
         int color2 = color1;
@@ -132,6 +130,9 @@ public class HintWidget extends WidgetWithBounds {
         graphics.fillGradient(x + width - 1, y + 1, x + width, y + height - 1, 400, color1, color2);
         graphics.fillGradient(x, y, x + width, y + 1, 400, color1, color1);
         graphics.fillGradient(x, y + height - 1, x + width, y + height, 400, color2, color2);
+        graphics.pose().popPose();
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 450);
         int lineY = y + 4;
         
         try (CloseableScissors scissors = Widget.scissor(graphics, new Rectangle(x + 4, y + 4, width - 8, height - 8 - 9 - 2))) {
@@ -155,7 +156,6 @@ public class HintWidget extends WidgetWithBounds {
         graphics.drawString(font, okay, this.okayBounds.x, this.okayBounds.y, 0xFF999999);
         
         graphics.pose().popPose();
-        RenderSystem.enableDepthTest();
         
         if (this.bounds.contains(mouseX, mouseY)) {
             ScreenOverlayImpl.getInstance().clearTooltips();
