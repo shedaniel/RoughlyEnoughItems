@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.widget.favorites.history;
 
 import com.google.common.collect.Iterables;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectLinkedOpenHashMap;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -31,9 +32,12 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.client.registry.display.DisplayKey;
+import me.shedaniel.rei.impl.client.registry.display.DisplaysHolder;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -41,7 +45,32 @@ import java.util.*;
 public class DisplayHistoryManager {
     public static final DisplayHistoryManager INSTANCE = new DisplayHistoryManager();
     private Map<String, DisplayEntry> entries = new LinkedHashMap<>();
+    private final Map<Display, DisplayEntry> displayToEntries = new Reference2ObjectLinkedOpenHashMap<>();
     private long lastCheckTime = -1;
+    
+    @Nullable
+    public Object getPossibleOrigin(DisplaysHolder holder, Display display) {
+        DisplayEntry entry = displayToEntries.get(display);
+        if (entry == null) return null;
+        Optional<ResourceLocation> location = display.getDisplayLocation();
+        if (location.isEmpty()) return null;
+        Set<Display> displays = holder.getDisplaysByKey(DisplayKey.create(display.getCategoryIdentifier(), location.get()));
+        for (Display d : displays) {
+            if (!displayToEntries.containsKey(d)) {
+                Object origin = holder.getDisplayOrigin(d);
+                
+                if (origin != null) {
+                    return origin;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    public Map<Display, DisplayEntry> getDisplayToEntries() {
+        return displayToEntries;
+    }
     
     public Collection<DisplayEntry> getEntries(DisplayHistoryWidget parent) {
         if ((lastCheckTime == -1 || Util.getMillis() - lastCheckTime > 4000) && !PluginManager.areAnyReloading()) {
@@ -56,12 +85,14 @@ public class DisplayHistoryManager {
         List<CompoundTag> displayHistory = ConfigManagerImpl.getInstance().getConfig().getDisplayHistory();
         Map<String, DisplayEntry> copy = new LinkedHashMap<>(entries);
         entries.clear();
+        displayToEntries.clear();
         for (CompoundTag tag : displayHistory) {
             String uuid = tag.getString("DisplayHistoryUUID");
             
             DisplayEntry entry = copy.get(uuid);
             if (entry != null) {
                 entries.put(entry.getUuid().toString(), entry);
+                displayToEntries.put(entry.getDisplay(), entry);
             } else if (tag.getBoolean("DisplayHistoryContains")) {
                 try {
                     CategoryIdentifier<?> categoryIdentifier = CategoryIdentifier.of(tag.getString("DisplayHistoryCategory"));
@@ -70,6 +101,7 @@ public class DisplayHistoryManager {
                         DisplayEntry newEntry = new DisplayEntry(parent, display, null);
                         newEntry.setUuid(UUID.fromString(uuid));
                         entries.put(newEntry.getUuid().toString(), newEntry);
+                        displayToEntries.put(newEntry.getDisplay(), newEntry);
                     }
                 } catch (Exception e) {
                     InternalLogger.getInstance().warn("Failed to read display history entry", e);
@@ -80,6 +112,7 @@ public class DisplayHistoryManager {
     
     public void removeEntry(DisplayEntry entry) {
         this.entries.remove(entry.getUuid().toString());
+        this.displayToEntries.remove(entry.getDisplay());
         List<CompoundTag> displayHistory = ConfigManagerImpl.getInstance().getConfig().getDisplayHistory();
         displayHistory.removeIf(tag -> tag.getString("DisplayHistoryUUID").equals(entry.getUuid().toString()));
         save();
@@ -92,6 +125,7 @@ public class DisplayHistoryManager {
             DisplayEntry entry = iterator.next();
             if (entry.getDisplay() == display) {
                 displayHistory.removeIf(tag -> tag.getString("DisplayHistoryUUID").equals(entry.getUuid().toString()));
+                this.displayToEntries.remove(entry.getDisplay());
                 iterator.remove();
             }
         }
@@ -100,10 +134,15 @@ public class DisplayHistoryManager {
         copy.put(newEntry.getUuid().toString(), newEntry);
         copy.putAll(this.entries);
         this.entries = copy;
+        this.displayToEntries.clear();
+        for (DisplayEntry entry : this.entries.values()) {
+            this.displayToEntries.put(entry.getDisplay(), entry);
+        }
         while (entries.size() >= 10) {
             DisplayEntry entry = Iterables.get(entries.values(), entries.size() - 1);
             displayHistory.removeIf(tag -> tag.getString("DisplayHistoryUUID").equals(entry.getUuid().toString()));
             this.entries.remove(entry.getUuid().toString());
+            this.displayToEntries.remove(entry.getDisplay());
         }
         
         CompoundTag compoundTag = new CompoundTag();
