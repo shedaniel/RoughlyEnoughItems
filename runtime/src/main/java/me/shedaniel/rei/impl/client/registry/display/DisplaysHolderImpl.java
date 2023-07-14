@@ -36,7 +36,9 @@ import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.client.gui.widget.favorites.history.DisplayHistoryManager;
 import me.shedaniel.rei.impl.common.InternalLogger;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,6 +47,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DisplaysHolderImpl implements DisplaysHolder {
     private final boolean cache;
+    private final SetMultimap<DisplayKey, Display> displaysByKey = Multimaps.newSetMultimap(new IdentityHashMap<>(), ReferenceOpenHashSet::new);
     private final Map<CategoryIdentifier<?>, DisplaysList> displays = new ConcurrentHashMap<>();
     private final Map<CategoryIdentifier<?>, List<Display>> unmodifiableDisplays;
     private final WeakHashMap<Display, Object> displaysBase = new WeakHashMap<>();
@@ -77,6 +80,10 @@ public class DisplaysHolderImpl implements DisplaysHolder {
     public void add(Display display, @Nullable Object origin) {
         this.displays.computeIfAbsent(display.getCategoryIdentifier(), location -> new DisplaysList())
                 .add(display);
+        Optional<ResourceLocation> location = display.getDisplayLocation();
+        if (location.isPresent()) {
+            this.displaysByKey.put(DisplayKey.create(display.getCategoryIdentifier(), location.get()), display);
+        }
         this.displayCount.increment();
         if (origin != null) {
             synchronized (this.displaysBase) {
@@ -137,6 +144,11 @@ public class DisplaysHolderImpl implements DisplaysHolder {
     }
     
     @Override
+    public Set<Display> getDisplaysByKey(DisplayKey key) {
+        return this.displaysByKey.get(key);
+    }
+    
+    @Override
     public boolean isCached(Display display) {
         return this.cache && this.displaysCached.contains(display);
     }
@@ -160,8 +172,14 @@ public class DisplaysHolderImpl implements DisplaysHolder {
     @Nullable
     public Object getDisplayOrigin(Display display) {
         synchronized (this.displaysBase) {
-            return this.displaysBase.get(display);
+            Object origin = this.displaysBase.get(display);
+            
+            if (origin != null) {
+                return origin;
+            }
         }
+        
+        return DisplayHistoryManager.INSTANCE.getPossibleOrigin(this, display);
     }
     
     private static class DisplaysList extends ArrayList<Display> {

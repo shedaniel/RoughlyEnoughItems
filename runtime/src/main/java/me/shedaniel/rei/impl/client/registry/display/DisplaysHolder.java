@@ -50,6 +50,8 @@ public interface DisplaysHolder {
     
     void endReload();
     
+    Set<Display> getDisplaysByKey(DisplayKey key);
+    
     boolean isCached(Display display);
     
     Set<Display> getDisplaysNotCached();
