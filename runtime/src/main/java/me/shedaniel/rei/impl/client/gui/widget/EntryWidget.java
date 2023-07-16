@@ -608,10 +608,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                     } else {
                         ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     }
-                    ConfigManager.getInstance().saveConfig();
-                    FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                    if (favoritesListWidget != null)
-                        favoritesListWidget.updateSearch();
                     return true;
                 }
             }
@@ -698,10 +694,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                     } else {
                         ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     }
-                    ConfigManager.getInstance().saveConfig();
-                    FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                    if (favoritesListWidget != null)
-                        favoritesListWidget.updateSearch();
                     return true;
                 }
             }
