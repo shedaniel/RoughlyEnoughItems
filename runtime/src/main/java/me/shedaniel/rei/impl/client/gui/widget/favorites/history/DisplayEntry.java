@@ -33,6 +33,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
@@ -214,7 +215,8 @@ public class DisplayEntry extends WidgetWithBounds {
                     graphics.pose().translate(xOffset(), yOffset(), 0);
                     graphics.pose().scale(xScale(), yScale(), 1.0F);
                     
-                    result.renderer.render(graphics, mouseX, mouseY, delta, widgets.get(), getBounds(), display);
+                    Rectangle transformedBounds = MatrixUtils.transform(MatrixUtils.inverse(graphics.pose().last().pose()), getBounds());
+                    result.renderer.render(graphics, mouseX, mouseY, delta, widgets.get(), transformedBounds, display);
                     graphics.pose().popPose();
                 }
             } else {
