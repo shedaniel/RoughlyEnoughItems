@@ -27,6 +27,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
+import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.gui.config.RecipeBorderType;
 import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
 import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
@@ -82,10 +84,13 @@ public class DisplayCompositeWidget extends DelegateWidgetWithBounds implements 
         
         if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(mouse())) {
             if (ConfigObject.getInstance().getFavoriteKeyCode().matchesKey(keyCode, scanCode)) {
-                FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                
-                if (favoritesListWidget != null) {
-                    favoritesListWidget.displayHistory.addDisplay(getBounds().clone(), display.provideInternalDisplay());
+                FavoriteEntry favoriteEntry = FavoriteEntryType.registry().get(FavoriteEntryType.DISPLAY)
+                        .fromArgs(display.provideInternalDisplay())
+                        .get()
+                        .left()
+                        .orElse(null);
+                if (favoriteEntry != null) {
+                    ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     return true;
                 }
             }
@@ -102,10 +107,13 @@ public class DisplayCompositeWidget extends DelegateWidgetWithBounds implements 
         
         if (ConfigObject.getInstance().isFavoritesEnabled() && containsMouse(mouseX, mouseY)) {
             if (ConfigObject.getInstance().getFavoriteKeyCode().matchesMouse(button)) {
-                FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                
-                if (favoritesListWidget != null) {
-                    favoritesListWidget.displayHistory.addDisplay(getBounds().clone(), display.provideInternalDisplay());
+                FavoriteEntry favoriteEntry = FavoriteEntryType.registry().get(FavoriteEntryType.DISPLAY)
+                        .fromArgs(display.provideInternalDisplay())
+                        .get()
+                        .left()
+                        .orElse(null);
+                if (favoriteEntry != null) {
+                    ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     return true;
                 }
             }
