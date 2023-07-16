@@ -41,6 +41,7 @@ import me.shedaniel.rei.api.client.gui.config.RecipeBorderType;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentProviderWidget;
 import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponentVisitorWidget;
+import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -66,6 +67,7 @@ import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.screen.DefaultDisplayViewingScreen;
+import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayCompositeWidget;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayTooltipComponent;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
@@ -78,10 +80,13 @@ import me.shedaniel.rei.impl.common.util.HNEntryStackWrapper;
 import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -383,6 +388,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                 public Tooltip getTooltip(TooltipContext context) {
                     Tooltip tooltip = Tooltip.create(context.getPoint());
                     tooltip.add((ClientTooltipComponent) tooltipComponent.get());
+                    tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
                     return tooltip;
                 }
             };
@@ -390,10 +396,16 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         
         @Override
         public boolean doAction(int button) {
+            Widgets.produceClickSound();
+            
+            if (!(Minecraft.getInstance().screen instanceof DisplayScreen) && Screen.hasControlDown()) {
+                AutoCraftingEvaluator.evaluateAutoCrafting(true, Screen.hasShiftDown(), display, Collections::emptyList);
+                return true;
+            }
+            
             ClientHelperImpl.getInstance()
                     .openDisplayViewingScreen(Map.of(CategoryRegistry.getInstance().get(display.getCategoryIdentifier()).getCategory(), List.of(display)),
                             null, List.of(), List.of());
-            Widgets.produceClickSound();
             return true;
         }
         
