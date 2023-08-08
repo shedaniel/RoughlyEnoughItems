@@ -57,7 +57,7 @@ public class FilteredStacksVisibilityHandler implements DisplayVisibilityPredica
     @Override
     public EventResult handleDisplay(DisplayCategory<?> category, Display display) {
         if (checkHiddenStacks) {
-            return visible.computeBooleanIfAbsent(display, displayPredicate) ? EventResult.pass() : EventResult.interruptFalse();
+            return visible.computeIfAbsent(display, displayPredicate) ? EventResult.pass() : EventResult.interruptFalse();
         }
         
         return EventResult.pass();

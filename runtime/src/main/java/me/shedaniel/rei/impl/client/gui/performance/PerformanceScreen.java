@@ -148,7 +148,7 @@ public class PerformanceScreen extends Screen {
         RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.getStages().forEach((stage, inner) -> {
             List<PerformanceEntryImpl> entries = new ArrayList<>();
             inner.times().forEach((obj, time) -> {
-                entries.add(new PerformanceEntryImpl(Component.literal(obj instanceof Pair ? ((Pair<REIPluginProvider<?>, REIPlugin<?>>) obj).getFirst().getPluginProviderName() : Objects.toString(obj)), time));
+                entries.add(new PerformanceEntryImpl(Component.literal(obj instanceof Pair ? getNameOfPlugin(obj) : Objects.toString(obj)), time));
             });
             Collection<Long> values = inner.times().values();
             long separateTime;
@@ -164,6 +164,24 @@ public class PerformanceScreen extends Screen {
         });
         list.children().add(0, new PerformanceEntryImpl(Component.literal("Total Load Time"), totalTime[0]));
         addWidget(list);
+    }
+    
+    private String getNameOfPlugin(Object obj) {
+        Pair<REIPluginProvider<?>, REIPlugin<?>> pair = (Pair<REIPluginProvider<?>, REIPlugin<?>>) obj;
+        REIPluginProvider<?> provider = pair.getFirst();
+        REIPlugin<?> plugin = pair.getSecond();
+        
+        String providerName = provider.getPluginProviderName();
+        
+        if (provider.provide().size() >= 1) {
+            String pluginName = plugin.getPluginProviderName();
+            
+            if (!providerName.equals(pluginName)) {
+                providerName = pluginName + " of " + providerName;
+            }
+        }
+        
+        return providerName;
     }
     
     @Override
