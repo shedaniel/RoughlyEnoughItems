@@ -31,23 +31,29 @@ import java.util.function.Function;
 
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
-interface AllOptions {
+interface AllREIConfigOptions {
     static <T> CompositeOption<T> make(String id, Function<ConfigObjectImpl, T> bind,
                                        BiConsumer<ConfigObjectImpl, T> save) {
         return new CompositeOption<>(translatable("config.rei.options." + id),
                 translatable("config.rei.options." + id + ".desc"), bind);
     }
     
-    CompositeOption<CheatingMode> CHEATING_MODE = make("cheating_mode", i -> i.basics.cheating, (i, v) -> i.basics.cheating = v);
+    CompositeOption<CheatingMode> CHEATING_MODE = make("cheating_mode", i -> i.basics.cheating, (i, v) -> i.basics.cheating = v)
+            .enumOptions();
     CompositeOption<Boolean> FAVORITES = make("favorites", i -> i.basics.favoritesEnabled, (i, v) -> i.basics.favoritesEnabled = v)
             .enabledDisabled();
     CompositeOption<Boolean> REDUCED_MOTION = make("reduced_motion", i -> i.basics.reduceMotion, (i, v) -> i.basics.reduceMotion = v)
             .trueFalse();
-    CompositeOption<ItemCheatingStyle> CHEATING_STYLE = make("cheating_style", i -> i.basics.cheatingStyle, (i, v) -> i.basics.cheatingStyle = v);
-    CompositeOption<DisplayScreenType> DISPLAY_SCREEN_TYPE = make("display_screen_type", i -> i.appearance.recipeScreenType, (i, v) -> i.appearance.recipeScreenType = v);
-    CompositeOption<AppearanceTheme> THEME = make("theme", i -> i.appearance.theme, (i, v) -> i.appearance.theme = v);
-    CompositeOption<SearchFieldLocation> SEARCH_FIELD_LOCATION = make("search_field_location", i -> i.appearance.layout.searchFieldLocation, (i, v) -> i.appearance.layout.searchFieldLocation = v);
-    CompositeOption<ConfigButtonPosition> CONFIG_BUTTON_LOCATION = make("config_button_location", i -> i.appearance.layout.configButtonLocation, (i, v) -> i.appearance.layout.configButtonLocation = v);
+    CompositeOption<ItemCheatingStyle> CHEATING_STYLE = make("cheating_style", i -> i.basics.cheatingStyle, (i, v) -> i.basics.cheatingStyle = v)
+            .enumOptions();
+    CompositeOption<DisplayScreenType> DISPLAY_SCREEN_TYPE = make("display_screen_type", i -> i.appearance.recipeScreenType, (i, v) -> i.appearance.recipeScreenType = v)
+            .enumOptions();
+    CompositeOption<AppearanceTheme> THEME = make("theme", i -> i.appearance.theme, (i, v) -> i.appearance.theme = v)
+            .enumOptions();
+    CompositeOption<SearchFieldLocation> SEARCH_FIELD_LOCATION = make("search_field_location", i -> i.appearance.layout.searchFieldLocation, (i, v) -> i.appearance.layout.searchFieldLocation = v)
+            .enumOptions();
+    CompositeOption<ConfigButtonPosition> CONFIG_BUTTON_LOCATION = make("config_button_location", i -> i.appearance.layout.configButtonLocation, (i, v) -> i.appearance.layout.configButtonLocation = v)
+            .enumOptions();
     CompositeOption<Boolean> CRAFTABLE_FILTER = make("craftable_filter", i -> i.appearance.layout.showCraftableOnlyButton, (i, v) -> i.appearance.layout.showCraftableOnlyButton = v)
             .enabledDisabled();
 }
