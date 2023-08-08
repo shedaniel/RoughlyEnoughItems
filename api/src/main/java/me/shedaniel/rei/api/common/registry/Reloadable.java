@@ -49,6 +49,12 @@ public interface Reloadable<P extends REIPlugin<?>> {
     }
     
     @ApiStatus.Experimental
+    default void preStage(ReloadStage stage) {}
+    
+    @ApiStatus.Experimental
+    default void postStage(ReloadStage stage) {}
+    
+    @ApiStatus.Experimental
     default void beforeReloadable(ReloadStage stage, Reloadable<P> other) {}
     
     @ApiStatus.Experimental
