@@ -161,7 +161,7 @@ public class UncertainDisplayViewingScreen extends Screen {
             
             @Override
             protected void applyValue() {
-                
+            
             }
         })));
         this._children().addAll(widgets);
@@ -178,11 +178,7 @@ public class UncertainDisplayViewingScreen extends Screen {
     @Override
     public void render(GuiGraphics graphics, int int_1, int int_2, float float_1) {
         scroll.update(float_1);
-        if (this.minecraft.level != null) {
-            renderBackground(graphics);
-        } else {
-            graphics.fillGradient(0, 0, this.width, this.height, -16777216, -16777216);
-        }
+        super.render(graphics, int_1, int_2, float_1);
         if (scroll.target() == 0) {
             graphics.drawCenteredString(this.font, Component.translatable("text.rei.recipe_screen_type.selection"), this.width / 2, 20, 16777215);
         } else {
@@ -210,7 +206,6 @@ public class UncertainDisplayViewingScreen extends Screen {
                 graphics.pose().popPose();
             }
         }
-        super.render(graphics, int_1, int_2, float_1);
         for (Widget widget : widgets) {
             widget.render(graphics, int_1, int_2, float_1);
         }
@@ -228,6 +223,15 @@ public class UncertainDisplayViewingScreen extends Screen {
         }
         ScissorsHandler.INSTANCE.removeLastScissor();
         button.render(graphics, int_1, int_2, float_1);
+    }
+    
+    @Override
+    public void renderBackground(GuiGraphics graphics, int i, int j, float f) {
+        if (this.minecraft.level != null) {
+            super.renderBackground(graphics, i, j, f);
+        } else {
+            graphics.fillGradient(0, 0, this.width, this.height, -16777216, -16777216);
+        }
     }
     
     private void updateFramePosition(float delta) {

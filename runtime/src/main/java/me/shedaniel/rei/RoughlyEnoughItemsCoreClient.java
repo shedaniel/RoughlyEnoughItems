@@ -356,9 +356,9 @@ public class RoughlyEnoughItemsCoreClient {
                 ((ScreenRegistryImpl) ScreenRegistry.getInstance()).getLastRendererProvider(screen);
             }
             if (ConfigObject.getInstance().doesDisableRecipeBook() && screen instanceof AbstractContainerScreen) {
-                access.getRenderables().removeIf(widget -> widget instanceof ImageButton button && button.resourceLocation.equals(recipeButtonTex));
-                access.getNarratables().removeIf(widget -> widget instanceof ImageButton button && button.resourceLocation.equals(recipeButtonTex));
-                screen.children().removeIf(widget -> widget instanceof ImageButton button && button.resourceLocation.equals(recipeButtonTex));
+                access.getRenderables().removeIf(widget -> widget instanceof ImageButton button && button.sprites.enabled().equals(recipeButtonTex));
+                access.getNarratables().removeIf(widget -> widget instanceof ImageButton button && button.sprites.enabled().equals(recipeButtonTex));
+                screen.children().removeIf(widget -> widget instanceof ImageButton button && button.sprites.enabled().equals(recipeButtonTex));
             }
         });
         ClientScreenInputEvent.MOUSE_CLICKED_PRE.register((minecraftClient, screen, mouseX, mouseY, button) -> {
@@ -386,11 +386,11 @@ public class RoughlyEnoughItemsCoreClient {
             }
             return EventResult.pass();
         });
-        ClientScreenInputEvent.MOUSE_SCROLLED_PRE.register((minecraftClient, screen, mouseX, mouseY, amount) -> {
+        ClientScreenInputEvent.MOUSE_SCROLLED_PRE.register((minecraftClient, screen, mouseX, mouseY, amountX, amountY) -> {
             if (shouldReturn(screen) || screen instanceof DisplayScreen)
                 return EventResult.pass();
             resetFocused(screen);
-            if (REIRuntime.getInstance().isOverlayVisible() && getOverlay().mouseScrolled(mouseX, mouseY, amount)
+            if (REIRuntime.getInstance().isOverlayVisible() && getOverlay().mouseScrolled(mouseX, mouseY, amountX, amountY)
                 && resetFocused(screen))
                 return EventResult.interruptFalse();
             return EventResult.pass();

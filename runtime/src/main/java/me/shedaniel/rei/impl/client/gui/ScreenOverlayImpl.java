@@ -350,25 +350,25 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
         if (!REIRuntime.getInstance().isOverlayVisible())
             return false;
-        if (menuHolder.mouseScrolled(mouseX, mouseY, amount))
+        if (menuHolder.mouseScrolled(mouseX, mouseY, amountX, amountY))
             return true;
-        if (hintsWidget.mouseScrolled(mouseX, mouseY, amount))
+        if (hintsWidget.mouseScrolled(mouseX, mouseY, amountX, amountY))
             return true;
-        if (isInside(mouseX, mouseY) && getEntryListWidget().mouseScrolled(mouseX, mouseY, amount)) {
+        if (isInside(mouseX, mouseY) && getEntryListWidget().mouseScrolled(mouseX, mouseY, amountX, amountY)) {
             return true;
         }
         if (isNotInExclusionZones(PointHelper.getMouseX(), PointHelper.getMouseY())) {
-            if (favoritesListWidget != null && favoritesListWidget.mouseScrolled(mouseX, mouseY, amount))
+            if (favoritesListWidget != null && favoritesListWidget.mouseScrolled(mouseX, mouseY, amountX, amountY))
                 return true;
         }
         for (Widget widget : widgets)
             if (widget != getEntryListWidget() && (favoritesListWidget == null || widget != favoritesListWidget)
                     && widget != menuHolder.widget()
                     && widget != hintsWidget
-                    && widget.mouseScrolled(mouseX, mouseY, amount))
+                    && widget.mouseScrolled(mouseX, mouseY, amountX, amountY))
                 return true;
         return false;
     }

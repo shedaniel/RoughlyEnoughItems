@@ -122,9 +122,9 @@ public class DefaultBeaconPaymentCategory implements DisplayCategory<DefaultBeac
         }
         
         @Override
-        public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-            if (containsMouse(double_1, double_2)) {
-                scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
+        public boolean mouseScrolled(double double_1, double double_2, double amountX, double amountY) {
+            if (containsMouse(double_1, double_2) && amountY != 0) {
+                scrolling.offset(ClothConfigInitializer.getScrollStep() * -amountY, true);
                 return true;
             }
             return false;

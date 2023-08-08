@@ -328,7 +328,6 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         darkStripesColor.update(delta);
-        renderBackground(graphics);
         super.render(graphics, mouseX, mouseY, delta);
         getOverlay().render(graphics, mouseX, mouseY, delta);
         for (Widget widget : widgets()) {
@@ -458,22 +457,22 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
         REIRuntimeImpl.isWithinRecipeViewingScreen = true;
         for (GuiEventListener listener : children()) {
-            if (listener.mouseScrolled(mouseX, mouseY, amount)) {
+            if (listener.mouseScrolled(mouseX, mouseY, amountX, amountY)) {
                 REIRuntimeImpl.isWithinRecipeViewingScreen = false;
                 return true;
             }
         }
         REIRuntimeImpl.isWithinRecipeViewingScreen = false;
         if (getBounds().contains(PointHelper.ofMouse())) {
-            if (amount > 0 && recipeBack.isEnabled())
+            if (amountY > 0 && recipeBack.isEnabled())
                 recipeBack.onClick();
-            else if (amount < 0 && recipeNext.isEnabled())
+            else if (amountY < 0 && recipeNext.isEnabled())
                 recipeNext.onClick();
         }
-        return super.mouseScrolled(mouseX, mouseY, amount);
+        return super.mouseScrolled(mouseX, mouseY, amountX, amountY);
     }
     
     @Override

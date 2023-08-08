@@ -562,12 +562,12 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
         if (REIRuntimeImpl.isWithinRecipeViewingScreen && entryStacks.size() > 1 && containsMouse(mouseX, mouseY)) {
-            if (amount < 0) {
+            if (amountY < 0) {
                 EntryWidget.stackDisplayOffset = ((System.currentTimeMillis() + stackDisplayOffset) / 1000 - 1) * 1000;
                 return true;
-            } else if (amount > 0) {
+            } else if (amountY > 0) {
                 EntryWidget.stackDisplayOffset = ((System.currentTimeMillis() + stackDisplayOffset) / 1000 + 1) * 1000;
                 return true;
             }

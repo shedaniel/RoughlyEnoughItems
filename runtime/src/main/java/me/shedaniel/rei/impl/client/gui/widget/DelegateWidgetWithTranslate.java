@@ -90,9 +90,9 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
         Vector4f mouse = transformMouse(mouseX, mouseY);
-        return super.mouseScrolled(mouse.x(), mouse.y(), amount);
+        return super.mouseScrolled(mouse.x(), mouse.y(), amountX, amountY);
     }
     
     @Override

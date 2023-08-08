@@ -167,12 +167,12 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (containsChecked(mouseX, mouseY, false)) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
+        if (containsChecked(mouseX, mouseY, false) && amountY != 0) {
             if (Screen.hasControlDown()) {
                 ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
                 scaleIndicator.setAs(10.0D);
-                if (config.setEntrySize(config.getEntrySize() + amount * 0.075)) {
+                if (config.setEntrySize(config.getEntrySize() + amountY * 0.075)) {
                     ConfigManager.getInstance().saveConfig();
                     REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
                     return true;
@@ -180,7 +180,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
             }
         }
         
-        return super.mouseScrolled(mouseX, mouseY, amount);
+        return super.mouseScrolled(mouseX, mouseY, amountX, amountY);
     }
     
     @Override

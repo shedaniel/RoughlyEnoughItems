@@ -127,8 +127,8 @@ public class WarningAndErrorScreen extends Screen {
     }
     
     @Override
-    public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        return listWidget.mouseScrolled(double_1, double_2, double_3) || super.mouseScrolled(double_1, double_2, double_3);
+    public boolean mouseScrolled(double double_1, double double_2, double amountX, double amountY) {
+        return listWidget.mouseScrolled(double_1, double_2, amountX, amountY) || super.mouseScrolled(double_1, double_2, amountX, amountY);
     }
     
     @Override
@@ -191,7 +191,7 @@ public class WarningAndErrorScreen extends Screen {
     private static class EmptyItem extends StringItem {
         @Override
         public void render(GuiGraphics graphics, int i, int i1, int i2, int i3, int i4, int i5, int i6, boolean b, float v) {
-            
+        
         }
         
         @Override

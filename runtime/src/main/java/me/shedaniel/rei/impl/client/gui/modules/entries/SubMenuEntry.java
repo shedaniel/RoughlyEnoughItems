@@ -141,8 +141,8 @@ public class SubMenuEntry extends AbstractMenuEntry {
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        return childMenu != null && !childMenu.children().isEmpty() && isSelected() && childMenu.mouseScrolled(mouseX, mouseY, amount);
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
+        return childMenu != null && !childMenu.children().isEmpty() && isSelected() && childMenu.mouseScrolled(mouseX, mouseY, amountX, amountY);
     }
     
     @Override

@@ -1,7 +1,7 @@
 accessWidener v1     named
 accessible    class  net/minecraft/client/gui/Font$StringRenderOutput
 accessible    class  net/minecraft/world/item/alchemy/PotionBrewing$Mix
-accessible    field  net/minecraft/client/gui/components/ImageButton                           resourceLocation        Lnet/minecraft/resources/ResourceLocation;
+accessible    field  net/minecraft/client/gui/components/ImageButton                           sprites                 Lnet/minecraft/client/gui/components/WidgetSprites;
 accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        hoveredSlot             Lnet/minecraft/world/inventory/Slot;
 accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        imageHeight             I
 accessible    field  net/minecraft/client/gui/screens/inventory/AbstractContainerScreen        imageWidth              I

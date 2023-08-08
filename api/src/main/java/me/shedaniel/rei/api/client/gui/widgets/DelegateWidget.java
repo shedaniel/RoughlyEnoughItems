@@ -85,8 +85,8 @@ public class DelegateWidget extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        return delegate().mouseScrolled(mouseX, mouseY, amount);
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
+        return delegate().mouseScrolled(mouseX, mouseY, amountX, amountY);
     }
     
     @Override

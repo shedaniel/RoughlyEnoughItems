@@ -251,9 +251,9 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
         }
         
         @Override
-        public boolean mouseScrolled(double d, double e, double f) {
+        public boolean mouseScrolled(double d, double e, double amountX, double amountY) {
             Vector4f mouse = transformMouse(d, e);
-            return super.mouseScrolled(mouse.x(), mouse.y(), f);
+            return super.mouseScrolled(mouse.x(), mouse.y(), amountX, amountY);
         }
         
         @Nullable

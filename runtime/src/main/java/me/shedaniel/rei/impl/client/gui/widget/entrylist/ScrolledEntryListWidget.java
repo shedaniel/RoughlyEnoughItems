@@ -149,13 +149,13 @@ public class ScrolledEntryListWidget extends CollapsingEntryListWidget {
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (containsChecked(mouseX, mouseY, false) && !Screen.hasControlDown()) {
-            scrolling.offset(ClothConfigInitializer.getScrollStep() * -amount, true);
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
+        if (containsChecked(mouseX, mouseY, false) && !Screen.hasControlDown() && amountY != 0) {
+            scrolling.offset(ClothConfigInitializer.getScrollStep() * -amountY, true);
             return true;
         }
         
-        return super.mouseScrolled(mouseX, mouseY, amount);
+        return super.mouseScrolled(mouseX, mouseY, amountX, amountY);
     }
     
     @Override

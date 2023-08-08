@@ -182,18 +182,18 @@ public class Menu extends WidgetWithBounds implements LateRenderable {
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
         if (getInnerBounds().contains(mouseX, mouseY)) {
-            scrolling.offset(ClothConfigInitializer.getScrollStep() * -amount, true);
+            scrolling.offset(ClothConfigInitializer.getScrollStep() * -amountY, true);
             return true;
         }
         for (FavoriteMenuEntry child : children()) {
             if (child instanceof SubMenuEntry) {
-                if (child.mouseScrolled(mouseX, mouseY, amount))
+                if (child.mouseScrolled(mouseX, mouseY, amountX, amountY))
                     return true;
             }
         }
-        return super.mouseScrolled(mouseX, mouseY, amount);
+        return super.mouseScrolled(mouseX, mouseY, amountX, amountY);
     }
     
     @Override

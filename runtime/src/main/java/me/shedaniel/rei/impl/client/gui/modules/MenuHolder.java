@@ -116,8 +116,8 @@ public class MenuHolder implements MenuAccess {
         }
     }
     
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        return menu != null && menu.wrappedMenu.mouseScrolled(mouseX, mouseY, amount);
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
+        return menu != null && menu.wrappedMenu.mouseScrolled(mouseX, mouseY, amountX, amountY);
     }
     
     private static class OverlayMenu {

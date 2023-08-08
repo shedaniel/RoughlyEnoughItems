@@ -78,7 +78,7 @@ public class HintsContainerWidget extends DelegateWidget {
     public void read() {
         Path path = Platform.getConfigFolder().resolve("roughlyenoughitems/hints.json");
         this.config = new HintsConfig();
-        String uuid = Minecraft.getInstance().getUser().getUuid();
+        String uuid = Minecraft.getInstance().getUser().getProfileId().toString();
         if (Files.exists(path)) {
             try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
                 this.config = new Gson().fromJson(reader, HintsConfig.class);

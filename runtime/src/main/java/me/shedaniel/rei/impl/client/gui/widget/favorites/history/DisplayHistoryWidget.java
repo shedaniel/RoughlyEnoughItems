@@ -238,7 +238,7 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
         Collection<DisplayEntry> entries = DisplayHistoryManager.INSTANCE.getEntries(this);
         
         if (containsMouse(mouseX, mouseY)) {
@@ -248,17 +248,17 @@ public class DisplayHistoryWidget extends WidgetWithBounds implements DraggableC
                 }
             }
             
-            scroll.setTo(scroll.target() + ClothConfigInitializer.getScrollStep() * amount * (getBounds().getWidth() / -50.0), ClothConfigInitializer.getScrollDuration());
+            scroll.setTo(scroll.target() + ClothConfigInitializer.getScrollStep() * amountY * (getBounds().getWidth() / -50.0), ClothConfigInitializer.getScrollDuration());
             return true;
         }
         
         for (DisplayEntry entry : entries) {
-            if (entry.mouseScrolled(mouseX, mouseY, amount)) {
+            if (entry.mouseScrolled(mouseX, mouseY, amountX, amountY)) {
                 return true;
             }
         }
         
-        return super.mouseScrolled(mouseX, mouseY, amount);
+        return super.mouseScrolled(mouseX, mouseY, amountX, amountY);
     }
     
     @Override

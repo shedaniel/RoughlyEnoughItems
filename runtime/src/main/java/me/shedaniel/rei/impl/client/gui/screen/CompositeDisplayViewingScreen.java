@@ -229,10 +229,10 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
         double height = scrolling.getMaxScrollHeight();
-        if (scrollListBounds.contains(mouseX, mouseY) && height > scrollListBounds.height - 2) {
-            scrolling.offset(ClothConfigInitializer.getScrollStep() * -amount, true);
+        if (scrollListBounds.contains(mouseX, mouseY) && height > scrollListBounds.height - 2 && amountY != 0) {
+            scrolling.offset(ClothConfigInitializer.getScrollStep() * -amountY, true);
             if (scrollBarAlphaFuture == 0)
                 scrollBarAlphaFuture = 1f;
             if (System.currentTimeMillis() - scrollBarAlphaFutureTime > 300f)
@@ -241,14 +241,14 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         }
         REIRuntimeImpl.isWithinRecipeViewingScreen = true;
         for (GuiEventListener listener : children()) {
-            if (listener.mouseScrolled(mouseX, mouseY, amount)) {
+            if (listener.mouseScrolled(mouseX, mouseY, amountX, amountY)) {
                 REIRuntimeImpl.isWithinRecipeViewingScreen = false;
                 return true;
             }
         }
         REIRuntimeImpl.isWithinRecipeViewingScreen = false;
-        if (bounds.contains(PointHelper.ofMouse())) {
-            if (amount < 0 && categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
+        if (bounds.contains(PointHelper.ofMouse()) && amountY != 0) {
+            if (amountY < 0 && categoryMap.get(categories.get(selectedCategoryIndex)).size() > 1) {
                 selectedRecipeIndex++;
                 if (selectedRecipeIndex >= categoryMap.get(categories.get(selectedCategoryIndex)).size())
                     selectedRecipeIndex = 0;
@@ -262,7 +262,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
                 return true;
             }
         }
-        return super.mouseScrolled(mouseX, mouseY, amount);
+        return super.mouseScrolled(mouseX, mouseY, amountX, amountY);
     }
     
     @Override
@@ -291,9 +291,8 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             }
         }
         scrolling.updatePosition(delta);
-        renderBackground(graphics);
-        getOverlay().render(graphics, mouseX, mouseY, delta);
         super.render(graphics, mouseX, mouseY, delta);
+        getOverlay().render(graphics, mouseX, mouseY, delta);
         for (Widget widget : widgets) {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             widget.render(graphics, mouseX, mouseY, delta);

@@ -145,10 +145,10 @@ public class CreditsScreen extends Screen {
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (entryListWidget.mouseScrolled(mouseX, mouseY, amount))
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
+        if (entryListWidget.mouseScrolled(mouseX, mouseY, amountX, amountY))
             return true;
-        return super.mouseScrolled(mouseX, mouseY, amount);
+        return super.mouseScrolled(mouseX, mouseY, amountX, amountY);
     }
     
     @Override

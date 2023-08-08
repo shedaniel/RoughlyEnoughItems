@@ -122,7 +122,7 @@ public class RoughlyEnoughItemsNetwork {
             try {
                 boolean shift = packetByteBuf.readBoolean();
                 try {
-                    InputSlotCrafter<AbstractContainerMenu, Container, Display> crafter = InputSlotCrafter.start(category, container, player, packetByteBuf.readAnySizeNbt(), shift);
+                    InputSlotCrafter<AbstractContainerMenu, Container, Display> crafter = InputSlotCrafter.start(category, container, player, packetByteBuf.readNbt(), shift);
                 } catch (InputSlotCrafter.NotEnoughMaterialsException e) {
                     if (!(container instanceof RecipeBookMenu)) {
                         return;

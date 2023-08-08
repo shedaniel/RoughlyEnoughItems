@@ -108,13 +108,13 @@ public class OverflowWidget extends DelegateWidgetWithTranslate {
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (containsMouse(mouseX, mouseY)) {
-            this.scale.setTo(this.scale.target() + amount * -0.2f, 300);
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
+        if (containsMouse(mouseX, mouseY) && amountY != 0) {
+            this.scale.setTo(this.scale.target() + amountY * -0.2f, 300);
             return true;
         }
         
-        return super.mouseScrolled(mouseX, mouseY, amount);
+        return super.mouseScrolled(mouseX, mouseY, amountX, amountY);
     }
     
     @Override

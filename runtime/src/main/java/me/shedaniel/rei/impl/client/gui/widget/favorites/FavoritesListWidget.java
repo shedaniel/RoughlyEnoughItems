@@ -91,23 +91,23 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
     private List<Widget> children = ImmutableList.of(favoritePanel, togglePanelButton, systemRegion, region);
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
         if (fullBounds.contains(mouseX, mouseY)) {
-            if (Screen.hasControlDown()) {
+            if (Screen.hasControlDown() && amountY != 0) {
                 ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
                 ScreenOverlayImpl.getEntryListWidget().scaleIndicator.setAs(10.0D);
-                if (config.setEntrySize(config.getEntrySize() + amount * 0.075)) {
+                if (config.setEntrySize(config.getEntrySize() + amountY * 0.075)) {
                     ConfigManager.getInstance().saveConfig();
                     REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
                     return true;
                 }
-            } else if (favoritePanel.mouseScrolled(mouseX, mouseY, amount)) {
+            } else if (favoritePanel.mouseScrolled(mouseX, mouseY, amountX, amountY)) {
                 return true;
-            } else if (displayHistory.mouseScrolled(mouseX, mouseY, amount)) {
+            } else if (displayHistory.mouseScrolled(mouseX, mouseY, amountX, amountY)) {
                 return true;
             }
         }
-        return super.mouseScrolled(mouseX, mouseY, amount);
+        return super.mouseScrolled(mouseX, mouseY, amountX, amountY);
     }
     
     @Override

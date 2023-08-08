@@ -179,12 +179,12 @@ public class HintWidget extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (containsMouse(mouseX, mouseY)) {
-            scroll.setTo(scroll.target() + ClothConfigInitializer.getScrollStep() * amount * (getBounds().getWidth() / -50.0), ClothConfigInitializer.getScrollDuration());
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
+        if (containsMouse(mouseX, mouseY) && amountY != 0) {
+            scroll.setTo(scroll.target() + ClothConfigInitializer.getScrollStep() * amountY * (getBounds().getWidth() / -50.0), ClothConfigInitializer.getScrollDuration());
             return true;
         }
         
-        return super.mouseScrolled(mouseX, mouseY, amount);
+        return super.mouseScrolled(mouseX, mouseY, amountX, amountY);
     }
 }

@@ -445,12 +445,12 @@ public class FilteringScreen extends Screen {
     }
     
     @Override
-    public boolean mouseScrolled(double double_1, double double_2, double double_3) {
-        if (getBounds().contains(double_1, double_2)) {
-            scrolling.offset(ClothConfigInitializer.getScrollStep() * -double_3, true);
+    public boolean mouseScrolled(double double_1, double double_2, double amountX, double amountY) {
+        if (getBounds().contains(double_1, double_2) && amountY != 0) {
+            scrolling.offset(ClothConfigInitializer.getScrollStep() * -amountY, true);
             return true;
         }
-        super.mouseScrolled(double_1, double_2, double_3);
+        super.mouseScrolled(double_1, double_2, amountX, amountY);
         return true;
     }
     

@@ -179,10 +179,10 @@ public class TabContainerWidget {
             }
             
             @Override
-            public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-                if (TabContainerWidget.this.bounds.contains(mouseX, mouseY) && categories.size() > 1) {
+            public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
+                if (TabContainerWidget.this.bounds.contains(mouseX, mouseY) && categories.size() > 1 && amountY != 0) {
                     int currentCategoryIndex = selectedCategory.getAsInt();
-                    if (amount > 0) {
+                    if (amountY > 0) {
                         currentCategoryIndex--;
                         if (currentCategoryIndex < 0)
                             currentCategoryIndex = categories.size() - 1;

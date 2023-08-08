@@ -407,13 +407,14 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         }
     }
     
-    public boolean mouseScrolled(double double_1, double double_2, double double_3) {
+    public boolean mouseScrolled(double double_1, double double_2, double amountX, double amountY) {
         for (E entry : entries) {
-            if (entry.mouseScrolled(double_1, double_2, double_3)) {
+            if (entry.mouseScrolled(double_1, double_2, amountX, amountY)) {
                 return true;
             }
         }
-        this.capYPosition(this.getScroll() - double_3 * (double) (getMaxScroll() / getItemCount()) / 2.0D);
+        if (amountY == 0) return false;
+        this.capYPosition(this.getScroll() - amountY * (double) (getMaxScroll() / getItemCount()) / 2.0D);
         return true;
     }
     

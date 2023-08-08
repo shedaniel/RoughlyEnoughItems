@@ -88,23 +88,22 @@ public class ErrorsScreen extends Screen {
     
     private void exit() {
         boolean localServer = this.minecraft.isLocalServer();
-        boolean connectedToRealms = this.minecraft.isConnectedToRealms();
         this.minecraft.level.disconnect();
         
         if (localServer) {
-            this.minecraft.clearLevel(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
+            this.minecraft.disconnect(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
         } else {
-            this.minecraft.clearLevel();
+            this.minecraft.disconnect();
         }
         
         System.exit(-1);
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (listWidget.mouseScrolled(mouseX, mouseY, amount))
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
+        if (listWidget.mouseScrolled(mouseX, mouseY, amountX, amountY))
             return true;
-        return super.mouseScrolled(mouseX, mouseY, amount);
+        return super.mouseScrolled(mouseX, mouseY, amountX, amountY);
     }
     
     @Override

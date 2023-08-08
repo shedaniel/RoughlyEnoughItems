@@ -161,9 +161,9 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
         }
         
         @Override
-        public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-            if (containsMouse(mouseX, mouseY)) {
-                scrolling.offset(ClothConfigInitializer.getScrollStep() * -amount, true);
+        public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
+            if (containsMouse(mouseX, mouseY) && amountY != 0) {
+                scrolling.offset(ClothConfigInitializer.getScrollStep() * -amountY, true);
                 return true;
             }
             return false;

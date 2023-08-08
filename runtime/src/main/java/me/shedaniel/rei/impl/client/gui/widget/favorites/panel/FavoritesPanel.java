@@ -113,12 +113,12 @@ public class FavoritesPanel extends WidgetWithBounds {
     }
     
     @Override
-    public boolean mouseScrolled(double d, double e, double f) {
-        if (innerBounds.contains(d, e)) {
-            scroller.offset(ClothConfigInitializer.getScrollStep() * -f, true);
+    public boolean mouseScrolled(double d, double e, double amountX, double amountY) {
+        if (innerBounds.contains(d, e) && amountY != 0) {
+            scroller.offset(ClothConfigInitializer.getScrollStep() * -amountY, true);
             return true;
         }
-        return super.mouseScrolled(d, e, f);
+        return super.mouseScrolled(d, e, amountX, amountY);
     }
     
     @Override

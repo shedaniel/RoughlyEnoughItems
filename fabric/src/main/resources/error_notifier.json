@@ -12,14 +12,14 @@
             "type": "depends",
             "modId": "architectury",
             "modName": "Architectury API",
-            "versions": ">=9.0.7 <10.0.0",
+            "versions": ">=10.0.0 <11.0.0",
             "url": "https://www.curseforge.com/minecraft/mc-mods/architectury-api/"
         },
         {
             "type": "depends",
             "modId": "cloth-config2",
             "modName": "Cloth Config",
-            "versions": ">=11.0.0 <12.0.0",
+            "versions": ">=12.0.0 <13.0.0",
             "url": "https://www.curseforge.com/minecraft/mc-mods/cloth-config/"
         }
     ]

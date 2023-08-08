@@ -57,9 +57,9 @@ public class MergedWidget extends Widget {
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
         for (Widget widget : this.widgets) {
-            if (widget.mouseScrolled(mouseX, mouseY, amount))
+            if (widget.mouseScrolled(mouseX, mouseY, amountX, amountY))
                 return true;
         }
         return false;

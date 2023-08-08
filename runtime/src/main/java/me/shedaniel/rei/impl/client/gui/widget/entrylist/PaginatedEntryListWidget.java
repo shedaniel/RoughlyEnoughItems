@@ -264,12 +264,12 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
     }
     
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (super.mouseScrolled(mouseX, mouseY, amount)) return true;
+    public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
+        if (super.mouseScrolled(mouseX, mouseY, amountX, amountY)) return true;
         if (!Screen.hasControlDown()) {
-            if (amount > 0 && leftButton.isEnabled())
+            if (amountY > 0 && leftButton.isEnabled())
                 leftButton.onClick();
-            else if (amount < 0 && rightButton.isEnabled())
+            else if (amountY < 0 && rightButton.isEnabled())
                 rightButton.onClick();
             else
                 return false;
