@@ -31,7 +31,7 @@ task fakeForgeJar(type: Jar, dependsOn: jar) {
     }
     ["REIPlugin", "REIPluginClient", "REIPluginCommon", "REIPluginDedicatedServer",
      "REIPluginLoader", "REIPluginLoaderClient", "REIPluginLoaderCommon", "REIPluginLoaderDedicatedServer"].each {
-        from(rootProject.file("fake/$it.class")) {
+        from(rootProject.file("fake/${it}.class")) {
             into "me/shedaniel/rei/forge"
         }
     }
