@@ -69,13 +69,10 @@ public class PluginStageExecutionWatcher implements HintProvider {
             
             @Override
             public void startReload() {
-                for (ReloadStage stage : ReloadStage.values()) {
-                    startReload(stage);
-                }
             }
             
             @Override
-            public void startReload(ReloadStage stage) {
+            public void preStage(ReloadStage stage) {
                 synchronized (allStages) {
                     if (manager == PluginManager.getInstance() && stage.ordinal() == 0) {
                         allStages.clear();
@@ -85,14 +82,7 @@ public class PluginStageExecutionWatcher implements HintProvider {
             }
             
             @Override
-            public void endReload() {
-                for (ReloadStage stage : ReloadStage.values()) {
-                    endReload(stage);
-                }
-            }
-            
-            @Override
-            public void endReload(ReloadStage stage) {
+            public void postStage(ReloadStage stage) {
                 synchronized (allStages) {
                     data().finishedStages.add(stage);
                 }

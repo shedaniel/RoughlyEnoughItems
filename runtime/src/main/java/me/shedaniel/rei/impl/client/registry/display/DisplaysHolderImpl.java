@@ -64,7 +64,7 @@ public class DisplaysHolderImpl implements DisplaysHolder {
             if (list == null) {
                 return null;
             } else {
-                return ((DisplaysList) list).unmodifiableList;
+                return ((DisplaysList) list).synchronizedList;
             }
         }, key -> CategoryRegistry.getInstance().tryGet(key).isPresent());
         this.displaysByInput = createSetMultimap();
@@ -183,12 +183,11 @@ public class DisplaysHolderImpl implements DisplaysHolder {
     }
     
     private static class DisplaysList extends ArrayList<Display> {
-        private final List<Display> unmodifiableList;
         private final List<Display> synchronizedList;
         
         public DisplaysList() {
-            this.synchronizedList = Collections.synchronizedList(this);
-            this.unmodifiableList = Collections.unmodifiableList(synchronizedList);
+            List<Display> unmodifiableList = Collections.unmodifiableList(this);
+            this.synchronizedList = Collections.synchronizedList(unmodifiableList);
         }
     }
     

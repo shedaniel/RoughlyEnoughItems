@@ -223,6 +223,7 @@ public class ViewsImpl implements Views {
                     class Wrapped implements DisplaySpec {
                         private Display display;
                         private List<ResourceLocation> ids = null;
+                        private final int hash = merger.hashOf(display);
                         
                         public Wrapped(Display display) {
                             this.display = display;
@@ -238,7 +239,7 @@ public class ViewsImpl implements Views {
                         
                         @Override
                         public int hashCode() {
-                            return merger.hashOf(display);
+                            return hash;
                         }
                         
                         @Override

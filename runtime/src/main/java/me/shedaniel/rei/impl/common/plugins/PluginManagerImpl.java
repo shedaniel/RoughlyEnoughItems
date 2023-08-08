@@ -231,6 +231,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     
     @Override
     public void pre(ReloadStage stage) {
+        this.reloading = stage;
         List<PluginWrapper<P>> plugins = new ArrayList<>(getPluginWrapped().toList());
         plugins.sort(Comparator.comparingDouble(PluginWrapper<P>::getPriority).reversed());
         Collections.reverse(plugins);
@@ -260,8 +261,22 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
                 }
             });
         } catch (Throwable throwable) {
+            this.reloading = null;
             new RuntimeException("Failed to run pre registration").printStackTrace();
         }
+        try (SectionClosable preStageAll = section(stage, "pre-stage/");
+             PerformanceLogger.Plugin perfLogger = RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.stage("Pre Stage " + stage.name())) {
+            for (Reloadable<P> reloadable : reloadables) {
+                Class<?> reloadableClass = reloadable.getClass();
+                try (SectionClosable preStage = section(stage, "pre-stage/" + name(reloadableClass) + "/");
+                     PerformanceLogger.Plugin.Inner inner = perfLogger.stage(name(reloadableClass))) {
+                    reloadable.preStage(stage);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                }
+            }
+        }
+        this.reloading = null;
         this.reloadStopwatch.stop();
         InternalLogger.getInstance().debug("========================================");
         InternalLogger.getInstance().debug(name(pluginClass) + " finished pre-reload for " + stage + " in " + reloadStopwatch + ".");
@@ -270,6 +285,7 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
     
     @Override
     public void post(ReloadStage stage) {
+        this.reloading = stage;
         List<PluginWrapper<P>> plugins = new ArrayList<>(getPluginWrapped().toList());
         plugins.sort(Comparator.comparingDouble(PluginWrapper<P>::getPriority).reversed());
         Collections.reverse(plugins);
@@ -296,8 +312,22 @@ public class PluginManagerImpl<P extends REIPlugin<?>> implements PluginManager<
                 }
             });
         } catch (Throwable throwable) {
+            this.reloading = null;
             new RuntimeException("Failed to run post registration").printStackTrace();
         }
+        try (SectionClosable postStageAll = section(stage, "post-stage/");
+             PerformanceLogger.Plugin perfLogger = RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.stage("Pre Stage " + stage.name())) {
+            for (Reloadable<P> reloadable : reloadables) {
+                Class<?> reloadableClass = reloadable.getClass();
+                try (SectionClosable postStage = section(stage, "post-stage/" + name(reloadableClass) + "/");
+                     PerformanceLogger.Plugin.Inner inner = perfLogger.stage(name(reloadableClass))) {
+                    reloadable.postStage(stage);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                }
+            }
+        }
+        this.reloading = null;
         this.reloadStopwatch.stop();
         postStopwatch.stop();
         InternalLogger.getInstance().debug("========================================");

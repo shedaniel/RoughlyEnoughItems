@@ -39,7 +39,6 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.registry.RecipeManagerContextImpl;
 import net.minecraft.world.item.crafting.Recipe;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -53,7 +52,7 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     private final List<DynamicDisplayGenerator<?>> globalDisplayGenerators = new ArrayList<>();
     private final List<DisplayVisibilityPredicate> visibilityPredicates = new ArrayList<>();
     private final List<DisplayFiller<?>> fillers = new ArrayList<>();
-    private final MutableLong lastAddWarning = new MutableLong(-1);
+    private long lastAddWarning = -1;
     private DisplaysHolder displaysHolder = new DisplaysHolderImpl(false);
     
     public DisplayRegistryImpl() {
@@ -73,12 +72,11 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     @Override
     public void add(Display display, @Nullable Object origin) {
         if (!PluginManager.areAnyReloading()) {
-            if (lastAddWarning != null) {
-                if (lastAddWarning.getValue() > 0 && System.currentTimeMillis() - lastAddWarning.getValue() > 5000) {
-                    InternalLogger.getInstance().warn("Detected runtime DisplayRegistry modification, this can be extremely dangerous!");
-                }
-                lastAddWarning.setValue(System.currentTimeMillis());
+            if (lastAddWarning < 0 || System.currentTimeMillis() - lastAddWarning > 5000) {
+                InternalLogger.getInstance().warn("Detected runtime DisplayRegistry modification, this can be extremely dangerous!");
+                InternalLogger.getInstance().debug("Detected runtime DisplayRegistry modification, this can be extremely dangerous!", new Throwable());
             }
+            lastAddWarning = System.currentTimeMillis();
         }
         
         this.displaysHolder.add(display, origin);
