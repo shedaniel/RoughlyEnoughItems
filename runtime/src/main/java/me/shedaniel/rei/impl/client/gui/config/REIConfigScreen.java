@@ -30,7 +30,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.gui.config.components.ConfigCategoriesListWidget;
-import me.shedaniel.rei.impl.client.gui.config.options.ConfigCategories;
+import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigCategories;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionCategory;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
 import me.shedaniel.rei.impl.client.gui.widget.HoleWidget;
@@ -50,7 +50,7 @@ public class REIConfigScreen extends Screen {
     private OptionCategory activeCategory;
     
     public REIConfigScreen(Screen parent) {
-        this(parent, ConfigCategories.CATEGORIES);
+        this(parent, AllREIConfigCategories.CATEGORIES);
     }
     
     public REIConfigScreen(Screen parent, List<OptionCategory> categories) {

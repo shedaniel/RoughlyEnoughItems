@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.config.options;
 
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
@@ -57,6 +58,22 @@ public interface OptionValueEntry<T> {
     static OptionValueEntry<Boolean> enabledDisabled() {
         return ofBoolean(translatable("config.rei.value.enabledDisabled.false"),
                 translatable("config.rei.value.enabledDisabled.true"));
+    }
+    
+    static <T> OptionValueEntry<T> enumOptions(T... array) {
+        Class<?> type = array.getClass().getComponentType();
+        Object[] constants = type.getEnumConstants();
+        return new Selection<T>() {
+            @Override
+            public List<Component> getOptions() {
+                return CollectionUtils.map(constants, o -> getOption((T) o));
+            }
+            
+            @Override
+            public Component getOption(T value) {
+                return null;
+            }
+        };
     }
     
     interface Selection<T> extends OptionValueEntry<T> {

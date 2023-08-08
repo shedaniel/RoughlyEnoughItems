@@ -43,6 +43,6 @@ public class ConfigCategoriesListWidget {
                 .isSelectable((index, entry) -> true)
                 .selected(selected)
                 .build();
-        return ScrollableViewWidget.create(bounds, list, true);
+        return ScrollableViewWidget.create(bounds, list.withPadding(0, 5), true);
     }
 }

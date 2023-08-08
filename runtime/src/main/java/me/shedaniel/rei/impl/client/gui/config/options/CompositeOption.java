@@ -56,4 +56,8 @@ public class CompositeOption<T> {
     public CompositeOption<Boolean> enabledDisabled() {
         return ((CompositeOption<Boolean>) this).entry(OptionValueEntry.enabledDisabled());
     }
+    
+    public CompositeOption<T> enumOptions(T... entry) {
+        return this.entry(OptionValueEntry.enumOptions(entry));
+    }
 }

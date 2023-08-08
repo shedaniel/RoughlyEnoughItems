@@ -23,41 +23,12 @@
 
 package me.shedaniel.rei.impl.client.gui.config.options;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.resources.ResourceLocation;
-
-import java.util.List;
-
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
-public interface ConfigCategories {
-    static OptionCategory make(String key) {
-        return OptionCategory.of(new ResourceLocation("roughlyenoughitems:textures/gui/config/" + key + ".png"),
-                translatable("config.rei.categories." + key));
+interface AllREIConfigGroups {
+    static <T> OptionGroup make(String id) {
+        return new OptionGroup(translatable("config.rei.options.groups." + id));
     }
     
-    OptionCategory APPEARANCE = make("appearance");
-    OptionCategory KEYBINDS = make("keybinds");
-    OptionCategory CHEATS = make("cheats");
-    OptionCategory LAYOUT = make("layout");
-    OptionCategory ACCESSIBILITY = make("accessibility");
-    OptionCategory FAVORITES = make("favorites");
-    OptionCategory PERFORMANCE = make("performance");
-    OptionCategory SEARCH = make("search");
-    OptionCategory FILTERING = make("filtering");
-    OptionCategory LIST = make("list");
-    OptionCategory DEBUG = make("debug");
-    List<OptionCategory> CATEGORIES = ImmutableList.of(
-            APPEARANCE,
-            KEYBINDS,
-            CHEATS,
-            LAYOUT,
-            ACCESSIBILITY,
-            FAVORITES,
-            PERFORMANCE,
-            SEARCH,
-            FILTERING,
-            LIST,
-            DEBUG
-    );
+    OptionGroup INTERFACE = make("interface");
 }
