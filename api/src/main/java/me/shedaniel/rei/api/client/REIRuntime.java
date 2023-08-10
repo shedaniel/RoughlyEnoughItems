@@ -194,4 +194,11 @@ public interface REIRuntime extends Reloadable<REIClientPlugin> {
      * @return the area of the favorites list
      */
     Rectangle calculateFavoritesListArea();
+
+    /**
+     * Returns whether the entry list should render or accept input.
+     *
+     * @return whether the entry list should render or accept input.
+     */
+    boolean shouldAutoHide();
 }

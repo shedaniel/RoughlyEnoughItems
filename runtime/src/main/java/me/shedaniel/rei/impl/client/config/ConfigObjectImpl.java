@@ -523,7 +523,14 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     public boolean isFocusModeZoomed() {
         return appearance.isFocusModeZoomed;
     }
-    
+
+    @Override
+    public boolean isUsingAutoHide() { return functionality.isAutoHideEnabled; }
+
+    public void setUsingAutoHide(boolean enabled) {
+        functionality.isAutoHideEnabled = enabled;
+    }
+
     @Override
     public SearchMode getTooltipSearchMode() {
         return advanced.search.tooltipSearch;
@@ -652,6 +659,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         private boolean allowInventoryHighlighting = true;
         @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         private ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
+        @Comment("Declares whether the entry panel is hidden before searching for items.") private boolean isAutoHideEnabled = false;
     }
     
     public static class Advanced {

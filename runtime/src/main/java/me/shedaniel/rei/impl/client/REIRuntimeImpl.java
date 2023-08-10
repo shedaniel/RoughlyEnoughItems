@@ -53,6 +53,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -251,7 +252,19 @@ public class REIRuntimeImpl implements REIRuntime {
         
         return bounds;
     }
-    
+
+    @Override
+    public boolean shouldAutoHide()
+    {
+        if (!ConfigObject.getInstance().isUsingAutoHide())
+            return false;
+
+        if (getSearchField() == null)
+            return false;
+
+        return StringUtil.isNullOrEmpty(getSearchField().getText());
+    }
+
     @Override
     public void startReload() {
         getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);

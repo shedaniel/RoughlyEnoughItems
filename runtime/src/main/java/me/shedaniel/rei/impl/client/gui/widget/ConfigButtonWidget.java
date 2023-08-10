@@ -127,6 +127,10 @@ public class ConfigButtonWidget {
                         config::isCraftableFilterEnabled,
                         config::setCraftableFilterEnabled
                 ),
+                ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.isAutoHideEnabled"),
+                        config::isUsingAutoHide,
+                        config::setUsingAutoHide
+                ),
                 new SubMenuEntry(Component.translatable("text.rei.config.menu.display"), List.of(
                         ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.remove_recipe_book"),
                                 config::doesDisableRecipeBook,

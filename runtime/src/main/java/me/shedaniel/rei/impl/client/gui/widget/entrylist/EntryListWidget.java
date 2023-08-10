@@ -49,6 +49,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
+import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
@@ -60,11 +61,13 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
+import java.util.Objects;
 
 @SuppressWarnings("UnstableApiUsage")
 @ApiStatus.Internal
@@ -168,6 +171,9 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (REIRuntime.getInstance().shouldAutoHide())
+            return false;
+
         if (containsChecked(mouseX, mouseY, false)) {
             if (Screen.hasControlDown()) {
                 ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
@@ -191,7 +197,10 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (!hasSpace()) return;
-        
+
+        if (REIRuntime.getInstance().shouldAutoHide())
+            return;
+
         boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
         renderEntries(fastEntryRendering, matrices, mouseX, mouseY, delta);
         
@@ -231,6 +240,9 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (REIRuntime.getInstance().shouldAutoHide())
+            return false;
+
         if (containsChecked(mouse(), false))
             for (Widget widget : getEntryWidgets())
                 if (widget.keyPressed(keyCode, scanCode, modifiers))
@@ -296,6 +308,10 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (!hasSpace()) return false;
+
+        if (REIRuntime.getInstance().shouldAutoHide())
+            return false;
+
         for (Widget widget : children())
             if (widget.mouseClicked(mouseX, mouseY, button))
                 return true;
@@ -304,6 +320,9 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (REIRuntime.getInstance().shouldAutoHide())
+            return false;
+
         if (containsChecked(mouseX, mouseY, false)) {
             LocalPlayer player = minecraft.player;
             if (ClientHelper.getInstance().isCheating() && !(Minecraft.getInstance().screen instanceof DisplayScreen) && player != null && player.containerMenu != null && !player.containerMenu.getCarried().isEmpty() && ClientHelperImpl.getInstance().canDeleteItems()) {

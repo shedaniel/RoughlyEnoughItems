@@ -697,6 +697,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     @Override
     @Nullable
     public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
+        if (REIRuntime.getInstance().shouldAutoHide())
+            return null;
+
         if (!getCurrentEntry().isEmpty() && containsMouse(mouseX, mouseY)) {
             return new DraggableStack() {
                 EntryStack<?> stack = getCurrentEntry().copy()

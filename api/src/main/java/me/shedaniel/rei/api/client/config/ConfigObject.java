@@ -363,6 +363,9 @@ public interface ConfigObject {
     
     @ApiStatus.Experimental
     boolean isFocusModeZoomed();
+
+    @ApiStatus.Experimental
+    boolean isUsingAutoHide();
     
     SearchMode getTooltipSearchMode();
     
