@@ -49,7 +49,7 @@ import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.world.inventory.*;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
@@ -121,15 +121,6 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
         registry.register(OXIDIZING, DefaultOxidizingDisplay.serializer());
         registry.register(OXIDATION_SCRAPING, DefaultOxidationScrapingDisplay.serializer());
         registry.register(INFO, DefaultInformationDisplay.serializer());
-    }
-    
-    @Override
-    public void registerMenuInfo(MenuInfoRegistry registry) {
-        registry.register(BuiltinPlugin.CRAFTING, CraftingMenu.class, SimpleMenuInfoProvider.of(RecipeBookGridMenuInfo::new));
-        registry.register(BuiltinPlugin.CRAFTING, InventoryMenu.class, SimpleMenuInfoProvider.of(RecipeBookGridMenuInfo::new));
-        registry.register(BuiltinPlugin.SMELTING, FurnaceMenu.class, SimpleMenuInfoProvider.of(RecipeBookGridMenuInfo::new));
-        registry.register(BuiltinPlugin.SMOKING, SmokerMenu.class, SimpleMenuInfoProvider.of(RecipeBookGridMenuInfo::new));
-        registry.register(BuiltinPlugin.BLASTING, BlastFurnaceMenu.class, SimpleMenuInfoProvider.of(RecipeBookGridMenuInfo::new));
     }
     
     @Override

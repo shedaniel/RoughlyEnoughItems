@@ -42,6 +42,7 @@ import java.util.function.Function;
  * @param <T> the type of the menu
  * @param <D> the type of display
  */
+@Deprecated(forRemoval = true)
 public interface SimpleMenuInfoProvider<T extends AbstractContainerMenu, D extends Display> extends MenuInfoProvider<T, D> {
     static <T extends AbstractContainerMenu, D extends Display> SimpleMenuInfoProvider<T, D> of(Function<D, @Nullable MenuInfo<T, D>> provider) {
         return provider::apply;

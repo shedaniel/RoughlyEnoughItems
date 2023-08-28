@@ -50,4 +50,8 @@ public class VanillaSlotAccessor implements SlotAccessor {
     public ItemStack takeStack(int amount) {
         return slot.remove(amount);
     }
+    
+    public Slot getSlot() {
+        return slot;
+    }
 }

@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.registry.Reloadable;
+import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessorRegistry;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
@@ -106,6 +107,16 @@ public interface REIPlugin<P extends REIPlugin<?>> extends Comparable<REIPlugin<
      */
     @ApiStatus.OverrideOnly
     default void registerDisplaySerializer(DisplaySerializerRegistry registry) {
+    }
+    
+    /**
+     * Registers new slot accessor serializers
+     *
+     * @param registry the registry
+     */
+    @ApiStatus.OverrideOnly
+    @ApiStatus.Experimental
+    default void registerSlotAccessors(SlotAccessorRegistry registry) {
     }
     
     @ApiStatus.OverrideOnly

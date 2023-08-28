@@ -30,10 +30,18 @@ import me.shedaniel.rei.api.common.entry.type.EntryTypeRegistry;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
+import me.shedaniel.rei.api.common.transfer.info.stack.PlayerInventorySlotAccessor;
+import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
+import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessorRegistry;
+import me.shedaniel.rei.api.common.transfer.info.stack.VanillaSlotAccessor;
 import me.shedaniel.rei.plugin.client.entry.FluidEntryDefinition;
 import me.shedaniel.rei.plugin.client.entry.ItemEntryDefinition;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -54,5 +62,49 @@ public class DefaultRuntimePlugin implements REIServerPlugin {
             }
             return CompoundEventResult.interruptTrue(stream.get());
         });
+    }
+    
+    @Override
+    public void registerSlotAccessors(SlotAccessorRegistry registry) {
+        registry.register(new ResourceLocation("roughlyenoughitems", "vanilla"),
+                slotAccessor -> slotAccessor instanceof VanillaSlotAccessor,
+                new SlotAccessorRegistry.Serializer() {
+                    @Override
+                    public SlotAccessor read(AbstractContainerMenu menu, Player player, CompoundTag tag) {
+                        int slot = tag.getInt("Slot");
+                        return new VanillaSlotAccessor(menu.slots.get(slot));
+                    }
+                    
+                    @Override
+                    @Nullable
+                    public CompoundTag save(AbstractContainerMenu menu, Player player, SlotAccessor accessor) {
+                        if (!(accessor instanceof VanillaSlotAccessor)) {
+                            throw new IllegalArgumentException("Cannot save non-vanilla slot accessor!");
+                        }
+                        CompoundTag tag = new CompoundTag();
+                        tag.putInt("Slot", ((VanillaSlotAccessor) accessor).getSlot().index);
+                        return tag;
+                    }
+                });
+        registry.register(new ResourceLocation("roughlyenoughitems", "player"),
+                slotAccessor -> slotAccessor instanceof PlayerInventorySlotAccessor,
+                new SlotAccessorRegistry.Serializer() {
+                    @Override
+                    public SlotAccessor read(AbstractContainerMenu menu, Player player, CompoundTag tag) {
+                        int slot = tag.getInt("Slot");
+                        return new PlayerInventorySlotAccessor(player, slot);
+                    }
+                    
+                    @Override
+                    @Nullable
+                    public CompoundTag save(AbstractContainerMenu menu, Player player, SlotAccessor accessor) {
+                        if (!(accessor instanceof PlayerInventorySlotAccessor)) {
+                            throw new IllegalArgumentException("Cannot save non-player slot accessor!");
+                        }
+                        CompoundTag tag = new CompoundTag();
+                        tag.putInt("Slot", ((PlayerInventorySlotAccessor) accessor).getIndex());
+                        return tag;
+                    }
+                });
     }
 }

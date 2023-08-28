@@ -38,9 +38,12 @@ import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.screen.ClickArea;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.InputIngredient;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -50,6 +53,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.ApiStatus;
@@ -71,6 +75,7 @@ public final class ClientInternals {
     private static Supplier<PluginManager<REIClientPlugin>> clientPluginManager = ClientInternals::throwNotSetup;
     private static Supplier<EntryRenderer<?>> emptyEntryRenderer = ClientInternals::throwNotSetup;
     private static Supplier<FilteringRuleTypeRegistry> filteringRuleTypeRegistry = ClientInternals::throwNotSetup;
+    private static Supplier<SimpleTransferHandler> simpleTransferHandler = ClientInternals::throwNotSetup;
     private static BiFunction<Supplier<DataResult<FavoriteEntry>>, Supplier<CompoundTag>, FavoriteEntry> delegateFavoriteEntry = (supplier, toJson) -> throwNotSetup();
     private static BiFunction<Component, List<FavoriteMenuEntry>, FavoriteMenuEntry> subMenuEntry = (supplier, toJson) -> throwNotSetup();
     private static BiFunction<Component, BooleanValue, FavoriteMenuEntry> toggleEntry = (supplier, toJson) -> throwNotSetup();
@@ -185,6 +190,10 @@ public final class ClientInternals {
         return filteringRuleTypeRegistry.get();
     }
     
+    public static SimpleTransferHandler getSimpleTransferHandler() {
+        return simpleTransferHandler.get();
+    }
+    
     @Environment(EnvType.CLIENT)
     public interface WidgetsProvider {
         boolean isRenderingPanel(Panel panel);
@@ -224,5 +233,9 @@ public final class ClientInternals {
         WidgetWithBounds wrapOverflow(Rectangle bounds, WidgetWithBounds widget);
         
         WidgetWithBounds wrapPadded(int padLeft, int padRight, int padTop, int padBottom, WidgetWithBounds widget);
+    }
+    
+    public interface SimpleTransferHandler {
+        TransferHandler.Result handle(TransferHandler.Context context, me.shedaniel.rei.api.client.registry.transfer.simple.SimpleTransferHandler.MissingInputRenderer missingInputRenderer, List<InputIngredient<ItemStack>> inputs, Iterable<SlotAccessor> inputSlots, Iterable<SlotAccessor> inventorySlots);
     }
 }
