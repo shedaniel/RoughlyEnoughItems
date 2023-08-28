@@ -82,6 +82,7 @@ import me.shedaniel.rei.impl.client.search.SearchProviderImpl;
 import me.shedaniel.rei.impl.client.search.SearchRuntime;
 import me.shedaniel.rei.impl.client.search.method.InputMethodRegistryImpl;
 import me.shedaniel.rei.impl.client.subsets.SubsetsRegistryImpl;
+import me.shedaniel.rei.impl.client.transfer.SimpleTransferHandlerImpl;
 import me.shedaniel.rei.impl.client.transfer.TransferHandlerRegistryImpl;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import me.shedaniel.rei.impl.common.InternalLogger;
@@ -162,6 +163,7 @@ public class RoughlyEnoughItemsCoreClient {
         ClientInternals.attachInstance((Function<Object, Tooltip.Entry>) QueuedTooltip.TooltipEntryImpl::new, "tooltipEntryProvider");
         ClientInternals.attachInstance((BiFunction<Component, List<FavoriteMenuEntry>, FavoriteMenuEntry>) SubMenuEntry::new, "subMenuEntry");
         ClientInternals.attachInstance((BiFunction<Component, BooleanValue, FavoriteMenuEntry>) (text, value) -> ToggleMenuEntry.of(text, value::get, value), "toggleEntry");
+        ClientInternals.attachInstanceSupplier(SimpleTransferHandlerImpl.INSTANCE, "simpleTransferHandler");
         ClientInternals.attachInstance((Function<@Nullable Boolean, ClickArea.Result>) successful -> new ClickArea.Result() {
             private List<CategoryIdentifier<?>> categories = Lists.newArrayList();
             private BooleanSupplier execute = () -> {

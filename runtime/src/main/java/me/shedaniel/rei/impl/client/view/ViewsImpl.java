@@ -30,11 +30,14 @@ import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongMaps;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.api.client.registry.display.DynamicDisplayGenerator;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
+import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.client.view.ViewSearchBuilder;
 import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
@@ -60,9 +63,11 @@ import me.shedaniel.rei.impl.client.registry.display.DisplaysHolder;
 import me.shedaniel.rei.impl.client.util.CrashReportUtils;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.display.DisplaySpec;
+import me.shedaniel.rei.plugin.autocrafting.DefaultCategoryHandler;
 import net.minecraft.CrashReport;
 import net.minecraft.ReportedException;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -429,92 +434,114 @@ public class ViewsImpl implements Views {
         
         AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
         Set<EntryStack<?>> craftables = new HashSet<>();
-        boolean onlyIncludeHasMenu = false;
+        AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
         
         for (Map.Entry<CategoryIdentifier<?>, List<Display>> entry : DisplayRegistry.getInstance().getAll().entrySet()) {
-            class InfoSerializationContext implements MenuSerializationContext<AbstractContainerMenu, LocalPlayer, Display> {
-                @Override
-                public AbstractContainerMenu getMenu() {
-                    return menu;
-                }
-                
-                @Override
-                public LocalPlayer getPlayerEntity() {
-                    return Minecraft.getInstance().player;
-                }
-                
-                @Override
-                public CategoryIdentifier<Display> getCategoryIdentifier() {
-                    return (CategoryIdentifier<Display>) entry.getKey();
-                }
-            }
-            
-            InfoSerializationContext context = new InfoSerializationContext();
+            MenuSerializationContext<AbstractContainerMenu, LocalPlayer, Display> context = createLegacyContext(menu, entry.getKey().cast());
             
             List<Display> displays = entry.getValue();
             for (Display display : displays) {
                 try {
-                    MenuInfo<AbstractContainerMenu, Display> info = menu != null ?
-                            MenuInfoRegistry.getInstance().getClient(display, context, menu)
-                            : null;
+                    TransferHandler.Context transferContext = TransferHandler.Context.create(false, false, containerScreen, display);
+                    boolean successful = matchesLegacyRequirements(menu, context, display);
                     
-                    if (onlyIncludeHasMenu && info == null) {
-                        continue;
-                    }
-                    
-                    Iterable<SlotAccessor> inputSlots = info != null ? Iterables.concat(info.getInputSlots(context.withDisplay(display)), info.getInventorySlots(context.withDisplay(display))) : Collections.emptySet();
-                    int slotsCraftable = 0;
-                    boolean containsNonEmpty = false;
-                    List<EntryIngredient> requiredInput = display.getRequiredEntries();
-                    Long2LongMap invCount = new Long2LongOpenHashMap(info == null ? CraftableFilter.INSTANCE.getInvStacks() : Long2LongMaps.EMPTY_MAP);
-                    for (SlotAccessor inputSlot : inputSlots) {
-                        ItemStack stack = inputSlot.getItemStack();
-                        
-                        EntryDefinition<ItemStack> definition;
-                        try {
-                            definition = VanillaEntryTypes.ITEM.getDefinition();
-                        } catch (NullPointerException e) {
-                            break;
-                        }
-                        
-                        if (!stack.isEmpty()) {
-                            long hash = definition.hash(null, stack, ComparisonContext.FUZZY);
-                            long newCount = invCount.get(hash) + Math.max(0, stack.getCount());
-                            invCount.put(hash, newCount);
-                        }
-                    }
-                    for (EntryIngredient slot : requiredInput) {
-                        if (slot.isEmpty()) {
-                            slotsCraftable++;
-                            continue;
-                        }
-                        for (EntryStack<?> slotPossible : slot) {
-                            if (slotPossible.getType() != VanillaEntryTypes.ITEM) continue;
-                            ItemStack stack = slotPossible.castValue();
-                            long hashFuzzy = EntryStacks.hashFuzzy(slotPossible);
-                            long availableAmount = invCount.get(hashFuzzy);
-                            if (availableAmount >= stack.getCount()) {
-                                invCount.put(hashFuzzy, availableAmount - stack.getCount());
-                                containsNonEmpty = true;
-                                slotsCraftable++;
-                                break;
+                    if (!successful) {
+                        for (TransferHandler handler : TransferHandlerRegistry.getInstance()) {
+                            if (!(handler instanceof DefaultCategoryHandler) && handler.checkApplicable(transferContext).isSuccessful()) {
+                                if (handler.handle(transferContext).isSuccessful()) {
+                                    successful = true;
+                                    break;
+                                }
                             }
                         }
                     }
-                    if (slotsCraftable == display.getRequiredEntries().size() && containsNonEmpty) {
-                        if (info != null && !onlyIncludeHasMenu) {
-                            onlyIncludeHasMenu = true;
-                            craftables.clear();
-                        }
-                        
-                        display.getOutputEntries().stream().flatMap(Collection::stream).collect(Collectors.toCollection(() -> craftables));
-                    }
+                    
+                    if (!successful) continue;
+                    
+                    display.getOutputEntries().stream().flatMap(Collection::stream)
+                            .collect(Collectors.toCollection(() -> craftables));
                 } catch (Throwable t) {
                     InternalLogger.getInstance().warn("Error while checking if display is craftable", t);
                 }
             }
         }
         return craftables;
+    }
+    
+    private static MenuSerializationContext<AbstractContainerMenu, LocalPlayer, Display> createLegacyContext(AbstractContainerMenu menu, CategoryIdentifier<Display> categoryIdentifier) {
+        class InfoSerializationContext implements MenuSerializationContext<AbstractContainerMenu, LocalPlayer, Display> {
+            @Override
+            public AbstractContainerMenu getMenu() {
+                return menu;
+            }
+            
+            @Override
+            public LocalPlayer getPlayerEntity() {
+                return Minecraft.getInstance().player;
+            }
+            
+            @Override
+            public CategoryIdentifier<Display> getCategoryIdentifier() {
+                return categoryIdentifier;
+            }
+        }
+        
+        return new InfoSerializationContext();
+    }
+    
+    private static boolean matchesLegacyRequirements(AbstractContainerMenu menu,
+                                                     MenuSerializationContext<AbstractContainerMenu, LocalPlayer, Display> context,
+                                                     Display display) {
+        MenuInfo<AbstractContainerMenu, Display> info = menu != null ?
+                MenuInfoRegistry.getInstance().getClient(display, context, menu)
+                : null;
+        
+        if (menu != null && info == null) {
+            return false;
+        }
+        
+        Iterable<SlotAccessor> inputSlots = info != null ? Iterables.concat(info.getInputSlots(context.withDisplay(display)), info.getInventorySlots(context.withDisplay(display))) : Collections.emptySet();
+        int slotsCraftable = 0;
+        boolean containsNonEmpty = false;
+        List<EntryIngredient> requiredInput = display.getRequiredEntries();
+        Long2LongMap invCount = new Long2LongOpenHashMap(info == null ? CraftableFilter.INSTANCE.getInvStacks() : Long2LongMaps.EMPTY_MAP);
+        for (SlotAccessor inputSlot : inputSlots) {
+            ItemStack stack = inputSlot.getItemStack();
+            
+            EntryDefinition<ItemStack> definition;
+            try {
+                definition = VanillaEntryTypes.ITEM.getDefinition();
+            } catch (NullPointerException e) {
+                break;
+            }
+            
+            if (!stack.isEmpty()) {
+                long hash = definition.hash(null, stack, ComparisonContext.FUZZY);
+                long newCount = invCount.get(hash) + Math.max(0, stack.getCount());
+                invCount.put(hash, newCount);
+            }
+        }
+        
+        for (EntryIngredient slot : requiredInput) {
+            if (slot.isEmpty()) {
+                slotsCraftable++;
+                continue;
+            }
+            for (EntryStack<?> slotPossible : slot) {
+                if (slotPossible.getType() != VanillaEntryTypes.ITEM) continue;
+                ItemStack stack = slotPossible.castValue();
+                long hashFuzzy = EntryStacks.hashFuzzy(slotPossible);
+                long availableAmount = invCount.get(hashFuzzy);
+                if (availableAmount >= stack.getCount()) {
+                    invCount.put(hashFuzzy, availableAmount - stack.getCount());
+                    containsNonEmpty = true;
+                    slotsCraftable++;
+                    break;
+                }
+            }
+        }
+        
+        return slotsCraftable == display.getRequiredEntries().size() && containsNonEmpty;
     }
     
     private static <T> boolean isStackWorkStationOfCategory(CategoryRegistry.CategoryConfiguration<?> category, EntryStack<T> stack) {

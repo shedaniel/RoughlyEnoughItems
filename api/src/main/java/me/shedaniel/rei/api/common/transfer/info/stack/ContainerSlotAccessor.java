@@ -29,6 +29,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * Simple implementation of {@link SlotAccessor} that wraps around a slot in {@link Container}.
  */
+@Deprecated(forRemoval = true)
 public class ContainerSlotAccessor implements SlotAccessor {
     protected Container container;
     protected int index;

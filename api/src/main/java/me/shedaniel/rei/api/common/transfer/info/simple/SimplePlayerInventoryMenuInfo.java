@@ -46,6 +46,7 @@ import java.util.stream.IntStream;
  * @param <T> the type of the menu
  * @param <D> the type of display
  */
+@Deprecated(forRemoval = true)
 public interface SimplePlayerInventoryMenuInfo<T extends AbstractContainerMenu, D extends Display> extends MenuInfo<T, D> {
     default RecipeFinderPopulator<T, D> getRecipeFinderPopulator() {
         return (context, finder) -> {
@@ -93,7 +94,7 @@ public interface SimplePlayerInventoryMenuInfo<T extends AbstractContainerMenu, 
     default Iterable<SlotAccessor> getInventorySlots(MenuInfoContext<T, ?, D> context) {
         Inventory inventory = context.getPlayerEntity().getInventory();
         return IntStream.range(0, inventory.items.size())
-                .mapToObj(index -> SlotAccessor.fromContainer(inventory, index))
+                .mapToObj(index -> SlotAccessor.fromPlayerInventory(context.getPlayerEntity(), index))
                 .collect(Collectors.toList());
     }
     

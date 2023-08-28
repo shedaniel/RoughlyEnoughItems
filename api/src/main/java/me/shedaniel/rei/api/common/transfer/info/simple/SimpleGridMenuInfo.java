@@ -44,6 +44,7 @@ import java.util.stream.IntStream;
  * @param <D> the type of display
  * @see SimpleGridMenuDisplay
  */
+@Deprecated(forRemoval = true)
 public interface SimpleGridMenuInfo<T extends AbstractContainerMenu, D extends SimpleGridMenuDisplay> extends SimplePlayerInventoryMenuInfo<T, D> {
     default Iterable<SlotAccessor> getInputSlots(MenuInfoContext<T, ?, D> context) {
         return getInputStackSlotIds(context)

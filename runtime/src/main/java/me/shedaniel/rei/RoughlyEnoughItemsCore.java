@@ -55,6 +55,7 @@ import me.shedaniel.rei.impl.common.logging.performance.PerformanceLoggerImpl;
 import me.shedaniel.rei.impl.common.plugins.PluginManagerImpl;
 import me.shedaniel.rei.impl.common.registry.RecipeManagerContextImpl;
 import me.shedaniel.rei.impl.common.transfer.MenuInfoRegistryImpl;
+import me.shedaniel.rei.impl.common.transfer.SlotAccessorRegistryImpl;
 import me.shedaniel.rei.impl.init.PluginDetector;
 import me.shedaniel.rei.impl.init.PrimitivePlatformAdapter;
 import net.minecraft.resources.ResourceLocation;
@@ -142,7 +143,8 @@ public class RoughlyEnoughItemsCore {
         Internals.attachInstanceSupplier(new PluginManagerImpl<>(
                 REIServerPlugin.class,
                 view -> view.then(PluginView.getInstance()),
-                new MenuInfoRegistryImpl()), "serverPluginManager");
+                new MenuInfoRegistryImpl(),
+                new SlotAccessorRegistryImpl()), "serverPluginManager");
     }
     
     public static void _reloadPlugins(@Nullable ReloadStage stage) {

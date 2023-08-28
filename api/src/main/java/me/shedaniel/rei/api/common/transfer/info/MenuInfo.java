@@ -62,6 +62,7 @@ import java.util.List;
  * @see me.shedaniel.rei.api.common.transfer.info.simple.SimplePlayerInventoryMenuInfo
  * @see me.shedaniel.rei.api.common.transfer.info.simple.SimpleGridMenuInfo
  */
+@Deprecated(forRemoval = true)
 public interface MenuInfo<T extends AbstractContainerMenu, D extends Display> {
     /**
      * Returns a {@link RecipeFinderPopulator}, used to populate a {@link RecipeFinder} with

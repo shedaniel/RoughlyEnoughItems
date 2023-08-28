@@ -30,6 +30,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 
 @FunctionalInterface
+@Deprecated(forRemoval = true)
 public interface DumpHandler<T extends AbstractContainerMenu, D extends Display> {
     boolean dump(MenuInfoContext<T, ?, D> context, ItemStack stackToDump);
     
