@@ -48,6 +48,8 @@ public interface AllREIConfigCategories {
     OptionCategory FILTERING = make("filtering");
     OptionCategory LIST = make("list");
     OptionCategory DEBUG = make("debug");
+    OptionCategory FLAGS = make("flags");
+    OptionCategory RESET = make("reset");
     List<OptionCategory> CATEGORIES = ImmutableList.of(
             APPEARANCE,
             KEYBINDS,
@@ -59,6 +61,8 @@ public interface AllREIConfigCategories {
             SEARCH,
             FILTERING,
             LIST,
-            DEBUG
+            DEBUG,
+            FLAGS,
+            RESET
     );
 }

@@ -358,7 +358,7 @@ public class ConfigManagerImpl implements ConfigManager {
     @SuppressWarnings("deprecation")
     @Override
     public Screen getConfigScreen(Screen parent) {
-        if (true) return new REIConfigScreen(parent);
+        if (Screen.hasShiftDown()) return new REIConfigScreen(parent);
         class EmptyEntry extends AbstractConfigListEntry<Object> {
             private final int height;
             
