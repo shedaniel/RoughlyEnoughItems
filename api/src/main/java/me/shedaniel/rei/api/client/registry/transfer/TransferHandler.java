@@ -27,6 +27,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.transfer.info.MenuTransferException;
 import me.shedaniel.rei.impl.ClientInternals;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -40,6 +41,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -50,7 +52,7 @@ import java.util.function.Supplier;
  * as a lightweight and simple way to implement recipe transfers.
  *
  * @see TransferHandlerRegistry
- * @see me.shedaniel.rei.api.common.transfer.info.MenuInfo
+ * @see me.shedaniel.rei.api.client.registry.transfer.simple.SimpleTransferHandler
  */
 @Environment(EnvType.CLIENT)
 public interface TransferHandler extends Comparable<TransferHandler> {
@@ -59,6 +61,16 @@ public interface TransferHandler extends Comparable<TransferHandler> {
      */
     default double getPriority() {
         return 0d;
+    }
+    
+    /**
+     * Returns whether the transfer handler is applicable to the current context.
+     *
+     * @param context the context of the transfer
+     * @return whether the transfer handler is applicable to the current context.
+     */
+    default ApplicabilityResult checkApplicable(Context context) {
+        return ApplicabilityResult.createApplicable();
     }
     
     /**
@@ -257,6 +269,33 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         }
     }
     
+    interface ApplicabilityResult {
+        static ApplicabilityResult createNotApplicable() {
+            return new ApplicabilityResultImpl(false, null);
+        }
+        
+        static ApplicabilityResult createApplicableWithError(Component error) {
+            return createApplicableWithError(Result.createFailed(error));
+        }
+        
+        static ApplicabilityResult createApplicableWithError(TransferHandler.Result result) {
+            if (result == null) throw new NullPointerException("result");
+            if (!result.isApplicable()) throw new IllegalArgumentException("result is not applicable");
+            return new ApplicabilityResultImpl(true, result);
+        }
+        
+        static ApplicabilityResult createApplicable() {
+            return new ApplicabilityResultImpl(true, null);
+        }
+        
+        boolean isApplicable();
+        
+        boolean isSuccessful();
+        
+        @Nullable
+        TransferHandler.Result getError();
+    }
+    
     @ApiStatus.Internal
     final class ResultImpl implements Result {
         private boolean successful, applicable, returningToScreen, blocking;
@@ -411,6 +450,34 @@ public interface TransferHandler extends Comparable<TransferHandler> {
         @Override
         public Display getDisplay() {
             return recipeDisplaySupplier.get();
+        }
+    }
+    
+    @ApiStatus.Internal
+    final class ApplicabilityResultImpl implements ApplicabilityResult {
+        private boolean applicable;
+        @Nullable
+        private Result error;
+        
+        public ApplicabilityResultImpl(boolean applicable, @Nullable Result error) {
+            this.applicable = applicable;
+            this.error = error;
+        }
+        
+        @Override
+        public boolean isApplicable() {
+            return this.applicable;
+        }
+        
+        @Override
+        public boolean isSuccessful() {
+            return this.isApplicable() && this.error == null;
+        }
+        
+        @Nullable
+        @Override
+        public TransferHandler.Result getError() {
+            return this.error;
         }
     }
 }

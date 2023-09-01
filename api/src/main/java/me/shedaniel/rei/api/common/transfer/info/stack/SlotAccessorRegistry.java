@@ -23,35 +23,40 @@
 
 package me.shedaniel.rei.api.common.transfer.info.stack;
 
-import net.minecraft.world.Container;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
+import me.shedaniel.rei.api.common.registry.Reloadable;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-/**
- * A wrapper for accessing {@link Slot}, can be wrapped for non-vanilla {@link Slot} implementations.
- *
- * @see SlotAccessorRegistry
- */
-public interface SlotAccessor {
-    ItemStack getItemStack();
-    
-    void setItemStack(ItemStack stack);
-    
-    ItemStack takeStack(int amount);
-    
-    static SlotAccessor fromSlot(Slot slot) {
-        return new VanillaSlotAccessor(slot);
+import java.util.function.Predicate;
+
+@ApiStatus.Experimental
+public interface SlotAccessorRegistry extends Reloadable<REIServerPlugin> {
+    /**
+     * @return the instance of {@link SlotAccessorRegistry}
+     */
+    static SlotAccessorRegistry getInstance() {
+        return PluginManager.getServerInstance().get(SlotAccessorRegistry.class);
     }
     
-    @Deprecated(forRemoval = true)
-    static SlotAccessor fromContainer(Container container, int index) {
-        return new ContainerSlotAccessor(container, index);
-    }
+    void register(ResourceLocation id, Predicate<SlotAccessor> accessorPredicate, Serializer serializer);
     
-    @ApiStatus.Experimental
-    static SlotAccessor fromPlayerInventory(Player player, int index) {
-        return new PlayerInventorySlotAccessor(player, index);
+    @Nullable
+    Serializer get(ResourceLocation id);
+    
+    CompoundTag save(AbstractContainerMenu menu, Player player, SlotAccessor accessor);
+    
+    SlotAccessor read(AbstractContainerMenu menu, Player player, CompoundTag tag);
+    
+    interface Serializer {
+        SlotAccessor read(AbstractContainerMenu menu, Player player, CompoundTag tag);
+        
+        @Nullable
+        CompoundTag save(AbstractContainerMenu menu, Player player, SlotAccessor accessor);
     }
 }

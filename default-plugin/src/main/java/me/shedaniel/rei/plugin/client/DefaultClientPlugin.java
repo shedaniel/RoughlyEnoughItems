@@ -40,12 +40,14 @@ import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
+import me.shedaniel.rei.api.client.registry.transfer.simple.SimpleTransferHandler;
 import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
+import me.shedaniel.rei.plugin.autocrafting.InventoryCraftingTransferHandler;
 import me.shedaniel.rei.plugin.autocrafting.recipebook.DefaultRecipeBookHandler;
 import me.shedaniel.rei.plugin.client.categories.*;
 import me.shedaniel.rei.plugin.client.categories.anvil.DefaultAnvilCategory;
@@ -59,6 +61,7 @@ import me.shedaniel.rei.plugin.client.exclusionzones.DefaultRecipeBookExclusionZ
 import me.shedaniel.rei.plugin.client.favorites.GameModeFavoriteEntry;
 import me.shedaniel.rei.plugin.client.favorites.TimeFavoriteEntry;
 import me.shedaniel.rei.plugin.client.favorites.WeatherFavoriteEntry;
+import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import me.shedaniel.rei.plugin.common.displays.*;
 import me.shedaniel.rei.plugin.common.displays.anvil.AnvilRecipe;
 import me.shedaniel.rei.plugin.common.displays.anvil.DefaultAnvilDisplay;
@@ -86,6 +89,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionBrewing;
@@ -370,7 +374,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     }
     
     protected void registerForgePotions(DisplayRegistry registry, BuiltinClientPlugin clientPlugin) {
-        
+    
     }
     
     @Override
@@ -391,6 +395,16 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerTransferHandlers(TransferHandlerRegistry registry) {
+        registry.register(SimpleTransferHandler.create(CraftingMenu.class, BuiltinPlugin.CRAFTING,
+                new SimpleTransferHandler.IntRange(1, 10)));
+        registry.register(new InventoryCraftingTransferHandler(SimpleTransferHandler.create(InventoryMenu.class, BuiltinPlugin.CRAFTING,
+                new SimpleTransferHandler.IntRange(1, 5))));
+        registry.register(SimpleTransferHandler.create(FurnaceMenu.class, BuiltinPlugin.SMELTING,
+                new SimpleTransferHandler.IntRange(0, 1)));
+        registry.register(SimpleTransferHandler.create(SmokerMenu.class, BuiltinPlugin.SMOKING,
+                new SimpleTransferHandler.IntRange(0, 1)));
+        registry.register(SimpleTransferHandler.create(BlastFurnaceMenu.class, BuiltinPlugin.BLASTING,
+                new SimpleTransferHandler.IntRange(0, 1)));
         registry.register(new DefaultRecipeBookHandler());
     }
     
