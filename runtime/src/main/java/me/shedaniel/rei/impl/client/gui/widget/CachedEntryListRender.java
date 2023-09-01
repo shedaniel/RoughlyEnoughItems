@@ -145,7 +145,7 @@ public class CachedEntryListRender {
         Minecraft minecraft = Minecraft.getInstance();
         TextureTarget target = new TextureTarget(width, height, true, false);
         target.bindWrite(true);
-        Matrix4f projectionMatrix = new Matrix4f().setOrtho(0.0F, width, 0.0F, height, 1000.0F, 3000.0F);
+        Matrix4f projectionMatrix = new Matrix4f().setOrtho(0.0F, width, height, 0.0F, 1000.0F, 3000.0F);
         RenderSystem.setProjectionMatrix(projectionMatrix);
         PoseStack modelViewStack = RenderSystem.getModelViewStack();
         modelViewStack.pushPose();
