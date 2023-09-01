@@ -28,6 +28,7 @@ import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
 @FunctionalInterface
+@Deprecated(forRemoval = true)
 public interface RecipeFinderPopulator<T extends AbstractContainerMenu, D extends Display> {
     void populate(MenuInfoContext<T, ?, D> context, RecipeFinder finder);
 }

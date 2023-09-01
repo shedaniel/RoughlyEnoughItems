@@ -30,6 +30,7 @@ import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 
+@Deprecated(forRemoval = true)
 public class RecipeBookGridMenuInfo<T extends RecipeBookMenu<?>, D extends SimpleGridMenuDisplay> implements SimpleGridMenuInfo<T, D> {
     private final D display;
     

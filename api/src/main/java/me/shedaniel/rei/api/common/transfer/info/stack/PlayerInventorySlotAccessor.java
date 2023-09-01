@@ -21,20 +21,39 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.common.transfer.info;
+package me.shedaniel.rei.api.common.transfer.info.stack;
 
-import me.shedaniel.rei.api.common.display.Display;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 
 /**
- * Context for container recipe transfer.
- *
- * @param <T> the type of {@link AbstractContainerMenu}
- * @param <P> the type of {@link Player}, server sided contexts may pass {@link net.minecraft.server.level.ServerPlayer} instead
- * @param <D> the type of {@link Display}
+ * Simple implementation of {@link SlotAccessor} that wraps around a slot in player's inventory.
  */
-@Deprecated(forRemoval = true)
-public interface MenuInfoContext<T extends AbstractContainerMenu, P extends Player, D extends Display> extends MenuSerializationContext<T, P, D> {
-    D getDisplay();
+public class PlayerInventorySlotAccessor implements SlotAccessor {
+    protected Player player;
+    protected int index;
+    
+    public PlayerInventorySlotAccessor(Player player, int index) {
+        this.player = player;
+        this.index = index;
+    }
+    
+    @Override
+    public ItemStack getItemStack() {
+        return player.getInventory().getItem(index);
+    }
+    
+    @Override
+    public void setItemStack(ItemStack stack) {
+        this.player.getInventory().setItem(index, stack);
+    }
+    
+    @Override
+    public ItemStack takeStack(int amount) {
+        return this.player.getInventory().removeItem(index, amount);
+    }
+    
+    public int getIndex() {
+        return index;
+    }
 }

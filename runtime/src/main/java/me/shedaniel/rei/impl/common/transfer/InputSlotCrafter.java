@@ -25,16 +25,11 @@ package me.shedaniel.rei.impl.common.transfer;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.entry.InputIngredient;
 import me.shedaniel.rei.api.common.transfer.RecipeFinder;
-import me.shedaniel.rei.api.common.transfer.info.MenuInfo;
-import me.shedaniel.rei.api.common.transfer.info.MenuInfoContext;
-import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -44,58 +39,52 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 
-public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Container, D extends Display> implements MenuInfoContext<T, ServerPlayer, D> {
-    protected CategoryIdentifier<D> category;
+public abstract class InputSlotCrafter<T extends AbstractContainerMenu, C extends Container> {
     protected T container;
-    protected MenuInfo<T, D> menuInfo;
     private Iterable<SlotAccessor> inputStacks;
     private Iterable<SlotAccessor> inventoryStacks;
-    private ServerPlayer player;
+    protected ServerPlayer player;
     
-    private InputSlotCrafter(CategoryIdentifier<D> category, T container) {
-        this.category = category;
+    protected InputSlotCrafter(T container) {
         this.container = container;
     }
     
-    public void setMenuInfo(MenuInfo<T, D> menuInfo) {
-        this.menuInfo = menuInfo;
-    }
-    
-    public static <T extends AbstractContainerMenu, C extends Container, D extends Display> InputSlotCrafter<T, C, D> start(CategoryIdentifier<D> category, T menu, ServerPlayer player, CompoundTag display, boolean hasShift) {
-        InputSlotCrafter<T, C, D> crafter = new InputSlotCrafter<>(category, menu);
-        MenuInfo<T, D> menuInfo = Objects.requireNonNull(MenuInfoRegistry.getInstance().get(category, menu, crafter, display), "Container Info does not exist on the server!");
-        crafter.setMenuInfo(menuInfo);
-        crafter.fillInputSlots(player, hasShift);
-        return crafter;
-    }
-    
-    private void fillInputSlots(ServerPlayer player, boolean hasShift) {
+    public void fillInputSlots(ServerPlayer player, boolean hasShift) {
         this.player = player;
-        this.inventoryStacks = this.menuInfo.getInventorySlots(this);
-        this.inputStacks = this.menuInfo.getInputSlots(this);
+        this.inventoryStacks = this.getInventorySlots();
+        this.inputStacks = this.getInputSlots();
         
         // Return the already placed items on the grid
         this.cleanInputs();
         
         RecipeFinder recipeFinder = new RecipeFinder();
-        this.menuInfo.getRecipeFinderPopulator().populate(this, recipeFinder);
+        this.populateRecipeFinder(recipeFinder);
         NonNullList<Ingredient> ingredients = NonNullList.create();
-        for (List<ItemStack> itemStacks : this.menuInfo.getInputs(this, true)) {
-            ingredients.add(CollectionUtils.toIngredient(itemStacks));
+        for (InputIngredient<ItemStack> itemStacks : this.getInputs()) {
+            ingredients.add(CollectionUtils.toIngredient(itemStacks.get()));
         }
         
         if (recipeFinder.findRecipe(ingredients, null)) {
             this.fillInputSlots(recipeFinder, ingredients, hasShift);
         } else {
             this.cleanInputs();
-            this.menuInfo.markDirty(this);
+            this.markDirty();
             throw new NotEnoughMaterialsException();
         }
         
-        this.menuInfo.markDirty(this);
+        this.markDirty();
     }
+    
+    protected abstract Iterable<SlotAccessor> getInputSlots();
+    
+    protected abstract Iterable<SlotAccessor> getInventorySlots();
+    
+    protected abstract List<InputIngredient<ItemStack>> getInputs();
+    
+    protected abstract void populateRecipeFinder(RecipeFinder recipeFinder);
+    
+    protected abstract void markDirty();
     
     public void alignRecipeToGrid(Iterable<SlotAccessor> inputStacks, Iterator<Integer> recipeItemIds, int craftsAmount) {
         for (SlotAccessor inputStack : inputStacks) {
@@ -155,9 +144,7 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
         }
     }
     
-    protected void cleanInputs() {
-        this.menuInfo.getInputCleanHandler().clean(this);
-    }
+    protected abstract void cleanInputs();
     
     @Nullable
     public SlotAccessor takeInventoryStack(ItemStack itemStack) {
@@ -175,25 +162,6 @@ public class InputSlotCrafter<T extends AbstractContainerMenu, C extends Contain
         return ItemStack.isSameItemSameTags(stack1, stack2);
     }
     
-    @Override
-    public T getMenu() {
-        return container;
+    public static class NotEnoughMaterialsException extends RuntimeException {
     }
-    
-    @Override
-    public ServerPlayer getPlayerEntity() {
-        return player;
-    }
-    
-    @Override
-    public D getDisplay() {
-        return menuInfo.getDisplay();
-    }
-    
-    @Override
-    public CategoryIdentifier<D> getCategoryIdentifier() {
-        return category;
-    }
-    
-    public static class NotEnoughMaterialsException extends RuntimeException {}
 }

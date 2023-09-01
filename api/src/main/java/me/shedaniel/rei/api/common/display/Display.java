@@ -32,7 +32,10 @@ import me.shedaniel.rei.api.common.transfer.info.MenuSerializationContext;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -68,8 +71,21 @@ public interface Display extends DisplaySpec {
      *
      * @return a list of inputs
      */
+    @Deprecated(forRemoval = true)
     default List<InputIngredient<EntryStack<?>>> getInputIngredients(MenuSerializationContext<?, ?, ?> context, MenuInfo<?, ?> info, boolean fill) {
         return CollectionUtils.mapIndexed(getInputEntries(context, info, fill), InputIngredient::of);
+    }
+    
+    /**
+     * Returns the list of inputs for this display, aligned for the menu. This only affects the stacks resolving for the display,
+     * and not necessarily the stacks that are displayed.
+     * <p>
+     * Each ingredient is also provided with the corresponding index slot-wise. The order of the list does not matter.
+     *
+     * @return a list of inputs
+     */
+    default List<InputIngredient<EntryStack<?>>> getInputIngredients(@Nullable AbstractContainerMenu menu, @Nullable Player player) {
+        return CollectionUtils.mapIndexed(getInputEntries(), InputIngredient::of);
     }
     
     /**

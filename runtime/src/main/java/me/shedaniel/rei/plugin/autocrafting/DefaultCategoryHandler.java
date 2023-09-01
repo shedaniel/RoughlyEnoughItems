@@ -55,22 +55,29 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public class DefaultCategoryHandler implements TransferHandler {
     @Override
-    public Result handle(Context context) {
+    public ApplicabilityResult checkApplicable(Context context) {
         Display display = context.getDisplay();
         AbstractContainerScreen<?> containerScreen = context.getContainerScreen();
-        if (containerScreen == null) {
-            return Result.createNotApplicable();
-        }
+        if (containerScreen == null) return ApplicabilityResult.createNotApplicable();
         AbstractContainerMenu menu = context.getMenu();
         MenuInfoContext<AbstractContainerMenu, Player, Display> menuInfoContext = ofContext(menu, display);
         MenuInfo<AbstractContainerMenu, Display> menuInfo = MenuInfoRegistry.getInstance().getClient(display, menuInfoContext, menu);
-        if (menuInfo == null) {
-            return Result.createNotApplicable();
-        }
+        if (menuInfo == null) return ApplicabilityResult.createNotApplicable();
+        return ApplicabilityResult.createApplicable();
+    }
+    
+    @Override
+    public Result handle(Context context) {
+        Display display = context.getDisplay();
+        AbstractContainerScreen<?> containerScreen = context.getContainerScreen();
+        AbstractContainerMenu menu = context.getMenu();
+        MenuInfoContext<AbstractContainerMenu, Player, Display> menuInfoContext = ofContext(menu, display);
+        MenuInfo<AbstractContainerMenu, Display> menuInfo = MenuInfoRegistry.getInstance().getClient(display, menuInfoContext, menu);
         try {
             menuInfo.validate(menuInfoContext);
         } catch (MenuTransferException e) {

@@ -34,6 +34,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
  * @param <T> the type of {@link AbstractContainerMenu}
  * @param <P> the type of {@link Player}, server sided contexts may pass {@link net.minecraft.server.level.ServerPlayer} instead
  */
+@Deprecated(forRemoval = true)
 public interface MenuSerializationContext<T extends AbstractContainerMenu, P extends Player, D extends Display> {
     T getMenu();
     
