@@ -31,6 +31,7 @@ import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,9 +40,9 @@ import java.util.Optional;
 public class DefaultCampfireDisplay extends BasicDisplay {
     private double cookTime;
     
-    public DefaultCampfireDisplay(CampfireCookingRecipe recipe) {
-        this(EntryIngredients.ofIngredients(recipe.getIngredients()), Collections.singletonList(EntryIngredients.of(recipe.getResultItem(BasicDisplay.registryAccess()))),
-                Optional.ofNullable(recipe).map(CampfireCookingRecipe::getId), recipe.getCookingTime());
+    public DefaultCampfireDisplay(RecipeHolder<CampfireCookingRecipe> recipe) {
+        this(EntryIngredients.ofIngredients(recipe.value().getIngredients()), Collections.singletonList(EntryIngredients.of(recipe.value().getResultItem(BasicDisplay.registryAccess()))),
+                Optional.ofNullable(recipe.id()), recipe.value().getCookingTime());
     }
     
     public DefaultCampfireDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location, CompoundTag tag) {

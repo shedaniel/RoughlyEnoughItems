@@ -25,16 +25,17 @@ package me.shedaniel.rei.plugin.common.displays.crafting;
 
 import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 
 import java.util.Collections;
 import java.util.Optional;
 
 public class DefaultShapedDisplay extends DefaultCraftingDisplay<ShapedRecipe> {
-    public DefaultShapedDisplay(ShapedRecipe recipe) {
+    public DefaultShapedDisplay(RecipeHolder<ShapedRecipe> recipe) {
         super(
-                EntryIngredients.ofIngredients(recipe.getIngredients()),
-                Collections.singletonList(EntryIngredients.of(recipe.getResultItem(BasicDisplay.registryAccess()))),
+                EntryIngredients.ofIngredients(recipe.value().getIngredients()),
+                Collections.singletonList(EntryIngredients.of(recipe.value().getResultItem(BasicDisplay.registryAccess()))),
                 Optional.of(recipe)
         );
     }
@@ -42,12 +43,12 @@ public class DefaultShapedDisplay extends DefaultCraftingDisplay<ShapedRecipe> {
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public int getWidth() {
-        return recipe.get().getWidth();
+        return recipe.get().value().getWidth();
     }
     
     @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public int getHeight() {
-        return recipe.get().getHeight();
+        return recipe.get().value().getHeight();
     }
 }

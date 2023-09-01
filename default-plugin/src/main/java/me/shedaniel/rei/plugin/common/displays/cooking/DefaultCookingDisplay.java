@@ -30,21 +30,22 @@ import me.shedaniel.rei.api.common.registry.RecipeManagerContext;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 public abstract class DefaultCookingDisplay extends BasicDisplay implements SimpleGridMenuDisplay {
-    private Recipe<?> recipe;
+    private RecipeHolder<?> recipe;
     private float xp;
     private double cookTime;
     
-    public DefaultCookingDisplay(AbstractCookingRecipe recipe) {
-        this(EntryIngredients.ofIngredients(recipe.getIngredients()), Collections.singletonList(EntryIngredients.of(recipe.getResultItem(BasicDisplay.registryAccess()))),
-                recipe, recipe.getExperience(), recipe.getCookingTime());
+    public DefaultCookingDisplay(RecipeHolder<? extends AbstractCookingRecipe> recipe) {
+        this(EntryIngredients.ofIngredients(recipe.value().getIngredients()), Collections.singletonList(EntryIngredients.of(recipe.value().getResultItem(BasicDisplay.registryAccess()))),
+                recipe, recipe.value().getExperience(), recipe.value().getCookingTime());
     }
     
     public DefaultCookingDisplay(List<EntryIngredient> input, List<EntryIngredient> output, CompoundTag tag) {
@@ -52,8 +53,8 @@ public abstract class DefaultCookingDisplay extends BasicDisplay implements Simp
                 tag.getFloat("xp"), tag.getDouble("cookTime"));
     }
     
-    public DefaultCookingDisplay(List<EntryIngredient> input, List<EntryIngredient> output, Recipe<?> recipe, float xp, double cookTime) {
-        super(input, output, Optional.ofNullable(recipe).map(Recipe::getId));
+    public DefaultCookingDisplay(List<EntryIngredient> input, List<EntryIngredient> output, @Nullable RecipeHolder<?> recipe, float xp, double cookTime) {
+        super(input, output, Optional.ofNullable(recipe).map(RecipeHolder::id));
         this.recipe = recipe;
         this.xp = xp;
         this.cookTime = cookTime;
@@ -68,7 +69,7 @@ public abstract class DefaultCookingDisplay extends BasicDisplay implements Simp
     }
     
     @ApiStatus.Internal
-    public Optional<Recipe<?>> getOptionalRecipe() {
+    public Optional<RecipeHolder<?>> getOptionalRecipe() {
         return Optional.ofNullable(recipe);
     }
     

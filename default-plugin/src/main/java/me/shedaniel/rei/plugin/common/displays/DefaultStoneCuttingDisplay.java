@@ -29,6 +29,7 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 
 import java.util.Collections;
@@ -36,9 +37,9 @@ import java.util.List;
 import java.util.Optional;
 
 public class DefaultStoneCuttingDisplay extends BasicDisplay {
-    public DefaultStoneCuttingDisplay(StonecutterRecipe recipe) {
-        this(EntryIngredients.ofIngredients(recipe.getIngredients()), Collections.singletonList(EntryIngredients.of(recipe.getResultItem(BasicDisplay.registryAccess()))),
-                Optional.ofNullable(recipe.getId()));
+    public DefaultStoneCuttingDisplay(RecipeHolder<StonecutterRecipe> recipe) {
+        this(EntryIngredients.ofIngredients(recipe.value().getIngredients()), Collections.singletonList(EntryIngredients.of(recipe.value().getResultItem(BasicDisplay.registryAccess()))),
+                Optional.ofNullable(recipe.id()));
     }
     
     public DefaultStoneCuttingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location) {

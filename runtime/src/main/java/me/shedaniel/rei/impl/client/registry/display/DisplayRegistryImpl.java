@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.registry.RecipeManagerContextImpl;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -169,9 +170,9 @@ public class DisplayRegistryImpl extends RecipeManagerContextImpl<REIClientPlugi
     @Override
     public void endReload() {
         if (!fillers.isEmpty()) {
-            List<Recipe<?>> allSortedRecipes = getAllSortedRecipes();
+            List<RecipeHolder<?>> allSortedRecipes = getAllSortedRecipes();
             for (int i = allSortedRecipes.size() - 1; i >= 0; i--) {
-                Recipe<?> recipe = allSortedRecipes.get(i);
+                RecipeHolder<?> recipe = allSortedRecipes.get(i);
                 addWithReason(recipe, DisplayAdditionReason.RECIPE_MANAGER);
             }
         }

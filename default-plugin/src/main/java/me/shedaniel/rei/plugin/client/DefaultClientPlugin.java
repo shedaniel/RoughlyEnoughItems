@@ -265,8 +265,8 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.registerRecipeFiller(BlastingRecipe.class, RecipeType.BLASTING, DefaultBlastingDisplay::new);
         registry.registerRecipeFiller(CampfireCookingRecipe.class, RecipeType.CAMPFIRE_COOKING, DefaultCampfireDisplay::new);
         registry.registerRecipeFiller(StonecutterRecipe.class, RecipeType.STONECUTTING, DefaultStoneCuttingDisplay::new);
-        registry.registerRecipeFiller(SmithingTransformRecipe.class, RecipeType.SMITHING, DefaultSmithingDisplay::new);
-        registry.registerRecipeFiller(SmithingTrimRecipe.class, RecipeType.SMITHING, DefaultSmithingDisplay::new);
+        registry.registerRecipeFiller(SmithingTransformRecipe.class, RecipeType.SMITHING, DefaultSmithingDisplay::ofTransforming);
+        registry.registerRecipeFiller(SmithingTrimRecipe.class, RecipeType.SMITHING, DefaultSmithingDisplay::ofTrimming);
         registry.registerFiller(AnvilRecipe.class, DefaultAnvilDisplay::new);
         registry.registerFiller(BrewingRecipe.class, DefaultBrewingDisplay::new);
         registry.registerFiller(TagKey.class, tagKey -> {
@@ -369,7 +369,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     }
     
     protected void registerForgePotions(DisplayRegistry registry, BuiltinClientPlugin clientPlugin) {
-        
+    
     }
     
     @Override

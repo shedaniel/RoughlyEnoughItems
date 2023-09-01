@@ -25,16 +25,17 @@ package me.shedaniel.rei.plugin.common.displays.crafting;
 
 import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 
 import java.util.Collections;
 import java.util.Optional;
 
 public class DefaultShapelessDisplay extends DefaultCraftingDisplay<ShapelessRecipe> {
-    public DefaultShapelessDisplay(ShapelessRecipe recipe) {
+    public DefaultShapelessDisplay(RecipeHolder<ShapelessRecipe> recipe) {
         super(
-                EntryIngredients.ofIngredients(recipe.getIngredients()),
-                Collections.singletonList(EntryIngredients.of(recipe.getResultItem(BasicDisplay.registryAccess()))),
+                EntryIngredients.ofIngredients(recipe.value().getIngredients()),
+                Collections.singletonList(EntryIngredients.of(recipe.value().getResultItem(BasicDisplay.registryAccess()))),
                 Optional.of(recipe)
         );
     }

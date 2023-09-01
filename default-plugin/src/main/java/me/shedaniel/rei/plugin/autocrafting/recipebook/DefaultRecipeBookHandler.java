@@ -37,6 +37,7 @@ import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 @Environment(EnvType.CLIENT)
 public class DefaultRecipeBookHandler implements TransferHandler {
@@ -61,7 +62,7 @@ public class DefaultRecipeBookHandler implements TransferHandler {
                 }
                 if (h == -1 || w == -1)
                     return Result.createNotApplicable();
-                Recipe<?> recipe = craftingDisplay.getOptionalRecipe().get();
+                RecipeHolder<?> recipe = craftingDisplay.getOptionalRecipe().get();
                 if (craftingDisplay.getHeight() > h || craftingDisplay.getWidth() > w)
                     return Result.createFailed(Component.translatable("error.rei.transfer.too_small", h, w));
                 if (!context.getMinecraft().player.getRecipeBook().contains(recipe))
@@ -76,7 +77,7 @@ public class DefaultRecipeBookHandler implements TransferHandler {
             }
         } else if (display instanceof DefaultCookingDisplay defaultDisplay) {
             if (defaultDisplay.getOptionalRecipe().isPresent()) {
-                Recipe<?> recipe = (defaultDisplay).getOptionalRecipe().get();
+                RecipeHolder<?> recipe = (defaultDisplay).getOptionalRecipe().get();
                 if (!context.getMinecraft().player.getRecipeBook().contains(recipe))
                     return Result.createNotApplicable();
                 if (!context.isActuallyCrafting())

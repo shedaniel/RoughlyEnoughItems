@@ -128,7 +128,7 @@ public class ChangelogLoader {
                             builder.add(width -> new ErrorsEntryListWidget.EmptyEntry(6));
                         }
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     builder.add(Component.translatable("rei.changelog.error.failedToReadChangelogFile"));
                 }
             }

@@ -28,11 +28,12 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.crafting.BlastingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 
 import java.util.List;
 
 public class DefaultBlastingDisplay extends DefaultCookingDisplay {
-    public DefaultBlastingDisplay(BlastingRecipe recipe) {
+    public DefaultBlastingDisplay(RecipeHolder<BlastingRecipe> recipe) {
         super(recipe);
     }
     

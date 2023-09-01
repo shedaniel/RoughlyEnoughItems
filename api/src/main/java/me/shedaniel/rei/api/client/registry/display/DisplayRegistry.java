@@ -35,6 +35,7 @@ import me.shedaniel.rei.api.common.registry.RecipeManagerContext;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -219,7 +220,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param <T>       the type of object
      * @param <D>       the type of display
      */
-    default <T extends Recipe<?>, D extends Display> void registerRecipeFiller(Class<T> typeClass, RecipeType<? super T> recipeType, Function<? extends T, @Nullable D> filler) {
+    default <T extends Recipe<?>, D extends Display> void registerRecipeFiller(Class<T> typeClass, RecipeType<? super T> recipeType, Function<? extends RecipeHolder<T>, @Nullable D> filler) {
         registerRecipeFiller(typeClass, type -> Objects.equals(recipeType, type), filler);
     }
     
@@ -234,7 +235,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param <T>       the type of object
      * @param <D>       the type of display
      */
-    default <T extends Recipe<?>, D extends Display> void registerRecipeFiller(Class<T> typeClass, Predicate<RecipeType<? super T>> recipeType, Function<? extends T, @Nullable D> filler) {
+    default <T extends Recipe<?>, D extends Display> void registerRecipeFiller(Class<T> typeClass, Predicate<RecipeType<? super T>> recipeType, Function<? extends RecipeHolder<T>, @Nullable D> filler) {
         registerRecipeFiller(typeClass, recipeType, Predicates.alwaysTrue(), filler);
     }
     
@@ -249,8 +250,12 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * @param <T>       the type of object
      * @param <D>       the type of display
      */
-    default <T extends Recipe<?>, D extends Display> void registerRecipeFiller(Class<T> typeClass, Predicate<RecipeType<? super T>> recipeType, Predicate<? extends T> predicate, Function<? extends T, @Nullable D> filler) {
-        registerFiller(typeClass, recipe -> recipeType.test((RecipeType<? super T>) recipe.getType()) && ((Predicate<T>) predicate).test(recipe), filler);
+    default <T extends Recipe<?>, D extends Display> void registerRecipeFiller(Class<T> typeClass, Predicate<RecipeType<? super T>> recipeType, Predicate<? extends RecipeHolder<T>> predicate, Function<? extends RecipeHolder<T>, @Nullable D> filler) {
+        registerFiller(RecipeHolder.class, recipe -> {
+            return typeClass.isInstance(recipe.value())
+                    && recipeType.test((RecipeType<? super T>) recipe.value().getType())
+                    && ((Predicate<RecipeHolder<T>>) predicate).test(recipe);
+        }, filler);
     }
     
     /**

@@ -27,6 +27,7 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.registry.RecipeManagerContext;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.BitSet;
@@ -37,12 +38,12 @@ public class DefaultCustomDisplay extends DefaultCraftingDisplay<Recipe<?>> {
     private int width;
     private int height;
     
-    public DefaultCustomDisplay(@Nullable Recipe<?> possibleRecipe, List<EntryIngredient> input, List<EntryIngredient> output) {
+    public DefaultCustomDisplay(@Nullable RecipeHolder<?> possibleRecipe, List<EntryIngredient> input, List<EntryIngredient> output) {
         this(null, possibleRecipe, input, output);
     }
     
-    public DefaultCustomDisplay(@Nullable ResourceLocation location, @Nullable Recipe<?> possibleRecipe, List<EntryIngredient> input, List<EntryIngredient> output) {
-        super(input, output, Optional.ofNullable(location == null && possibleRecipe != null ? possibleRecipe.getId() : location), Optional.ofNullable(possibleRecipe));
+    public DefaultCustomDisplay(@Nullable ResourceLocation location, @Nullable RecipeHolder<?> possibleRecipe, List<EntryIngredient> input, List<EntryIngredient> output) {
+        super(input, output, Optional.ofNullable((RecipeHolder<Recipe<?>>) possibleRecipe));
         BitSet row = new BitSet(3);
         BitSet column = new BitSet(3);
         for (int i = 0; i < 9; i++)
@@ -58,7 +59,7 @@ public class DefaultCustomDisplay extends DefaultCraftingDisplay<Recipe<?>> {
     }
     
     public static DefaultCustomDisplay simple(List<EntryIngredient> input, List<EntryIngredient> output, Optional<ResourceLocation> location) {
-        Recipe<?> optionalRecipe = location.flatMap(resourceLocation -> RecipeManagerContext.getInstance().getRecipeManager().byKey(resourceLocation))
+        RecipeHolder<?> optionalRecipe = location.flatMap(resourceLocation -> RecipeManagerContext.getInstance().getRecipeManager().byKey(resourceLocation))
                 .orElse(null);
         return new DefaultCustomDisplay(location.orElse(null), optionalRecipe, input, output);
     }

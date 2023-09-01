@@ -28,7 +28,7 @@ import dev.architectury.utils.GameInstance;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.registry.RecipeManagerContext;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 
 import java.util.Collections;
@@ -38,9 +38,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class RecipeManagerContextImpl<P extends REIPlugin<?>> implements RecipeManagerContext<P> {
-    private static final Comparator<Recipe<?>> RECIPE_COMPARATOR = Comparator.comparing((Recipe<?> o) -> o.getId().getNamespace()).thenComparing(o -> o.getId().getPath());
+    private static final Comparator<RecipeHolder<?>> RECIPE_COMPARATOR = Comparator.comparing((RecipeHolder<?> o) -> o.id().getNamespace()).thenComparing(o -> o.id().getPath());
     private final Supplier<RecipeManager> recipeManager;
-    private List<Recipe<?>> sortedRecipes = null;
+    private List<RecipeHolder<?>> sortedRecipes = null;
     
     public RecipeManagerContextImpl(Supplier<RecipeManager> recipeManager) {
         this.recipeManager = recipeManager;
@@ -52,7 +52,7 @@ public class RecipeManagerContextImpl<P extends REIPlugin<?>> implements RecipeM
     }
     
     @Override
-    public List<Recipe<?>> getAllSortedRecipes() {
+    public List<RecipeHolder<?>> getAllSortedRecipes() {
         if (sortedRecipes == null) {
             this.sortedRecipes = getRecipeManager().getRecipes().parallelStream().sorted(RECIPE_COMPARATOR).collect(Collectors.toList());
         }

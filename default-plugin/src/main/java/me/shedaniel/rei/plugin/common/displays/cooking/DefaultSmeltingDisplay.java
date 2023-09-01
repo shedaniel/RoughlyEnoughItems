@@ -27,12 +27,13 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 
 import java.util.List;
 
 public class DefaultSmeltingDisplay extends DefaultCookingDisplay {
-    public DefaultSmeltingDisplay(SmeltingRecipe recipe) {
+    public DefaultSmeltingDisplay(RecipeHolder<SmeltingRecipe> recipe) {
         super(recipe);
     }
     

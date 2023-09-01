@@ -24,6 +24,7 @@
 package me.shedaniel.rei.plugin.common.displays.crafting;
 
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,4 +74,9 @@ public interface CraftingRecipeSizeProvider<R extends Recipe<?>> {
     
     @Nullable
     Size getSize(R recipe);
+    
+    @Nullable
+    default Size getSize(RecipeHolder<R> recipeHolder) {
+        return getSize(recipeHolder.value());
+    }
 }

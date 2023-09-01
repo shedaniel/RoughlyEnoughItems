@@ -43,24 +43,17 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.ShapedRecipe;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.item.crafting.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicDisplay implements SimpleGridMenuDisplay {
-    protected Optional<C> recipe;
+    protected Optional<RecipeHolder<C>> recipe;
     
-    public DefaultCraftingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<C> recipe) {
-        this(inputs, outputs, recipe.map(Recipe::getId), recipe);
-    }
-    
-    public DefaultCraftingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location, Optional<C> recipe) {
-        super(inputs, outputs, location);
+    public DefaultCraftingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<RecipeHolder<C>> recipe) {
+        super(inputs, outputs, recipe.map(RecipeHolder::id));
         this.recipe = recipe;
     }
     
@@ -89,24 +82,25 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
     }
     
     @Nullable
-    public static DefaultCraftingDisplay<?> of(Recipe<?> recipe) {
+    public static DefaultCraftingDisplay<?> of(RecipeHolder<? extends Recipe<?>> holder) {
+        Recipe<?> recipe = holder.value();
         if (recipe instanceof ShapelessRecipe) {
-            return new DefaultShapelessDisplay((ShapelessRecipe) recipe);
+            return new DefaultShapelessDisplay((RecipeHolder<ShapelessRecipe>) holder);
         } else if (recipe instanceof ShapedRecipe) {
-            return new DefaultShapedDisplay((ShapedRecipe) recipe);
+            return new DefaultShapedDisplay((RecipeHolder<ShapedRecipe>) holder);
         } else if (!recipe.isSpecial()) {
             NonNullList<Ingredient> ingredients = recipe.getIngredients();
             for (CraftingRecipeSizeProvider<?> pair : SIZE_PROVIDER) {
-                CraftingRecipeSizeProvider.Size size = ((CraftingRecipeSizeProvider<Recipe<?>>) pair).getSize(recipe);
+                CraftingRecipeSizeProvider.Size size = ((CraftingRecipeSizeProvider<Recipe<?>>) pair).getSize((RecipeHolder<Recipe<?>>) holder);
                 
                 if (size != null) {
-                    return new DefaultCustomShapedDisplay(recipe, EntryIngredients.ofIngredients(recipe.getIngredients()),
+                    return new DefaultCustomShapedDisplay(holder, EntryIngredients.ofIngredients(recipe.getIngredients()),
                             Collections.singletonList(EntryIngredients.of(recipe.getResultItem(BasicDisplay.registryAccess()))),
                             size.getWidth(), size.getHeight());
                 }
             }
             
-            return new DefaultCustomDisplay(recipe, EntryIngredients.ofIngredients(recipe.getIngredients()),
+            return new DefaultCustomDisplay(holder, EntryIngredients.ofIngredients(recipe.getIngredients()),
                     Collections.singletonList(EntryIngredients.of(recipe.getResultItem(BasicDisplay.registryAccess()))));
         }
         
@@ -118,13 +112,13 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
         return BuiltinPlugin.CRAFTING;
     }
     
-    public Optional<C> getOptionalRecipe() {
+    public Optional<RecipeHolder<C>> getOptionalRecipe() {
         return recipe;
     }
     
     @Override
     public Optional<ResourceLocation> getDisplayLocation() {
-        return getOptionalRecipe().map(Recipe::getId);
+        return getOptionalRecipe().map(RecipeHolder::id);
     }
     
     public <T extends AbstractContainerMenu> List<List<ItemStack>> getOrganisedInputEntries(SimpleGridMenuInfo<T, DefaultCraftingDisplay<?>> menuInfo, T container) {

@@ -28,8 +28,9 @@ import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -44,7 +45,7 @@ public interface RecipeManagerContext<P extends REIPlugin<?>> extends Reloadable
     /**
      * @return a list of sorted recipes
      */
-    List<Recipe<?>> getAllSortedRecipes();
+    List<RecipeHolder<?>> getAllSortedRecipes();
     
     /**
      * Returns the vanilla recipe manager
@@ -53,14 +54,16 @@ public interface RecipeManagerContext<P extends REIPlugin<?>> extends Reloadable
      */
     RecipeManager getRecipeManager();
     
-    default Recipe<?> byId(CompoundTag tag, String key) {
+    @Nullable
+    default RecipeHolder<?> byId(CompoundTag tag, String key) {
         if (tag.contains(key, Tag.TAG_STRING)) {
             return getRecipeManager().byKey(new ResourceLocation(tag.getString(key))).orElse(null);
         }
         return null;
     }
     
-    default Recipe<?> byId(ResourceLocation location) {
+    @Nullable
+    default RecipeHolder<?> byId(ResourceLocation location) {
         return getRecipeManager().byKey(location).orElse(null);
     }
 }
