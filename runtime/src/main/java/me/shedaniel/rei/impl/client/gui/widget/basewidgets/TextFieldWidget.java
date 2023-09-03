@@ -160,6 +160,10 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     }
     
     public void onChanged(String newText) {
+        int length = newText.length();
+        if (this.firstCharacterIndex > length) {
+            this.firstCharacterIndex = length;
+        }
         if (this.responder != null) {
             this.responder.accept(newText);
         }
@@ -409,7 +413,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (this.isVisible()) {
             this.renderBorder(matrices);
-            
+
             int color = this.editable ? this.editableColor : this.notEditableColor;
             int int_4 = this.cursorPos - this.firstCharacterIndex;
             int int_5 = this.highlightPos - this.firstCharacterIndex;
@@ -582,7 +586,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
             if (this.firstCharacterIndex > j) {
                 this.firstCharacterIndex = j;
             }
-            
+
             int width = this.getWidth();
             String clippedText = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex), width);
             int int_4 = clippedText.length() + this.firstCharacterIndex;
