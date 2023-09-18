@@ -33,6 +33,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.DisplayMerger;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.InputIngredient;
 import me.shedaniel.rei.api.common.util.EntryStacks;
@@ -45,6 +46,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Iterator;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
@@ -90,6 +92,32 @@ public class DefaultCraftingCategory implements DisplayCategory<DefaultCraftingD
     @Override
     @Nullable
     public DisplayMerger<DefaultCraftingDisplay<?>> getDisplayMerger() {
-        return DisplayCategory.getContentMerger();
+        return new DisplayMerger<>() {
+            @Override
+            public boolean canMerge(DefaultCraftingDisplay<?> first, DefaultCraftingDisplay<?> second) {
+                if (!first.getCategoryIdentifier().equals(second.getCategoryIdentifier())) return false;
+                if (!equals(first.getOrganisedInputEntries(3, 3), second.getInputEntries())) return false;
+                if (!equals(first.getOutputEntries(), second.getOutputEntries())) return false;
+                if (first.isShapeless() != second.isShapeless()) return false;
+                if (first.getWidth() != second.getWidth()) return false;
+                if (first.getHeight() != second.getHeight()) return false;
+                return true;
+            }
+            
+            @Override
+            public int hashOf(DefaultCraftingDisplay<?> display) {
+                return display.getCategoryIdentifier().hashCode() * 31 * 31 * 31 + display.getOrganisedInputEntries(3, 3).hashCode() * 31 * 31 + display.getOutputEntries().hashCode();
+            }
+            
+            private boolean equals(List<EntryIngredient> l1, List<EntryIngredient> l2) {
+                if (l1.size() != l2.size()) return false;
+                Iterator<EntryIngredient> it1 = l1.iterator();
+                Iterator<EntryIngredient> it2 = l2.iterator();
+                while (it1.hasNext() && it2.hasNext()) {
+                    if (!it1.next().equals(it2.next())) return false;
+                }
+                return true;
+            }
+        };
     }
 }

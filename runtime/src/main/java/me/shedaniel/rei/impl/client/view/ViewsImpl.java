@@ -240,7 +240,7 @@ public class ViewsImpl implements Views {
                             if (this == o) return true;
                             if (!(o instanceof Wrapped)) return false;
                             Wrapped wrapped = (Wrapped) o;
-                            return merger.canMerge(display, wrapped.display);
+                            return hash == wrapped.hash && merger.canMerge(display, wrapped.display);
                         }
                         
                         @Override
