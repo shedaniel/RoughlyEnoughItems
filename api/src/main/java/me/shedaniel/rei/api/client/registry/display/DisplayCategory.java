@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplayMerger;
+import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.util.Identifiable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -41,6 +42,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 @Environment(EnvType.CLIENT)
@@ -149,14 +151,24 @@ public interface DisplayCategory<T extends Display> extends DisplayCategoryView<
             @Override
             public boolean canMerge(T first, T second) {
                 if (!first.getCategoryIdentifier().equals(second.getCategoryIdentifier())) return false;
-                if (!first.getInputEntries().equals(second.getInputEntries())) return false;
-                if (!first.getOutputEntries().equals(second.getOutputEntries())) return false;
+                if (!equals(first.getInputEntries(), second.getInputEntries())) return false;
+                if (!equals(first.getOutputEntries(), second.getOutputEntries())) return false;
                 return true;
             }
             
             @Override
             public int hashOf(T display) {
                 return display.getCategoryIdentifier().hashCode() * 31 * 31 * 31 + display.getInputEntries().hashCode() * 31 * 31 + display.getOutputEntries().hashCode();
+            }
+            
+            private boolean equals(List<EntryIngredient> l1, List<EntryIngredient> l2) {
+                if (l1.size() != l2.size()) return false;
+                Iterator<EntryIngredient> it1 = l1.iterator();
+                Iterator<EntryIngredient> it2 = l2.iterator();
+                while (it1.hasNext() && it2.hasNext()) {
+                    if (!it1.next().equals(it2.next())) return false;
+                }
+                return true;
             }
         };
     }
