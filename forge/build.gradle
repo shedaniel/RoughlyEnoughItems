@@ -255,7 +255,7 @@ unifiedPublishing {
     project {
         displayName = "[Forge $rootProject.supported_version] v$project.version"
         releaseType = "release"
-        gameVersions = ["1.20", "1.20.1"]
+        gameVersions = []
         gameLoaders = ["forge"]
         changelog = rootProject.releaseChangelog
 
@@ -286,6 +286,7 @@ unifiedPublishing {
                 token = project.hasProperty("modrinth_key") ? project.property("modrinth_key") : System.getenv("modrinth_key")
                 id = "OM4ZYSws"
                 version = "$project.version+$project.name"
+                gameVersions.addAll project.minecraft_version
             }
         }
     }

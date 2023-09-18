@@ -106,12 +106,12 @@ unifiedPublishing {
     project {
         displayName = "[Fabric $rootProject.supported_version] v$project.version"
         releaseType = "release"
-        gameVersions = ["1.20", "1.20.1"]
+        gameVersions = []
         gameLoaders = ["fabric"]
         changelog = rootProject.releaseChangelog
 
         mainPublication remapJar
-        
+
         relations {
             depends {
                 curseforge = "architectury-api"
@@ -131,7 +131,7 @@ unifiedPublishing {
             curseforge {
                 token = project.hasProperty("danielshe_curse_api_key") ? project.property("danielshe_curse_api_key") : System.getenv("danielshe_curse_api_key")
                 id = "310111"
-                gameVersions.addAll "Java 17", "1.20-Snapshot"
+                gameVersions.addAll "Java 17", "1.20.2-Snapshot"
             }
         }
 
@@ -140,6 +140,7 @@ unifiedPublishing {
                 token = project.hasProperty("modrinth_key") ? project.property("modrinth_key") : System.getenv("modrinth_key")
                 id = "nfn13YXA"
                 version = "$project.version+$project.name"
+                gameVersions.addAll project.minecraft_version
             }
         }
     }
