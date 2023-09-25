@@ -28,6 +28,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
+import static me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigGroups.*;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
 public interface AllREIConfigCategories {
@@ -37,19 +38,41 @@ public interface AllREIConfigCategories {
     }
     
     OptionCategory APPEARANCE = make("appearance")
-            .add(AllREIConfigGroups.INTERFACE);
-    OptionCategory KEYBINDS = make("keybinds");
-    OptionCategory CHEATS = make("cheats");
-    OptionCategory LAYOUT = make("layout");
-    OptionCategory ACCESSIBILITY = make("accessibility");
-    OptionCategory FAVORITES = make("favorites");
-    OptionCategory PERFORMANCE = make("performance");
-    OptionCategory SEARCH = make("search");
-    OptionCategory FILTERING = make("filtering");
-    OptionCategory LIST = make("list");
-    OptionCategory DEBUG = make("debug");
+            .add(APPEARANCE_INTERFACE)
+            .add(APPEARANCE_TOOLTIPS);
+    OptionCategory KEYBINDS = make("keybinds")
+            .add(KEYBINDS_KEYBINDS)
+            .add(KEYBINDS_ADVANCED);
+    OptionCategory CHEATS = make("cheats")
+            .add(CHEATS_CHEATS)
+            .add(CHEATS_ADVANCED);
+    OptionCategory LAYOUT = make("layout")
+            .add(LAYOUT_WIDGETS)
+            .add(LAYOUT_PANEL);
+    OptionCategory ACCESSIBILITY = make("accessibility")
+            .add(ACCESSIBILITY_DISPLAY)
+            .add(ACCESSIBILITY_WIDGETS);
+    OptionCategory FAVORITES = make("favorites")
+            .add(FAVORITES_FAVORITES)
+            .add(FAVORITES_ADVANCED);
+    OptionCategory PERFORMANCE = make("performance")
+            .add(PERFORMANCE_RENDERING)
+            .add(PERFORMANCE_RELOAD);
+    OptionCategory SEARCH = make("search")
+            .add(SEARCH_APPEARANCE)
+            .add(SEARCH_FILTERS)
+            .add(SEARCH_ADVANCED);
+    OptionCategory FILTERING = make("filtering")
+            .add(FILTERING_FILTERING)
+            .add(FILTERING_ADVANCED);
+    OptionCategory LIST = make("list")
+            .add(LIST_ENTRIES);
+    OptionCategory DEBUG = make("debug")
+            .add(DEBUG_PERFORMANCE);
     OptionCategory FLAGS = make("flags");
-    OptionCategory RESET = make("reset");
+    OptionCategory RESET = make("reset")
+            .add(RESET_RELOAD)
+            .add(RESET_RESET);
     List<OptionCategory> CATEGORIES = ImmutableList.of(
             APPEARANCE,
             KEYBINDS,
