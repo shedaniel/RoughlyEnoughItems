@@ -628,6 +628,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public static class KeyBindings {
+        @ConfigEntry.Gui.Excluded
+        public boolean useNativeKeybinds;
         public ModifierKeyCode recipeKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_R), Modifier.none());
         public ModifierKeyCode usageKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_U), Modifier.none());
         public ModifierKeyCode hideKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_O), Modifier.of(false, true, false));

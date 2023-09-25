@@ -30,13 +30,13 @@ import java.util.List;
 
 public class OptionGroup {
     private final Component groupName;
-    private final List<CompositeOption> options = new ArrayList<>();
+    private final List<CompositeOption<?>> options = new ArrayList<>();
     
     public OptionGroup(Component groupName) {
         this.groupName = groupName;
     }
     
-    public OptionGroup add(CompositeOption option) {
+    public OptionGroup add(CompositeOption<?> option) {
         this.options.add(option);
         return this;
     }

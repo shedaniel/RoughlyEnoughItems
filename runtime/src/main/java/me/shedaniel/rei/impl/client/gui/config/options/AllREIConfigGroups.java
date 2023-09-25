@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.config.options;
 
+import static me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigOptions.*;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
 interface AllREIConfigGroups {
@@ -30,5 +31,67 @@ interface AllREIConfigGroups {
         return new OptionGroup(translatable("config.rei.options.groups." + id));
     }
     
-    OptionGroup INTERFACE = make("interface");
+    OptionGroup APPEARANCE_INTERFACE = make("appearance.interface")
+            .add(THEME)
+            .add(RECIPE_BORDER)
+            .add(REDUCED_MOTION)
+            .add(RECIPE_LOOKUP_STYLE);
+    OptionGroup APPEARANCE_TOOLTIPS = make("appearance.tooltips")
+            .add(APPEND_MOD_NAMES)
+            .add(APPEND_FAVORITES_HINT);
+    OptionGroup KEYBINDS_KEYBINDS = make("keybinds.keybinds");
+    OptionGroup KEYBINDS_ADVANCED = make("keybinds.advanced")
+            .add(USE_NATIVE_KEYBINDS);
+    OptionGroup CHEATS_CHEATS = make("cheats.cheats")
+            .add(CHEATS_MODE)
+            .add(CHEATS_METHOD)
+            .add(CHEATS_AMOUNT);
+    OptionGroup CHEATS_ADVANCED = make("cheats.advanced")
+            .add(GIVE_COMMAND);
+    OptionGroup LAYOUT_WIDGETS = make("layout.widgets")
+            .add(SEARCH_FIELD_LOCATION)
+            .add(CONFIG_BUTTON_LOCATION)
+            .add(CRAFTABLE_FILTER);
+    OptionGroup LAYOUT_PANEL = make("layout.panel")
+            .add(BOUNDARIES);
+    OptionGroup ACCESSIBILITY_DISPLAY = make("accessibility.display")
+            .add(LARGER_TABS)
+            .add(LARGER_ARROW_BUTTONS);
+    OptionGroup ACCESSIBILITY_WIDGETS = make("accessibility.widgets")
+            .add(SCROLLBAR_VISIBILITY)
+            .add(CLICKABLE_RECIPE_ARROWS);
+    OptionGroup FAVORITES_FAVORITES = make("favorites.favorites")
+            .add(FAVORITES_MODE)
+            .add(NEW_FAVORITES_BUTTON_VISIBILITY);
+    OptionGroup FAVORITES_ADVANCED = make("favorites.advanced")
+            .add(GAME_MODE_COMMAND)
+            .add(TIME_COMMAND)
+            .add(WEATHER_COMMAND);
+    OptionGroup PERFORMANCE_RENDERING = make("performance.rendering")
+            .add(BATCHED_RENDERING)
+            .add(CACHED_RENDERING);
+    OptionGroup PERFORMANCE_RELOAD = make("performance.reload")
+            .add(RELOAD_THREAD)
+            .add(CACHED_DISPLAY_LOOKUP);
+    OptionGroup SEARCH_APPEARANCE = make("search.appearance")
+            .add(SYNTAX_HIGHLIGHTING);
+    OptionGroup SEARCH_FILTERS = make("search.filters")
+            .add(MOD_SEARCH)
+            .add(TOOLTIP_SEARCH)
+            .add(TAG_SEARCH)
+            .add(IDENTIFIER_SEARCH);
+    OptionGroup SEARCH_ADVANCED = make("search.advanced");
+    OptionGroup FILTERING_FILTERING = make("filtering.filtering");
+    OptionGroup FILTERING_ADVANCED = make("filtering.advanced")
+            .add(FILTER_DISPLAYS);
+    OptionGroup LIST_ENTRIES = make("list.entries")
+            .add(DISPLAY_MODE)
+            .add(ORDERING)
+            .add(ZOOM)
+            .add(FOCUS_MODE);
+    OptionGroup DEBUG_PERFORMANCE = make("debug.performance")
+            .add(SEARCH_PERFORMANCE)
+            .add(ENTRY_LIST_PERFORMANCE);
+    OptionGroup RESET_RELOAD = make("reset.reload");
+    OptionGroup RESET_RESET = make("reset.reset");
 }
