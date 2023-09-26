@@ -25,8 +25,8 @@ package me.shedaniel.rei.mixin.forge;
 
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
-import net.minecraft.network.protocol.game.ClientboundUpdateTagsPacket;
 import net.minecraft.world.item.crafting.RecipeManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

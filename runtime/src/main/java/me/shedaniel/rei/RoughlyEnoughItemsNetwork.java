@@ -171,7 +171,7 @@ public class RoughlyEnoughItemsNetwork {
             try {
                 boolean shift = packetByteBuf.readBoolean();
                 try {
-                    CompoundTag nbt = packetByteBuf.readAnySizeNbt();
+                    CompoundTag nbt = packetByteBuf.readNbt();
                     List<InputIngredient<ItemStack>> inputs = readInputs(nbt.getCompound("Inputs"));
                     List<SlotAccessor> input = readSlots(container, player, nbt.getList("InputSlots", Tag.TAG_COMPOUND));
                     List<SlotAccessor> inventory = readSlots(container, player, nbt.getList("InventorySlots", Tag.TAG_COMPOUND));
