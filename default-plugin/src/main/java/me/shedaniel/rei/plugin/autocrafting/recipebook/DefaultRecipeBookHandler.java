@@ -27,6 +27,7 @@ import me.shedaniel.rei.api.client.ClientHelper;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.SimpleGridMenuDisplay;
+import me.shedaniel.rei.api.common.transfer.info.MenuTransferException;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultCookingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import net.fabricmc.api.EnvType;
@@ -39,17 +40,26 @@ import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
+import java.util.Optional;
+
 @Environment(EnvType.CLIENT)
 public class DefaultRecipeBookHandler implements TransferHandler {
     @Override
-    public Result handle(Context context) {
+    public ApplicabilityResult checkApplicable(Context context) {
         if (context.getDisplay() instanceof SimpleGridMenuDisplay && ClientHelper.getInstance().canUseMovePackets())
-            return Result.createNotApplicable();
+            return ApplicabilityResult.createNotApplicable();
         Display display = context.getDisplay();
         if (!(context.getMenu() instanceof RecipeBookMenu<?> container))
-            return Result.createNotApplicable();
+            return ApplicabilityResult.createNotApplicable();
         if (container == null)
-            return Result.createNotApplicable();
+            return ApplicabilityResult.createNotApplicable();
+        return ApplicabilityResult.createApplicable();
+    }
+    
+    @Override
+    public Result handle(Context context) {
+        RecipeBookMenu<?> container = (RecipeBookMenu<?>) context.getMenu();
+        Display display = context.getDisplay();
         if (display instanceof DefaultCraftingDisplay<?> craftingDisplay) {
             if (craftingDisplay.getOptionalRecipe().isPresent()) {
                 int h = -1, w = -1;

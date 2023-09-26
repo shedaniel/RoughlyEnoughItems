@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRenderer;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.api.common.transfer.info.MenuTransferException;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -41,10 +42,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -99,7 +97,15 @@ public class AutoCraftingEvaluator {
         
         for (TransferHandler transferHandler : TransferHandlerRegistry.getInstance()) {
             try {
-                TransferHandler.Result transferResult = transferHandler.handle(context);
+                TransferHandler.ApplicabilityResult applicabilityResult = transferHandler.checkApplicable(context);
+                if (!applicabilityResult.isApplicable()) continue;
+                TransferHandler.Result transferResult;
+                
+                if (applicabilityResult.isSuccessful()) {
+                    transferResult = transferHandler.handle(context);
+                } else {
+                    transferResult = applicabilityResult.getError();
+                }
                 
                 if (transferResult.isBlocking() && actuallyCrafting) {
                     if (transferResult.isReturningToScreen()) {

@@ -39,6 +39,7 @@ import java.util.function.Predicate;
 /**
  * Registry for {@link MenuInfo}, for the default REI {@link me.shedaniel.rei.api.client.registry.transfer.TransferHandler}.
  */
+@Deprecated(forRemoval = true)
 public interface MenuInfoRegistry extends Reloadable<REIServerPlugin> {
     static MenuInfoRegistry getInstance() {
         return PluginManager.getServerInstance().get(MenuInfoRegistry.class);

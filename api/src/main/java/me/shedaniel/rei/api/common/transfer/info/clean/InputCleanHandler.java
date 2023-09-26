@@ -33,6 +33,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
 @FunctionalInterface
+@Deprecated(forRemoval = true)
 public interface InputCleanHandler<T extends AbstractContainerMenu, D extends Display> {
     void clean(MenuInfoContext<T, ? extends ServerPlayer, D> context);
     

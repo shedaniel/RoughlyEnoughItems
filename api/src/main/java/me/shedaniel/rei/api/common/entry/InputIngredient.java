@@ -71,6 +71,34 @@ public interface InputIngredient<T> {
     }
     
     /**
+     * Creates an input ingredient at the given index.
+     *
+     * @param index      the index
+     * @param displayIndex the display index
+     * @param ingredient the ingredient
+     * @param <T>        the type of entry
+     * @return the input ingredient
+     */
+    static <T> InputIngredient<T> of(int index, int displayIndex, List<T> ingredient) {
+        return new InputIngredient<>() {
+            @Override
+            public List<T> get() {
+                return ingredient;
+            }
+            
+            @Override
+            public int getIndex() {
+                return index;
+            }
+            
+            @Override
+            public int getDisplayIndex() {
+                return displayIndex;
+            }
+        };
+    }
+    
+    /**
      * Returns an input ingredient with only the stacks matching given entry type.
      *
      * @param ingredient the original ingredient
@@ -93,6 +121,11 @@ public interface InputIngredient<T> {
             public int getIndex() {
                 return ingredient.getIndex();
             }
+            
+            @Override
+            public int getDisplayIndex() {
+                return ingredient.getDisplayIndex();
+            }
         };
     }
     
@@ -111,4 +144,8 @@ public interface InputIngredient<T> {
      * @return the index
      */
     int getIndex();
+    
+    default int getDisplayIndex() {
+        return getIndex();
+    }
 }

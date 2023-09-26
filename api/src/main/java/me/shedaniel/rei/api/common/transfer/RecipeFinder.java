@@ -26,8 +26,7 @@ package me.shedaniel.rei.api.common.transfer;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.*;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.Nullable;
@@ -40,11 +39,11 @@ public class RecipeFinder {
     public final Int2IntMap idToAmountMap = new Int2IntOpenHashMap();
     
     public static int getItemId(ItemStack stack) {
-        return BuiltInRegistries.ITEM.getId(stack.getItem());
+        return StackedContents.getStackingIndex(stack);
     }
     
     public static ItemStack getStackFromId(int itemId) {
-        return itemId == 0 ? ItemStack.EMPTY : new ItemStack(Item.byId(itemId));
+        return StackedContents.fromStackingIndex(itemId);
     }
     
     public void addNormalItem(ItemStack stack) {
@@ -63,7 +62,6 @@ public class RecipeFinder {
             int itemCount = Math.min(count, stack.getCount());
             this.addItem(itemId, itemCount);
         }
-        
     }
     
     public boolean contains(int itemId) {
@@ -93,16 +91,16 @@ public class RecipeFinder {
         return this.findRecipe(ingredients, intList_1, 1);
     }
     
-    public boolean findRecipe(NonNullList<Ingredient> ingredients, @Nullable IntList intList_1, int int_1) {
-        return (new RecipeFinder.Filter(ingredients)).find(int_1, intList_1);
+    public boolean findRecipe(NonNullList<Ingredient> ingredients, @Nullable IntList intList_1, int maxCrafts) {
+        return (new RecipeFinder.Filter(ingredients)).find(maxCrafts, intList_1);
     }
     
     public int countRecipeCrafts(NonNullList<Ingredient> ingredients, @Nullable IntList intList_1) {
         return this.countRecipeCrafts(ingredients, Integer.MAX_VALUE, intList_1);
     }
     
-    public int countRecipeCrafts(NonNullList<Ingredient> ingredients, int int_1, @Nullable IntList intList_1) {
-        return (new RecipeFinder.Filter(ingredients)).countCrafts(int_1, intList_1);
+    public int countRecipeCrafts(NonNullList<Ingredient> ingredients, int maxCrafts, @Nullable IntList intList_1) {
+        return (new RecipeFinder.Filter(ingredients)).countCrafts(maxCrafts, intList_1);
     }
     
     public void clear() {
@@ -115,7 +113,7 @@ public class RecipeFinder {
         private final int[] usableIngredientItemIds;
         private final int usableIngredientSize;
         private final BitSet bitSet;
-        private final IntList field_7557 = new IntArrayList();
+        private final IntList path = new IntArrayList();
         private final NonNullList<Ingredient> ingredientsInput;
         
         public Filter(NonNullList<Ingredient> ingredientsInput) {
@@ -133,7 +131,7 @@ public class RecipeFinder {
                 // Loops over usable ingredients
                 for (int usableIngredientIndex = 0; usableIngredientIndex < this.usableIngredientSize; ++usableIngredientIndex) {
                     if (possibleStacks.contains(this.usableIngredientItemIds[usableIngredientIndex])) {
-                        this.bitSet.set(this.method_7420(true, usableIngredientIndex, ingredientIndex));
+                        this.bitSet.set(this.getIndex(true, usableIngredientIndex, ingredientIndex));
                     }
                 }
             }
@@ -141,21 +139,21 @@ public class RecipeFinder {
         }
         
         @SuppressWarnings("deprecation")
-        public boolean find(int int_1, @Nullable IntList intList_1) {
-            if (int_1 <= 0) {
+        public boolean find(int maxCrafts, @Nullable IntList intList_1) {
+            if (maxCrafts <= 0) {
                 return true;
             } else {
                 int int_2;
-                for (int_2 = 0; this.method_7423(int_1); ++int_2) {
-                    RecipeFinder.this.take(this.usableIngredientItemIds[this.field_7557.getInt(0)], int_1);
-                    int int_3 = this.field_7557.size() - 1;
-                    this.method_7421(this.field_7557.getInt(int_3));
+                for (int_2 = 0; this.dfs(maxCrafts); ++int_2) {
+                    RecipeFinder.this.take(this.usableIngredientItemIds[this.path.getInt(0)], maxCrafts);
+                    int int_3 = this.path.size() - 1;
+                    this.setSatisfied(this.path.getInt(int_3));
                     
                     for (int int_4 = 0; int_4 < int_3; ++int_4) {
-                        this.method_7414((int_4 & 1) == 0, this.field_7557.get(int_4), this.field_7557.get(int_4 + 1));
+                        this.toggleResidual((int_4 & 1) == 0, this.path.get(int_4), this.path.get(int_4 + 1));
                     }
                     
-                    this.field_7557.clear();
+                    this.path.clear();
                     this.bitSet.clear(0, this.ingredientCount + this.usableIngredientSize);
                 }
                 
@@ -174,9 +172,9 @@ public class RecipeFinder {
                         intList_1.add(0);
                     } else {
                         for (int int_7 = 0; int_7 < this.usableIngredientSize; ++int_7) {
-                            if (this.method_7425(false, int_5, int_7)) {
-                                this.method_7414(true, int_7, int_5);
-                                RecipeFinder.this.addItem(this.usableIngredientItemIds[int_7], int_1);
+                            if (this.hasResidual(false, int_5, int_7)) {
+                                this.toggleResidual(true, int_7, int_5);
+                                RecipeFinder.this.addItem(this.usableIngredientItemIds[int_7], maxCrafts);
                                 if (boolean_2) {
                                     intList_1.add(this.usableIngredientItemIds[int_7]);
                                 }
@@ -209,18 +207,18 @@ public class RecipeFinder {
             return intCollection_1.toIntArray();
         }
         
-        private boolean method_7423(int int_1) {
+        private boolean dfs(int amount) {
             int usableIngredientSize = this.usableIngredientSize;
             
             for (int int_3 = 0; int_3 < usableIngredientSize; ++int_3) {
-                if (RecipeFinder.this.idToAmountMap.get(this.usableIngredientItemIds[int_3]) >= int_1) {
-                    this.method_7413(false, int_3);
+                if (RecipeFinder.this.idToAmountMap.get(this.usableIngredientItemIds[int_3]) >= amount) {
+                    this.visit(false, int_3);
                     
-                    while (!this.field_7557.isEmpty()) {
-                        int int_4 = this.field_7557.size();
+                    while (!this.path.isEmpty()) {
+                        int int_4 = this.path.size();
                         boolean boolean_1 = (int_4 & 1) == 1;
-                        int int_5 = this.field_7557.getInt(int_4 - 1);
-                        if (!boolean_1 && !this.method_7416(int_5)) {
+                        int int_5 = this.path.getInt(int_4 - 1);
+                        if (!boolean_1 && !this.isSatisfied(int_5)) {
                             break;
                         }
                         
@@ -228,19 +226,19 @@ public class RecipeFinder {
                         
                         int int_8;
                         for (int_8 = 0; int_8 < int_6; ++int_8) {
-                            if (!this.method_7426(boolean_1, int_8) && this.method_7418(boolean_1, int_5, int_8) && this.method_7425(boolean_1, int_5, int_8)) {
-                                this.method_7413(boolean_1, int_8);
+                            if (!this.hasVisited(boolean_1, int_8) && this.hasConnection(boolean_1, int_5, int_8) && this.hasResidual(boolean_1, int_5, int_8)) {
+                                this.visit(boolean_1, int_8);
                                 break;
                             }
                         }
                         
-                        int_8 = this.field_7557.size();
+                        int_8 = this.path.size();
                         if (int_8 == int_4) {
-                            this.field_7557.removeInt(int_8 - 1);
+                            this.path.removeInt(int_8 - 1);
                         }
                     }
                     
-                    if (!this.field_7557.isEmpty()) {
+                    if (!this.path.isEmpty()) {
                         return true;
                     }
                 }
@@ -249,57 +247,57 @@ public class RecipeFinder {
             return false;
         }
         
-        private boolean method_7416(int int_1) {
-            return this.bitSet.get(this.method_7419(int_1));
+        private boolean isSatisfied(int int_1) {
+            return this.bitSet.get(this.getSatisfiedIndex(int_1));
         }
         
-        private void method_7421(int int_1) {
-            this.bitSet.set(this.method_7419(int_1));
+        private void setSatisfied(int int_1) {
+            this.bitSet.set(this.getSatisfiedIndex(int_1));
         }
         
-        private int method_7419(int int_1) {
+        private int getSatisfiedIndex(int int_1) {
             return this.ingredientCount + this.usableIngredientSize + int_1;
         }
         
-        private boolean method_7418(boolean boolean_1, int int_1, int int_2) {
-            return this.bitSet.get(this.method_7420(boolean_1, int_1, int_2));
+        private boolean hasConnection(boolean boolean_1, int int_1, int int_2) {
+            return this.bitSet.get(this.getIndex(boolean_1, int_1, int_2));
         }
         
-        private boolean method_7425(boolean boolean_1, int int_1, int int_2) {
-            return boolean_1 != this.bitSet.get(1 + this.method_7420(boolean_1, int_1, int_2));
+        private boolean hasResidual(boolean boolean_1, int int_1, int int_2) {
+            return boolean_1 != this.bitSet.get(1 + this.getIndex(boolean_1, int_1, int_2));
         }
         
-        private void method_7414(boolean boolean_1, int int_1, int int_2) {
-            this.bitSet.flip(1 + this.method_7420(boolean_1, int_1, int_2));
+        private void toggleResidual(boolean boolean_1, int int_1, int int_2) {
+            this.bitSet.flip(1 + this.getIndex(boolean_1, int_1, int_2));
         }
         
-        private int method_7420(boolean boolean_1, int int_1, int int_2) {
+        private int getIndex(boolean boolean_1, int int_1, int int_2) {
             int int_3 = boolean_1 ? int_1 * this.ingredientCount + int_2 : int_2 * this.ingredientCount + int_1;
             return this.ingredientCount + this.usableIngredientSize + this.ingredientCount + 2 * int_3;
         }
         
-        private void method_7413(boolean boolean_1, int int_1) {
-            this.bitSet.set(this.method_7424(boolean_1, int_1));
-            this.field_7557.add(int_1);
+        private void visit(boolean boolean_1, int int_1) {
+            this.bitSet.set(this.getVisitedIndex(boolean_1, int_1));
+            this.path.add(int_1);
         }
         
-        private boolean method_7426(boolean boolean_1, int int_1) {
-            return this.bitSet.get(this.method_7424(boolean_1, int_1));
+        private boolean hasVisited(boolean boolean_1, int int_1) {
+            return this.bitSet.get(this.getVisitedIndex(boolean_1, int_1));
         }
         
-        private int method_7424(boolean boolean_1, int int_1) {
+        private int getVisitedIndex(boolean boolean_1, int int_1) {
             return (boolean_1 ? 0 : this.ingredientCount) + int_1;
         }
         
-        public int countCrafts(int int_1, @Nullable IntList intList_1) {
+        public int countCrafts(int maxCrafts, @Nullable IntList intList_1) {
             int int_2 = 0;
-            int int_3 = Math.min(int_1, this.method_7415()) + 1;
+            int crafts = Math.min(maxCrafts, this.getMinIngredientCount()) + 1;
             
             while (true) {
                 while (true) {
-                    int int_4 = (int_2 + int_3) / 2;
+                    int int_4 = (int_2 + crafts) / 2;
                     if (this.find(int_4, null)) {
-                        if (int_3 - int_2 <= 1) {
+                        if (crafts - int_2 <= 1) {
                             if (int_4 > 0) {
                                 this.find(int_4, intList_1);
                             }
@@ -309,30 +307,30 @@ public class RecipeFinder {
                         
                         int_2 = int_4;
                     } else {
-                        int_3 = int_4;
+                        crafts = int_4;
                     }
                 }
             }
         }
         
         @SuppressWarnings("deprecation")
-        private int method_7415() {
-            int int_1 = Integer.MAX_VALUE;
+        private int getMinIngredientCount() {
+            int min = Integer.MAX_VALUE;
             
-            for (Ingredient ingredient_1 : this.ingredients) {
-                int int_2 = 0;
+            for (Ingredient ingredient : this.ingredients) {
+                int maxIngredientCount = 0;
                 
-                int int_3;
-                for (IntListIterator var5 = ingredient_1.getStackingIds().iterator(); var5.hasNext(); int_2 = Math.max(int_2, RecipeFinder.this.idToAmountMap.get(int_3))) {
-                    int_3 = var5.next();
+                int currStackingId;
+                for (IntListIterator stackingIds = ingredient.getStackingIds().iterator(); stackingIds.hasNext(); maxIngredientCount = Math.max(maxIngredientCount, RecipeFinder.this.idToAmountMap.get(currStackingId))) {
+                    currStackingId = stackingIds.next();
                 }
                 
-                if (int_1 > 0) {
-                    int_1 = Math.min(int_1, int_2);
+                if (min > 0) {
+                    min = Math.min(min, maxIngredientCount);
                 }
             }
             
-            return int_1;
+            return min;
         }
     }
 }

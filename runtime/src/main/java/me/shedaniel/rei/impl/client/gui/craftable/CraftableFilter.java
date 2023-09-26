@@ -27,12 +27,15 @@ import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongMaps;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
 public class CraftableFilter {
     public static final CraftableFilter INSTANCE = new CraftableFilter();
     private boolean dirty = false;
     private Long2LongMap invStacks = new Long2LongOpenHashMap();
     private Long2LongMap containerStacks = new Long2LongOpenHashMap();
+    private long menuId = -2;
     
     public void markDirty() {
         dirty = true;
@@ -49,6 +52,14 @@ public class CraftableFilter {
     
     public void tick() {
         if (dirty) return;
+        AbstractContainerMenu menu = Minecraft.getInstance().player.containerMenu;
+        long currentMenuId = menu == null ? -1 : menu.containerId;
+        if (currentMenuId != menuId) {
+            menuId = currentMenuId;
+            markDirty();
+        }
+        if (dirty) return;
+        
         Long2LongMap currentStacks;
         try {
             currentStacks = ClientHelperImpl.getInstance()._getInventoryItemsTypes();

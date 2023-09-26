@@ -40,6 +40,7 @@ import java.util.Optional;
  * @param <D> the type of display
  * @see SimpleMenuInfoProvider
  */
+@Deprecated(forRemoval = true)
 public interface MenuInfoProvider<T extends AbstractContainerMenu, D extends Display> {
     @Environment(EnvType.CLIENT)
     Optional<MenuInfo<T, D>> provideClient(D display, MenuSerializationContext<T, ?, D> context, T menu);

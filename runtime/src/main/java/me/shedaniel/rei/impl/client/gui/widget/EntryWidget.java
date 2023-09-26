@@ -53,6 +53,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.transfer.info.MenuTransferException;
 import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
@@ -615,7 +616,15 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                 if (handler != null) {
                     AbstractContainerScreen<?> containerScreen = REIRuntime.getInstance().getPreviousContainerScreen();
                     TransferHandler.Context context = TransferHandler.Context.create(true, Screen.hasShiftDown() || button == 1, containerScreen, display);
-                    TransferHandler.Result transferResult = handler.handle(context);
+                    TransferHandler.ApplicabilityResult applicabilityResult = handler.checkApplicable(context);
+                    if (!applicabilityResult.isApplicable()) return false;
+                    TransferHandler.Result transferResult;
+                    
+                    if (applicabilityResult.isSuccessful()) {
+                        transferResult = handler.handle(context);
+                    } else {
+                        transferResult = applicabilityResult.getError();
+                    }
                     
                     if (transferResult.isBlocking()) {
                         minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));

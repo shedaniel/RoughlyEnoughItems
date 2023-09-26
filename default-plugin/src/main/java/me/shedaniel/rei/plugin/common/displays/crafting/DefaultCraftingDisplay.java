@@ -41,6 +41,7 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
@@ -185,6 +186,11 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
         return getInputIngredients(craftingWidth, craftingHeight);
     }
     
+    @Override
+    public List<InputIngredient<EntryStack<?>>> getInputIngredients(@Nullable AbstractContainerMenu menu, @Nullable Player player) {
+        return getInputIngredients(3, 3);
+    }
+    
     public List<InputIngredient<EntryStack<?>>> getInputIngredients(int craftingWidth, int craftingHeight) {
         int inputWidth = getInputWidth(craftingWidth, craftingHeight);
         int inputHeight = getInputHeight(craftingWidth, craftingHeight);
@@ -198,7 +204,9 @@ public abstract class DefaultCraftingDisplay<C extends Recipe<?>> extends BasicD
                 continue;
             }
             int index = getSlotWithSize(inputWidth, i, craftingWidth);
-            grid.put(new IntIntImmutablePair(i % inputWidth, i / inputWidth), InputIngredient.of(index, stacks));
+            int x = i % inputWidth;
+            int y = i / inputWidth;
+            grid.put(new IntIntImmutablePair(x, y), InputIngredient.of(index, 3 * y + x, stacks));
         }
         
         List<InputIngredient<EntryStack<?>>> list = new ArrayList<>(craftingWidth * craftingHeight);
