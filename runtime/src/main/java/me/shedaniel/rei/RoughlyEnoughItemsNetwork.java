@@ -172,7 +172,9 @@ public class RoughlyEnoughItemsNetwork {
                 boolean shift = packetByteBuf.readBoolean();
                 try {
                     CompoundTag nbt = packetByteBuf.readAnySizeNbt();
-                    List<InputIngredient<ItemStack>> inputs = readInputs(nbt.getCompound("Inputs"));
+                    int version = nbt.getInt("Version");
+                    if (version != 1) throw new IllegalStateException("Server and client REI protocol version mismatch! Server: 1, Client: " + version);
+                    List<InputIngredient<ItemStack>> inputs = readInputs(nbt.getList("Inputs", Tag.TAG_COMPOUND));
                     List<SlotAccessor> input = readSlots(container, player, nbt.getList("InputSlots", Tag.TAG_COMPOUND));
                     List<SlotAccessor> inventory = readSlots(container, player, nbt.getList("InventorySlots", Tag.TAG_COMPOUND));
                     NewInputSlotCrafter<AbstractContainerMenu, Container> crafter = new NewInputSlotCrafter<>(container, input, inventory, inputs);
@@ -201,10 +203,11 @@ public class RoughlyEnoughItemsNetwork {
         return slots;
     }
     
-    private static List<InputIngredient<ItemStack>> readInputs(CompoundTag tag) {
+    private static List<InputIngredient<ItemStack>> readInputs(ListTag tag) {
         List<InputIngredient<ItemStack>> inputs = new ArrayList<>();
-        for (Map.Entry<String, Tag> entry : tag.tags.entrySet()) {
-            InputIngredient<EntryStack<?>> stacks = InputIngredient.of(Integer.parseInt(entry.getKey()), EntryIngredient.read((ListTag) entry.getValue()));
+        for (Tag t : tag) {
+            CompoundTag compoundTag = (CompoundTag) t;
+            InputIngredient<EntryStack<?>> stacks = InputIngredient.of(compoundTag.getInt("Index"), EntryIngredient.read(compoundTag.getList("Ingredient", Tag.TAG_COMPOUND)));
             inputs.add(InputIngredient.withType(stacks, VanillaEntryTypes.ITEM));
         }
         return inputs;
