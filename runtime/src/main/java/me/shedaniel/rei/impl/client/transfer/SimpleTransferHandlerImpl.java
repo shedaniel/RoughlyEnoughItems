@@ -94,6 +94,7 @@ public enum SimpleTransferHandlerImpl implements ClientInternals.SimpleTransferH
     
     private CompoundTag save(TransferHandler.Context context, List<InputIngredient<ItemStack>> inputs, Iterable<SlotAccessor> inputSlots, Iterable<SlotAccessor> inventorySlots) {
         CompoundTag tag = new CompoundTag();
+        tag.putInt("Version", 1);
         tag.put("Inputs", saveInputs(inputs));
         tag.put("InventorySlots", saveSlots(context,inventorySlots));
         tag.put("InputSlots", saveSlots(context, inputSlots));
@@ -111,10 +112,13 @@ public enum SimpleTransferHandlerImpl implements ClientInternals.SimpleTransferH
     }
     
     private Tag saveInputs(List<InputIngredient<ItemStack>> inputs) {
-        CompoundTag tag = new CompoundTag();
+        ListTag tag = new ListTag();
         
         for (InputIngredient<ItemStack> input : inputs) {
-            tag.put(String.valueOf(input.getIndex()), EntryIngredients.ofItemStacks(input.get()).saveIngredient());
+            CompoundTag innerTag = new CompoundTag();
+            innerTag.put("Ingredient", EntryIngredients.ofItemStacks(input.get()).saveIngredient());
+            innerTag.putInt("Index", input.getIndex());
+            tag.add(innerTag);
         }
         
         return tag;
