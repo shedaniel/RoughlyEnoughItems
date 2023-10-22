@@ -55,6 +55,7 @@ public class REIConfigScreen extends Screen {
     private final Screen parent;
     private final List<OptionCategory> categories;
     private final List<Widget> widgets = new ArrayList<>();
+    private final Map<CompositeOption<?>, ?> defaultOptions = new HashMap<>();
     private final Map<CompositeOption<?>, ?> options = new HashMap<>();
     private OptionCategory activeCategory;
     @Nullable
@@ -71,10 +72,12 @@ public class REIConfigScreen extends Screen {
         Preconditions.checkArgument(!categories.isEmpty(), "Categories cannot be empty!");
         this.activeCategory = categories.get(0);
         
+        ConfigObjectImpl defaultConfig = new ConfigObjectImpl();
         ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
         for (OptionCategory category : categories) {
             for (OptionGroup group : category.getGroups()) {
                 for (CompositeOption<?> option : group.getOptions()) {
+                    ((Map<CompositeOption<?>, Object>) this.defaultOptions).put(option, option.getBind().apply(defaultConfig));
                     ((Map<CompositeOption<?>, Object>) this.options).put(option, option.getBind().apply(config));
                 }
             }
@@ -105,6 +108,10 @@ public class REIConfigScreen extends Screen {
             }
         }));
         this.widgets.add(Widgets.delegate(() -> list[0]));
+    }
+    
+    public Map<CompositeOption<?>, ?> getDefaultOptions() {
+        return defaultOptions;
     }
     
     public Map<CompositeOption<?>, ?> getOptions() {

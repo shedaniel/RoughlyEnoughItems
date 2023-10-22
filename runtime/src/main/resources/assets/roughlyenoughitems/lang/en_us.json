@@ -372,6 +372,7 @@
   "config.rei.options.groups.reset.reset": "Reset",
   "config.rei.options.reset.reset_all_options": "Reset All Options",
   "config.rei.options.reset.reset_all_options.desc": "This is an extremely destructive operation. This resets all REI options as the factory state, and cannot be reversed.",
+  "config.rei.value.default": "%s (Default)",
   "config.rei.value.trueFalse.false": "False",
   "config.rei.value.trueFalse.true": "True",
   "config.rei.value.enabledDisabled.false": "Disabled",

@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.client.gui.config.components;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.widgets.Label;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -36,6 +37,7 @@ import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionValueEntry;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.entries.ToggleMenuEntry;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -43,41 +45,67 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.Map;
 
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
+import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
 public class ConfigOptionValueWidget {
     public static <T> WidgetWithBounds create(CompositeOption<T> option) {
+        Map<CompositeOption<?>, ?> defaultOptions = ((REIConfigScreen) Minecraft.getInstance().screen).getDefaultOptions();
         Map<CompositeOption<?>, ?> options = ((REIConfigScreen) Minecraft.getInstance().screen).getOptions();
         OptionValueEntry<T> entry = option.getEntry();
         T value = (T) options.get(option);
-        Component text;
+        Component[] text = new Component[1];
         
         if (entry instanceof OptionValueEntry.Selection<T> selection) {
-            text = selection.getOption(value);
+            text[0] = selection.getOption(value);
         } else {
-            text = literal(value.toString());
+            text[0] = literal(value.toString());
         }
         
-        Label label = Widgets.createLabel(new Point(), text).rightAligned()
-                .color(0xFFE0E0E0)
-                .hoveredColor(0xFFE0E0E0);
+        if (value.equals(defaultOptions.get(option))) {
+            text[0] = translatable("config.rei.value.default", text[0]);
+        }
+        
         Matrix4f[] matrix = {new Matrix4f()};
+        Label label = Widgets.createLabel(new Point(), text[0]).rightAligned()
+                .color(0xFFE0E0E0)
+                .hoveredColor(0xFFE0E0E0)
+                .onRender((poses, l) -> {
+                    if (MatrixUtils.transform(matrix[0], l.getBounds()).contains(PointHelper.ofMouse())) {
+                        l.setMessage(text[0].copy().withStyle(ChatFormatting.UNDERLINE));
+                    } else {
+                        l.setMessage(text[0]);
+                    }
+                });
         
         if (entry instanceof OptionValueEntry.Selection<T> selection) {
             int noOfOptions = selection.getOptions().size();
             if (noOfOptions == 2) {
                 label.clickable().onClick($ -> {
                     ((Map<CompositeOption<?>, Object>) options).put(option, selection.getOptions().get((selection.getOptions().indexOf((T) options.get(option)) + 1) % 2));
-                    label.setMessage(selection.getOption((T) options.get(option)));
+                    text[0] = selection.getOption((T) options.get(option));
+                    
+                    if (options.get(option).equals(defaultOptions.get(option))) {
+                        text[0] = translatable("config.rei.value.default", text[0]);
+                    }
                 });
             } else if (noOfOptions >= 2) {
                 label.clickable().onClick($ -> {
-                    Menu menu = new Menu(MatrixUtils.transform(matrix[0], label.getBounds()), CollectionUtils.map(selection.getOptions(),
-                            opt -> ToggleMenuEntry.of(selection.getOption(opt), () -> false, o -> {
-                                        ((REIConfigScreen) Minecraft.getInstance().screen).closeMenu();
-                                        ((Map<CompositeOption<?>, Object>) options).put(option, opt);
-                                        label.setMessage(selection.getOption(opt));
-                                    })
-                                    .withActive(() -> true)), false);
+                    Menu menu = new Menu(MatrixUtils.transform(matrix[0], label.getBounds()), CollectionUtils.map(selection.getOptions(), opt -> {
+                        Component selectionOption = selection.getOption(opt);
+                        if (opt.equals(defaultOptions.get(option))) {
+                            selectionOption = translatable("config.rei.value.default", selectionOption);
+                        }
+                        
+                        return ToggleMenuEntry.of(selectionOption, () -> false, o -> {
+                            ((REIConfigScreen) Minecraft.getInstance().screen).closeMenu();
+                            ((Map<CompositeOption<?>, Object>) options).put(option, opt);
+                            text[0] = selection.getOption(opt);
+                            
+                            if (options.get(option).equals(defaultOptions.get(option))) {
+                                text[0] = translatable("config.rei.value.default", text[0]);
+                            }
+                        });
+                    }), false);
                     ((REIConfigScreen) Minecraft.getInstance().screen).closeMenu();
                     ((REIConfigScreen) Minecraft.getInstance().screen).openMenu(menu);
                 });
