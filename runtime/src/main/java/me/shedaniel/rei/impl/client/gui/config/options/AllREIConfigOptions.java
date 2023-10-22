@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.client.gui.config.options;
 
 import me.shedaniel.rei.api.client.gui.config.*;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
+import me.shedaniel.rei.impl.client.gui.config.options.preview.ThemePreviewer;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -35,11 +36,12 @@ interface AllREIConfigOptions {
     static <T> CompositeOption<T> make(String id, Function<ConfigObjectImpl, T> bind,
                                        BiConsumer<ConfigObjectImpl, T> save) {
         return new CompositeOption<>(translatable("config.rei.options." + id),
-                translatable("config.rei.options." + id + ".desc"), bind);
+                translatable("config.rei.options." + id + ".desc"), bind, save);
     }
     
     CompositeOption<AppearanceTheme> THEME = make("appearance.theme", i -> i.appearance.theme, (i, v) -> i.appearance.theme = v)
-            .enumOptions();
+            .enumOptions()
+            .previewer(ThemePreviewer.INSTANCE);
     CompositeOption<RecipeBorderType> RECIPE_BORDER = make("appearance.recipe_border", i -> i.appearance.recipeBorder, (i, v) -> i.appearance.recipeBorder = v)
             .enumOptions();
     CompositeOption<Boolean> REDUCED_MOTION = make("appearance.reduced_motion", i -> i.basics.reduceMotion, (i, v) -> i.basics.reduceMotion = v)
@@ -53,7 +55,7 @@ interface AllREIConfigOptions {
     // TODO: NATIVE KEYBINDS
     CompositeOption<Boolean> USE_NATIVE_KEYBINDS = make("keybinds.use_native_keybinds", i -> i.basics.keyBindings.useNativeKeybinds, (i, v) -> i.basics.keyBindings.useNativeKeybinds = v)
             .enabledDisabled();
-    CompositeOption<CheatingMode> CHEATS_MODE = make("cheats.cheats", i -> i.basics.cheating, (i, v) -> i.basics.cheating = v)
+    CompositeOption<CheatingMode> CHEATS_MODE = make("cheats.mode", i -> i.basics.cheating, (i, v) -> i.basics.cheating = v)
             .enumOptions();
     CompositeOption<ItemCheatingStyle> CHEATS_METHOD = make("cheats.method", i -> i.basics.cheatingStyle, (i, v) -> i.basics.cheatingStyle = v)
             .enumOptions();

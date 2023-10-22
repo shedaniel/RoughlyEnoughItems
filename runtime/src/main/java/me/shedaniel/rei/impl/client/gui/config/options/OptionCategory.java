@@ -55,4 +55,8 @@ public class OptionCategory {
     public Component getName() {
         return name;
     }
+    
+    public List<OptionGroup> getGroups() {
+        return groups;
+    }
 }

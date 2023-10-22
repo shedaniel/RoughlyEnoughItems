@@ -21,27 +21,29 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.config.components;
+package me.shedaniel.rei.impl.client.gui.config.options.preview;
 
-import me.shedaniel.math.Point;
+import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.gui.widgets.Label;
+import me.shedaniel.rei.api.client.gui.config.AppearanceTheme;
+import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.impl.client.gui.config.options.OptionCategory;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
+import me.shedaniel.rei.impl.client.gui.config.options.ConfigPreviewer;
+import me.shedaniel.rei.impl.client.gui.widget.basewidgets.PanelWidget;
 
-public class ConfigCategoryEntryWidget {
-    public static WidgetWithBounds create(OptionCategory category) {
-        Label label = Widgets.createLabel(new Point(21, 7), category.getName().copy().withStyle(style -> style.withColor(0xFFC0C0C0)))
-                .leftAligned();
-        Font font = Minecraft.getInstance().font;
-        Rectangle bounds = new Rectangle(0, 0, label.getBounds().getMaxX(), 7 * 3);
-        return Widgets.concatWithBounds(
-                bounds,
-                label,
-                Widgets.createTexturedWidget(category.getIcon(), new Rectangle(3, 3, 16, 16), 0, 0, 1, 1, 1, 1)
-        );
+import java.util.List;
+import java.util.function.Supplier;
+
+public enum ThemePreviewer implements ConfigPreviewer<AppearanceTheme> {
+    INSTANCE;
+    
+    @Override
+    public WidgetWithBounds preview(int width, Supplier<AppearanceTheme> value) {
+        Panel base = Widgets.createCategoryBase(new Rectangle(width * 10 / 2, 3, width * 10 / 8, 20));
+        ((PanelWidget) base).setDarkBackgroundAlpha(ValueAnimator.ofFloat()
+                .withConvention(() -> value.get() == AppearanceTheme.DARK ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
+                .asFloat());
+        return Widgets.concatWithBounds(new Rectangle(0, 0, width, 26), List.of(base));
     }
 }
