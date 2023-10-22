@@ -375,5 +375,6 @@
   "config.rei.value.trueFalse.false": "False",
   "config.rei.value.trueFalse.true": "True",
   "config.rei.value.enabledDisabled.false": "Disabled",
-  "config.rei.value.enabledDisabled.true": "Enabled"
+  "config.rei.value.enabledDisabled.true": "Enabled",
+  "config.rei.texts.preview": "Preview..."
 }

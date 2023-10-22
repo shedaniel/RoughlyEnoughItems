@@ -38,6 +38,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
@@ -51,7 +52,7 @@ public final class PanelWidget extends Panel {
     private int xTextureOffset = 0;
     private int yTextureOffset = RecipeBorderType.DEFAULT.getYOffset();
     private Predicate<Panel> rendering = Predicates.alwaysTrue();
-    private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
+    private NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
             .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
             .asFloat();
     
@@ -101,6 +102,11 @@ public final class PanelWidget extends Panel {
     @Override
     public void setRendering(Predicate<Panel> rendering) {
         this.rendering = Objects.requireNonNull(rendering);
+    }
+    
+    @ApiStatus.Internal
+    public void setDarkBackgroundAlpha(NumberAnimator<Float> darkBackgroundAlpha) {
+        this.darkBackgroundAlpha = darkBackgroundAlpha;
     }
     
     @Override

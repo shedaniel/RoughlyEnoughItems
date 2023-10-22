@@ -28,6 +28,7 @@ import net.minecraft.network.chat.Component;
 
 import java.util.List;
 
+import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
 public interface OptionValueEntry<T> {
@@ -39,8 +40,8 @@ public interface OptionValueEntry<T> {
     static OptionValueEntry<Boolean> ofBoolean(Component falseText, Component trueText) {
         return new Selection<Boolean>() {
             @Override
-            public List<Component> getOptions() {
-                return List.of(falseText, trueText);
+            public List<Boolean> getOptions() {
+                return List.of(false, true);
             }
             
             @Override
@@ -61,23 +62,23 @@ public interface OptionValueEntry<T> {
     }
     
     static <T> OptionValueEntry<T> enumOptions(T... array) {
-        Class<?> type = array.getClass().getComponentType();
+        Class<T> type = (Class<T>) array.getClass().getComponentType();
         Object[] constants = type.getEnumConstants();
         return new Selection<T>() {
             @Override
-            public List<Component> getOptions() {
-                return CollectionUtils.map(constants, o -> getOption((T) o));
+            public List<T> getOptions() {
+                return CollectionUtils.map(constants, type::cast);
             }
             
             @Override
             public Component getOption(T value) {
-                return null;
+                return literal(value.toString());
             }
         };
     }
     
     interface Selection<T> extends OptionValueEntry<T> {
-        List<Component> getOptions();
+        List<T> getOptions();
         
         Component getOption(T value);
     }

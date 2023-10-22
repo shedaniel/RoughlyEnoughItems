@@ -21,27 +21,12 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.client.gui.config.components;
+package me.shedaniel.rei.impl.client.gui.config.options;
 
-import me.shedaniel.math.Point;
-import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.gui.widgets.Label;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.impl.client.gui.config.options.OptionCategory;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 
-public class ConfigCategoryEntryWidget {
-    public static WidgetWithBounds create(OptionCategory category) {
-        Label label = Widgets.createLabel(new Point(21, 7), category.getName().copy().withStyle(style -> style.withColor(0xFFC0C0C0)))
-                .leftAligned();
-        Font font = Minecraft.getInstance().font;
-        Rectangle bounds = new Rectangle(0, 0, label.getBounds().getMaxX(), 7 * 3);
-        return Widgets.concatWithBounds(
-                bounds,
-                label,
-                Widgets.createTexturedWidget(category.getIcon(), new Rectangle(3, 3, 16, 16), 0, 0, 1, 1, 1, 1)
-        );
-    }
+import java.util.function.Supplier;
+
+public interface ConfigPreviewer<T> {
+    WidgetWithBounds preview(int width, Supplier<T> value);
 }

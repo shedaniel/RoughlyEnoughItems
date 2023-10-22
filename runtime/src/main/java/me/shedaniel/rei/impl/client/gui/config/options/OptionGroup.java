@@ -40,4 +40,12 @@ public class OptionGroup {
         this.options.add(option);
         return this;
     }
+    
+    public Component getGroupName() {
+        return groupName;
+    }
+    
+    public List<CompositeOption<?>> getOptions() {
+        return options;
+    }
 }

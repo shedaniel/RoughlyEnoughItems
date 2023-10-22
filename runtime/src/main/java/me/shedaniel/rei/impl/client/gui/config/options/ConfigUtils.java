@@ -27,7 +27,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
-interface ConfigUtils {
+public interface ConfigUtils {
     static MutableComponent literal(String text) {
         return new TextComponent(text);
     }

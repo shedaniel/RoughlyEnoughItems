@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.config.components;
 
 import dev.architectury.utils.value.IntValue;
-import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;

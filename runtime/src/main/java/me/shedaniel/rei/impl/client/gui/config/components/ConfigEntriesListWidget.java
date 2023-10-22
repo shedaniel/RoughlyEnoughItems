@@ -23,25 +23,22 @@
 
 package me.shedaniel.rei.impl.client.gui.config.components;
 
-import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.gui.widgets.Label;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.impl.client.gui.config.options.OptionCategory;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
+import me.shedaniel.rei.impl.client.gui.config.options.OptionGroup;
+import me.shedaniel.rei.impl.client.gui.widget.ListWidget;
+import me.shedaniel.rei.impl.client.gui.widget.ScrollableViewWidget;
+import me.shedaniel.rei.impl.common.util.RectangleUtils;
 
-public class ConfigCategoryEntryWidget {
-    public static WidgetWithBounds create(OptionCategory category) {
-        Label label = Widgets.createLabel(new Point(21, 7), category.getName().copy().withStyle(style -> style.withColor(0xFFC0C0C0)))
-                .leftAligned();
-        Font font = Minecraft.getInstance().font;
-        Rectangle bounds = new Rectangle(0, 0, label.getBounds().getMaxX(), 7 * 3);
-        return Widgets.concatWithBounds(
-                bounds,
-                label,
-                Widgets.createTexturedWidget(category.getIcon(), new Rectangle(3, 3, 16, 16), 0, 0, 1, 1, 1, 1)
-        );
+import java.util.List;
+
+public class ConfigEntriesListWidget {
+    public static Widget create(Rectangle bounds, List<OptionGroup> groups) {
+        WidgetWithBounds list = ListWidget.builderOf(RectangleUtils.inset(bounds, 6, 6), groups,
+                        (index, entry) -> ConfigGroupWidget.create(entry, bounds.width - 12 - 6))
+                .gap(7)
+                .build();
+        return ScrollableViewWidget.create(bounds, list.withPadding(0, 5), true);
     }
 }

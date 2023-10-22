@@ -28,26 +28,37 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.utils.value.IntValue;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
+import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.config.components.ConfigCategoriesListWidget;
+import me.shedaniel.rei.impl.client.gui.config.components.ConfigEntriesListWidget;
 import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigCategories;
+import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionCategory;
+import me.shedaniel.rei.impl.client.gui.config.options.OptionGroup;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
-import me.shedaniel.rei.impl.client.gui.widget.HoleWidget;
+import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class REIConfigScreen extends Screen {
     private final Screen parent;
     private final List<OptionCategory> categories;
     private final List<Widget> widgets = new ArrayList<>();
+    private final Map<CompositeOption<?>, ?> options = new HashMap<>();
     private OptionCategory activeCategory;
+    @Nullable
+    private Menu menu;
     
     public REIConfigScreen(Screen parent) {
         this(parent, AllREIConfigCategories.CATEGORIES);
@@ -59,6 +70,15 @@ public class REIConfigScreen extends Screen {
         this.categories = categories;
         Preconditions.checkArgument(!categories.isEmpty(), "Categories cannot be empty!");
         this.activeCategory = categories.get(0);
+        
+        ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
+        for (OptionCategory category : categories) {
+            for (OptionGroup group : category.getGroups()) {
+                for (CompositeOption<?> option : group.getOptions()) {
+                    ((Map<CompositeOption<?>, Object>) this.options).put(option, option.getBind().apply(config));
+                }
+            }
+        }
     }
     
     @Override
@@ -71,10 +91,12 @@ public class REIConfigScreen extends Screen {
                 }));
         this.widgets.add(Widgets.createLabel(new Point(width / 2, 12), this.title));
         int sideWidth = (int) (width / 3.8);
+        Widget[] list = {ConfigEntriesListWidget.create(new Rectangle(12 + sideWidth, 32, width - 20 - sideWidth, height - 32 - 32), activeCategory.getGroups())};
         this.widgets.add(ConfigCategoriesListWidget.create(new Rectangle(8, 32, sideWidth, height - 32 - 32), categories, new IntValue() {
             @Override
             public void accept(int i) {
                 REIConfigScreen.this.activeCategory = categories.get(i);
+                list[0] = ConfigEntriesListWidget.create(new Rectangle(12 + sideWidth, 32, width - 20 - sideWidth, height - 32 - 32), activeCategory.getGroups());
             }
             
             @Override
@@ -82,7 +104,11 @@ public class REIConfigScreen extends Screen {
                 return categories.indexOf(activeCategory);
             }
         }));
-        this.widgets.add(HoleWidget.create(new Rectangle(12 + sideWidth, 32, width - 20 - sideWidth, height - 32 - 32), () -> 0, 32));
+        this.widgets.add(Widgets.delegate(() -> list[0]));
+    }
+    
+    public Map<CompositeOption<?>, ?> getOptions() {
+        return options;
     }
     
     @Override
@@ -106,6 +132,8 @@ public class REIConfigScreen extends Screen {
     
     @Override
     public boolean charTyped(char character, int modifiers) {
+        if (menu != null && menu.charTyped(character, modifiers))
+            return true;
         for (GuiEventListener listener : children())
             if (listener.charTyped(character, modifiers))
                 return true;
@@ -114,6 +142,8 @@ public class REIConfigScreen extends Screen {
     
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        if (menu != null && menu.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
+            return true;
         for (GuiEventListener entry : children())
             if (entry.mouseDragged(mouseX, mouseY, button, deltaX, deltaY))
                 return true;
@@ -121,7 +151,16 @@ public class REIConfigScreen extends Screen {
     }
     
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (menu != null && menu.mouseClicked(mouseX, mouseY, button))
+            return true;
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+    
+    @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (menu != null && menu.mouseReleased(mouseX, mouseY, button))
+            return true;
         for (GuiEventListener entry : children())
             if (entry.mouseReleased(mouseX, mouseY, button))
                 return true;
@@ -130,9 +169,21 @@ public class REIConfigScreen extends Screen {
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        if (menu != null && menu.mouseScrolled(mouseX, mouseY, amount))
+            return true;
         for (GuiEventListener listener : children())
             if (listener.mouseScrolled(mouseX, mouseY, amount))
                 return true;
         return super.mouseScrolled(mouseX, mouseY, amount);
+    }
+    
+    public void openMenu(Menu menu) {
+        this.menu = menu;
+        this.widgets.add(menu);
+    }
+    
+    public void closeMenu() {
+        this.widgets.remove(menu);
+        this.menu = null;
     }
 }

@@ -48,7 +48,7 @@ public class ListWidget {
     public static abstract class AbstractBuilder<T extends WidgetWithBounds, SELF extends AbstractBuilder<T, SELF>> {
         protected final Rectangle bounds;
         protected IntValue selected = new IntValue() {
-            private int value;
+            private int value = -1;
             
             @Override
             public void accept(int i) {
