@@ -239,7 +239,7 @@ public class FilteringScreen extends Screen {
         scrolling.renderScrollBar(0, 1.0F, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8F : 1F);
         matrices.pushPose();
         matrices.translate(0, 0, 300);
-        this.searchField.laterRender(matrices, mouseX, mouseY, delta);
+        this.searchField.render(matrices, mouseX, mouseY, delta);
         this.selectAllButton.render(matrices, mouseX, mouseY, delta);
         this.selectNoneButton.render(matrices, mouseX, mouseY, delta);
         this.hideButton.render(matrices, mouseX, mouseY, delta);
