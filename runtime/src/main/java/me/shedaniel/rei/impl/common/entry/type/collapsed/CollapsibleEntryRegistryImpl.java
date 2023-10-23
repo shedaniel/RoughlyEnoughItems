@@ -47,6 +47,10 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
         if (old != null) {
             InternalLogger.getInstance().warn("Overwritten collapsible entry group [%s] %s with %d entries", id, name.getString(), stacks.size());
         }
+        if (stacks.isEmpty()) {
+            InternalLogger.getInstance().warn("Collapsible entry group [%s] %s has no entries, ignoring.", id, name.getString());
+            this.entries.remove(id);
+        }
     }
     
     @Override
