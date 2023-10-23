@@ -26,7 +26,9 @@ package me.shedaniel.rei.impl.client.gui.screen;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
 import net.minecraft.client.gui.chat.NarratorChatListener;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -40,12 +42,14 @@ public class ConfigReloadingScreen extends Screen {
     private final BooleanSupplier predicate;
     private Supplier<@Nullable Component> subtitle = () -> null;
     private final Runnable parent;
+    private final Runnable cancel;
     
-    public ConfigReloadingScreen(Component title, BooleanSupplier predicate, Runnable parent) {
+    public ConfigReloadingScreen(Component title, BooleanSupplier predicate, Runnable parent, Runnable cancel) {
         super(NarratorChatListener.NO_TITLE);
         this.title = title;
         this.predicate = predicate;
         this.parent = parent;
+        this.cancel = cancel;
     }
     
     public void setSubtitle(Supplier<@Nullable Component> subtitle) {
@@ -55,6 +59,15 @@ public class ConfigReloadingScreen extends Screen {
     @Override
     public boolean shouldCloseOnEsc() {
         return false;
+    }
+    
+    @Override
+    public void init() {
+        super.init();
+        if (cancel == null) return;
+        this.addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 12, 200, 20, CommonComponents.GUI_CANCEL, button -> {
+            cancel.run();
+        }));
     }
     
     @Override

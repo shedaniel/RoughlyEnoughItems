@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.math.Vector4f;
+import dev.architectury.platform.Platform;
 import dev.architectury.utils.value.BooleanValue;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -152,15 +153,22 @@ public class CraftableFilterButtonWidget {
                                     ConfigReloadingScreen reloadingScreen = new ConfigReloadingScreen(new TranslatableComponent("text.rei.input.methods.initializing"),
                                             () -> !future.isDone(), () -> {
                                         Minecraft.getInstance().setScreen(screen);
+                                    }, () -> {
+                                        Minecraft.getInstance().setScreen(screen);
+                                        InternalLogger.getInstance().error("Failed to prepare input method: cancelled");
+                                        ConfigManagerImpl.getInstance().getConfig().setInputMethodId(new ResourceLocation("rei:default"));
+                                        future.cancel(Platform.isFabric());
+                                        service.shutdown();
                                     });
                                     reloadingScreen.setSubtitle(() -> new TranslatableComponent("text.rei.input.methods.reload.progress", String.format("%.2f", progress[0] * 100)));
                                     Minecraft.getInstance().setScreen(reloadingScreen);
                                     access.close();
                                     future.whenComplete((unused, throwable) -> {
                                         service.shutdown();
+                                        if (throwable != null) return;
+                                        ScreenOverlayImpl.getInstance().getHintsContainer().addHint(12, () -> new Point(getCraftableFilterBounds().getCenterX(), getCraftableFilterBounds().getCenterY()),
+                                                "text.rei.hint.input.methods", List.of(new TranslatableComponent("text.rei.hint.input.methods")));
                                     });
-                                    ScreenOverlayImpl.getInstance().getHintsContainer().addHint(12, () -> new Point(getCraftableFilterBounds().getCenterX(), getCraftableFilterBounds().getCenterY()),
-                                            "text.rei.hint.input.methods", List.of(new TranslatableComponent("text.rei.hint.input.methods")));
                                 })
                         .withActive(() -> !Objects.equals(config.getInputMethodId(), pair.getKey()))
                         .withTooltip(() -> Tooltip.create(Widget.mouse(), pair.getValue().getDescription()))
