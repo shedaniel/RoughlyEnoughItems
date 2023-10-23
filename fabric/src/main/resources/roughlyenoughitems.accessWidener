@@ -40,3 +40,5 @@ accessible field net/minecraft/world/item/crafting/SmithingTransformRecipe addit
 accessible field net/minecraft/world/item/crafting/SmithingTrimRecipe template Lnet/minecraft/world/item/crafting/Ingredient;
 accessible field net/minecraft/world/item/crafting/SmithingTrimRecipe base Lnet/minecraft/world/item/crafting/Ingredient;
 accessible field net/minecraft/world/item/crafting/SmithingTrimRecipe addition Lnet/minecraft/world/item/crafting/Ingredient;
+accessible field net/minecraft/world/item/CreativeModeTab displayItemsGenerator Lnet/minecraft/world/item/CreativeModeTab$DisplayItemsGenerator;
+accessible class net/minecraft/world/item/CreativeModeTab$ItemDisplayBuilder
