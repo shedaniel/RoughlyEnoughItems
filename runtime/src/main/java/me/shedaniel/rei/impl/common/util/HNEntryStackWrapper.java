@@ -21,43 +21,35 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.impl.common.entry.type;
+package me.shedaniel.rei.impl.common.util;
 
-import it.unimi.dsi.fastutil.longs.LongList;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.common.util.HNEntryStackWrapper;
+import me.shedaniel.rei.api.common.util.EntryStacks;
+import org.jetbrains.annotations.ApiStatus;
 
-import java.util.List;
-import java.util.stream.Stream;
-
-public interface EntryRegistryList {
-    int size();
+@ApiStatus.Internal
+public class HNEntryStackWrapper extends HashedEntryStackWrapper {
+    private final EntryStack<?> normalized;
+    private final long normalizedHash;
     
-    Stream<EntryStack<?>> stream();
+    public HNEntryStackWrapper(EntryStack<?> stack) {
+        super(stack);
+        this.normalized = stack.normalize();
+        this.normalizedHash = EntryStacks.hashExact(this.normalized);
+    }
     
-    List<EntryStack<?>> collect();
+    public HNEntryStackWrapper(EntryStack<?> stack, long hash) {
+        super(stack, hash);
+        this.normalized = stack.normalize();
+        this.normalizedHash = EntryStacks.hashExact(this.normalized);
+    }
     
-    List<HNEntryStackWrapper> collectHN();
+    public EntryStack<?> normalized() {
+        return normalized;
+    }
     
-    int indexOf(EntryStack<?> stack);
-    
-    int lastIndexOf(EntryStack<?> stack);
-    
-    void add(EntryStack<?> stack, long hashExact);
-    
-    void add(int index, EntryStack<?> stack, long hashExact);
-    
-    void addAll(List<EntryStack<?>> stacks, LongList hashes);
-    
-    void addAll(int index, List<EntryStack<?>> stacks, LongList hashes);
-    
-    void remove(EntryStack<?> stack, long hashExact);
-    
-    boolean removeExactIf(StackFilteringPredicate predicate);
-    
-    boolean needsHash();
-    
-    interface StackFilteringPredicate {
-        boolean test(EntryStack<?> stack, long hashExact);
+    @Override
+    public HashedEntryStackWrapper normalize() {
+        return new HashedEntryStackWrapper(normalized, normalizedHash);
     }
 }

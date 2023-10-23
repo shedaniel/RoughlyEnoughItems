@@ -38,7 +38,7 @@ import me.shedaniel.rei.api.common.registry.ReloadStage;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.common.InternalLogger;
-import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
+import me.shedaniel.rei.impl.common.util.HNEntryStackWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.core.NonNullList;
@@ -81,7 +81,7 @@ public class EntryRegistryImpl implements EntryRegistry {
     @Override
     public void startReload() {
         this.listeners.clear();
-        this.registryList.collectHashed().clear();
+        this.registryList.collectHN().clear();
         this.entriesHash = new LongOpenHashSet();
         this.filteredList = new PreFilteredEntryList(this, this.registryList);
         this.listeners.add(filteredList);
@@ -121,17 +121,17 @@ public class EntryRegistryImpl implements EntryRegistry {
         return Collections.unmodifiableList(filteredList.getList());
     }
     
-    public List<HashedEntryStackWrapper> getPreFilteredComplexList() {
+    public List<HNEntryStackWrapper> getPreFilteredComplexList() {
         return Collections.unmodifiableList(filteredList.getComplexList());
     }
     
-    public List<HashedEntryStackWrapper> getComplexList() {
-        return Collections.unmodifiableList(registryList.collectHashed());
+    public List<HNEntryStackWrapper> getComplexList() {
+        return Collections.unmodifiableList(registryList.collectHN());
     }
     
     @Override
     public void refilter() {
-        List<HashedEntryStackWrapper> stacks = registryList.collectHashed();
+        List<HNEntryStackWrapper> stacks = registryList.collectHN();
         
         for (EntryRegistryListener listener : listeners) {
             listener.onReFilter(stacks);

@@ -48,14 +48,14 @@ import java.util.function.UnaryOperator;
 
 public class AsyncSearchManager {
     private static final ExecutorService EXECUTOR_SERVICE = new ThreadCreator("REI-AsyncSearchManager").asService(Math.min(3, Runtime.getRuntime().availableProcessors()));
-    private final Supplier<List<HashedEntryStackWrapper>> stacksProvider;
+    private final Supplier<List<? extends HashedEntryStackWrapper>> stacksProvider;
     private final Supplier<Predicate<HashedEntryStackWrapper>> additionalPredicateSupplier;
     private final UnaryOperator<HashedEntryStackWrapper> transformer;
     private volatile Map.Entry<List<HashedEntryStackWrapper>, SearchFilter> last;
     public volatile ExecutorTuple executor;
     public volatile SearchFilter filter;
     
-    public AsyncSearchManager(Supplier<List<HashedEntryStackWrapper>> stacksProvider, Supplier<Predicate<HashedEntryStackWrapper>> additionalPredicateSupplier, UnaryOperator<HashedEntryStackWrapper> transformer) {
+    public AsyncSearchManager(Supplier<List<? extends HashedEntryStackWrapper>> stacksProvider, Supplier<Predicate<HashedEntryStackWrapper>> additionalPredicateSupplier, UnaryOperator<HashedEntryStackWrapper> transformer) {
         this.stacksProvider = stacksProvider;
         this.additionalPredicateSupplier = additionalPredicateSupplier;
         this.transformer = transformer;
@@ -134,7 +134,7 @@ public class AsyncSearchManager {
     }
     
     public static CompletableFuture<Map.Entry<List<HashedEntryStackWrapper>, SearchFilter>> get(SearchFilter filter, Predicate<HashedEntryStackWrapper> additionalPredicate,
-            UnaryOperator<HashedEntryStackWrapper> transformer, List<HashedEntryStackWrapper> stacks, Map.Entry<List<HashedEntryStackWrapper>, SearchFilter> last,
+            UnaryOperator<HashedEntryStackWrapper> transformer, List<? extends HashedEntryStackWrapper> stacks, Map.Entry<List<HashedEntryStackWrapper>, SearchFilter> last,
             AsyncSearchManager manager, Executor executor, Steps steps) {
         int searchPartitionSize = ConfigObject.getInstance().getAsyncSearchPartitionSize();
         boolean shouldAsync = ConfigObject.getInstance().shouldAsyncSearch() && stacks.size() > searchPartitionSize * 4;
@@ -144,7 +144,7 @@ public class AsyncSearchManager {
             if (shouldAsync) {
                 List<CompletableFuture<List<HashedEntryStackWrapper>>> futures = Lists.newArrayList();
                 int partitions = 0;
-                for (Iterable<HashedEntryStackWrapper> partitionStacks : CollectionUtils.partition(stacks, searchPartitionSize * 4)) {
+                for (Iterable<? extends HashedEntryStackWrapper> partitionStacks : CollectionUtils.partition(stacks, searchPartitionSize * 4)) {
                     final int finalPartitions = partitions;
                     futures.add(CompletableFuture.supplyAsync(() -> {
                         List<HashedEntryStackWrapper> filtered = Lists.newArrayList();

@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.common.entry.type;
 import it.unimi.dsi.fastutil.longs.LongCollection;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
+import me.shedaniel.rei.impl.common.util.HNEntryStackWrapper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -40,7 +40,7 @@ public interface FilteredEntryList extends EntryRegistryListener {
     
     List<EntryStack<?>> getList();
     
-    List<HashedEntryStackWrapper> getComplexList();
+    List<HNEntryStackWrapper> getComplexList();
     
     boolean isFiltered(EntryStack<?> stack, long hashExact);
 }
