@@ -31,9 +31,7 @@ import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.registry.screen.OverlayRendererProvider;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 import static me.shedaniel.rei.RoughlyEnoughItemsCoreClient.resetFocused;
 import static me.shedaniel.rei.RoughlyEnoughItemsCoreClient.shouldReturn;
@@ -41,22 +39,50 @@ import static me.shedaniel.rei.RoughlyEnoughItemsCoreClient.shouldReturn;
 public enum DefaultScreenOverlayRenderer implements OverlayRendererProvider {
     INSTANCE;
     
-    private final List<Runnable> onRemoved = new ArrayList<>();
+    @Nullable
+    private ClientGuiEvent.ScreenRenderPre renderPre;
+    @Nullable
+    private ClientGuiEvent.ContainerScreenRenderBackground renderContainerBg;
+    @Nullable
+    private ClientGuiEvent.ContainerScreenRenderForeground renderContainerFg;
+    @Nullable
+    private ClientGuiEvent.ScreenRenderPost renderPost;
+    
+    {
+        ClientGuiEvent.RENDER_PRE.register((screen, graphics, mouseX, mouseY, delta) -> {
+            if (renderPre != null) {
+                return renderPre.render(screen, graphics, mouseX, mouseY, delta);
+            } else {
+                return EventResult.pass();
+            }
+        });
+        ClientGuiEvent.RENDER_CONTAINER_BACKGROUND.register((screen, graphics, mouseX, mouseY, delta) -> {
+            if (renderContainerBg != null) {
+                renderContainerBg.render(screen, graphics, mouseX, mouseY, delta);
+            }
+        });
+        ClientGuiEvent.RENDER_CONTAINER_FOREGROUND.register((screen, graphics, mouseX, mouseY, delta) -> {
+            if (renderContainerFg != null) {
+                renderContainerFg.render(screen, graphics, mouseX, mouseY, delta);
+            }
+        });
+        ClientGuiEvent.RENDER_POST.register((screen, graphics, mouseX, mouseY, delta) -> {
+            if (renderPost != null) {
+                renderPost.render(screen, graphics, mouseX, mouseY, delta);
+            }
+        });
+    }
     
     @Override
     public void onApplied(Sink sink) {
         int[] rendered = {0};
-        ClientGuiEvent.ScreenRenderPre renderPre;
-        ClientGuiEvent.ContainerScreenRenderBackground renderContainerBg;
-        ClientGuiEvent.ContainerScreenRenderForeground renderContainerFg;
-        ClientGuiEvent.ScreenRenderPost renderPost;
-        ClientGuiEvent.RENDER_PRE.register(renderPre = (screen, graphics, mouseX, mouseY, delta) -> {
+        this.renderPre = (screen, graphics, mouseX, mouseY, delta) -> {
             if (shouldReturn(screen))
                 return EventResult.pass();
             rendered[0] = 0;
             return EventResult.pass();
-        });
-        ClientGuiEvent.RENDER_CONTAINER_BACKGROUND.register(renderContainerBg = (screen, graphics, mouseX, mouseY, delta) -> {
+        };
+        this.renderContainerBg = (screen, graphics, mouseX, mouseY, delta) -> {
             if (shouldReturn(screen))
                 return;
             rendered[0] = 1;
@@ -65,8 +91,8 @@ public enum DefaultScreenOverlayRenderer implements OverlayRendererProvider {
                 sink.render(graphics, mouseX, mouseY, delta);
             }
             resetFocused(screen);
-        });
-        ClientGuiEvent.RENDER_CONTAINER_FOREGROUND.register(renderContainerFg = (screen, graphics, mouseX, mouseY, delta) -> {
+        };
+        this.renderContainerFg = (screen, graphics, mouseX, mouseY, delta) -> {
             if (shouldReturn(screen))
                 return;
             rendered[0] = 2;
@@ -76,8 +102,8 @@ public enum DefaultScreenOverlayRenderer implements OverlayRendererProvider {
             sink.lateRender(graphics, mouseX, mouseY, delta);
             graphics.pose().popPose();
             resetFocused(screen);
-        });
-        ClientGuiEvent.RENDER_POST.register(renderPost = (screen, graphics, mouseX, mouseY, delta) -> {
+        };
+        this.renderPost = (screen, graphics, mouseX, mouseY, delta) -> {
             if (shouldReturn(screen) || rendered[0] == 2)
                 return;
             if (screen instanceof AbstractContainerScreen) {
@@ -92,18 +118,14 @@ public enum DefaultScreenOverlayRenderer implements OverlayRendererProvider {
                 sink.lateRender(graphics, mouseX, mouseY, delta);
             }
             resetFocused(screen);
-        });
-        this.onRemoved.add(() -> {
-            ClientGuiEvent.RENDER_PRE.unregister(renderPre);
-            ClientGuiEvent.RENDER_CONTAINER_BACKGROUND.unregister(renderContainerBg);
-            ClientGuiEvent.RENDER_CONTAINER_FOREGROUND.unregister(renderContainerFg);
-            ClientGuiEvent.RENDER_POST.unregister(renderPost);
-        });
+        };
     }
     
     @Override
     public void onRemoved() {
-        this.onRemoved.forEach(Runnable::run);
-        this.onRemoved.clear();
+        this.renderPre = null;
+        this.renderContainerBg = null;
+        this.renderContainerFg = null;
+        this.renderPost = null;
     }
 }

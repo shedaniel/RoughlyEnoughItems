@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.entry.filtering.FilteringContextType;
 import me.shedaniel.rei.impl.common.InternalLogger;
+import me.shedaniel.rei.impl.common.util.HNEntryStackWrapper;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import org.jetbrains.annotations.Nullable;
 
@@ -49,7 +50,7 @@ public class PreFilteredEntryList implements FilteredEntryList {
     private final EntryRegistryList list;
     private final Map<FilteringRule<?>, DataPair> filteringData = new HashMap<>();
     private final Long2BooleanMap cached = new Long2BooleanOpenHashMap();
-    private final List<HashedEntryStackWrapper> listView = new InternalListView();
+    private final List<HNEntryStackWrapper> listView = new InternalListView();
     private final List<EntryStack<?>> simpleListView = new InternalSimpleListView(listView);
     private long mod = 0;
     
@@ -87,7 +88,7 @@ public class PreFilteredEntryList implements FilteredEntryList {
     }
     
     @Override
-    public void onReFilter(List<HashedEntryStackWrapper> stacks) {
+    public void onReFilter(List<HNEntryStackWrapper> stacks) {
         ConfigObject config = ConfigObject.getInstance();
         if (config.getFilteredStackProviders() != null) {
             List<EntryStack<?>> normalizedFilteredStacks = CollectionUtils.map(config.getFilteredStackProviders(), EntryStackProvider::provide);
@@ -97,7 +98,7 @@ public class PreFilteredEntryList implements FilteredEntryList {
         }
         
         Stopwatch stopwatch = Stopwatch.createStarted();
-        refreshFilteringFor(true, null, Lists.transform(stacks, HashedEntryStackWrapper::unwrap), new AbstractLongList() {
+        refreshFilteringFor(true, null, Lists.transform(stacks, HNEntryStackWrapper::unwrap), new AbstractLongList() {
             @Override
             public long getLong(int index) {
                 return stacks.get(index).hashExact();
@@ -216,16 +217,16 @@ public class PreFilteredEntryList implements FilteredEntryList {
     }
     
     @Override
-    public List<HashedEntryStackWrapper> getComplexList() {
+    public List<HNEntryStackWrapper> getComplexList() {
         return listView;
     }
     
-    private class InternalListView extends AbstractList<HashedEntryStackWrapper> {
+    private class InternalListView extends AbstractList<HNEntryStackWrapper> {
         private long prevMod = -1;
-        private List<HashedEntryStackWrapper> stacks;
+        private List<HNEntryStackWrapper> stacks;
         
         @Override
-        public HashedEntryStackWrapper get(int index) {
+        public HNEntryStackWrapper get(int index) {
             if (prevMod == mod) {
                 return stacks.get(index);
             }
@@ -250,18 +251,18 @@ public class PreFilteredEntryList implements FilteredEntryList {
         }
         
         @Override
-        public Iterator<HashedEntryStackWrapper> iterator() {
+        public Iterator<HNEntryStackWrapper> iterator() {
             if (prevMod == mod) {
                 return stacks.iterator();
             }
             
-            Iterator<HashedEntryStackWrapper> iterator = list.collectHashed().iterator();
+            Iterator<HNEntryStackWrapper> iterator = list.collectHN().iterator();
             return new AbstractIterator<>() {
                 @Nullable
                 @Override
-                protected HashedEntryStackWrapper computeNext() {
+                protected HNEntryStackWrapper computeNext() {
                     while (iterator.hasNext()) {
-                        HashedEntryStackWrapper wrapper = iterator.next();
+                        HNEntryStackWrapper wrapper = iterator.next();
                         if (isFiltered(wrapper.unwrap(), wrapper.hashExact())) return wrapper;
                     }
                     
@@ -272,9 +273,9 @@ public class PreFilteredEntryList implements FilteredEntryList {
     }
     
     private static class InternalSimpleListView extends AbstractList<EntryStack<?>> {
-        private final List<HashedEntryStackWrapper> list;
+        private final List<HNEntryStackWrapper> list;
         
-        public InternalSimpleListView(List<HashedEntryStackWrapper> list) {
+        public InternalSimpleListView(List<HNEntryStackWrapper> list) {
             this.list = list;
         }
         
@@ -290,7 +291,7 @@ public class PreFilteredEntryList implements FilteredEntryList {
         
         @Override
         public Iterator<EntryStack<?>> iterator() {
-            return Iterators.transform(list.iterator(), HashedEntryStackWrapper::unwrap);
+            return Iterators.transform(list.iterator(), HNEntryStackWrapper::unwrap);
         }
     }
     
