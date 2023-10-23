@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.common.entry.type;
 
 import it.unimi.dsi.fastutil.longs.LongList;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.impl.common.util.HNEntryStackWrapper;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.core.registries.BuiltInRegistries;
 
@@ -35,7 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class EntryRegistryListImpl implements EntryRegistryList {
-    private final List<HashedEntryStackWrapper> hashedList = new ArrayList<>(BuiltInRegistries.ITEM.keySet().size() + 100);
+    private final List<HNEntryStackWrapper> hashedList = new ArrayList<>(BuiltInRegistries.ITEM.keySet().size() + 100);
     private final List<EntryStack<?>> list = createMappedList(hashedList);
     
     public EntryRegistryListImpl() {
@@ -61,7 +62,7 @@ public class EntryRegistryListImpl implements EntryRegistryList {
     }
     
     @Override
-    public List<HashedEntryStackWrapper> collectHashed() {
+    public List<HNEntryStackWrapper> collectHN() {
         return hashedList;
     }
     
@@ -77,20 +78,20 @@ public class EntryRegistryListImpl implements EntryRegistryList {
     
     @Override
     public void add(EntryStack<?> stack, long hashExact) {
-        hashedList.add(new HashedEntryStackWrapper(stack, hashExact));
+        hashedList.add(new HNEntryStackWrapper(stack, hashExact));
     }
     
     @Override
     public void add(int index, EntryStack<?> stack, long hashExact) {
-        hashedList.add(index, new HashedEntryStackWrapper(stack, hashExact));
+        hashedList.add(index, new HNEntryStackWrapper(stack, hashExact));
     }
     
     @Override
     public void addAll(List<EntryStack<?>> stacks, LongList hashes) {
         hashedList.addAll(new AbstractList<>() {
             @Override
-            public HashedEntryStackWrapper get(int index) {
-                return new HashedEntryStackWrapper(stacks.get(index), hashes.getLong(index));
+            public HNEntryStackWrapper get(int index) {
+                return new HNEntryStackWrapper(stacks.get(index), hashes.getLong(index));
             }
             
             @Override
@@ -104,8 +105,8 @@ public class EntryRegistryListImpl implements EntryRegistryList {
     public void addAll(int index, List<EntryStack<?>> stacks, LongList hashes) {
         hashedList.addAll(index, new AbstractList<>() {
             @Override
-            public HashedEntryStackWrapper get(int index) {
-                return new HashedEntryStackWrapper(stacks.get(index), hashes.getLong(index));
+            public HNEntryStackWrapper get(int index) {
+                return new HNEntryStackWrapper(stacks.get(index), hashes.getLong(index));
             }
             
             @Override
@@ -134,7 +135,7 @@ public class EntryRegistryListImpl implements EntryRegistryList {
         return list;
     }
     
-    private static List<EntryStack<?>> createMappedList(List<HashedEntryStackWrapper> hashedList) {
+    private static List<EntryStack<?>> createMappedList(List<HNEntryStackWrapper> hashedList) {
         return new AbstractList<>() {
             @Override
             public EntryStack<?> get(int index) {
@@ -148,12 +149,12 @@ public class EntryRegistryListImpl implements EntryRegistryList {
             
             @Override
             public void add(int index, EntryStack<?> element) {
-                hashedList.add(index, new HashedEntryStackWrapper(element));
+                hashedList.add(index, new HNEntryStackWrapper(element));
             }
             
             @Override
             public EntryStack<?> set(int index, EntryStack<?> element) {
-                return hashedList.set(index, new HashedEntryStackWrapper(element)).unwrap();
+                return hashedList.set(index, new HNEntryStackWrapper(element)).unwrap();
             }
             
             @Override

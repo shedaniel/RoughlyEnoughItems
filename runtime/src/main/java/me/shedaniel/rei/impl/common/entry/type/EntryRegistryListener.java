@@ -25,7 +25,7 @@ package me.shedaniel.rei.impl.common.entry.type;
 
 import it.unimi.dsi.fastutil.longs.LongList;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
+import me.shedaniel.rei.impl.common.util.HNEntryStackWrapper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -39,5 +39,5 @@ public interface EntryRegistryListener {
     
     default void removeEntries(List<EntryStack<?>> stacks, @Nullable LongList hashes) {}
     
-    default void onReFilter(List<HashedEntryStackWrapper> stacks) {}
+    default void onReFilter(List<HNEntryStackWrapper> stacks) {}
 }

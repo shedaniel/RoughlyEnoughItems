@@ -95,7 +95,7 @@ public class DefaultCraftingCategory implements DisplayCategory<DefaultCraftingD
             @Override
             public boolean canMerge(DefaultCraftingDisplay<?> first, DefaultCraftingDisplay<?> second) {
                 if (!first.getCategoryIdentifier().equals(second.getCategoryIdentifier())) return false;
-                if (!equals(first.getOrganisedInputEntries(3, 3), second.getInputEntries())) return false;
+                if (!equals(first.getOrganisedInputEntries(3, 3), second.getOrganisedInputEntries(3, 3))) return false;
                 if (!equals(first.getOutputEntries(), second.getOutputEntries())) return false;
                 if (first.isShapeless() != second.isShapeless()) return false;
                 if (first.getWidth() != second.getWidth()) return false;
