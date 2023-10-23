@@ -51,7 +51,7 @@ public class CollapsedEntriesCache {
         return instance;
     }
     
-    public void prepare(Collection<HashedEntryStackWrapper> stacks) {
+    public void prepare(Collection<? extends HashedEntryStackWrapper> stacks) {
         Collection<CollapsibleEntryRegistryImpl.Entry> entries = ((CollapsibleEntryRegistryImpl) CollapsibleEntryRegistry.getInstance()).getEntries();
         InternalLogger.getInstance().debug("Preparing collapsed entry groups cache with %d entries and %d stacks", entries.size(), stacks.size());
         

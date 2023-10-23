@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.search.argument;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -33,12 +32,14 @@ import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.method.CharacterUnpackingInputMethod;
 import me.shedaniel.rei.api.client.search.method.InputMethod;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.search.IntRange;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentType;
 import me.shedaniel.rei.impl.client.search.argument.type.ArgumentTypesRegistry;
 import me.shedaniel.rei.impl.client.search.collapsed.CollapsedEntriesCache;
 import me.shedaniel.rei.impl.client.search.result.ArgumentApplicableResult;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
+import me.shedaniel.rei.impl.common.util.HNEntryStackWrapper;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -78,18 +79,8 @@ public class Argument<T, R> {
     public static void resetCache(boolean cache) {
         Argument.cache = new ArgumentCache();
         CollapsedEntriesCache.reset();
-        Collection<HashedEntryStackWrapper> stacks = new AbstractCollection<>() {
-            @Override
-            public Iterator<HashedEntryStackWrapper> iterator() {
-                return Iterators.transform(((EntryRegistryImpl) EntryRegistry.getInstance()).getComplexList().iterator(),
-                        HashedEntryStackWrapper::normalize);
-            }
-            
-            @Override
-            public int size() {
-                return ((EntryRegistryImpl) EntryRegistry.getInstance()).getComplexList().size();
-            }
-        };
+        List<HashedEntryStackWrapper> stacks = CollectionUtils.map(((EntryRegistryImpl) EntryRegistry.getInstance()).getComplexList(),
+                HNEntryStackWrapper::normalize);
         if (cache) {
             Argument.cache.prepareFilter(stacks, ArgumentTypesRegistry.ARGUMENT_TYPE_LIST, ArgumentCache.EXECUTOR_SERVICE);
         }
