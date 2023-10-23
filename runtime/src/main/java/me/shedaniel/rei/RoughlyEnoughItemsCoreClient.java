@@ -482,6 +482,7 @@ public class RoughlyEnoughItemsCoreClient {
             }
             lastReload.setValue(System.currentTimeMillis());
         }
+        InternalLogger.getInstance().debug("Starting Reload Plugins of stage " + start, new Throwable());
         if (ConfigObject.getInstance().doesRegisterRecipesInAnotherThread()) {
             Future<?>[] futures = new Future<?>[1];
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> RoughlyEnoughItemsCore._reloadPlugins(start), RELOAD_PLUGINS)
