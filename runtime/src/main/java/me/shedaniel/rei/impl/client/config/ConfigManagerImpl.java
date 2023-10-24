@@ -470,7 +470,7 @@ public class ConfigManagerImpl implements ConfigManager {
                         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
                             if (PluginManager.areAnyReloading()) {
                                 Screen screen = Minecraft.getInstance().screen;
-                                Minecraft.getInstance().setScreen(new ConfigReloadingScreen(new TranslatableComponent("text.rei.config.is.reloading"), PluginManager::areAnyReloading, () -> Minecraft.getInstance().setScreen(screen)));
+                                Minecraft.getInstance().setScreen(new ConfigReloadingScreen(new TranslatableComponent("text.rei.config.is.reloading"), PluginManager::areAnyReloading, () -> Minecraft.getInstance().setScreen(screen), null));
                             } else {
                                 super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
                             }

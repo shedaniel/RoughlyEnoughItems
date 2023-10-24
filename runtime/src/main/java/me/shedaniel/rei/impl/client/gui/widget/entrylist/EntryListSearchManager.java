@@ -44,6 +44,7 @@ import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
+import me.shedaniel.rei.impl.common.util.HNEntryStackWrapper;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -80,7 +81,7 @@ public class EntryListSearchManager {
         return checkCraftable ? stack -> workingItems.contains(stack.hashExact()) : stack -> true;
     }, HashedEntryStackWrapper::normalize);
     
-    private static List<HashedEntryStackWrapper> getAllEntriesContextually(SearchFilter filter) {
+    private static List<HNEntryStackWrapper> getAllEntriesContextually(SearchFilter filter) {
         if (EntryRegistry.getInstance().isReloading()) return List.of();
         if (ConfigObject.getInstance().isHidingEntryPanelIfIdle() && filter.getFilter().isEmpty()) {
             return List.of();
