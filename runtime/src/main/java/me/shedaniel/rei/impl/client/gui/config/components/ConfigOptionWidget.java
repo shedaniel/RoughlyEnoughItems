@@ -25,17 +25,25 @@ package me.shedaniel.rei.impl.client.gui.config.components;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
+import me.shedaniel.clothconfig2.api.ScissorsHandler;
+import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
+import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Label;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.util.MatrixUtils;
+import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
+import me.shedaniel.rei.impl.common.util.RectangleUtils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,8 +51,9 @@ import java.util.List;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
 public class ConfigOptionWidget {
-    public static WidgetWithBounds create(CompositeOption<?> option, int width) {
+    public static <T> WidgetWithBounds create(CompositeOption<T> option, int width) {
         List<Widget> widgets = new ArrayList<>();
+        int[] stableHeight = {12};
         int[] height = {12};
         widgets.add(Widgets.createLabel(new Point(0, 0), option.getName().copy().withStyle(style -> style.withColor(0xFFC0C0C0)))
                         .leftAligned());
@@ -54,21 +63,28 @@ public class ConfigOptionWidget {
             final MutableComponent description = option.getDescription().copy().withStyle(style -> style.withColor(0xFF757575));
             final List<FormattedCharSequence> split = Minecraft.getInstance().font.split(description, width);
             final boolean hasPreview = option.hasPreview();
-            final Label preview = Widgets.createLabel(new Point(), translatable("config.rei.texts.preview"))
+            final Label previewLabel = Widgets.createLabel(new Point(), translatable("config.rei.texts.preview"))
                     .color(0xFFA5F4FF)
                     .hoveredColor(0xFFD1FAFF)
                     .noShadow()
                     .clickable()
+                    .onClick($ -> clickPreview())
                     .rightAligned();
+            @Nullable
+            WidgetWithBounds preview = null;
+            boolean previewVisible = false;
+            Matrix4f previewTranslation = new Matrix4f();
+            final NumberAnimator<Float> previewHeight = ValueAnimator.ofFloat()
+                    .withConvention(() -> previewVisible ? preview.getBounds().getHeight() : 0f, ValueAnimator.typicalTransitionTime());
             boolean nextLinePreview = false;
             
             {
-                height[0] += 12 * split.size();
+                stableHeight[0] += 12 * split.size();
                 if (hasPreview) {
                     int lastWidth = Minecraft.getInstance().font.width(split.get(split.size() - 1));
-                    if (lastWidth + preview.getBounds().width + 10 > width) {
+                    if (lastWidth + this.previewLabel.getBounds().width + 10 > width) {
                         nextLinePreview = true;
-                        height[0] += 12;
+                        stableHeight[0] += 12;
                     }
                 }
             }
@@ -80,26 +96,48 @@ public class ConfigOptionWidget {
             
             @Override
             public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+                this.previewHeight.update(delta);
+                height[0] = stableHeight[0] + Math.round(this.previewHeight.value());
+                
                 for (int i = 0; i < split.size(); i++) {
                     Minecraft.getInstance().font.draw(poses, split.get(i), 0, 12 + 12 * i, -1);
                 }
                 
                 if (hasPreview) {
                     if (nextLinePreview) {
-                        this.preview.setPoint(new Point(width, 12 + 12 * split.size()));
+                        this.previewLabel.setPoint(new Point(width, 12 + 12 * split.size()));
                     } else {
-                        this.preview.setPoint(new Point(width, 12 + 12 * split.size() - 12));
+                        this.previewLabel.setPoint(new Point(width, 12 + 12 * split.size() - 12));
                     }
                     
-                    this.preview.render(poses, mouseX, mouseY, delta);
+                    this.previewLabel.render(poses, mouseX, mouseY, delta);
+                    
+                    if (this.preview != null && this.previewHeight.value() > 0.1f) {
+                        ScissorsHandler.INSTANCE.scissor(MatrixUtils.transform(poses.last().pose(), new Rectangle(0, 24 + 12 * split.size() - (nextLinePreview ? 0 : 12), width, this.previewHeight.value())));
+                        this.previewTranslation = Matrix4f.createTranslateMatrix(0, 12 + 12 * split.size(), 100);
+                        this.preview.render(poses, mouseX, mouseY, delta);
+                        ScissorsHandler.INSTANCE.removeLastScissor();
+                    }
                 }
+            }
+            
+            private void clickPreview() {
+                if (this.preview == null) {
+                    this.preview = option.getPreviewer().preview(width, () -> (T) ((REIConfigScreen) Minecraft.getInstance().screen).getOptions().get(option));
+                    this.preview = Widgets.withTranslate(this.preview, () -> this.previewTranslation);
+                }
+                
+                this.previewVisible = !this.previewVisible;
             }
             
             @Override
             public List<? extends GuiEventListener> children() {
-                return List.of(preview);
+                if (this.preview != null && this.previewHeight.value() > 0.1f) return List.of(this.previewLabel, this.preview);
+                return List.of(this.previewLabel);
             }
         });
-        return Widgets.concatWithBounds(new Rectangle(0, 0, width, height[0]), widgets);
+        
+        height[0] = stableHeight[0];
+        return Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, height[0]), widgets);
     }
 }

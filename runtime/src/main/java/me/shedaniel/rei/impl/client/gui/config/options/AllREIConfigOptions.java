@@ -25,11 +25,14 @@ package me.shedaniel.rei.impl.client.gui.config.options;
 
 import me.shedaniel.rei.api.client.gui.config.*;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
+import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
 import me.shedaniel.rei.impl.client.gui.config.options.preview.ThemePreviewer;
+import net.minecraft.client.Minecraft;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
 interface AllREIConfigOptions {
@@ -47,7 +50,8 @@ interface AllREIConfigOptions {
     CompositeOption<Boolean> REDUCED_MOTION = make("appearance.reduced_motion", i -> i.basics.reduceMotion, (i, v) -> i.basics.reduceMotion = v)
             .enabledDisabled();
     CompositeOption<DisplayScreenType> RECIPE_LOOKUP_STYLE = make("appearance.recipe_lookup_style", i -> i.appearance.recipeScreenType, (i, v) -> i.appearance.recipeScreenType = v)
-            .enumOptions();
+            .options(DisplayScreenType.ORIGINAL, DisplayScreenType.COMPOSITE)
+            .defaultValue(() -> DisplayScreenType.ORIGINAL);
     CompositeOption<Boolean> APPEND_MOD_NAMES = make("appearance.append_mod_names", i -> i.advanced.tooltips.appendModNames, (i, v) -> i.advanced.tooltips.appendModNames = v)
             .enabledDisabled();
     CompositeOption<Boolean> APPEND_FAVORITES_HINT = make("appearance.append_favorites_hint", i -> i.advanced.tooltips.displayFavoritesTooltip, (i, v) -> i.advanced.tooltips.displayFavoritesTooltip = v)
@@ -63,14 +67,28 @@ interface AllREIConfigOptions {
             .enumOptions();
     CompositeOption<String> GIVE_COMMAND = make("cheats.give_command", i -> i.advanced.commands.giveCommand, (i, v) -> i.advanced.commands.giveCommand = v);
     CompositeOption<SearchFieldLocation> SEARCH_FIELD_LOCATION = make("layout.search_field_location", i -> i.appearance.layout.searchFieldLocation, (i, v) -> i.appearance.layout.searchFieldLocation = v)
-            .enumOptions();
+            .entry(OptionValueEntry.<SearchFieldLocation>enumOptions().overrideText(location -> {
+                if (Minecraft.getInstance().screen instanceof REIConfigScreen configScreen) {
+                    return literal(location.toString(configScreen.getOptions().get(AllREIConfigOptions.LOCATION) == DisplayPanelLocation.RIGHT));
+                } else {
+                    return literal(location.toString(true));
+                }
+            }));
     CompositeOption<ConfigButtonPosition> CONFIG_BUTTON_LOCATION = make("layout.config_button_location", i -> i.appearance.layout.configButtonLocation, (i, v) -> i.appearance.layout.configButtonLocation = v)
-            .enumOptions();
+            .entry(OptionValueEntry.<ConfigButtonPosition>enumOptions().overrideText(location -> {
+                if (Minecraft.getInstance().screen instanceof REIConfigScreen configScreen) {
+                    return literal(location.toString(configScreen.getOptions().get(AllREIConfigOptions.LOCATION) == DisplayPanelLocation.RIGHT));
+                } else {
+                    return literal(location.toString(true));
+                }
+            }));
     CompositeOption<Boolean> CRAFTABLE_FILTER = make("layout.craftable_filter", i -> i.appearance.layout.showCraftableOnlyButton, (i, v) -> i.appearance.layout.showCraftableOnlyButton = v)
             .enabledDisabled();
     // TODO: BOUNDARIES
     CompositeOption<Boolean> BOUNDARIES = make("layout.boundaries", i -> true, (i, v) -> {
     });
+    CompositeOption<DisplayPanelLocation> LOCATION = make("layout.location", i -> i.advanced.accessibility.displayPanelLocation, (i, v) -> i.advanced.accessibility.displayPanelLocation = v)
+            .enumOptions();
     CompositeOption<Boolean> LARGER_TABS = make("accessibility.larger_tabs", i -> !i.advanced.accessibility.useCompactTabs, (i, v) -> i.advanced.accessibility.useCompactTabs = !v)
             .enabledDisabled();
     CompositeOption<Boolean> LARGER_ARROW_BUTTONS = make("accessibility.larger_arrow_buttons", i -> !i.advanced.accessibility.useCompactTabButtons, (i, v) -> i.advanced.accessibility.useCompactTabButtons = !v)

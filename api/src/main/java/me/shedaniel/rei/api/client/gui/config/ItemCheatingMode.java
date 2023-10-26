@@ -27,8 +27,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.language.I18n;
 
-import java.util.Locale;
-
 @Environment(EnvType.CLIENT)
 public enum ItemCheatingMode {
     REI_LIKE,
@@ -36,6 +34,10 @@ public enum ItemCheatingMode {
     
     @Override
     public String toString() {
-        return I18n.get("config.roughlyenoughitems.itemCheatingMode." + name().toLowerCase(Locale.ROOT));
+        if (this == REI_LIKE) {
+            return I18n.get("config.rei.value.cheats.amount.default");
+        } else {
+            return I18n.get("config.rei.value.cheats.amount.reversed");
+        }
     }
 }

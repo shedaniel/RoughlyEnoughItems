@@ -35,11 +35,11 @@ public enum CheatingMode {
     public String toString() {
         switch (this) {
             case ON:
-                return I18n.get("config.rei.value.enabledDisabled.true");
+                return I18n.get("config.rei.value.trueFalse.true");
             case OFF:
-                return I18n.get("config.rei.value.enabledDisabled.false");
+                return I18n.get("config.rei.value.trueFalse.false");
             case WHEN_CREATIVE:
-                return I18n.get("config.roughlyenoughitems.cheating.when_creative");
+                return I18n.get("config.rei.value.cheats.mode.when_creative");
             default:
                 throw new IllegalStateException("Unknown CheatingMode: " + this);
         }

@@ -31,12 +31,13 @@ import net.minecraft.client.resources.language.I18n;
 import java.util.Locale;
 
 @Environment(EnvType.CLIENT)
-public enum ConfigButtonPosition implements SelectionListEntry.Translatable {
+public enum ConfigButtonPosition {
     UPPER,
     LOWER;
     
-    @Override
-    public String getKey() {
-        return I18n.get("config.roughlyenoughitems.layout.configButtonLocation." + name().toLowerCase(Locale.ROOT));
+    public String toString(boolean right) {
+        if (this == UPPER && right) return I18n.get("config.rei.value.layout.config_button_location.top_right");
+        if (this == UPPER) return I18n.get("config.rei.value.layout.config_button_location.top_left");
+        return I18n.get("config.rei.value.layout.config_button_location.next_to_search");
     }
 }

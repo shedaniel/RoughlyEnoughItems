@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.config.components;
 
+import com.google.common.base.MoreObjects;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -43,6 +44,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
@@ -61,7 +63,7 @@ public class ConfigOptionValueWidget {
             text[0] = literal(value.toString());
         }
         
-        if (value.equals(defaultOptions.get(option))) {
+        if (value.equals(Objects.requireNonNullElseGet(option.getDefaultValue(), () -> (T) defaultOptions.get(option)))) {
             text[0] = translatable("config.rei.value.default", text[0]);
         }
         
@@ -84,7 +86,7 @@ public class ConfigOptionValueWidget {
                     ((Map<CompositeOption<?>, Object>) options).put(option, selection.getOptions().get((selection.getOptions().indexOf((T) options.get(option)) + 1) % 2));
                     text[0] = selection.getOption((T) options.get(option));
                     
-                    if (options.get(option).equals(defaultOptions.get(option))) {
+                    if (options.get(option).equals(Objects.requireNonNullElseGet(option.getDefaultValue(), () -> (T) defaultOptions.get(option)))) {
                         text[0] = translatable("config.rei.value.default", text[0]);
                     }
                 });

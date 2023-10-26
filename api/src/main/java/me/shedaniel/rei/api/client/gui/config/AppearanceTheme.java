@@ -31,12 +31,12 @@ import net.minecraft.client.resources.language.I18n;
 import java.util.Locale;
 
 @Environment(EnvType.CLIENT)
-public enum AppearanceTheme implements SelectionListEntry.Translatable {
+public enum AppearanceTheme {
     LIGHT,
     DARK;
     
     @Override
-    public String getKey() {
-        return I18n.get("config.roughlyenoughitems.theme." + name().toLowerCase(Locale.ROOT));
+    public String toString() {
+        return I18n.get("config.rei.value.appearance.theme." + name().toLowerCase(Locale.ROOT));
     }
 }

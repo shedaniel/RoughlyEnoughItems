@@ -24,12 +24,16 @@
 package me.shedaniel.rei.impl.client.gui.config.options.preview;
 
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
+import me.shedaniel.math.Color;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.config.AppearanceTheme;
+import me.shedaniel.rei.api.client.gui.widgets.Label;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.gui.config.options.ConfigPreviewer;
+import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.PanelWidget;
 
 import java.util.List;
@@ -40,10 +44,19 @@ public enum ThemePreviewer implements ConfigPreviewer<AppearanceTheme> {
     
     @Override
     public WidgetWithBounds preview(int width, Supplier<AppearanceTheme> value) {
-        Panel base = Widgets.createCategoryBase(new Rectangle(width * 10 / 2, 3, width * 10 / 8, 20));
+        Panel base = Widgets.createCategoryBase(new Rectangle(width * 5 / 20, 3, width * 5 / 10, 50));
         ((PanelWidget) base).setDarkBackgroundAlpha(ValueAnimator.ofFloat()
                 .withConvention(() -> value.get() == AppearanceTheme.DARK ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
                 .asFloat());
-        return Widgets.concatWithBounds(new Rectangle(0, 0, width, 26), List.of(base));
+        ValueAnimator<Color> labelColor = ValueAnimator.ofColor(value.get() == AppearanceTheme.LIGHT ? Color.ofTransparent(0xFF404040) : Color.ofTransparent(0xFFBBBBBB))
+                .withConvention(() -> value.get() == AppearanceTheme.LIGHT ? Color.ofTransparent(0xFF404040) : Color.ofTransparent(0xFFBBBBBB), ValueAnimator.typicalTransitionTime());
+        Label label = Widgets.createLabel(new Point(width / 2, 24), ConfigUtils.literal("Preview"))
+                .centered()
+                .noShadow()
+                .color(labelColor.value().getColor());
+        return Widgets.concatWithBounds(new Rectangle(0, 0, width, 56), List.of(base, label, Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+            labelColor.update(delta);
+            label.color(labelColor.value().getColor());
+        })));
     }
 }
