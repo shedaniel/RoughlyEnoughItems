@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.api.client.gui.config;
 
-import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.language.I18n;
@@ -31,13 +30,13 @@ import net.minecraft.client.resources.language.I18n;
 import java.util.Locale;
 
 @Environment(EnvType.CLIENT)
-public enum SearchMode implements SelectionListEntry.Translatable {
+public enum SearchMode {
     ALWAYS,
     PREFIX,
     NEVER;
     
     @Override
-    public String getKey() {
-        return I18n.get("config.roughlyenoughitems.search_mode." + name().toLowerCase(Locale.ROOT));
+    public String toString() {
+        return I18n.get("config.rei.value.search.filters." + name().toLowerCase(Locale.ROOT));
     }
 }

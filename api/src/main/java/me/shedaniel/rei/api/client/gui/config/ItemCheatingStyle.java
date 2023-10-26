@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.api.client.gui.config;
 
-import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.language.I18n;
@@ -31,12 +30,12 @@ import net.minecraft.client.resources.language.I18n;
 import java.util.Locale;
 
 @Environment(EnvType.CLIENT)
-public enum ItemCheatingStyle implements SelectionListEntry.Translatable {
+public enum ItemCheatingStyle {
     GRAB,
     GIVE;
     
     @Override
-    public String getKey() {
-        return I18n.get("config.roughlyenoughitems.cheatingStyle." + name().toLowerCase(Locale.ROOT));
+    public String toString() {
+        return I18n.get("config.rei.value.cheats.method." + name().toLowerCase(Locale.ROOT));
     }
 }

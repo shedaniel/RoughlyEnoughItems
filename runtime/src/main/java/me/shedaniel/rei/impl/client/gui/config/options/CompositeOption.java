@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class CompositeOption<T> {
     private final Component name;
@@ -37,6 +38,8 @@ public class CompositeOption<T> {
     private final BiConsumer<ConfigObjectImpl, T> save;
     @Nullable
     private ConfigPreviewer<T> previewer;
+    @Nullable
+    private Supplier<T> defaultValue = null;
     private OptionValueEntry<T> entry;
     
     public CompositeOption(Component name, Component description, Function<ConfigObjectImpl, T> bind, BiConsumer<ConfigObjectImpl, T> save) {
@@ -67,8 +70,17 @@ public class CompositeOption<T> {
         return this.entry(OptionValueEntry.enumOptions(entry));
     }
     
+    public CompositeOption<T> options(T... entry) {
+        return this.entry(OptionValueEntry.options(entry));
+    }
+    
     public CompositeOption<T> previewer(ConfigPreviewer<T> previewer) {
         this.previewer = previewer;
+        return this;
+    }
+    
+    public CompositeOption<T> defaultValue(Supplier<T> defaultValue) {
+        this.defaultValue = defaultValue;
         return this;
     }
     
@@ -99,5 +111,11 @@ public class CompositeOption<T> {
     
     public boolean hasPreview() {
         return previewer != null;
+    }
+    
+    @Nullable
+    public T getDefaultValue() {
+        if (defaultValue == null) return null;
+        return defaultValue.get();
     }
 }

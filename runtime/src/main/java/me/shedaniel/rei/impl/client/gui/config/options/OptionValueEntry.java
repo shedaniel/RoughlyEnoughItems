@@ -26,7 +26,9 @@ package me.shedaniel.rei.impl.client.gui.config.options;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.network.chat.Component;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
@@ -37,7 +39,7 @@ public interface OptionValueEntry<T> {
         };
     }
     
-    static OptionValueEntry<Boolean> ofBoolean(Component falseText, Component trueText) {
+    static OptionValueEntry.Selection<Boolean> ofBoolean(Component falseText, Component trueText) {
         return new Selection<Boolean>() {
             @Override
             public List<Boolean> getOptions() {
@@ -51,17 +53,17 @@ public interface OptionValueEntry<T> {
         };
     }
     
-    static OptionValueEntry<Boolean> trueFalse() {
+    static OptionValueEntry.Selection<Boolean> trueFalse() {
         return ofBoolean(translatable("config.rei.value.trueFalse.false"),
                 translatable("config.rei.value.trueFalse.true"));
     }
     
-    static OptionValueEntry<Boolean> enabledDisabled() {
+    static OptionValueEntry.Selection<Boolean> enabledDisabled() {
         return ofBoolean(translatable("config.rei.value.enabledDisabled.false"),
                 translatable("config.rei.value.enabledDisabled.true"));
     }
     
-    static <T> OptionValueEntry<T> enumOptions(T... array) {
+    static <T> OptionValueEntry.Selection<T> enumOptions(T... array) {
         Class<T> type = (Class<T>) array.getClass().getComponentType();
         Object[] constants = type.getEnumConstants();
         return new Selection<T>() {
@@ -77,9 +79,37 @@ public interface OptionValueEntry<T> {
         };
     }
     
+    static <T> OptionValueEntry<T> options(T... options) {
+        return new Selection<T>() {
+            @Override
+            public List<T> getOptions() {
+                return Arrays.asList(options);
+            }
+            
+            @Override
+            public Component getOption(T value) {
+                return literal(value.toString());
+            }
+        };
+    }
+    
     interface Selection<T> extends OptionValueEntry<T> {
         List<T> getOptions();
         
         Component getOption(T value);
+        
+        default Selection<T> overrideText(Function<T, Component> textFunction) {
+            return new Selection<T>() {
+                @Override
+                public List<T> getOptions() {
+                    return Selection.this.getOptions();
+                }
+                
+                @Override
+                public Component getOption(T value) {
+                    return textFunction.apply(value);
+                }
+            };
+        }
     }
 }

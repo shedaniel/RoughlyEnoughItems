@@ -53,7 +53,8 @@ interface AllREIConfigGroups {
             .add(CONFIG_BUTTON_LOCATION)
             .add(CRAFTABLE_FILTER);
     OptionGroup LAYOUT_PANEL = make("layout.panel")
-            .add(BOUNDARIES);
+            .add(BOUNDARIES)
+            .add(LOCATION);
     OptionGroup ACCESSIBILITY_DISPLAY = make("accessibility.display")
             .add(LARGER_TABS)
             .add(LARGER_ARROW_BUTTONS);

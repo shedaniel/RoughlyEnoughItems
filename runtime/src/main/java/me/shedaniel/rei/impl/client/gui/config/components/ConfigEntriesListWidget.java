@@ -38,6 +38,7 @@ public class ConfigEntriesListWidget {
         WidgetWithBounds list = ListWidget.builderOf(RectangleUtils.inset(bounds, 6, 6), groups,
                         (index, entry) -> ConfigGroupWidget.create(entry, bounds.width - 12 - 6))
                 .gap(7)
+                .calculateTotalHeightDynamically(true)
                 .build();
         return ScrollableViewWidget.create(bounds, list.withPadding(0, 5), true);
     }
