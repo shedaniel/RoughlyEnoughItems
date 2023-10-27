@@ -94,7 +94,7 @@ public class REIConfigScreen extends Screen {
                     Minecraft.getInstance().setScreen(new CreditsScreen(this));
                 }));
         this.widgets.add(Widgets.createLabel(new Point(width / 2, 12), this.title));
-        int sideWidth = (int) (width / 3.8);
+        int sideWidth = (int) (width / 4.2);
         boolean singlePane = width - 20 - sideWidth <= 330;
         int singleSideWidth = 32 + 6 + 4;
         Widget[] list = {ConfigEntriesListWidget.create(new Rectangle(singlePane ? 8 + singleSideWidth : 12 + sideWidth, 32, singlePane ? width - 16 - singleSideWidth : width - 20 - sideWidth, height - 32 - 32), activeCategory.getGroups())};

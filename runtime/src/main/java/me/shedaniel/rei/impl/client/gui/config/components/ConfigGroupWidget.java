@@ -35,37 +35,71 @@ import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionGroup;
 import me.shedaniel.rei.impl.client.gui.config.options.preview.TooltipPreview;
 import net.minecraft.client.gui.GuiComponent;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public class ConfigGroupWidget {
+    private static final Map<OptionGroup, Pair<PreviewLocation, SpecialGroupConstructor>> SPECIAL_GROUPS = new HashMap<>();
+    
+    static {
+        addPreview(AllREIConfigGroups.APPEARANCE_TOOLTIPS, PreviewLocation.RIGHT, (entry, width, height) -> TooltipPreview.create(width, height));
+    }
+    
+    public static void addPreview(OptionGroup group, PreviewLocation location, SpecialGroupConstructor constructor) {
+        SPECIAL_GROUPS.put(group, Pair.of(location, constructor));
+    }
+    
     public static WidgetWithBounds create(OptionGroup entry, int width) {
-        if (entry == AllREIConfigGroups.APPEARANCE_TOOLTIPS) {
+        WidgetWithBounds groupTitle = Widgets.createLabel(new Point(0, 3), entry.getGroupName().copy().withStyle(style -> style.withColor(0xFFC0C0C0).withUnderlined(true)))
+                .leftAligned()
+                .withPadding(0, 0, 0, 6);
+        WidgetWithBounds contents;
+        
+        if (SPECIAL_GROUPS.containsKey(entry)) {
+            Pair<PreviewLocation, SpecialGroupConstructor> pair = SPECIAL_GROUPS.get(entry);
+            PreviewLocation location = pair.getLeft();
             int halfWidth = width * 6 / 10 - 2;
-            WidgetWithBounds left = _create(entry, halfWidth);
-            Widget background = Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-                GuiComponent.fill(matrices, 0, 0, width - halfWidth - 4, left.getBounds().height, 0xFF333333);
-                GuiComponent.fill(matrices, 1, 1, width - halfWidth - 4 - 1, left.getBounds().height - 1, 0xFF000000);
-            });
-            Widget right = Widgets.withTranslate(TooltipPreview.create(() -> width - halfWidth - 4, () -> left.getBounds().height), halfWidth + 2, 0, 0);
-            return Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, left.getBounds().height), left, background, right);
+            if (halfWidth <= 200) location = PreviewLocation.TOP;
+            
+            if (location == PreviewLocation.RIGHT) {
+                WidgetWithBounds original = _create(entry, halfWidth);
+                Widget background = createBackgroundSlot(() -> new Rectangle(halfWidth + 2, 0, width - halfWidth - 4, original.getBounds().height));
+                Widget right = Widgets.withTranslate(pair.getRight().create(entry, () -> width - halfWidth - 4, () -> original.getBounds().height), halfWidth + 2, 0, 0);
+                contents = Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, original.getBounds().height), original, background, right);
+            } else {
+                WidgetWithBounds original = _create(entry, width);
+                
+                if (location == PreviewLocation.TOP) {
+                    WidgetWithBounds widget = pair.getRight().create(entry, () -> width, null);
+                    Widget background = createBackgroundSlot(widget::getBounds);
+                    WidgetWithBounds translatedOriginal = Widgets.withTranslate(original, () -> Matrix4f.createTranslateMatrix(0, widget.getBounds().height + 4, 0));
+                    contents = Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, widget.getBounds().height + 4 + translatedOriginal.getBounds().height), translatedOriginal, background, widget);
+                } else {
+                    WidgetWithBounds widget = pair.getRight().create(entry, () -> width, null);
+                    Widget background = createBackgroundSlot(widget::getBounds);
+                    contents = Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, original.getBounds().getMaxY() + 4 + widget.getBounds().height), original,
+                            Widgets.withTranslate(Widgets.concat(background, widget), () -> Matrix4f.createTranslateMatrix(0, original.getBounds().getMaxY() + 4, 0)));
+                }
+            }
+        } else {
+            contents = _create(entry, width);
         }
         
-        return _create(entry, width);
+        return Widgets.concatWithBounds(
+                () -> new Rectangle(0, 0, width, groupTitle.getBounds().getMaxY() + contents.getBounds().height),
+                groupTitle,
+                Widgets.withTranslate(contents, () -> Matrix4f.createTranslateMatrix(0, groupTitle.getBounds().getMaxY(), 0))
+        );
     }
     
     private static WidgetWithBounds _create(OptionGroup entry, int width) {
         List<Triple<Widget, Supplier<Rectangle>, Matrix4f[]>> widgets = new ArrayList<>();
         int[] height = {0};
-        WidgetWithBounds groupTitle = Widgets.createLabel(new Point(0, 3), entry.getGroupName().copy().withStyle(style -> style.withColor(0xFFC0C0C0).withUnderlined(true)))
-                .leftAligned()
-                .withPadding(0, 0, 0, 6);
-        widgets.add(Triple.of(groupTitle, groupTitle::getBounds, new Matrix4f[]{new Matrix4f()}));
-        height[0] = Math.max(height[0], groupTitle.getBounds().getMaxY());
         
         for (CompositeOption<?> option : entry.getOptions()) {
             Matrix4f[] translation = new Matrix4f[]{Matrix4f.createTranslateMatrix(0, height[0], 0)};
@@ -77,7 +111,7 @@ public class ConfigGroupWidget {
                 Matrix4f[] translationDrawable = new Matrix4f[]{Matrix4f.createTranslateMatrix(0, height[0], 0)};
                 widgets.add(Triple.of(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
                     for (int x = 0; x <= width; x += 4) {
-                        GuiComponent.fill(matrices, x, 1, x + 2, 2, 0xFF757575);
+                        GuiComponent.fill(matrices, Math.min(width, x), 1, Math.min(width, x + 2), 2, 0xFF757575);
                     }
                 }), () -> translationDrawable[0]), () ->
                         MatrixUtils.transform(translationDrawable[0], new Rectangle(0, 0, 1, 7)), translationDrawable));
@@ -104,6 +138,23 @@ public class ConfigGroupWidget {
             public int size() {
                 return widgets.size();
             }
+        });
+    }
+    
+    @FunctionalInterface
+    public interface SpecialGroupConstructor {
+        WidgetWithBounds create(OptionGroup entry, IntSupplier width, @Nullable IntSupplier height);
+    }
+    
+    public enum PreviewLocation {
+        RIGHT, TOP, BOTTOM
+    }
+    
+    private static Widget createBackgroundSlot(Supplier<Rectangle> bounds) {
+        return Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+            Rectangle rectangle = bounds.get();
+            GuiComponent.fill(matrices, rectangle.x, rectangle.y, rectangle.getMaxX(), rectangle.getMaxY(), 0xFF333333);
+            GuiComponent.fill(matrices, rectangle.x + 1, rectangle.y + 1, rectangle.getMaxX() - 1, rectangle.getMaxY() - 1, 0xFF000000);
         });
     }
 }
