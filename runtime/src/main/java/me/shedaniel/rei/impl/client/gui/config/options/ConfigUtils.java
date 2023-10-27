@@ -33,7 +33,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 public interface ConfigUtils {
     static boolean isReducedMotion() {
         if (Minecraft.getInstance().screen instanceof REIConfigScreen screen) {
-            return ((Boolean) screen.getOptions().get(AllREIConfigOptions.REDUCED_MOTION)).booleanValue();
+            return screen.get(AllREIConfigOptions.REDUCED_MOTION);
         } else {
             return ConfigObject.getInstance().isReducedMotion();
         }

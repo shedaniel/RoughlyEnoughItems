@@ -35,7 +35,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
-import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
+import me.shedaniel.rei.impl.client.gui.config.ConfigAccess;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
 import net.minecraft.client.Minecraft;
@@ -50,13 +50,13 @@ import java.util.List;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
 public class ConfigOptionWidget {
-    public static <T> WidgetWithBounds create(CompositeOption<T> option, int width) {
+    public static <T> WidgetWithBounds create(ConfigAccess access, CompositeOption<T> option, int width) {
         List<Widget> widgets = new ArrayList<>();
         int[] stableHeight = {12};
         int[] height = {12};
         widgets.add(Widgets.createLabel(new Point(0, 0), option.getName().copy().withStyle(style -> style.withColor(0xFFC0C0C0)))
                 .leftAligned());
-        WidgetWithBounds optionValue = ConfigOptionValueWidget.create(option);
+        WidgetWithBounds optionValue = ConfigOptionValueWidget.create(access, option);
         widgets.add(Widgets.withTranslate(optionValue, () -> Matrix4f.createTranslateMatrix(width - optionValue.getBounds().width - optionValue.getBounds().x, 0, 0)));
         widgets.add(new WidgetWithBounds() {
             final MutableComponent description = option.getDescription().copy().withStyle(style -> style.withColor(0xFF757575));
@@ -123,7 +123,7 @@ public class ConfigOptionWidget {
             
             private void clickPreview() {
                 if (this.preview == null) {
-                    this.preview = option.getPreviewer().preview(width, () -> (T) ((REIConfigScreen) Minecraft.getInstance().screen).getOptions().get(option));
+                    this.preview = option.getPreviewer().preview(width, () -> access.get(option));
                     this.preview = Widgets.withTranslate(this.preview, () -> this.previewTranslation);
                 }
                 

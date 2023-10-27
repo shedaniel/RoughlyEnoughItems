@@ -52,7 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class REIConfigScreen extends Screen {
+public class REIConfigScreen extends Screen implements ConfigAccess {
     private final Screen parent;
     private final List<OptionCategory> categories;
     private final List<Widget> widgets = new ArrayList<>();
@@ -97,12 +97,12 @@ public class REIConfigScreen extends Screen {
         int sideWidth = (int) (width / 4.2);
         boolean singlePane = width - 20 - sideWidth <= 330;
         int singleSideWidth = 32 + 6 + 4;
-        Widget[] list = {ConfigEntriesListWidget.create(new Rectangle(singlePane ? 8 + singleSideWidth : 12 + sideWidth, 32, singlePane ? width - 16 - singleSideWidth : width - 20 - sideWidth, height - 32 - 32), activeCategory.getGroups())};
+        Widget[] list = {ConfigEntriesListWidget.create(this, new Rectangle(singlePane ? 8 + singleSideWidth : 12 + sideWidth, 32, singlePane ? width - 16 - singleSideWidth : width - 20 - sideWidth, height - 32 - 32), activeCategory.getGroups())};
         IntValue selectedCategory = new IntValue() {
             @Override
             public void accept(int i) {
                 REIConfigScreen.this.activeCategory = categories.get(i);
-                list[0] = ConfigEntriesListWidget.create(new Rectangle(singlePane ? 8 + singleSideWidth : 12 + sideWidth, 32, singlePane ? width - 16 - singleSideWidth : width - 20 - sideWidth, height - 32 - 32), activeCategory.getGroups());
+                list[0] = ConfigEntriesListWidget.create(REIConfigScreen.this, new Rectangle(singlePane ? 8 + singleSideWidth : 12 + sideWidth, 32, singlePane ? width - 16 - singleSideWidth : width - 20 - sideWidth, height - 32 - 32), activeCategory.getGroups());
             }
             
             @Override
@@ -201,5 +201,20 @@ public class REIConfigScreen extends Screen {
     public void closeMenu() {
         this.widgets.remove(menu);
         this.menu = null;
+    }
+    
+    @Override
+    public <T> T get(CompositeOption<T> option) {
+        return (T) getOptions().get(option);
+    }
+    
+    @Override
+    public <T> void set(CompositeOption<T> option, T value) {
+        ((Map<CompositeOption<?>, Object>) getOptions()).put(option, value);
+    }
+    
+    @Override
+    public <T> T getDefault(CompositeOption<T> option) {
+        return (T) getDefaultOptions().get(option);
     }
 }

@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.client.gui.config.components;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.impl.client.gui.config.ConfigAccess;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionGroup;
 import me.shedaniel.rei.impl.client.gui.widget.ListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.ScrollableViewWidget;
@@ -34,9 +35,9 @@ import me.shedaniel.rei.impl.common.util.RectangleUtils;
 import java.util.List;
 
 public class ConfigEntriesListWidget {
-    public static Widget create(Rectangle bounds, List<OptionGroup> groups) {
+    public static Widget create(ConfigAccess access, Rectangle bounds, List<OptionGroup> groups) {
         WidgetWithBounds list = ListWidget.builderOf(RectangleUtils.inset(bounds, 6, 6), groups,
-                        (index, entry) -> ConfigGroupWidget.create(entry, bounds.width - 12 - 6))
+                        (index, entry) -> ConfigGroupWidget.create(access, entry, bounds.width - 12 - 6))
                 .gap(7)
                 .calculateTotalHeightDynamically(true)
                 .build();
