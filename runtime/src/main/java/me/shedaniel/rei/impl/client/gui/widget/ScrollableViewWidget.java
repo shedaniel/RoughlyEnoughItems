@@ -69,7 +69,7 @@ public class ScrollableViewWidget {
         }));
         widgets.add(createScrollerWidget(bounds, scrollingRef[0]));
         
-        return Widgets.withBounds(Widgets.concat(widgets), bounds);
+        return Widgets.concatWithBounds(bounds, widgets);
     }
     
     private static Widget createScrollerWidget(Rectangle bounds, ScrollingContainer scrolling) {

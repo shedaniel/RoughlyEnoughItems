@@ -37,9 +37,8 @@ import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
-import me.shedaniel.rei.impl.common.util.RectangleUtils;
+import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
@@ -56,7 +55,7 @@ public class ConfigOptionWidget {
         int[] stableHeight = {12};
         int[] height = {12};
         widgets.add(Widgets.createLabel(new Point(0, 0), option.getName().copy().withStyle(style -> style.withColor(0xFFC0C0C0)))
-                        .leftAligned());
+                .leftAligned());
         WidgetWithBounds optionValue = ConfigOptionValueWidget.create(option);
         widgets.add(Widgets.withTranslate(optionValue, () -> Matrix4f.createTranslateMatrix(width - optionValue.getBounds().width - optionValue.getBounds().x, 0, 0)));
         widgets.add(new WidgetWithBounds() {
@@ -97,6 +96,7 @@ public class ConfigOptionWidget {
             @Override
             public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
                 this.previewHeight.update(delta);
+                if (ConfigUtils.isReducedMotion()) this.previewHeight.completeImmediately();
                 height[0] = stableHeight[0] + Math.round(this.previewHeight.value());
                 
                 for (int i = 0; i < split.size(); i++) {

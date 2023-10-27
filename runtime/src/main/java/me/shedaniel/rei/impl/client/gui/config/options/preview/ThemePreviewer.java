@@ -56,6 +56,9 @@ public enum ThemePreviewer implements ConfigPreviewer<AppearanceTheme> {
                 .color(labelColor.value().getColor());
         return Widgets.concatWithBounds(new Rectangle(0, 0, width, 56), List.of(base, label, Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
             labelColor.update(delta);
+            if (ConfigUtils.isReducedMotion()) {
+                labelColor.completeImmediately();
+            }
             label.color(labelColor.value().getColor());
         })));
     }

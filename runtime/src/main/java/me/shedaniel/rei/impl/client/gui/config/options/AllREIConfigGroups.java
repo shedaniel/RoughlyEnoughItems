@@ -26,7 +26,7 @@ package me.shedaniel.rei.impl.client.gui.config.options;
 import static me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigOptions.*;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
-interface AllREIConfigGroups {
+public interface AllREIConfigGroups {
     static <T> OptionGroup make(String id) {
         return new OptionGroup(translatable("config.rei.options.groups." + id));
     }

@@ -44,4 +44,12 @@ public class ConfigCategoryEntryWidget {
                 Widgets.createTexturedWidget(category.getIcon(), new Rectangle(3, 3, 16, 16), 0, 0, 1, 1, 1, 1)
         );
     }
+    
+    public static WidgetWithBounds createTiny(OptionCategory category) {
+        Rectangle bounds = new Rectangle(0, 0, 16, 16);
+        return Widgets.withTooltip(
+                Widgets.withBounds(Widgets.createTexturedWidget(category.getIcon(), bounds, 0, 0, 1, 1, 1, 1), bounds),
+                category.getName()
+        );
+    }
 }

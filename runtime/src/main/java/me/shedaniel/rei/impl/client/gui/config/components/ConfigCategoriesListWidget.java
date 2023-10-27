@@ -44,4 +44,14 @@ public class ConfigCategoriesListWidget {
                 .build();
         return ScrollableViewWidget.create(bounds, list.withPadding(0, 5), true);
     }
+    
+    public static Widget createTiny(Rectangle bounds, List<OptionCategory> categories, IntValue selected) {
+        WidgetWithBounds list = ListWidget.builderOf(RectangleUtils.inset(bounds, (bounds.width - 6 - 16) / 2, 9), categories,
+                        (index, entry) -> ConfigCategoryEntryWidget.createTiny(entry))
+                .gap(7)
+                .isSelectable((index, entry) -> true)
+                .selected(selected)
+                .build();
+        return ScrollableViewWidget.create(bounds, list.withPadding(0, 9), true);
+    }
 }
