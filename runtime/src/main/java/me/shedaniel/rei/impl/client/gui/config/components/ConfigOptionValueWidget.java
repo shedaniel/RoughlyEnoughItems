@@ -23,7 +23,9 @@
 
 package me.shedaniel.rei.impl.client.gui.config.components;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
+import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
@@ -44,6 +46,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
@@ -52,13 +55,7 @@ public class ConfigOptionValueWidget {
     public static <T> WidgetWithBounds create(ConfigAccess access, CompositeOption<T> option) {
         OptionValueEntry<T> entry = option.getEntry();
         T value = access.get(option);
-        Component[] text = new Component[1];
-        
-        if (entry instanceof OptionValueEntry.Selection<T> selection) {
-            text[0] = selection.getOption(value);
-        } else {
-            text[0] = literal(value.toString());
-        }
+        Component[] text = {entry.getOption(value)};
         
         if (value.equals(Objects.requireNonNullElseGet(option.getDefaultValue(), () -> access.getDefault(option)))) {
             text[0] = translatable("config.rei.value.default", text[0]);
@@ -77,38 +74,9 @@ public class ConfigOptionValueWidget {
                 });
         
         if (entry instanceof OptionValueEntry.Selection<T> selection) {
-            int noOfOptions = selection.getOptions().size();
-            if (noOfOptions == 2) {
-                label.clickable().onClick($ -> {
-                    access.set(option, selection.getOptions().get((selection.getOptions().indexOf(access.get(option)) + 1) % 2));
-                    text[0] = selection.getOption(access.get(option));
-                    
-                    if (access.get(option).equals(Objects.requireNonNullElseGet(option.getDefaultValue(), () -> access.getDefault(option)))) {
-                        text[0] = translatable("config.rei.value.default", text[0]);
-                    }
-                });
-            } else if (noOfOptions >= 2) {
-                label.clickable().onClick($ -> {
-                    Menu menu = new Menu(MatrixUtils.transform(matrix[0], label.getBounds()), CollectionUtils.map(selection.getOptions(), opt -> {
-                        Component selectionOption = selection.getOption(opt);
-                        if (opt.equals(access.getDefault(option))) {
-                            selectionOption = translatable("config.rei.value.default", selectionOption);
-                        }
-                        
-                        return ToggleMenuEntry.of(selectionOption, () -> false, o -> {
-                            ((REIConfigScreen) Minecraft.getInstance().screen).closeMenu();
-                            access.set(option, opt);
-                            text[0] = selection.getOption(opt);
-                            
-                            if (access.get(option).equals(access.getDefault(option))) {
-                                text[0] = translatable("config.rei.value.default", text[0]);
-                            }
-                        });
-                    }), false);
-                    ((REIConfigScreen) Minecraft.getInstance().screen).closeMenu();
-                    ((REIConfigScreen) Minecraft.getInstance().screen).openMenu(menu);
-                });
-            }
+            applySelection(access, option, selection, label, text, matrix);
+        } else if (access.get(option) instanceof ModifierKeyCode) {
+            applyKeycode(access, option, label, text, matrix);
         }
         
         return Widgets.concatWithBounds(() -> new Rectangle(-label.getBounds().width, 0, label.getBounds().width + 8, 14),
@@ -117,5 +85,60 @@ public class ConfigOptionValueWidget {
                 Widgets.withTranslate(Widgets.createTexturedWidget(new ResourceLocation("roughlyenoughitems:textures/gui/config/selector.png"),
                         new Rectangle(1, 1, 4, 6), 0, 0, 1, 1, 1, 1), 0, 0.5, 0)
         );
+    }
+    
+    private static <T> void applySelection(ConfigAccess access, CompositeOption<T> option, OptionValueEntry.Selection<T> selection, Label label, Component[] text, Matrix4f[] matrix) {
+        int noOfOptions = selection.getOptions().size();
+        if (noOfOptions == 2) {
+            label.clickable().onClick($ -> {
+                access.set(option, selection.getOptions().get((selection.getOptions().indexOf(access.get(option)) + 1) % 2));
+                text[0] = selection.getOption(access.get(option));
+                
+                if (access.get(option).equals(Objects.requireNonNullElseGet(option.getDefaultValue(), () -> access.getDefault(option)))) {
+                    text[0] = translatable("config.rei.value.default", text[0]);
+                }
+            });
+        } else if (noOfOptions >= 2) {
+            label.clickable().onClick($ -> {
+                Menu menu = new Menu(MatrixUtils.transform(matrix[0], label.getBounds()), CollectionUtils.map(selection.getOptions(), opt -> {
+                    Component selectionOption = selection.getOption(opt);
+                    if (opt.equals(access.getDefault(option))) {
+                        selectionOption = translatable("config.rei.value.default", selectionOption);
+                    }
+                    
+                    return ToggleMenuEntry.of(selectionOption, () -> false, o -> {
+                        ((REIConfigScreen) Minecraft.getInstance().screen).closeMenu();
+                        access.set(option, opt);
+                        text[0] = selection.getOption(opt);
+                        
+                        if (access.get(option).equals(access.getDefault(option))) {
+                            text[0] = translatable("config.rei.value.default", text[0]);
+                        }
+                    });
+                }), false);
+                access.closeMenu();
+                access.openMenu(menu);
+            });
+        }
+    }
+    
+    private static <T> void applyKeycode(ConfigAccess access, CompositeOption<T> option, Label label, Component[] text, Matrix4f[] matrix) {
+        label.clickable().onClick($ -> {
+            access.closeMenu();
+            access.focusKeycode((CompositeOption<ModifierKeyCode>) option);
+        });
+        BiConsumer<PoseStack, Label> render = label.getOnRender();
+        label.onRender((poses, $) -> {
+            render.accept(poses, $);
+            text[0] = ((ModifierKeyCode) access.get(option)).getLocalizedName();
+            
+            if (access.getFocusedKeycode() == option) {
+                text[0] = literal("> ").withStyle(ChatFormatting.YELLOW)
+                        .append(text[0].copy().withStyle(ChatFormatting.YELLOW))
+                        .append(literal(" <").withStyle(ChatFormatting.YELLOW));
+            } else if (access.get(option).equals(access.getDefault(option))) {
+                text[0] = translatable("config.rei.value.default", text[0]);
+            }
+        });
     }
 }

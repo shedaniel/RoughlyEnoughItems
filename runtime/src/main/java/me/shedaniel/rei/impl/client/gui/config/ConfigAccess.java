@@ -23,7 +23,10 @@
 
 package me.shedaniel.rei.impl.client.gui.config;
 
+import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
+import me.shedaniel.rei.impl.client.gui.modules.Menu;
+import org.jetbrains.annotations.Nullable;
 
 public interface ConfigAccess {
     <T> T get(CompositeOption<T> option);
@@ -31,4 +34,13 @@ public interface ConfigAccess {
     <T> void set(CompositeOption<T> option, T value);
     
     <T> T getDefault(CompositeOption<T> option);
+    
+    void closeMenu();
+    
+    void openMenu(Menu menu);
+    
+    void focusKeycode(CompositeOption<ModifierKeyCode> option);
+    
+    @Nullable
+    CompositeOption<ModifierKeyCode> getFocusedKeycode();
 }

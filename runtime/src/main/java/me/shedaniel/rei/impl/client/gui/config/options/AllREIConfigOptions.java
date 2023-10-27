@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.config.options;
 
+import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.client.gui.config.*;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
@@ -54,6 +55,26 @@ public interface AllREIConfigOptions {
             .enabledDisabled();
     CompositeOption<Boolean> APPEND_FAVORITES_HINT = make("appearance.append_favorites_hint", i -> i.advanced.tooltips.displayFavoritesTooltip, (i, v) -> i.advanced.tooltips.displayFavoritesTooltip = v)
             .enabledDisabled();
+    CompositeOption<ModifierKeyCode> RECIPE_KEYBIND = make("keybinds.recipe", i -> i.basics.keyBindings.recipeKeybind.copy(), (i, v) -> i.basics.keyBindings.recipeKeybind = v)
+            .keybind();
+    CompositeOption<ModifierKeyCode> USAGE_KEYBIND = make("keybinds.usage", i -> i.basics.keyBindings.usageKeybind.copy(), (i, v) -> i.basics.keyBindings.usageKeybind = v)
+            .keybind();
+    CompositeOption<ModifierKeyCode> HIDE_KEYBIND = make("keybinds.hide", i -> i.basics.keyBindings.hideKeybind.copy(), (i, v) -> i.basics.keyBindings.hideKeybind = v)
+            .keybind();
+    CompositeOption<ModifierKeyCode> PREVIOUS_PAGE_KEYBIND = make("keybinds.previous_page", i -> i.basics.keyBindings.previousPageKeybind.copy(), (i, v) -> i.basics.keyBindings.previousPageKeybind = v)
+            .keybind();
+    CompositeOption<ModifierKeyCode> NEXT_PAGE_KEYBIND = make("keybinds.next_page", i -> i.basics.keyBindings.nextPageKeybind.copy(), (i, v) -> i.basics.keyBindings.nextPageKeybind = v)
+            .keybind();
+    CompositeOption<ModifierKeyCode> FOCUS_SEARCH_KEYBIND = make("keybinds.focus_search", i -> i.basics.keyBindings.focusSearchFieldKeybind.copy(), (i, v) -> i.basics.keyBindings.focusSearchFieldKeybind = v)
+            .keybind();
+    CompositeOption<ModifierKeyCode> COPY_RECIPE_ID_KEYBIND = make("keybinds.copy_recipe_id", i -> i.basics.keyBindings.copyRecipeIdentifierKeybind.copy(), (i, v) -> i.basics.keyBindings.copyRecipeIdentifierKeybind = v)
+            .keybind();
+    CompositeOption<ModifierKeyCode> FAVORITE_KEYBIND = make("keybinds.favorite", i -> i.basics.keyBindings.favoriteKeybind.copy(), (i, v) -> i.basics.keyBindings.favoriteKeybind = v)
+            .keybind();
+    CompositeOption<ModifierKeyCode> EXPORT_IMAGE_KEYBIND = make("keybinds.export_image", i -> i.basics.keyBindings.exportImageKeybind.copy(), (i, v) -> i.basics.keyBindings.exportImageKeybind = v)
+            .keybind();
+    CompositeOption<ModifierKeyCode> BACK_KEYBIND = make("keybinds.back", i -> i.basics.keyBindings.previousScreenKeybind.copy(), (i, v) -> i.basics.keyBindings.previousScreenKeybind = v)
+            .keybind();
     // TODO: NATIVE KEYBINDS
     CompositeOption<Boolean> USE_NATIVE_KEYBINDS = make("keybinds.use_native_keybinds", i -> i.basics.keyBindings.useNativeKeybinds, (i, v) -> i.basics.keyBindings.useNativeKeybinds = v)
             .enabledDisabled();

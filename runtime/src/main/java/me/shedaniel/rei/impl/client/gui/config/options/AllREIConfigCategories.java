@@ -42,7 +42,7 @@ public interface AllREIConfigCategories {
             .add(APPEARANCE_TOOLTIPS);
     OptionCategory KEYBINDS = make("keybinds")
             .add(KEYBINDS_KEYBINDS)
-            .add(KEYBINDS_ADVANCED);
+            /*.add(KEYBINDS_ADVANCED)*/;
     OptionCategory CHEATS = make("cheats")
             .add(CHEATS_CHEATS)
             .add(CHEATS_ADVANCED);

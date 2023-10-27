@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.config.options;
 
+import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.network.chat.Component;
 
@@ -34,13 +35,14 @@ import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.litera
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
 public interface OptionValueEntry<T> {
+    Component getOption(T value);
+    
     static <T> OptionValueEntry<T> noOp() {
-        return new OptionValueEntry<T>() {
-        };
+        return value -> literal(value.toString());
     }
     
     static OptionValueEntry.Selection<Boolean> ofBoolean(Component falseText, Component trueText) {
-        return new Selection<Boolean>() {
+        return new Selection<>() {
             @Override
             public List<Boolean> getOptions() {
                 return List.of(false, true);
@@ -66,7 +68,7 @@ public interface OptionValueEntry<T> {
     static <T> OptionValueEntry.Selection<T> enumOptions(T... array) {
         Class<T> type = (Class<T>) array.getClass().getComponentType();
         Object[] constants = type.getEnumConstants();
-        return new Selection<T>() {
+        return new Selection<>() {
             @Override
             public List<T> getOptions() {
                 return CollectionUtils.map(constants, type::cast);
@@ -80,7 +82,7 @@ public interface OptionValueEntry<T> {
     }
     
     static <T> OptionValueEntry<T> options(T... options) {
-        return new Selection<T>() {
+        return new Selection<>() {
             @Override
             public List<T> getOptions() {
                 return Arrays.asList(options);
@@ -93,13 +95,15 @@ public interface OptionValueEntry<T> {
         };
     }
     
+    static OptionValueEntry<ModifierKeyCode> keybind() {
+        return ModifierKeyCode::getLocalizedName;
+    }
+    
     interface Selection<T> extends OptionValueEntry<T> {
         List<T> getOptions();
         
-        Component getOption(T value);
-        
         default Selection<T> overrideText(Function<T, Component> textFunction) {
-            return new Selection<T>() {
+            return new Selection<>() {
                 @Override
                 public List<T> getOptions() {
                     return Selection.this.getOptions();

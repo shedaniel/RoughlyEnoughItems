@@ -39,7 +39,17 @@ public interface AllREIConfigGroups {
     OptionGroup APPEARANCE_TOOLTIPS = make("appearance.tooltips")
             .add(APPEND_MOD_NAMES)
             .add(APPEND_FAVORITES_HINT);
-    OptionGroup KEYBINDS_KEYBINDS = make("keybinds.keybinds");
+    OptionGroup KEYBINDS_KEYBINDS = make("keybinds.keybinds")
+            .add(RECIPE_KEYBIND)
+            .add(USAGE_KEYBIND)
+            .add(HIDE_KEYBIND)
+            .add(PREVIOUS_PAGE_KEYBIND)
+            .add(NEXT_PAGE_KEYBIND)
+            .add(FOCUS_SEARCH_KEYBIND)
+            .add(COPY_RECIPE_ID_KEYBIND)
+            .add(FAVORITE_KEYBIND)
+            .add(EXPORT_IMAGE_KEYBIND)
+            .add(BACK_KEYBIND);
     OptionGroup KEYBINDS_ADVANCED = make("keybinds.advanced")
             .add(USE_NATIVE_KEYBINDS);
     OptionGroup CHEATS_CHEATS = make("cheats.cheats")
