@@ -84,7 +84,7 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        return button == 0 && containsMouse(mouseX, mouseY) && onClick.test(this);
+        return button == 0 && containsMouse(mouseX, mouseY) && onClick != null && onClick.test(this);
     }
     
     public void setRenderer(DisplayCategory<?> category, Renderer renderer, Component categoryName, boolean selected) {
@@ -126,7 +126,7 @@ public class TabWidget extends WidgetWithBounds implements DraggableStackProvide
                 renderer.setZ(100);
                 renderer.render(matrices, new Rectangle(bounds.getCenterX() - 8, bounds.getCenterY() - 5, 16, 16), mouseX, mouseY, delta);
             }
-            if (containsMouse(mouseX, mouseY)) {
+            if (containsMouse(mouseX, mouseY) && category != null) {
                 drawTooltip();
             }
         }

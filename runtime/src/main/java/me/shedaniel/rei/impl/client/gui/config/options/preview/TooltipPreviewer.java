@@ -33,7 +33,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
+import me.shedaniel.rei.impl.client.gui.config.ConfigAccess;
 import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigOptions;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -51,13 +51,13 @@ import java.util.List;
 import java.util.function.IntSupplier;
 import java.util.stream.Stream;
 
-public class TooltipPreview {
-    public static WidgetWithBounds create(IntSupplier width, @Nullable IntSupplier height) {
+public class TooltipPreviewer {
+    public static WidgetWithBounds create(ConfigAccess access, int width, @Nullable IntSupplier height) {
         Rectangle bounds = new Rectangle();
         return Widgets.withBounds(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
             EntryStack<ItemStack> stack = EntryStacks.of(Items.OAK_PLANKS);
-            boolean appendModNames = (Boolean) ((REIConfigScreen) Minecraft.getInstance().screen).getOptions().get(AllREIConfigOptions.APPEND_MOD_NAMES);
-            boolean appendFavorites = (Boolean) ((REIConfigScreen) Minecraft.getInstance().screen).getOptions().get(AllREIConfigOptions.APPEND_FAVORITES_HINT);
+            boolean appendModNames = access.get(AllREIConfigOptions.APPEND_MOD_NAMES);
+            boolean appendFavorites = access.get(AllREIConfigOptions.APPEND_FAVORITES_HINT);
             List<Tooltip.Entry> entries = new ArrayList<>();
             entries.add(Tooltip.entry(new TranslatableComponent("block.minecraft.oak_planks")));
             if (appendModNames) {
@@ -68,15 +68,15 @@ public class TooltipPreview {
                 entries.addAll(Stream.of(I18n.get("text.rei.favorites_tooltip", name).split("\n"))
                         .map(TextComponent::new).map(Tooltip::entry).toList());
             }
-            List<FormattedCharSequence> components = entries.stream().flatMap(entry -> Minecraft.getInstance().font.split(entry.getAsText(), width.getAsInt() - 12 - 4).stream()).toList();
+            List<FormattedCharSequence> components = entries.stream().flatMap(entry -> Minecraft.getInstance().font.split(entry.getAsText(), width - 12 - 4).stream()).toList();
             int minWidth = components.stream().mapToInt(component -> Minecraft.getInstance().font.width(component)).max().orElse(0) + 4;
             int minHeight = components.stream().mapToInt(component -> components.get(0) == component && components.size() >= 2 ? 2 + 10 : 10).sum() + 4;
             
-            int tX = Math.max(6, (width.getAsInt() - minWidth) / 2), tWidth = Math.min(width.getAsInt() - 12, minWidth), tY = 24 + 4, tHeight = Math.min(minHeight, height == null ? 100000 : height.getAsInt() - tY - 4);
+            int tX = Math.max(6, (width - minWidth) / 2), tWidth = Math.min(width - 12, minWidth), tY = 24 + 4, tHeight = Math.min(minHeight, height == null ? 100000 : height.getAsInt() - tY - 4);
             matrices.pushPose();
             matrices.translate(0, height == null ? 4 : Math.max(0, (height.getAsInt() - (tY + tHeight)) / 2), 400);
-            bounds.setBounds(0, 0, width.getAsInt(), height == null ? tY + tHeight + 12 : height.getAsInt());
-            stack.getRenderer().render(stack, matrices, new Rectangle(width.getAsInt() / 2 - 12, 0, 24, 24), mouseX, mouseY, delta);
+            bounds.setSize(width, height == null ? tY + tHeight + 12 : height.getAsInt());
+            stack.getRenderer().render(stack, matrices, new Rectangle(width / 2 - 12, 0, 24, 24), mouseX, mouseY, delta);
             
             matrices.translate(0, 0, -400);
             Tesselator tesselator = Tesselator.getInstance();

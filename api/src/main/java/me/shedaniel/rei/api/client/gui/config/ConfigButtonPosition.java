@@ -36,7 +36,7 @@ public enum ConfigButtonPosition {
     LOWER;
     
     public String toString(boolean right) {
-        if (this == UPPER && right) return I18n.get("config.rei.value.layout.config_button_location.top_right");
+        if (this == UPPER && !right) return I18n.get("config.rei.value.layout.config_button_location.top_right");
         if (this == UPPER) return I18n.get("config.rei.value.layout.config_button_location.top_left");
         return I18n.get("config.rei.value.layout.config_button_location.next_to_search");
     }

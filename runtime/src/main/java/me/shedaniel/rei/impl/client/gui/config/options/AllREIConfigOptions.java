@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.gui.config.options;
 import me.shedaniel.rei.api.client.gui.config.*;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
-import me.shedaniel.rei.impl.client.gui.config.options.preview.ThemePreviewer;
 import net.minecraft.client.Minecraft;
 
 import java.util.function.BiConsumer;
@@ -43,8 +42,7 @@ public interface AllREIConfigOptions {
     }
     
     CompositeOption<AppearanceTheme> THEME = make("appearance.theme", i -> i.appearance.theme, (i, v) -> i.appearance.theme = v)
-            .enumOptions()
-            .previewer(ThemePreviewer.INSTANCE);
+            .enumOptions();
     CompositeOption<RecipeBorderType> RECIPE_BORDER = make("appearance.recipe_border", i -> i.appearance.recipeBorder, (i, v) -> i.appearance.recipeBorder = v)
             .enumOptions();
     CompositeOption<Boolean> REDUCED_MOTION = make("appearance.reduced_motion", i -> i.basics.reduceMotion, (i, v) -> i.basics.reduceMotion = v)

@@ -404,9 +404,14 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         return isHighlightEnabled();
     }
     
-    private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
+    private NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
             .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
             .asFloat();
+    
+    @ApiStatus.Internal
+    public void setDarkBackgroundAlpha(NumberAnimator<Float> darkBackgroundAlpha) {
+        this.darkBackgroundAlpha = darkBackgroundAlpha;
+    }
     
     protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
         if (background) {

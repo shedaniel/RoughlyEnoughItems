@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.config.components;
 
-import com.google.common.base.MoreObjects;
 import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -33,6 +32,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.client.gui.config.ConfigAccess;
 import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionValueEntry;
@@ -43,18 +43,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.Map;
 import java.util.Objects;
 
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
 public class ConfigOptionValueWidget {
-    public static <T> WidgetWithBounds create(CompositeOption<T> option) {
-        Map<CompositeOption<?>, ?> defaultOptions = ((REIConfigScreen) Minecraft.getInstance().screen).getDefaultOptions();
-        Map<CompositeOption<?>, ?> options = ((REIConfigScreen) Minecraft.getInstance().screen).getOptions();
+    public static <T> WidgetWithBounds create(ConfigAccess access, CompositeOption<T> option) {
         OptionValueEntry<T> entry = option.getEntry();
-        T value = (T) options.get(option);
+        T value = access.get(option);
         Component[] text = new Component[1];
         
         if (entry instanceof OptionValueEntry.Selection<T> selection) {
@@ -63,7 +60,7 @@ public class ConfigOptionValueWidget {
             text[0] = literal(value.toString());
         }
         
-        if (value.equals(Objects.requireNonNullElseGet(option.getDefaultValue(), () -> (T) defaultOptions.get(option)))) {
+        if (value.equals(Objects.requireNonNullElseGet(option.getDefaultValue(), () -> access.getDefault(option)))) {
             text[0] = translatable("config.rei.value.default", text[0]);
         }
         
@@ -83,10 +80,10 @@ public class ConfigOptionValueWidget {
             int noOfOptions = selection.getOptions().size();
             if (noOfOptions == 2) {
                 label.clickable().onClick($ -> {
-                    ((Map<CompositeOption<?>, Object>) options).put(option, selection.getOptions().get((selection.getOptions().indexOf((T) options.get(option)) + 1) % 2));
-                    text[0] = selection.getOption((T) options.get(option));
+                    access.set(option, selection.getOptions().get((selection.getOptions().indexOf(access.get(option)) + 1) % 2));
+                    text[0] = selection.getOption(access.get(option));
                     
-                    if (options.get(option).equals(Objects.requireNonNullElseGet(option.getDefaultValue(), () -> (T) defaultOptions.get(option)))) {
+                    if (access.get(option).equals(Objects.requireNonNullElseGet(option.getDefaultValue(), () -> access.getDefault(option)))) {
                         text[0] = translatable("config.rei.value.default", text[0]);
                     }
                 });
@@ -94,16 +91,16 @@ public class ConfigOptionValueWidget {
                 label.clickable().onClick($ -> {
                     Menu menu = new Menu(MatrixUtils.transform(matrix[0], label.getBounds()), CollectionUtils.map(selection.getOptions(), opt -> {
                         Component selectionOption = selection.getOption(opt);
-                        if (opt.equals(defaultOptions.get(option))) {
+                        if (opt.equals(access.getDefault(option))) {
                             selectionOption = translatable("config.rei.value.default", selectionOption);
                         }
                         
                         return ToggleMenuEntry.of(selectionOption, () -> false, o -> {
                             ((REIConfigScreen) Minecraft.getInstance().screen).closeMenu();
-                            ((Map<CompositeOption<?>, Object>) options).put(option, opt);
+                            access.set(option, opt);
                             text[0] = selection.getOption(opt);
                             
-                            if (options.get(option).equals(defaultOptions.get(option))) {
+                            if (access.get(option).equals(access.getDefault(option))) {
                                 text[0] = translatable("config.rei.value.default", text[0]);
                             }
                         });

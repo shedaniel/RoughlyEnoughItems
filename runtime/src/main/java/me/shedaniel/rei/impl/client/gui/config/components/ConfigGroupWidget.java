@@ -30,10 +30,13 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
+import me.shedaniel.rei.impl.client.gui.config.ConfigAccess;
 import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigGroups;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionGroup;
-import me.shedaniel.rei.impl.client.gui.config.options.preview.TooltipPreview;
+import me.shedaniel.rei.impl.client.gui.config.options.preview.AccessibilityDisplayPreviewer;
+import me.shedaniel.rei.impl.client.gui.config.options.preview.InterfacePreviewer;
+import me.shedaniel.rei.impl.client.gui.config.options.preview.TooltipPreviewer;
 import net.minecraft.client.gui.GuiComponent;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -47,14 +50,16 @@ public class ConfigGroupWidget {
     private static final Map<OptionGroup, Pair<PreviewLocation, SpecialGroupConstructor>> SPECIAL_GROUPS = new HashMap<>();
     
     static {
-        addPreview(AllREIConfigGroups.APPEARANCE_TOOLTIPS, PreviewLocation.RIGHT, (entry, width, height) -> TooltipPreview.create(width, height));
+        addPreview(AllREIConfigGroups.APPEARANCE_INTERFACE, PreviewLocation.RIGHT, (access, entry, width, height) -> InterfacePreviewer.create(access, width, height));
+        addPreview(AllREIConfigGroups.APPEARANCE_TOOLTIPS, PreviewLocation.RIGHT, (access, entry, width, height) -> TooltipPreviewer.create(access, width, height));
+        addPreview(AllREIConfigGroups.ACCESSIBILITY_DISPLAY, PreviewLocation.BOTTOM, (access, entry, width, height) -> AccessibilityDisplayPreviewer.create(access, width));
     }
     
     public static void addPreview(OptionGroup group, PreviewLocation location, SpecialGroupConstructor constructor) {
         SPECIAL_GROUPS.put(group, Pair.of(location, constructor));
     }
     
-    public static WidgetWithBounds create(OptionGroup entry, int width) {
+    public static WidgetWithBounds create(ConfigAccess access, OptionGroup entry, int width) {
         WidgetWithBounds groupTitle = Widgets.createLabel(new Point(0, 3), entry.getGroupName().copy().withStyle(style -> style.withColor(0xFFC0C0C0).withUnderlined(true)))
                 .leftAligned()
                 .withPadding(0, 0, 0, 6);
@@ -64,30 +69,30 @@ public class ConfigGroupWidget {
             Pair<PreviewLocation, SpecialGroupConstructor> pair = SPECIAL_GROUPS.get(entry);
             PreviewLocation location = pair.getLeft();
             int halfWidth = width * 6 / 10 - 2;
-            if (halfWidth <= 200) location = PreviewLocation.TOP;
+            if (halfWidth <= 200 && location == PreviewLocation.RIGHT) location = PreviewLocation.TOP;
             
             if (location == PreviewLocation.RIGHT) {
-                WidgetWithBounds original = _create(entry, halfWidth);
+                WidgetWithBounds original = _create(access, entry, halfWidth);
                 Widget background = createBackgroundSlot(() -> new Rectangle(halfWidth + 2, 0, width - halfWidth - 4, original.getBounds().height));
-                Widget right = Widgets.withTranslate(pair.getRight().create(entry, () -> width - halfWidth - 4, () -> original.getBounds().height), halfWidth + 2, 0, 0);
+                Widget right = Widgets.withTranslate(pair.getRight().create(access, entry, width - halfWidth - 4, () -> original.getBounds().height), halfWidth + 2, 0, 0);
                 contents = Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, original.getBounds().height), original, background, right);
             } else {
-                WidgetWithBounds original = _create(entry, width);
+                WidgetWithBounds original = _create(access, entry, width);
                 
                 if (location == PreviewLocation.TOP) {
-                    WidgetWithBounds widget = pair.getRight().create(entry, () -> width, null);
+                    WidgetWithBounds widget = pair.getRight().create(access, entry, width, null);
                     Widget background = createBackgroundSlot(widget::getBounds);
                     WidgetWithBounds translatedOriginal = Widgets.withTranslate(original, () -> Matrix4f.createTranslateMatrix(0, widget.getBounds().height + 4, 0));
                     contents = Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, widget.getBounds().height + 4 + translatedOriginal.getBounds().height), translatedOriginal, background, widget);
                 } else {
-                    WidgetWithBounds widget = pair.getRight().create(entry, () -> width, null);
+                    WidgetWithBounds widget = pair.getRight().create(access, entry, width, null);
                     Widget background = createBackgroundSlot(widget::getBounds);
-                    contents = Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, original.getBounds().getMaxY() + 4 + widget.getBounds().height), original,
+                    contents = Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, original.getBounds().getMaxY() + 2 + widget.getBounds().height), original,
                             Widgets.withTranslate(Widgets.concat(background, widget), () -> Matrix4f.createTranslateMatrix(0, original.getBounds().getMaxY() + 4, 0)));
                 }
             }
         } else {
-            contents = _create(entry, width);
+            contents = _create(access, entry, width);
         }
         
         return Widgets.concatWithBounds(
@@ -97,13 +102,13 @@ public class ConfigGroupWidget {
         );
     }
     
-    private static WidgetWithBounds _create(OptionGroup entry, int width) {
+    private static WidgetWithBounds _create(ConfigAccess access, OptionGroup entry, int width) {
         List<Triple<Widget, Supplier<Rectangle>, Matrix4f[]>> widgets = new ArrayList<>();
         int[] height = {0};
         
         for (CompositeOption<?> option : entry.getOptions()) {
             Matrix4f[] translation = new Matrix4f[]{Matrix4f.createTranslateMatrix(0, height[0], 0)};
-            WidgetWithBounds widget = Widgets.withTranslate(ConfigOptionWidget.create(option, width), () -> translation[0]);
+            WidgetWithBounds widget = Widgets.withTranslate(ConfigOptionWidget.create(access, option, width), () -> translation[0]);
             widgets.add(Triple.of(widget, () -> MatrixUtils.transform(translation[0], widget.getBounds()), translation));
             height[0] = Math.max(height[0], widget.getBounds().getMaxY());
             
@@ -143,7 +148,7 @@ public class ConfigGroupWidget {
     
     @FunctionalInterface
     public interface SpecialGroupConstructor {
-        WidgetWithBounds create(OptionGroup entry, IntSupplier width, @Nullable IntSupplier height);
+        WidgetWithBounds create(ConfigAccess access, OptionGroup entry, int width, @Nullable IntSupplier height);
     }
     
     public enum PreviewLocation {

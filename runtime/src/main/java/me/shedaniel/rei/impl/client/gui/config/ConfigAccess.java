@@ -21,27 +21,14 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.api.client.gui.config;
+package me.shedaniel.rei.impl.client.gui.config;
 
-import net.minecraft.client.resources.language.I18n;
+import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 
-public enum CheatingMode {
-    OFF,
-    ON,
-    WHEN_CREATIVE,
-    ;
+public interface ConfigAccess {
+    <T> T get(CompositeOption<T> option);
     
-    @Override
-    public String toString() {
-        switch (this) {
-            case ON:
-                return I18n.get("config.rei.value.enabledDisabled.true");
-            case OFF:
-                return I18n.get("config.rei.value.enabledDisabled.false");
-            case WHEN_CREATIVE:
-                return I18n.get("config.rei.value.cheats.mode.when_creative");
-            default:
-                throw new IllegalStateException("Unknown CheatingMode: " + this);
-        }
-    }
+    <T> void set(CompositeOption<T> option, T value);
+    
+    <T> T getDefault(CompositeOption<T> option);
 }
