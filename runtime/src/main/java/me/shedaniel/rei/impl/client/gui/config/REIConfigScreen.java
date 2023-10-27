@@ -32,6 +32,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
+import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.config.components.ConfigCategoriesListWidget;
 import me.shedaniel.rei.impl.client.gui.config.components.ConfigEntriesListWidget;
 import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigCategories;
@@ -94,19 +95,26 @@ public class REIConfigScreen extends Screen {
                 }));
         this.widgets.add(Widgets.createLabel(new Point(width / 2, 12), this.title));
         int sideWidth = (int) (width / 3.8);
-        Widget[] list = {ConfigEntriesListWidget.create(new Rectangle(12 + sideWidth, 32, width - 20 - sideWidth, height - 32 - 32), activeCategory.getGroups())};
-        this.widgets.add(ConfigCategoriesListWidget.create(new Rectangle(8, 32, sideWidth, height - 32 - 32), categories, new IntValue() {
+        boolean singlePane = width - 20 - sideWidth <= 330;
+        int singleSideWidth = 32 + 6 + 4;
+        Widget[] list = {ConfigEntriesListWidget.create(new Rectangle(singlePane ? 8 + singleSideWidth : 12 + sideWidth, 32, singlePane ? width - 16 - singleSideWidth : width - 20 - sideWidth, height - 32 - 32), activeCategory.getGroups())};
+        IntValue selectedCategory = new IntValue() {
             @Override
             public void accept(int i) {
                 REIConfigScreen.this.activeCategory = categories.get(i);
-                list[0] = ConfigEntriesListWidget.create(new Rectangle(12 + sideWidth, 32, width - 20 - sideWidth, height - 32 - 32), activeCategory.getGroups());
+                list[0] = ConfigEntriesListWidget.create(new Rectangle(singlePane ? 8 + singleSideWidth : 12 + sideWidth, 32, singlePane ? width - 16 - singleSideWidth : width - 20 - sideWidth, height - 32 - 32), activeCategory.getGroups());
             }
             
             @Override
             public int getAsInt() {
                 return categories.indexOf(activeCategory);
             }
-        }));
+        };
+        if (!singlePane) {
+            this.widgets.add(ConfigCategoriesListWidget.create(new Rectangle(8, 32, sideWidth, height - 32 - 32), categories, selectedCategory));
+        } else {
+            this.widgets.add(ConfigCategoriesListWidget.createTiny(new Rectangle(8, 32, singleSideWidth - 4, height - 32 - 32), categories, selectedCategory));
+        }
         this.widgets.add(Widgets.delegate(() -> list[0]));
     }
     
@@ -125,6 +133,7 @@ public class REIConfigScreen extends Screen {
         for (Widget widget : widgets) {
             widget.render(poses, mouseX, mouseY, delta);
         }
+        ScreenOverlayImpl.getInstance().lateRender(poses, mouseX, mouseY, delta);
     }
     
     @Override

@@ -35,7 +35,7 @@ import java.util.function.Function;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
-interface AllREIConfigOptions {
+public interface AllREIConfigOptions {
     static <T> CompositeOption<T> make(String id, Function<ConfigObjectImpl, T> bind,
                                        BiConsumer<ConfigObjectImpl, T> save) {
         return new CompositeOption<>(translatable("config.rei.options." + id),

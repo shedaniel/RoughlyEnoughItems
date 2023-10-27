@@ -30,8 +30,10 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
+import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigGroups;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionGroup;
+import me.shedaniel.rei.impl.client.gui.config.options.preview.TooltipPreview;
 import net.minecraft.client.gui.GuiComponent;
 import org.apache.commons.lang3.tuple.Triple;
 
@@ -42,6 +44,21 @@ import java.util.function.Supplier;
 
 public class ConfigGroupWidget {
     public static WidgetWithBounds create(OptionGroup entry, int width) {
+        if (entry == AllREIConfigGroups.APPEARANCE_TOOLTIPS) {
+            int halfWidth = width * 6 / 10 - 2;
+            WidgetWithBounds left = _create(entry, halfWidth);
+            Widget background = Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+                GuiComponent.fill(matrices, 0, 0, width - halfWidth - 4, left.getBounds().height, 0xFF333333);
+                GuiComponent.fill(matrices, 1, 1, width - halfWidth - 4 - 1, left.getBounds().height - 1, 0xFF000000);
+            });
+            Widget right = Widgets.withTranslate(TooltipPreview.create(() -> width - halfWidth - 4, () -> left.getBounds().height), halfWidth + 2, 0, 0);
+            return Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, left.getBounds().height), left, background, right);
+        }
+        
+        return _create(entry, width);
+    }
+    
+    private static WidgetWithBounds _create(OptionGroup entry, int width) {
         List<Triple<Widget, Supplier<Rectangle>, Matrix4f[]>> widgets = new ArrayList<>();
         int[] height = {0};
         WidgetWithBounds groupTitle = Widgets.createLabel(new Point(0, 3), entry.getGroupName().copy().withStyle(style -> style.withColor(0xFFC0C0C0).withUnderlined(true)))

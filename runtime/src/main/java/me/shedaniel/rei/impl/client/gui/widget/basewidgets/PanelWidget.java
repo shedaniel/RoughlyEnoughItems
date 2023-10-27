@@ -31,11 +31,10 @@ import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.config.ConfigObject;
-import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.config.RecipeBorderType;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
+import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.jetbrains.annotations.ApiStatus;
@@ -117,6 +116,7 @@ public final class PanelWidget extends Panel {
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         this.darkBackgroundAlpha.update(delta);
+        if (ConfigUtils.isReducedMotion()) this.darkBackgroundAlpha.completeImmediately();
         if (!getRendering().test(this))
             return;
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;

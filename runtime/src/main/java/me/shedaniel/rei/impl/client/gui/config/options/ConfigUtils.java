@@ -23,11 +23,22 @@
 
 package me.shedaniel.rei.impl.client.gui.config.options;
 
+import me.shedaniel.rei.api.client.config.ConfigObject;
+import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
 public interface ConfigUtils {
+    static boolean isReducedMotion() {
+        if (Minecraft.getInstance().screen instanceof REIConfigScreen screen) {
+            return ((Boolean) screen.getOptions().get(AllREIConfigOptions.REDUCED_MOTION)).booleanValue();
+        } else {
+            return ConfigObject.getInstance().isReducedMotion();
+        }
+    }
+    
     static MutableComponent literal(String text) {
         return new TextComponent(text);
     }
