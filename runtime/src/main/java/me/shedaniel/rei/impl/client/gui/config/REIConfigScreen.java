@@ -24,8 +24,11 @@
 package me.shedaniel.rei.impl.client.gui.config;
 
 import com.google.common.base.Preconditions;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.utils.value.IntValue;
+import me.shedaniel.clothconfig2.api.Modifier;
+import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -61,6 +64,9 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     private OptionCategory activeCategory;
     @Nullable
     private Menu menu;
+    @Nullable
+    private CompositeOption<ModifierKeyCode> focusedKeycodeOption = null;
+    private ModifierKeyCode partialKeycode = null;
     
     public REIConfigScreen(Screen parent) {
         this(parent, AllREIConfigCategories.CATEGORIES);
@@ -168,8 +174,40 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (menu != null && menu.mouseClicked(mouseX, mouseY, button))
+        if (menu != null) {
+            if (!menu.mouseClicked(mouseX, mouseY, button))
+                closeMenu();
             return true;
+        }
+        
+        if (this.focusedKeycodeOption != null && this.partialKeycode != null) {
+            if (this.partialKeycode.isUnknown()) {
+                this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(button));
+            } else if (this.partialKeycode.getType() == InputConstants.Type.KEYSYM) {
+                Modifier modifier = this.partialKeycode.getModifier();
+                int code = this.partialKeycode.getKeyCode().getValue();
+                if (Minecraft.ON_OSX ? code == 343 || code == 347 : code == 341 || code == 345) {
+                    this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), true, modifier.hasShift()));
+                    this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(button));
+                    return true;
+                }
+                
+                if (code == 344 || code == 340) {
+                    this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), modifier.hasControl(), true));
+                    this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(button));
+                    return true;
+                }
+                
+                if (code == 342 || code == 346) {
+                    this.partialKeycode.setModifier(Modifier.of(true, modifier.hasControl(), modifier.hasShift()));
+                    this.partialKeycode.setKeyCode(InputConstants.Type.MOUSE.getOrCreate(button));
+                    return true;
+                }
+            }
+            
+            return true;
+        }
+        
         return super.mouseClicked(mouseX, mouseY, button);
     }
     
@@ -177,6 +215,11 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (menu != null && menu.mouseReleased(mouseX, mouseY, button))
             return true;
+        if (this.focusedKeycodeOption != null && this.partialKeycode != null && !this.partialKeycode.isUnknown()) {
+            this.set(this.focusedKeycodeOption, this.partialKeycode);
+            this.focusKeycode(null);
+            return true;
+        }
         for (GuiEventListener entry : children())
             if (entry.mouseReleased(mouseX, mouseY, button))
                 return true;
@@ -193,11 +236,79 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
         return super.mouseScrolled(mouseX, mouseY, amount);
     }
     
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (this.focusedKeycodeOption != null) {
+            if (keyCode != 256) {
+                if (this.partialKeycode.isUnknown()) {
+                    this.partialKeycode.setKeyCode(InputConstants.getKey(keyCode, scanCode));
+                } else {
+                    Modifier modifier = this.partialKeycode.getModifier();
+                    if (this.partialKeycode.getType() == InputConstants.Type.KEYSYM) {
+                        int code = this.partialKeycode.getKeyCode().getValue();
+                        if (Minecraft.ON_OSX ? code == 343 || code == 347 : code == 341 || code == 345) {
+                            this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), true, modifier.hasShift()));
+                            this.partialKeycode.setKeyCode(InputConstants.getKey(keyCode, scanCode));
+                            return true;
+                        }
+                        
+                        if (code == 344 || code == 340) {
+                            this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), modifier.hasControl(), true));
+                            this.partialKeycode.setKeyCode(InputConstants.getKey(keyCode, scanCode));
+                            return true;
+                        }
+                        
+                        if (code == 342 || code == 346) {
+                            this.partialKeycode.setModifier(Modifier.of(true, modifier.hasControl(), modifier.hasShift()));
+                            this.partialKeycode.setKeyCode(InputConstants.getKey(keyCode, scanCode));
+                            return true;
+                        }
+                    }
+                    
+                    if (Minecraft.ON_OSX ? keyCode == 343 || keyCode == 347 : keyCode == 341 || keyCode == 345) {
+                        this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), true, modifier.hasShift()));
+                        return true;
+                    }
+                    
+                    if (keyCode == 344 || keyCode == 340) {
+                        this.partialKeycode.setModifier(Modifier.of(modifier.hasAlt(), modifier.hasControl(), true));
+                        return true;
+                    }
+                    
+                    if (keyCode == 342 || keyCode == 346) {
+                        this.partialKeycode.setModifier(Modifier.of(true, modifier.hasControl(), modifier.hasShift()));
+                        return true;
+                    }
+                }
+            } else {
+                this.set(this.focusedKeycodeOption, ModifierKeyCode.unknown());
+                this.focusKeycode(null);
+            }
+            
+            return true;
+        }
+        
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+    
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        if (this.focusedKeycodeOption != null && this.partialKeycode != null) {
+            this.set(this.focusedKeycodeOption, this.partialKeycode);
+            this.focusKeycode(null);
+            return true;
+        }
+        
+        return super.keyReleased(keyCode, scanCode, modifiers);
+    }
+    
+    @Override
     public void openMenu(Menu menu) {
         this.menu = menu;
         this.widgets.add(menu);
     }
     
+    @Override
     public void closeMenu() {
         this.widgets.remove(menu);
         this.menu = null;
@@ -216,5 +327,23 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     @Override
     public <T> T getDefault(CompositeOption<T> option) {
         return (T) getDefaultOptions().get(option);
+    }
+    
+    @Override
+    public void focusKeycode(CompositeOption<ModifierKeyCode> option) {
+        this.focusedKeycodeOption = option;
+        
+        if (this.focusedKeycodeOption != null) {
+            this.partialKeycode = this.get(this.focusedKeycodeOption);
+            this.partialKeycode.setKeyCodeAndModifier(InputConstants.UNKNOWN, Modifier.none());
+        } else {
+            this.partialKeycode = null;
+        }
+    }
+    
+    @Override
+    @Nullable
+    public CompositeOption<ModifierKeyCode> getFocusedKeycode() {
+        return this.focusedKeycodeOption;
     }
 }

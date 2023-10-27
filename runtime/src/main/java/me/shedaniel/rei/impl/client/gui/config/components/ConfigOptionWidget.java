@@ -38,6 +38,7 @@ import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.impl.client.gui.config.ConfigAccess;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.MutableComponent;
@@ -47,6 +48,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
 public class ConfigOptionWidget {
@@ -59,7 +61,15 @@ public class ConfigOptionWidget {
         WidgetWithBounds optionValue = ConfigOptionValueWidget.create(access, option);
         widgets.add(Widgets.withTranslate(optionValue, () -> Matrix4f.createTranslateMatrix(width - optionValue.getBounds().width - optionValue.getBounds().x, 0, 0)));
         widgets.add(new WidgetWithBounds() {
-            final MutableComponent description = option.getDescription().copy().withStyle(style -> style.withColor(0xFF757575));
+            final MutableComponent description = Util.make(() -> {
+                MutableComponent description = option.getDescription().copy().withStyle(style -> style.withColor(0xFF757575));
+                if (description.getString().endsWith(".desc")) {
+                    return literal("");
+                } else {
+                    return description;
+                }
+            });
+            
             final List<FormattedCharSequence> split = Minecraft.getInstance().font.split(description, width);
             final boolean hasPreview = option.hasPreview();
             final Label previewLabel = Widgets.createLabel(new Point(), translatable("config.rei.texts.preview"))

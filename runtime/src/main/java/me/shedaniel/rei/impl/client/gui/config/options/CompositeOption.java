@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.config.options;
 
+import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -40,7 +41,7 @@ public class CompositeOption<T> {
     private ConfigPreviewer<T> previewer;
     @Nullable
     private Supplier<T> defaultValue = null;
-    private OptionValueEntry<T> entry;
+    private OptionValueEntry<T> entry = OptionValueEntry.noOp();
     
     public CompositeOption(Component name, Component description, Function<ConfigObjectImpl, T> bind, BiConsumer<ConfigObjectImpl, T> save) {
         this.name = name;
@@ -64,6 +65,10 @@ public class CompositeOption<T> {
     
     public CompositeOption<Boolean> enabledDisabled() {
         return ((CompositeOption<Boolean>) this).entry(OptionValueEntry.enabledDisabled());
+    }
+    
+    public CompositeOption<ModifierKeyCode> keybind() {
+        return ((CompositeOption<ModifierKeyCode>) this).entry(OptionValueEntry.keybind());
     }
     
     public CompositeOption<T> enumOptions(T... entry) {
