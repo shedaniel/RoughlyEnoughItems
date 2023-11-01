@@ -56,9 +56,10 @@ public class ConfigOptionWidget {
         List<Widget> widgets = new ArrayList<>();
         int[] stableHeight = {12};
         int[] height = {12};
-        widgets.add(Widgets.createLabel(new Point(0, 0), option.getName().copy().withStyle(style -> style.withColor(0xFFC0C0C0)))
+        Label fieldNameLabel;
+        widgets.add(fieldNameLabel = Widgets.createLabel(new Point(0, 0), option.getName().copy().withStyle(style -> style.withColor(0xFFC0C0C0)))
                 .leftAligned());
-        WidgetWithBounds optionValue = ConfigOptionValueWidget.create(access, option);
+        WidgetWithBounds optionValue = ConfigOptionValueWidget.create(access, option, width - 10 - fieldNameLabel.getBounds().width);
         widgets.add(Widgets.withTranslate(optionValue, () -> Matrix4f.createTranslateMatrix(width - optionValue.getBounds().width - optionValue.getBounds().x, 0, 0)));
         widgets.add(new WidgetWithBounds() {
             final MutableComponent description = Util.make(() -> {
