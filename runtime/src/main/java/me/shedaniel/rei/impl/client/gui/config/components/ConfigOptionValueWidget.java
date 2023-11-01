@@ -34,6 +34,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.client.gui.config.ConfigAccess;
 import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
@@ -42,24 +43,52 @@ import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import me.shedaniel.rei.impl.client.gui.modules.entries.ToggleMenuEntry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 
+import java.lang.ref.Reference;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
 public class ConfigOptionValueWidget {
-    public static <T> WidgetWithBounds create(ConfigAccess access, CompositeOption<T> option) {
-        OptionValueEntry<T> entry = option.getEntry();
-        T value = access.get(option);
-        Component[] text = {entry.getOption(value)};
+    public static <T> WidgetWithBounds create(ConfigAccess access, CompositeOption<T> option, int width) {
+        Font font = Minecraft.getInstance().font;
+        Component[] text = {null};
+        Consumer<Component> setText = t -> {
+            if (access.getFocusedKeycode() == option) {
+                text[0] = literal("> ").withStyle(ChatFormatting.YELLOW)
+                        .append(t.copy().withStyle(ChatFormatting.YELLOW))
+                        .append(literal(" <").withStyle(ChatFormatting.YELLOW));
+            } else if (access.get(option).equals(Objects.requireNonNullElseGet(option.getDefaultValue(), () -> access.getDefault(option)))) {
+                text[0] = translatable("config.rei.value.default", t);
+                
+                if (font.width(text[0]) > width) {
+                    int trimTo = width - font.width("...") - (font.width(text[0]) - font.width(t));
+                    FormattedText trimmed = font.substrByWidth(t, trimTo);
+                    FormattedText composite = FormattedText.composite(trimmed, literal("..."));
+                    text[0] = literal(composite.getString());
+                    text[0] = translatable("config.rei.value.default", text[0]);
+                }
+            } else if (font.width(t) > width) {
+                int trimTo = width - font.width("...");
+                FormattedText trimmed = font.substrByWidth(t, trimTo);
+                FormattedText composite = FormattedText.composite(trimmed, literal("..."));
+                text[0] = literal(composite.getString());
+            } else {
+                text[0] = t;
+            }
+        };
         
-        if (value.equals(Objects.requireNonNullElseGet(option.getDefaultValue(), () -> access.getDefault(option)))) {
-            text[0] = translatable("config.rei.value.default", text[0]);
-        }
+        setText.accept(option.getEntry().getOption(access.get(option)));
         
         Matrix4f[] matrix = {new Matrix4f()};
         Label label = Widgets.createLabel(new Point(), text[0]).rightAligned()
@@ -73,10 +102,10 @@ public class ConfigOptionValueWidget {
                     }
                 });
         
-        if (entry instanceof OptionValueEntry.Selection<T> selection) {
-            applySelection(access, option, selection, label, text, matrix);
+        if (option.getEntry() instanceof OptionValueEntry.Selection<T> selection) {
+            applySelection(access, option, selection, label, setText, matrix);
         } else if (access.get(option) instanceof ModifierKeyCode) {
-            applyKeycode(access, option, label, text, matrix);
+            applyKeycode(access, option, label, setText, matrix);
         }
         
         return Widgets.concatWithBounds(() -> new Rectangle(-label.getBounds().width, 0, label.getBounds().width + 8, 14),
@@ -87,16 +116,12 @@ public class ConfigOptionValueWidget {
         );
     }
     
-    private static <T> void applySelection(ConfigAccess access, CompositeOption<T> option, OptionValueEntry.Selection<T> selection, Label label, Component[] text, Matrix4f[] matrix) {
+    private static <T> void applySelection(ConfigAccess access, CompositeOption<T> option, OptionValueEntry.Selection<T> selection, Label label, Consumer<Component> setText, Matrix4f[] matrix) {
         int noOfOptions = selection.getOptions().size();
         if (noOfOptions == 2) {
             label.clickable().onClick($ -> {
                 access.set(option, selection.getOptions().get((selection.getOptions().indexOf(access.get(option)) + 1) % 2));
-                text[0] = selection.getOption(access.get(option));
-                
-                if (access.get(option).equals(Objects.requireNonNullElseGet(option.getDefaultValue(), () -> access.getDefault(option)))) {
-                    text[0] = translatable("config.rei.value.default", text[0]);
-                }
+                setText.accept(selection.getOption(access.get(option)));
             });
         } else if (noOfOptions >= 2) {
             label.clickable().onClick($ -> {
@@ -109,11 +134,7 @@ public class ConfigOptionValueWidget {
                     return ToggleMenuEntry.of(selectionOption, () -> false, o -> {
                         ((REIConfigScreen) Minecraft.getInstance().screen).closeMenu();
                         access.set(option, opt);
-                        text[0] = selection.getOption(opt);
-                        
-                        if (access.get(option).equals(access.getDefault(option))) {
-                            text[0] = translatable("config.rei.value.default", text[0]);
-                        }
+                        setText.accept(selection.getOption(opt));
                     });
                 }), false);
                 access.closeMenu();
@@ -122,7 +143,7 @@ public class ConfigOptionValueWidget {
         }
     }
     
-    private static <T> void applyKeycode(ConfigAccess access, CompositeOption<T> option, Label label, Component[] text, Matrix4f[] matrix) {
+    private static <T> void applyKeycode(ConfigAccess access, CompositeOption<T> option, Label label, Consumer<Component> setText, Matrix4f[] matrix) {
         label.clickable().onClick($ -> {
             access.closeMenu();
             access.focusKeycode((CompositeOption<ModifierKeyCode>) option);
@@ -130,15 +151,7 @@ public class ConfigOptionValueWidget {
         BiConsumer<PoseStack, Label> render = label.getOnRender();
         label.onRender((poses, $) -> {
             render.accept(poses, $);
-            text[0] = ((ModifierKeyCode) access.get(option)).getLocalizedName();
-            
-            if (access.getFocusedKeycode() == option) {
-                text[0] = literal("> ").withStyle(ChatFormatting.YELLOW)
-                        .append(text[0].copy().withStyle(ChatFormatting.YELLOW))
-                        .append(literal(" <").withStyle(ChatFormatting.YELLOW));
-            } else if (access.get(option).equals(access.getDefault(option))) {
-                text[0] = translatable("config.rei.value.default", text[0]);
-            }
+            setText.accept(((ModifierKeyCode) access.get(option)).getLocalizedName());
         });
     }
 }

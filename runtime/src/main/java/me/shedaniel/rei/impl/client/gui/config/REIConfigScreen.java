@@ -95,10 +95,6 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     public void init() {
         super.init();
         this.widgets.clear();
-        this.widgets.add(Widgets.createButton(new Rectangle(4, 4, 100, 20), new TranslatableComponent("text.rei.credits"))
-                .onClick(button -> {
-                    Minecraft.getInstance().setScreen(new CreditsScreen(this));
-                }));
         this.widgets.add(Widgets.createLabel(new Point(width / 2, 12), this.title));
         int sideWidth = (int) (width / 4.2);
         boolean singlePane = width - 20 - sideWidth <= 330;
