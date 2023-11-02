@@ -83,7 +83,7 @@ public final class RecipeDisplayExporter {
         RenderTarget renderTarget = new TextureTarget(window.getWidth(), window.getHeight(), true, false);
         renderTarget.bindWrite(true);
         RenderSystem.clear(256, Minecraft.ON_OSX);
-        Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float) ((double) window.getWidth() / window.getGuiScale()), 0.0F, (float) ((double) window.getHeight() / window.getGuiScale()), 1000.0F, 3000.0F);
+        Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float) ((double) window.getWidth() / window.getGuiScale()), (float) ((double) window.getHeight() / window.getGuiScale()), 0.0F, 1000.0F, 3000.0F);
         RenderSystem.setProjectionMatrix(matrix4f);
         PoseStack poseStack = RenderSystem.getModelViewStack();
         poseStack.pushPose();
