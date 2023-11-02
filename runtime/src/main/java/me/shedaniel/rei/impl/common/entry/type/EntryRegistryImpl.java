@@ -65,7 +65,9 @@ public class EntryRegistryImpl implements EntryRegistry {
     
     @Override
     public void acceptPlugin(REIClientPlugin plugin) {
+        int size = size();
         plugin.registerEntries(this);
+        InternalLogger.getInstance().trace("Registered %d entries from plugin %s", size() - size, plugin.getPluginProviderName());
     }
     
     @Override

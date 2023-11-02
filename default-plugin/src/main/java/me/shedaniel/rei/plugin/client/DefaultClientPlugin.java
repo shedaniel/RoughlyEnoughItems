@@ -41,7 +41,6 @@ import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.simple.SimpleTransferHandler;
-import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
@@ -105,6 +104,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -129,28 +129,19 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     
     @Override
     public void registerEntries(EntryRegistry registry) {
-        if (Minecraft.getInstance().player == null || Minecraft.getInstance().player.connection == null)
-            return;
-        Minecraft.getInstance().executeBlocking(() -> {
-            CreativeModeTabs.tryRebuildTabContents(Minecraft.getInstance().player.connection.enabledFeatures(),
-                    Minecraft.getInstance().options.operatorItemsTab().get() && Minecraft.getInstance().player.canUseGameMasterBlocks(),
-                    BasicDisplay.registryAccess());
-        });
         Multimap<Item, EntryStack<ItemStack>> items = Multimaps.newListMultimap(new Reference2ObjectOpenHashMap<>()
                 , ArrayList::new);
         
-        for (CreativeModeTab tab : CreativeModeTabs.allTabs()) {
-            if (tab.getType() != CreativeModeTab.Type.HOTBAR && tab.getType() != CreativeModeTab.Type.INVENTORY) {
-                try {
-                    for (ItemStack stack : tab.getDisplayItems()) {
-                        try {
-                            items.put(stack.getItem(), EntryStacks.of(stack));
-                        } catch (Exception ignore) {
-                        }
+        for (Map.Entry<CreativeModeTab, Collection<ItemStack>> entry : collectTabs().entrySet()) {
+            try {
+                for (ItemStack stack : entry.getValue()) {
+                    try {
+                        items.put(stack.getItem(), EntryStacks.of(stack));
+                    } catch (Exception ignore) {
                     }
-                } catch (Exception exception) {
-                    exception.printStackTrace();
                 }
+            } catch (Exception exception) {
+                exception.printStackTrace();
             }
         }
         
@@ -172,6 +163,17 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             if (!state.isEmpty() && state.isSource()) {
                 registry.addEntry(EntryStacks.of(fluid));
             }
+        }
+    }
+    
+    private static Map<CreativeModeTab, Collection<ItemStack>> collectTabs() {
+        try {
+            return (Map<CreativeModeTab, Collection<ItemStack>>) Class.forName(Platform.isForge() ? "me.shedaniel.rei.impl.client.forge.CreativeModeTabCollectorImpl"
+                            : "me.shedaniel.rei.impl.client.fabric.CreativeModeTabCollectorImpl")
+                    .getDeclaredMethod("collectTabs")
+                    .invoke(null);
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            throw new RuntimeException(e);
         }
     }
     
