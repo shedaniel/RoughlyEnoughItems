@@ -108,6 +108,8 @@ public interface AllREIConfigOptions {
     });
     CompositeOption<DisplayPanelLocation> LOCATION = make("layout.location", i -> i.advanced.accessibility.displayPanelLocation, (i, v) -> i.advanced.accessibility.displayPanelLocation = v)
             .enumOptions();
+    CompositeOption<Boolean> HIDE_LIST_IF_IDLE = make("layout.hide_when_idle", i -> i.appearance.hideEntryPanelIfIdle, (i, v) -> i.appearance.hideEntryPanelIfIdle = v)
+            .enabledDisabled();
     CompositeOption<Boolean> LARGER_TABS = make("accessibility.larger_tabs", i -> !i.advanced.accessibility.useCompactTabs, (i, v) -> i.advanced.accessibility.useCompactTabs = !v)
             .enabledDisabled();
     CompositeOption<Boolean> LARGER_ARROW_BUTTONS = make("accessibility.larger_arrow_buttons", i -> !i.advanced.accessibility.useCompactTabButtons, (i, v) -> i.advanced.accessibility.useCompactTabButtons = !v)
@@ -116,6 +118,10 @@ public interface AllREIConfigOptions {
             .ofBoolean(translatable("config.rei.value.accessibility.scrollbar_visibility.when_scrolling"), translatable("config.rei.value.accessibility.scrollbar_visibility.always"));
     CompositeOption<Boolean> CLICKABLE_RECIPE_ARROWS = make("accessibility.clickable_recipe_arrows", i -> i.advanced.miscellaneous.clickableRecipeArrows, (i, v) -> i.advanced.miscellaneous.clickableRecipeArrows = v)
             .enabledDisabled();
+    CompositeOption<Boolean> VANILLA_RECIPE_BOOK = make("accessibility.vanilla_recipe_book", i -> !i.functionality.disableRecipeBook, (i, v) -> i.functionality.disableRecipeBook = !v)
+            .enabledDisabled();
+    CompositeOption<Boolean> STATUS_EFFECTS_LOCATION = make("accessibility.status_effects_location", i -> i.functionality.leftSideMobEffects, (i, v) -> i.functionality.leftSideMobEffects = v)
+            .ofBoolean(translatable("config.rei.value.accessibility.status_effects_location.right"), translatable("config.rei.value.accessibility.status_effects_location.left"));
     CompositeOption<Boolean> FAVORITES_MODE = make("favorites.mode", i -> i.basics.favoritesEnabled, (i, v) -> i.basics.favoritesEnabled = v)
             .enabledDisabled();
     CompositeOption<FavoriteAddWidgetMode> NEW_FAVORITES_BUTTON_VISIBILITY = make("favorites.new_favorites_button_visibility", i -> i.advanced.layout.favoriteAddWidgetMode, (i, v) -> i.advanced.layout.favoriteAddWidgetMode = v)
@@ -144,6 +150,8 @@ public interface AllREIConfigOptions {
     // TODO: ASYNC_SEARCH
     // TODO: CUSTOMIZED_FILTERING
     CompositeOption<Boolean> FILTER_DISPLAYS = make("filtering.filter_displays", i -> i.advanced.filtering.shouldFilterDisplays, (i, v) -> i.advanced.filtering.shouldFilterDisplays = v)
+            .enabledDisabled();
+    CompositeOption<Boolean> MERGE_DISPLAYS = make("filtering.merge_displays", i -> i.advanced.layout.mergeDisplayUnderOne, (i, v) -> i.advanced.layout.mergeDisplayUnderOne = v)
             .enabledDisabled();
     CompositeOption<Boolean> DISPLAY_MODE = make("list.display_mode", i -> i.appearance.scrollingEntryListWidget, (i, v) -> i.appearance.scrollingEntryListWidget = v)
             .ofBoolean(translatable("config.rei.value.list.display_mode.paginated"), translatable("config.rei.value.list.display_mode.scrolled"));
