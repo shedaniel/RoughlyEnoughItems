@@ -64,13 +64,17 @@ public interface AllREIConfigGroups {
             .add(CRAFTABLE_FILTER);
     OptionGroup LAYOUT_PANEL = make("layout.panel")
             .add(BOUNDARIES)
-            .add(LOCATION);
+            .add(LOCATION)
+            .add(HIDE_LIST_IF_IDLE);
     OptionGroup ACCESSIBILITY_DISPLAY = make("accessibility.display")
             .add(LARGER_TABS)
             .add(LARGER_ARROW_BUTTONS);
     OptionGroup ACCESSIBILITY_WIDGETS = make("accessibility.widgets")
             .add(SCROLLBAR_VISIBILITY)
             .add(CLICKABLE_RECIPE_ARROWS);
+    OptionGroup ACCESSIBILITY_FEATURES = make("accessibility.features")
+            .add(VANILLA_RECIPE_BOOK)
+            .add(STATUS_EFFECTS_LOCATION);
     OptionGroup FAVORITES_FAVORITES = make("favorites.favorites")
             .add(FAVORITES_MODE)
             .add(NEW_FAVORITES_BUTTON_VISIBILITY);
@@ -94,12 +98,14 @@ public interface AllREIConfigGroups {
     OptionGroup SEARCH_ADVANCED = make("search.advanced");
     OptionGroup FILTERING_FILTERING = make("filtering.filtering");
     OptionGroup FILTERING_ADVANCED = make("filtering.advanced")
-            .add(FILTER_DISPLAYS);
+            .add(FILTER_DISPLAYS)
+            .add(MERGE_DISPLAYS);
     OptionGroup LIST_ENTRIES = make("list.entries")
             .add(DISPLAY_MODE)
             .add(ORDERING)
             .add(ZOOM)
             .add(FOCUS_MODE);
+    OptionGroup LIST_COLLAPSIBLE_GROUPS = make("list.collapsible_groups");
     OptionGroup DEBUG_PERFORMANCE = make("debug.performance")
             .add(SEARCH_PERFORMANCE)
             .add(ENTRY_LIST_PERFORMANCE);

@@ -51,7 +51,8 @@ public interface AllREIConfigCategories {
             .add(LAYOUT_PANEL);
     OptionCategory ACCESSIBILITY = make("accessibility")
             .add(ACCESSIBILITY_DISPLAY)
-            .add(ACCESSIBILITY_WIDGETS);
+            .add(ACCESSIBILITY_WIDGETS)
+            .add(ACCESSIBILITY_FEATURES);
     OptionCategory FAVORITES = make("favorites")
             .add(FAVORITES_FAVORITES)
             .add(FAVORITES_ADVANCED);
@@ -66,7 +67,8 @@ public interface AllREIConfigCategories {
             .add(FILTERING_FILTERING)
             .add(FILTERING_ADVANCED);
     OptionCategory LIST = make("list")
-            .add(LIST_ENTRIES);
+            .add(LIST_ENTRIES)
+            .add(LIST_COLLAPSIBLE_GROUPS);
     OptionCategory DEBUG = make("debug")
             .add(DEBUG_PERFORMANCE);
     OptionCategory FLAGS = make("flags");
