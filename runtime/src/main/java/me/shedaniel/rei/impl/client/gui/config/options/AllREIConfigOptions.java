@@ -27,6 +27,7 @@ import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.client.gui.config.*;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
+import me.shedaniel.rei.impl.client.gui.config.options.configure.PanelBoundariesConfiguration;
 import net.minecraft.client.Minecraft;
 
 import java.util.function.BiConsumer;
@@ -103,9 +104,18 @@ public interface AllREIConfigOptions {
             }));
     CompositeOption<Boolean> CRAFTABLE_FILTER = make("layout.craftable_filter", i -> i.appearance.layout.showCraftableOnlyButton, (i, v) -> i.appearance.layout.showCraftableOnlyButton = v)
             .enabledDisabled();
-    // TODO: BOUNDARIES
-    CompositeOption<Boolean> BOUNDARIES = make("layout.boundaries", i -> true, (i, v) -> {
-    });
+    CompositeOption<PanelBoundary> BOUNDARIES = make("layout.boundaries", i -> {
+        return new PanelBoundary(i.appearance.horizontalEntriesBoundaries, i.appearance.verticalEntriesBoundaries,
+                i.appearance.horizontalEntriesBoundariesColumns, i.appearance.verticalEntriesBoundariesRows,
+                i.appearance.horizontalEntriesBoundariesAlignment, i.appearance.verticalEntriesBoundariesAlignment);
+    }, (i, v) -> {
+        i.appearance.horizontalEntriesBoundaries = v.horizontalPercentage();
+        i.appearance.verticalEntriesBoundaries = v.verticalPercentage();
+        i.appearance.horizontalEntriesBoundariesColumns = v.horizontalLimit();
+        i.appearance.verticalEntriesBoundariesRows = v.verticalLimit();
+        i.appearance.horizontalEntriesBoundariesAlignment = v.horizontalAlign();
+        i.appearance.verticalEntriesBoundariesAlignment = v.verticalAlign();
+    }).configure(PanelBoundariesConfiguration.INSTANCE);
     CompositeOption<DisplayPanelLocation> LOCATION = make("layout.location", i -> i.advanced.accessibility.displayPanelLocation, (i, v) -> i.advanced.accessibility.displayPanelLocation = v)
             .enumOptions();
     CompositeOption<Boolean> HIDE_LIST_IF_IDLE = make("layout.hide_when_idle", i -> i.appearance.hideEntryPanelIfIdle, (i, v) -> i.appearance.hideEntryPanelIfIdle = v)

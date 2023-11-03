@@ -373,6 +373,12 @@ public interface ConfigObject {
     double getVerticalEntriesBoundariesRows();
     
     @ApiStatus.Experimental
+    double getHorizontalEntriesBoundariesAlignments();
+    
+    @ApiStatus.Experimental
+    double getVerticalEntriesBoundariesAlignments();
+    
+    @ApiStatus.Experimental
     double getFavoritesHorizontalEntriesBoundariesPercentage();
     
     @ApiStatus.Experimental

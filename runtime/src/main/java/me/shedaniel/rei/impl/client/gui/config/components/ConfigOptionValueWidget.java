@@ -34,7 +34,6 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import me.shedaniel.rei.api.common.util.FormattingUtils;
 import me.shedaniel.rei.impl.client.gui.config.ConfigAccess;
 import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
@@ -44,14 +43,11 @@ import me.shedaniel.rei.impl.client.gui.modules.entries.ToggleMenuEntry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 
-import java.lang.ref.Reference;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -68,7 +64,7 @@ public class ConfigOptionValueWidget {
                 text[0] = literal("> ").withStyle(ChatFormatting.YELLOW)
                         .append(t.copy().withStyle(ChatFormatting.YELLOW))
                         .append(literal(" <").withStyle(ChatFormatting.YELLOW));
-            } else if (access.get(option).equals(Objects.requireNonNullElseGet(option.getDefaultValue(), () -> access.getDefault(option)))) {
+            } else if (!(option.getEntry() instanceof OptionValueEntry.Configure<T>) && access.get(option).equals(Objects.requireNonNullElseGet(option.getDefaultValue(), () -> access.getDefault(option)))) {
                 text[0] = translatable("config.rei.value.default", t);
                 
                 if (font.width(text[0]) > width) {
@@ -106,6 +102,13 @@ public class ConfigOptionValueWidget {
             applySelection(access, option, selection, label, setText, matrix);
         } else if (access.get(option) instanceof ModifierKeyCode) {
             applyKeycode(access, option, label, setText, matrix);
+        } else if (option.getEntry() instanceof OptionValueEntry.Configure<T>) {
+            label.clickable().onClick($ -> {
+                ((OptionValueEntry.Configure<T>) option.getEntry()).configure(access, option, () -> {
+                    Minecraft.getInstance().setScreen((Screen) access);
+                    setText.accept(option.getEntry().getOption(access.get(option)));
+                });
+            });
         }
         
         return Widgets.concatWithBounds(() -> new Rectangle(-label.getBounds().width, 0, label.getBounds().width + 8, 14),

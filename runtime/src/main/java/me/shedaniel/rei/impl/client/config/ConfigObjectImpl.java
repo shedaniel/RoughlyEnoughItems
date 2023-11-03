@@ -541,6 +541,16 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return Mth.clamp(appearance.verticalEntriesBoundariesRows, 1, 1000);
     }
     
+    @Override
+    public double getHorizontalEntriesBoundariesAlignments() {
+        return appearance.horizontalEntriesBoundariesAlignment;
+    }
+    
+    @Override
+    public double getVerticalEntriesBoundariesAlignments() {
+        return appearance.verticalEntriesBoundariesAlignment;
+    }
+    
     @ApiStatus.Experimental
     @Override
     public double getFavoritesHorizontalEntriesBoundariesPercentage() {
@@ -665,6 +675,8 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") public double verticalEntriesBoundaries = 1.0;
         public int horizontalEntriesBoundariesColumns = 50;
         public int verticalEntriesBoundariesRows = 1000;
+        public double horizontalEntriesBoundariesAlignment = 1.0;
+        public double verticalEntriesBoundariesAlignment = 0.5;
         @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") public double favoritesHorizontalEntriesBoundaries = 1.0;
         public int favoritesHorizontalEntriesBoundariesColumns = 50;
         @UseSpecialSearchFilterSyntaxHighlightingScreen public SyntaxHighlightingMode syntaxHighlightingMode = SyntaxHighlightingMode.COLORFUL;
