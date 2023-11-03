@@ -51,11 +51,11 @@ import static java.util.concurrent.TimeUnit.*;
 
 @Environment(EnvType.CLIENT)
 public class PerformanceScreen extends Screen {
-    private Screen parent;
+    private Runnable onClose;
     
-    public PerformanceScreen(Screen parent) {
+    public PerformanceScreen(Runnable onClose) {
         super(new TranslatableComponent("text.rei.performance"));
-        this.parent = parent;
+        this.onClose = onClose;
     }
     
     private PerformanceEntryListWidget list;
@@ -140,8 +140,8 @@ public class PerformanceScreen extends Screen {
         {
             Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));
             addRenderableWidget(new Button(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
-                minecraft.setScreen(parent);
-                this.parent = null;
+                this.onClose.run();
+                this.onClose = null;
             }));
         }
         list = new PerformanceEntryListWidget();

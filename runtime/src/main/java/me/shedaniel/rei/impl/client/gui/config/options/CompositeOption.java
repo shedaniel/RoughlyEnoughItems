@@ -42,6 +42,7 @@ public class CompositeOption<T> {
     @Nullable
     private Supplier<T> defaultValue = null;
     private OptionValueEntry<T> entry = OptionValueEntry.noOp();
+    private boolean requiresLevel = false;
     
     public CompositeOption(Component name, Component description, Function<ConfigObjectImpl, T> bind, BiConsumer<ConfigObjectImpl, T> save) {
         this.name = name;
@@ -81,6 +82,23 @@ public class CompositeOption<T> {
     
     public CompositeOption<T> configure(OptionValueEntry.Configurator<T> configurator) {
         return this.entry(OptionValueEntry.configure(configurator));
+    }
+    
+    public CompositeOption<T> details(OptionValueEntry.Configurator<T> configurator) {
+        return this.entry(OptionValueEntry.details(configurator));
+    }
+    
+    public CompositeOption<T> reload(OptionValueEntry.Configurator<T> configurator) {
+        return this.entry(OptionValueEntry.reload(configurator));
+    }
+    
+    public CompositeOption<T> requiresLevel() {
+        this.requiresLevel = true;
+        return this;
+    }
+    
+    public boolean isRequiresLevel() {
+        return requiresLevel;
     }
     
     public CompositeOption<T> previewer(ConfigPreviewer<T> previewer) {
@@ -126,5 +144,14 @@ public class CompositeOption<T> {
     public T getDefaultValue() {
         if (defaultValue == null) return null;
         return defaultValue.get();
+    }
+    
+    public CompositeOption<T> copy() {
+        CompositeOption<T> option = new CompositeOption<>(name, description, bind, save);
+        option.entry = entry;
+        option.previewer = previewer;
+        option.defaultValue = defaultValue;
+        option.requiresLevel = requiresLevel;
+        return option;
     }
 }

@@ -62,18 +62,16 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class CollapsibleEntriesScreen extends Screen {
-    private final Screen parent;
+    private final Runnable onClose;
     private final CollapsibleConfigManager.CollapsibleConfigObject configObject;
-    private final Runnable editedSink;
     private final List<CollapsibleEntryWidget> widgets = new ArrayList<>();
     private ListWidget listWidget;
     private boolean dirty = true;
     
-    public CollapsibleEntriesScreen(Screen parent, CollapsibleConfigManager.CollapsibleConfigObject configObject, Runnable editedSink) {
+    public CollapsibleEntriesScreen(Runnable onClose, CollapsibleConfigManager.CollapsibleConfigObject configObject) {
         super(new TranslatableComponent("text.rei.collapsible.entries.title"));
-        this.parent = parent;
+        this.onClose = onClose;
         this.configObject = configObject;
-        this.editedSink = editedSink;
         this.prepareWidgets(configObject);
     }
     
@@ -82,11 +80,10 @@ public class CollapsibleEntriesScreen extends Screen {
         
         for (CollapsibleConfigManager.CustomGroup customEntry : configObject.customGroups) {
             this.widgets.add(new CollapsibleEntryWidget(true, customEntry.id, new TextComponent(customEntry.name),
-                    CollectionUtils.filterAndMap(customEntry.stacks, EntryStackProvider::isValid, EntryStackProvider::provide), configObject, editedSink,
+                    CollectionUtils.filterAndMap(customEntry.stacks, EntryStackProvider::isValid, EntryStackProvider::provide), configObject,
                     () -> {
                         this.prepareWidgets(configObject);
                         this.dirty = true;
-                        this.editedSink.run();
                     }));
         }
         
@@ -101,11 +98,10 @@ public class CollapsibleEntriesScreen extends Screen {
         }
         
         for (CollapsibleEntryRegistryImpl.Entry entry : collapsibleRegistry.getEntries()) {
-            this.widgets.add(new CollapsibleEntryWidget(false, entry.getId(), entry.getName(), entries.get(entry.getId()), configObject, editedSink,
+            this.widgets.add(new CollapsibleEntryWidget(false, entry.getId(), entry.getName(), entries.get(entry.getId()), configObject,
                     () -> {
                         this.prepareWidgets(configObject);
                         this.dirty = true;
-                        this.editedSink.run();
                     }));
         }
     }
@@ -124,7 +120,6 @@ public class CollapsibleEntriesScreen extends Screen {
                 setupCustom(new ResourceLocation("custom:" + UUID.randomUUID()), "", new ArrayList<>(), this.configObject, () -> {
                     this.prepareWidgets(configObject);
                     this.dirty = true;
-                    this.editedSink.run();
                 });
             }));
         }
@@ -202,7 +197,7 @@ public class CollapsibleEntriesScreen extends Screen {
     
     @Override
     public void onClose() {
-        this.minecraft.setScreen(this.parent);
+        this.onClose.run();
     }
     
     private static class ListWidget extends Widget {

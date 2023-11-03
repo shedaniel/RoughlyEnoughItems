@@ -60,7 +60,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CollapsibleEntryWidget extends WidgetWithBounds {
@@ -94,7 +93,7 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
     private int rowSize;
     
     public CollapsibleEntryWidget(boolean custom, ResourceLocation id, Component component, Collection<EntryStack<?>> stacks,
-            CollapsibleConfigManager.CollapsibleConfigObject configObject, Runnable editedSink, Runnable markDirty) {
+                                  CollapsibleConfigManager.CollapsibleConfigObject configObject, Runnable markDirty) {
         this.custom = custom;
         this.id = id;
         this.component = component;
@@ -107,7 +106,6 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
             } else {
                 this.configObject.disabledGroups.add(this.id);
             }
-            editedSink.run();
         });
         this.toggleButton.setWidth(this.font.width(toggleButton.getMessage()) + 8);
         if (this.custom) {

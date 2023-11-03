@@ -59,4 +59,12 @@ public class OptionCategory {
     public List<OptionGroup> getGroups() {
         return groups;
     }
+    
+    public OptionCategory copy() {
+        OptionCategory category = new OptionCategory(icon, name);
+        for (OptionGroup group : groups) {
+            category.add(group.copy());
+        }
+        return category;
+    }
 }
