@@ -31,22 +31,23 @@ import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.config.components.ConfigCategoriesListWidget;
 import me.shedaniel.rei.impl.client.gui.config.components.ConfigEntriesListWidget;
-import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigCategories;
-import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
-import me.shedaniel.rei.impl.client.gui.config.options.OptionCategory;
-import me.shedaniel.rei.impl.client.gui.config.options.OptionGroup;
+import me.shedaniel.rei.impl.client.gui.config.options.*;
 import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,6 +55,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
 public class REIConfigScreen extends Screen implements ConfigAccess {
     private final Screen parent;
@@ -75,18 +78,39 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     public REIConfigScreen(Screen parent, List<OptionCategory> categories) {
         super(new TranslatableComponent("config.roughlyenoughitems.title"));
         this.parent = parent;
-        this.categories = categories;
-        Preconditions.checkArgument(!categories.isEmpty(), "Categories cannot be empty!");
-        this.activeCategory = categories.get(0);
+        this.categories = CollectionUtils.map(categories, OptionCategory::copy);
+        this.cleanRequiresLevel();
+        Preconditions.checkArgument(!this.categories.isEmpty(), "Categories cannot be empty!");
+        this.activeCategory = this.categories.get(0);
         
         ConfigObjectImpl defaultConfig = new ConfigObjectImpl();
         ConfigObjectImpl config = ConfigManagerImpl.getInstance().getConfig();
-        for (OptionCategory category : categories) {
+        for (OptionCategory category : this.categories) {
             for (OptionGroup group : category.getGroups()) {
                 for (CompositeOption<?> option : group.getOptions()) {
                     ((Map<CompositeOption<?>, Object>) this.defaultOptions).put(option, option.getBind().apply(defaultConfig));
                     ((Map<CompositeOption<?>, Object>) this.options).put(option, option.getBind().apply(config));
                 }
+            }
+        }
+    }
+    
+    private void cleanRequiresLevel() {
+        if (!(REIRuntime.getInstance().getPreviousContainerScreen() == null || Minecraft.getInstance().getConnection() == null || Minecraft.getInstance().getConnection().getRecipeManager() == null)) {
+            return;
+        }
+        
+        for (OptionCategory category : this.categories) {
+            for (OptionGroup group : category.getGroups()) {
+                group.getOptions().replaceAll(option -> {
+                    if (option.isRequiresLevel()) {
+                        return new CompositeOption<>(option.getName(), option.getDescription(), i -> 0, (i, v) -> new Object())
+                                .entry(value -> translatable("config.rei.texts.requires_level").withStyle(ChatFormatting.RED))
+                                .defaultValue(() -> 1);
+                    } else {
+                        return option;
+                    }
+                });
             }
         }
     }

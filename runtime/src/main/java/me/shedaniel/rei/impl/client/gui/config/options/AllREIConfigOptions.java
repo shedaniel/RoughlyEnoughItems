@@ -24,12 +24,28 @@
 package me.shedaniel.rei.impl.client.gui.config.options;
 
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
+import me.shedaniel.rei.RoughlyEnoughItemsCore;
+import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.gui.config.*;
+import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
+import me.shedaniel.rei.api.common.plugins.PluginManager;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
+import me.shedaniel.rei.impl.client.config.collapsible.CollapsibleConfigManager;
+import me.shedaniel.rei.impl.client.config.entries.ConfigureCategoriesScreen;
 import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
 import me.shedaniel.rei.impl.client.gui.config.options.configure.PanelBoundariesConfiguration;
+import me.shedaniel.rei.impl.client.gui.performance.PerformanceScreen;
+import me.shedaniel.rei.impl.client.gui.screen.ConfigReloadingScreen;
+import me.shedaniel.rei.impl.client.gui.screen.collapsible.CollapsibleEntriesScreen;
+import me.shedaniel.rei.impl.client.search.argument.Argument;
+import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.TranslatableComponent;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -132,6 +148,8 @@ public interface AllREIConfigOptions {
             .enabledDisabled();
     CompositeOption<Boolean> STATUS_EFFECTS_LOCATION = make("accessibility.status_effects_location", i -> i.functionality.leftSideMobEffects, (i, v) -> i.functionality.leftSideMobEffects = v)
             .ofBoolean(translatable("config.rei.value.accessibility.status_effects_location.right"), translatable("config.rei.value.accessibility.status_effects_location.left"));
+    CompositeOption<Boolean> INVENTORY_SEARCH = make("accessibility.inventory_search", i -> i.functionality.allowInventoryHighlighting, (i, v) -> i.functionality.allowInventoryHighlighting = v)
+            .enabledDisabled();
     CompositeOption<Boolean> FAVORITES_MODE = make("favorites.mode", i -> i.basics.favoritesEnabled, (i, v) -> i.basics.favoritesEnabled = v)
             .enabledDisabled();
     CompositeOption<FavoriteAddWidgetMode> NEW_FAVORITES_BUTTON_VISIBILITY = make("favorites.new_favorites_button_visibility", i -> i.advanced.layout.favoriteAddWidgetMode, (i, v) -> i.advanced.layout.favoriteAddWidgetMode = v)
@@ -158,7 +176,21 @@ public interface AllREIConfigOptions {
     CompositeOption<SearchMode> IDENTIFIER_SEARCH = make("search.identifier_search", i -> i.advanced.search.identifierSearch, (i, v) -> i.advanced.search.identifierSearch = v)
             .enumOptions();
     // TODO: ASYNC_SEARCH
-    // TODO: CUSTOMIZED_FILTERING
+    CompositeOption<ConfigureCategoriesScreen> CUSTOMIZED_FILTERING = make("filtering.customized_filtering", i -> {
+        return new ConfigureCategoriesScreen(
+                new HashMap<>(i.getFilteringQuickCraftCategories()),
+                new HashSet<>(i.getHiddenCategories()),
+                new ArrayList<>(i.getCategoryOrdering())
+        );
+    }, (i, screen) -> {
+        i.setFilteringQuickCraftCategories(screen.getFilteringQuickCraftCategories());
+        i.setHiddenCategories(screen.getHiddenCategories());
+        i.setCategoryOrdering(screen.getCategoryOrdering());
+    }).configure((access, option, onClose) -> {
+        ConfigureCategoriesScreen screen = access.get(option);
+        screen.parent = Minecraft.getInstance().screen;
+        Minecraft.getInstance().setScreen(screen);
+    }).requiresLevel();
     CompositeOption<Boolean> FILTER_DISPLAYS = make("filtering.filter_displays", i -> i.advanced.filtering.shouldFilterDisplays, (i, v) -> i.advanced.filtering.shouldFilterDisplays = v)
             .enabledDisabled();
     CompositeOption<Boolean> MERGE_DISPLAYS = make("filtering.merge_displays", i -> i.advanced.layout.mergeDisplayUnderOne, (i, v) -> i.advanced.layout.mergeDisplayUnderOne = v)
@@ -170,11 +202,46 @@ public interface AllREIConfigOptions {
     CompositeOption<Double> ZOOM = make("list.zoom", i -> i.advanced.accessibility.entrySize, (i, v) -> i.advanced.accessibility.entrySize = v);
     CompositeOption<Boolean> FOCUS_MODE = make("list.focus_mode", i -> i.appearance.isFocusModeZoomed, (i, v) -> i.appearance.isFocusModeZoomed = v)
             .ofBoolean(translatable("config.rei.value.list.focus_mode.highlighted"), translatable("config.rei.value.list.focus_mode.zoomed"));
-    // TODO: PLUGINS_PERFORMANCE
+    CompositeOption<CollapsibleConfigManager.CollapsibleConfigObject> COLLAPSIBLE_ENTRIES = make("list.collapsible_entries", i -> {
+        CollapsibleConfigManager.CollapsibleConfigObject object = new CollapsibleConfigManager.CollapsibleConfigObject();
+        object.disabledGroups.addAll(CollapsibleConfigManager.getInstance().getConfig().disabledGroups);
+        object.customGroups.addAll(CollectionUtils.map(CollapsibleConfigManager.getInstance().getConfig().customGroups, CollapsibleConfigManager.CustomGroup::copy));
+        return object;
+    }, (i, object) -> {
+        CollapsibleConfigManager.CollapsibleConfigObject actualConfig = CollapsibleConfigManager.getInstance().getConfig();
+        actualConfig.disabledGroups.clear();
+        actualConfig.disabledGroups.addAll(object.disabledGroups);
+        actualConfig.customGroups.clear();
+        actualConfig.customGroups.addAll(object.customGroups);
+        CollapsibleConfigManager.getInstance().saveConfig();
+        ((CollapsibleEntryRegistryImpl) CollapsibleEntryRegistry.getInstance()).recollectCustomEntries();
+    }).configure((access, option, onClose) -> {
+        Minecraft.getInstance().setScreen(new CollapsibleEntriesScreen(onClose, access.get(option)));
+    }).requiresLevel();
+    CompositeOption<Object> PLUGINS_PERFORMANCE = make("debug.plugins_performance", i -> null, (i, v) -> new Object())
+            .details((access, option, onClose) -> Minecraft.getInstance().setScreen(new PerformanceScreen(onClose)))
+            .requiresLevel();
     CompositeOption<Boolean> SEARCH_PERFORMANCE = make("debug.search_performance", i -> i.advanced.search.debugSearchTimeRequired, (i, v) -> i.advanced.search.debugSearchTimeRequired = v)
             .enabledDisabled();
     CompositeOption<Boolean> ENTRY_LIST_PERFORMANCE = make("debug.entry_list_performance", i -> i.advanced.layout.debugRenderTimeRequired, (i, v) -> i.advanced.layout.debugRenderTimeRequired = v)
             .enabledDisabled();
     // TODO: RELOAD
+    CompositeOption<Object> RELOAD_PLUGINS = make("reset.reload_plugins", i -> null, (i, v) -> new Object())
+            .reload((access, option, onClose) -> {
+                RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
+                RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
+                while (!PluginManager.areAnyReloading()) {
+                    try {
+                        Thread.sleep(10);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+                Minecraft.getInstance().setScreen(new ConfigReloadingScreen(new TranslatableComponent("text.rei.config.is.reloading"), PluginManager::areAnyReloading, onClose, null));
+            }).requiresLevel();
+    CompositeOption<Object> RELOAD_SEARCH = make("reset.reload_search", i -> null, (i, v) -> new Object())
+            .reload((access, option, onClose) -> {
+                Argument.resetCache(true);
+            }).requiresLevel();
     // TODO: RESET
 }

@@ -96,7 +96,8 @@ public interface AllREIConfigGroups {
             .add(TAG_SEARCH)
             .add(IDENTIFIER_SEARCH);
     OptionGroup SEARCH_ADVANCED = make("search.advanced");
-    OptionGroup FILTERING_FILTERING = make("filtering.filtering");
+    OptionGroup FILTERING_FILTERING = make("filtering.filtering")
+            .add(CUSTOMIZED_FILTERING);
     OptionGroup FILTERING_ADVANCED = make("filtering.advanced")
             .add(FILTER_DISPLAYS)
             .add(MERGE_DISPLAYS);
@@ -105,10 +106,14 @@ public interface AllREIConfigGroups {
             .add(ORDERING)
             .add(ZOOM)
             .add(FOCUS_MODE);
-    OptionGroup LIST_COLLAPSIBLE_GROUPS = make("list.collapsible_groups");
+    OptionGroup LIST_COLLAPSIBLE_GROUPS = make("list.collapsible_groups")
+            .add(COLLAPSIBLE_ENTRIES);
     OptionGroup DEBUG_PERFORMANCE = make("debug.performance")
+            .add(PLUGINS_PERFORMANCE)
             .add(SEARCH_PERFORMANCE)
             .add(ENTRY_LIST_PERFORMANCE);
-    OptionGroup RESET_RELOAD = make("reset.reload");
+    OptionGroup RESET_RELOAD = make("reset.reload")
+            .add(RELOAD_PLUGINS)
+            .add(RELOAD_SEARCH);
     OptionGroup RESET_RESET = make("reset.reset");
 }

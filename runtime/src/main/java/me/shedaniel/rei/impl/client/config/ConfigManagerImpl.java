@@ -420,7 +420,7 @@ public class ConfigManagerImpl implements ConfigManager {
                     collapsibleConfigObject.customGroups.addAll(CollectionUtils.map(CollapsibleConfigManager.getInstance().getConfig().customGroups, CollapsibleConfigManager.CustomGroup::copy));
                     builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.functionality")).getEntries().add(0, new ButtonsConfigEntry(220,
                             Triple.of(new TranslatableComponent("text.rei.collapsible.entries"), $ -> {}, editedSink -> {
-                                Minecraft.getInstance().setScreen(new CollapsibleEntriesScreen(Minecraft.getInstance().screen, collapsibleConfigObject, editedSink));
+                                // Minecraft.getInstance().setScreen(new CollapsibleEntriesScreen(Minecraft.getInstance().screen, collapsibleConfigObject, editedSink));
                             })) {
                         @Override
                         public boolean isEditable() {
@@ -478,7 +478,8 @@ public class ConfigManagerImpl implements ConfigManager {
                     });
                     builder.getOrCreateCategory(Component.translatable("config.roughlyenoughitems.advanced")).getEntries().add(0, new ButtonsConfigEntry(220,
                             Triple.of(new TranslatableComponent("text.rei.performance"), $ -> {}, $ -> {
-                                Minecraft.getInstance().setScreen(new PerformanceScreen(Minecraft.getInstance().screen));
+                                Screen s = Minecraft.getInstance().screen;
+                                Minecraft.getInstance().setScreen(new PerformanceScreen(() -> Minecraft.getInstance().setScreen(s)));
                             })));
                 }
                 ConfigAddonRegistryImpl addonRegistry = (ConfigAddonRegistryImpl) ConfigAddonRegistry.getInstance();

@@ -48,4 +48,12 @@ public class OptionGroup {
     public List<CompositeOption<?>> getOptions() {
         return options;
     }
+    
+    public OptionGroup copy() {
+        OptionGroup group = new OptionGroup(groupName);
+        for (CompositeOption<?> option : options) {
+            group.add(option);
+        }
+        return group;
+    }
 }

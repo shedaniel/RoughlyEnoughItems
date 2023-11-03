@@ -110,6 +110,34 @@ public interface OptionValueEntry<T> {
         };
     }
     
+    static <T> OptionValueEntry.Configure<T> details(Configurator<T> configurator) {
+        return new Configure<>() {
+            @Override
+            public void configure(ConfigAccess access, CompositeOption<T> option, Runnable onClose) {
+                configurator.configure(access, option, onClose);
+            }
+            
+            @Override
+            public Component getOption(T value) {
+                return translatable("config.rei.texts.details");
+            }
+        };
+    }
+    
+    static <T> OptionValueEntry.Configure<T> reload(Configurator<T> configurator) {
+        return new Configure<>() {
+            @Override
+            public void configure(ConfigAccess access, CompositeOption<T> option, Runnable onClose) {
+                configurator.configure(access, option, onClose);
+            }
+            
+            @Override
+            public Component getOption(T value) {
+                return translatable("config.rei.texts.reload");
+            }
+        };
+    }
+    
     static OptionValueEntry<ModifierKeyCode> keybind() {
         return ModifierKeyCode::getLocalizedName;
     }

@@ -349,6 +349,7 @@
   "config.rei.options.accessibility.vanilla_recipe_book.desc": "Toggle the vanilla recipe book. This option is not designed for Modpack developers, as users should be the one to decide whether to use the vanilla recipe book.",
   "config.rei.options.accessibility.status_effects_location": "Status Effects Location",
   "config.rei.options.accessibility.status_effects_location.desc": "The location of the status effects. By vanilla, the status effects are placed on the right, but this can be changed to the left.",
+  "config.rei.options.accessibility.inventory_search": "Inventory Search",
   "config.rei.value.accessibility.status_effects_location.left": "Left",
   "config.rei.value.accessibility.status_effects_location.right": "Right",
   "config.rei.options.groups.favorites.favorites": "Favorites",
@@ -431,6 +432,8 @@
   "config.rei.value.list.focus_mode.highlighted": "Highlighted",
   "config.rei.value.list.focus_mode.zoomed": "Zoomed",
   "config.rei.options.groups.list.collapsible_groups": "Collapsible Groups",
+  "config.rei.options.list.collapsible_entries": "Collapsible Entries",
+  "config.rei.options.list.collapsible_entries.desc": "Collapsible Entries allows you to group entries together, and expand / collapse them. This is useful for organizing entries, and hiding entries you do not need.",
   "config.rei.options.groups.debug.performance": "Performance",
   "config.rei.options.debug.plugins_performance": "Plugins Performance",
   "config.rei.options.debug.plugins_performance.desc": "Detailed break-down of plugins' reload times. This is very useful in debugging the performance after loaded into a world.",
@@ -452,5 +455,8 @@
   "config.rei.value.enabledDisabled.false": "Disabled",
   "config.rei.value.enabledDisabled.true": "Enabled",
   "config.rei.texts.preview": "Preview...",
-  "config.rei.texts.configure": "Configure..."
+  "config.rei.texts.configure": "Configure...",
+  "config.rei.texts.details": "Details...",
+  "config.rei.texts.reload": "Reload...",
+  "config.rei.texts.requires_level": "Load Level First!"
 }
