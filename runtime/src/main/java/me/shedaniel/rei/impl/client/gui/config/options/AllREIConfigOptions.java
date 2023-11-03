@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.client.gui.config.options;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
+import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.gui.config.*;
 import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
@@ -33,6 +34,7 @@ import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.config.collapsible.CollapsibleConfigManager;
 import me.shedaniel.rei.impl.client.config.entries.ConfigureCategoriesScreen;
+import me.shedaniel.rei.impl.client.config.entries.FilteringEntry;
 import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
 import me.shedaniel.rei.impl.client.gui.config.options.configure.PanelBoundariesConfiguration;
 import me.shedaniel.rei.impl.client.gui.performance.PerformanceScreen;
@@ -176,7 +178,7 @@ public interface AllREIConfigOptions {
     CompositeOption<SearchMode> IDENTIFIER_SEARCH = make("search.identifier_search", i -> i.advanced.search.identifierSearch, (i, v) -> i.advanced.search.identifierSearch = v)
             .enumOptions();
     // TODO: ASYNC_SEARCH
-    CompositeOption<ConfigureCategoriesScreen> CUSTOMIZED_FILTERING = make("filtering.customized_filtering", i -> {
+    CompositeOption<ConfigureCategoriesScreen> CATEGORIES = make("filtering.categories", i -> {
         return new ConfigureCategoriesScreen(
                 new HashMap<>(i.getFilteringQuickCraftCategories()),
                 new HashSet<>(i.getHiddenCategories()),
@@ -190,6 +192,19 @@ public interface AllREIConfigOptions {
         ConfigureCategoriesScreen screen = access.get(option);
         screen.parent = Minecraft.getInstance().screen;
         Minecraft.getInstance().setScreen(screen);
+    }).requiresLevel();
+    CompositeOption<FilteringEntry> CUSTOMIZED_FILTERING = make("filtering.customized_filtering", i -> {
+        return FilteringEntry.of(
+                CollectionUtils.map(i.advanced.filtering.filteredStacks, EntryStackProvider::provide),
+                i.advanced.filtering.filteringRules
+        );
+    }, (i, entry) -> {
+        i.advanced.filtering.filteredStacks = CollectionUtils.map(entry.configFiltered(), EntryStackProvider::ofStack);
+        i.advanced.filtering.filteringRules = new ArrayList<>(entry.rules());
+    }).configure((access, option, onClose) -> {
+        FilteringEntry entry = access.get(option);
+        entry.filteringRulesScreen().parent = Minecraft.getInstance().screen;
+        Minecraft.getInstance().setScreen(entry.filteringRulesScreen());
     }).requiresLevel();
     CompositeOption<Boolean> FILTER_DISPLAYS = make("filtering.filter_displays", i -> i.advanced.filtering.shouldFilterDisplays, (i, v) -> i.advanced.filtering.shouldFilterDisplays = v)
             .enabledDisabled();

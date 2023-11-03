@@ -26,7 +26,6 @@ package me.shedaniel.rei.impl.client.config;
 import com.mojang.blaze3d.platform.InputConstants;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
-import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
@@ -47,10 +46,6 @@ import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.util.*;
 
 @ApiStatus.Internal
@@ -58,13 +53,9 @@ import java.util.*;
 @Environment(EnvType.CLIENT)
 @SuppressWarnings("FieldMayBeFinal")
 public class ConfigObjectImpl implements ConfigObject, ConfigData {
-    @ConfigEntry.Category("basics") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
     public Basics basics = new Basics();
-    @ConfigEntry.Category("appearance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
     public Appearance appearance = new Appearance();
-    @ConfigEntry.Category("functionality") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
     public Functionality functionality = new Functionality();
-    @ConfigEntry.Category("advanced") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
     public Advanced advanced = new Advanced();
     
     @Override
@@ -80,7 +71,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public boolean isCheating() {
         return basics.cheating == CheatingMode.ON || (basics.cheating == CheatingMode.WHEN_CREATIVE && Minecraft.getInstance().gameMode != null
-                                                      && Minecraft.getInstance().gameMode.getPlayerMode() == GameType.CREATIVE);
+                && Minecraft.getInstance().gameMode.getPlayerMode() == GameType.CREATIVE);
     }
     
     @Override
@@ -596,49 +587,20 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return advanced.search.modSearch;
     }
     
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface DontApplyFieldName {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseSpecialRecipeTypeScreen {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseSpecialSearchFilterSyntaxHighlightingScreen {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseFilteringScreen {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UsePercentage {
-        double min();
-        
-        double max();
-        
-        String prefix() default "Size: ";
-    }
-    
     public static class Basics {
-        @ConfigEntry.Gui.Excluded public List<FavoriteEntry> favorites = new ArrayList<>();
-        @ConfigEntry.Gui.Excluded public List<FavoriteEntry> hiddenFavorites = new ArrayList<>();
-        @ConfigEntry.Gui.Excluded public List<CompoundTag> displayHistory = new ArrayList<>();
-        @Comment("Declares whether cheating mode is on.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        public List<FavoriteEntry> favorites = new ArrayList<>();
+        public List<FavoriteEntry> hiddenFavorites = new ArrayList<>();
+        public List<CompoundTag> displayHistory = new ArrayList<>();
         public CheatingMode cheating = CheatingMode.OFF;
         public boolean favoritesEnabled = true;
         public boolean reduceMotion = false;
-        @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
         public KeyBindings keyBindings = new KeyBindings();
-        @Comment("Declares whether REI is visible.") @ConfigEntry.Gui.Excluded public boolean overlayVisible = true;
-        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        @Comment("Declares whether REI is visible.")
+        public boolean overlayVisible = true;
         public ItemCheatingStyle cheatingStyle = ItemCheatingStyle.GRAB;
     }
     
     public static class KeyBindings {
-        @ConfigEntry.Gui.Excluded
         public boolean useNativeKeybinds;
         public ModifierKeyCode recipeKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_R), Modifier.none());
         public ModifierKeyCode usageKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_U), Modifier.none());
@@ -653,123 +615,128 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public static class Appearance {
-        @UseSpecialRecipeTypeScreen public DisplayScreenType recipeScreenType = DisplayScreenType.UNSET;
-        @Comment("Declares the appearance of REI windows.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        public DisplayScreenType recipeScreenType = DisplayScreenType.UNSET;
+        @Comment("Declares the appearance of REI windows.")
         public AppearanceTheme theme = AppearanceTheme.LIGHT;
-        @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
         public Layout layout = new Layout();
-        @Comment("Declares the appearance of recipe's border.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+        @Comment("Declares the appearance of recipe's border.")
         public RecipeBorderType recipeBorder = RecipeBorderType.DEFAULT;
-        @Comment("Declares whether entry panel is scrolled.") public boolean scrollingEntryListWidget = false;
-        @Comment("Declares whether entry panel should be invisible when not searching") public boolean hideEntryPanelIfIdle = false;
+        @Comment("Declares whether entry panel is scrolled.")
+        public boolean scrollingEntryListWidget = false;
+        @Comment("Declares whether entry panel should be invisible when not searching")
+        public boolean hideEntryPanelIfIdle = false;
         
         public static class Layout {
-            @Comment("Declares the position of the search field.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+            @Comment("Declares the position of the search field.")
             public SearchFieldLocation searchFieldLocation = SearchFieldLocation.CENTER;
-            @Comment("Declares the position of the config button.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+            @Comment("Declares the position of the config button.")
             public ConfigButtonPosition configButtonLocation = ConfigButtonPosition.LOWER;
-            @Comment("Declares whether the craftable filter button is enabled.") public boolean showCraftableOnlyButton = true;
+            @Comment("Declares whether the craftable filter button is enabled.")
+            public boolean showCraftableOnlyButton = true;
         }
         
-        @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") public double horizontalEntriesBoundaries = 1.0;
-        @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") public double verticalEntriesBoundaries = 1.0;
+        public double horizontalEntriesBoundaries = 1.0;
+        public double verticalEntriesBoundaries = 1.0;
         public int horizontalEntriesBoundariesColumns = 50;
         public int verticalEntriesBoundariesRows = 1000;
         public double horizontalEntriesBoundariesAlignment = 1.0;
         public double verticalEntriesBoundariesAlignment = 0.5;
-        @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") public double favoritesHorizontalEntriesBoundaries = 1.0;
+        public double favoritesHorizontalEntriesBoundaries = 1.0;
         public int favoritesHorizontalEntriesBoundariesColumns = 50;
-        @UseSpecialSearchFilterSyntaxHighlightingScreen public SyntaxHighlightingMode syntaxHighlightingMode = SyntaxHighlightingMode.COLORFUL;
+        public SyntaxHighlightingMode syntaxHighlightingMode = SyntaxHighlightingMode.COLORFUL;
         public boolean isFocusModeZoomed = false;
     }
     
     public static class Functionality {
-        @ConfigEntry.Gui.Excluded @Nullable public ResourceLocation inputMethod = null;
-        @Comment("Declares whether REI should remove the recipe book.") public boolean disableRecipeBook = false;
-        @Comment("Declares whether mob effects should be on the left side instead of the right side.") public boolean leftSideMobEffects = false;
-        @Comment("Declares whether subsets is enabled.") public boolean isSubsetsEnabled = false;
+        @Nullable
+        public ResourceLocation inputMethod = null;
+        @Comment("Declares whether REI should remove the recipe book.")
+        public boolean disableRecipeBook = false;
+        @Comment("Declares whether mob effects should be on the left side instead of the right side.")
+        public boolean leftSideMobEffects = false;
+        @Comment("Declares whether subsets is enabled.")
+        public boolean isSubsetsEnabled = false;
         public boolean allowInventoryHighlighting = true;
-        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
         public ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
     }
     
     public static class Advanced {
-        @ConfigEntry.Gui.CollapsibleObject
         public Tooltips tooltips = new Tooltips();
-        @ConfigEntry.Gui.CollapsibleObject
         public Layout layout = new Layout();
-        @ConfigEntry.Gui.CollapsibleObject
         public Accessibility accessibility = new Accessibility();
-        @ConfigEntry.Gui.CollapsibleObject
         public Search search = new Search();
-        @ConfigEntry.Gui.CollapsibleObject
         public Commands commands = new Commands();
-        @ConfigEntry.Gui.CollapsibleObject
         public Miscellaneous miscellaneous = new Miscellaneous();
-        @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
         public Filtering filtering = new Filtering();
         
         public static class Tooltips {
-            @Comment("Declares whether REI should append mod names to entries.") public boolean appendModNames = true;
-            @Comment("Declares whether favorites tooltip should be displayed.") public boolean displayFavoritesTooltip = false;
-            @ConfigEntry.Gui.Excluded public boolean displayIMEHints = true;
+            @Comment("Declares whether REI should append mod names to entries.")
+            public boolean appendModNames = true;
+            @Comment("Declares whether favorites tooltip should be displayed.")
+            public boolean displayFavoritesTooltip = false;
+            public boolean displayIMEHints = true;
         }
         
         public static class Layout {
             @Comment("The ordering of the items on the entry panel.")
-            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
             public EntryPanelOrderingConfig entryPanelOrdering = EntryPanelOrderingConfig.REGISTRY_ASCENDING;
-            @Comment("Declares the maximum amount of recipes displayed in a page if possible.") @ConfigEntry.BoundedDiscrete(min = 2, max = 99)
+            @Comment("Declares the maximum amount of recipes displayed in a page if possible.")
             public int maxRecipesPerPage = 8;
-            @Comment("Declares the maximum amount of recipes displayed in a page if possible.") @ConfigEntry.BoundedDiscrete(min = 100, max = 1000)
+            @Comment("Declares the maximum amount of recipes displayed in a page if possible.")
             public int maxRecipesPageHeight = 300;
-            @Comment("Declares whether entry rendering time should be debugged.") public boolean debugRenderTimeRequired = false;
-            @Comment("Merges displays with equal contents under 1 display.") public boolean mergeDisplayUnderOne = true;
-            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+            @Comment("Declares whether entry rendering time should be debugged.")
+            public boolean debugRenderTimeRequired = false;
+            @Comment("Merges displays with equal contents under 1 display.")
+            public boolean mergeDisplayUnderOne = true;
             public FavoriteAddWidgetMode favoriteAddWidgetMode = FavoriteAddWidgetMode.ALWAYS_VISIBLE;
         }
         
         public static class Accessibility {
-            @UsePercentage(min = 0.25, max = 4.0) public double entrySize = 1.0;
-            @Comment("Declares the position of the entry panel.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+            public double entrySize = 1.0;
+            @Comment("Declares the position of the entry panel.")
             public DisplayPanelLocation displayPanelLocation = DisplayPanelLocation.RIGHT;
-            @Comment("Declares how the scrollbar in composite screen should act.") public boolean compositeScrollBarPermanent = false;
+            @Comment("Declares how the scrollbar in composite screen should act.")
+            public boolean compositeScrollBarPermanent = false;
             public boolean toastDisplayedOnCopyIdentifier = true;
-            @Comment("Declares whether REI should use compact tabs for categories.") public boolean useCompactTabs = true;
-            @Comment("Declares whether REI should use compact tab buttons for categories.") public boolean useCompactTabButtons = false;
+            @Comment("Declares whether REI should use compact tabs for categories.")
+            public boolean useCompactTabs = true;
+            @Comment("Declares whether REI should use compact tab buttons for categories.")
+            public boolean useCompactTabButtons = false;
         }
         
         public static class Search {
-            @Comment("Declares whether search time should be debugged.") public boolean debugSearchTimeRequired = false;
-            @Comment("Declares whether REI should search async.") public boolean asyncSearch = true;
-            @Comment("Declares how many entries should be grouped one async search.") @ConfigEntry.BoundedDiscrete(min = 25, max = 400)
+            @Comment("Declares whether search time should be debugged.")
+            public boolean debugSearchTimeRequired = false;
+            @Comment("Declares whether REI should search async.")
+            public boolean asyncSearch = true;
+            @Comment("Declares how many entries should be grouped one async search.")
             public int asyncSearchPartitionSize = 100;
             public boolean patchAsyncThreadCrash = true;
-            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
             public SearchMode tooltipSearch = SearchMode.ALWAYS;
-            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
             public SearchMode tagSearch = SearchMode.PREFIX;
-            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
             public SearchMode identifierSearch = SearchMode.ALWAYS;
-            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
             public SearchMode modSearch = SearchMode.PREFIX;
         }
         
         public static class Commands {
-            @Comment("Declares the command used to change gamemode.") public String gamemodeCommand = "/gamemode {gamemode}";
-            @Comment("Declares the command used in servers to cheat items.") public String giveCommand = "/give {player_name} {item_identifier}{nbt} {count}";
-            @Comment("Declares the command used to change weather.") public String weatherCommand = "/weather {weather}";
-            @Comment("Declares the command used to change time.") public String timeCommand = "/time set {time}";
+            @Comment("Declares the command used to change gamemode.")
+            public String gamemodeCommand = "/gamemode {gamemode}";
+            @Comment("Declares the command used in servers to cheat items.")
+            public String giveCommand = "/give {player_name} {item_identifier}{nbt} {count}";
+            @Comment("Declares the command used to change weather.")
+            public String weatherCommand = "/weather {weather}";
+            @Comment("Declares the command used to change time.")
+            public String timeCommand = "/time set {time}";
         }
         
         public static class Miscellaneous {
-            @Comment("Declares whether arrows in containers should be clickable.") public boolean clickableRecipeArrows = true;
+            @Comment("Declares whether arrows in containers should be clickable.")
+            public boolean clickableRecipeArrows = true;
             public boolean registerRecipesInAnotherThread = true;
             public boolean newFastEntryRendering = true;
-            @ConfigEntry.Gui.PrefixText
             public boolean cachingFastEntryRendering = false;
             public boolean cachingDisplayLookup = true;
-            @ConfigEntry.Gui.Excluded public CategorySettings categorySettings = new CategorySettings();
+            public CategorySettings categorySettings = new CategorySettings();
             
             public static class CategorySettings {
                 public Map<CategoryIdentifier<?>, Boolean> filteringQuickCraftCategories = new HashMap<>();
@@ -779,9 +746,9 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         }
         
         public static class Filtering {
-            @UseFilteringScreen public List<EntryStackProvider<?>> filteredStacks = new ArrayList<>();
+            public List<EntryStackProvider<?>> filteredStacks = new ArrayList<>();
             public boolean shouldFilterDisplays = true;
-            @ConfigEntry.Gui.Excluded public List<FilteringRule<?>> filteringRules = new ArrayList<>();
+            public List<FilteringRule<?>> filteringRules = new ArrayList<>();
         }
     }
 }

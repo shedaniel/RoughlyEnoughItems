@@ -97,6 +97,7 @@ public interface AllREIConfigGroups {
             .add(IDENTIFIER_SEARCH);
     OptionGroup SEARCH_ADVANCED = make("search.advanced");
     OptionGroup FILTERING_FILTERING = make("filtering.filtering")
+            .add(CATEGORIES)
             .add(CUSTOMIZED_FILTERING);
     OptionGroup FILTERING_ADVANCED = make("filtering.advanced")
             .add(FILTER_DISPLAYS)
