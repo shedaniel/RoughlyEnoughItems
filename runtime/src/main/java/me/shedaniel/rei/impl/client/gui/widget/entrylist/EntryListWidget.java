@@ -137,7 +137,7 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
         int heightReduction = (int) Math.round(bounds.height * (1 - ConfigObject.getInstance().getVerticalEntriesBoundariesPercentage()));
         bounds.y += (int) Math.round(heightReduction * ConfigObject.getInstance().getVerticalEntriesBoundariesAlignments());
         bounds.height -= heightReduction;
-        int maxHeight = (int) Math.ceil(entrySize() * ConfigObject.getInstance().getVerticalEntriesBoundariesRows());
+        int maxHeight = (int) Math.ceil(entrySize() * ConfigObject.getInstance().getVerticalEntriesBoundariesAlignments() + entrySize() * 0.75);
         if (bounds.height > maxHeight) {
             bounds.y += (int) Math.round((bounds.height - maxHeight) * ConfigObject.getInstance().getVerticalEntriesBoundariesAlignments());
             bounds.height = maxHeight;

@@ -36,6 +36,7 @@ import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigOptions;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionValueEntry;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Checkbox;
@@ -105,8 +106,32 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
                     }
                     if (!isReducedMotion()) innerAlphaAnimator.setTo(-1.0F, 200);
                 }
+                
+                @Override
+                public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+                    if (horizontalUsePercentage) return super.keyPressed(keyCode, scanCode, modifiers);
+                    boolean leftArrow = keyCode == 263;
+                    double newValue;
+                    if (leftArrow) {
+                        newValue = Mth.clamp((valueToLimit(value, 50) - 1) / 50.0, 0, 1);
+                    } else if (keyCode == 262) {
+                        newValue = Mth.clamp((valueToLimit(value, 50) + 1) / 50.0, 0, 1);
+                    } else {
+                        return super.keyPressed(keyCode, scanCode, modifiers);
+                    }
+                    
+                    if (newValue != value) {
+                        value = newValue;
+                        applyValue();
+                        updateMessage();
+                        return true;
+                    }
+                    
+                    return false;
+                }
             });
-            addRenderableWidget(horizontalAlignmentSlider = new AbstractSliderButton(0, 0, 20, 20, getHAlignmentSliderMessage(boundary.horizontalAlign()), boundary.horizontalAlign()) {
+            DisplayPanelLocation location = access.get(AllREIConfigOptions.LOCATION);
+            addRenderableWidget(horizontalAlignmentSlider = new AbstractSliderButton(0, 0, 20, 20, getHAlignmentSliderMessage(location == DisplayPanelLocation.LEFT ? 1 - boundary.horizontalAlign() : boundary.horizontalAlign()), location == DisplayPanelLocation.LEFT ? 1 - boundary.horizontalAlign() : boundary.horizontalAlign()) {
                 @Override
                 protected void updateMessage() {
                     setMessage(getHAlignmentSliderMessage(value));
@@ -115,7 +140,7 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
                 @Override
                 protected void applyValue() {
                     PanelBoundary boundary = access.get(option);
-                    access.set(option, new PanelBoundary(boundary.horizontalPercentage(), boundary.verticalPercentage(), boundary.horizontalLimit(), boundary.verticalLimit(), snapPercentage(value), boundary.verticalAlign()));
+                    access.set(option, new PanelBoundary(boundary.horizontalPercentage(), boundary.verticalPercentage(), boundary.horizontalLimit(), boundary.verticalLimit(), location == DisplayPanelLocation.LEFT ? 1 - snapPercentage(value) : snapPercentage(value), boundary.verticalAlign()));
                     if (!isReducedMotion()) innerAlphaAnimator.setTo(-1.0F, 200);
                 }
             });
@@ -145,6 +170,29 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
                         access.set(option, new PanelBoundary(boundary.horizontalPercentage(), 1.0, boundary.horizontalLimit(), valueToLimit(value, 1000), boundary.horizontalAlign(), boundary.verticalAlign()));
                     }
                     if (!isReducedMotion()) innerAlphaAnimator.setTo(-1.0F, 200);
+                }
+                
+                @Override
+                public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+                    if (verticalUsePercentage) return super.keyPressed(keyCode, scanCode, modifiers);
+                    boolean leftArrow = keyCode == 263;
+                    double newValue;
+                    if (leftArrow) {
+                        newValue = Mth.clamp((valueToLimit(value, 1000) - 1) / 1000.0, 0, 1);
+                    } else if (keyCode == 262) {
+                        newValue = Mth.clamp((valueToLimit(value, 1000) + 1) / 1000.0, 0, 1);
+                    } else {
+                        return super.keyPressed(keyCode, scanCode, modifiers);
+                    }
+                    
+                    if (newValue != value) {
+                        value = newValue;
+                        applyValue();
+                        updateMessage();
+                        return true;
+                    }
+                    
+                    return false;
                 }
             });
             addRenderableWidget(verticalAlignmentSlider = new AbstractSliderButton(0, 0, 20, 20, getVAlignmentSliderMessage(boundary.verticalAlign()), boundary.verticalAlign()) {
@@ -221,7 +269,6 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
         
         @Override
         public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-            this.boundsAnimator.update(delta);
             this.innerAlphaAnimator.setTarget(this.innerAlphaAnimator.target() + (1.0F - this.innerAlphaAnimator.target()) * 0.06F);
             this.innerAlphaAnimator.update(delta);
             this.renderBackground(poses);
@@ -258,10 +305,10 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
             this.verticalAlignmentSlider.setWidth(panelBounds.width - 12);
             
             super.render(poses, mouseX, mouseY, delta);
-            renderPreview(poses, panelBounds);
+            renderPreview(poses, panelBounds, delta);
         }
         
-        private void renderPreview(PoseStack poses, Rectangle panelBounds) {
+        private void renderPreview(PoseStack poses, Rectangle panelBounds, float delta) {
             int entrySize = Mth.ceil(18 * access.get(AllREIConfigOptions.ZOOM));
             Rectangle overlayBounds;
             DisplayPanelLocation location = access.get(AllREIConfigOptions.LOCATION);
@@ -284,20 +331,24 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
             int heightReduction = (int) Math.round(overlayBounds.height * (1 - boundary.verticalPercentage()));
             overlayBounds.height -= heightReduction;
             overlayBounds.y += (int) Math.round(heightReduction * boundary.verticalAlign());
-            int maxHeight = entrySize * boundary.verticalLimit();
+            int maxHeight = (int) Math.ceil(entrySize * boundary.verticalLimit() + entrySize * 0.75);
             if (overlayBounds.height > maxHeight) {
                 overlayBounds.y += (int) Math.round((overlayBounds.height - maxHeight) * boundary.verticalAlign());
                 overlayBounds.height = maxHeight;
             }
-            this.boundsAnimator.setTo(overlayBounds.getFloatingBounds(), isReducedMotion() ? 0 : 200);
+            this.boundsAnimator.update(delta);
+            this.boundsAnimator.setTo(overlayBounds.getFloatingBounds(), Util.make(() -> {
+                FloatingRectangle target = boundsAnimator.target();
+                return target.x == 0 && target.y == 0 && target.width == 0 && target.height == 0;
+            }) || isReducedMotion() ? 0 : 200);
             overlayBounds = this.boundsAnimator.value().getBounds();
             
-            this.fillGradient(poses, overlayBounds.x, overlayBounds.y, overlayBounds.getMaxX(), overlayBounds.getMaxY(), 0x80ff0000, 0x80ff0000);
+            this.fillGradient(poses, overlayBounds.x, overlayBounds.y, overlayBounds.getMaxX(), overlayBounds.getMaxY(), 0x80fff0ad, 0x80fff0ad);
             
             int width = Math.max(Mth.floor((overlayBounds.width - 2) / (float) entrySize), 1);
             int height = Math.max(Mth.floor((overlayBounds.height - 2) / (float) entrySize), 1);
             Rectangle innerBounds = new Rectangle((int) (overlayBounds.getCenterX() - width * (entrySize / 2f)), (int) (overlayBounds.getCenterY() - height * (entrySize / 2f)), width * entrySize, height * entrySize);
-            int color = 0x00ff00 | ((int) (Math.ceil(Mth.clamp(innerAlphaAnimator.floatValue(), 0, 1) * 0x80))) << 24;
+            int color = 0x823c0a | ((int) (Math.ceil(Mth.clamp(innerAlphaAnimator.floatValue(), 0, 1) * 0x80))) << 24;
             for (int i = 0; i < width; i++) {
                 for (int j = 0; j < height; j++) {
                     int slotX = innerBounds.x + i * entrySize + 1;
