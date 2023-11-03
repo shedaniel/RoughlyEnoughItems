@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.client.gui.config.options;
 
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.client.gui.config.ConfigAccess;
 import net.minecraft.network.chat.Component;
 
 import java.util.Arrays;
@@ -95,8 +96,29 @@ public interface OptionValueEntry<T> {
         };
     }
     
+    static <T> OptionValueEntry.Configure<T> configure(Configurator<T> configurator) {
+        return new Configure<>() {
+            @Override
+            public void configure(ConfigAccess access, CompositeOption<T> option, Runnable onClose) {
+                configurator.configure(access, option, onClose);
+            }
+            
+            @Override
+            public Component getOption(T value) {
+                return translatable("config.rei.texts.configure");
+            }
+        };
+    }
+    
     static OptionValueEntry<ModifierKeyCode> keybind() {
         return ModifierKeyCode::getLocalizedName;
+    }
+    
+    interface Configurator<T> {
+        void configure(ConfigAccess access, CompositeOption<T> option, Runnable onClose);
+    }
+    
+    interface Configure<T> extends OptionValueEntry<T>, Configurator<T> {
     }
     
     interface Selection<T> extends OptionValueEntry<T> {

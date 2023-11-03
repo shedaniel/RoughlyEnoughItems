@@ -269,14 +269,13 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     private static Rectangle calculateOverlayBounds() {
         Rectangle bounds = ScreenRegistry.getInstance().getOverlayBounds(ConfigObject.getInstance().getDisplayPanelLocation(), Minecraft.getInstance().screen);
         
+        double hAlign = ConfigObject.getInstance().getDisplayPanelLocation() == DisplayPanelLocation.LEFT ? 1 - ConfigObject.getInstance().getHorizontalEntriesBoundariesAlignments() : ConfigObject.getInstance().getHorizontalEntriesBoundariesAlignments();
         int widthReduction = (int) Math.round(bounds.width * (1 - ConfigObject.getInstance().getHorizontalEntriesBoundariesPercentage()));
-        if (ConfigObject.getInstance().getDisplayPanelLocation() == DisplayPanelLocation.RIGHT)
-            bounds.x += widthReduction;
+        bounds.x += (int) Math.round(widthReduction * hAlign);
         bounds.width -= widthReduction;
         int maxWidth = (int) Math.ceil(entrySize() * ConfigObject.getInstance().getHorizontalEntriesBoundariesColumns() + entrySize() * 0.75);
         if (bounds.width > maxWidth) {
-            if (ConfigObject.getInstance().getDisplayPanelLocation() == DisplayPanelLocation.RIGHT)
-                bounds.x += bounds.width - maxWidth;
+            bounds.x += (int) Math.round((bounds.width - maxWidth) * hAlign);
             bounds.width = maxWidth;
         }
         

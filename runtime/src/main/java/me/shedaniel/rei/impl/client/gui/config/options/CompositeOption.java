@@ -79,6 +79,10 @@ public class CompositeOption<T> {
         return this.entry(OptionValueEntry.options(entry));
     }
     
+    public CompositeOption<T> configure(OptionValueEntry.Configurator<T> configurator) {
+        return this.entry(OptionValueEntry.configure(configurator));
+    }
+    
     public CompositeOption<T> previewer(ConfigPreviewer<T> previewer) {
         this.previewer = previewer;
         return this;

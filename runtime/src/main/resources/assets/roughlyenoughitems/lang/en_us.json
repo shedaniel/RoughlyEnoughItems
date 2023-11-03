@@ -314,6 +314,18 @@
   "config.rei.options.groups.layout.panel": "Panel",
   "config.rei.options.layout.boundaries": "Boundaries",
   "config.rei.options.layout.boundaries.desc": "Declare the boundaries of the panel. Useful to limit the columns / rows displayed on screen.",
+  "config.rei.options.layout.boundaries.desc.configure": "Configure Panel Boundaries",
+  "config.rei.options.layout.boundaries.desc.horizontal": "Horizontal",
+  "config.rei.options.layout.boundaries.desc.vertical": "Vertical",
+  "config.rei.options.layout.boundaries.desc.limit_by_percentage": "Limit by Percentage",
+  "config.rei.options.layout.boundaries.desc.limit": "Limit: %s",
+  "config.rei.options.layout.boundaries.desc.alignment": "Alignment: %s",
+  "config.rei.options.layout.boundaries.desc.horizontal_alignment.left": "Left",
+  "config.rei.options.layout.boundaries.desc.horizontal_alignment.center": "Center",
+  "config.rei.options.layout.boundaries.desc.horizontal_alignment.right": "Right",
+  "config.rei.options.layout.boundaries.desc.vertical_alignment.top": "Top",
+  "config.rei.options.layout.boundaries.desc.vertical_alignment.center": "Center",
+  "config.rei.options.layout.boundaries.desc.vertical_alignment.bottom": "Bottom",
   "config.rei.options.layout.location": "Location",
   "config.rei.options.layout.location.desc": "Change the location of the panel. The entire REI setup may be mirrored horizontally, including the list and all widgets.",
   "config.rei.options.layout.hide_when_idle": "Hide When Idle",
@@ -439,5 +451,6 @@
   "config.rei.value.trueFalse.true": "True",
   "config.rei.value.enabledDisabled.false": "Disabled",
   "config.rei.value.enabledDisabled.true": "Enabled",
-  "config.rei.texts.preview": "Preview..."
+  "config.rei.texts.preview": "Preview...",
+  "config.rei.texts.configure": "Configure..."
 }
