@@ -74,7 +74,8 @@ public interface AllREIConfigGroups {
             .add(CLICKABLE_RECIPE_ARROWS);
     OptionGroup ACCESSIBILITY_FEATURES = make("accessibility.features")
             .add(VANILLA_RECIPE_BOOK)
-            .add(STATUS_EFFECTS_LOCATION);
+            .add(STATUS_EFFECTS_LOCATION)
+            .add(INVENTORY_SEARCH);
     OptionGroup FAVORITES_FAVORITES = make("favorites.favorites")
             .add(FAVORITES_MODE)
             .add(NEW_FAVORITES_BUTTON_VISIBILITY);
