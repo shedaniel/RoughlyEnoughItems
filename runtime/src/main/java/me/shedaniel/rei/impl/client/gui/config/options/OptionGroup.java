@@ -27,6 +27,7 @@ import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class OptionGroup {
     private final Component groupName;
@@ -47,6 +48,20 @@ public class OptionGroup {
     
     public List<CompositeOption<?>> getOptions() {
         return options;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof OptionGroup group) {
+            return group.groupName.equals(groupName);
+        }
+        
+        return super.equals(obj);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(groupName);
     }
     
     public OptionGroup copy() {
