@@ -23,93 +23,25 @@
 
 package me.shedaniel.rei.impl.client.config.entries;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.vertex.PoseStack;
-import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 @ApiStatus.Internal
-public class FilteringEntry extends AbstractConfigListEntry<List<EntryStack<?>>> {
-    private int width;
-    Consumer<List<EntryStack<?>>> saveConsumer;
-    Consumer<List<FilteringRule<?>>> rulesSaveConsumer;
-    List<EntryStack<?>> defaultValue;
-    Set<EntryStack<?>> configFiltered;
-    List<FilteringRule<?>> rules;
-    boolean edited = false;
-    final FilteringScreen filteringScreen = new FilteringScreen(this);
-    final FilteringRulesScreen filteringRulesScreen = new FilteringRulesScreen(this);
-    private final AbstractWidget buttonWidget = new Button(0, 0, 0, 20, Component.translatable("config.roughlyenoughitems.filteringScreen"), button -> {
-        filteringRulesScreen.parent = Minecraft.getInstance().screen;
-        Minecraft.getInstance().setScreen(filteringRulesScreen);
-    });
-    private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);
-    
-    public FilteringEntry(int width, List<EntryStack<?>> configFiltered, List<FilteringRule<?>> rules, List<EntryStack<?>> defaultValue, Consumer<List<EntryStack<?>>> saveConsumer, Consumer<List<FilteringRule<?>>> rulesSaveConsumer) {
-        super(Component.empty(), false);
-        this.width = width;
-        this.configFiltered = new TreeSet<>(Comparator.comparing(EntryStacks::hashExact));
-        this.configFiltered.addAll(configFiltered);
-        this.rules = Lists.newArrayList(rules);
-        this.defaultValue = defaultValue;
-        this.saveConsumer = saveConsumer;
-        this.rulesSaveConsumer = rulesSaveConsumer;
-    }
-    
-    @Override
-    public List<EntryStack<?>> getValue() {
-        return Lists.newArrayList(configFiltered);
-    }
-    
-    @Override
-    public Optional<List<EntryStack<?>>> getDefaultValue() {
-        return Optional.ofNullable(defaultValue);
-    }
-    
-    @Override
-    public void save() {
-        saveConsumer.accept(getValue());
-        rulesSaveConsumer.accept(rules);
-        this.edited = false;
-    }
-    
-    @Override
-    public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isSelected, float delta) {
-        super.render(matrices, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isSelected, delta);
-        Window window = Minecraft.getInstance().getWindow();
-        this.buttonWidget.active = this.isEditable();
-        this.buttonWidget.y = y;
-        this.buttonWidget.x = x + entryWidth / 2 - width / 2;
-        this.buttonWidget.setWidth(width);
-        this.buttonWidget.render(matrices, mouseX, mouseY, delta);
-    }
-    
-    @Override
-    public List<? extends GuiEventListener> children() {
-        return children;
-    }
-    
-    @Override
-    public List<? extends NarratableEntry> narratables() {
-        return children;
-    }
-    
-    @Override
-    public boolean isEdited() {
-        return super.isEdited() || edited;
+public record FilteringEntry(
+        Set<EntryStack<?>> configFiltered,
+        List<FilteringRule<?>> rules,
+        FilteringScreen filteringScreen,
+        FilteringRulesScreen filteringRulesScreen
+) {
+    public static FilteringEntry of(List<EntryStack<?>> configFiltered, List<FilteringRule<?>> rules) {
+        TreeSet<EntryStack<?>> set = new TreeSet<>(Comparator.comparing(EntryStacks::hashExact));
+        set.addAll(configFiltered);
+        ArrayList<FilteringRule<?>> list = new ArrayList<>(rules);
+        FilteringScreen filteringScreen = new FilteringScreen(set);
+        return new FilteringEntry(set, list, filteringScreen, new FilteringRulesScreen(filteringScreen, list));
     }
 }
