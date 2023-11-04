@@ -39,10 +39,10 @@ import me.shedaniel.rei.impl.client.gui.config.options.preview.InterfacePreviewe
 import me.shedaniel.rei.impl.client.gui.config.options.preview.TooltipPreviewer;
 import net.minecraft.client.gui.GuiComponent;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
@@ -79,14 +79,13 @@ public class ConfigGroupWidget {
             } else {
                 WidgetWithBounds original = _create(access, entry, width);
                 
+                WidgetWithBounds widget = pair.getRight().create(access, entry, width, null);
+                Widget background = createBackgroundSlot(widget::getBounds);
+                
                 if (location == PreviewLocation.TOP) {
-                    WidgetWithBounds widget = pair.getRight().create(access, entry, width, null);
-                    Widget background = createBackgroundSlot(widget::getBounds);
                     WidgetWithBounds translatedOriginal = Widgets.withTranslate(original, () -> Matrix4f.createTranslateMatrix(0, widget.getBounds().height + 4, 0));
                     contents = Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, widget.getBounds().height + 4 + translatedOriginal.getBounds().height), translatedOriginal, background, widget);
                 } else {
-                    WidgetWithBounds widget = pair.getRight().create(access, entry, width, null);
-                    Widget background = createBackgroundSlot(widget::getBounds);
                     contents = Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, original.getBounds().getMaxY() + 2 + widget.getBounds().height), original,
                             Widgets.withTranslate(Widgets.concat(background, widget), () -> Matrix4f.createTranslateMatrix(0, original.getBounds().getMaxY() + 4, 0)));
                 }
@@ -103,40 +102,31 @@ public class ConfigGroupWidget {
     }
     
     private static WidgetWithBounds _create(ConfigAccess access, OptionGroup entry, int width) {
-        List<Triple<Widget, Supplier<Rectangle>, Matrix4f[]>> widgets = new ArrayList<>();
+        List<WidgetComposite> widgets = new ArrayList<>();
         int[] height = {0};
         
         for (CompositeOption<?> option : entry.getOptions()) {
-            Matrix4f[] translation = new Matrix4f[]{Matrix4f.createTranslateMatrix(0, height[0], 0)};
-            WidgetWithBounds widget = Widgets.withTranslate(ConfigOptionWidget.create(access, option, width), () -> translation[0]);
-            widgets.add(Triple.of(widget, () -> MatrixUtils.transform(translation[0], widget.getBounds()), translation));
-            height[0] = Math.max(height[0], widget.getBounds().getMaxY());
+            widgets.add(WidgetComposite.of(ConfigOptionWidget.create(access, option, width)));
             
             if (entry.getOptions().get(entry.getOptions().size() - 1) != option) {
-                Matrix4f[] translationDrawable = new Matrix4f[]{Matrix4f.createTranslateMatrix(0, height[0], 0)};
-                widgets.add(Triple.of(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+                Widget separator = Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
                     for (int x = 0; x <= width; x += 4) {
                         GuiComponent.fill(matrices, Math.min(width, x), 1, Math.min(width, x + 2), 2, 0xFF757575);
                     }
-                }), () -> translationDrawable[0]), () ->
-                        MatrixUtils.transform(translationDrawable[0], new Rectangle(0, 0, 1, 7)), translationDrawable));
-                height[0] += 7;
+                });
+                widgets.add(WidgetComposite.of(Widgets.withBounds(separator, new Rectangle(0, 0, 1, 7))));
             }
         }
         
-        widgets.add(Triple.of(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            int h = 0;
-            for (Triple<Widget, Supplier<Rectangle>, Matrix4f[]> widget : widgets) {
-                widget.getRight()[0] = Matrix4f.createTranslateMatrix(0, h, 0);
-                h = Math.max(h, widget.getMiddle().get().getMaxY());
-            }
-            height[0] = h;
-        }), Rectangle::new, new Matrix4f[]{new Matrix4f()}));
+        widgets.add(WidgetComposite.ofNonAccounting(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+            recalculateHeight(widgets, i -> height[0] = i);
+        })));
+        recalculateHeight(widgets, i -> height[0] = i);
         
         return Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, height[0]), new AbstractList<>() {
             @Override
             public Widget get(int index) {
-                return widgets.get(index).getLeft();
+                return widgets.get(index).widget();
             }
             
             @Override
@@ -144,6 +134,31 @@ public class ConfigGroupWidget {
                 return widgets.size();
             }
         });
+    }
+    
+    private record WidgetComposite(
+            Widget widget,
+            Supplier<Rectangle> bounds,
+            Matrix4f translation
+    ) {
+        public static WidgetComposite of(WidgetWithBounds widget) {
+            Matrix4f translation = new Matrix4f();
+            return new WidgetComposite(Widgets.withTranslate(widget, translation),
+                    () -> MatrixUtils.transform(translation, widget.getBounds()), translation);
+        }
+        
+        public static WidgetComposite ofNonAccounting(Widget widget) {
+            return new WidgetComposite(widget, Rectangle::new, new Matrix4f());
+        }
+    }
+    
+    private static void recalculateHeight(List<WidgetComposite> widgets, IntConsumer setHeight) {
+        int height = 0;
+        for (WidgetComposite widget : widgets) {
+            widget.translation().load(Matrix4f.createTranslateMatrix(0, height, 0));
+            height = Math.max(height, widget.bounds().get().getMaxY());
+        }
+        setHeight.accept(height);
     }
     
     @FunctionalInterface
