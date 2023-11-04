@@ -103,7 +103,8 @@ public interface AllREIConfigOptions {
             .enumOptions();
     CompositeOption<ItemCheatingMode> CHEATS_AMOUNT = make("cheats.amount", i -> i.functionality.itemCheatingMode, (i, v) -> i.functionality.itemCheatingMode = v)
             .enumOptions();
-    CompositeOption<String> GIVE_COMMAND = make("cheats.give_command", i -> i.advanced.commands.giveCommand, (i, v) -> i.advanced.commands.giveCommand = v);
+    CompositeOption<String> GIVE_COMMAND = make("cheats.give_command", i -> i.advanced.commands.giveCommand, (i, v) -> i.advanced.commands.giveCommand = v)
+            .string();
     CompositeOption<SearchFieldLocation> SEARCH_FIELD_LOCATION = make("layout.search_field_location", i -> i.appearance.layout.searchFieldLocation, (i, v) -> i.appearance.layout.searchFieldLocation = v)
             .entry(OptionValueEntry.<SearchFieldLocation>enumOptions().overrideText(location -> {
                 if (Minecraft.getInstance().screen instanceof REIConfigScreen configScreen) {
@@ -156,9 +157,12 @@ public interface AllREIConfigOptions {
             .enabledDisabled();
     CompositeOption<FavoriteAddWidgetMode> NEW_FAVORITES_BUTTON_VISIBILITY = make("favorites.new_favorites_button_visibility", i -> i.advanced.layout.favoriteAddWidgetMode, (i, v) -> i.advanced.layout.favoriteAddWidgetMode = v)
             .enumOptions();
-    CompositeOption<String> GAME_MODE_COMMAND = make("favorites.game_mode_command", i -> i.advanced.commands.gamemodeCommand, (i, v) -> i.advanced.commands.gamemodeCommand = v);
-    CompositeOption<String> TIME_COMMAND = make("favorites.time_command", i -> i.advanced.commands.timeCommand, (i, v) -> i.advanced.commands.timeCommand = v);
-    CompositeOption<String> WEATHER_COMMAND = make("favorites.weather_command", i -> i.advanced.commands.weatherCommand, (i, v) -> i.advanced.commands.weatherCommand = v);
+    CompositeOption<String> GAME_MODE_COMMAND = make("favorites.game_mode_command", i -> i.advanced.commands.gamemodeCommand, (i, v) -> i.advanced.commands.gamemodeCommand = v)
+            .string();
+    CompositeOption<String> TIME_COMMAND = make("favorites.time_command", i -> i.advanced.commands.timeCommand, (i, v) -> i.advanced.commands.timeCommand = v)
+            .string();
+    CompositeOption<String> WEATHER_COMMAND = make("favorites.weather_command", i -> i.advanced.commands.weatherCommand, (i, v) -> i.advanced.commands.weatherCommand = v)
+            .string();
     CompositeOption<Boolean> BATCHED_RENDERING = make("performance.batched_rendering", i -> i.advanced.miscellaneous.newFastEntryRendering, (i, v) -> i.advanced.miscellaneous.newFastEntryRendering = v)
             .enabledDisabled();
     CompositeOption<Boolean> CACHED_RENDERING = make("performance.cached_rendering", i -> i.advanced.miscellaneous.cachingFastEntryRendering, (i, v) -> i.advanced.miscellaneous.cachingFastEntryRendering = v)

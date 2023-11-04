@@ -87,7 +87,7 @@ public interface AllREIConfigCategories {
             FILTERING,
             LIST,
             DEBUG,
-            FLAGS,
+            // FLAGS,
             RESET
     );
 }
