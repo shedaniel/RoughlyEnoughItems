@@ -142,6 +142,10 @@ public interface OptionValueEntry<T> {
         return ModifierKeyCode::getLocalizedName;
     }
     
+    static OptionValueEntry.String string() {
+        return ConfigUtils::literal;
+    }
+    
     interface Configurator<T> {
         void configure(ConfigAccess access, CompositeOption<T> option, Runnable onClose);
     }
@@ -165,5 +169,8 @@ public interface OptionValueEntry<T> {
                 }
             };
         }
+    }
+    
+    interface String extends OptionValueEntry<java.lang.String> {
     }
 }

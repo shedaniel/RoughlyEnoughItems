@@ -37,7 +37,6 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonPrimitiv
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.api.DeserializationException;
 import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
-import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.addon.ConfigAddonRegistry;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
@@ -46,15 +45,11 @@ import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.gui.config.CheatingMode;
-import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
-import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.addon.ConfigAddonRegistryImpl;
 import me.shedaniel.rei.impl.client.config.collapsible.CollapsibleConfigManager;
 import me.shedaniel.rei.impl.client.config.entries.ConfigAddonsEntry;
-import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.config.REIConfigScreen;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import net.fabricmc.api.EnvType;
@@ -298,14 +293,7 @@ public class ConfigManagerImpl implements ConfigManager {
                 if (!addonRegistry.getAddons().isEmpty()) {
                     builder.getOrCreateCategory(new TranslatableComponent("config.roughlyenoughitems.basics")).getEntries().add(0, new ConfigAddonsEntry(220));
                 }
-                return builder.setSavingRunnable(() -> {
-                    saveConfig();
-                    EntryRegistry.getInstance().refilter();
-                    REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
-                    if (REIRuntimeImpl.getSearchField() != null) {
-                        ScreenOverlayImpl.getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
-                    }
-                }).build();
+                return null;
             });
             return provider.get();
         } catch (Exception e) {

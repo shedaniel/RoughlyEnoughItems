@@ -34,27 +34,34 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
+import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
 import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.config.components.ConfigCategoriesListWidget;
 import me.shedaniel.rei.impl.client.gui.config.components.ConfigEntriesListWidget;
-import me.shedaniel.rei.impl.client.gui.config.options.*;
-import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
+import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigCategories;
+import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
+import me.shedaniel.rei.impl.client.gui.config.options.OptionCategory;
+import me.shedaniel.rei.impl.client.gui.config.options.OptionGroup;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.apache.commons.lang3.mutable.Mutable;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
@@ -120,15 +127,15 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
         super.init();
         this.widgets.clear();
         this.widgets.add(Widgets.createLabel(new Point(width / 2, 12), this.title));
-        int sideWidth = (int) (width / 4.2);
+        int sideWidth = (int) Math.round(width / 4.2);
         boolean singlePane = width - 20 - sideWidth <= 330;
         int singleSideWidth = 32 + 6 + 4;
-        Widget[] list = {ConfigEntriesListWidget.create(this, new Rectangle(singlePane ? 8 + singleSideWidth : 12 + sideWidth, 32, singlePane ? width - 16 - singleSideWidth : width - 20 - sideWidth, height - 32 - 32), activeCategory.getGroups())};
+        Mutable<Widget> list = new MutableObject<>(createEntriesList(singlePane, singleSideWidth, sideWidth));
         IntValue selectedCategory = new IntValue() {
             @Override
-            public void accept(int i) {
-                REIConfigScreen.this.activeCategory = categories.get(i);
-                list[0] = ConfigEntriesListWidget.create(REIConfigScreen.this, new Rectangle(singlePane ? 8 + singleSideWidth : 12 + sideWidth, 32, singlePane ? width - 16 - singleSideWidth : width - 20 - sideWidth, height - 32 - 32), activeCategory.getGroups());
+            public void accept(int index) {
+                REIConfigScreen.this.activeCategory = categories.get(index);
+                list.setValue(createEntriesList(singlePane, singleSideWidth, sideWidth));
             }
             
             @Override
@@ -141,7 +148,31 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
         } else {
             this.widgets.add(ConfigCategoriesListWidget.createTiny(new Rectangle(8, 32, singleSideWidth - 4, height - 32 - 32), categories, selectedCategory));
         }
-        this.widgets.add(Widgets.delegate(() -> list[0]));
+        this.widgets.add(Widgets.delegate(list::getValue));
+        this.widgets.add(Widgets.createButton(new Rectangle(width / 2 - 150 - 10, height - 26, 150, 20), translatable("gui.cancel")).onClick(button -> {
+            Minecraft.getInstance().setScreen(this.parent);
+        }));
+        this.widgets.add(Widgets.createButton(new Rectangle(width / 2 + 10, height - 26, 150, 20), translatable("gui.done")).onClick(button -> {
+            for (OptionCategory optionCategory : this.categories) {
+                for (OptionGroup group : optionCategory.getGroups()) {
+                    for (CompositeOption<?> option : group.getOptions()) {
+                        ((BiConsumer<ConfigObjectImpl, Object>) option.getSave()).accept(ConfigManagerImpl.getInstance().getConfig(), this.get(option));
+                    }
+                }
+            }
+            
+            ConfigManagerImpl.getInstance().saveConfig();
+            EntryRegistry.getInstance().refilter();
+            REIRuntime.getInstance().getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
+            if (REIRuntimeImpl.getSearchField() != null) {
+                ScreenOverlayImpl.getEntryListWidget().updateSearch(REIRuntimeImpl.getSearchField().getText(), true);
+            }
+            Minecraft.getInstance().setScreen(this.parent);
+        }));
+    }
+    
+    private Widget createEntriesList(boolean singlePane, int singleSideWidth, int sideWidth) {
+        return ConfigEntriesListWidget.create(this, new Rectangle(singlePane ? 8 + singleSideWidth : 12 + sideWidth, 32, singlePane ? width - 16 - singleSideWidth : width - 20 - sideWidth, height - 32 - 32), activeCategory.getGroups());
     }
     
     public Map<CompositeOption<?>, ?> getDefaultOptions() {

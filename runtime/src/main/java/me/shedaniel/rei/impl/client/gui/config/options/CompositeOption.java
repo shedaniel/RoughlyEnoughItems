@@ -72,6 +72,10 @@ public class CompositeOption<T> {
         return ((CompositeOption<ModifierKeyCode>) this).entry(OptionValueEntry.keybind());
     }
     
+    public CompositeOption<String> string() {
+        return ((CompositeOption<String>) this).entry(OptionValueEntry.string());
+    }
+    
     public CompositeOption<T> enumOptions(T... entry) {
         return this.entry(OptionValueEntry.enumOptions(entry));
     }
