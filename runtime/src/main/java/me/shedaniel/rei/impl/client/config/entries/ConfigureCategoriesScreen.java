@@ -55,7 +55,7 @@ public class ConfigureCategoriesScreen extends Screen {
     public Screen parent;
     
     public ConfigureCategoriesScreen(Map<CategoryIdentifier<?>, Boolean> filteringQuickCraftCategories, Set<CategoryIdentifier<?>> hiddenCategories, List<CategoryIdentifier<?>> categoryOrdering) {
-        super(new TranslatableComponent("config.roughlyenoughitems.configureCategories.title"));
+        super(Component.translatable("config.roughlyenoughitems.configureCategories.title"));
         this.filteringQuickCraftCategories = filteringQuickCraftCategories;
         this.hiddenCategories = hiddenCategories;
         this.categoryOrdering = categoryOrdering;
@@ -236,7 +236,7 @@ public class ConfigureCategoriesScreen extends Screen {
                 }).leftAligned();
             }
             {
-                this.upButton = new Button(0, 0, 20, 20, new TextComponent("↑"), button -> {
+                this.upButton = new Button(0, 0, 20, 20, Component.literal("↑"), button -> {
                     int index = categoryOrdering.indexOf(configuration.getCategoryIdentifier());
                     if (index > 0) {
                         categoryOrdering.remove(index);
@@ -245,7 +245,7 @@ public class ConfigureCategoriesScreen extends Screen {
                         resetListEntries();
                     }
                 });
-                this.downButton = new Button(0, 0, 20, 20, new TextComponent("↓"), button -> {
+                this.downButton = new Button(0, 0, 20, 20, Component.literal("↓"), button -> {
                     int index = categoryOrdering.indexOf(configuration.getCategoryIdentifier());
                     if (index < categoryOrdering.size() - 1) {
                         categoryOrdering.remove(index);
@@ -294,14 +294,14 @@ public class ConfigureCategoriesScreen extends Screen {
             }
             boolean shown = !hiddenCategories.contains(configuration.getCategoryIdentifier());
             {
-                Component subtitle = new TranslatableComponent("config.roughlyenoughitems.configureCategories.visibility." + shown)
+                Component subtitle = Component.translatable("config.roughlyenoughitems.configureCategories.visibility." + shown)
                         .withStyle(shown ? ChatFormatting.GREEN : ChatFormatting.RED);
                 int i = client.font.drawShadow(matrices, subtitle.getVisualOrderText(), xPos, y + 22, 8421504);
                 visibilityToggleButton.getPoint().setLocation(i + 3, y + 22);
                 visibilityToggleButton.render(matrices, mouseX, mouseY, delta);
             }
             if (shown) {
-                Component subtitle = new TranslatableComponent("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure." + filteringQuickCraftCategories.getOrDefault(configuration.getCategoryIdentifier(), configuration.isQuickCraftingEnabledByDefault()))
+                Component subtitle = Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure." + filteringQuickCraftCategories.getOrDefault(configuration.getCategoryIdentifier(), configuration.isQuickCraftingEnabledByDefault()))
                         .withStyle(ChatFormatting.GRAY);
                 int i = client.font.drawShadow(matrices, subtitle.getVisualOrderText(), xPos, y + 32, 8421504);
                 quickCraftToggleButton.getPoint().setLocation(i + 3, y + 32);

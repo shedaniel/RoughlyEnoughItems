@@ -32,7 +32,6 @@ import me.shedaniel.rei.impl.client.config.collapsible.CollapsibleConfigManager;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
@@ -89,7 +88,7 @@ public class CollapsibleEntryRegistryImpl implements CollapsibleEntryRegistry {
         this.customEntries.clear();
         for (CollapsibleConfigManager.CustomGroup customEntry : CollapsibleConfigManager.getInstance().getConfig().customGroups) {
             List<HashedEntryStackWrapper> stacks = CollectionUtils.filterAndMap(customEntry.stacks, EntryStackProvider::isValid, provider -> new HashedEntryStackWrapper(provider.provide()));
-            Entry entry = new Entry(customEntry.id, new TextComponent(customEntry.name),
+            Entry entry = new Entry(customEntry.id, Component.literal(customEntry.name),
                     new ListMatcher(stacks), false);
             this.customEntries.add(entry);
             InternalLogger.getInstance().debug("Added custom collapsible entry group [%s] %s with %d entries", entry.getId(), entry.getName().getString(), stacks.size());

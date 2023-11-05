@@ -27,7 +27,7 @@ import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomShapelessDisplay;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.SuspiciousStewRecipe;
@@ -57,7 +57,7 @@ public class SuspiciousStewRecipeFiller implements CraftingRecipeFiller<Suspicio
     @Override
     public void registerCategories(CategoryRegistry registry) {
         registerExtension(registry, (bounds, widgets, display) -> {
-            widgets.add(createInfoWidget(bounds, display, new TranslatableComponent("text.rei.crafting.suspicious_stew")));
+            widgets.add(createInfoWidget(bounds, display, Component.translatable("text.rei.crafting.suspicious_stew")));
         });
     }
 }

@@ -36,6 +36,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
@@ -52,8 +53,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -109,24 +108,24 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
     private SearchFilter lastFilter = SearchFilter.matchAll();
     
     public CustomCollapsibleEntrySelectionScreen(List<EntryStack<?>> selectedStacks) {
-        super(new TranslatableComponent("text.rei.collapsible.entries.custom.title"));
+        super(Component.translatable("text.rei.collapsible.entries.custom.title"));
         this.selectedStacks = selectedStacks;
         this.searchField = new OverlaySearchField(0, 0, 0, 0);
         {
-            Component selectAllText = new TranslatableComponent("config.roughlyenoughitems.filteredEntries.selectAll");
+            Component selectAllText = Component.translatable("config.roughlyenoughitems.filteredEntries.selectAll");
             this.selectAllButton = new Button(0, 0, Minecraft.getInstance().font.width(selectAllText) + 10, 20, selectAllText, button -> {
                 this.points.clear();
                 this.points.add(new PointPair(new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2), new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2)));
             });
         }
         {
-            Component selectNoneText = new TranslatableComponent("config.roughlyenoughitems.filteredEntries.selectNone");
+            Component selectNoneText = Component.translatable("config.roughlyenoughitems.filteredEntries.selectNone");
             this.selectNoneButton = new Button(0, 0, Minecraft.getInstance().font.width(selectNoneText) + 10, 20, selectNoneText, button -> {
                 this.points.clear();
             });
         }
         {
-            Component addText = new TranslatableComponent("text.rei.collapsible.entries.custom.select.add");
+            Component addText = Component.translatable("text.rei.collapsible.entries.custom.select.add");
             this.addButton = new Button(0, 0, Minecraft.getInstance().font.width(addText) + 10, 20, addText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack<?> stack = entryStacks.get(i);
@@ -140,7 +139,7 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
             });
         }
         {
-            Component removeText = new TranslatableComponent("text.rei.collapsible.entries.custom.select.remove");
+            Component removeText = Component.translatable("text.rei.collapsible.entries.custom.select.remove");
             this.removeButton = new Button(0, 0, Minecraft.getInstance().font.width(removeText) + 10, 20, removeText, button -> {
                 for (int i = 0; i < entryStacks.size(); i++) {
                     EntryStack<?> stack = entryStacks.get(i);
@@ -153,7 +152,7 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
             });
         }
         {
-            Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));
+            Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             this.backButton = new Button(0, 0, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
@@ -275,7 +274,7 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         }
         
         this.font.drawShadow(poses, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
-        Component hint = new TranslatableComponent("config.roughlyenoughitems.filteringRulesScreen.hint").withStyle(ChatFormatting.YELLOW);
+        Component hint = Component.translatable("config.roughlyenoughitems.filteringRulesScreen.hint").withStyle(ChatFormatting.YELLOW);
         this.font.drawShadow(poses, hint, this.width - this.font.width(hint) - 15, 12.0F, -1);
     }
     
@@ -520,7 +519,7 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
             if (searchField.containsMouse(mouseX, mouseY))
                 return;
-            Tooltip tooltip = getCurrentTooltip(new Point(mouseX, mouseY));
+            Tooltip tooltip = getCurrentTooltip(TooltipContext.of(new Point(mouseX, mouseY)));
             if (tooltip != null) {
                 CustomCollapsibleEntrySelectionScreen.this.tooltip = tooltip;
             }

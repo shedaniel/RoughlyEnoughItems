@@ -50,8 +50,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -100,7 +98,7 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
         this.stacks = CollectionUtils.map(stacks, stack -> Widgets.createSlot(new Rectangle(0, 0, 16, 16))
                 .entry(stack).disableBackground());
         this.configObject = configObject;
-        this.toggleButton = new Button(0, 0, 20, 20, new TranslatableComponent("text.rei.collapsible.entries.toggle"), button -> {
+        this.toggleButton = new Button(0, 0, 20, 20, Component.translatable("text.rei.collapsible.entries.toggle"), button -> {
             if (this.configObject.disabledGroups.contains(this.id)) {
                 this.configObject.disabledGroups.remove(this.id);
             } else {
@@ -109,7 +107,7 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
         });
         this.toggleButton.setWidth(this.font.width(toggleButton.getMessage()) + 8);
         if (this.custom) {
-            this.deleteButton = new Button(0, 0, 20, 20, new TranslatableComponent("text.rei.collapsible.entries.delete"), button -> {
+            this.deleteButton = new Button(0, 0, 20, 20, Component.translatable("text.rei.collapsible.entries.delete"), button -> {
                 this.configObject.customGroups.removeIf(customEntry -> customEntry.id.equals(this.id));
                 markDirty.run();
             });
@@ -171,11 +169,11 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
             try (CloseableScissors scissors = scissor(poses, lineBounds)) {
                 poses.pushPose();
                 poses.translate(0, -idDrawer.progress() * 10, 0);
-                font.drawShadow(poses, new TranslatableComponent("text.rei.collapsible.entries.count", this.stacks.size() + ""), bounds.x + 4, y, 0xFFAAAAAA);
+                font.drawShadow(poses, Component.translatable("text.rei.collapsible.entries.count", this.stacks.size() + ""), bounds.x + 4, y, 0xFFAAAAAA);
                 boolean enabled = !this.configObject.disabledGroups.contains(this.id);
-                Component sideText = new TranslatableComponent("text.rei.collapsible.entries.enabled." + enabled);
+                Component sideText = Component.translatable("text.rei.collapsible.entries.enabled." + enabled);
                 font.drawShadow(poses, sideText, bounds.getMaxX() - 4 - font.width(sideText), y, enabled ? 0xDD55FF55 : 0xDDFF5555);
-                renderTextScrolling(poses, new TextComponent(this.id.toString()), bounds.x + 4, y + 10, bounds.width - 8, 0xFF777777);
+                renderTextScrolling(poses, Component.literal(this.id.toString()), bounds.x + 4, y + 10, bounds.width - 8, 0xFF777777);
                 poses.popPose();
             }
         }
@@ -183,15 +181,15 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
         if (y + 9 >= 30 && y < minecraft.screen.height) {
             Rectangle lineBounds = new Rectangle(bounds.x + 4, y, bounds.width - 8, 9);
             modIdDrawer.setTo(lineBounds.contains(mouseX, mouseY), ConfigObject.getInstance().isReducedMotion() ? 0 : 400);
-            int xo = font.drawShadow(poses, new TranslatableComponent("text.rei.collapsible.entries.source").append(" "), bounds.x + 4, y, 0xFFAAAAAA);
+            int xo = font.drawShadow(poses, Component.translatable("text.rei.collapsible.entries.source").append(" "), bounds.x + 4, y, 0xFFAAAAAA);
             try (CloseableScissors scissors = scissor(poses, lineBounds)) {
                 poses.pushPose();
                 if (this.custom) {
-                    renderTextScrolling(poses, TextTransformations.applyRainbow(new TranslatableComponent("text.rei.collapsible.entries.source.custom").getVisualOrderText(), xo - 1, y), xo - 1, y, bounds.getWidth() - 8, 0xFFAAAAAA);
+                    renderTextScrolling(poses, TextTransformations.applyRainbow(Component.translatable("text.rei.collapsible.entries.source.custom").getVisualOrderText(), xo - 1, y), xo - 1, y, bounds.getWidth() - 8, 0xFFAAAAAA);
                 } else {
                     poses.translate(0, -modIdDrawer.progress() * 10, 0);
-                    renderTextScrolling(poses, new TextComponent(ClientHelper.getInstance().getModFromModId(this.id.getNamespace())), xo - 1, y, bounds.getMaxX() - 4 - (xo - 1), 0xFF777777);
-                    renderTextScrolling(poses, new TextComponent(this.id.getNamespace().toString()), xo - 1, y + 10, bounds.getMaxX() - 4 - (xo - 1), 0xFF777777);
+                    renderTextScrolling(poses, Component.literal(ClientHelper.getInstance().getModFromModId(this.id.getNamespace())), xo - 1, y, bounds.getMaxX() - 4 - (xo - 1), 0xFF777777);
+                    renderTextScrolling(poses, Component.literal(this.id.getNamespace().toString()), xo - 1, y + 10, bounds.getMaxX() - 4 - (xo - 1), 0xFF777777);
                 }
                 poses.popPose();
             }

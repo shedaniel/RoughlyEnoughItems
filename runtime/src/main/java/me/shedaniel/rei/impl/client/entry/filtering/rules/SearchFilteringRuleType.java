@@ -88,7 +88,7 @@ public enum SearchFilteringRuleType implements FilteringRuleType<SearchFiltering
     @Override
     @Nullable
     public Function<Screen, Screen> createEntryScreen(SearchFilteringRule rule) {
-        return screen -> new OptionEntriesScreen(new TranslatableComponent("config.roughlyenoughitems.filteringRulesScreen"), screen) {
+        return screen -> new OptionEntriesScreen(Component.translatable("config.roughlyenoughitems.filteringRulesScreen"), screen) {
             TextFieldListEntry entry = null;
             BooleanListEntry show = null;
             List<EntryWidget> entryStacks = new ArrayList<>();

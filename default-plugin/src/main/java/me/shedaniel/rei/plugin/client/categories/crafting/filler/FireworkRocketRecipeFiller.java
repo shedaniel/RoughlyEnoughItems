@@ -31,7 +31,7 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomShapelessDisplay;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.FireworkRocketRecipe;
@@ -72,7 +72,7 @@ public class FireworkRocketRecipeFiller implements CraftingRecipeFiller<Firework
     @Override
     public void registerCategories(CategoryRegistry registry) {
         registerExtension(registry, (bounds, widgets, display) -> {
-            widgets.add(createInfoWidget(bounds, display, new TranslatableComponent("text.rei.crafting.firework.gunpowder.amount")));
+            widgets.add(createInfoWidget(bounds, display, Component.translatable("text.rei.crafting.firework.gunpowder.amount")));
         });
     }
 }

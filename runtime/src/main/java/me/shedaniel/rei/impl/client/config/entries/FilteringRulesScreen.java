@@ -269,7 +269,7 @@ public class FilteringRulesScreen extends Screen {
     private static <Cache> Function<Screen, Screen> placeholderScreen(FilteringRule<Cache> r) {
         class PlaceholderScreen extends OptionEntriesScreen {
             public PlaceholderScreen(Screen parent) {
-                super(new TranslatableComponent("config.roughlyenoughitems.filteringRulesScreen"), parent);
+                super(Component.translatable("config.roughlyenoughitems.filteringRulesScreen"), parent);
             }
             
             @Override

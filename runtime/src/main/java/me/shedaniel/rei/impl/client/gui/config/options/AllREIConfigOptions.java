@@ -43,7 +43,6 @@ import me.shedaniel.rei.impl.client.gui.screen.collapsible.CollapsibleEntriesScr
 import me.shedaniel.rei.impl.client.search.argument.Argument;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -256,7 +255,7 @@ public interface AllREIConfigOptions {
                         throw new RuntimeException(e);
                     }
                 }
-                Minecraft.getInstance().setScreen(new ConfigReloadingScreen(new TranslatableComponent("text.rei.config.is.reloading"), PluginManager::areAnyReloading, onClose, null));
+                Minecraft.getInstance().setScreen(new ConfigReloadingScreen(translatable("text.rei.config.is.reloading"), PluginManager::areAnyReloading, onClose, null));
             }).requiresLevel();
     CompositeOption<Object> RELOAD_SEARCH = make("reset.reload_search", i -> null, (i, v) -> new Object())
             .reload((access, option, onClose) -> {

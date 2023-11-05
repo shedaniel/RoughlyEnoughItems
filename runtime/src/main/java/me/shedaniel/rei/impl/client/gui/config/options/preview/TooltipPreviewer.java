@@ -35,12 +35,11 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.gui.config.ConfigAccess;
 import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigOptions;
+import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -59,14 +58,14 @@ public class TooltipPreviewer {
             boolean appendModNames = access.get(AllREIConfigOptions.APPEND_MOD_NAMES);
             boolean appendFavorites = access.get(AllREIConfigOptions.APPEND_FAVORITES_HINT);
             List<Tooltip.Entry> entries = new ArrayList<>();
-            entries.add(Tooltip.entry(new TranslatableComponent("block.minecraft.oak_planks")));
+            entries.add(Tooltip.entry(ConfigUtils.translatable("block.minecraft.oak_planks")));
             if (appendModNames) {
-                entries.add(Tooltip.entry(new TextComponent("Minecraft").withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC)));
+                entries.add(Tooltip.entry(ConfigUtils.literal("Minecraft").withStyle(ChatFormatting.BLUE, ChatFormatting.ITALIC)));
             }
             if (appendFavorites) {
                 String name = ConfigObject.getInstance().getFavoriteKeyCode().getLocalizedName().getString();
                 entries.addAll(Stream.of(I18n.get("text.rei.favorites_tooltip", name).split("\n"))
-                        .map(TextComponent::new).map(Tooltip::entry).toList());
+                        .map(ConfigUtils::literal).map(Tooltip::entry).toList());
             }
             List<FormattedCharSequence> components = entries.stream().flatMap(entry -> Minecraft.getInstance().font.split(entry.getAsText(), width - 12 - 4).stream()).toList();
             int minWidth = components.stream().mapToInt(component -> Minecraft.getInstance().font.width(component)).max().orElse(0) + 4;
@@ -97,8 +96,7 @@ public class TooltipPreviewer {
             RenderSystem.disableTexture();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
-            bufferBuilder.end();
-            BufferUploader.end(bufferBuilder);
+            BufferUploader.drawWithShader(bufferBuilder.end());
             RenderSystem.disableBlend();
             RenderSystem.enableTexture();
             

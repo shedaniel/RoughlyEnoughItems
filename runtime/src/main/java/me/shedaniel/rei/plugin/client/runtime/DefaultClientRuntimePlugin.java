@@ -83,10 +83,8 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -387,8 +385,8 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                 @Nullable
                 public Tooltip getTooltip(TooltipContext context) {
                     Tooltip tooltip = Tooltip.create(context.getPoint());
-                    tooltip.add((ClientTooltipComponent) tooltipComponent.get());
-                    tooltip.add(new TranslatableComponent("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
+                    tooltip.add(tooltipComponent.get());
+                    tooltip.add(Component.translatable("text.auto_craft.move_items.tooltip").withStyle(ChatFormatting.YELLOW));
                     return tooltip;
                 }
             };

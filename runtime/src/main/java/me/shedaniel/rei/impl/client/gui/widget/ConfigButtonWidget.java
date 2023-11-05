@@ -123,7 +123,7 @@ public class ConfigButtonWidget {
                             return false;
                         }
                 ),
-                ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.reduced_motion"),
+                ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.reduced_motion"),
                         config::isReducedMotion,
                         config::setReducedMotion
                 ),

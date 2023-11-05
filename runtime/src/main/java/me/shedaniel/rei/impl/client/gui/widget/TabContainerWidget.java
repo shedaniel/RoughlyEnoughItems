@@ -207,10 +207,10 @@ public class TabContainerWidget extends GuiComponent {
                                                    Runnable leftAction, Runnable rightAction) {
         List<Widget> widgets = new ArrayList<>();
         Button tabLeft, tabRight;
-        widgets.add(tabLeft = Widgets.createButton(new Rectangle(bounds.x, bounds.getMaxY() - tabSize + 1 - tabButtonsSize, tabButtonsSize, tabButtonsSize), new TextComponent(""))
+        widgets.add(tabLeft = Widgets.createButton(new Rectangle(bounds.x, bounds.getMaxY() - tabSize + 1 - tabButtonsSize, tabButtonsSize, tabButtonsSize), Component.literal(""))
                 .onClick(button -> leftAction.run())
                 .tooltipLine(Component.translatable("text.rei.previous_page")));
-        widgets.add(tabRight = Widgets.createButton(new Rectangle(bounds.x + bounds.width - tabButtonsSize - (isCompactTabButtons ? 0 : 1), bounds.getMaxY() - tabSize + 1 - tabButtonsSize, tabButtonsSize, tabButtonsSize), new TextComponent(""))
+        widgets.add(tabRight = Widgets.createButton(new Rectangle(bounds.x + bounds.width - tabButtonsSize - (isCompactTabButtons ? 0 : 1), bounds.getMaxY() - tabSize + 1 - tabButtonsSize, tabButtonsSize, tabButtonsSize), Component.literal(""))
                 .onClick(button -> rightAction.run())
                 .tooltipLine(Component.translatable("text.rei.next_page")));
         

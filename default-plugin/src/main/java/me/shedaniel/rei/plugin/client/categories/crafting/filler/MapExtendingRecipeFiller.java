@@ -30,7 +30,7 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomDisplay;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.MapExtendingRecipe;
 
@@ -75,9 +75,9 @@ public class MapExtendingRecipeFiller implements CraftingRecipeFiller<MapExtendi
                 return tooltip;
             });
             stack.tooltip(
-                    new TranslatableComponent("filled_map.id", mapId).withStyle(ChatFormatting.GRAY),
-                    new TranslatableComponent("filled_map.scale", (1 << scale)).withStyle(ChatFormatting.GRAY),
-                    new TranslatableComponent("filled_map.level", scale, 4).withStyle(ChatFormatting.GRAY)
+                    Component.translatable("filled_map.id", mapId).withStyle(ChatFormatting.GRAY),
+                    Component.translatable("filled_map.scale", (1 << scale)).withStyle(ChatFormatting.GRAY),
+                    Component.translatable("filled_map.level", scale, 4).withStyle(ChatFormatting.GRAY)
             );
         }
         return stacks;

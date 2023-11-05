@@ -114,7 +114,7 @@ public class CraftableFilterButtonWidget {
             entries.add(new SubMenuEntry(Component.translatable("text.rei.config.menu.search_field.input_method"), createInputMethodEntries(access, applicableInputMethods)));
         }
         
-        entries.add(ToggleMenuEntry.of(new TranslatableComponent("text.rei.config.menu.search_field.hide_entry_panel_idle"),
+        entries.add(ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.search_field.hide_entry_panel_idle"),
                 config::isHidingEntryPanelIfIdle,
                 hideEntryPanelIfIdle -> {
                     config.setHidingEntryPanelIfIdle(hideEntryPanelIfIdle);

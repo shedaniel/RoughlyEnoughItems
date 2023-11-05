@@ -54,8 +54,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
@@ -69,7 +67,7 @@ public class CollapsibleEntriesScreen extends Screen {
     private boolean dirty = true;
     
     public CollapsibleEntriesScreen(Runnable onClose, CollapsibleConfigManager.CollapsibleConfigObject configObject) {
-        super(new TranslatableComponent("text.rei.collapsible.entries.title"));
+        super(Component.translatable("text.rei.collapsible.entries.title"));
         this.onClose = onClose;
         this.configObject = configObject;
         this.prepareWidgets(configObject);
@@ -79,7 +77,7 @@ public class CollapsibleEntriesScreen extends Screen {
         this.widgets.clear();
         
         for (CollapsibleConfigManager.CustomGroup customEntry : configObject.customGroups) {
-            this.widgets.add(new CollapsibleEntryWidget(true, customEntry.id, new TextComponent(customEntry.name),
+            this.widgets.add(new CollapsibleEntryWidget(true, customEntry.id, Component.literal(customEntry.name),
                     CollectionUtils.filterAndMap(customEntry.stacks, EntryStackProvider::isValid, EntryStackProvider::provide), configObject,
                     () -> {
                         this.prepareWidgets(configObject);
@@ -110,12 +108,12 @@ public class CollapsibleEntriesScreen extends Screen {
     public void init() {
         super.init();
         {
-            Component backText = new TextComponent("↩ ").append(new TranslatableComponent("gui.back"));
+            Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             addRenderableWidget(new Button(4, 4, font.width(backText) + 10, 20, backText,
                     button -> this.onClose()));
         }
         {
-            Component addText = new TextComponent(" + ");
+            Component addText = Component.literal(" + ");
             addRenderableWidget(new Button(width - 4 - 20, 4, 20, 20, addText, $ -> {
                 setupCustom(new ResourceLocation("custom:" + UUID.randomUUID()), "", new ArrayList<>(), this.configObject, () -> {
                     this.prepareWidgets(configObject);
@@ -130,23 +128,23 @@ public class CollapsibleEntriesScreen extends Screen {
     }
     
     public static void setupCustom(ResourceLocation id, String name, List<EntryStack<?>> stacks, CollapsibleConfigManager.CollapsibleConfigObject configObject, Runnable markDirty) {
-        Minecraft.getInstance().setScreen(new OptionEntriesScreen(new TranslatableComponent("text.rei.collapsible.entries.custom.title"), Minecraft.getInstance().screen) {
+        Minecraft.getInstance().setScreen(new OptionEntriesScreen(Component.translatable("text.rei.collapsible.entries.custom.title"), Minecraft.getInstance().screen) {
             private TextFieldListEntry entry;
             
             @Override
             public void addEntries(Consumer<ListEntry> entryConsumer) {
                 addEmpty(entryConsumer, 10);
-                addText(entryConsumer, new TranslatableComponent("text.rei.collapsible.entries.custom.id").withStyle(ChatFormatting.GRAY)
-                        .append(new TextComponent(" " + id).withStyle(ChatFormatting.DARK_GRAY)));
+                addText(entryConsumer, Component.translatable("text.rei.collapsible.entries.custom.id").withStyle(ChatFormatting.GRAY)
+                        .append(Component.literal(" " + id).withStyle(ChatFormatting.DARK_GRAY)));
                 addEmpty(entryConsumer, 10);
-                addText(entryConsumer, new TranslatableComponent("text.rei.collapsible.entries.custom.name").withStyle(ChatFormatting.GRAY));
+                addText(entryConsumer, Component.translatable("text.rei.collapsible.entries.custom.name").withStyle(ChatFormatting.GRAY));
                 entryConsumer.accept(this.entry = new TextFieldListEntry(width - 36, widget -> {
                     widget.setMaxLength(40);
                     if (this.entry != null) widget.setValue(this.entry.getWidget().getValue());
                     else widget.setValue(name);
                 }));
                 addEmpty(entryConsumer, 10);
-                entryConsumer.accept(new ButtonListEntry(width - 36, $ -> new TranslatableComponent("text.rei.collapsible.entries.custom.select"), ($, button) -> {
+                entryConsumer.accept(new ButtonListEntry(width - 36, $ -> Component.translatable("text.rei.collapsible.entries.custom.select"), ($, button) -> {
                     CustomCollapsibleEntrySelectionScreen screen = new CustomCollapsibleEntrySelectionScreen(stacks);
                     screen.parent = this.minecraft.screen;
                     this.minecraft.setScreen(screen);

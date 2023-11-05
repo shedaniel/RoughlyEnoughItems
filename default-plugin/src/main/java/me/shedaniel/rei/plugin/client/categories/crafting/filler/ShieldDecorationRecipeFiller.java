@@ -31,6 +31,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomShapelessDisplay;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -54,9 +55,9 @@ public class ShieldDecorationRecipeFiller implements CraftingRecipeFiller<Shield
             
             for (int i = 0; i < 2; i++) {
                 BannerPattern.Builder patternBuilder = new BannerPattern.Builder();
-                BannerPattern[] allPatterns = BannerPattern.values();
+                Holder<BannerPattern>[] allPatterns = Registry.BANNER_PATTERN.holders().toArray(Holder[]::new);
                 for (int j = 0; j < 2; j++) {
-                    BannerPattern pattern = allPatterns[random.nextInt(allPatterns.length - 1) + 1];
+                    Holder<BannerPattern> pattern = allPatterns[random.nextInt(allPatterns.length - 1) + 1];
                     patternBuilder.addPattern(pattern, colors[random.nextInt(colors.length)]);
                 }
                 ItemStack banner = new ItemStack(bannerOptional.get());

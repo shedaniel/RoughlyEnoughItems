@@ -43,16 +43,12 @@ import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.config.components.ConfigCategoriesListWidget;
 import me.shedaniel.rei.impl.client.gui.config.components.ConfigEntriesListWidget;
-import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigCategories;
-import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
-import me.shedaniel.rei.impl.client.gui.config.options.OptionCategory;
-import me.shedaniel.rei.impl.client.gui.config.options.OptionGroup;
+import me.shedaniel.rei.impl.client.gui.config.options.*;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TranslatableComponent;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
@@ -83,7 +79,7 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     }
     
     public REIConfigScreen(Screen parent, List<OptionCategory> categories) {
-        super(new TranslatableComponent("config.roughlyenoughitems.title"));
+        super(ConfigUtils.translatable("config.roughlyenoughitems.title"));
         this.parent = parent;
         this.categories = CollectionUtils.map(categories, OptionCategory::copy);
         this.cleanRequiresLevel();
