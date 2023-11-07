@@ -23,33 +23,72 @@
 
 package me.shedaniel.rei.impl.client.gui.config.components;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.gui.widgets.Label;
-import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import me.shedaniel.rei.api.client.gui.widgets.*;
+import me.shedaniel.rei.api.client.util.MatrixUtils;
+import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionCategory;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.FormattedCharSequence;
+
+import static me.shedaniel.rei.api.client.gui.widgets.Widget.scissor;
 
 public class ConfigCategoryEntryWidget {
-    public static WidgetWithBounds create(OptionCategory category) {
-        Label label = Widgets.createLabel(new Point(21, 7), category.getName().copy().withStyle(style -> style.withColor(0xFFC0C0C0)))
+    public static WidgetWithBounds create(OptionCategory category, int width) {
+        boolean hasDescription = !category.getDescription().getString().endsWith(".desc");
+        Label label = Widgets.createLabel(new Point(21, hasDescription ? 5 : 7), category.getName().copy().withStyle(style -> style.withColor(0xFFC0C0C0)))
                 .leftAligned();
         Font font = Minecraft.getInstance().font;
-        Rectangle bounds = new Rectangle(0, 0, label.getBounds().getMaxX(), 7 * 3);
+        MutableComponent description = category.getDescription().copy().withStyle(style -> style.withColor(0xFF909090));
+        Widget descriptionLabel = Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+            renderTextScrolling(matrices, description, 0, 0, (int) ((width - 21 - 6) / 0.75), 0xFF909090);
+        });
+        Rectangle bounds = new Rectangle(0, 0, label.getBounds().getMaxX(), hasDescription ? 24 : 7 * 3);
         return Widgets.concatWithBounds(
                 bounds,
                 label,
-                Widgets.createTexturedWidget(category.getIcon(), new Rectangle(3, 3, 16, 16), 0, 0, 1, 1, 1, 1)
+                hasDescription ? Widgets.withTranslate(Widgets.withTranslate(descriptionLabel, Matrix4f.createScaleMatrix(0.75f, 0.75f, 0.75f)), 21, 5 + 10, 0) : Widgets.noOp(),
+                Widgets.createTexturedWidget(category.getIcon(), new Rectangle(3, hasDescription ? 5 : 3, 16, 16), 0, 0, 1, 1, 1, 1)
         );
     }
     
     public static WidgetWithBounds createTiny(OptionCategory category) {
         Rectangle bounds = new Rectangle(0, 0, 16, 16);
+        Component[] texts = category.getDescription().getString().endsWith(".desc") ? new Component[]{category.getName()}
+                : new Component[]{category.getName().copy().withStyle(ChatFormatting.UNDERLINE), category.getDescription()};
         return Widgets.withTooltip(
                 Widgets.withBounds(Widgets.createTexturedWidget(category.getIcon(), bounds, 0, 0, 1, 1, 1, 1), bounds),
-                category.getName()
+                texts
         );
+    }
+    
+    private static void renderTextScrolling(PoseStack poses, Component text, int x, int y, int width, int color) {
+        renderTextScrolling(poses, text.getVisualOrderText(), x, y, width, color);
+    }
+    
+    private static void renderTextScrolling(PoseStack poses, FormattedCharSequence text, int x, int y, int width, int color) {
+        try (CloseableScissors scissors = scissor(poses, new Rectangle(x, y, width, y + 9))) {
+            Font font = Minecraft.getInstance().font;
+            int textWidth = font.width(text);
+            textWidth = MatrixUtils.transform(MatrixUtils.inverse(poses.last().pose()), new Rectangle(0, 0, textWidth, 100)).width;
+            width = MatrixUtils.transform(MatrixUtils.inverse(poses.last().pose()), new Rectangle(0, 0, width, 100)).width;
+            if (textWidth > width && !ConfigUtils.isReducedMotion()) {
+                poses.pushPose();
+                float textX = (System.currentTimeMillis() % ((textWidth + 10) * textWidth / 3)) / (float) textWidth * 3;
+                poses.translate(-textX, 0, 0);
+                font.drawShadow(poses, text, x + width - textWidth - 10, y, color);
+                font.drawShadow(poses, text, x + width, y, color);
+                poses.popPose();
+            } else {
+                font.drawShadow(poses, text, x, y, color);
+            }
+        }
     }
 }

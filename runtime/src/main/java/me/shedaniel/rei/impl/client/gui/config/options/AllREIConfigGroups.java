@@ -39,7 +39,7 @@ public interface AllREIConfigGroups {
     OptionGroup APPEARANCE_TOOLTIPS = make("appearance.tooltips")
             .add(APPEND_MOD_NAMES)
             .add(APPEND_FAVORITES_HINT);
-    OptionGroup KEYBINDS_KEYBINDS = make("keybinds.keybinds")
+    OptionGroup INPUT_KEYBINDS = make("input.keybinds")
             .add(RECIPE_KEYBIND)
             .add(USAGE_KEYBIND)
             .add(HIDE_KEYBIND)
@@ -50,14 +50,8 @@ public interface AllREIConfigGroups {
             .add(FAVORITE_KEYBIND)
             .add(EXPORT_IMAGE_KEYBIND)
             .add(BACK_KEYBIND);
-    OptionGroup KEYBINDS_ADVANCED = make("keybinds.advanced")
+    OptionGroup INPUT_ADVANCED = make("input.advanced")
             .add(USE_NATIVE_KEYBINDS);
-    OptionGroup CHEATS_CHEATS = make("cheats.cheats")
-            .add(CHEATS_MODE)
-            .add(CHEATS_METHOD)
-            .add(CHEATS_AMOUNT);
-    OptionGroup CHEATS_ADVANCED = make("cheats.advanced")
-            .add(GIVE_COMMAND);
     OptionGroup LAYOUT_WIDGETS = make("layout.widgets")
             .add(SEARCH_FIELD_LOCATION)
             .add(CONFIG_BUTTON_LOCATION)
@@ -76,27 +70,6 @@ public interface AllREIConfigGroups {
             .add(VANILLA_RECIPE_BOOK)
             .add(STATUS_EFFECTS_LOCATION)
             .add(INVENTORY_SEARCH);
-    OptionGroup FAVORITES_FAVORITES = make("favorites.favorites")
-            .add(FAVORITES_MODE)
-            .add(NEW_FAVORITES_BUTTON_VISIBILITY);
-    OptionGroup FAVORITES_ADVANCED = make("favorites.advanced")
-            .add(GAME_MODE_COMMAND)
-            .add(TIME_COMMAND)
-            .add(WEATHER_COMMAND);
-    OptionGroup PERFORMANCE_RENDERING = make("performance.rendering")
-            .add(BATCHED_RENDERING)
-            .add(CACHED_RENDERING);
-    OptionGroup PERFORMANCE_RELOAD = make("performance.reload")
-            .add(RELOAD_THREAD)
-            .add(CACHED_DISPLAY_LOOKUP);
-    OptionGroup SEARCH_APPEARANCE = make("search.appearance")
-            .add(SYNTAX_HIGHLIGHTING);
-    OptionGroup SEARCH_FILTERS = make("search.filters")
-            .add(MOD_SEARCH)
-            .add(TOOLTIP_SEARCH)
-            .add(TAG_SEARCH)
-            .add(IDENTIFIER_SEARCH);
-    OptionGroup SEARCH_ADVANCED = make("search.advanced");
     OptionGroup FILTERING_FILTERING = make("filtering.filtering")
             .add(CATEGORIES)
             .add(CUSTOMIZED_FILTERING);
@@ -110,6 +83,33 @@ public interface AllREIConfigGroups {
             .add(FOCUS_MODE);
     OptionGroup LIST_COLLAPSIBLE_GROUPS = make("list.collapsible_groups")
             .add(COLLAPSIBLE_ENTRIES);
+    OptionGroup FAVORITES_FAVORITES = make("favorites.favorites")
+            .add(FAVORITES_MODE)
+            .add(NEW_FAVORITES_BUTTON_VISIBILITY);
+    OptionGroup FAVORITES_ADVANCED = make("favorites.advanced")
+            .add(GAME_MODE_COMMAND)
+            .add(TIME_COMMAND)
+            .add(WEATHER_COMMAND);
+    OptionGroup SEARCH_APPEARANCE = make("search.appearance")
+            .add(SYNTAX_HIGHLIGHTING);
+    OptionGroup SEARCH_FILTERS = make("search.filters")
+            .add(MOD_SEARCH)
+            .add(TOOLTIP_SEARCH)
+            .add(TAG_SEARCH)
+            .add(IDENTIFIER_SEARCH);
+    OptionGroup SEARCH_ADVANCED = make("search.advanced");
+    OptionGroup CHEATS_CHEATS = make("cheats.cheats")
+            .add(CHEATS_MODE)
+            .add(CHEATS_METHOD)
+            .add(CHEATS_AMOUNT);
+    OptionGroup CHEATS_ADVANCED = make("cheats.advanced")
+            .add(GIVE_COMMAND);
+    OptionGroup PERFORMANCE_RENDERING = make("performance.rendering")
+            .add(BATCHED_RENDERING)
+            .add(CACHED_RENDERING);
+    OptionGroup PERFORMANCE_RELOAD = make("performance.reload")
+            .add(RELOAD_THREAD)
+            .add(CACHED_DISPLAY_LOOKUP);
     OptionGroup DEBUG_PERFORMANCE = make("debug.performance")
             .add(PLUGINS_PERFORMANCE)
             .add(SEARCH_PERFORMANCE)

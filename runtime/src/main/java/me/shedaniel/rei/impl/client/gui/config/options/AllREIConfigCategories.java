@@ -34,18 +34,16 @@ import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.transl
 public interface AllREIConfigCategories {
     static OptionCategory make(String key) {
         return OptionCategory.of(new ResourceLocation("roughlyenoughitems:textures/gui/config/" + key + ".png"),
-                translatable("config.rei.categories." + key));
+                translatable("config.rei.categories." + key),
+                translatable("config.rei.categories." + key + ".desc"));
     }
     
     OptionCategory APPEARANCE = make("appearance")
             .add(APPEARANCE_INTERFACE)
             .add(APPEARANCE_TOOLTIPS);
-    OptionCategory KEYBINDS = make("keybinds")
-            .add(KEYBINDS_KEYBINDS)
+    OptionCategory INPUT = make("input")
+            .add(INPUT_KEYBINDS)
             /*.add(KEYBINDS_ADVANCED)*/;
-    OptionCategory CHEATS = make("cheats")
-            .add(CHEATS_CHEATS)
-            .add(CHEATS_ADVANCED);
     OptionCategory LAYOUT = make("layout")
             .add(LAYOUT_WIDGETS)
             .add(LAYOUT_PANEL);
@@ -53,22 +51,25 @@ public interface AllREIConfigCategories {
             .add(ACCESSIBILITY_DISPLAY)
             .add(ACCESSIBILITY_WIDGETS)
             .add(ACCESSIBILITY_FEATURES);
-    OptionCategory FAVORITES = make("favorites")
-            .add(FAVORITES_FAVORITES)
-            .add(FAVORITES_ADVANCED);
-    OptionCategory PERFORMANCE = make("performance")
-            .add(PERFORMANCE_RENDERING)
-            .add(PERFORMANCE_RELOAD);
-    OptionCategory SEARCH = make("search")
-            .add(SEARCH_APPEARANCE)
-            .add(SEARCH_FILTERS)
-            .add(SEARCH_ADVANCED);
     OptionCategory FILTERING = make("filtering")
             .add(FILTERING_FILTERING)
             .add(FILTERING_ADVANCED);
     OptionCategory LIST = make("list")
             .add(LIST_ENTRIES)
             .add(LIST_COLLAPSIBLE_GROUPS);
+    OptionCategory FAVORITES = make("favorites")
+            .add(FAVORITES_FAVORITES)
+            .add(FAVORITES_ADVANCED);
+    OptionCategory SEARCH = make("search")
+            .add(SEARCH_APPEARANCE)
+            .add(SEARCH_FILTERS)
+            .add(SEARCH_ADVANCED);
+    OptionCategory CHEATS = make("cheats")
+            .add(CHEATS_CHEATS)
+            .add(CHEATS_ADVANCED);
+    OptionCategory PERFORMANCE = make("performance")
+            .add(PERFORMANCE_RENDERING)
+            .add(PERFORMANCE_RELOAD);
     OptionCategory DEBUG = make("debug")
             .add(DEBUG_PERFORMANCE);
     OptionCategory FLAGS = make("flags");
@@ -77,15 +78,15 @@ public interface AllREIConfigCategories {
             .add(RESET_RESET);
     List<OptionCategory> CATEGORIES = ImmutableList.of(
             APPEARANCE,
-            KEYBINDS,
-            CHEATS,
+            INPUT,
             LAYOUT,
             ACCESSIBILITY,
-            FAVORITES,
-            PERFORMANCE,
-            SEARCH,
             FILTERING,
             LIST,
+            FAVORITES,
+            SEARCH,
+            CHEATS,
+            PERFORMANCE,
             DEBUG,
             // FLAGS,
             RESET
