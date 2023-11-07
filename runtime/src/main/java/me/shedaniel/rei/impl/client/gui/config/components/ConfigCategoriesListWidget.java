@@ -37,7 +37,7 @@ import java.util.List;
 public class ConfigCategoriesListWidget {
     public static Widget create(Rectangle bounds, List<OptionCategory> categories, IntValue selected) {
         WidgetWithBounds list = ListWidget.builderOf(RectangleUtils.inset(bounds, 3, 5), categories,
-                        (index, entry) -> ConfigCategoryEntryWidget.create(entry))
+                        (index, entry) -> ConfigCategoryEntryWidget.create(entry, bounds.width - 6))
                 .gap(3)
                 .isSelectable((index, entry) -> true)
                 .selected(selected)

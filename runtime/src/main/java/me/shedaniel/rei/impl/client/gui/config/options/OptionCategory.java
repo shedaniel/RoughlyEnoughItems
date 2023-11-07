@@ -32,15 +32,17 @@ import java.util.List;
 public class OptionCategory {
     private final ResourceLocation icon;
     private final Component name;
+    private final Component description;
     private final List<OptionGroup> groups = new ArrayList<>();
     
-    private OptionCategory(ResourceLocation icon, Component name) {
+    private OptionCategory(ResourceLocation icon, Component name, Component description) {
         this.icon = icon;
         this.name = name;
+        this.description = description;
     }
     
-    public static OptionCategory of(ResourceLocation icon, Component name) {
-        return new OptionCategory(icon, name);
+    public static OptionCategory of(ResourceLocation icon, Component name, Component description) {
+        return new OptionCategory(icon, name, description);
     }
     
     public OptionCategory add(OptionGroup group) {
@@ -56,12 +58,16 @@ public class OptionCategory {
         return name;
     }
     
+    public Component getDescription() {
+        return description;
+    }
+    
     public List<OptionGroup> getGroups() {
         return groups;
     }
     
     public OptionCategory copy() {
-        OptionCategory category = new OptionCategory(icon, name);
+        OptionCategory category = new OptionCategory(icon, name, description);
         for (OptionGroup group : groups) {
             category.add(group.copy());
         }

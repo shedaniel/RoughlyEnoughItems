@@ -74,37 +74,29 @@ public interface AllREIConfigOptions {
             .enabledDisabled();
     CompositeOption<Boolean> APPEND_FAVORITES_HINT = make("appearance.append_favorites_hint", i -> i.advanced.tooltips.displayFavoritesTooltip, (i, v) -> i.advanced.tooltips.displayFavoritesTooltip = v)
             .enabledDisabled();
-    CompositeOption<ModifierKeyCode> RECIPE_KEYBIND = make("keybinds.recipe", i -> i.basics.keyBindings.recipeKeybind.copy(), (i, v) -> i.basics.keyBindings.recipeKeybind = v)
+    CompositeOption<ModifierKeyCode> RECIPE_KEYBIND = make("input.recipe", i -> i.basics.keyBindings.recipeKeybind.copy(), (i, v) -> i.basics.keyBindings.recipeKeybind = v)
             .keybind();
-    CompositeOption<ModifierKeyCode> USAGE_KEYBIND = make("keybinds.usage", i -> i.basics.keyBindings.usageKeybind.copy(), (i, v) -> i.basics.keyBindings.usageKeybind = v)
+    CompositeOption<ModifierKeyCode> USAGE_KEYBIND = make("input.usage", i -> i.basics.keyBindings.usageKeybind.copy(), (i, v) -> i.basics.keyBindings.usageKeybind = v)
             .keybind();
-    CompositeOption<ModifierKeyCode> HIDE_KEYBIND = make("keybinds.hide", i -> i.basics.keyBindings.hideKeybind.copy(), (i, v) -> i.basics.keyBindings.hideKeybind = v)
+    CompositeOption<ModifierKeyCode> HIDE_KEYBIND = make("input.hide", i -> i.basics.keyBindings.hideKeybind.copy(), (i, v) -> i.basics.keyBindings.hideKeybind = v)
             .keybind();
-    CompositeOption<ModifierKeyCode> PREVIOUS_PAGE_KEYBIND = make("keybinds.previous_page", i -> i.basics.keyBindings.previousPageKeybind.copy(), (i, v) -> i.basics.keyBindings.previousPageKeybind = v)
+    CompositeOption<ModifierKeyCode> PREVIOUS_PAGE_KEYBIND = make("input.previous_page", i -> i.basics.keyBindings.previousPageKeybind.copy(), (i, v) -> i.basics.keyBindings.previousPageKeybind = v)
             .keybind();
-    CompositeOption<ModifierKeyCode> NEXT_PAGE_KEYBIND = make("keybinds.next_page", i -> i.basics.keyBindings.nextPageKeybind.copy(), (i, v) -> i.basics.keyBindings.nextPageKeybind = v)
+    CompositeOption<ModifierKeyCode> NEXT_PAGE_KEYBIND = make("input.next_page", i -> i.basics.keyBindings.nextPageKeybind.copy(), (i, v) -> i.basics.keyBindings.nextPageKeybind = v)
             .keybind();
-    CompositeOption<ModifierKeyCode> FOCUS_SEARCH_KEYBIND = make("keybinds.focus_search", i -> i.basics.keyBindings.focusSearchFieldKeybind.copy(), (i, v) -> i.basics.keyBindings.focusSearchFieldKeybind = v)
+    CompositeOption<ModifierKeyCode> FOCUS_SEARCH_KEYBIND = make("input.focus_search", i -> i.basics.keyBindings.focusSearchFieldKeybind.copy(), (i, v) -> i.basics.keyBindings.focusSearchFieldKeybind = v)
             .keybind();
-    CompositeOption<ModifierKeyCode> COPY_RECIPE_ID_KEYBIND = make("keybinds.copy_recipe_id", i -> i.basics.keyBindings.copyRecipeIdentifierKeybind.copy(), (i, v) -> i.basics.keyBindings.copyRecipeIdentifierKeybind = v)
+    CompositeOption<ModifierKeyCode> COPY_RECIPE_ID_KEYBIND = make("input.copy_recipe_id", i -> i.basics.keyBindings.copyRecipeIdentifierKeybind.copy(), (i, v) -> i.basics.keyBindings.copyRecipeIdentifierKeybind = v)
             .keybind();
-    CompositeOption<ModifierKeyCode> FAVORITE_KEYBIND = make("keybinds.favorite", i -> i.basics.keyBindings.favoriteKeybind.copy(), (i, v) -> i.basics.keyBindings.favoriteKeybind = v)
+    CompositeOption<ModifierKeyCode> FAVORITE_KEYBIND = make("input.favorite", i -> i.basics.keyBindings.favoriteKeybind.copy(), (i, v) -> i.basics.keyBindings.favoriteKeybind = v)
             .keybind();
-    CompositeOption<ModifierKeyCode> EXPORT_IMAGE_KEYBIND = make("keybinds.export_image", i -> i.basics.keyBindings.exportImageKeybind.copy(), (i, v) -> i.basics.keyBindings.exportImageKeybind = v)
+    CompositeOption<ModifierKeyCode> EXPORT_IMAGE_KEYBIND = make("input.export_image", i -> i.basics.keyBindings.exportImageKeybind.copy(), (i, v) -> i.basics.keyBindings.exportImageKeybind = v)
             .keybind();
-    CompositeOption<ModifierKeyCode> BACK_KEYBIND = make("keybinds.back", i -> i.basics.keyBindings.previousScreenKeybind.copy(), (i, v) -> i.basics.keyBindings.previousScreenKeybind = v)
+    CompositeOption<ModifierKeyCode> BACK_KEYBIND = make("input.back", i -> i.basics.keyBindings.previousScreenKeybind.copy(), (i, v) -> i.basics.keyBindings.previousScreenKeybind = v)
             .keybind();
     // TODO: NATIVE KEYBINDS
-    CompositeOption<Boolean> USE_NATIVE_KEYBINDS = make("keybinds.use_native_keybinds", i -> i.basics.keyBindings.useNativeKeybinds, (i, v) -> i.basics.keyBindings.useNativeKeybinds = v)
+    CompositeOption<Boolean> USE_NATIVE_KEYBINDS = make("input.use_native_keybinds", i -> i.basics.keyBindings.useNativeKeybinds, (i, v) -> i.basics.keyBindings.useNativeKeybinds = v)
             .enabledDisabled();
-    CompositeOption<CheatingMode> CHEATS_MODE = make("cheats.mode", i -> i.basics.cheating, (i, v) -> i.basics.cheating = v)
-            .enumOptions();
-    CompositeOption<ItemCheatingStyle> CHEATS_METHOD = make("cheats.method", i -> i.basics.cheatingStyle, (i, v) -> i.basics.cheatingStyle = v)
-            .enumOptions();
-    CompositeOption<ItemCheatingMode> CHEATS_AMOUNT = make("cheats.amount", i -> i.functionality.itemCheatingMode, (i, v) -> i.functionality.itemCheatingMode = v)
-            .enumOptions();
-    CompositeOption<String> GIVE_COMMAND = make("cheats.give_command", i -> i.advanced.commands.giveCommand, (i, v) -> i.advanced.commands.giveCommand = v)
-            .string();
     CompositeOption<SearchFieldLocation> SEARCH_FIELD_LOCATION = make("layout.search_field_location", i -> i.appearance.layout.searchFieldLocation, (i, v) -> i.appearance.layout.searchFieldLocation = v)
             .entry(OptionValueEntry.<SearchFieldLocation>enumOptions().overrideText(location -> {
                 if (Minecraft.getInstance().screen instanceof REIConfigScreen configScreen) {
@@ -153,35 +145,6 @@ public interface AllREIConfigOptions {
             .ofBoolean(translatable("config.rei.value.accessibility.status_effects_location.right"), translatable("config.rei.value.accessibility.status_effects_location.left"));
     CompositeOption<Boolean> INVENTORY_SEARCH = make("accessibility.inventory_search", i -> i.functionality.allowInventoryHighlighting, (i, v) -> i.functionality.allowInventoryHighlighting = v)
             .enabledDisabled();
-    CompositeOption<Boolean> FAVORITES_MODE = make("favorites.mode", i -> i.basics.favoritesEnabled, (i, v) -> i.basics.favoritesEnabled = v)
-            .enabledDisabled();
-    CompositeOption<FavoriteAddWidgetMode> NEW_FAVORITES_BUTTON_VISIBILITY = make("favorites.new_favorites_button_visibility", i -> i.advanced.layout.favoriteAddWidgetMode, (i, v) -> i.advanced.layout.favoriteAddWidgetMode = v)
-            .enumOptions();
-    CompositeOption<String> GAME_MODE_COMMAND = make("favorites.game_mode_command", i -> i.advanced.commands.gamemodeCommand, (i, v) -> i.advanced.commands.gamemodeCommand = v)
-            .string();
-    CompositeOption<String> TIME_COMMAND = make("favorites.time_command", i -> i.advanced.commands.timeCommand, (i, v) -> i.advanced.commands.timeCommand = v)
-            .string();
-    CompositeOption<String> WEATHER_COMMAND = make("favorites.weather_command", i -> i.advanced.commands.weatherCommand, (i, v) -> i.advanced.commands.weatherCommand = v)
-            .string();
-    CompositeOption<Boolean> BATCHED_RENDERING = make("performance.batched_rendering", i -> i.advanced.miscellaneous.newFastEntryRendering, (i, v) -> i.advanced.miscellaneous.newFastEntryRendering = v)
-            .enabledDisabled();
-    CompositeOption<Boolean> CACHED_RENDERING = make("performance.cached_rendering", i -> i.advanced.miscellaneous.cachingFastEntryRendering, (i, v) -> i.advanced.miscellaneous.cachingFastEntryRendering = v)
-            .enabledDisabled();
-    CompositeOption<Boolean> RELOAD_THREAD = make("performance.reload_thread", i -> i.advanced.miscellaneous.registerRecipesInAnotherThread, (i, v) -> i.advanced.miscellaneous.registerRecipesInAnotherThread = v)
-            .ofBoolean(translatable("config.rei.values.performance.reload_thread.main_thread"), translatable("config.rei.values.performance.reload_thread.rei_thread"));
-    CompositeOption<Boolean> CACHED_DISPLAY_LOOKUP = make("performance.cached_display_lookup", i -> i.advanced.miscellaneous.cachingDisplayLookup, (i, v) -> i.advanced.miscellaneous.cachingDisplayLookup = v)
-            .enabledDisabled();
-    CompositeOption<SyntaxHighlightingMode> SYNTAX_HIGHLIGHTING = make("search.syntax_highlighting", i -> i.appearance.syntaxHighlightingMode, (i, v) -> i.appearance.syntaxHighlightingMode = v)
-            .enumOptions();
-    CompositeOption<SearchMode> MOD_SEARCH = make("search.mod_search", i -> i.advanced.search.modSearch, (i, v) -> i.advanced.search.modSearch = v)
-            .enumOptions();
-    CompositeOption<SearchMode> TOOLTIP_SEARCH = make("search.tooltip_search", i -> i.advanced.search.tooltipSearch, (i, v) -> i.advanced.search.tooltipSearch = v)
-            .enumOptions();
-    CompositeOption<SearchMode> TAG_SEARCH = make("search.tag_search", i -> i.advanced.search.tagSearch, (i, v) -> i.advanced.search.tagSearch = v)
-            .enumOptions();
-    CompositeOption<SearchMode> IDENTIFIER_SEARCH = make("search.identifier_search", i -> i.advanced.search.identifierSearch, (i, v) -> i.advanced.search.identifierSearch = v)
-            .enumOptions();
-    // TODO: ASYNC_SEARCH
     CompositeOption<ConfigureCategoriesScreen> CATEGORIES = make("filtering.categories", i -> {
         return new ConfigureCategoriesScreen(
                 new HashMap<>(i.getFilteringQuickCraftCategories()),
@@ -237,6 +200,43 @@ public interface AllREIConfigOptions {
     }).configure((access, option, onClose) -> {
         Minecraft.getInstance().setScreen(new CollapsibleEntriesScreen(onClose, access.get(option)));
     }).requiresLevel();
+    CompositeOption<Boolean> FAVORITES_MODE = make("favorites.mode", i -> i.basics.favoritesEnabled, (i, v) -> i.basics.favoritesEnabled = v)
+            .enabledDisabled();
+    CompositeOption<FavoriteAddWidgetMode> NEW_FAVORITES_BUTTON_VISIBILITY = make("favorites.new_favorites_button_visibility", i -> i.advanced.layout.favoriteAddWidgetMode, (i, v) -> i.advanced.layout.favoriteAddWidgetMode = v)
+            .enumOptions();
+    CompositeOption<String> GAME_MODE_COMMAND = make("favorites.game_mode_command", i -> i.advanced.commands.gamemodeCommand, (i, v) -> i.advanced.commands.gamemodeCommand = v)
+            .string();
+    CompositeOption<String> TIME_COMMAND = make("favorites.time_command", i -> i.advanced.commands.timeCommand, (i, v) -> i.advanced.commands.timeCommand = v)
+            .string();
+    CompositeOption<String> WEATHER_COMMAND = make("favorites.weather_command", i -> i.advanced.commands.weatherCommand, (i, v) -> i.advanced.commands.weatherCommand = v)
+            .string();
+    CompositeOption<SyntaxHighlightingMode> SYNTAX_HIGHLIGHTING = make("search.syntax_highlighting", i -> i.appearance.syntaxHighlightingMode, (i, v) -> i.appearance.syntaxHighlightingMode = v)
+            .enumOptions();
+    CompositeOption<SearchMode> MOD_SEARCH = make("search.mod_search", i -> i.advanced.search.modSearch, (i, v) -> i.advanced.search.modSearch = v)
+            .enumOptions();
+    CompositeOption<SearchMode> TOOLTIP_SEARCH = make("search.tooltip_search", i -> i.advanced.search.tooltipSearch, (i, v) -> i.advanced.search.tooltipSearch = v)
+            .enumOptions();
+    CompositeOption<SearchMode> TAG_SEARCH = make("search.tag_search", i -> i.advanced.search.tagSearch, (i, v) -> i.advanced.search.tagSearch = v)
+            .enumOptions();
+    CompositeOption<SearchMode> IDENTIFIER_SEARCH = make("search.identifier_search", i -> i.advanced.search.identifierSearch, (i, v) -> i.advanced.search.identifierSearch = v)
+            .enumOptions();
+    // TODO: ASYNC_SEARCH
+    CompositeOption<CheatingMode> CHEATS_MODE = make("cheats.mode", i -> i.basics.cheating, (i, v) -> i.basics.cheating = v)
+            .enumOptions();
+    CompositeOption<ItemCheatingStyle> CHEATS_METHOD = make("cheats.method", i -> i.basics.cheatingStyle, (i, v) -> i.basics.cheatingStyle = v)
+            .enumOptions();
+    CompositeOption<ItemCheatingMode> CHEATS_AMOUNT = make("cheats.amount", i -> i.functionality.itemCheatingMode, (i, v) -> i.functionality.itemCheatingMode = v)
+            .enumOptions();
+    CompositeOption<String> GIVE_COMMAND = make("cheats.give_command", i -> i.advanced.commands.giveCommand, (i, v) -> i.advanced.commands.giveCommand = v)
+            .string();
+    CompositeOption<Boolean> BATCHED_RENDERING = make("performance.batched_rendering", i -> i.advanced.miscellaneous.newFastEntryRendering, (i, v) -> i.advanced.miscellaneous.newFastEntryRendering = v)
+            .enabledDisabled();
+    CompositeOption<Boolean> CACHED_RENDERING = make("performance.cached_rendering", i -> i.advanced.miscellaneous.cachingFastEntryRendering, (i, v) -> i.advanced.miscellaneous.cachingFastEntryRendering = v)
+            .enabledDisabled();
+    CompositeOption<Boolean> RELOAD_THREAD = make("performance.reload_thread", i -> i.advanced.miscellaneous.registerRecipesInAnotherThread, (i, v) -> i.advanced.miscellaneous.registerRecipesInAnotherThread = v)
+            .ofBoolean(translatable("config.rei.values.performance.reload_thread.main_thread"), translatable("config.rei.values.performance.reload_thread.rei_thread"));
+    CompositeOption<Boolean> CACHED_DISPLAY_LOOKUP = make("performance.cached_display_lookup", i -> i.advanced.miscellaneous.cachingDisplayLookup, (i, v) -> i.advanced.miscellaneous.cachingDisplayLookup = v)
+            .enabledDisabled();
     CompositeOption<Object> PLUGINS_PERFORMANCE = make("debug.plugins_performance", i -> null, (i, v) -> new Object())
             .details((access, option, onClose) -> Minecraft.getInstance().setScreen(new PerformanceScreen(onClose)))
             .requiresLevel();
