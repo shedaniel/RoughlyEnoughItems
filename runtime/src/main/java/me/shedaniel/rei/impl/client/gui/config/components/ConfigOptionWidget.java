@@ -38,6 +38,7 @@ import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.impl.client.gui.config.ConfigAccess;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
+import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -57,17 +58,17 @@ public class ConfigOptionWidget {
         int[] stableHeight = {12};
         int[] height = {12};
         Label fieldNameLabel;
-        widgets.add(fieldNameLabel = Widgets.createLabel(new Point(0, 0), option.getName().copy().withStyle(style -> style.withColor(0xFFC0C0C0)))
+        widgets.add(fieldNameLabel = Widgets.createLabel(new Point(0, 0), TextTransformations.highlightText(option.getName().copy(), option.getOptionNameHighlight(), style -> style.withColor(0xFFC0C0C0)))
                 .leftAligned());
         WidgetWithBounds optionValue = ConfigOptionValueWidget.create(access, option, width - 10 - fieldNameLabel.getBounds().width);
         widgets.add(Widgets.withTranslate(optionValue, () -> Matrix4f.createTranslateMatrix(width - optionValue.getBounds().width - optionValue.getBounds().x, 0, 0)));
         widgets.add(new WidgetWithBounds() {
             final MutableComponent description = Util.make(() -> {
-                MutableComponent description = option.getDescription().copy().withStyle(style -> style.withColor(0xFF757575));
+                MutableComponent description = option.getDescription().copy();
                 if (description.getString().endsWith(".desc")) {
                     return literal("");
                 } else {
-                    return description;
+                    return TextTransformations.highlightText(description, option.getOptionDescriptionHighlight(), style -> style.withColor(0xFF757575));
                 }
             });
             

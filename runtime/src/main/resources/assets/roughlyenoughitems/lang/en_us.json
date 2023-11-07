@@ -462,6 +462,7 @@
   "config.rei.value.trueFalse.true": "True",
   "config.rei.value.enabledDisabled.false": "Disabled",
   "config.rei.value.enabledDisabled.true": "Enabled",
+  "config.rei.texts.search_options": "Search options...",
   "config.rei.texts.preview": "Preview...",
   "config.rei.texts.configure": "Configure...",
   "config.rei.texts.details": "Details...",

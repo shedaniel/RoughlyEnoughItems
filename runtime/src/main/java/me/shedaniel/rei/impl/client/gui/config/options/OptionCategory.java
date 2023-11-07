@@ -30,24 +30,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OptionCategory {
+    private final String key;
     private final ResourceLocation icon;
     private final Component name;
     private final Component description;
     private final List<OptionGroup> groups = new ArrayList<>();
     
-    private OptionCategory(ResourceLocation icon, Component name, Component description) {
+    private OptionCategory(String key, ResourceLocation icon, Component name, Component description) {
+        this.key = key;
         this.icon = icon;
         this.name = name;
         this.description = description;
     }
     
-    public static OptionCategory of(ResourceLocation icon, Component name, Component description) {
-        return new OptionCategory(icon, name, description);
+    public static OptionCategory of(String key, ResourceLocation icon, Component name, Component description) {
+        return new OptionCategory(key, icon, name, description);
     }
     
     public OptionCategory add(OptionGroup group) {
         this.groups.add(group);
         return this;
+    }
+    
+    public String getKey() {
+        return key;
     }
     
     public ResourceLocation getIcon() {
@@ -67,7 +73,7 @@ public class OptionCategory {
     }
     
     public OptionCategory copy() {
-        OptionCategory category = new OptionCategory(icon, name, description);
+        OptionCategory category = new OptionCategory(key, icon, name, description);
         for (OptionGroup group : groups) {
             category.add(group.copy());
         }

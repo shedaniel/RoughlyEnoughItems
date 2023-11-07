@@ -37,6 +37,7 @@ import me.shedaniel.rei.impl.client.gui.config.options.OptionGroup;
 import me.shedaniel.rei.impl.client.gui.config.options.preview.AccessibilityDisplayPreviewer;
 import me.shedaniel.rei.impl.client.gui.config.options.preview.InterfacePreviewer;
 import me.shedaniel.rei.impl.client.gui.config.options.preview.TooltipPreviewer;
+import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import net.minecraft.client.gui.GuiComponent;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -59,13 +60,13 @@ public class ConfigGroupWidget {
         SPECIAL_GROUPS.put(group, Pair.of(location, constructor));
     }
     
-    public static WidgetWithBounds create(ConfigAccess access, OptionGroup entry, int width) {
-        WidgetWithBounds groupTitle = Widgets.createLabel(new Point(0, 3), entry.getGroupName().copy().withStyle(style -> style.withColor(0xFFC0C0C0).withUnderlined(true)))
+    public static WidgetWithBounds create(ConfigAccess access, OptionGroup entry, int width, boolean applyPreview) {
+        WidgetWithBounds groupTitle = Widgets.createLabel(new Point(0, 3), TextTransformations.highlightText(entry.getGroupName().copy(), entry.getGroupNameHighlight(), style -> style.withColor(0xFFC0C0C0).withUnderlined(true)))
                 .leftAligned()
                 .withPadding(0, 0, 0, 6);
         WidgetWithBounds contents;
         
-        if (SPECIAL_GROUPS.containsKey(entry)) {
+        if (applyPreview && SPECIAL_GROUPS.containsKey(entry)) {
             Pair<PreviewLocation, SpecialGroupConstructor> pair = SPECIAL_GROUPS.get(entry);
             PreviewLocation location = pair.getLeft();
             int halfWidth = width * 6 / 10 - 2;

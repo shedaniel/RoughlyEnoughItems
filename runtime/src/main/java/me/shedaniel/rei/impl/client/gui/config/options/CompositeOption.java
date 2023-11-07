@@ -33,6 +33,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class CompositeOption<T> {
+    private final String id;
     private final Component name;
     private final Component description;
     private final Function<ConfigObjectImpl, T> bind;
@@ -43,8 +44,13 @@ public class CompositeOption<T> {
     private Supplier<T> defaultValue = null;
     private OptionValueEntry<T> entry = OptionValueEntry.noOp();
     private boolean requiresLevel = false;
+    @Nullable
+    private String optionNameHighlight = null;
+    @Nullable
+    private String optionDescriptionHighlight = null;
     
-    public CompositeOption(Component name, Component description, Function<ConfigObjectImpl, T> bind, BiConsumer<ConfigObjectImpl, T> save) {
+    public CompositeOption(String id, Component name, Component description, Function<ConfigObjectImpl, T> bind, BiConsumer<ConfigObjectImpl, T> save) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.bind = bind;
@@ -101,8 +107,26 @@ public class CompositeOption<T> {
         return this;
     }
     
+    public void setOptionNameHighlight(@Nullable String optionNameHighlight) {
+        this.optionNameHighlight = optionNameHighlight;
+    }
+    
+    public void setOptionDescriptionHighlight(@Nullable String optionDescriptionHighlight) {
+        this.optionDescriptionHighlight = optionDescriptionHighlight;
+    }
+    
     public boolean isRequiresLevel() {
         return requiresLevel;
+    }
+    
+    @Nullable
+    public String getOptionNameHighlight() {
+        return optionNameHighlight;
+    }
+    
+    @Nullable
+    public String getOptionDescriptionHighlight() {
+        return optionDescriptionHighlight;
     }
     
     public CompositeOption<T> previewer(ConfigPreviewer<T> previewer) {
@@ -113,6 +137,10 @@ public class CompositeOption<T> {
     public CompositeOption<T> defaultValue(Supplier<T> defaultValue) {
         this.defaultValue = defaultValue;
         return this;
+    }
+    
+    public String getId() {
+        return id;
     }
     
     public Component getName() {
@@ -151,7 +179,7 @@ public class CompositeOption<T> {
     }
     
     public CompositeOption<T> copy() {
-        CompositeOption<T> option = new CompositeOption<>(name, description, bind, save);
+        CompositeOption<T> option = new CompositeOption<>(id, name, description, bind, save);
         option.entry = entry;
         option.previewer = previewer;
         option.defaultValue = defaultValue;

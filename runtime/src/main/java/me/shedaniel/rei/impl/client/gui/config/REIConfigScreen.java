@@ -31,6 +31,7 @@ import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -43,16 +44,22 @@ import me.shedaniel.rei.impl.client.config.ConfigObjectImpl;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.config.components.ConfigCategoriesListWidget;
 import me.shedaniel.rei.impl.client.gui.config.components.ConfigEntriesListWidget;
+import me.shedaniel.rei.impl.client.gui.config.components.ConfigSearchListWidget;
 import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigCategories;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionCategory;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionGroup;
 import me.shedaniel.rei.impl.client.gui.modules.Menu;
+import me.shedaniel.rei.impl.client.gui.widget.HoleWidget;
+import me.shedaniel.rei.impl.client.gui.widget.basewidgets.TextFieldWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.apache.commons.compress.harmony.unpack200.bytecode.forms.WideForm;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
@@ -63,15 +70,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.translatable;
 
 public class REIConfigScreen extends Screen implements ConfigAccess {
     private final Screen parent;
     private final List<OptionCategory> categories;
     private final List<Widget> widgets = new ArrayList<>();
-    private final Map<CompositeOption<?>, ?> defaultOptions = new HashMap<>();
-    private final Map<CompositeOption<?>, ?> options = new HashMap<>();
+    private final Map<String, ?> defaultOptions = new HashMap<>();
+    private final Map<String, ?> options = new HashMap<>();
     private OptionCategory activeCategory;
+    private boolean searching;
     @Nullable
     private Menu menu;
     @Nullable
@@ -95,8 +104,8 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
         for (OptionCategory category : this.categories) {
             for (OptionGroup group : category.getGroups()) {
                 for (CompositeOption<?> option : group.getOptions()) {
-                    ((Map<CompositeOption<?>, Object>) this.defaultOptions).put(option, option.getBind().apply(defaultConfig));
-                    ((Map<CompositeOption<?>, Object>) this.options).put(option, option.getBind().apply(config));
+                    ((Map<String, Object>) this.defaultOptions).put(option.getId(), option.getBind().apply(defaultConfig));
+                    ((Map<String, Object>) this.options).put(option.getId(), option.getBind().apply(config));
                 }
             }
         }
@@ -111,7 +120,7 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
             for (OptionGroup group : category.getGroups()) {
                 group.getOptions().replaceAll(option -> {
                     if (option.isRequiresLevel()) {
-                        return new CompositeOption<>(option.getName(), option.getDescription(), i -> 0, (i, v) -> new Object())
+                        return new CompositeOption<>(option.getId(), option.getName(), option.getDescription(), i -> 0, (i, v) -> new Object())
                                 .entry(value -> translatable("config.rei.texts.requires_level").withStyle(ChatFormatting.RED))
                                 .defaultValue(() -> 1);
                     } else {
@@ -128,27 +137,53 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
         this.widgets.clear();
         this.widgets.add(Widgets.createLabel(new Point(width / 2, 12), this.title));
         int sideWidth = (int) Math.round(width / 4.2);
-        boolean singlePane = width - 20 - sideWidth <= 330;
-        int singleSideWidth = 32 + 6 + 4;
-        Mutable<Widget> list = new MutableObject<>(createEntriesList(singlePane, singleSideWidth, sideWidth));
-        IntValue selectedCategory = new IntValue() {
-            @Override
-            public void accept(int index) {
-                REIConfigScreen.this.activeCategory = categories.get(index);
-                list.setValue(createEntriesList(singlePane, singleSideWidth, sideWidth));
-            }
-            
-            @Override
-            public int getAsInt() {
-                return categories.indexOf(activeCategory);
-            }
-        };
-        if (!singlePane) {
-            this.widgets.add(ConfigCategoriesListWidget.create(new Rectangle(8, 32, sideWidth, height - 32 - 32), categories, selectedCategory));
+        if (this.searching) {
+            this.widgets.add(Widgets.createButton(new Rectangle(8, 32, sideWidth, 20), literal("↩ ").append(translatable("gui.back")))
+                    .onClick(button -> setSearching(false)));
+            this.widgets.add(HoleWidget.createBackground(new Rectangle(8 + sideWidth + 4, 32, width - 16 - sideWidth - 4, 20), () -> 0, 32));
+            TextFieldWidget textField = new TextFieldWidget(new Rectangle(8 + sideWidth + 4 + 6, 32 + 6, width - 16 - sideWidth - 4 - 10, 12)) {
+                @Override
+                protected void renderSuggestion(PoseStack matrices, int x, int y) {
+                    int color;
+                    if (containsMouse(PointHelper.ofMouse()) || isFocused()) {
+                        color = 0xddeaeaea;
+                    } else {
+                        color = -6250336;
+                    }
+                    this.font.drawShadow(matrices, this.font.plainSubstrByWidth(this.getSuggestion(), this.getWidth()), x, y, color);
+                }
+            };
+            textField.setHasBorder(false);
+            textField.setMaxLength(9000);
+            this.widgets.add(textField);
+            this.widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+                textField.setSuggestion(!textField.isFocused() && textField.getText().isEmpty() ? I18n.get("config.rei.texts.search_options") : null);
+            }));
+            this.widgets.add(ConfigSearchListWidget.create(this, this.categories, textField, new Rectangle(8, 32 + 20 + 4, width - 16, height - 32 - (32 + 20 + 4))));
         } else {
-            this.widgets.add(ConfigCategoriesListWidget.createTiny(new Rectangle(8, 32, singleSideWidth - 4, height - 32 - 32), categories, selectedCategory));
+            boolean singlePane = width - 20 - sideWidth <= 330;
+            int singleSideWidth = 32 + 6 + 4;
+            Mutable<Widget> list = new MutableObject<>(createEntriesList(singlePane, singleSideWidth, sideWidth));
+            IntValue selectedCategory = new IntValue() {
+                @Override
+                public void accept(int index) {
+                    REIConfigScreen.this.activeCategory = categories.get(index);
+                    list.setValue(createEntriesList(singlePane, singleSideWidth, sideWidth));
+                }
+                
+                @Override
+                public int getAsInt() {
+                    return categories.indexOf(activeCategory);
+                }
+            };
+            if (!singlePane) {
+                this.widgets.add(ConfigCategoriesListWidget.create(new Rectangle(8, 32, sideWidth, height - 32 - 32), categories, selectedCategory));
+            } else {
+                this.widgets.add(ConfigCategoriesListWidget.createTiny(new Rectangle(8, 32, singleSideWidth - 4, height - 32 - 32), categories, selectedCategory));
+            }
+            this.widgets.add(Widgets.delegate(list::getValue));
         }
-        this.widgets.add(Widgets.delegate(list::getValue));
+        
         this.widgets.add(Widgets.createButton(new Rectangle(width / 2 - 150 - 10, height - 26, 150, 20), translatable("gui.cancel")).onClick(button -> {
             Minecraft.getInstance().setScreen(this.parent);
         }));
@@ -175,11 +210,11 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
         return ConfigEntriesListWidget.create(this, new Rectangle(singlePane ? 8 + singleSideWidth : 12 + sideWidth, 32, singlePane ? width - 16 - singleSideWidth : width - 20 - sideWidth, height - 32 - 32), activeCategory.getGroups());
     }
     
-    public Map<CompositeOption<?>, ?> getDefaultOptions() {
+    public Map<String, ?> getDefaultOptions() {
         return defaultOptions;
     }
     
-    public Map<CompositeOption<?>, ?> getOptions() {
+    public Map<String, ?> getOptions() {
         return options;
     }
     
@@ -367,17 +402,17 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     
     @Override
     public <T> T get(CompositeOption<T> option) {
-        return (T) getOptions().get(option);
+        return (T) getOptions().get(option.getId());
     }
     
     @Override
     public <T> void set(CompositeOption<T> option, T value) {
-        ((Map<CompositeOption<?>, Object>) getOptions()).put(option, value);
+        ((Map<String, Object>) getOptions()).put(option.getId(), value);
     }
     
     @Override
     public <T> T getDefault(CompositeOption<T> option) {
-        return (T) getDefaultOptions().get(option);
+        return (T) getDefaultOptions().get(option.getId());
     }
     
     @Override
@@ -396,5 +431,14 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     @Nullable
     public CompositeOption<ModifierKeyCode> getFocusedKeycode() {
         return this.focusedKeycodeOption;
+    }
+    
+    public void setSearching(boolean searching) {
+        this.searching = searching;
+        this.init(this.minecraft, this.width, this.height);
+    }
+    
+    public boolean isSearching() {
+        return searching;
     }
 }

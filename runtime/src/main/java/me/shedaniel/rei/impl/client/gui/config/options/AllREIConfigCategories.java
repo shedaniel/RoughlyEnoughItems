@@ -33,7 +33,7 @@ import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.transl
 
 public interface AllREIConfigCategories {
     static OptionCategory make(String key) {
-        return OptionCategory.of(new ResourceLocation("roughlyenoughitems:textures/gui/config/" + key + ".png"),
+        return OptionCategory.of(key, new ResourceLocation("roughlyenoughitems:textures/gui/config/" + key + ".png"),
                 translatable("config.rei.categories." + key),
                 translatable("config.rei.categories." + key + ".desc"));
     }
