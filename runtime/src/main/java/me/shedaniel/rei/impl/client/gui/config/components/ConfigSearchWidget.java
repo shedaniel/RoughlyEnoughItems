@@ -299,7 +299,7 @@ public class ConfigSearchWidget {
     }
     
     public enum MatchType {
-        KEY(1.0F),
+        KEY(0.0005F),
         NAME(0.98F),
         DESCRIPTION(0.8F),
         ;
