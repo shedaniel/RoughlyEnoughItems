@@ -24,12 +24,20 @@
 package me.shedaniel.rei.impl.client.gui.text;
 
 import me.shedaniel.math.Color;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Locale;
+import java.util.function.UnaryOperator;
+
+import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
 
 @ApiStatus.Internal
 public class TextTransformations {
@@ -90,6 +98,35 @@ public class TextTransformations {
             
             return true;
         };
+    }
+    
+    public static MutableComponent highlightText(MutableComponent component, @Nullable String highlight, UnaryOperator<Style> styleOperator) {
+        if (highlight == null) return component.withStyle(styleOperator);
+        String string = component.getString();
+        if (string.toLowerCase(Locale.ROOT).equals(highlight.toLowerCase(Locale.ROOT))) {
+            return component.withStyle(styleOperator).withStyle(ChatFormatting.YELLOW);
+        }
+        String[] parts = string.toLowerCase(Locale.ROOT).split(highlight.toLowerCase(Locale.ROOT));
+        if (string.toLowerCase(Locale.ROOT).endsWith(highlight.toLowerCase(Locale.ROOT))) {
+            // Append an empty string to the end
+            String[] newParts = new String[parts.length + 1];
+            System.arraycopy(parts, 0, newParts, 0, parts.length);
+            newParts[parts.length] = "";
+            parts = newParts;
+        }
+        if (parts.length <= 1) return component.withStyle(styleOperator);
+        MutableComponent output = literal("");
+        int curr = 0;
+        for (int i = 0; i < parts.length; i++) {
+            output.append(literal(string.substring(curr, curr + parts[i].length())).withStyle(styleOperator));
+            curr += parts[i].length();
+            if (i != parts.length - 1) {
+                output.append(literal(string.substring(curr, curr + highlight.length())).withStyle(styleOperator)
+                        .withStyle(ChatFormatting.YELLOW));
+                curr += highlight.length();
+            }
+        }
+        return output;
     }
     
     @FunctionalInterface

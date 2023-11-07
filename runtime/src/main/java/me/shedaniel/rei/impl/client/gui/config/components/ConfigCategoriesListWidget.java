@@ -27,30 +27,56 @@ import dev.architectury.utils.value.IntValue;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionCategory;
 import me.shedaniel.rei.impl.client.gui.widget.ListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.ScrollableViewWidget;
 import me.shedaniel.rei.impl.common.util.RectangleUtils;
+import org.apache.commons.lang3.mutable.Mutable;
+import org.apache.commons.lang3.mutable.MutableObject;
 
 import java.util.List;
 
 public class ConfigCategoriesListWidget {
     public static Widget create(Rectangle bounds, List<OptionCategory> categories, IntValue selected) {
-        WidgetWithBounds list = ListWidget.builderOf(RectangleUtils.inset(bounds, 3, 5), categories,
-                        (index, entry) -> ConfigCategoryEntryWidget.create(entry, bounds.width - 6))
+        final Mutable<WidgetWithBounds> list = new MutableObject<>(null);
+        list.setValue(ListWidget.builderOfWidgets(RectangleUtils.inset(bounds, 3, 5),
+                        CollectionUtils.concatUnmodifiable(List.of(ConfigSearchWidget.create(() -> list.getValue() != null && list.getValue().getBounds().height + 6 > bounds.height ? bounds.width - 6 - 6 : bounds.width - 6)),
+                                CollectionUtils.map(categories, entry -> ConfigCategoryEntryWidget.create(entry, bounds.width - 6))))
                 .gap(3)
-                .isSelectable((index, entry) -> true)
-                .selected(selected)
-                .build();
-        return ScrollableViewWidget.create(bounds, list.withPadding(0, 5), true);
+                .isSelectable((index, entry) -> index != 0)
+                .selected(new IntValue() {
+                    @Override
+                    public void accept(int value) {
+                        selected.accept(value - 1);
+                    }
+                    
+                    @Override
+                    public int getAsInt() {
+                        return selected.getAsInt() + 1;
+                    }
+                })
+                .build());
+        return ScrollableViewWidget.create(bounds, list.getValue().withPadding(0, 5), true);
     }
     
     public static Widget createTiny(Rectangle bounds, List<OptionCategory> categories, IntValue selected) {
-        WidgetWithBounds list = ListWidget.builderOf(RectangleUtils.inset(bounds, (bounds.width - 6 - 16) / 2, 9), categories,
-                        (index, entry) -> ConfigCategoryEntryWidget.createTiny(entry))
+        WidgetWithBounds list = ListWidget.builderOfWidgets(RectangleUtils.inset(bounds, (bounds.width - 6 - 16) / 2, 9),
+                        CollectionUtils.concatUnmodifiable(List.of(ConfigSearchWidget.createTiny()),
+                                CollectionUtils.map(categories, ConfigCategoryEntryWidget::createTiny)))
                 .gap(7)
-                .isSelectable((index, entry) -> true)
-                .selected(selected)
+                .isSelectable((index, entry) -> index != 0)
+                .selected(new IntValue() {
+                    @Override
+                    public void accept(int value) {
+                        selected.accept(value - 1);
+                    }
+                    
+                    @Override
+                    public int getAsInt() {
+                        return selected.getAsInt() + 1;
+                    }
+                })
                 .build();
         return ScrollableViewWidget.create(bounds, list.withPadding(0, 9), true);
     }

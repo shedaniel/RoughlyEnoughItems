@@ -28,7 +28,7 @@ import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.transl
 
 public interface AllREIConfigGroups {
     static <T> OptionGroup make(String id) {
-        return new OptionGroup(translatable("config.rei.options.groups." + id));
+        return new OptionGroup(id, translatable("config.rei.options.groups." + id));
     }
     
     OptionGroup APPEARANCE_INTERFACE = make("appearance.interface")

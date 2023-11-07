@@ -37,7 +37,7 @@ import java.util.List;
 public class ConfigEntriesListWidget {
     public static Widget create(ConfigAccess access, Rectangle bounds, List<OptionGroup> groups) {
         WidgetWithBounds list = ListWidget.builderOf(RectangleUtils.inset(bounds, 6, 6), groups,
-                        (index, entry) -> ConfigGroupWidget.create(access, entry, bounds.width - 12 - 6))
+                        (index, entry) -> ConfigGroupWidget.create(access, entry, bounds.width - 12 - 6, false))
                 .gap(7)
                 .calculateTotalHeightDynamically(true)
                 .build();

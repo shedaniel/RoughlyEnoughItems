@@ -24,16 +24,21 @@
 package me.shedaniel.rei.impl.client.gui.config.options;
 
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class OptionGroup {
+    private final String id;
     private final Component groupName;
     private final List<CompositeOption<?>> options = new ArrayList<>();
+    @Nullable
+    private String groupNameHighlight = null;
     
-    public OptionGroup(Component groupName) {
+    public OptionGroup(String id, Component groupName) {
+        this.id = id;
         this.groupName = groupName;
     }
     
@@ -42,12 +47,25 @@ public class OptionGroup {
         return this;
     }
     
+    public void setGroupNameHighlight(@Nullable String groupNameHighlight) {
+        this.groupNameHighlight = groupNameHighlight;
+    }
+    
+    public String getId() {
+        return id;
+    }
+    
     public Component getGroupName() {
         return groupName;
     }
     
     public List<CompositeOption<?>> getOptions() {
         return options;
+    }
+    
+    @Nullable
+    public String getGroupNameHighlight() {
+        return groupNameHighlight;
     }
     
     @Override
@@ -65,7 +83,7 @@ public class OptionGroup {
     }
     
     public OptionGroup copy() {
-        OptionGroup group = new OptionGroup(groupName);
+        OptionGroup group = new OptionGroup(id, groupName);
         for (CompositeOption<?> option : options) {
             group.add(option);
         }
