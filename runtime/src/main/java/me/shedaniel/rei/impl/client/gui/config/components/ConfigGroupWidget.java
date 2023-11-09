@@ -48,7 +48,7 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public class ConfigGroupWidget {
-    private static final Map<OptionGroup, Pair<PreviewLocation, SpecialGroupConstructor>> SPECIAL_GROUPS = new HashMap<>();
+    private static final Map<String, Pair<PreviewLocation, SpecialGroupConstructor>> SPECIAL_GROUPS = new HashMap<>();
     
     static {
         addPreview(AllREIConfigGroups.APPEARANCE_INTERFACE, PreviewLocation.RIGHT, (access, entry, width, height) -> InterfacePreviewer.create(access, width, height));
@@ -57,7 +57,7 @@ public class ConfigGroupWidget {
     }
     
     public static void addPreview(OptionGroup group, PreviewLocation location, SpecialGroupConstructor constructor) {
-        SPECIAL_GROUPS.put(group, Pair.of(location, constructor));
+        SPECIAL_GROUPS.put(group.getId(), Pair.of(location, constructor));
     }
     
     public static WidgetWithBounds create(ConfigAccess access, OptionGroup entry, int width, boolean applyPreview) {
@@ -66,8 +66,8 @@ public class ConfigGroupWidget {
                 .withPadding(0, 0, 0, 6);
         WidgetWithBounds contents;
         
-        if (applyPreview && SPECIAL_GROUPS.containsKey(entry)) {
-            Pair<PreviewLocation, SpecialGroupConstructor> pair = SPECIAL_GROUPS.get(entry);
+        if (applyPreview && SPECIAL_GROUPS.containsKey(entry.getId())) {
+            Pair<PreviewLocation, SpecialGroupConstructor> pair = SPECIAL_GROUPS.get(entry.getId());
             PreviewLocation location = pair.getLeft();
             int halfWidth = width * 6 / 10 - 2;
             if (halfWidth <= 200 && location == PreviewLocation.RIGHT) location = PreviewLocation.TOP;
