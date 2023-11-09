@@ -31,6 +31,7 @@ import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.config.entry.EntryStackProvider;
 import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -53,6 +54,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -176,6 +178,19 @@ public class CollapsibleEntriesScreen extends Screen {
         this.listWidget.render(poses, mouseX, mouseY, delta);
         super.render(poses, mouseX, mouseY, delta);
         this.font.drawShadow(poses, this.title, this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
+        
+        if (ConfigObject.getInstance().doDebugRenderTimeRequired()) {
+            Component debugText = new TextComponent(String.format("%s fps", minecraft.fpsString.split(" ")[0]));
+            int stringWidth = font.width(debugText);
+            fillGradient(poses, minecraft.screen.width - stringWidth - 2, 32, minecraft.screen.width, 32 + font.lineHeight + 2, -16777216, -16777216);
+            MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+            poses.pushPose();
+            poses.translate(0.0D, 0.0D, getBlitOffset());
+            Matrix4f matrix = poses.last().pose();
+            font.drawInBatch(debugText.getVisualOrderText(), minecraft.screen.width - stringWidth, 32 + 2, -1, false, matrix, immediate, false, 0, 15728880);
+            immediate.endBatch();
+            poses.popPose();
+        }
     }
     
     @Override
@@ -272,9 +287,9 @@ public class CollapsibleEntriesScreen extends Screen {
         
         private int getMaxScrollDist() {
             return Arrays.stream(this.columns).mapToInt(ListWidget::getHeightOf)
-                           .max()
-                           .orElse(0)
-                   + PADDING * 2;
+                    .max()
+                    .orElse(0)
+                    + PADDING * 2;
         }
         
         @Override
