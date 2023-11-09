@@ -67,7 +67,7 @@ public abstract class CollapsingEntryListWidget extends EntryListWidget {
         super.updateEntriesPosition();
     }
     
-    private void updateStacks() {
+    public void updateStacks() {
         lastUpdatedCount = updatedCount;
         
         List</*EntryStack<?> | List<EntryStack<?>>*/ Object> stacks = new ArrayList<>((int) (collapsedStacks.size() * 1.5));
