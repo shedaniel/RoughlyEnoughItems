@@ -227,14 +227,13 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
     private void renderStacks(PoseStack poses, int mouseX, int mouseY, float delta, Rectangle bounds, int y) {
         poses.pushPose();
         try (CloseableScissors outerScissors = scissor(poses, new Rectangle(bounds.x, y, bounds.width, bounds.getMaxY() - 3 - y))) {
-            bounds.y += (bounds.height - 6 - 10) * 0.0;
             y = bounds.y + 37 - this.scroller.scrollAmountInt();
             int x = bounds.getCenterX() - 8 * rowSize;
             int xIndex = 0;
             poses.translate(0, 0, 100);
-            BatchedEntryRendererManager manager = new BatchedEntryRendererManager();
+            BatchedEntryRendererManager<EntryWidget> manager = new BatchedEntryRendererManager<>();
             for (Slot stack : this.stacks) {
-                if (y + 16 >= 30) {
+                if (y + 16 >= 30 && y + 16 >= bounds.y + 37) {
                     stack.getBounds().setBounds(x + 16 * xIndex - 1, y - 1, 18, 18);
                     manager.add((EntryWidget) stack);
                 }
@@ -242,7 +241,7 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
                 if (xIndex >= this.rowSize) {
                     y += 16;
                     xIndex = 0;
-                    if (y >= bounds.getMaxY()) {
+                    if (y >= bounds.getMaxY() || y >= minecraft.screen.height) {
                         break;
                     }
                 }
