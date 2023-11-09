@@ -180,7 +180,7 @@ public class CollapsibleEntriesScreen extends Screen {
         this.font.drawShadow(poses, this.title, this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
         
         if (ConfigObject.getInstance().doDebugRenderTimeRequired()) {
-            Component debugText = new TextComponent(String.format("%s fps", minecraft.fpsString.split(" ")[0]));
+            Component debugText = Component.literal(String.format("%s fps", minecraft.fpsString.split(" ")[0]));
             int stringWidth = font.width(debugText);
             fillGradient(poses, minecraft.screen.width - stringWidth - 2, 32, minecraft.screen.width, 32 + font.lineHeight + 2, -16777216, -16777216);
             MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
