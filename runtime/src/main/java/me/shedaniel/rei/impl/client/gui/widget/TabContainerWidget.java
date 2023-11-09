@@ -59,6 +59,7 @@ public class TabContainerWidget extends GuiComponent {
     }
     
     public void updateScroll(List<DisplayCategory<?>> categories, int selectedCategory, long duration) {
+        if (ConfigObject.getInstance().isReducedMotion()) duration = 0;
         this.initTabsVariables();
         if (categories.size() <= tabsPerPage) {
             scrollAnimator.setAs(0d);
@@ -96,42 +97,17 @@ public class TabContainerWidget extends GuiComponent {
         }
         
         if (categories.size() > tabsPerPage) {
-            Button tabLeft, tabRight;
-            this.widgets.add(tabLeft = Widgets.createButton(new Rectangle(bounds.x, bounds.getMaxY() - tabSize + 1 - tabButtonsSize, tabButtonsSize, tabButtonsSize), Component.empty())
-                    .onClick(button -> {
-                        int currentCategoryPage = selectedCategory.getAsInt() / tabsPerPage();
-                        currentCategoryPage = Math.floorMod(currentCategoryPage - 1, categories.size() / tabsPerPage() + 1);
-                        selectedCategory.accept(Mth.clamp(currentCategoryPage * tabsPerPage() + tabsPerPage() / 2,
-                                tabsPerPage() / 2, categories.size() - (int) Math.ceil(tabsPerPage() / 2.0)));
-                    })
-                    .tooltipLine(Component.translatable("text.rei.previous_page")));
-            this.widgets.add(tabRight = Widgets.createButton(new Rectangle(bounds.x + bounds.width - tabButtonsSize - (isCompactTabButtons ? 0 : 1), bounds.getMaxY() - tabSize + 1 - tabButtonsSize, tabButtonsSize, tabButtonsSize), Component.empty())
-                    .onClick(button -> {
-                        int currentCategoryPage = selectedCategory.getAsInt() / tabsPerPage();
-                        currentCategoryPage = Math.floorMod(currentCategoryPage + 1, categories.size() / tabsPerPage() + 1);
-                        selectedCategory.accept(Mth.clamp(currentCategoryPage * tabsPerPage() + tabsPerPage() / 2,
-                                tabsPerPage() / 2, categories.size() - (int) Math.ceil(tabsPerPage() / 2.0)));
-                    })
-                    .tooltipLine(Component.translatable("text.rei.next_page")));
-            
-            this.widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-                Rectangle tabLeftBounds = tabLeft.getBounds();
-                Rectangle tabRightBounds = tabRight.getBounds();
-                if (isCompactTabButtons) {
-                    matrices.pushPose();
-                    matrices.translate(0, 0.5, 0);
-                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_SMALL_TEXTURE);
-                    blit(matrices, tabLeftBounds.x + 2, tabLeftBounds.y + 2, 0, 0, 6, 6, 6, 6);
-                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_SMALL_TEXTURE);
-                    blit(matrices, tabRightBounds.x + 2, tabRightBounds.y + 2, 0, 0, 6, 6, 6, 6);
-                    matrices.popPose();
-                } else {
-                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_TEXTURE);
-                    blit(matrices, tabLeftBounds.x + 4, tabLeftBounds.y + 4, 0, 0, 8, 8, 8, 8);
-                    RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_TEXTURE);
-                    blit(matrices, tabRightBounds.x + 4, tabRightBounds.y + 4, 0, 0, 8, 8, 8, 8);
-                }
-            }), 0, 0, 1));
+            this.widgets.addAll(getCategoryButtons(bounds, isCompactTabButtons, tabSize, tabButtonsSize, () -> {
+                int currentCategoryPage = selectedCategory.getAsInt() / tabsPerPage();
+                currentCategoryPage = Math.floorMod(currentCategoryPage - 1, categories.size() / tabsPerPage() + 1);
+                selectedCategory.accept(Mth.clamp(currentCategoryPage * tabsPerPage() + tabsPerPage() / 2,
+                        tabsPerPage() / 2, categories.size() - (int) Math.ceil(tabsPerPage() / 2.0)));
+            }, () -> {
+                int currentCategoryPage = selectedCategory.getAsInt() / tabsPerPage();
+                currentCategoryPage = Math.floorMod(currentCategoryPage + 1, categories.size() / tabsPerPage() + 1);
+                selectedCategory.accept(Mth.clamp(currentCategoryPage * tabsPerPage() + tabsPerPage() / 2,
+                        tabsPerPage() / 2, categories.size() - (int) Math.ceil(tabsPerPage() / 2.0)));
+            }));
         }
         
         this.widgets.add(new Widget() {
@@ -225,6 +201,38 @@ public class TabContainerWidget extends GuiComponent {
                 }
             });
         }
+    }
+    
+    public static List<Widget> getCategoryButtons(Rectangle bounds, boolean isCompactTabButtons, int tabSize, int tabButtonsSize,
+                                                   Runnable leftAction, Runnable rightAction) {
+        List<Widget> widgets = new ArrayList<>();
+        Button tabLeft, tabRight;
+        widgets.add(tabLeft = Widgets.createButton(new Rectangle(bounds.x, bounds.getMaxY() - tabSize + 1 - tabButtonsSize, tabButtonsSize, tabButtonsSize), Component.literal(""))
+                .onClick(button -> leftAction.run())
+                .tooltipLine(Component.translatable("text.rei.previous_page")));
+        widgets.add(tabRight = Widgets.createButton(new Rectangle(bounds.x + bounds.width - tabButtonsSize - (isCompactTabButtons ? 0 : 1), bounds.getMaxY() - tabSize + 1 - tabButtonsSize, tabButtonsSize, tabButtonsSize), Component.literal(""))
+                .onClick(button -> rightAction.run())
+                .tooltipLine(Component.translatable("text.rei.next_page")));
+        
+        widgets.add(Widgets.withTranslate(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+            Rectangle tabLeftBounds = tabLeft.getBounds();
+            Rectangle tabRightBounds = tabRight.getBounds();
+            if (isCompactTabButtons) {
+                matrices.pushPose();
+                matrices.translate(0, 0.5, 0);
+                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_SMALL_TEXTURE);
+                blit(matrices, tabLeftBounds.x + 2, tabLeftBounds.y + 2, 0, 0, 6, 6, 6, 6);
+                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_SMALL_TEXTURE);
+                blit(matrices, tabRightBounds.x + 2, tabRightBounds.y + 2, 0, 0, 6, 6, 6, 6);
+                matrices.popPose();
+            } else {
+                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_LEFT_TEXTURE);
+                blit(matrices, tabLeftBounds.x + 4, tabLeftBounds.y + 4, 0, 0, 8, 8, 8, 8);
+                RenderSystem.setShaderTexture(0, InternalTextures.ARROW_RIGHT_TEXTURE);
+                blit(matrices, tabRightBounds.x + 4, tabRightBounds.y + 4, 0, 0, 8, 8, 8, 8);
+            }
+        }), 0, 0, 1));
+        return widgets;
     }
     
     public List<Widget> widgets() {

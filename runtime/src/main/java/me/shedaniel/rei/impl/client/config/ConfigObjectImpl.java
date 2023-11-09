@@ -24,10 +24,8 @@
 package me.shedaniel.rei.impl.client.config;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import dev.architectury.platform.Platform;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
-import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 import me.shedaniel.clothconfig2.api.Modifier;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
@@ -48,26 +46,16 @@ import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @ApiStatus.Internal
 @Config(name = "roughlyenoughitems/config")
 @Environment(EnvType.CLIENT)
+@SuppressWarnings("FieldMayBeFinal")
 public class ConfigObjectImpl implements ConfigObject, ConfigData {
-    @ConfigEntry.Category("basics") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
     public Basics basics = new Basics();
-    @ConfigEntry.Category("appearance") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
-    private Appearance appearance = new Appearance();
-    @ConfigEntry.Category("functionality") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
-    private Functionality functionality = new Functionality();
-    @ConfigEntry.Category("advanced") @ConfigEntry.Gui.TransitiveObject @DontApplyFieldName
+    public Appearance appearance = new Appearance();
+    public Functionality functionality = new Functionality();
     public Advanced advanced = new Advanced();
     
     @Override
@@ -83,7 +71,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @Override
     public boolean isCheating() {
         return basics.cheating == CheatingMode.ON || (basics.cheating == CheatingMode.WHEN_CREATIVE && Minecraft.getInstance().gameMode != null
-                                                      && Minecraft.getInstance().gameMode.getPlayerMode() == GameType.CREATIVE);
+                && Minecraft.getInstance().gameMode.getPlayerMode() == GameType.CREATIVE);
     }
     
     @Override
@@ -122,7 +110,16 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public boolean isFavoritesAnimated() {
-        return basics.motion.favoritesAnimation;
+        return !basics.reduceMotion;
+    }
+    
+    @Override
+    public boolean isReducedMotion() {
+        return basics.reduceMotion;
+    }
+    
+    public boolean setReducedMotion(boolean reducedMotion) {
+        return basics.reduceMotion = reducedMotion;
     }
     
     @Override
@@ -137,6 +134,15 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     public void setEntryListWidgetScrolled(boolean scrollingEntryListWidget) {
         appearance.scrollingEntryListWidget = scrollingEntryListWidget;
+    }
+    
+    @Override
+    public boolean isHidingEntryPanelIfIdle() {
+        return appearance.hideEntryPanelIfIdle;
+    }
+    
+    public void setHidingEntryPanelIfIdle(boolean hideEntryPanelIfIdle) {
+        appearance.hideEntryPanelIfIdle = hideEntryPanelIfIdle;
     }
     
     @Override
@@ -403,15 +409,15 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     }
     
     public List<FavoriteEntry> getConfigFavoriteEntries() {
-        return basics.favorites;
+        return FavoritesConfigManager.getInstance().getConfig().favorites;
     }
     
     public List<FavoriteEntry> getHiddenFavoriteEntries() {
-        return basics.hiddenFavorites;
+        return FavoritesConfigManager.getInstance().getConfig().hiddenFavorites;
     }
     
     public List<CompoundTag> getDisplayHistory() {
-        return basics.displayHistory;
+        return FavoritesConfigManager.getInstance().getConfig().displays;
     }
     
     @Override
@@ -433,7 +439,34 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     @ApiStatus.Experimental
     @Override
     public Map<CategoryIdentifier<?>, Boolean> getFilteringQuickCraftCategories() {
-        return advanced.filtering.filteringQuickCraftCategories;
+        return advanced.miscellaneous.categorySettings.filteringQuickCraftCategories;
+    }
+    
+    @ApiStatus.Internal
+    public void setFilteringQuickCraftCategories(Map<CategoryIdentifier<?>, Boolean> filteringQuickCraftCategories) {
+        advanced.miscellaneous.categorySettings.filteringQuickCraftCategories = filteringQuickCraftCategories;
+    }
+    
+    @ApiStatus.Experimental
+    @Override
+    public Set<CategoryIdentifier<?>> getHiddenCategories() {
+        return advanced.miscellaneous.categorySettings.hiddenCategories;
+    }
+    
+    @ApiStatus.Internal
+    public void setHiddenCategories(Set<CategoryIdentifier<?>> hiddenCategories) {
+        advanced.miscellaneous.categorySettings.hiddenCategories = hiddenCategories;
+    }
+    
+    @ApiStatus.Experimental
+    @Override
+    public List<CategoryIdentifier<?>> getCategoryOrdering() {
+        return advanced.miscellaneous.categorySettings.categoryOrdering;
+    }
+    
+    @ApiStatus.Internal
+    public void setCategoryOrdering(List<CategoryIdentifier<?>> categoryOrdering) {
+        advanced.miscellaneous.categorySettings.categoryOrdering = categoryOrdering;
     }
     
     @Override
@@ -499,6 +532,16 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return Mth.clamp(appearance.verticalEntriesBoundariesRows, 1, 1000);
     }
     
+    @Override
+    public double getHorizontalEntriesBoundariesAlignments() {
+        return appearance.horizontalEntriesBoundariesAlignment;
+    }
+    
+    @Override
+    public double getVerticalEntriesBoundariesAlignments() {
+        return appearance.verticalEntriesBoundariesAlignment;
+    }
+    
     @ApiStatus.Experimental
     @Override
     public double getFavoritesHorizontalEntriesBoundariesPercentage() {
@@ -544,201 +587,168 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return advanced.search.modSearch;
     }
     
-    @Override
-    public boolean isJEICompatibilityLayerEnabled() {
-        return Platform.isForge() && advanced.enableJeiCompatibilityLayer;
-    }
-    
-    public void setJEICompatibilityLayerEnabled(boolean value) {
-        advanced.enableJeiCompatibilityLayer = value;
-    }
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface DontApplyFieldName {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseSpecialRecipeTypeScreen {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseSpecialSearchFilterSyntaxHighlightingScreen {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseFilteringScreen {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UseFilteringCategoriesScreen {}
-    
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target({ElementType.FIELD})
-    @interface UsePercentage {
-        double min();
-        
-        double max();
-        
-        String prefix() default "Size: ";
-    }
-    
     public static class Basics {
-        @ConfigEntry.Gui.Excluded public List<FavoriteEntry> favorites = new ArrayList<>();
-        @ConfigEntry.Gui.Excluded public List<FavoriteEntry> hiddenFavorites = new ArrayList<>();
-        @ConfigEntry.Gui.Excluded public List<CompoundTag> displayHistory = new ArrayList<>();
-        @Comment("Declares whether cheating mode is on.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-        private CheatingMode cheating = CheatingMode.OFF;
-        private boolean favoritesEnabled = true;
-        @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
-        private KeyBindings keyBindings = new KeyBindings();
-        @Comment("Declares whether REI is visible.") @ConfigEntry.Gui.Excluded private boolean overlayVisible = true;
-        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-        private ItemCheatingStyle cheatingStyle = ItemCheatingStyle.GRAB;
-        @ConfigEntry.Gui.CollapsibleObject
-        private Motion motion = new Motion();
-    }
-    
-    public static class Motion {
-        private boolean favoritesAnimation = true;
+        public List<FavoriteEntry> favorites = new ArrayList<>();
+        public List<FavoriteEntry> hiddenFavorites = new ArrayList<>();
+        public List<CompoundTag> displayHistory = new ArrayList<>();
+        public CheatingMode cheating = CheatingMode.OFF;
+        public boolean favoritesEnabled = true;
+        public boolean reduceMotion = false;
+        public KeyBindings keyBindings = new KeyBindings();
+        @Comment("Declares whether REI is visible.")
+        public boolean overlayVisible = true;
+        public ItemCheatingStyle cheatingStyle = ItemCheatingStyle.GRAB;
     }
     
     public static class KeyBindings {
-        private ModifierKeyCode recipeKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_R), Modifier.none());
-        private ModifierKeyCode usageKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_U), Modifier.none());
-        private ModifierKeyCode hideKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_O), Modifier.of(false, true, false));
-        private ModifierKeyCode previousPageKeybind = ModifierKeyCode.unknown();
-        private ModifierKeyCode nextPageKeybind = ModifierKeyCode.unknown();
-        private ModifierKeyCode focusSearchFieldKeybind = ModifierKeyCode.unknown();
-        private ModifierKeyCode copyRecipeIdentifierKeybind = ModifierKeyCode.of(InputConstants.Type.MOUSE.getOrCreate(InputConstants.MOUSE_BUTTON_MIDDLE), Modifier.none());
-        private ModifierKeyCode favoriteKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_A), Modifier.none());
-        private ModifierKeyCode exportImageKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_F8), Modifier.none());
-        private ModifierKeyCode previousScreenKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_BACKSPACE), Modifier.none());
+        public boolean useNativeKeybinds;
+        public ModifierKeyCode recipeKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_R), Modifier.none());
+        public ModifierKeyCode usageKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_U), Modifier.none());
+        public ModifierKeyCode hideKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_O), Modifier.of(false, true, false));
+        public ModifierKeyCode previousPageKeybind = ModifierKeyCode.unknown();
+        public ModifierKeyCode nextPageKeybind = ModifierKeyCode.unknown();
+        public ModifierKeyCode focusSearchFieldKeybind = ModifierKeyCode.unknown();
+        public ModifierKeyCode copyRecipeIdentifierKeybind = ModifierKeyCode.of(InputConstants.Type.MOUSE.getOrCreate(InputConstants.MOUSE_BUTTON_MIDDLE), Modifier.none());
+        public ModifierKeyCode favoriteKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_A), Modifier.none());
+        public ModifierKeyCode exportImageKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_F8), Modifier.none());
+        public ModifierKeyCode previousScreenKeybind = ModifierKeyCode.of(InputConstants.Type.KEYSYM.getOrCreate(InputConstants.KEY_BACKSPACE), Modifier.none());
     }
     
     public static class Appearance {
-        @UseSpecialRecipeTypeScreen private DisplayScreenType recipeScreenType = DisplayScreenType.UNSET;
-        @Comment("Declares the appearance of REI windows.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-        private AppearanceTheme theme = AppearanceTheme.LIGHT;
-        @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
-        private Layout layout = new Layout();
-        @Comment("Declares the appearance of recipe's border.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-        private RecipeBorderType recipeBorder = RecipeBorderType.DEFAULT;
-        @Comment("Declares whether entry panel is scrolled.") private boolean scrollingEntryListWidget = false;
+        public DisplayScreenType recipeScreenType = DisplayScreenType.UNSET;
+        @Comment("Declares the appearance of REI windows.")
+        public AppearanceTheme theme = AppearanceTheme.LIGHT;
+        public Layout layout = new Layout();
+        @Comment("Declares the appearance of recipe's border.")
+        public RecipeBorderType recipeBorder = RecipeBorderType.DEFAULT;
+        @Comment("Declares whether entry panel is scrolled.")
+        public boolean scrollingEntryListWidget = false;
+        @Comment("Declares whether entry panel should be invisible when not searching")
+        public boolean hideEntryPanelIfIdle = false;
         
         public static class Layout {
-            @Comment("Declares the position of the search field.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-            private SearchFieldLocation searchFieldLocation = SearchFieldLocation.CENTER;
-            @Comment("Declares the position of the config button.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-            private ConfigButtonPosition configButtonLocation = ConfigButtonPosition.LOWER;
-            @Comment("Declares whether the craftable filter button is enabled.") private boolean showCraftableOnlyButton = true;
+            @Comment("Declares the position of the search field.")
+            public SearchFieldLocation searchFieldLocation = SearchFieldLocation.CENTER;
+            @Comment("Declares the position of the config button.")
+            public ConfigButtonPosition configButtonLocation = ConfigButtonPosition.LOWER;
+            @Comment("Declares whether the craftable filter button is enabled.")
+            public boolean showCraftableOnlyButton = true;
         }
         
-        @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double horizontalEntriesBoundaries = 1.0;
-        @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double verticalEntriesBoundaries = 1.0;
-        private int horizontalEntriesBoundariesColumns = 50;
-        private int verticalEntriesBoundariesRows = 1000;
-        @UsePercentage(min = 0.1, max = 1.0, prefix = "Limit: ") private double favoritesHorizontalEntriesBoundaries = 1.0;
-        private int favoritesHorizontalEntriesBoundariesColumns = 50;
-        @UseSpecialSearchFilterSyntaxHighlightingScreen private SyntaxHighlightingMode syntaxHighlightingMode = SyntaxHighlightingMode.COLORFUL;
-        private boolean isFocusModeZoomed = false;
+        public double horizontalEntriesBoundaries = 1.0;
+        public double verticalEntriesBoundaries = 1.0;
+        public int horizontalEntriesBoundariesColumns = 50;
+        public int verticalEntriesBoundariesRows = 1000;
+        public double horizontalEntriesBoundariesAlignment = 1.0;
+        public double verticalEntriesBoundariesAlignment = 0.5;
+        public double favoritesHorizontalEntriesBoundaries = 1.0;
+        public int favoritesHorizontalEntriesBoundariesColumns = 50;
+        public SyntaxHighlightingMode syntaxHighlightingMode = SyntaxHighlightingMode.COLORFUL;
+        public boolean isFocusModeZoomed = false;
     }
     
     public static class Functionality {
-        @ConfigEntry.Gui.Excluded @Nullable private ResourceLocation inputMethod = null;
-        @Comment("Declares whether REI should remove the recipe book.") private boolean disableRecipeBook = false;
-        @Comment("Declares whether mob effects should be on the left side instead of the right side.") private boolean leftSideMobEffects = false;
-        @Comment("Declares whether subsets is enabled.") private boolean isSubsetsEnabled = false;
-        private boolean allowInventoryHighlighting = true;
-        @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-        private ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
+        @Nullable
+        public ResourceLocation inputMethod = null;
+        @Comment("Declares whether REI should remove the recipe book.")
+        public boolean disableRecipeBook = false;
+        @Comment("Declares whether mob effects should be on the left side instead of the right side.")
+        public boolean leftSideMobEffects = false;
+        @Comment("Declares whether subsets is enabled.")
+        public boolean isSubsetsEnabled = false;
+        public boolean allowInventoryHighlighting = true;
+        public ItemCheatingMode itemCheatingMode = ItemCheatingMode.REI_LIKE;
     }
     
     public static class Advanced {
-        @ConfigEntry.Gui.CollapsibleObject
-        private Tooltips tooltips = new Tooltips();
-        @ConfigEntry.Gui.CollapsibleObject
-        private Layout layout = new Layout();
-        @ConfigEntry.Gui.CollapsibleObject
-        private Accessibility accessibility = new Accessibility();
-        @ConfigEntry.Gui.CollapsibleObject
-        private Search search = new Search();
-        @ConfigEntry.Gui.CollapsibleObject
-        private Commands commands = new Commands();
-        @ConfigEntry.Gui.CollapsibleObject
-        private Miscellaneous miscellaneous = new Miscellaneous();
-        @ConfigEntry.Gui.CollapsibleObject(startExpanded = true)
+        public Tooltips tooltips = new Tooltips();
+        public Layout layout = new Layout();
+        public Accessibility accessibility = new Accessibility();
+        public Search search = new Search();
+        public Commands commands = new Commands();
+        public Miscellaneous miscellaneous = new Miscellaneous();
         public Filtering filtering = new Filtering();
-        @ConfigEntry.Gui.Excluded
-        public boolean enableJeiCompatibilityLayer = true;
         
         public static class Tooltips {
-            @Comment("Declares whether REI should append mod names to entries.") private boolean appendModNames = true;
-            @Comment("Declares whether favorites tooltip should be displayed.") private boolean displayFavoritesTooltip = false;
-            @ConfigEntry.Gui.Excluded private boolean displayIMEHints = true;
+            @Comment("Declares whether REI should append mod names to entries.")
+            public boolean appendModNames = true;
+            @Comment("Declares whether favorites tooltip should be displayed.")
+            public boolean displayFavoritesTooltip = false;
+            public boolean displayIMEHints = true;
         }
         
         public static class Layout {
             @Comment("The ordering of the items on the entry panel.")
-            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-            private EntryPanelOrderingConfig entryPanelOrdering = EntryPanelOrderingConfig.REGISTRY_ASCENDING;
-            @Comment("Declares the maximum amount of recipes displayed in a page if possible.") @ConfigEntry.BoundedDiscrete(min = 2, max = 99)
-            private int maxRecipesPerPage = 8;
-            @Comment("Declares the maximum amount of recipes displayed in a page if possible.") @ConfigEntry.BoundedDiscrete(min = 100, max = 1000)
-            private int maxRecipesPageHeight = 300;
-            @Comment("Declares whether entry rendering time should be debugged.") private boolean debugRenderTimeRequired = false;
-            @Comment("Merges displays with equal contents under 1 display.") private boolean mergeDisplayUnderOne = true;
-            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-            private FavoriteAddWidgetMode favoriteAddWidgetMode = FavoriteAddWidgetMode.ALWAYS_VISIBLE;
+            public EntryPanelOrderingConfig entryPanelOrdering = EntryPanelOrderingConfig.REGISTRY_ASCENDING;
+            @Comment("Declares the maximum amount of recipes displayed in a page if possible.")
+            public int maxRecipesPerPage = 8;
+            @Comment("Declares the maximum amount of recipes displayed in a page if possible.")
+            public int maxRecipesPageHeight = 300;
+            @Comment("Declares whether entry rendering time should be debugged.")
+            public boolean debugRenderTimeRequired = false;
+            @Comment("Merges displays with equal contents under 1 display.")
+            public boolean mergeDisplayUnderOne = true;
+            public FavoriteAddWidgetMode favoriteAddWidgetMode = FavoriteAddWidgetMode.ALWAYS_VISIBLE;
         }
         
         public static class Accessibility {
-            @UsePercentage(min = 0.25, max = 4.0) private double entrySize = 1.0;
-            @Comment("Declares the position of the entry panel.") @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-            private DisplayPanelLocation displayPanelLocation = DisplayPanelLocation.RIGHT;
-            @Comment("Declares how the scrollbar in composite screen should act.") private boolean compositeScrollBarPermanent = false;
-            private boolean toastDisplayedOnCopyIdentifier = true;
-            @Comment("Declares whether REI should use compact tabs for categories.") private boolean useCompactTabs = true;
-            @Comment("Declares whether REI should use compact tab buttons for categories.") private boolean useCompactTabButtons = false;
+            public double entrySize = 1.0;
+            @Comment("Declares the position of the entry panel.")
+            public DisplayPanelLocation displayPanelLocation = DisplayPanelLocation.RIGHT;
+            @Comment("Declares how the scrollbar in composite screen should act.")
+            public boolean compositeScrollBarPermanent = false;
+            public boolean toastDisplayedOnCopyIdentifier = true;
+            @Comment("Declares whether REI should use compact tabs for categories.")
+            public boolean useCompactTabs = true;
+            @Comment("Declares whether REI should use compact tab buttons for categories.")
+            public boolean useCompactTabButtons = false;
         }
         
         public static class Search {
-            @Comment("Declares whether search time should be debugged.") private boolean debugSearchTimeRequired = false;
-            @Comment("Declares whether REI should search async.") private boolean asyncSearch = true;
-            @Comment("Declares how many entries should be grouped one async search.") @ConfigEntry.BoundedDiscrete(min = 25, max = 400)
-            private int asyncSearchPartitionSize = 100;
-            private boolean patchAsyncThreadCrash = true;
-            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-            private SearchMode tooltipSearch = SearchMode.ALWAYS;
-            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-            private SearchMode tagSearch = SearchMode.PREFIX;
-            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-            private SearchMode identifierSearch = SearchMode.ALWAYS;
-            @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-            private SearchMode modSearch = SearchMode.PREFIX;
+            @Comment("Declares whether search time should be debugged.")
+            public boolean debugSearchTimeRequired = false;
+            @Comment("Declares whether REI should search async.")
+            public boolean asyncSearch = true;
+            @Comment("Declares how many entries should be grouped one async search.")
+            public int asyncSearchPartitionSize = 100;
+            public boolean patchAsyncThreadCrash = true;
+            public SearchMode tooltipSearch = SearchMode.ALWAYS;
+            public SearchMode tagSearch = SearchMode.PREFIX;
+            public SearchMode identifierSearch = SearchMode.ALWAYS;
+            public SearchMode modSearch = SearchMode.PREFIX;
         }
         
         public static class Commands {
-            @Comment("Declares the command used to change gamemode.") private String gamemodeCommand = "/gamemode {gamemode}";
-            @Comment("Declares the command used in servers to cheat items.") private String giveCommand = "/give {player_name} {item_identifier}{nbt} {count}";
-            @Comment("Declares the command used to change weather.") private String weatherCommand = "/weather {weather}";
-            @Comment("Declares the command used to change time.") private String timeCommand = "/time set {time}";
+            @Comment("Declares the command used to change gamemode.")
+            public String gamemodeCommand = "/gamemode {gamemode}";
+            @Comment("Declares the command used in servers to cheat items.")
+            public String giveCommand = "/give {player_name} {item_identifier}{nbt} {count}";
+            @Comment("Declares the command used to change weather.")
+            public String weatherCommand = "/weather {weather}";
+            @Comment("Declares the command used to change time.")
+            public String timeCommand = "/time set {time}";
         }
         
         public static class Miscellaneous {
-            @Comment("Declares whether arrows in containers should be clickable.") private boolean clickableRecipeArrows = true;
-            private boolean registerRecipesInAnotherThread = true;
-            private boolean newFastEntryRendering = true;
-            @ConfigEntry.Gui.PrefixText
-            private boolean cachingFastEntryRendering = false;
-            private boolean cachingDisplayLookup = true;
+            @Comment("Declares whether arrows in containers should be clickable.")
+            public boolean clickableRecipeArrows = true;
+            public boolean registerRecipesInAnotherThread = true;
+            public boolean newFastEntryRendering = true;
+            public boolean cachingFastEntryRendering = false;
+            public boolean cachingDisplayLookup = true;
+            public CategorySettings categorySettings = new CategorySettings();
+            
+            public static class CategorySettings {
+                public Map<CategoryIdentifier<?>, Boolean> filteringQuickCraftCategories = new HashMap<>();
+                public List<CategoryIdentifier<?>> categoryOrdering = new ArrayList<>();
+                public Set<CategoryIdentifier<?>> hiddenCategories = new HashSet<>();
+            }
         }
         
         public static class Filtering {
-            @UseFilteringScreen private List<EntryStackProvider<?>> filteredStacks = new ArrayList<>();
+            public List<EntryStackProvider<?>> filteredStacks = new ArrayList<>();
             public boolean shouldFilterDisplays = true;
-            @ConfigEntry.Gui.Excluded public List<FilteringRule<?>> filteringRules = new ArrayList<>();
-            @UseFilteringCategoriesScreen public Map<CategoryIdentifier<?>, Boolean> filteringQuickCraftCategories = new HashMap<>();
+            public List<FilteringRule<?>> filteringRules = new ArrayList<>();
         }
     }
 }

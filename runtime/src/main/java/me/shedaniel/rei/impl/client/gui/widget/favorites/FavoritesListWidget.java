@@ -126,9 +126,9 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
     @Override
     @Nullable
     public DraggableComponent<Object> getHovered(DraggingContext<Screen> context, double mouseX, double mouseY) {
-        DraggableComponent<?> stack = region.getHoveredStack(context, mouseX, mouseY);
+        DraggableComponent<?> stack = region.getHovered(context, mouseX, mouseY);
         if (stack != null) return (DraggableComponent<Object>) stack;
-        stack = systemRegion.getHoveredStack(context, mouseX, mouseY);
+        stack = systemRegion.getHovered(context, mouseX, mouseY);
         if (stack != null) return (DraggableComponent<Object>) stack;
         if (favoritePanel.containsMouse(mouseX, mouseY)) {
             stack = favoritePanel.getHoveredStack(mouseX, mouseY);

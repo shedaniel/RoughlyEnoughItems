@@ -27,6 +27,7 @@ import dev.architectury.platform.Platform;
 import dev.architectury.utils.value.BooleanValue;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.REIRuntime;
 import me.shedaniel.rei.api.client.config.ConfigManager;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
@@ -110,6 +111,13 @@ public class CraftableFilterButtonWidget {
         if (applicableInputMethods.size() > 1) {
             entries.add(new SubMenuEntry(Component.translatable("text.rei.config.menu.search_field.input_method"), createInputMethodEntries(access, applicableInputMethods)));
         }
+        
+        entries.add(ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.search_field.hide_entry_panel_idle"),
+                config::isHidingEntryPanelIfIdle,
+                hideEntryPanelIfIdle -> {
+                    config.setHidingEntryPanelIfIdle(hideEntryPanelIfIdle);
+                    REIRuntime.getInstance().getOverlay().orElseThrow().queueReloadSearch();
+                }));
         
         return entries;
     }

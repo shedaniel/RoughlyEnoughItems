@@ -35,6 +35,6 @@ public enum FavoriteAddWidgetMode {
     
     @Override
     public String toString() {
-        return I18n.get("config.roughlyenoughitems.layout.favoriteAddWidgetMode." + name().toLowerCase(Locale.ROOT));
+        return I18n.get("config.rei.value.favorites.new_favorites_button_visibility." + name().toLowerCase(Locale.ROOT));
     }
 }

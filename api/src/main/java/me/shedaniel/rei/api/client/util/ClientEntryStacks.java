@@ -25,10 +25,16 @@ package me.shedaniel.rei.api.client.util;
 
 import dev.architectury.fluid.FluidStack;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.client.entry.renderer.EntryRendererProvider;
+import me.shedaniel.rei.api.client.entry.renderer.EntryRendererRegistry;
 import me.shedaniel.rei.api.client.entry.type.BuiltinClientEntryTypes;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
+import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.EntryDefinition;
+import me.shedaniel.rei.api.common.entry.type.EntryType;
+import net.minecraft.network.chat.Component;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -44,22 +50,75 @@ public final class ClientEntryStacks {
         return EntryStack.of(BuiltinClientEntryTypes.RENDERING, renderer);
     }
     
+    /**
+     * Sets a renderer for the {@link EntryStack}. This will override the default renderer from the {@link EntryDefinition}.
+     * <p>
+     * You can transform the renderer on a {@link EntryType} level
+     * using {@link EntryRendererRegistry#register(EntryType, EntryRendererProvider)}.
+     *
+     * @return the {@link EntryStack}
+     * @see EntryStack#getRenderer() for how the tooltip is resolved
+     * @see EntryRenderer#empty() for an empty renderer
+     * @deprecated use {@link EntryStack#withRenderer(EntryRenderer)} with {@link EntryRenderer#empty()} instead
+     */
+    @Deprecated(forRemoval = true)
     public static <T> EntryStack<T> setNotRenderer(EntryStack<? extends T> stack) {
         return setRenderer(stack, EntryRenderer.empty());
     }
     
+    /**
+     * Sets a renderer for the {@link EntryStack}. This will override the default renderer from the {@link EntryDefinition}.
+     * <p>
+     * You can transform the renderer on a {@link EntryType} level
+     * using {@link EntryRendererRegistry#register(EntryType, EntryRendererProvider)}.
+     *
+     * @param renderer the new renderer to use
+     * @return the {@link EntryStack}
+     * @see EntryStack#getRenderer() for how the tooltip is resolved
+     * @see EntryRenderer#empty() for an empty renderer
+     * @deprecated use {@link EntryStack#withRenderer(EntryRenderer)} instead
+     */
+    @Deprecated(forRemoval = true)
     public static <T> EntryStack<T> setRenderer(EntryStack<? extends T> stack, EntryRenderer<? extends T> renderer) {
         return stack.setting(EntryStack.Settings.RENDERER, s -> renderer).cast();
     }
     
+    /**
+     * Sets a renderer for the {@link EntryStack}. This will override the default renderer from the {@link EntryDefinition}.
+     * <p>
+     * You can transform the renderer on a {@link EntryType} level
+     * using {@link EntryRendererRegistry#register(EntryType, EntryRendererProvider)}.
+     *
+     * @param rendererProvider the new renderer to use
+     * @return the {@link EntryStack}
+     * @see EntryStack#getRenderer() for how the tooltip is resolved
+     * @see EntryRenderer#empty() for an empty renderer
+     * @deprecated use {@link EntryStack#withRenderer(Function)} instead
+     */
+    @Deprecated(forRemoval = true)
     @SuppressWarnings("rawtypes")
     public static <T> EntryStack<T> setRenderer(EntryStack<? extends T> stack, Function<EntryStack<T>, EntryRenderer<? extends T>> rendererProvider) {
         return stack.setting(EntryStack.Settings.RENDERER, (Function) rendererProvider).cast();
     }
     
+    /**
+     * Sets a tooltip processor to the {@link EntryStack}. The processor will be used to modify the tooltip.
+     * <p>
+     * You can transform the tooltip on a {@link EntryType} level
+     * using {@link EntryRendererRegistry#transformTooltip(EntryType, EntryRendererRegistry.TooltipTransformer)}.
+     * <p>
+     * To append to the tooltip, use {@link EntryStack#tooltip(Component...)} instead.
+     *
+     * @param stack     the stack to set the tooltip processor to
+     * @param processor the processor to modify the tooltips
+     * @return the {@link EntryStack}
+     * @see EntryStack#getTooltip(TooltipContext, boolean) for how the tooltip is resolved
+     * @deprecated use {@link EntryStack#tooltipProcessor(BiFunction)} instead
+     */
     @SuppressWarnings("rawtypes")
+    @Deprecated(forRemoval = true)
     public static <T> EntryStack<T> setTooltipProcessor(EntryStack<? extends T> stack, BiFunction<EntryStack<T>, Tooltip, Tooltip> processor) {
-        return stack.setting(EntryStack.Settings.TOOLTIP_PROCESSOR, (BiFunction) processor).cast();
+        return stack.tooltipProcessor((BiFunction) processor);
     }
     
     public static EntryStack<FluidStack> setFluidRenderRatio(EntryStack<FluidStack> stack, float ratio) {

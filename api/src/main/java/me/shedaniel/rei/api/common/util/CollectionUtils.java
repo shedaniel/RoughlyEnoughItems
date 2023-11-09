@@ -514,6 +514,10 @@ public class CollectionUtils {
     
     @SafeVarargs
     public static <T> List<T> concatUnmodifiable(List<? extends T>... lists) {
+        return new ListConcatenationView<>(Arrays.asList(lists));
+    }
+    
+    public static <T> List<T> concatUnmodifiable(Iterable<List<? extends T>> lists) {
         return new ListConcatenationView<>(lists);
     }
     
@@ -521,10 +525,9 @@ public class CollectionUtils {
      * A list which acts as view of the concatenation of a number of lists.
      */
     private static class ListConcatenationView<E> extends AbstractList<E> {
-        private final List<? extends E>[] lists;
+        private final Iterable<List<? extends E>> lists;
         
-        @SafeVarargs
-        public ListConcatenationView(List<? extends E>... lists) {
+        public ListConcatenationView(Iterable<List<? extends E>> lists) {
             this.lists = lists;
         }
         

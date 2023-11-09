@@ -55,7 +55,6 @@ public class CollapsedEntriesCache {
         Collection<CollapsibleEntryRegistryImpl.Entry> entries = ((CollapsibleEntryRegistryImpl) CollapsibleEntryRegistry.getInstance()).getEntries();
         InternalLogger.getInstance().debug("Preparing collapsed entry groups cache with %d entries and %d stacks", entries.size(), stacks.size());
         
-        List<CompletableFuture<?>> futures = Lists.newArrayList();
         for (CollapsibleEntryRegistryImpl.Entry entry : entries) {
             if (entry.canCache()) {
                 for (HashedEntryStackWrapper stack : stacks) {

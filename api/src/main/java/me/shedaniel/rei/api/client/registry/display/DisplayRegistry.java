@@ -212,7 +212,7 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
      * <p>
      * Vanilla {@link Recipe} are by default filled, display filters
-     * can be used to automatically generate displaies for vanilla {@link Recipe}.
+     * can be used to automatically generate displays for vanilla {@link Recipe}.
      *
      * @param typeClass the type of {@code T}
      * @param filler    the filler, taking a {@code T} and returning a {@code D}
@@ -227,7 +227,24 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
      * <p>
      * Vanilla {@link Recipe} are by default filled, display filters
-     * can be used to automatically generate displaies for vanilla {@link Recipe}.
+     * can be used to automatically generate displays for vanilla {@link Recipe}.
+     *
+     * @param typeClass the type of {@code T}
+     * @param filler    the filler, taking a {@code T} and returning a {@code D}
+     * @param <T>       the type of object
+     * @param <D>       the type of display
+     * @since 8.4
+     */
+    @ApiStatus.Experimental
+    default <T extends Recipe<?>, D extends Display> void registerRecipesFiller(Class<T> typeClass, RecipeType<? super T> recipeType, Function<? extends T, @Nullable Collection<? extends D>> filler) {
+        registerRecipesFiller(typeClass, type -> Objects.equals(recipeType, type), filler);
+    }
+    
+    /**
+     * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
+     * <p>
+     * Vanilla {@link Recipe} are by default filled, display filters
+     * can be used to automatically generate displays for vanilla {@link Recipe}.
      *
      * @param typeClass the type of {@code T}
      * @param filler    the filler, taking a {@code T} and returning a {@code D}
@@ -242,7 +259,24 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
      * <p>
      * Vanilla {@link Recipe} are by default filled, display filters
-     * can be used to automatically generate displaies for vanilla {@link Recipe}.
+     * can be used to automatically generate displays for vanilla {@link Recipe}.
+     *
+     * @param typeClass the type of {@code T}
+     * @param filler    the filler, taking a {@code T} and returning a {@code D}
+     * @param <T>       the type of object
+     * @param <D>       the type of display
+     * @since 8.4
+     */
+    @ApiStatus.Experimental
+    default <T extends Recipe<?>, D extends Display> void registerRecipesFiller(Class<T> typeClass, Predicate<RecipeType<? super T>> recipeType, Function<? extends T, @Nullable Collection<? extends D>> filler) {
+        registerRecipesFiller(typeClass, recipeType, Predicates.alwaysTrue(), filler);
+    }
+    
+    /**
+     * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
+     * <p>
+     * Vanilla {@link Recipe} are by default filled, display filters
+     * can be used to automatically generate displays for vanilla {@link Recipe}.
      *
      * @param typeClass the type of {@code T}
      * @param filler    the filler, taking a {@code T} and returning a {@code D}
@@ -257,7 +291,24 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
      * <p>
      * Vanilla {@link Recipe} are by default filled, display filters
-     * can be used to automatically generate displaies for vanilla {@link Recipe}.
+     * can be used to automatically generate displays for vanilla {@link Recipe}.
+     *
+     * @param typeClass the type of {@code T}
+     * @param filler    the filler, taking a {@code T} and returning a {@code D}
+     * @param <T>       the type of object
+     * @param <D>       the type of display
+     * @since 8.4
+     */
+    @ApiStatus.Experimental
+    default <T extends Recipe<?>, D extends Display> void registerRecipesFiller(Class<T> typeClass, Predicate<RecipeType<? super T>> recipeType, Predicate<? extends T> predicate, Function<? extends T, @Nullable Collection<? extends D>> filler) {
+        registerDisplaysFiller(typeClass, recipe -> recipeType.test((RecipeType<? super T>) recipe.getType()) && ((Predicate<T>) predicate).test(recipe), filler);
+    }
+    
+    /**
+     * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
+     * <p>
+     * Vanilla {@link Recipe} are by default filled, display filters
+     * can be used to automatically generate displays for vanilla {@link Recipe}.
      *
      * @param typeClass the type of {@code T}
      * @param filler    the filler, taking a {@code T} and returning a {@code D}
@@ -272,7 +323,24 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
      * <p>
      * Vanilla {@link Recipe} are by default filled, display filters
-     * can be used to automatically generate displaies for vanilla {@link Recipe}.
+     * can be used to automatically generate displays for vanilla {@link Recipe}.
+     *
+     * @param typeClass the type of {@code T}
+     * @param filler    the filler, taking a {@code T} and returning a {@code D}
+     * @param <T>       the type of object
+     * @param <D>       the type of display
+     * @since 8.4
+     */
+    @ApiStatus.Experimental
+    default <T, D extends Display> void registerDisplaysFiller(Class<T> typeClass, Function<? extends T, @Nullable Collection<? extends D>> filler) {
+        registerDisplaysFiller(typeClass, Predicates.alwaysTrue(), filler);
+    }
+    
+    /**
+     * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
+     * <p>
+     * Vanilla {@link Recipe} are by default filled, display filters
+     * can be used to automatically generate displays for vanilla {@link Recipe}.
      *
      * @param typeClass the type of {@code T}
      * @param predicate the predicate of {@code T}
@@ -286,7 +354,23 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
      * <p>
      * Vanilla {@link Recipe} are by default filled, display filters
-     * can be used to automatically generate displaies for vanilla {@link Recipe}.
+     * can be used to automatically generate displays for vanilla {@link Recipe}.
+     *
+     * @param typeClass the type of {@code T}
+     * @param predicate the predicate of {@code T}
+     * @param filler    the filler, taking a {@code T} and returning a {@code D}
+     * @param <T>       the type of object
+     * @param <D>       the type of display
+     * @since 8.4
+     */
+    @ApiStatus.Experimental
+    <T, D extends Display> void registerDisplaysFiller(Class<T> typeClass, Predicate<? extends T> predicate, Function<? extends T, @Nullable Collection<? extends D>> filler);
+    
+    /**
+     * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
+     * <p>
+     * Vanilla {@link Recipe} are by default filled, display filters
+     * can be used to automatically generate displays for vanilla {@link Recipe}.
      *
      * @param typeClass the type of {@code T}
      * @param predicate the predicate of {@code T} and reason
@@ -301,13 +385,43 @@ public interface DisplayRegistry extends RecipeManagerContext<REIClientPlugin> {
      * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
      * <p>
      * Vanilla {@link Recipe} are by default filled, display filters
-     * can be used to automatically generate displaies for vanilla {@link Recipe}.
+     * can be used to automatically generate displays for vanilla {@link Recipe}.
+     *
+     * @param typeClass the type of {@code T}
+     * @param predicate the predicate of {@code T} and reason
+     * @param filler    the filler, taking a {@code T} and returning a {@code D}
+     * @param <T>       the type of object
+     * @param <D>       the type of display
+     * @since 8.4
+     */
+    @ApiStatus.Experimental
+    <T, D extends Display> void registerDisplaysFiller(Class<T> typeClass, BiPredicate<? extends T, DisplayAdditionReasons> predicate, Function<? extends T, @Nullable Collection<? extends D>> filler);
+    
+    /**
+     * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
+     * <p>
+     * Vanilla {@link Recipe} are by default filled, display filters
+     * can be used to automatically generate displays for vanilla {@link Recipe}.
      *
      * @param predicate the predicate of the object
      * @param filler    the filler, taking an object and returning a {@code D}
      * @param <D>       the type of display
      */
     <D extends Display> void registerFiller(Predicate<?> predicate, Function<?, @Nullable D> filler);
+    
+    /**
+     * Registers a display filler, to be filled during {@link #tryFillDisplay(Object)}.
+     * <p>
+     * Vanilla {@link Recipe} are by default filled, display filters
+     * can be used to automatically generate displays for vanilla {@link Recipe}.
+     *
+     * @param predicate the predicate of the object
+     * @param filler    the filler, taking an object and returning a {@code D}
+     * @param <D>       the type of display
+     * @since 8.4
+     */
+    @ApiStatus.Experimental
+    <D extends Display> void registerDisplaysFiller(Predicate<?> predicate, Function<?, @Nullable Collection<? extends D>> filler);
     
     /**
      * Tries to fill displays from {@code T}.

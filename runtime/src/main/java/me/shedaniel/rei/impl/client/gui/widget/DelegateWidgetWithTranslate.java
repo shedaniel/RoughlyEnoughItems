@@ -42,6 +42,11 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
         this.translate = translate;
     }
     
+    public DelegateWidgetWithTranslate(Widget widget, Supplier<Matrix4f> translate) {
+        super(widget);
+        this.translate = translate;
+    }
+    
     protected Matrix4f translate() {
         return translate.get();
     }

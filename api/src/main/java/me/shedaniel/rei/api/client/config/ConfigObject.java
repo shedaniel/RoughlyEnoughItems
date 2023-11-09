@@ -37,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Environment(EnvType.CLIENT)
 public interface ConfigObject {
@@ -119,7 +120,17 @@ public interface ConfigObject {
      *
      * @return whether favorites motions are animated
      */
+    @Deprecated(forRemoval = true)
     boolean isFavoritesAnimated();
+    
+    /**
+     * Returns whether motions are reduced.
+     *
+     * @return whether motions are reduced
+     * @since 8.4
+     */
+    @ApiStatus.Experimental
+    boolean isReducedMotion();
     
     /**
      * Returns whether a toast is shown on screen when a display identifier is copied.
@@ -134,6 +145,9 @@ public interface ConfigObject {
      * @return whether the entry list is scrolled, rather than paginated
      */
     boolean isEntryListWidgetScrolled();
+    
+    @ApiStatus.Experimental
+    boolean isHidingEntryPanelIfIdle();
     
     /**
      * Returns whether REI should append mod names to tooltips.
@@ -322,6 +336,12 @@ public interface ConfigObject {
     Map<CategoryIdentifier<?>, Boolean> getFilteringQuickCraftCategories();
     
     @ApiStatus.Experimental
+    Set<CategoryIdentifier<?>> getHiddenCategories();
+    
+    @ApiStatus.Experimental
+    List<CategoryIdentifier<?>> getCategoryOrdering();
+    
+    @ApiStatus.Experimental
     boolean shouldAsyncSearch();
     
     @ApiStatus.Experimental
@@ -353,6 +373,12 @@ public interface ConfigObject {
     double getVerticalEntriesBoundariesRows();
     
     @ApiStatus.Experimental
+    double getHorizontalEntriesBoundariesAlignments();
+    
+    @ApiStatus.Experimental
+    double getVerticalEntriesBoundariesAlignments();
+    
+    @ApiStatus.Experimental
     double getFavoritesHorizontalEntriesBoundariesPercentage();
     
     @ApiStatus.Experimental
@@ -372,5 +398,14 @@ public interface ConfigObject {
     
     SearchMode getModSearchMode();
     
-    boolean isJEICompatibilityLayerEnabled();
+    /**
+     * Returns whether the JEI compatibility layer is enabled.
+     *
+     * @return whether the JEI compatibility layer is enabled
+     * @deprecated the JEI compatibility layer is not bundled with REI anymore
+     */
+    @Deprecated(forRemoval = true)
+    default boolean isJEICompatibilityLayerEnabled() {
+        return false;
+    }
 }

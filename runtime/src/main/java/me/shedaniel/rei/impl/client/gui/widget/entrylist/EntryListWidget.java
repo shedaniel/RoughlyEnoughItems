@@ -135,11 +135,11 @@ public abstract class EntryListWidget extends WidgetWithBounds implements Overla
     private static Rectangle updateInnerBounds(Rectangle bounds) {
         bounds = bounds.clone();
         int heightReduction = (int) Math.round(bounds.height * (1 - ConfigObject.getInstance().getVerticalEntriesBoundariesPercentage()));
-        bounds.y += heightReduction / 2;
+        bounds.y += (int) Math.round(heightReduction * ConfigObject.getInstance().getVerticalEntriesBoundariesAlignments());
         bounds.height -= heightReduction;
-        int maxHeight = (int) Math.ceil(entrySize() * ConfigObject.getInstance().getVerticalEntriesBoundariesRows());
+        int maxHeight = (int) Math.ceil(entrySize() * ConfigObject.getInstance().getVerticalEntriesBoundariesRows() + entrySize() * 0.75);
         if (bounds.height > maxHeight) {
-            bounds.y += (bounds.height - maxHeight) / 2;
+            bounds.y += (int) Math.round((bounds.height - maxHeight) * ConfigObject.getInstance().getVerticalEntriesBoundariesAlignments());
             bounds.height = maxHeight;
         }
         int entrySize = entrySize();

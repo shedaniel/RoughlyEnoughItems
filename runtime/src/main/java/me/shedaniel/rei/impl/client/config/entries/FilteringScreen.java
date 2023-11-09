@@ -86,14 +86,15 @@ public class FilteringScreen extends Screen {
     };
     
     Screen parent;
-    private FilteringEntry filteringEntry;
+    private Set<EntryStack<?>> configFiltered;
     private Tooltip tooltip = null;
     private List<EntryStack<?>> entryStacks = null;
     private Rectangle innerBounds;
     private List<FilteringListEntry> entries = Collections.emptyList();
     private List<GuiEventListener> elements = Collections.emptyList();
     
-    private record PointPair(Point firstPoint, @Nullable Point secondPoint) {}
+    private record PointPair(Point firstPoint, @Nullable Point secondPoint) {
+    }
     
     private List<PointPair> points = new ArrayList<>();
     
@@ -107,9 +108,9 @@ public class FilteringScreen extends Screen {
     
     private SearchFilter lastFilter = SearchFilter.matchAll();
     
-    public FilteringScreen(FilteringEntry filteringEntry) {
+    public FilteringScreen(Set<EntryStack<?>> configFiltered) {
         super(Component.translatable("config.roughlyenoughitems.filteringScreen"));
-        this.filteringEntry = filteringEntry;
+        this.configFiltered = configFiltered;
         this.searchField = new OverlaySearchField(0, 0, 0, 0);
         {
             Component selectAllText = Component.translatable("config.roughlyenoughitems.filteredEntries.selectAll");
@@ -136,8 +137,7 @@ public class FilteringScreen extends Screen {
                             FilteringListEntry entry = entries.get(i);
                             entry.getBounds().y = entry.backupY - scrolling.scrollAmountInt();
                             if (entry.isSelected() && !entry.isFiltered()) {
-                                filteringEntry.configFiltered.add(stack);
-                                filteringEntry.edited = true;
+                        configFiltered.add(stack);
                                 entry.dirty = true;
                             }
                         }
@@ -152,8 +152,7 @@ public class FilteringScreen extends Screen {
                             EntryStack<?> stack = entryStacks.get(i);
                             FilteringListEntry entry = entries.get(i);
                             entry.getBounds().y = entry.backupY - scrolling.scrollAmountInt();
-                            if (entry.isSelected() && filteringEntry.configFiltered.remove(stack)) {
-                                filteringEntry.edited = true;
+                    if (entry.isSelected() && configFiltered.remove(stack)) {
                                 entry.dirty = true;
                             }
                         }
@@ -171,6 +170,12 @@ public class FilteringScreen extends Screen {
                     .build();
         }
         this.searchField.isMain = false;
+    }
+    
+    @Override
+    public void onClose() {
+        this.minecraft.setScreen(parent);
+        this.parent = null;
     }
     
     private static Rectangle updateInnerBounds(Rectangle bounds) {
@@ -485,7 +490,7 @@ public class FilteringScreen extends Screen {
         
         public boolean isFiltered() {
             if (dirty) {
-                filtered = filteringEntry.configFiltered.contains(getCurrentEntry());
+                filtered = configFiltered.contains(getCurrentEntry());
                 dirty = false;
             }
             return filtered;

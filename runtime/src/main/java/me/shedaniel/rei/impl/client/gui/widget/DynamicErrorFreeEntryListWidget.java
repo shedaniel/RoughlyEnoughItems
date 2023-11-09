@@ -229,17 +229,22 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     
     @Deprecated
     protected void renderBackBackground(PoseStack matrices, BufferBuilder buffer, Tesselator tessellator) {
+        DynamicErrorFreeEntryListWidget.renderBackBackground(matrices, buffer, tessellator, backgroundLocation,
+                left, top, right, bottom, (int) getScroll(), 32);
+    }
+    
+    public static void renderBackBackground(PoseStack matrices, BufferBuilder buffer, Tesselator tesselator,
+            ResourceLocation backgroundLocation, int left, int top, int right, int bottom, int yOffset, int color) {
         RenderSystem.setShaderTexture(0, backgroundLocation);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         Matrix4f matrix = matrices.last().pose();
-        float float_2 = 32.0F;
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        buffer.vertex(matrix, this.left, this.bottom, 0.0F).uv(this.left / 32.0F, ((this.bottom + (int) this.getScroll()) / 32.0F)).color(32, 32, 32, 255).endVertex();
-        buffer.vertex(matrix, this.right, this.bottom, 0.0F).uv(this.right / 32.0F, ((this.bottom + (int) this.getScroll()) / 32.0F)).color(32, 32, 32, 255).endVertex();
-        buffer.vertex(matrix, this.right, this.top, 0.0F).uv(this.right / 32.0F, ((this.top + (int) this.getScroll()) / 32.0F)).color(32, 32, 32, 255).endVertex();
-        buffer.vertex(matrix, this.left, this.top, 0.0F).uv(this.left / 32.0F, ((this.top + (int) this.getScroll()) / 32.0F)).color(32, 32, 32, 255).endVertex();
-        tessellator.end();
+        buffer.vertex(matrix, left, bottom, 0.0F).uv(left / 32.0F, ((bottom + yOffset) / 32.0F)).color(color, color, color, 255).endVertex();
+        buffer.vertex(matrix, right, bottom, 0.0F).uv(right / 32.0F, ((bottom + yOffset) / 32.0F)).color(color, color, color, 255).endVertex();
+        buffer.vertex(matrix, right, top, 0.0F).uv(right / 32.0F, ((top + yOffset) / 32.0F)).color(color, color, color, 255).endVertex();
+        buffer.vertex(matrix, left, top, 0.0F).uv(left / 32.0F, ((top + yOffset) / 32.0F)).color(color, color, color, 255).endVertex();
+        tesselator.end();
     }
     
     @Override
