@@ -43,6 +43,7 @@ import me.shedaniel.rei.api.client.gui.screen.DisplayScreen;
 import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
+import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.overlay.ScreenOverlay;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
@@ -62,6 +63,8 @@ import me.shedaniel.rei.impl.client.gui.dragging.CurrentDraggingStack;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import me.shedaniel.rei.impl.client.registry.display.DisplayRegistryImpl;
 import me.shedaniel.rei.impl.client.registry.display.DisplaysHolder;
+import me.shedaniel.rei.impl.client.util.CyclingList;
+import me.shedaniel.rei.impl.client.util.OriginalRetainingCyclingList;
 import me.shedaniel.rei.impl.client.view.ViewsImpl;
 import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
@@ -77,7 +80,6 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -87,10 +89,8 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("UnstableApiUsage")
 public class EntryWidget extends Slot implements DraggableStackProviderWidget {
-    @ApiStatus.Internal
-    public static long stackDisplayOffset = 0;
-    
     @ApiStatus.Internal
     private byte noticeMark = 0;
     protected boolean highlight = true;
@@ -99,8 +99,9 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     protected boolean interactable = true;
     protected boolean interactableFavorites = true;
     protected boolean wasClicked = false;
-    private Rectangle bounds;
-    private List<EntryStack<?>> entryStacks;
+    private final Rectangle bounds;
+    private final OriginalRetainingCyclingList<EntryStack<?>> stacks = new OriginalRetainingCyclingList<>(EntryStack::empty);
+    private long lastCycleTime = -1;
     @Nullable
     private Set<UnaryOperator<Tooltip>> tooltipProcessors;
     public ResourceLocation tagMatch;
@@ -117,7 +118,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     public EntryWidget(Rectangle bounds) {
         this.bounds = bounds;
-        this.entryStacks = Collections.emptyList();
     }
     
     @Override
@@ -244,60 +244,64 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         return background;
     }
     
-    public EntryWidget clearStacks() {
-        entryStacks = Collections.emptyList();
+    @Override
+    public Slot clearEntries() {
+        this.getCyclingEntries().clear();
+        if (removeTagMatch) tagMatch = null;
         return this;
     }
     
-    @Override
-    public Slot clearEntries() {
-        return clearStacks();
+    public EntryWidget clearStacks() {
+        return (EntryWidget) this.clearEntries();
     }
     
     @Override
     public EntryWidget entry(EntryStack<?> stack) {
         Objects.requireNonNull(stack);
-        if (entryStacks.isEmpty()) {
-            entryStacks = Collections.singletonList(stack);
-        } else {
-            if (!(entryStacks instanceof ArrayList)) {
-                entryStacks = new ArrayList<>(entryStacks);
-            }
-            entryStacks.add(stack);
-        }
+        this.getCyclingEntries().add(stack);
         if (removeTagMatch) tagMatch = null;
         return this;
     }
     
     @Override
     public EntryWidget entries(Collection<? extends EntryStack<?>> stacks) {
-        if (!stacks.isEmpty()) {
-            if (!(entryStacks instanceof ArrayList)) {
-                entryStacks = new ArrayList<>(entryStacks);
-            }
-            entryStacks.addAll(stacks);
-            if (removeTagMatch) tagMatch = null;
-        }
+        Objects.requireNonNull(stacks);
+        this.getCyclingEntries().addAll(stacks);
+        if (removeTagMatch) tagMatch = null;
         return this;
+    }
+    
+    public Slot entries(CyclingList<EntryStack<?>> stacks) {
+        this.getCyclingEntries().setBacking(stacks);
+        if (removeTagMatch) tagMatch = null;
+        return this;
+    }
+    
+    public CyclingList<EntryStack<?>> getBackingCyclingEntries() {
+        return this.stacks.getBacking();
+    }
+    
+    public OriginalRetainingCyclingList<EntryStack<?>> getCyclingEntries() {
+        return this.stacks;
     }
     
     @Override
     public EntryStack<?> getCurrentEntry() {
-        int size = entryStacks.size();
-        if (size == 0)
-            return EntryStack.empty();
-        if (size == 1)
-            return entryStacks.get(0);
-        return entryStacks.get(Mth.floor(((System.currentTimeMillis() + stackDisplayOffset) / getCyclingInterval() % (double) size)));
-    }
-    
-    protected long getCyclingInterval() {
-        return 1000;
+        if (this.lastCycleTime == -1) this.lastCycleTime = System.currentTimeMillis();
+        if (System.currentTimeMillis() > this.lastCycleTime + getCyclingInterval()) {
+            this.lastCycleTime = System.currentTimeMillis();
+            this.getCyclingEntries().next();
+        }
+        return this.getCyclingEntries().peek();
     }
     
     @Override
     public List<EntryStack<?>> getEntries() {
-        return entryStacks;
+        return getCyclingEntries().get();
+    }
+    
+    protected long getCyclingInterval() {
+        return 1000;
     }
     
     @Override
@@ -400,9 +404,14 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         return isHighlightEnabled();
     }
     
-    private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
+    private NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
             .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
             .asFloat();
+    
+    @ApiStatus.Internal
+    public void setDarkBackgroundAlpha(NumberAnimator<Float> darkBackgroundAlpha) {
+        this.darkBackgroundAlpha = darkBackgroundAlpha;
+    }
     
     protected void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (background) {
@@ -564,12 +573,18 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (REIRuntimeImpl.isWithinRecipeViewingScreen && entryStacks.size() > 1 && containsMouse(mouseX, mouseY)) {
+        if (REIRuntimeImpl.isWithinRecipeViewingScreen && this.getCyclingEntries().get().size() > 1 && containsMouse(mouseX, mouseY)) {
             if (amount < 0) {
-                EntryWidget.stackDisplayOffset = ((System.currentTimeMillis() + stackDisplayOffset) / 1000 - 1) * 1000;
+                for (EntryWidget slot : Widgets.<EntryWidget>walk(minecraft.screen.children(), EntryWidget.class::isInstance)) {
+                    slot.getCyclingEntries().previous();
+                    slot.lastCycleTime = System.currentTimeMillis();
+                }
                 return true;
             } else if (amount > 0) {
-                EntryWidget.stackDisplayOffset = ((System.currentTimeMillis() + stackDisplayOffset) / 1000 + 1) * 1000;
+                for (EntryWidget slot : Widgets.<EntryWidget>walk(minecraft.screen.children(), EntryWidget.class::isInstance)) {
+                    slot.getCyclingEntries().next();
+                    slot.lastCycleTime = System.currentTimeMillis();
+                }
                 return true;
             }
         }
@@ -600,10 +615,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                     } else {
                         ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     }
-                    ConfigManager.getInstance().saveConfig();
-                    FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                    if (favoritesListWidget != null)
-                        favoritesListWidget.updateSearch();
                     return true;
                 }
             }
@@ -690,10 +701,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
                     } else {
                         ConfigObject.getInstance().getFavoriteEntries().add(favoriteEntry);
                     }
-                    ConfigManager.getInstance().saveConfig();
-                    FavoritesListWidget favoritesListWidget = ScreenOverlayImpl.getFavoritesListWidget();
-                    if (favoritesListWidget != null)
-                        favoritesListWidget.updateSearch();
                     return true;
                 }
             }
@@ -710,7 +717,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     public DraggableStack getHoveredStack(DraggingContext<Screen> context, double mouseX, double mouseY) {
         if (!getCurrentEntry().isEmpty() && containsMouse(mouseX, mouseY)) {
             return new DraggableStack() {
-                EntryStack<?> stack = getCurrentEntry().copy()
+                final EntryStack<?> stack = getCurrentEntry().copy()
                         .removeSetting(EntryStack.Settings.RENDERER)
                         .removeSetting(EntryStack.Settings.FLUID_RENDER_RATIO);
                 
@@ -752,7 +759,7 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
         category.setDetail("Highlight enabled", () -> String.valueOf(isHighlightEnabled()));
         category.setDetail("Tooltip enabled", () -> String.valueOf(isTooltipsEnabled()));
         category.setDetail("Background enabled", () -> String.valueOf(isBackgroundEnabled()));
-        category.setDetail("Entries count", () -> String.valueOf(entryStacks.size()));
+        category.setDetail("Entries count", () -> String.valueOf(getEntries().size()));
         EntryStack<?> currentEntry = getCurrentEntry();
         
         CrashReportCategory entryCategory = report.addCategory("Current Rendering Entry");

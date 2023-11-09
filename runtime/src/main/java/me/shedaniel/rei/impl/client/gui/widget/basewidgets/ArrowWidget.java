@@ -33,6 +33,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collections;
 import java.util.List;
@@ -41,7 +42,7 @@ import java.util.Objects;
 public final class ArrowWidget extends Arrow {
     private Rectangle bounds;
     private double animationDuration = -1;
-    private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
+    private NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
             .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
             .asFloat();
     
@@ -59,6 +60,11 @@ public final class ArrowWidget extends Arrow {
         this.animationDuration = animationDurationMS;
         if (this.animationDuration <= 0)
             this.animationDuration = -1;
+    }
+    
+    @ApiStatus.Internal
+    public void setDarkBackgroundAlpha(NumberAnimator<Float> darkBackgroundAlpha) {
+        this.darkBackgroundAlpha = darkBackgroundAlpha;
     }
     
     @Override

@@ -27,8 +27,11 @@ import com.mojang.serialization.DataResult;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.api.client.gui.Renderer;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
+import me.shedaniel.rei.api.client.gui.widgets.Slot;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -93,6 +96,8 @@ public class DelegatingFavoriteEntryProviderImpl extends FavoriteEntry {
     
     @Override
     public FavoriteEntry copy() {
+        if (value != null && toJson != null) return value.copy();
+        if (value != null) return FavoriteEntry.delegateResult(() -> DataResult.success(value.copy()), toJson);
         return FavoriteEntry.delegateResult(supplier, toJson);
     }
     
@@ -113,5 +118,11 @@ public class DelegatingFavoriteEntryProviderImpl extends FavoriteEntry {
     @Override
     public boolean isSame(FavoriteEntry other) {
         return getUnwrapped().isSame(other.getUnwrapped());
+    }
+    
+    @Override
+    @Nullable
+    public DraggableComponent<?> asDraggableComponent(Slot slot) {
+        return getUnwrapped().asDraggableComponent(slot);
     }
 }

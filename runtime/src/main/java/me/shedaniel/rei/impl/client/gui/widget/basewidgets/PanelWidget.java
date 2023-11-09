@@ -29,13 +29,13 @@ import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.config.ConfigObject;
-import me.shedaniel.rei.api.client.gui.config.DisplayScreenType;
 import me.shedaniel.rei.api.client.gui.config.RecipeBorderType;
 import me.shedaniel.rei.api.client.gui.widgets.Panel;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
+import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import org.jetbrains.annotations.ApiStatus;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collections;
@@ -50,7 +50,7 @@ public final class PanelWidget extends Panel {
     private int xTextureOffset = 0;
     private int yTextureOffset = RecipeBorderType.DEFAULT.getYOffset();
     private Predicate<Panel> rendering = Predicates.alwaysTrue();
-    private final NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
+    private NumberAnimator<Float> darkBackgroundAlpha = ValueAnimator.ofFloat()
             .withConvention(() -> REIRuntime.getInstance().isDarkThemeEnabled() ? 1.0F : 0.0F, ValueAnimator.typicalTransitionTime())
             .asFloat();
     
@@ -102,6 +102,11 @@ public final class PanelWidget extends Panel {
         this.rendering = Objects.requireNonNull(rendering);
     }
     
+    @ApiStatus.Internal
+    public void setDarkBackgroundAlpha(NumberAnimator<Float> darkBackgroundAlpha) {
+        this.darkBackgroundAlpha = darkBackgroundAlpha;
+    }
+    
     @Override
     public Rectangle getBounds() {
         return bounds;
@@ -110,6 +115,7 @@ public final class PanelWidget extends Panel {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.darkBackgroundAlpha.update(delta);
+        if (ConfigUtils.isReducedMotion()) this.darkBackgroundAlpha.completeImmediately();
         if (!getRendering().test(this))
             return;
         int x = bounds.x, y = bounds.y, width = bounds.width, height = bounds.height;

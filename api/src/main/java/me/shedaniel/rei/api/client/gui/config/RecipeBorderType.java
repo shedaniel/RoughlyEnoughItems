@@ -57,6 +57,6 @@ public enum RecipeBorderType {
     
     @Override
     public String toString() {
-        return I18n.get("config.roughlyenoughitems.recipeBorder." + name().toLowerCase(Locale.ROOT));
+        return I18n.get("config.rei.value.appearance.recipe_border." + name().toLowerCase(Locale.ROOT));
     }
 }

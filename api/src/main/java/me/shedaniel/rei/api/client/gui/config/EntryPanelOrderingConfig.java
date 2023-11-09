@@ -27,6 +27,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.language.I18n;
 
+import java.util.Locale;
+
 @Environment(EnvType.CLIENT)
 public enum EntryPanelOrderingConfig {
     REGISTRY_ASCENDING(EntryPanelOrdering.REGISTRY, true),
@@ -59,6 +61,6 @@ public enum EntryPanelOrderingConfig {
     
     @Override
     public String toString() {
-        return I18n.get("config.roughlyenoughitems.list_ordering_button", I18n.get(getOrdering().getNameTranslationKey()), I18n.get(isAscending ? "ordering.rei.ascending" : "ordering.rei.descending"));
+        return I18n.get("config.rei.value.list.ordering." + name().toLowerCase(Locale.ROOT));
     }
 }

@@ -148,6 +148,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
         transformFiltering(setupDisplay);
         transformIngredientNotice(setupDisplay, ingredientStackToNotice);
         transformResultNotice(setupDisplay, resultStackToNotice);
+        unifyIngredients(setupDisplay);
         for (EntryWidget widget : Widgets.<EntryWidget>walk(widgets, EntryWidget.class::isInstance)) {
             widget.removeTagMatch = true;
         }

@@ -25,6 +25,8 @@ package me.shedaniel.rei.api.client.gui.config;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 
 import java.util.Locale;
@@ -35,8 +37,12 @@ public enum SearchFieldLocation {
     BOTTOM_SIDE,
     TOP_SIDE;
     
-    @Override
-    public String toString() {
-        return I18n.get("config.roughlyenoughitems.layout.searchFieldLocation.%s".formatted(name().toLowerCase(Locale.ROOT)));
+    public String toString(boolean right) {
+        if (this == CENTER) return I18n.get("config.rei.value.layout.search_field_location.center");
+        if (this == BOTTOM_SIDE && right) return I18n.get("config.rei.value.layout.search_field_location.bottom_right");
+        if (this == BOTTOM_SIDE) return I18n.get("config.rei.value.layout.search_field_location.bottom_left");
+        if (this == TOP_SIDE && right) return I18n.get("config.rei.value.layout.search_field_location.top_right");
+        if (this == TOP_SIDE) return I18n.get("config.rei.value.layout.search_field_location.top_left");
+        return "";
     }
 }

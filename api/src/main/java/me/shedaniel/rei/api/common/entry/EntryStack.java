@@ -27,6 +27,7 @@ import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
+import me.shedaniel.rei.api.client.entry.renderer.EntryRendererProvider;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRendererRegistry;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -194,7 +195,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * using {@link EntryRendererRegistry#transformTooltip(EntryType, EntryRendererRegistry.TooltipTransformer)}.
      * <p>
      * This tooltip can be appended by {@link EntryStack#tooltip(Component...)},
-     * and further processed by {@link me.shedaniel.rei.api.client.util.ClientEntryStacks#setTooltipProcessor(EntryStack, BiFunction)}.
+     * and further processed by {@link EntryStack#tooltipProcessor(BiFunction)} instead.
      *
      * @param context       the tooltip context
      * @param appendModName whether to append the mod name
@@ -214,7 +215,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * using {@link EntryRendererRegistry#transformTooltip(EntryType, EntryRendererRegistry.TooltipTransformer)}.
      * <p>
      * This tooltip can be appended by {@link EntryStack#tooltip(Component...)},
-     * and further processed by {@link me.shedaniel.rei.api.client.util.ClientEntryStacks#setTooltipProcessor(EntryStack, BiFunction)}.
+     * and further processed by {@link EntryStack#tooltipProcessor(BiFunction)} instead.
      *
      * @param context the tooltip context
      * @return the tooltip, can be {@code null}
@@ -257,7 +258,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * then is processed by {@link EntryRendererRegistry}.
      * <p>
      * To modify the renderer at a per stack level,
-     * use {@link me.shedaniel.rei.api.client.util.ClientEntryStacks#setRenderer(EntryStack, EntryRenderer)}.
+     * use {@link EntryStack#withRenderer(EntryRenderer)} instead.
      *
      * @return the {@link EntryRenderer} of this {@link EntryStack}
      */
@@ -405,7 +406,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * <p>
      * It is generally not recommended to use this method, but to instead use the helper
      * methods such as {@link EntryStack#tooltip(Component...)} and
-     * the methods in {@link me.shedaniel.rei.api.client.util.ClientEntryStacks}.
+     * the methods in {@link EntryStack#tooltipProcessor(BiFunction)} instead.
      *
      * @param settings the setting to apply
      * @param value    the value of the setting to apply
@@ -459,7 +460,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * You can transform the tooltip on a {@link EntryType} level
      * using {@link EntryRendererRegistry#transformTooltip(EntryType, EntryRendererRegistry.TooltipTransformer)}.
      * <p>
-     * To modify the tooltip, use {@link me.shedaniel.rei.api.client.util.ClientEntryStacks#setTooltipProcessor(EntryStack, BiFunction)} instead.
+     * To modify the tooltip, use {@link EntryStack#tooltipProcessor(BiFunction)} instead.
      *
      * @param tooltips the tooltips to append
      * @return this {@link EntryStack}
@@ -476,7 +477,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * You can transform the tooltip on a {@link EntryType} level
      * using {@link EntryRendererRegistry#transformTooltip(EntryType, EntryRendererRegistry.TooltipTransformer)}.
      * <p>
-     * To modify the tooltip, use {@link me.shedaniel.rei.api.client.util.ClientEntryStacks#setTooltipProcessor(EntryStack, BiFunction)} instead.
+     * To modify the tooltip, use {@link EntryStack#tooltipProcessor(BiFunction)} instead.
      *
      * @param tooltips the tooltips to append
      * @return this {@link EntryStack}
@@ -493,7 +494,7 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      * You can transform the tooltip on a {@link EntryType} level
      * using {@link EntryRendererRegistry#transformTooltip(EntryType, EntryRendererRegistry.TooltipTransformer)}.
      * <p>
-     * To modify the tooltip, use {@link me.shedaniel.rei.api.client.util.ClientEntryStacks#setTooltipProcessor(EntryStack, BiFunction)} instead.
+     * To modify the tooltip, use {@link EntryStack#tooltipProcessor(BiFunction)} instead.
      *
      * @param tooltipProvider the provider for the tooltips to append
      * @return this {@link EntryStack}
@@ -505,6 +506,59 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
     }
     
     /**
+     * Sets a tooltip processor to this {@link EntryStack}. The processor will be used to modify the tooltip.
+     * <p>
+     * You can transform the tooltip on a {@link EntryType} level
+     * using {@link EntryRendererRegistry#transformTooltip(EntryType, EntryRendererRegistry.TooltipTransformer)}.
+     * <p>
+     * To append to the tooltip, use {@link EntryStack#tooltip(Component...)} instead.
+     *
+     * @param tooltipProcessor the processor to modify the tooltips
+     * @return this {@link EntryStack}
+     * @see EntryStack#getTooltip(TooltipContext, boolean) for how the tooltip is resolved
+     * @since 8.4
+     */
+    @SuppressWarnings("rawtypes")
+    @Environment(EnvType.CLIENT)
+    default EntryStack<T> tooltipProcessor(BiFunction<EntryStack<T>, Tooltip, Tooltip> tooltipProcessor) {
+        return setting(EntryStack.Settings.TOOLTIP_PROCESSOR, (BiFunction) tooltipProcessor).cast();
+    }
+    
+    /**
+     * Sets a renderer for this {@link EntryStack}. This will override the default renderer from the {@link EntryDefinition}.
+     * <p>
+     * You can transform the renderer on a {@link EntryType} level
+     * using {@link EntryRendererRegistry#register(EntryType, EntryRendererProvider)}.
+     *
+     * @param renderer the new renderer to use
+     * @return this {@link EntryStack}
+     * @see EntryStack#getRenderer() for how the tooltip is resolved
+     * @see EntryRenderer#empty() for an empty renderer
+     * @since 8.4
+     */
+    @Environment(EnvType.CLIENT)
+    default EntryStack<T> withRenderer(EntryRenderer<? super T> renderer) {
+        return setting(Settings.RENDERER, $ -> renderer).cast();
+    }
+    
+    /**
+     * Sets a renderer for this {@link EntryStack}. This will override the default renderer from the {@link EntryDefinition}.
+     * <p>
+     * You can transform the renderer on a {@link EntryType} level
+     * using {@link EntryRendererRegistry#register(EntryType, EntryRendererProvider)}.
+     *
+     * @param renderer the new renderer to use
+     * @return this {@link EntryStack}
+     * @see EntryStack#getRenderer() for how the tooltip is resolved
+     * @since 8.4
+     */
+    @SuppressWarnings("rawtypes")
+    @Environment(EnvType.CLIENT)
+    default EntryStack<T> withRenderer(Function<EntryStack<T>, EntryRenderer<? super T>> renderer) {
+        return setting(Settings.RENDERER, (Function) renderer).cast();
+    }
+    
+    /**
      * Returns the cheated stack of this {@link EntryStack}.
      *
      * @return the cheated stack of this {@link EntryStack}
@@ -512,6 +566,12 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
      */
     EntryStack<ItemStack> cheatsAs();
     
+    /**
+     * Settings for {@link EntryStack}s.
+     * Please consider using the utility methods in {@link EntryStack} instead of using this class directly.
+     *
+     * @param <R> the type of the setting
+     */
     @Deprecated
     class Settings<R> {
         @ApiStatus.Internal
@@ -543,8 +603,8 @@ public interface EntryStack<T> extends TextRepresentable, Renderer {
             });
         }
         
-        private R defaultValue;
-        private short id;
+        private final R defaultValue;
+        private final short id;
         
         @ApiStatus.Internal
         public Settings(R defaultValue) {

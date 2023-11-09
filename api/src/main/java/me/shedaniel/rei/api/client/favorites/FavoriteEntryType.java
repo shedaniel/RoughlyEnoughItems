@@ -25,6 +25,7 @@ package me.shedaniel.rei.api.client.favorites;
 
 import com.mojang.serialization.DataResult;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
+import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.registry.Reloadable;
@@ -44,6 +45,11 @@ public interface FavoriteEntryType<T extends FavoriteEntry> {
      * A builtin type of favorites, wrapping a {@link EntryStack}.
      */
     ResourceLocation ENTRY_STACK = new ResourceLocation("roughlyenoughitems", "entry_stack");
+    /**
+     * A builtin type of favorites, wrapping a {@link Display}.
+     */
+    @ApiStatus.Experimental
+    ResourceLocation DISPLAY = new ResourceLocation("roughlyenoughitems", "display");
     
     static Registry registry() {
         return PluginManager.getClientInstance().get(FavoriteEntryType.Registry.class);

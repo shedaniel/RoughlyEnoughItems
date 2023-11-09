@@ -34,13 +34,11 @@ import me.shedaniel.rei.api.client.gui.config.SearchFieldLocation;
 import me.shedaniel.rei.api.client.gui.widgets.Button;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.api.client.util.ClientEntryStacks;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
-import me.shedaniel.rei.impl.client.gui.changelog.ChangelogLoader;
 import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.CachedEntryListRender;
 import me.shedaniel.rei.impl.client.gui.widget.DefaultDisplayChoosePageWidget;
@@ -56,7 +54,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
-    private Button leftButton, rightButton, changelogButton;
+    private Button leftButton, rightButton;
     private List<Widget> additionalWidgets;
     private List</*EntryStack<?> | EntryIngredient*/ Object> stacks = new ArrayList<>();
     private Object2IntMap<CollapsedStack> collapsedStackIndices = new Object2IntOpenHashMap<>();
@@ -87,7 +85,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
                     CachedEntryListRender.Sprite sprite = CachedEntryListRender.get(entry.getCurrentEntry());
                     if (sprite != null) {
                         CachingEntryRenderer renderer = new CachingEntryRenderer(sprite);
-                        entry.our = ClientEntryStacks.setRenderer(entry.getCurrentEntry().copy().cast(), stack -> renderer);
+                        entry.our = entry.getCurrentEntry().copy().cast().withRenderer(stack -> renderer);
                     }
                 }
             }
@@ -136,12 +134,11 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
         }
         page = Math.max(Math.min(page, getTotalPages() - 1), 0);
         int skip = Math.max(0, page * entries.size());
-        List</*EntryStack<?> | List<EntryStack<?>>*/ Object> subList = stacks.stream().skip(skip).limit(Math.max(0, entries.size() - Math.max(0, -page * entries.size()))).toList();
+        List</*EntryStack<?> | List<EntryStack<?>>*/ Object> subList = stacks.subList(skip, Math.min(stacks.size(), skip + entries.size()));
         Int2ObjectMap<CollapsedStack> indexedCollapsedStack = getCollapsedStackIndexed();
         Set<CollapsedStack> collapsedStacks = new LinkedHashSet<>();
         for (int i = 0; i < subList.size(); i++) {
-            /*EntryStack<?> | List<EntryStack<?>>*/
-            Object stack = subList.get(i);
+            /*EntryStack<?> | List<EntryStack<?>>*/ Object stack = subList.get(i);
             EntryListStackEntry entry = entries.get(i + Math.max(0, -page * entries.size()));
             entry.clearStacks();
             
@@ -214,22 +211,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             graphics.blit(InternalTextures.ARROW_LEFT_TEXTURE, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
             graphics.pose().popPose();
         }));
-        this.changelogButton = Widgets.createButton(new Rectangle(overlayBounds.getMaxX() - 18 - 18, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), Component.empty())
-                .onClick(button -> {
-                    ChangelogLoader.show();
-                })
-                .containsMousePredicate((button, point) -> button.getBounds().contains(point) && overlay.isNotInExclusionZones(point.x, point.y))
-                .tooltipLine(Component.translatable("text.rei.changelog.title"))
-                .focusable(false);
-        this.additionalWidgets.add(changelogButton);
-        this.additionalWidgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
-            Rectangle bounds = changelogButton.getBounds();
-            graphics.pose().pushPose();
-            graphics.pose().translate(0.5f, 0, 1);
-            graphics.blit(InternalTextures.CHEST_GUI_TEXTURE, bounds.x + 1, bounds.y + 2, !ChangelogLoader.hasVisited() ? 28 : 14, 0, 14, 14);
-            graphics.pose().popPose();
-        }));
-        this.rightButton = Widgets.createButton(new Rectangle(overlayBounds.getMaxX() - 18, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), Component.literal(""))
+        this.rightButton = Widgets.createButton(new Rectangle(overlayBounds.getMaxX() - 18, overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 5, 16, 16), Component.translatable(""))
                 .onClick(button -> {
                     setPage(getPage() + 1);
                     if (getPage() >= getTotalPages())
@@ -247,7 +229,7 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
             graphics.blit(InternalTextures.ARROW_RIGHT_TEXTURE, bounds.x + 4, bounds.y + 4, 0, 0, 8, 8, 8, 8);
             graphics.pose().popPose();
         }));
-        this.additionalWidgets.add(Widgets.createClickableLabel(new Point(overlayBounds.x + ((overlayBounds.width - 18) / 2), overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), Component.empty(), label -> {
+        this.additionalWidgets.add(Widgets.createClickableLabel(new Point(overlayBounds.x + (overlayBounds.width / 2), overlayBounds.y + (ConfigObject.getInstance().getSearchFieldLocation() == SearchFieldLocation.TOP_SIDE ? 24 : 0) + 10), Component.empty(), label -> {
             if (!Screen.hasShiftDown()) {
                 setPage(0);
                 updateEntriesPosition();

@@ -45,13 +45,13 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class FilteringAddRuleScreen extends Screen {
-    private final FilteringEntry entry;
+    private final List<FilteringRule<?>> rules;
     private RulesList rulesList;
     Screen parent;
     
-    public FilteringAddRuleScreen(FilteringEntry entry) {
+    public FilteringAddRuleScreen(List<FilteringRule<?>> rules) {
         super(Component.translatable("config.roughlyenoughitems.filteringRulesScreen.new"));
-        this.entry = entry;
+        this.rules = rules;
     }
     
     @Override
@@ -68,7 +68,7 @@ public class FilteringAddRuleScreen extends Screen {
         rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
         for (FilteringRuleType<?> rule : FilteringRuleTypeRegistry.getInstance()) {
             if (!rule.isSingular())
-                rulesList.addItem(new DefaultRuleEntry(parent, entry, rule.createNew(), null));
+                rulesList.addItem(new DefaultRuleEntry(parent, rules, rule.createNew(), null));
         }
         rulesList.selectItem(rulesList.children().get(0));
     }
@@ -78,6 +78,11 @@ public class FilteringAddRuleScreen extends Screen {
         this.rulesList.render(graphics, mouseX, mouseY, delta);
         super.render(graphics, mouseX, mouseY, delta);
         graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
+    }
+    
+    @Override
+    public void onClose() {
+        this.minecraft.setScreen(parent);
     }
     
     public static class RulesList extends DynamicElementListWidget<RuleEntry> {
@@ -129,13 +134,12 @@ public class FilteringAddRuleScreen extends Screen {
         private final Button addButton;
         private final Function<Screen, Screen> screenFunction;
         
-        public DefaultRuleEntry(Screen parent, FilteringEntry entry, FilteringRule<?> rule, Function<Screen, Screen> screenFunction) {
+        public DefaultRuleEntry(Screen parent, List<FilteringRule<?>> rules, FilteringRule<?> rule, Function<Screen, Screen> screenFunction) {
             super(rule);
             this.screenFunction = (screenFunction == null ? ((FilteringRuleType<FilteringRule<?>>) rule.getType()).createEntryScreen(rule) : screenFunction);
             addButton = new Button(0, 0, 20, 20, Component.nullToEmpty(" + "), button -> {
-                entry.edited = true;
                 Minecraft.getInstance().setScreen(this.screenFunction.apply(parent));
-                entry.rules.add(0, rule);
+                rules.add(0, rule);
             }, Supplier::get) {
             };
             addButton.active = this.screenFunction != null;

@@ -34,6 +34,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
@@ -148,10 +149,10 @@ public class FavoritesPanel extends WidgetWithBounds {
     }
     
     @Nullable
-    public DraggableStack getHoveredStack(double mouseX, double mouseY) {
+    public DraggableComponent<?> getHoveredStack(double mouseX, double mouseY) {
         for (FavoritesPanelRow row : rows.get()) {
             if (row instanceof FavoritesPanelEntriesRow entriesRow) {
-                DraggableStack hoveredStack = entriesRow.getHoveredStack(mouseX, mouseY);
+                DraggableComponent<?> hoveredStack = entriesRow.getHoveredStack(mouseX, mouseY);
                 
                 if (hoveredStack != null) {
                     return hoveredStack;

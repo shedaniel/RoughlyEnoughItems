@@ -30,6 +30,7 @@ import me.shedaniel.math.Dimension;
 import me.shedaniel.math.FloatingRectangle;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.*;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
@@ -109,7 +110,7 @@ public class DisplayEntry extends WidgetWithBounds {
         float y = parentBounds.getCenterY() - displayBounds.height / 2 * scale;
         FloatingRectangle newBounds = new Rectangle(x, y, displayBounds.width * scale, displayBounds.height * scale).getFloatingBounds();
         if (hasInitialBounds) {
-            if (this.size.width == 1 && this.size.height == 1) {
+            if (this.size.width == 1 && this.size.height == 1 && !ConfigObject.getInstance().isReducedMotion()) {
                 this.bounds.setTo(newBounds, 700);
             } else {
                 this.bounds.setAs(newBounds);

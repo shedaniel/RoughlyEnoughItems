@@ -27,6 +27,7 @@ import com.google.common.collect.*;
 import dev.architectury.event.EventResult;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceSet;
@@ -36,6 +37,7 @@ import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
+import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.registry.screen.ExclusionZones;
 import me.shedaniel.rei.api.client.registry.screen.ScreenRegistry;
@@ -43,6 +45,7 @@ import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerRegistry;
 import me.shedaniel.rei.api.client.registry.transfer.simple.SimpleTransferHandler;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.ClientInternals;
@@ -54,6 +57,7 @@ import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconBaseCategor
 import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconPaymentCategory;
 import me.shedaniel.rei.plugin.client.categories.cooking.DefaultCookingCategory;
 import me.shedaniel.rei.plugin.client.categories.crafting.DefaultCraftingCategory;
+import me.shedaniel.rei.plugin.client.categories.crafting.filler.*;
 import me.shedaniel.rei.plugin.client.categories.tag.DefaultTagCategory;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultPotionEffectExclusionZones;
 import me.shedaniel.rei.plugin.client.exclusionzones.DefaultRecipeBookExclusionZones;
@@ -72,7 +76,6 @@ import me.shedaniel.rei.plugin.common.displays.cooking.DefaultBlastingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmeltingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
-import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomDisplay;
 import me.shedaniel.rei.plugin.common.displays.tag.DefaultTagDisplay;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.fabricmc.api.EnvType;
@@ -113,6 +116,19 @@ import java.util.stream.Stream;
 @Environment(EnvType.CLIENT)
 @ApiStatus.Internal
 public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin {
+    private static final CraftingRecipeFiller<?>[] CRAFTING_RECIPE_FILLERS = new CraftingRecipeFiller[]{
+            new TippedArrowRecipeFiller(),
+            new ShulkerBoxColoringFiller(),
+            new BannerDuplicateRecipeFiller(),
+            new ShieldDecorationRecipeFiller(),
+            new SuspiciousStewRecipeFiller(),
+            new BookCloningRecipeFiller(),
+            new FireworkRocketRecipeFiller(),
+            new ArmorDyeRecipeFiller(),
+            new MapCloningRecipeFiller(),
+            new MapExtendingRecipeFiller()
+    };
+    
     public DefaultClientPlugin() {
         ClientInternals.attachInstance((Supplier<Object>) () -> this, "builtinClientPlugin");
     }
@@ -178,6 +194,24 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     }
     
     @Override
+    public void registerCollapsibleEntries(CollapsibleEntryRegistry registry) {
+        registry.group(new ResourceLocation("roughlyenoughitems", "enchanted_book"), Component.translatable("item.minecraft.enchanted_book"),
+                stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(Items.ENCHANTED_BOOK));
+        registry.group(new ResourceLocation("roughlyenoughitems", "potion"), Component.translatable("item.minecraft.potion"),
+                stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(Items.POTION));
+        registry.group(new ResourceLocation("roughlyenoughitems", "splash_potion"), Component.translatable("item.minecraft.splash_potion"),
+                stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(Items.SPLASH_POTION));
+        registry.group(new ResourceLocation("roughlyenoughitems", "lingering_potion"), Component.translatable("item.minecraft.lingering_potion"),
+                stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(Items.LINGERING_POTION));
+        registry.group(new ResourceLocation("roughlyenoughitems", "spawn_egg"), Component.translatable("text.rei.spawn_egg"),
+                stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().getItem() instanceof SpawnEggItem);
+        registry.group(new ResourceLocation("roughlyenoughitems", "tipped_arrow"), Component.translatable("item.minecraft.tipped_arrow"),
+                stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().is(Items.TIPPED_ARROW));
+        registry.group(new ResourceLocation("roughlyenoughitems", "music_disc"), Component.translatable("text.rei.music_disc"),
+                stack -> stack.getType() == VanillaEntryTypes.ITEM && stack.<ItemStack>castValue().getItem() instanceof RecordItem);
+    }
+    
+    @Override
     public void registerCategories(CategoryRegistry registry) {
         registry.add(
                 new DefaultCraftingCategory(),
@@ -227,6 +261,10 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             
             return EventResult.pass();
         });
+        
+        for (CraftingRecipeFiller<?> filler : CRAFTING_RECIPE_FILLERS) {
+            filler.registerCategories(registry);
+        }
         
         Set<Item> axes = Sets.newHashSet(), hoes = Sets.newHashSet(), shovels = Sets.newHashSet();
         EntryRegistry.getInstance().getEntryStacks().filter(stack -> stack.getValueType() == ItemStack.class).map(stack -> ((ItemStack) stack.getValue()).getItem()).forEach(item -> {
@@ -289,25 +327,9 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         for (Map.Entry<Item, Integer> entry : AbstractFurnaceBlockEntity.getFuel().entrySet()) {
             registry.add(new DefaultFuelDisplay(Collections.singletonList(EntryIngredients.of(entry.getKey())), Collections.emptyList(), entry.getValue()));
         }
-        EntryIngredient arrowStack = EntryIngredient.of(EntryStacks.of(Items.ARROW));
-        ReferenceSet<Potion> registeredPotions = new ReferenceOpenHashSet<>();
-        EntryRegistry.getInstance().getEntryStacks().filter(entry -> entry.getValueType() == ItemStack.class && entry.<ItemStack>castValue().getItem() == Items.LINGERING_POTION).forEach(entry -> {
-            ItemStack itemStack = (ItemStack) entry.getValue();
-            Potion potion = PotionUtils.getPotion(itemStack);
-            if (registeredPotions.add(potion)) {
-                List<EntryIngredient> input = new ArrayList<>();
-                for (int i = 0; i < 4; i++)
-                    input.add(arrowStack);
-                input.add(EntryIngredients.of(itemStack));
-                for (int i = 0; i < 4; i++)
-                    input.add(arrowStack);
-                ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
-                PotionUtils.setPotion(outputStack, potion);
-                PotionUtils.setCustomEffects(outputStack, PotionUtils.getCustomEffects(itemStack));
-                EntryIngredient output = EntryIngredients.of(outputStack);
-                registry.add(new DefaultCustomDisplay(null, input, Collections.singletonList(output)));
-            }
-        });
+        for (CraftingRecipeFiller<?> filler : CRAFTING_RECIPE_FILLERS) {
+            filler.registerDisplays(registry);
+        }
         if (ComposterBlock.COMPOSTABLES.isEmpty()) {
             ComposterBlock.bootStrap();
         }

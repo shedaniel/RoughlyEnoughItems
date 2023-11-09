@@ -24,10 +24,13 @@
 package me.shedaniel.rei.impl.common.entry;
 
 import com.google.common.collect.Iterators;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.settings.EntryIngredientSetting;
 import me.shedaniel.rei.impl.Internals;
 import net.minecraft.nbt.ListTag;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -240,9 +243,37 @@ public enum EntryIngredientImpl implements Internals.EntryIngredientProvider {
         public EntryIngredient map(UnaryOperator<EntryStack<?>> transformer) {
             return this;
         }
+        
+        @Nullable
+        @Override
+        public <T> T getSetting(EntryIngredientSetting<T> setting) {
+            return null;
+        }
+        
+        @Override
+        public <T> EntryIngredient setting(EntryIngredientSetting<T> setting, T value) {
+            return this;
+        }
     }
     
-    private static class SingletonEntryIngredient extends AbstractList<EntryStack<?>> implements EntryIngredient, RandomAccess {
+    private static abstract class AbstractEntryIngredient extends AbstractList<EntryStack<?>> implements EntryIngredient {
+        private Map<EntryIngredientSetting<?>, Object> settings = null;
+        
+        @Override
+        @Nullable
+        public <T> T getSetting(EntryIngredientSetting<T> setting) {
+            return SettingsHandler.get(this.settings, setting);
+        }
+        
+        @Override
+        public <T> EntryIngredient setting(EntryIngredientSetting<T> setting, T value) {
+            if (value == null) this.settings = SettingsHandler.remove(this.settings, setting);
+            else this.settings = SettingsHandler.set(this.settings, setting, value);
+            return this;
+        }
+    }
+    
+    private static class SingletonEntryIngredient extends AbstractEntryIngredient implements EntryIngredient, RandomAccess {
         private EntryStack<?> stack;
         
         public SingletonEntryIngredient(EntryStack<?> stack) {
@@ -366,7 +397,7 @@ public enum EntryIngredientImpl implements Internals.EntryIngredientProvider {
         }
     }
     
-    private static class ArrayIngredient extends AbstractList<EntryStack<?>> implements EntryIngredient, RandomAccess {
+    private static class ArrayIngredient extends AbstractEntryIngredient implements EntryIngredient, RandomAccess {
         private static final long serialVersionUID = -2764017481108945198L;
         private final EntryStack<?>[] array;
         
@@ -471,6 +502,38 @@ public enum EntryIngredientImpl implements Internals.EntryIngredientProvider {
                 out[i] = transformer.apply(array[i]);
             }
             return new ArrayIngredient(out);
+        }
+    }
+    
+    private static class SettingsHandler {
+        private static Map<EntryIngredientSetting<?>, Object> set(Map<EntryIngredientSetting<?>, Object> map, EntryIngredientSetting<?> setting, Object value) {
+            if (map == null) {
+                map = new Reference2ObjectOpenHashMap<>();
+            }
+            
+            map.put(setting, value);
+            return map;
+        }
+        
+        private static <T> T get(Map<EntryIngredientSetting<?>, Object> map, EntryIngredientSetting<T> setting) {
+            if (map == null) {
+                return null;
+            }
+            
+            Object o = map.get(setting);
+            return o == null ? null : (T) o;
+        }
+        
+        private static Map<EntryIngredientSetting<?>, Object> remove(Map<EntryIngredientSetting<?>, Object> map, EntryIngredientSetting<?> setting) {
+            if (map == null) {
+                return null;
+            }
+            
+            map.remove(setting);
+            if (map.isEmpty()) {
+                return null;
+            }
+            return map;
         }
     }
 }

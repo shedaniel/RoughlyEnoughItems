@@ -31,7 +31,7 @@ import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
-import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
+import me.shedaniel.rei.api.client.gui.drag.component.DraggableComponent;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.util.ClientEntryStacks;
@@ -39,6 +39,7 @@ import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import me.shedaniel.rei.impl.client.gui.widget.DisplayedEntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.panel.FavoritesPanel;
+import me.shedaniel.rei.impl.client.gui.widget.region.EntryStacksRegionWidget;
 import me.shedaniel.rei.impl.client.gui.widget.region.RealRegionEntry;
 import me.shedaniel.rei.impl.client.gui.widget.region.RegionDraggableStack;
 import net.minecraft.client.gui.GuiGraphics;
@@ -68,7 +69,7 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
         this.widgets = CollectionUtils.map(this.entries, entry -> new SectionFavoriteWidget(new Point(0, 0), entrySize, entry));
         
         for (SectionFavoriteWidget widget : this.widgets) {
-            widget.size.setTo(entrySize * 100, 300);
+            widget.size.setTo(entrySize * 100, ConfigObject.getInstance().isReducedMotion() ? 0 : 300);
         }
         
         this.lastY = panel.getInnerBounds().y;
@@ -86,7 +87,7 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
         this.lastY = y;
         int entrySize = entrySize();
         boolean fastEntryRendering = ConfigObject.getInstance().doesFastEntryRendering();
-        updateEntriesPosition(entry -> true);
+        updateEntriesPosition(entry -> !ConfigObject.getInstance().isReducedMotion());
         for (SectionFavoriteWidget widget : widgets) {
             widget.update(delta);
             
@@ -119,12 +120,12 @@ public class FavoritesPanelEntriesRow extends FavoritesPanelRow {
     }
     
     @Nullable
-    public DraggableStack getHoveredStack(double mouseX, double mouseY) {
+    public DraggableComponent<?> getHoveredStack(double mouseX, double mouseY) {
         for (SectionFavoriteWidget widget : widgets) {
             if (widget.containsMouse(mouseX, mouseY + panel.getScrolledAmount())) {
                 RealRegionEntry<FavoriteEntry> entry = new RealRegionEntry<>(panel.getParent().getRegion(), widget.entry.copy(), entrySize());
                 entry.size.setAs(entrySize() * 100);
-                return new RegionDraggableStack<>(entry, widget);
+                return EntryStacksRegionWidget.wrapDraggable(new RegionDraggableStack<>(entry, widget), entry.region, entry);
             }
         }
         

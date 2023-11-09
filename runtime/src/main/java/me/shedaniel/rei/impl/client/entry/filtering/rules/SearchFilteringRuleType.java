@@ -25,13 +25,12 @@ package me.shedaniel.rei.impl.client.entry.filtering.rules;
 
 import com.google.common.collect.Lists;
 import me.shedaniel.math.Rectangle;
-import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
 import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntryStack;
-import me.shedaniel.rei.impl.client.config.entries.FilteringRuleOptionsScreen;
+import me.shedaniel.rei.impl.client.gui.screen.generic.OptionEntriesScreen;
 import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import net.minecraft.ChatFormatting;
@@ -89,16 +88,16 @@ public enum SearchFilteringRuleType implements FilteringRuleType<SearchFiltering
     @Override
     @Nullable
     public Function<Screen, Screen> createEntryScreen(SearchFilteringRule rule) {
-        return screen -> new FilteringRuleOptionsScreen<>(rule, screen) {
-            TextFieldRuleEntry entry = null;
-            BooleanRuleEntry show = null;
+        return screen -> new OptionEntriesScreen(Component.translatable("config.roughlyenoughitems.filteringRulesScreen"), screen) {
+            TextFieldListEntry entry = null;
+            BooleanListEntry show = null;
             List<EntryWidget> entryStacks = new ArrayList<>();
             
             @Override
-            public void addEntries(Consumer<RuleEntry> entryConsumer) {
+            public void addEntries(Consumer<ListEntry> entryConsumer) {
                 addEmpty(entryConsumer, 10);
                 addText(entryConsumer, Component.translatable("rule.roughlyenoughitems.filtering.search.filter").withStyle(ChatFormatting.GRAY));
-                entryConsumer.accept(entry = new TextFieldRuleEntry(width - 36, rule, widget -> {
+                entryConsumer.accept(entry = new TextFieldListEntry(width - 36, widget -> {
                     widget.setMaxLength(9999);
                     widget.setResponder(searchTerm -> {
                         SearchFilter filter = SearchProvider.getInstance().createFilter(searchTerm);
@@ -116,10 +115,10 @@ public enum SearchFilteringRuleType implements FilteringRuleType<SearchFiltering
                 Function<Boolean, Component> function = bool -> {
                     return Component.translatable("rule.roughlyenoughitems.filtering.search.show." + bool);
                 };
-                entryConsumer.accept(show = new BooleanRuleEntry(width - 36, show == null ? rule.show : show.getBoolean(), rule, function));
+                entryConsumer.accept(show = new BooleanListEntry(width - 36, show == null ? rule.show : show.getBoolean(), function));
                 addEmpty(entryConsumer, 10);
-                entryConsumer.accept(new SubRulesEntry(rule, () -> function.apply(show == null ? rule.show : show.getBoolean()),
-                        Collections.singletonList(new EntryStacksRuleEntry(rule, () -> entryStacks))));
+                entryConsumer.accept(new SubListEntry(() -> function.apply(show == null ? rule.show : show.getBoolean()),
+                        Collections.singletonList(new EntryStacksRuleEntry(() -> entryStacks))));
             }
             
             @Override
@@ -135,12 +134,11 @@ public enum SearchFilteringRuleType implements FilteringRuleType<SearchFiltering
         return false;
     }
     
-    public static class EntryStacksRuleEntry extends FilteringRuleOptionsScreen.RuleEntry {
+    public static class EntryStacksRuleEntry extends OptionEntriesScreen.ListEntry {
         private final Supplier<Iterable<EntryWidget>> entryStacks;
         private int totalHeight;
         
-        public EntryStacksRuleEntry(FilteringRule<?> rule, Supplier<Iterable<EntryWidget>> entryStacks) {
-            super(rule);
+        public EntryStacksRuleEntry(Supplier<Iterable<EntryWidget>> entryStacks) {
             this.entryStacks = entryStacks;
         }
         

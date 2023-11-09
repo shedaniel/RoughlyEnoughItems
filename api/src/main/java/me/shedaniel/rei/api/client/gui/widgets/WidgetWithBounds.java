@@ -24,6 +24,7 @@
 package me.shedaniel.rei.api.client.gui.widgets;
 
 import me.shedaniel.math.Rectangle;
+import org.jetbrains.annotations.ApiStatus;
 import net.minecraft.client.gui.GuiGraphics;
 
 public abstract class WidgetWithBounds extends Widget {
@@ -41,5 +42,35 @@ public abstract class WidgetWithBounds extends Widget {
         getBounds().setBounds(bounds);
         render(graphics, mouseX, mouseY, delta);
         getBounds().setBounds(clone);
+    }
+    
+    @ApiStatus.Experimental
+    public final WidgetWithBounds withPadding(int padding) {
+        return Widgets.padded(padding, this);
+    }
+    
+    @ApiStatus.Experimental
+    public final WidgetWithBounds withPadding(int padX, int padY) {
+        return Widgets.padded(padX, padY, this);
+    }
+    
+    @ApiStatus.Experimental
+    public final WidgetWithBounds withPaddingHorizontal(int padX) {
+        return Widgets.padded(padX, 0, this);
+    }
+    
+    @ApiStatus.Experimental
+    public final WidgetWithBounds withPaddingVertical(int padY) {
+        return Widgets.padded(0, padY, this);
+    }
+    
+    @ApiStatus.Experimental
+    public final WidgetWithBounds withPadding(int padLeft, int padRight, int padTop, int padBottom) {
+        return Widgets.padded(padLeft, padRight, padTop, padBottom, this);
+    }
+    
+    @ApiStatus.Experimental
+    public final WidgetWithBounds withScissors() {
+        return Widgets.scissored(this);
     }
 }

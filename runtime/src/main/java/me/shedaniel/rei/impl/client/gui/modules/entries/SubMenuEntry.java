@@ -26,6 +26,8 @@ package me.shedaniel.rei.impl.client.gui.modules.entries;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
+import me.shedaniel.math.FloatingRectangle;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
@@ -108,8 +110,14 @@ public class SubMenuEntry extends AbstractMenuEntry {
                 }
                 boolean facingDownwards = fullHeight - menuStart.getMaxY() > menuStart.y;
                 
-                menu.menuStartPoint.y = facingDownwards ? menuStart.y - 1 : menuStart.getMaxY() - (menu.scrolling.getMaxScrollHeight() + 1);
-                menu.menuStartPoint.x = facingRight ? menuStart.getMaxX() : menuStart.x - (menu.getMaxEntryWidth() + 2 + (menu.scrolling.getMaxScrollHeight() > menu.getInnerHeight(menu.menuStartPoint.y) ? 6 : 0));
+                int newY = facingDownwards ? menuStart.y - 1 : menuStart.getMaxY() - (menu.scrolling.getMaxScrollHeight() + 1);
+                int newX = facingRight ? menuStart.getMaxX() : menuStart.x - (menu.getMaxEntryWidth() + 2 + (menu.scrolling.getMaxScrollHeight() > menu.getInnerHeight(menu.menuStartPoint.y) ? 6 : 0));
+                
+                if (!menu.menuStartPoint.equals(new Point(newX, newY))) {
+                    menu.menuStartPoint.setLocation(newX, newY);
+                    Rectangle createBounds = menu.createBounds();
+                    menu.bounds.setAs(new FloatingRectangle(facingRight ? createBounds.x : createBounds.getMaxX(), facingDownwards ? createBounds.y : createBounds.getMaxY(), 0.1, 0.1));
+                }
                 
                 List<Rectangle> areas = Lists.newArrayList(ScissorsHandler.INSTANCE.getScissorsAreas());
                 ScissorsHandler.INSTANCE.clearScissors();
@@ -118,6 +126,8 @@ public class SubMenuEntry extends AbstractMenuEntry {
                     ScissorsHandler.INSTANCE.scissor(area);
                 }
             }
+        } else {
+            this.childMenu = null;
         }
         graphics.drawString(font, text, getX() + 2, getY() + 2, isSelected() ? 16777215 : 8947848, false);
         if (!entries.isEmpty()) {

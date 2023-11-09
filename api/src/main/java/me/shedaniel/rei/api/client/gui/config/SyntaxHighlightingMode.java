@@ -38,6 +38,6 @@ public enum SyntaxHighlightingMode {
     
     @Override
     public String toString() {
-        return I18n.get("config.roughlyenoughitems.syntaxHighlightingMode." + name().toLowerCase(Locale.ROOT));
+        return I18n.get("config.rei.value.search.syntax_highlighting." + name().toLowerCase(Locale.ROOT));
     }
 }

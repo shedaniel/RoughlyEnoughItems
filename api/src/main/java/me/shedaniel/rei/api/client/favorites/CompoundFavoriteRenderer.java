@@ -27,6 +27,7 @@ import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.Renderer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -114,10 +115,10 @@ public class CompoundFavoriteRenderer implements Renderer {
             }
             if (Util.getMillis() - nextSwitch > 1000) {
                 nextSwitch = Util.getMillis();
-                offset.setTo((offset.target().intValue() + 1) % count, 500);
+                offset.setTo((offset.target().intValue() + 1) % count, ConfigObject.getInstance().isReducedMotion() ? 0 : 500);
             }
         } else {
-            offset.setTo(supplier.getAsInt() % count, 500);
+            offset.setTo(supplier.getAsInt() % count, ConfigObject.getInstance().isReducedMotion() ? 0 : 500);
         }
     }
 }

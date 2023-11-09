@@ -23,25 +23,35 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
+import com.google.common.base.Suppliers;
+import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
+import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.display.DisplaySpec;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 public class DisplayTooltipComponent implements TooltipComponent, ClientTooltipComponent {
+    private final List<Widget> widgets;
     private final Widget widget;
     private final DisplaySpec display;
     private final Rectangle bounds;
+    private final Supplier<AutoCraftingEvaluator.AutoCraftingResult> autoCraftingResult =
+            Suppliers.memoizeWithExpiration(this::evaluateAutoCrafting, 1000, TimeUnit.MILLISECONDS);
     
     public DisplayTooltipComponent(DisplaySpec display) {
         Display internalDisplay = display.provideInternalDisplay();
@@ -51,13 +61,20 @@ public class DisplayTooltipComponent implements TooltipComponent, ClientTooltipC
         List<Widget> widgets = configuration.getView(internalDisplay).setupDisplay(internalDisplay, bounds);
         
         this.display = display;
+        this.widgets = widgets;
         this.widget = Widgets.concat(widgets);
     }
     
     public DisplayTooltipComponent(DisplaySpec display, List<Widget> widgets, Rectangle bounds) {
+        this.widgets = widgets;
         this.widget = Widgets.concat(widgets);
         this.display = display;
         this.bounds = bounds;
+    }
+    
+    private AutoCraftingEvaluator.AutoCraftingResult evaluateAutoCrafting() {
+        if (this.display == null) return new AutoCraftingEvaluator.AutoCraftingResult();
+        return AutoCraftingEvaluator.evaluateAutoCrafting(false, false, this.display.provideInternalDisplay(), this.display::provideInternalDisplayIds);
     }
     
     @Override
@@ -76,6 +93,17 @@ public class DisplayTooltipComponent implements TooltipComponent, ClientTooltipC
         graphics.pose().translate(x + 2, y + 2, 0);
         graphics.pose().translate(-this.bounds.getX(), -this.bounds.getY(), 0);
         widget.render(graphics, -1000, -1000, 0);
+        
+        AutoCraftingEvaluator.AutoCraftingResult craftingResult = autoCraftingResult.get();
+        if (craftingResult.hasApplicable && craftingResult.renderer != null) {
+            graphics.pose().pushPose();
+            Rectangle transformedBounds = MatrixUtils.transform(MatrixUtils.inverse(graphics.pose().last().pose()), new Rectangle(x + 2, y + 2, bounds.width, bounds.height));
+            Point mouse = MatrixUtils.transform(graphics.pose().last().pose(), PointHelper.ofMouse());
+            craftingResult.renderer.render(graphics, mouse.x, mouse.y, Minecraft.getInstance().getDeltaFrameTime(),
+                    widgets, transformedBounds, display.provideInternalDisplay());
+            graphics.pose().popPose();
+        }
+        
         graphics.pose().popPose();
     }
 }
