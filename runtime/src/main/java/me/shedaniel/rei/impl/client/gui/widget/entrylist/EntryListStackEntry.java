@@ -163,6 +163,21 @@ public class EntryListStackEntry extends DisplayedEntryWidget {
         if (collapsedStack != null && button == 0 && Screen.hasAltDown()) {
             parent.updatedCount++;
             collapsedStack.setExpanded(!collapsedStack.isExpanded());
+            parent.updateStacks();
+            
+            if (!collapsedStack.isExpanded() && parent instanceof PaginatedEntryListWidget paginatedList) {
+                List<Object> stacks = parent.getStacks();
+                
+                for (int i = 0; i < stacks.size(); i++) {
+                    CollapsedStack stack = parent.getCollapsedStackIndexed().get(i);
+                    
+                    if (stack == collapsedStack) {
+                        paginatedList.setPage(Mth.clamp(i / paginatedList.getEntryWidgets().size(), 0, paginatedList.getTotalPages() - 1));
+                        break;
+                    }
+                }
+            }
+            
             parent.updateEntriesPosition();
             Widgets.produceClickSound();
             return true;

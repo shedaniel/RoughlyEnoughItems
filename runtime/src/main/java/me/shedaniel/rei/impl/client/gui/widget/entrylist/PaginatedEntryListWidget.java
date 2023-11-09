@@ -135,12 +135,11 @@ public class PaginatedEntryListWidget extends CollapsingEntryListWidget {
         }
         page = Math.max(Math.min(page, getTotalPages() - 1), 0);
         int skip = Math.max(0, page * entries.size());
-        List</*EntryStack<?> | List<EntryStack<?>>*/ Object> subList = stacks.stream().skip(skip).limit(Math.max(0, entries.size() - Math.max(0, -page * entries.size()))).toList();
+        List</*EntryStack<?> | List<EntryStack<?>>*/ Object> subList = stacks.subList(skip, Math.min(stacks.size(), skip + entries.size()));
         Int2ObjectMap<CollapsedStack> indexedCollapsedStack = getCollapsedStackIndexed();
         Set<CollapsedStack> collapsedStacks = new LinkedHashSet<>();
         for (int i = 0; i < subList.size(); i++) {
-            /*EntryStack<?> | List<EntryStack<?>>*/
-            Object stack = subList.get(i);
+            /*EntryStack<?> | List<EntryStack<?>>*/ Object stack = subList.get(i);
             EntryListStackEntry entry = entries.get(i + Math.max(0, -page * entries.size()));
             entry.clearStacks();
             
