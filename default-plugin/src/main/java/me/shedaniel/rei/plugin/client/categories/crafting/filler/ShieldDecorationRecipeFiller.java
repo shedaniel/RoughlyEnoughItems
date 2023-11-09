@@ -32,7 +32,7 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCustomShapelessDisplay;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.*;
@@ -49,13 +49,13 @@ public class ShieldDecorationRecipeFiller implements CraftingRecipeFiller<Shield
         Random random = new Random();
         
         for (DyeColor color : colors) {
-            Optional<Item> bannerOptional = Registry.ITEM.getOptional(new ResourceLocation(color.getName() + "_banner"));
+            Optional<Item> bannerOptional = BuiltInRegistries.ITEM.getOptional(new ResourceLocation(color.getName() + "_banner"));
             if (bannerOptional.isEmpty()) continue;
             out.add(Pair.of(color, new ItemStack(bannerOptional.get())));
             
             for (int i = 0; i < 2; i++) {
                 BannerPattern.Builder patternBuilder = new BannerPattern.Builder();
-                Holder<BannerPattern>[] allPatterns = Registry.BANNER_PATTERN.holders().toArray(Holder[]::new);
+                Holder<BannerPattern>[] allPatterns = BuiltInRegistries.BANNER_PATTERN.holders().toArray(Holder[]::new);
                 for (int j = 0; j < 2; j++) {
                     Holder<BannerPattern> pattern = allPatterns[random.nextInt(allPatterns.length - 1) + 1];
                     patternBuilder.addPattern(pattern, colors[random.nextInt(colors.length)]);

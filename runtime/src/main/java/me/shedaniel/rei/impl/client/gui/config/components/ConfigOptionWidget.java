@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.config.components;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -45,6 +44,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,7 +61,7 @@ public class ConfigOptionWidget {
         widgets.add(fieldNameLabel = Widgets.createLabel(new Point(0, 0), TextTransformations.highlightText(option.getName().copy(), option.getOptionNameHighlight(), style -> style.withColor(0xFFC0C0C0)))
                 .leftAligned());
         WidgetWithBounds optionValue = ConfigOptionValueWidget.create(access, option, width - 10 - fieldNameLabel.getBounds().width);
-        widgets.add(Widgets.withTranslate(optionValue, () -> Matrix4f.createTranslateMatrix(width - optionValue.getBounds().width - optionValue.getBounds().x, 0, 0)));
+        widgets.add(Widgets.withTranslate(optionValue, () -> new Matrix4f().translate(width - optionValue.getBounds().width - optionValue.getBounds().x, 0, 0)));
         widgets.add(new WidgetWithBounds() {
             final MutableComponent description = Util.make(() -> {
                 MutableComponent description = option.getDescription().copy();
@@ -126,7 +126,7 @@ public class ConfigOptionWidget {
                     
                     if (this.preview != null && this.previewHeight.value() > 0.1f) {
                         ScissorsHandler.INSTANCE.scissor(MatrixUtils.transform(poses.last().pose(), new Rectangle(0, 24 + 12 * split.size() - (nextLinePreview ? 0 : 12), width, this.previewHeight.value())));
-                        this.previewTranslation = Matrix4f.createTranslateMatrix(0, 12 + 12 * split.size(), 100);
+                        this.previewTranslation = new Matrix4f().translate(0, 12 + 12 * split.size(), 100);
                         this.preview.render(poses, mouseX, mouseY, delta);
                         ScissorsHandler.INSTANCE.removeLastScissor();
                     }

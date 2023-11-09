@@ -27,7 +27,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
@@ -56,12 +55,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static me.shedaniel.rei.impl.client.gui.widget.entrylist.EntryListWidget.entrySize;
 
@@ -116,13 +117,13 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
             this.selectAllButton = new Button(0, 0, Minecraft.getInstance().font.width(selectAllText) + 10, 20, selectAllText, button -> {
                 this.points.clear();
                 this.points.add(new PointPair(new Point(-Integer.MAX_VALUE / 2, -Integer.MAX_VALUE / 2), new Point(Integer.MAX_VALUE / 2, Integer.MAX_VALUE / 2)));
-            });
+            }, Supplier::get) {};
         }
         {
             Component selectNoneText = Component.translatable("config.roughlyenoughitems.filteredEntries.selectNone");
             this.selectNoneButton = new Button(0, 0, Minecraft.getInstance().font.width(selectNoneText) + 10, 20, selectNoneText, button -> {
                 this.points.clear();
-            });
+            }, Supplier::get) {};
         }
         {
             Component addText = Component.translatable("text.rei.collapsible.entries.custom.select.add");
@@ -136,7 +137,7 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
                         entry.dirty = true;
                     }
                 }
-            });
+            }, Supplier::get) {};
         }
         {
             Component removeText = Component.translatable("text.rei.collapsible.entries.custom.select.remove");
@@ -149,14 +150,14 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
                         entry.dirty = true;
                     }
                 }
-            });
+            }, Supplier::get) {};
         }
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             this.backButton = new Button(0, 0, Minecraft.getInstance().font.width(backText) + 10, 20, backText, button -> {
                 minecraft.setScreen(parent);
                 this.parent = null;
-            });
+            }, Supplier::get) {};
         }
         this.searchField.isMain = false;
     }
@@ -181,18 +182,18 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         super.init();
         Rectangle bounds = getBounds();
         updateSearch(this.searchField.getText());
-        this.selectAllButton.x = 2;
-        this.selectAllButton.y = bounds.getMaxY() - 22;
-        this.selectNoneButton.x = 4 + selectAllButton.getWidth();
-        this.selectNoneButton.y = bounds.getMaxY() - 22;
-        int searchFieldWidth = Math.max(bounds.width - (selectNoneButton.x + selectNoneButton.getWidth() + addButton.getWidth() + removeButton.getWidth() + 12), 100);
-        this.searchField.getBounds().setBounds(selectNoneButton.x + selectNoneButton.getWidth() + 4, bounds.getMaxY() - 21, searchFieldWidth, 18);
-        this.addButton.x = bounds.getMaxX() - addButton.getWidth() - removeButton.getWidth() - 4;
-        this.addButton.y = bounds.getMaxY() - 22;
-        this.removeButton.x = bounds.getMaxX() - removeButton.getWidth() - 2;
-        this.removeButton.y = bounds.getMaxY() - 22;
-        this.backButton.x = 4;
-        this.backButton.y = 4;
+        this.selectAllButton.setX(2);
+        this.selectAllButton.setY(bounds.getMaxY() - 22);
+        this.selectNoneButton.setX(4 + selectAllButton.getWidth());
+        this.selectNoneButton.setY(bounds.getMaxY() - 22);
+        int searchFieldWidth = Math.max(bounds.width - (selectNoneButton.getX() + selectNoneButton.getWidth() + addButton.getWidth() + removeButton.getWidth() + 12), 100);
+        this.searchField.getBounds().setBounds(selectNoneButton.getX() + selectNoneButton.getWidth() + 4, bounds.getMaxY() - 21, searchFieldWidth, 18);
+        this.addButton.setX(bounds.getMaxX() - addButton.getWidth() - removeButton.getWidth() - 4);
+        this.addButton.setY(bounds.getMaxY() - 22);
+        this.removeButton.setX(bounds.getMaxX() - removeButton.getWidth() - 2);
+        this.removeButton.setY(bounds.getMaxY() - 22);
+        this.backButton.setX(4);
+        this.backButton.setY(4);
         this.searchField.setResponder(this::updateSearch);
     }
     
@@ -254,7 +255,6 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         BufferBuilder buffer = tesselator.getBuilder();
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 0, 1);
-        RenderSystem.disableTexture();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         Matrix4f matrix = poses.last().pose();
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
@@ -263,7 +263,6 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         buffer.vertex(matrix, width, bounds.y, 0.0F).uv(1.0F, 0.0F).color(0, 0, 0, 255).endVertex();
         buffer.vertex(matrix, 0, bounds.y, 0.0F).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
         tesselator.end();
-        RenderSystem.enableTexture();
         RenderSystem.disableBlend();
         renderHoleBackground(poses, 0, bounds.y, 64, 255, 255);
         
@@ -431,13 +430,6 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         
         if (keyCode == 256 && this.shouldCloseOnEsc()) {
             this.backButton.onPress();
-            return true;
-        } else if (keyCode == 258) {
-            boolean bl = !hasShiftDown();
-            if (!this.changeFocus(bl)) {
-                this.changeFocus(bl);
-            }
-            
             return true;
         }
         return false;

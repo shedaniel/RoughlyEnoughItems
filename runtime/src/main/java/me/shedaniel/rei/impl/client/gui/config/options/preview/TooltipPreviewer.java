@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.config.options.preview;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
@@ -43,6 +42,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.joml.Matrix4f;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -93,12 +93,10 @@ public class TooltipPreviewer {
             fillGradient(matrix4f, bufferBuilder, tX - 3, tY - 3, tX + tWidth + 3, tY - 3 + 1, 400, 1347420415, 1347420415);
             fillGradient(matrix4f, bufferBuilder, tX - 3, tY + tHeight + 2, tX + tWidth + 3, tY + tHeight + 3, 400, 1344798847, 1344798847);
             RenderSystem.enableDepthTest();
-            RenderSystem.disableTexture();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             BufferUploader.drawWithShader(bufferBuilder.end());
             RenderSystem.disableBlend();
-            RenderSystem.enableTexture();
             
             matrices.translate(0, 0, 400);
             

@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.config.components;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.*;
@@ -37,6 +36,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
+import org.joml.Matrix4f;
 
 import static me.shedaniel.rei.api.client.gui.widgets.Widget.scissor;
 
@@ -54,7 +54,7 @@ public class ConfigCategoryEntryWidget {
         return Widgets.concatWithBounds(
                 bounds,
                 label,
-                hasDescription ? Widgets.withTranslate(Widgets.withTranslate(descriptionLabel, Matrix4f.createScaleMatrix(0.75f, 0.75f, 0.75f)), 21, 5 + 10, 0) : Widgets.noOp(),
+                hasDescription ? Widgets.withTranslate(Widgets.withTranslate(descriptionLabel, new Matrix4f().scaling(0.75f, 0.75f, 0.75f)), 21, 5 + 10, 0) : Widgets.noOp(),
                 Widgets.createTexturedWidget(category.getIcon(), new Rectangle(3, hasDescription ? 5 : 3, 16, 16), 0, 0, 1, 1, 1, 1)
         );
     }

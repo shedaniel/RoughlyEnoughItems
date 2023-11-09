@@ -299,15 +299,15 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
                     return DataResult.success(new DisplayFavoriteEntry(null, UUID.fromString(object.getString("UUID"))), Lifecycle.stable());
                 }
             } catch (Throwable throwable) {
-                return DataResult.error(throwable.getMessage());
+                return DataResult.error(throwable::getMessage);
             }
         }
         
         @Override
         public DataResult<DisplayFavoriteEntry> fromArgs(Object... args) {
-            if (args.length == 0) return DataResult.error("Cannot create DisplayFavoriteEntry from empty args!");
+            if (args.length == 0) return DataResult.error(() -> "Cannot create DisplayFavoriteEntry from empty args!");
             if (!(args[0] instanceof Display display))
-                return DataResult.error("Creation of DisplayFavoriteEntry from args expected Display as the first argument!");
+                return DataResult.error(() -> "Creation of DisplayFavoriteEntry from args expected Display as the first argument!");
             return DataResult.success(new DisplayFavoriteEntry(display, UUID.randomUUID()), Lifecycle.stable());
         }
         

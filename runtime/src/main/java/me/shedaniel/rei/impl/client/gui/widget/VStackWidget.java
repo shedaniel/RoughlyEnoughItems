@@ -24,13 +24,13 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.google.common.collect.ForwardingList;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -125,7 +125,7 @@ public class VStackWidget {
         @Override
         protected Matrix4f translate() {
             Rectangle bounds = delegate().getBounds();
-            return Matrix4f.createTranslateMatrix(position.x - bounds.x, position.y - bounds.y, 0);
+            return new Matrix4f().translate(position.x - bounds.x, position.y - bounds.y, 0);
         }
     }
     

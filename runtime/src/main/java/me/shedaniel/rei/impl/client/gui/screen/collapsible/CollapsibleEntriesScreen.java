@@ -27,7 +27,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Rectangle;
@@ -49,6 +48,7 @@ import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistr
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -57,9 +57,11 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4f;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class CollapsibleEntriesScreen extends Screen {
     private final Runnable onClose;
@@ -112,7 +114,7 @@ public class CollapsibleEntriesScreen extends Screen {
         {
             Component backText = Component.literal("↩ ").append(Component.translatable("gui.back"));
             addRenderableWidget(new Button(4, 4, font.width(backText) + 10, 20, backText,
-                    button -> this.onClose()));
+                    button -> this.onClose(), Supplier::get) {});
         }
         {
             Component addText = Component.literal(" + ");
@@ -121,7 +123,7 @@ public class CollapsibleEntriesScreen extends Screen {
                     this.prepareWidgets(configObject);
                     this.dirty = true;
                 });
-            }));
+            }, Supplier::get) {});
         }
         
         this.listWidget = new ListWidget(width, height, 30);
@@ -184,12 +186,9 @@ public class CollapsibleEntriesScreen extends Screen {
             int stringWidth = font.width(debugText);
             fillGradient(poses, minecraft.screen.width - stringWidth - 2, 32, minecraft.screen.width, 32 + font.lineHeight + 2, -16777216, -16777216);
             MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-            poses.pushPose();
-            poses.translate(0.0D, 0.0D, getBlitOffset());
             Matrix4f matrix = poses.last().pose();
-            font.drawInBatch(debugText.getVisualOrderText(), minecraft.screen.width - stringWidth, 32 + 2, -1, false, matrix, immediate, false, 0, 15728880);
+            font.drawInBatch(debugText.getVisualOrderText(), minecraft.screen.width - stringWidth, 32 + 2, -1, false, matrix, immediate, Font.DisplayMode.NORMAL, 0, 15728880);
             immediate.endBatch();
-            poses.popPose();
         }
     }
     
@@ -252,7 +251,6 @@ public class CollapsibleEntriesScreen extends Screen {
                     GuiComponent.BACKGROUND_LOCATION, 0, this.top, this.width, this.height, 0, 32);
             RenderSystem.enableBlend();
             RenderSystem.blendFuncSeparate(770, 771, 0, 1);
-            RenderSystem.disableTexture();
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             Matrix4f matrix = poses.last().pose();
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
@@ -261,7 +259,6 @@ public class CollapsibleEntriesScreen extends Screen {
             buffer.vertex(matrix, this.width, this.top, 0.0F).uv(1, 0).color(0xFF000000).endVertex();
             buffer.vertex(matrix, 0, this.top, 0.0F).uv(0, 0).color(0xFF000000).endVertex();
             tesselator.end();
-            RenderSystem.enableTexture();
             RenderSystem.disableBlend();
             
             try (CloseableScissors scissors = scissor(poses, new Rectangle(0, this.top, this.width - 6, this.height - this.top))) {

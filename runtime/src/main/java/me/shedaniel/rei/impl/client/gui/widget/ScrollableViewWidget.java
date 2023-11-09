@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Rectangle;
@@ -32,6 +31,7 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,7 +62,7 @@ public class ScrollableViewWidget {
         }
         
         widgets.add(Widgets.scissored(scrollingRef[0].getScissorBounds(), Widgets.withTranslate(inner,
-                () -> Matrix4f.createTranslateMatrix(0, -scrollingRef[0].scrollAmountInt(), 0))));
+                () -> new Matrix4f().translate(0, -scrollingRef[0].scrollAmountInt(), 0))));
         widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
             scrollingRef[0].updatePosition(delta);
             scrollingRef[0].renderScrollBar();

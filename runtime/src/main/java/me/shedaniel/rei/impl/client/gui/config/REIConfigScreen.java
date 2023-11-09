@@ -214,7 +214,7 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     
     @Override
     public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-        this.renderDirtBackground(0);
+        this.renderDirtBackground(poses);
         super.render(poses, mouseX, mouseY, delta);
         for (Widget widget : widgets) {
             widget.render(poses, mouseX, mouseY, delta);

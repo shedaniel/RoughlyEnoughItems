@@ -28,14 +28,13 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.impl.client.gui.widget.DynamicErrorFreeEntryListWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Matrix4f;
 
 import java.util.function.IntSupplier;
 
@@ -81,7 +80,6 @@ public class HoleWidget {
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.enableBlend();
             RenderSystem.blendFuncSeparate(770, 771, 0, 1);
-            RenderSystem.disableTexture();
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
             Matrix4f matrix = matrices.last().pose();
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
@@ -94,7 +92,6 @@ public class HoleWidget {
             buffer.vertex(matrix, bounds.getMaxX(), bounds.getMaxY() - 4, 0.0F).uv(1, 0).color(0, 0, 0, 0).endVertex();
             buffer.vertex(matrix, bounds.x, bounds.getMaxY() - 4, 0.0F).uv(0, 0).color(0, 0, 0, 0).endVertex();
             tesselator.end();
-            RenderSystem.enableTexture();
             RenderSystem.disableBlend();
         }), bounds);
     }

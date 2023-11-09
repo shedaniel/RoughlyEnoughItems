@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.config.components;
 
-import com.mojang.math.Matrix4f;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -41,6 +40,7 @@ import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import net.minecraft.client.gui.GuiComponent;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.*;
 import java.util.function.IntConsumer;
@@ -84,11 +84,11 @@ public class ConfigGroupWidget {
                 Widget background = createBackgroundSlot(widget::getBounds);
                 
                 if (location == PreviewLocation.TOP) {
-                    WidgetWithBounds translatedOriginal = Widgets.withTranslate(original, () -> Matrix4f.createTranslateMatrix(0, widget.getBounds().height + 4, 0));
+                    WidgetWithBounds translatedOriginal = Widgets.withTranslate(original, () -> new Matrix4f().translate(0, widget.getBounds().height + 4, 0));
                     contents = Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, widget.getBounds().height + 4 + translatedOriginal.getBounds().height), translatedOriginal, background, widget);
                 } else {
                     contents = Widgets.concatWithBounds(() -> new Rectangle(0, 0, width, original.getBounds().getMaxY() + 2 + widget.getBounds().height), original,
-                            Widgets.withTranslate(Widgets.concat(background, widget), () -> Matrix4f.createTranslateMatrix(0, original.getBounds().getMaxY() + 4, 0)));
+                            Widgets.withTranslate(Widgets.concat(background, widget), () -> new Matrix4f().translate(0, original.getBounds().getMaxY() + 4, 0)));
                 }
             }
         } else {
@@ -98,7 +98,7 @@ public class ConfigGroupWidget {
         return Widgets.concatWithBounds(
                 () -> new Rectangle(0, 0, width, groupTitle.getBounds().getMaxY() + contents.getBounds().height),
                 groupTitle,
-                Widgets.withTranslate(contents, () -> Matrix4f.createTranslateMatrix(0, groupTitle.getBounds().getMaxY(), 0))
+                Widgets.withTranslate(contents, () -> new Matrix4f().translate(0, groupTitle.getBounds().getMaxY(), 0))
         );
     }
     
@@ -156,7 +156,7 @@ public class ConfigGroupWidget {
     private static void recalculateHeight(List<WidgetComposite> widgets, IntConsumer setHeight) {
         int height = 0;
         for (WidgetComposite widget : widgets) {
-            widget.translation().load(Matrix4f.createTranslateMatrix(0, height, 0));
+            widget.translation().set(new Matrix4f().translate(0, height, 0));
             height = Math.max(height, widget.bounds().get().getMaxY());
         }
         setHeight.accept(height);

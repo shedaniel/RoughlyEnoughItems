@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.math.Matrix4f;
 import dev.architectury.utils.value.IntValue;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
@@ -32,6 +31,7 @@ import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.client.gui.GuiComponent;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -227,7 +227,7 @@ public class ListWidget {
         @Override
         protected Matrix4f translate() {
             Rectangle bounds = delegate().getBounds();
-            return Matrix4f.createTranslateMatrix(position.x - bounds.x, position.y - bounds.y, 0);
+            return new Matrix4f().translate(position.x - bounds.x, position.y - bounds.y, 0);
         }
     }
     

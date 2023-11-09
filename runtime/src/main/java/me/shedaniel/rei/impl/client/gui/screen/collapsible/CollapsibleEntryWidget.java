@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.screen.collapsible;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.animator.ProgressValueAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -45,7 +44,6 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.GameRenderer;
@@ -54,10 +52,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Supplier;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CollapsibleEntryWidget extends WidgetWithBounds {
@@ -104,20 +104,19 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
             } else {
                 this.configObject.disabledGroups.add(this.id);
             }
-        });
+        }, Supplier::get) {};
         this.toggleButton.setWidth(this.font.width(toggleButton.getMessage()) + 8);
         if (this.custom) {
             this.deleteButton = new Button(0, 0, 20, 20, Component.translatable("text.rei.collapsible.entries.delete"), button -> {
                 this.configObject.customGroups.removeIf(customEntry -> customEntry.id.equals(this.id));
                 markDirty.run();
-            });
+            }, Supplier::get) {};
             this.deleteButton.setWidth(this.font.width(deleteButton.getMessage()) + 8);
             this.configureButton = new Button(0, 0, 20, 20, Component.nullToEmpty(null), button -> {
                 CollapsibleEntriesScreen.setupCustom(this.id, this.component.getString(), new ArrayList<>(stacks), this.configObject, markDirty);
-            }) {
+            }, Supplier::get) {
                 @Override
-                protected void renderBg(PoseStack matrices, Minecraft client, int mouseX, int mouseY) {
-                    super.renderBg(matrices, client, mouseX, mouseY);
+                public void renderWidget(PoseStack matrices, int mouseX, int mouseY, float delta) {
                     RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
                     blit(matrices, x + 3, y + 3, 0, 0, 14, 14);
                 }
@@ -199,21 +198,21 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
         
         poses.pushPose();
         poses.translate(0, 0, 400);
-        this.toggleButton.x = bounds.getMaxX() - 4 - toggleButton.getWidth();
-        this.toggleButton.y = bounds.getMaxY() - 4 - toggleButton.getHeight();
+        this.toggleButton.setX(bounds.getMaxX() - 4 - toggleButton.getWidth());
+        this.toggleButton.setY(bounds.getMaxY() - 4 - toggleButton.getHeight());
         this.toggleButton.render(poses, mouseX, mouseY, delta);
         if (this.toggleButton.isMouseOver(mouseX, mouseY)) {
             ScreenOverlayImpl.getInstance().clearTooltips();
         }
         if (this.custom) {
-            this.deleteButton.x = toggleButton.x - 2 - deleteButton.getWidth();
-            this.deleteButton.y = bounds.getMaxY() - 4 - deleteButton.getHeight();
+            this.deleteButton.setX(toggleButton.getX() - 2 - deleteButton.getWidth());
+            this.deleteButton.setY(bounds.getMaxY() - 4 - deleteButton.getHeight());
             this.deleteButton.render(poses, mouseX, mouseY, delta);
             if (this.deleteButton.isMouseOver(mouseX, mouseY)) {
                 ScreenOverlayImpl.getInstance().clearTooltips();
             }
-            this.configureButton.x = deleteButton.x - 2 - configureButton.getWidth();
-            this.configureButton.y = bounds.getMaxY() - 4 - configureButton.getHeight();
+            this.configureButton.setX(deleteButton.getX() - 2 - configureButton.getWidth());
+            this.configureButton.setY(bounds.getMaxY() - 4 - configureButton.getHeight());
             this.configureButton.render(poses, mouseX, mouseY, delta);
             if (this.configureButton.isMouseOver(mouseX, mouseY)) {
                 ScreenOverlayImpl.getInstance().clearTooltips();
@@ -252,7 +251,6 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
             if (this.stacks.size() > rowSize * 3) {
                 Tesselator tesselator = Tesselator.getInstance();
                 BufferBuilder buffer = tesselator.getBuilder();
-                RenderSystem.disableTexture();
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
                 RenderSystem.setShader(GameRenderer::getPositionColorShader);
@@ -264,7 +262,6 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
                 buffer.vertex(matrix, this.x + this.width - 1, this.y + this.height - 40, 0.0F).color(0x00000000).endVertex();
                 buffer.vertex(matrix, this.x + 1, this.y + this.height - 40, 0.0F).color(0x00000000).endVertex();
                 tesselator.end();
-                RenderSystem.enableTexture();
                 RenderSystem.disableBlend();
             }
         }

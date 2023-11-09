@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.config.options.preview;
 
-import com.mojang.math.Matrix4f;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Point;
@@ -44,6 +43,7 @@ import me.shedaniel.rei.impl.client.gui.widget.basewidgets.PanelWidget;
 import net.minecraft.Util;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +65,7 @@ public class InterfacePreviewer {
                     base.getBounds().setBounds(2, 2, width - 4, height.getAsInt() - 4);
                     return base;
                 }),
-                Widgets.withTranslate(widget, () -> Matrix4f.createTranslateMatrix(0, (height.getAsInt() - widget.getBounds().height) / 2, 0))
+                Widgets.withTranslate(widget, () -> new Matrix4f().translate(0, (height.getAsInt() - widget.getBounds().height) / 2, 0))
         );
     }
     
