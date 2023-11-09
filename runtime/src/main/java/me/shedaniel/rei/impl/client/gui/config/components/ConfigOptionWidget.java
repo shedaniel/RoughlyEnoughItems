@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.config.components;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.ScissorsHandler;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -40,6 +39,7 @@ import me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
@@ -106,13 +106,13 @@ public class ConfigOptionWidget {
             }
             
             @Override
-            public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+            public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
                 this.previewHeight.update(delta);
                 if (ConfigUtils.isReducedMotion()) this.previewHeight.completeImmediately();
                 height[0] = stableHeight[0] + Math.round(this.previewHeight.value());
                 
                 for (int i = 0; i < split.size(); i++) {
-                    Minecraft.getInstance().font.draw(poses, split.get(i), 0, 12 + 12 * i, -1);
+                    graphics.drawString(font, split.get(i), 0, 12 + 12 * i, -1, false);
                 }
                 
                 if (hasPreview) {
@@ -122,12 +122,12 @@ public class ConfigOptionWidget {
                         this.previewLabel.setPoint(new Point(width, 12 + 12 * split.size() - 12));
                     }
                     
-                    this.previewLabel.render(poses, mouseX, mouseY, delta);
+                    this.previewLabel.render(graphics, mouseX, mouseY, delta);
                     
                     if (this.preview != null && this.previewHeight.value() > 0.1f) {
-                        ScissorsHandler.INSTANCE.scissor(MatrixUtils.transform(poses.last().pose(), new Rectangle(0, 24 + 12 * split.size() - (nextLinePreview ? 0 : 12), width, this.previewHeight.value())));
+                        ScissorsHandler.INSTANCE.scissor(MatrixUtils.transform(graphics.pose().last().pose(), new Rectangle(0, 24 + 12 * split.size() - (nextLinePreview ? 0 : 12), width, this.previewHeight.value())));
                         this.previewTranslation = new Matrix4f().translate(0, 12 + 12 * split.size(), 100);
-                        this.preview.render(poses, mouseX, mouseY, delta);
+                        this.preview.render(graphics, mouseX, mouseY, delta);
                         ScissorsHandler.INSTANCE.removeLastScissor();
                     }
                 }

@@ -51,6 +51,7 @@ import me.shedaniel.rei.impl.client.gui.widget.HoleWidget;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.TextFieldWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
@@ -137,20 +138,20 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
             this.widgets.add(HoleWidget.createBackground(new Rectangle(8 + sideWidth + 4, 32, width - 16 - sideWidth - 4, 20), () -> 0, 32));
             TextFieldWidget textField = new TextFieldWidget(new Rectangle(8 + sideWidth + 4 + 6, 32 + 6, width - 16 - sideWidth - 4 - 10, 12)) {
                 @Override
-                protected void renderSuggestion(PoseStack matrices, int x, int y) {
+                protected void renderSuggestion(GuiGraphics graphics, int x, int y) {
                     int color;
                     if (containsMouse(PointHelper.ofMouse()) || isFocused()) {
                         color = 0xddeaeaea;
                     } else {
                         color = -6250336;
                     }
-                    this.font.drawShadow(matrices, this.font.plainSubstrByWidth(this.getSuggestion(), this.getWidth()), x, y, color);
+                    graphics.drawString(this.font, this.font.plainSubstrByWidth(this.getSuggestion(), this.getWidth()), x, y, color);
                 }
             };
             textField.setHasBorder(false);
             textField.setMaxLength(9000);
             this.widgets.add(textField);
-            this.widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+            this.widgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
                 textField.setSuggestion(!textField.isFocused() && textField.getText().isEmpty() ? I18n.get("config.rei.texts.search_options") : null);
             }));
             this.widgets.add(ConfigSearchListWidget.create(this, this.categories, textField, new Rectangle(8, 32 + 20 + 4, width - 16, height - 32 - (32 + 20 + 4))));
@@ -213,13 +214,13 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
     }
     
     @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-        this.renderDirtBackground(poses);
-        super.render(poses, mouseX, mouseY, delta);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        this.renderDirtBackground(graphics);
+        super.render(graphics, mouseX, mouseY, delta);
         for (Widget widget : widgets) {
-            widget.render(poses, mouseX, mouseY, delta);
+            widget.render(graphics, mouseX, mouseY, delta);
         }
-        ScreenOverlayImpl.getInstance().lateRender(poses, mouseX, mouseY, delta);
+        ScreenOverlayImpl.getInstance().lateRender(graphics, mouseX, mouseY, delta);
     }
     
     @Override

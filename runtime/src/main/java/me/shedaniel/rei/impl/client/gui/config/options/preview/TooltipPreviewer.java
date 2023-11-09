@@ -53,7 +53,7 @@ import java.util.stream.Stream;
 public class TooltipPreviewer {
     public static WidgetWithBounds create(ConfigAccess access, int width, @Nullable IntSupplier height) {
         Rectangle bounds = new Rectangle();
-        return Widgets.withBounds(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+        return Widgets.withBounds(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             EntryStack<ItemStack> stack = EntryStacks.of(Items.OAK_PLANKS);
             boolean appendModNames = access.get(AllREIConfigOptions.APPEND_MOD_NAMES);
             boolean appendFavorites = access.get(AllREIConfigOptions.APPEND_FAVORITES_HINT);
@@ -72,17 +72,17 @@ public class TooltipPreviewer {
             int minHeight = components.stream().mapToInt(component -> components.get(0) == component && components.size() >= 2 ? 2 + 10 : 10).sum() + 4;
             
             int tX = Math.max(6, (width - minWidth) / 2), tWidth = Math.min(width - 12, minWidth), tY = 24 + 4, tHeight = Math.min(minHeight, height == null ? 100000 : height.getAsInt() - tY - 4);
-            matrices.pushPose();
-            matrices.translate(0, height == null ? 4 : Math.max(0, (height.getAsInt() - (tY + tHeight)) / 2), 400);
+            graphics.pose().pushPose();
+            graphics.pose().translate(0, height == null ? 4 : Math.max(0, (height.getAsInt() - (tY + tHeight)) / 2), 400);
             bounds.setSize(width, height == null ? tY + tHeight + 12 : height.getAsInt());
-            stack.getRenderer().render(stack, matrices, new Rectangle(width / 2 - 12, 0, 24, 24), mouseX, mouseY, delta);
+            stack.getRenderer().render(stack, graphics, new Rectangle(width / 2 - 12, 0, 24, 24), mouseX, mouseY, delta);
             
-            matrices.translate(0, 0, -400);
+            graphics.pose().translate(0, 0, -400);
             Tesselator tesselator = Tesselator.getInstance();
             BufferBuilder bufferBuilder = tesselator.getBuilder();
             RenderSystem.setShader(GameRenderer::getPositionColorShader);
             bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-            Matrix4f matrix4f = matrices.last().pose();
+            Matrix4f matrix4f = graphics.pose().last().pose();
             fillGradient(matrix4f, bufferBuilder, tX - 3, tY - 4, tX + tWidth + 3, tY - 3, 400, -267386864, -267386864);
             fillGradient(matrix4f, bufferBuilder, tX - 3, tY + tHeight + 3, tX + tWidth + 3, tY + tHeight + 4, 400, -267386864, -267386864);
             fillGradient(matrix4f, bufferBuilder, tX - 3, tY - 3, tX + tWidth + 3, tY + tHeight + 3, 400, -267386864, -267386864);
@@ -98,14 +98,14 @@ public class TooltipPreviewer {
             BufferUploader.drawWithShader(bufferBuilder.end());
             RenderSystem.disableBlend();
             
-            matrices.translate(0, 0, 400);
+            graphics.pose().translate(0, 0, 400);
             
             for (int i = 0; i < components.size(); i++) {
-                Minecraft.getInstance().font.draw(matrices, components.get(i), tX + 2, tY + 2, -1);
+                graphics.drawString(Minecraft.getInstance().font, components.get(i), tX + 2, tY + 2, -1, false);
                 tY += 10 + (i == 0 ? 2 : 0);
             }
             
-            matrices.popPose();
+            graphics.pose().popPose();
         }), bounds);
     }
     

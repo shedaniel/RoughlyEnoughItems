@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.config.options.configure;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.FloatingRectangle;
@@ -38,6 +37,7 @@ import me.shedaniel.rei.impl.client.gui.config.options.OptionValueEntry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.screens.Screen;
@@ -268,19 +268,19 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
         }
         
         @Override
-        public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             this.innerAlphaAnimator.setTarget(this.innerAlphaAnimator.target() + (1.0F - this.innerAlphaAnimator.target()) * 0.06F);
             this.innerAlphaAnimator.update(delta);
-            this.renderBackground(poses);
+            this.renderBackground(graphics);
             Rectangle panelBounds = new Rectangle(this.width * 3 / 10, this.height * 4 / 40, this.width * 4 / 10, this.height * 32 / 40);
-            Widgets.createCategoryBase(panelBounds).render(poses, mouseX, mouseY, delta);
+            Widgets.createCategoryBase(panelBounds).render(graphics, mouseX, mouseY, delta);
             int y = panelBounds.y + 6;
-            this.font.draw(poses, translatable("config.rei.options.layout.boundaries.desc.configure").withStyle(ChatFormatting.UNDERLINE), panelBounds.x + 6, y, 0xff404040);
+            graphics.drawString(this.font, translatable("config.rei.options.layout.boundaries.desc.configure").withStyle(ChatFormatting.UNDERLINE), panelBounds.x + 6, y, 0xff404040, false);
             y += 14;
-            this.font.draw(poses, translatable("config.rei.options.layout.boundaries.desc.horizontal"), panelBounds.x + 6, y, 0xff404040);
+            graphics.drawString(this.font, translatable("config.rei.options.layout.boundaries.desc.horizontal"), panelBounds.x + 6, y, 0xff404040);
             this.horizontalLimit.setX(panelBounds.x + 6);
             this.horizontalLimit.setY(y + 10);
-            this.font.draw(poses, translatable("config.rei.options.layout.boundaries.desc.limit_by_percentage"), horizontalLimit.getX() + 24, horizontalLimit.getY() + 6, 0xff404040);
+            graphics.drawString(this.font, translatable("config.rei.options.layout.boundaries.desc.limit_by_percentage"), horizontalLimit.getX() + 24, horizontalLimit.getY() + 6, 0xff404040, false);
             y += 32;
             this.horizontalSlider.setX(panelBounds.x + 6);
             this.horizontalSlider.setY(y);
@@ -291,10 +291,10 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
             this.horizontalAlignmentSlider.setWidth(panelBounds.width - 12);
             y += 28;
             
-            this.font.draw(poses, translatable("config.rei.options.layout.boundaries.desc.vertical"), panelBounds.x + 6, y, 0xff404040);
+            graphics.drawString(this.font, translatable("config.rei.options.layout.boundaries.desc.vertical"), panelBounds.x + 6, y, 0xff404040, false);
             this.verticalLimit.setX(panelBounds.x + 6);
             this.verticalLimit.setY(y + 10);
-            this.font.draw(poses, translatable("config.rei.options.layout.boundaries.desc.limit_by_percentage"), verticalLimit.getX() + 24, verticalLimit.getY() + 6, 0xff404040);
+            graphics.drawString(this.font, translatable("config.rei.options.layout.boundaries.desc.limit_by_percentage"), verticalLimit.getX() + 24, verticalLimit.getY() + 6, 0xff404040, false);
             y += 32;
             this.verticalSlider.setX(panelBounds.x + 6);
             this.verticalSlider.setY(y);
@@ -304,11 +304,11 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
             this.verticalAlignmentSlider.setY(y);
             this.verticalAlignmentSlider.setWidth(panelBounds.width - 12);
             
-            super.render(poses, mouseX, mouseY, delta);
-            renderPreview(poses, panelBounds, delta);
+            super.render(graphics, mouseX, mouseY, delta);
+            renderPreview(graphics, panelBounds, delta);
         }
         
-        private void renderPreview(PoseStack poses, Rectangle panelBounds, float delta) {
+        private void renderPreview(GuiGraphics graphics, Rectangle panelBounds, float delta) {
             int entrySize = Mth.ceil(18 * access.get(AllREIConfigOptions.ZOOM));
             Rectangle overlayBounds;
             DisplayPanelLocation location = access.get(AllREIConfigOptions.LOCATION);
@@ -343,7 +343,7 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
             }) || isReducedMotion() ? 0 : 200);
             overlayBounds = this.boundsAnimator.value().getBounds();
             
-            this.fillGradient(poses, overlayBounds.x, overlayBounds.y, overlayBounds.getMaxX(), overlayBounds.getMaxY(), 0x80fff0ad, 0x80fff0ad);
+            graphics.fillGradient(overlayBounds.x, overlayBounds.y, overlayBounds.getMaxX(), overlayBounds.getMaxY(), 0x80fff0ad, 0x80fff0ad);
             
             int width = Math.max(Mth.floor((overlayBounds.width - 2) / (float) entrySize), 1);
             int height = Math.max(Mth.floor((overlayBounds.height - 2) / (float) entrySize), 1);
@@ -353,7 +353,7 @@ public enum PanelBoundariesConfiguration implements OptionValueEntry.Configurato
                 for (int j = 0; j < height; j++) {
                     int slotX = innerBounds.x + i * entrySize + 1;
                     int slotY = innerBounds.y + j * entrySize + 1;
-                    this.fillGradient(poses, slotX, slotY, slotX + entrySize - 2, slotY + entrySize - 2, color, color);
+                    graphics.fillGradient(slotX, slotY, slotX + entrySize - 2, slotY + entrySize - 2, color, color);
                 }
             }
         }

@@ -192,11 +192,11 @@ public class DisplayCompositeWidget extends DelegateWidgetWithBounds implements 
             if (bounds.width <= Math.max(18, this.bounds.width / 2 - 6) && bounds.height <= Math.max(18, this.bounds.height / 2 - 6) && this.onFavoritesRegion) {
                 this.panel.yTextureOffset(RecipeBorderType.LIGHTER.getYOffset());
                 this.panel.getBounds().setBounds(bounds);
-                this.panel.render(matrices, mouseX, mouseY, delta);
+                this.panel.render(graphics, mouseX, mouseY, delta);
                 graphics.pose().pushPose();
                 graphics.pose().translate(0, 0.5, 0);
                 this.slot.getBounds().setBounds(bounds.getCenterX() - 7, bounds.getCenterY() - 7, 14, 14);
-                this.slot.render(matrices, mouseX, mouseY, delta);
+                this.slot.render(graphics, mouseX, mouseY, delta);
                 graphics.pose().popPose();
             } else {
                 this.panel.yTextureOffset(ConfigObject.getInstance().getRecipeBorderType().getYOffset());
@@ -205,12 +205,12 @@ public class DisplayCompositeWidget extends DelegateWidgetWithBounds implements 
                 graphics.pose().scale(bounds.width / (float) this.bounds.getWidth(), bounds.height / (float) this.bounds.getHeight(), 1);
                 graphics.pose().translate(-this.bounds.getX(), -this.bounds.getY(), 0);
                 this.panel.getBounds().setBounds(this.bounds);
-                this.panel.render(matrices, mouseX, mouseY, delta);
+                this.panel.render(graphics, mouseX, mouseY, delta);
                 graphics.pose().popPose();
                 graphics.pose().translate(bounds.getX(), bounds.getY(), 1);
                 graphics.pose().scale(bounds.width / (float) this.bounds.getWidth(), bounds.height / (float) this.bounds.getHeight(), 1);
                 graphics.pose().translate(-this.bounds.getX(), -this.bounds.getY(), 0);
-                widget.render(matrices, -1000, -1000, delta);
+                widget.render(graphics, -1000, -1000, delta);
             }
             graphics.pose().popPose();
         }

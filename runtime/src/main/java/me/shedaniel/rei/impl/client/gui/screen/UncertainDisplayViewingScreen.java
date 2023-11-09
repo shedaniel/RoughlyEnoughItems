@@ -138,9 +138,9 @@ public class UncertainDisplayViewingScreen extends Screen {
         graphics.drawCenteredString(this.font, Component.translatable("text.rei.recipe_screen_type.selection"), this.width / 2, 20, 16777215);
         ScissorsHandler.INSTANCE.scissor(new Rectangle(0, 20 + font.lineHeight + 2, width, height - 42));
         if (showTips) {
-            float i = 32;
+            int i = 32;
             for (FormattedCharSequence s : this.font.split(Component.translatable("text.rei.recipe_screen_type.selection.sub").withStyle(ChatFormatting.GRAY), width - 30)) {
-                graphics.drawString(font, s, width / 2 - font.width(s) / 2, i, -1);
+                graphics.drawString(font, s, width / 2 - font.width(s) / 2, i, -1, false);
                 i += 10;
             }
         }

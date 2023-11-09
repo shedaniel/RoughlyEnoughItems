@@ -49,7 +49,7 @@ public class AccessibilityDisplayPreviewer {
                 Widgets.scissored(new Rectangle(1, 1, width - 2, 34 + 17), Widgets.createCategoryBase(new Rectangle(width / 2 - 28 * 3 / 2 - 10, 30 + 17, 28 * 3 + 20, 28))),
                 Widgets.delegate(() -> MoreObjects.firstNonNull(selected[0] < 4 ? tabs[selected[0]] : null, Widgets.noOp())),
                 Widgets.delegate(() -> MoreObjects.firstNonNull(buttons[0], Widgets.noOp())),
-                Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+                Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
                     boolean largerTabs = access.get(AllREIConfigOptions.LARGER_TABS);
                     boolean largerArrowButtons = access.get(AllREIConfigOptions.LARGER_ARROW_BUTTONS);
                     int tabSize = largerTabs ? 28 : 24;

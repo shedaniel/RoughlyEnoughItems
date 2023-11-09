@@ -276,22 +276,22 @@ public class ConfigureCategoriesScreen extends Screen {
             {
                 Component subtitle = Component.translatable("config.roughlyenoughitems.configureCategories.visibility." + shown)
                         .withStyle(shown ? ChatFormatting.GREEN : ChatFormatting.RED);
-                int i = client.font.drawShadow(matrices, subtitle.getVisualOrderText(), xPos, y + 22, 8421504);
+                int i = graphics.drawString(client.font, subtitle.getVisualOrderText(), xPos, y + 22, 8421504);
                 visibilityToggleButton.getPoint().setLocation(i + 3, y + 22);
-                visibilityToggleButton.render(matrices, mouseX, mouseY, delta);
+                visibilityToggleButton.render(graphics, mouseX, mouseY, delta);
             }
             if (shown) {
                 Component subtitle = Component.translatable("config.roughlyenoughitems.filtering.filteringQuickCraftCategories.configure." + filteringQuickCraftCategories.getOrDefault(configuration.getCategoryIdentifier(), configuration.isQuickCraftingEnabledByDefault()))
                         .withStyle(ChatFormatting.GRAY);
-                int i = client.font.drawShadow(matrices, subtitle.getVisualOrderText(), xPos, y + 32, 8421504);
+                int i = graphics.drawString(client.font, subtitle.getVisualOrderText(), xPos, y + 32, 8421504);
                 quickCraftToggleButton.getPoint().setLocation(i + 3, y + 32);
-                quickCraftToggleButton.render(matrices, mouseX, mouseY, delta);
+                quickCraftToggleButton.render(graphics, mouseX, mouseY, delta);
             } else {
                 quickCraftToggleButton.getPoint().setLocation(-12390, -12390);
             }
             upButton.setX(x + entryWidth - 20);
             upButton.setY(y + entryHeight / 2 - 21);
-            upButton.render(matrices, mouseX, mouseY, delta);
+            upButton.render(graphics, mouseX, mouseY, delta);
             downButton.setX(x + entryWidth - 20);
             downButton.setY(y + entryHeight / 2 + 1);
             downButton.render(graphics, mouseX, mouseY, delta);

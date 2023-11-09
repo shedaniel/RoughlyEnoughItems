@@ -30,7 +30,6 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
-import net.minecraft.client.gui.GuiComponent;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
@@ -153,7 +152,7 @@ public class ListWidget {
         
         int[] i = {0};
         List<CellWidget<T>> wrapped = CollectionUtils.map(entries, cell -> new CellWidget<>(innerBounds, i[0]++, cell, selected, entries, isSelectable));
-        Widget update = Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+        Widget update = Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             if (calculateTotalHeightDynamically) {
                 height[0] = collectTotalHeight(entries, gap);
                 innerBounds.width = height[0] > bounds.getHeight() ? bounds.width - 6 : bounds.width;
@@ -169,9 +168,9 @@ public class ListWidget {
                 CellWidget<T> cellWidget = wrapped.get(selected.getAsInt());
                 int x1 = innerBounds.x, x2 = innerBounds.getMaxX();
                 boolean contains = new Rectangle(x1 - 1, cellWidget.position.y - 1, x2 - x1 + 2, cellWidget.getBounds().height + 2).contains(mouseX, mouseY);
-                GuiComponent.fill(matrices, x1 - 1, cellWidget.position.y - 1, x2 + 1,
+                graphics.fill(x1 - 1, cellWidget.position.y - 1, x2 + 1,
                         cellWidget.position.y + cellWidget.getBounds().height + 1, contains ? 0xFFD0D0D0 : 0xFF8F8F8F);
-                GuiComponent.fill(matrices, x1, cellWidget.position.y, x2,
+                graphics.fill(x1, cellWidget.position.y, x2,
                         cellWidget.position.y + cellWidget.getBounds().height, 0xFF000000);
             }
         });

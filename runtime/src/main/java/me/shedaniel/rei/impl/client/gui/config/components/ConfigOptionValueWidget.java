@@ -42,6 +42,7 @@ import me.shedaniel.rei.impl.client.gui.modules.entries.ToggleMenuEntry;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -90,7 +91,7 @@ public class ConfigOptionValueWidget {
         Label label = Widgets.createLabel(new Point(), text[0]).rightAligned()
                 .color(0xFFE0E0E0)
                 .hoveredColor(0xFFE0E0E0)
-                .onRender((poses, l) -> {
+                .onRender((graphics, l) -> {
                     if (MatrixUtils.transform(matrix[0], l.getBounds()).contains(PointHelper.ofMouse())) {
                         l.setMessage(text[0].copy().withStyle(ChatFormatting.UNDERLINE));
                     } else {
@@ -113,7 +114,7 @@ public class ConfigOptionValueWidget {
         
         return Widgets.concatWithBounds(() -> new Rectangle(-label.getBounds().width, 0, label.getBounds().width + 8, 14),
                 label,
-                Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> matrix[0] = matrices.last().pose()),
+                Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> matrix[0] = graphics.pose().last().pose()),
                 Widgets.withTranslate(Widgets.createTexturedWidget(new ResourceLocation("roughlyenoughitems:textures/gui/config/selector.png"),
                         new Rectangle(1, 1, 4, 6), 0, 0, 1, 1, 1, 1), 0, 0.5, 0)
         );
@@ -151,9 +152,9 @@ public class ConfigOptionValueWidget {
             access.closeMenu();
             access.focusKeycode((CompositeOption<ModifierKeyCode>) option);
         });
-        BiConsumer<PoseStack, Label> render = label.getOnRender();
-        label.onRender((poses, $) -> {
-            render.accept(poses, $);
+        BiConsumer<GuiGraphics, Label> render = label.getOnRender();
+        label.onRender((graphics, $) -> {
+            render.accept(graphics, $);
             setText.accept(((ModifierKeyCode) access.get(option)).getLocalizedName());
         });
     }

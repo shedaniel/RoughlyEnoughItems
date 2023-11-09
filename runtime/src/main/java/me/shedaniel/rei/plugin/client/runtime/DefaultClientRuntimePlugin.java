@@ -361,20 +361,20 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
             for (EntryIngredient ingredient : display.getOutputEntries()) {
                 slot.entries(ingredient);
             }
-            return new AbstractRenderer() {
+            return new Renderer() {
                 @Override
-                public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                    matrices.pushPose();
-                    matrices.translate(bounds.getX(), bounds.getY(), 1);
-                    matrices.scale(bounds.width / (float) panel.getBounds().getWidth(), bounds.height / (float) panel.getBounds().getHeight(), 1);
-                    panel.render(matrices, mouseX, mouseY, delta);
-                    matrices.popPose();
+                public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                    graphics.pose().pushPose();
+                    graphics.pose().translate(bounds.getX(), bounds.getY(), 1);
+                    graphics.pose().scale(bounds.width / (float) panel.getBounds().getWidth(), bounds.height / (float) panel.getBounds().getHeight(), 1);
+                    panel.render(graphics, mouseX, mouseY, delta);
+                    graphics.pose().popPose();
                     if (bounds.width > 4 && bounds.height > 4) {
-                        matrices.pushPose();
-                        matrices.translate(0, 0.5, 0);
+                        graphics.pose().pushPose();
+                        graphics.pose().translate(0, 0.5, 0);
                         slot.getBounds().setBounds(bounds.x + 2, bounds.y + 2, bounds.width - 4, bounds.height - 4);
-                        slot.render(matrices, mouseX, mouseY, delta);
-                        matrices.popPose();
+                        slot.render(graphics, mouseX, mouseY, delta);
+                        graphics.pose().popPose();
                     }
                 }
                 

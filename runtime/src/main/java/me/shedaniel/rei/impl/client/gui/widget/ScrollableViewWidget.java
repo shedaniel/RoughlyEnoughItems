@@ -30,6 +30,7 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import org.joml.Matrix4f;
 
@@ -63,9 +64,9 @@ public class ScrollableViewWidget {
         
         widgets.add(Widgets.scissored(scrollingRef[0].getScissorBounds(), Widgets.withTranslate(inner,
                 () -> new Matrix4f().translate(0, -scrollingRef[0].scrollAmountInt(), 0))));
-        widgets.add(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+        widgets.add(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             scrollingRef[0].updatePosition(delta);
-            scrollingRef[0].renderScrollBar();
+            scrollingRef[0].renderScrollBar(graphics);
         }));
         widgets.add(createScrollerWidget(bounds, scrollingRef[0]));
         
@@ -75,7 +76,7 @@ public class ScrollableViewWidget {
     private static Widget createScrollerWidget(Rectangle bounds, ScrollingContainer scrolling) {
         return new Widget() {
             @Override
-            public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+            public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             }
             
             @Override

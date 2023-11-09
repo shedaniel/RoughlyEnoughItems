@@ -26,7 +26,10 @@ package me.shedaniel.rei.impl.client.gui.screen.collapsible;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
 import me.shedaniel.math.Rectangle;
@@ -49,7 +52,7 @@ import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -166,7 +169,7 @@ public class CollapsibleEntriesScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (this.dirty) {
             this.listWidget.clear();
             
@@ -177,16 +180,16 @@ public class CollapsibleEntriesScreen extends Screen {
             this.dirty = false;
         }
         
-        this.listWidget.render(poses, mouseX, mouseY, delta);
-        super.render(poses, mouseX, mouseY, delta);
-        this.font.drawShadow(poses, this.title, this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
+        this.listWidget.render(graphics, mouseX, mouseY, delta);
+        super.render(graphics, mouseX, mouseY, delta);
+        graphics.drawString(this.font, this.title, Math.round(this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
         
         if (ConfigObject.getInstance().doDebugRenderTimeRequired()) {
             Component debugText = Component.literal(String.format("%s fps", minecraft.fpsString.split(" ")[0]));
             int stringWidth = font.width(debugText);
-            fillGradient(poses, minecraft.screen.width - stringWidth - 2, 32, minecraft.screen.width, 32 + font.lineHeight + 2, -16777216, -16777216);
+            graphics.fillGradient(minecraft.screen.width - stringWidth - 2, 32, minecraft.screen.width, 32 + font.lineHeight + 2, -16777216, -16777216);
             MultiBufferSource.BufferSource immediate = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-            Matrix4f matrix = poses.last().pose();
+            Matrix4f matrix = graphics.pose().last().pose();
             font.drawInBatch(debugText.getVisualOrderText(), minecraft.screen.width - stringWidth, 32 + 2, -1, false, matrix, immediate, Font.DisplayMode.NORMAL, 0, 15728880);
             immediate.endBatch();
         }
@@ -242,17 +245,17 @@ public class CollapsibleEntriesScreen extends Screen {
         }
         
         @Override
-        public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             this.scroller.updatePosition(delta);
             
             Tesselator tesselator = Tesselator.getInstance();
             BufferBuilder buffer = tesselator.getBuilder();
-            DynamicErrorFreeEntryListWidget.renderBackBackground(poses, buffer, tesselator,
-                    GuiComponent.BACKGROUND_LOCATION, 0, this.top, this.width, this.height, 0, 32);
+            DynamicErrorFreeEntryListWidget.renderBackBackground(graphics, buffer, tesselator,
+                    Screen.BACKGROUND_LOCATION, 0, this.top, this.width, this.height, 0, 32);
             RenderSystem.enableBlend();
             RenderSystem.blendFuncSeparate(770, 771, 0, 1);
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-            Matrix4f matrix = poses.last().pose();
+            Matrix4f matrix = graphics.pose().last().pose();
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             buffer.vertex(matrix, 0, this.top + 4, 0.0F).uv(0, 1).color(0x00000000).endVertex();
             buffer.vertex(matrix, this.width, this.top + 4, 0.0F).uv(1, 1).color(0x00000000).endVertex();
@@ -261,7 +264,7 @@ public class CollapsibleEntriesScreen extends Screen {
             tesselator.end();
             RenderSystem.disableBlend();
             
-            try (CloseableScissors scissors = scissor(poses, new Rectangle(0, this.top, this.width - 6, this.height - this.top))) {
+            try (CloseableScissors scissors = scissor(graphics, new Rectangle(0, this.top, this.width - 6, this.height - this.top))) {
                 int entryWidth = (this.width - 12 - 6 - PADDING) / this.columns.length - PADDING;
                 for (int i = 0; i < this.columns.length; i++) {
                     int x = 6 + PADDING + i * (entryWidth + PADDING);
@@ -269,17 +272,17 @@ public class CollapsibleEntriesScreen extends Screen {
                     for (CollapsibleEntryWidget widget : this.columns[i]) {
                         widget.setPosition(x, y);
                         widget.setWidth(entryWidth);
-                        widget.render(poses, mouseX, mouseY, delta);
+                        widget.render(graphics, mouseX, mouseY, delta);
                         y += widget.getHeight() + PADDING;
                     }
                 }
             }
             
-            this.scroller.renderScrollBar();
+            this.scroller.renderScrollBar(graphics);
             
-            DynamicErrorFreeEntryListWidget.renderBackBackground(poses, buffer, tesselator,
-                    GuiComponent.BACKGROUND_LOCATION, 0, 0, this.width, this.top, 0, 64);
-            ScreenOverlayImpl.getInstance().lateRender(poses, mouseX, mouseY, delta);
+            DynamicErrorFreeEntryListWidget.renderBackBackground(graphics, buffer, tesselator,
+                    Screen.BACKGROUND_LOCATION, 0, 0, this.width, this.top, 0, 64);
+            ScreenOverlayImpl.getInstance().lateRender(graphics, mouseX, mouseY, delta);
         }
         
         private int getMaxScrollDist() {

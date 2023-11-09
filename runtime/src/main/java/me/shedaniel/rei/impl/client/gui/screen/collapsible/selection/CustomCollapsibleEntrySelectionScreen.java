@@ -47,6 +47,7 @@ import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
@@ -214,8 +215,8 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
     }
     
     @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
-        renderHoleBackground(poses, 0, height, 32, 255, 255);
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        renderHoleBackground(graphics.pose(), 0, height, 32, 255, 255);
         updateSelectionCache();
         Rectangle bounds = getBounds();
         tooltip = null;
@@ -238,17 +239,17 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
             manager.add(entry);
             nextIndex++;
         }
-        manager.render(poses, mouseX, mouseY, delta);
+        manager.render(graphics, mouseX, mouseY, delta);
         updatePosition(delta);
-        scrolling.renderScrollBar(0, 1.0F, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8F : 1F);
-        poses.pushPose();
-        poses.translate(0, 0, 300);
-        this.searchField.render(poses, mouseX, mouseY, delta);
-        this.selectAllButton.render(poses, mouseX, mouseY, delta);
-        this.selectNoneButton.render(poses, mouseX, mouseY, delta);
-        this.addButton.render(poses, mouseX, mouseY, delta);
-        this.removeButton.render(poses, mouseX, mouseY, delta);
-        poses.popPose();
+        scrolling.renderScrollBar(graphics, 0, 1.0F, REIRuntime.getInstance().isDarkThemeEnabled() ? 0.8F : 1F);
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 300);
+        this.searchField.render(graphics, mouseX, mouseY, delta);
+        this.selectAllButton.render(graphics, mouseX, mouseY, delta);
+        this.selectNoneButton.render(graphics, mouseX, mouseY, delta);
+        this.addButton.render(graphics, mouseX, mouseY, delta);
+        this.removeButton.render(graphics, mouseX, mouseY, delta);
+        graphics.pose().popPose();
         
         ScissorsHandler.INSTANCE.removeLastScissor();
         Tesselator tesselator = Tesselator.getInstance();
@@ -256,7 +257,7 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         RenderSystem.enableBlend();
         RenderSystem.blendFuncSeparate(770, 771, 0, 1);
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        Matrix4f matrix = poses.last().pose();
+        Matrix4f matrix = graphics.pose().last().pose();
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
         buffer.vertex(matrix, 0, bounds.y + 4, 0.0F).uv(0.0F, 1.0F).color(0, 0, 0, 0).endVertex();
         buffer.vertex(matrix, width, bounds.y + 4, 0.0F).uv(1.0F, 1.0F).color(0, 0, 0, 0).endVertex();
@@ -264,17 +265,17 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         buffer.vertex(matrix, 0, bounds.y, 0.0F).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
         tesselator.end();
         RenderSystem.disableBlend();
-        renderHoleBackground(poses, 0, bounds.y, 64, 255, 255);
+        renderHoleBackground(graphics.pose(), 0, bounds.y, 64, 255, 255);
         
-        this.backButton.render(poses, mouseX, mouseY, delta);
+        this.backButton.render(graphics, mouseX, mouseY, delta);
         
         if (tooltip != null) {
-            ScreenOverlayImpl.getInstance().renderTooltip(poses, tooltip);
+            ScreenOverlayImpl.getInstance().renderTooltip(graphics, tooltip);
         }
         
-        this.font.drawShadow(poses, this.title.getVisualOrderText(), this.width / 2.0F - this.font.width(this.title) / 2.0F, 12.0F, -1);
+        graphics.drawString(this.font, this.title.getVisualOrderText(), Math.round(this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
         Component hint = Component.translatable("config.roughlyenoughitems.filteringRulesScreen.hint").withStyle(ChatFormatting.YELLOW);
-        this.font.drawShadow(poses, hint, this.width - this.font.width(hint) - 15, 12.0F, -1);
+        graphics.drawString(this.font, hint, this.width - this.font.width(hint) - 15, 12, -1);
     }
     
     private Predicate<Rectangle> getSelection() {
@@ -476,11 +477,11 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         }
         
         @Override
-        protected void drawExtra(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        protected void drawExtra(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             if (isSelected()) {
                 Rectangle bounds = getBounds();
                 RenderSystem.disableDepthTest();
-                fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0x896b70fa, 0x896b70fa);
+                graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0x896b70fa, 0x896b70fa);
                 RenderSystem.enableDepthTest();
             }
         }
@@ -498,17 +499,17 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         }
         
         @Override
-        protected void drawBackground(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        protected void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             if (isFiltered()) {
                 Rectangle bounds = getBounds();
                 RenderSystem.disableDepthTest();
-                fillGradient(matrices, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0xff873e23, 0xff873e23);
+                graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0xff873e23, 0xff873e23);
                 RenderSystem.enableDepthTest();
             }
         }
         
         @Override
-        protected void queueTooltip(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        protected void queueTooltip(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             if (searchField.containsMouse(mouseX, mouseY))
                 return;
             Tooltip tooltip = getCurrentTooltip(TooltipContext.of(new Point(mouseX, mouseY)));

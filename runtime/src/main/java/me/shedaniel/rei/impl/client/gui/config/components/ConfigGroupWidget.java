@@ -37,7 +37,6 @@ import me.shedaniel.rei.impl.client.gui.config.options.preview.AccessibilityDisp
 import me.shedaniel.rei.impl.client.gui.config.options.preview.InterfacePreviewer;
 import me.shedaniel.rei.impl.client.gui.config.options.preview.TooltipPreviewer;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
-import net.minecraft.client.gui.GuiComponent;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -110,16 +109,16 @@ public class ConfigGroupWidget {
             widgets.add(WidgetComposite.of(ConfigOptionWidget.create(access, option, width)));
             
             if (entry.getOptions().get(entry.getOptions().size() - 1) != option) {
-                Widget separator = Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+                Widget separator = Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
                     for (int x = 0; x <= width; x += 4) {
-                        GuiComponent.fill(matrices, Math.min(width, x), 1, Math.min(width, x + 2), 2, 0xFF757575);
+                        graphics.fill(Math.min(width, x), 1, Math.min(width, x + 2), 2, 0xFF757575);
                     }
                 });
                 widgets.add(WidgetComposite.of(Widgets.withBounds(separator, new Rectangle(0, 0, 1, 7))));
             }
         }
         
-        widgets.add(WidgetComposite.ofNonAccounting(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+        widgets.add(WidgetComposite.ofNonAccounting(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             recalculateHeight(widgets, i -> height[0] = i);
         })));
         recalculateHeight(widgets, i -> height[0] = i);
@@ -172,10 +171,10 @@ public class ConfigGroupWidget {
     }
     
     private static Widget createBackgroundSlot(Supplier<Rectangle> bounds) {
-        return Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+        return Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             Rectangle rectangle = bounds.get();
-            GuiComponent.fill(matrices, rectangle.x, rectangle.y, rectangle.getMaxX(), rectangle.getMaxY(), 0xFF333333);
-            GuiComponent.fill(matrices, rectangle.x + 1, rectangle.y + 1, rectangle.getMaxX() - 1, rectangle.getMaxY() - 1, 0xFF000000);
+            graphics.fill(rectangle.x, rectangle.y, rectangle.getMaxX(), rectangle.getMaxY(), 0xFF333333);
+            graphics.fill(rectangle.x + 1, rectangle.y + 1, rectangle.getMaxX() - 1, rectangle.getMaxY() - 1, 0xFF000000);
         });
     }
 }

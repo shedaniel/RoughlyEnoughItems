@@ -29,6 +29,7 @@ import me.shedaniel.rei.api.client.gui.widgets.CloseableScissors;
 import me.shedaniel.rei.api.client.gui.widgets.DelegateWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
+import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.function.Supplier;
 
@@ -46,15 +47,15 @@ public class ScissoredWidget extends DelegateWidget {
     }
     
     @Override
-    public void render(PoseStack poseStack, int mouseX, int mouseY, float delta) {
-        try (CloseableScissors scissors = scissor(poseStack, this.bounds.get())) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        try (CloseableScissors scissors = scissor(graphics, this.bounds.get())) {
             boolean containsMouse = this.delegate() instanceof WidgetWithBounds withBounds ? withBounds.containsMouse(mouseX, mouseY)
                     : this.bounds.get().contains(mouseX, mouseY);
             
             if (containsMouse) {
-                super.render(poseStack, mouseX, mouseY, delta);
+                super.render(graphics, mouseX, mouseY, delta);
             } else {
-                super.render(poseStack, Integer.MAX_VALUE, Integer.MAX_VALUE, delta);
+                super.render(graphics, Integer.MAX_VALUE, Integer.MAX_VALUE, delta);
             }
         }
     }

@@ -33,6 +33,7 @@ import me.shedaniel.rei.impl.client.gui.config.options.OptionCategory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
@@ -47,8 +48,8 @@ public class ConfigCategoryEntryWidget {
                 .leftAligned();
         Font font = Minecraft.getInstance().font;
         MutableComponent description = category.getDescription().copy().withStyle(style -> style.withColor(0xFF909090));
-        Widget descriptionLabel = Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
-            renderTextScrolling(matrices, description, 0, 0, (int) ((width - 21 - 6) / 0.75), 0xFF909090);
+        Widget descriptionLabel = Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
+            renderTextScrolling(graphics, description, 0, 0, (int) ((width - 21 - 6) / 0.75), 0xFF909090);
         });
         Rectangle bounds = new Rectangle(0, 0, label.getBounds().getMaxX(), hasDescription ? 24 : 7 * 3);
         return Widgets.concatWithBounds(
@@ -69,25 +70,25 @@ public class ConfigCategoryEntryWidget {
         );
     }
     
-    private static void renderTextScrolling(PoseStack poses, Component text, int x, int y, int width, int color) {
-        renderTextScrolling(poses, text.getVisualOrderText(), x, y, width, color);
+    private static void renderTextScrolling(GuiGraphics graphics, Component text, int x, int y, int width, int color) {
+        renderTextScrolling(graphics, text.getVisualOrderText(), x, y, width, color);
     }
     
-    private static void renderTextScrolling(PoseStack poses, FormattedCharSequence text, int x, int y, int width, int color) {
-        try (CloseableScissors scissors = scissor(poses, new Rectangle(x, y, width, y + 9))) {
+    private static void renderTextScrolling(GuiGraphics graphics, FormattedCharSequence text, int x, int y, int width, int color) {
+        try (CloseableScissors scissors = scissor(graphics, new Rectangle(x, y, width, y + 9))) {
             Font font = Minecraft.getInstance().font;
             int textWidth = font.width(text);
-            textWidth = MatrixUtils.transform(MatrixUtils.inverse(poses.last().pose()), new Rectangle(0, 0, textWidth, 100)).width;
-            width = MatrixUtils.transform(MatrixUtils.inverse(poses.last().pose()), new Rectangle(0, 0, width, 100)).width;
+            textWidth = MatrixUtils.transform(MatrixUtils.inverse(graphics.pose().last().pose()), new Rectangle(0, 0, textWidth, 100)).width;
+            width = MatrixUtils.transform(MatrixUtils.inverse(graphics.pose().last().pose()), new Rectangle(0, 0, width, 100)).width;
             if (textWidth > width && !ConfigUtils.isReducedMotion()) {
-                poses.pushPose();
+                graphics.pose().pushPose();
                 float textX = (System.currentTimeMillis() % ((textWidth + 10) * textWidth / 3)) / (float) textWidth * 3;
-                poses.translate(-textX, 0, 0);
-                font.drawShadow(poses, text, x + width - textWidth - 10, y, color);
-                font.drawShadow(poses, text, x + width, y, color);
-                poses.popPose();
+                graphics.pose().translate(-textX, 0, 0);
+                graphics.drawString(font, text, x + width - textWidth - 10, y, color);
+                graphics.drawString(font, text, x + width, y, color);
+                graphics.pose().popPose();
             } else {
-                font.drawShadow(poses, text, x, y, color);
+                graphics.drawString(font, text, x, y, color);
             }
         }
     }

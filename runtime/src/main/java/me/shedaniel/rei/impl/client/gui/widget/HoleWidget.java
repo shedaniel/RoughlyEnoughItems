@@ -65,15 +65,15 @@ public class HoleWidget {
     }
     
     public static Widget createBackground(Rectangle bounds, ResourceLocation backgroundLocation, IntSupplier yOffset, int colorIntensity) {
-        return Widgets.withBounds(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+        return Widgets.withBounds(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             Tesselator tesselator = Tesselator.getInstance();
             BufferBuilder buffer = tesselator.getBuilder();
-            DynamicErrorFreeEntryListWidget.renderBackBackground(matrices, buffer, tesselator, backgroundLocation, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), yOffset.getAsInt(), colorIntensity);
+            DynamicErrorFreeEntryListWidget.renderBackBackground(graphics, buffer, tesselator, backgroundLocation, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), yOffset.getAsInt(), colorIntensity);
         }), bounds);
     }
     
     public static Widget createInnerShadow(Rectangle bounds) {
-        return Widgets.withBounds(Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+        return Widgets.withBounds(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             Tesselator tesselator = Tesselator.getInstance();
             BufferBuilder buffer = tesselator.getBuilder();
             RenderSystem.disableDepthTest();
@@ -81,7 +81,7 @@ public class HoleWidget {
             RenderSystem.enableBlend();
             RenderSystem.blendFuncSeparate(770, 771, 0, 1);
             RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-            Matrix4f matrix = matrices.last().pose();
+            Matrix4f matrix = graphics.pose().last().pose();
             buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             buffer.vertex(matrix, bounds.x, bounds.y + 4, 0.0F).uv(0, 1).color(0, 0, 0, 0).endVertex();
             buffer.vertex(matrix, bounds.getMaxX(), bounds.y + 4, 0.0F).uv(1, 1).color(0, 0, 0, 0).endVertex();

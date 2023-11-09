@@ -247,13 +247,13 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
             }
         
             @Override
-            public void render(PoseStack matrices, Point position, int mouseX, int mouseY, float delta) {
-                component.render(matrices, position, mouseX, mouseY, delta);
+            public void render(GuiGraphics graphics, Point position, int mouseX, int mouseY, float delta) {
+                component.render(graphics, position, mouseX, mouseY, delta);
             }
         
             @Override
-            public void render(PoseStack matrices, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                component.render(matrices, bounds, mouseX, mouseY, delta);
+            public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
+                component.render(graphics, bounds, mouseX, mouseY, delta);
             }
         };
     }

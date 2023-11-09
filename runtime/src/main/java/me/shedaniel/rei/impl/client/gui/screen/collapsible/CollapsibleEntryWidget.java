@@ -44,6 +44,7 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
 import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.GameRenderer;
@@ -116,9 +117,9 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
                 CollapsibleEntriesScreen.setupCustom(this.id, this.component.getString(), new ArrayList<>(stacks), this.configObject, markDirty);
             }, Supplier::get) {
                 @Override
-                public void renderWidget(PoseStack matrices, int mouseX, int mouseY, float delta) {
+                public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
                     RenderSystem.setShaderTexture(0, InternalTextures.CHEST_GUI_TEXTURE);
-                    blit(matrices, x + 3, y + 3, 0, 0, 14, 14);
+                    graphics.blit(InternalTextures.CHEST_GUI_TEXTURE, x + 3, y + 3, 0, 0, 14, 14);
                 }
             };
         } else {
@@ -150,84 +151,84 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
     }
     
     @Override
-    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.scroller.updatePosition(delta);
         this.idDrawer.update(delta);
         this.modIdDrawer.update(delta);
         Rectangle bounds = this.getBounds();
-        fillGradient(poses, bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0xFF777777, 0xFF777777);
-        fillGradient(poses, bounds.x + 1, bounds.y + 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, 0xFF000000, 0xFF000000);
+        graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0xFF777777, 0xFF777777);
+        graphics.fillGradient(bounds.x + 1, bounds.y + 1, bounds.getMaxX() - 1, bounds.getMaxY() - 1, 0xFF000000, 0xFF000000);
         int y = bounds.y + 4;
         if (y + 9 >= 30 && y < minecraft.screen.height) {
-            renderTextScrolling(poses, this.component, bounds.x + 4, y, bounds.width - 8, 0xFFDDDDDD);
+            renderTextScrolling(graphics, this.component, bounds.x + 4, y, bounds.width - 8, 0xFFDDDDDD);
         }
         y += 13;
         if (y + 9 >= 30 && y < minecraft.screen.height) {
             Rectangle lineBounds = new Rectangle(bounds.x + 4, y, bounds.width - 8, 9);
             idDrawer.setTo(lineBounds.contains(mouseX, mouseY), ConfigObject.getInstance().isReducedMotion() ? 0 : 400);
-            try (CloseableScissors scissors = scissor(poses, lineBounds)) {
-                poses.pushPose();
-                poses.translate(0, -idDrawer.progress() * 10, 0);
-                font.drawShadow(poses, Component.translatable("text.rei.collapsible.entries.count", this.stacks.size() + ""), bounds.x + 4, y, 0xFFAAAAAA);
+            try (CloseableScissors scissors = scissor(graphics, lineBounds)) {
+                graphics.pose().pushPose();
+                graphics.pose().translate(0, -idDrawer.progress() * 10, 0);
+                graphics.drawString(font, Component.translatable("text.rei.collapsible.entries.count", this.stacks.size() + ""), bounds.x + 4, y, 0xFFAAAAAA);
                 boolean enabled = !this.configObject.disabledGroups.contains(this.id);
                 Component sideText = Component.translatable("text.rei.collapsible.entries.enabled." + enabled);
-                font.drawShadow(poses, sideText, bounds.getMaxX() - 4 - font.width(sideText), y, enabled ? 0xDD55FF55 : 0xDDFF5555);
-                renderTextScrolling(poses, Component.literal(this.id.toString()), bounds.x + 4, y + 10, bounds.width - 8, 0xFF777777);
-                poses.popPose();
+                graphics.drawString(font, sideText, bounds.getMaxX() - 4 - font.width(sideText), y, enabled ? 0xDD55FF55 : 0xDDFF5555);
+                renderTextScrolling(graphics, Component.literal(this.id.toString()), bounds.x + 4, y + 10, bounds.width - 8, 0xFF777777);
+                graphics.pose().popPose();
             }
         }
         y += 10;
         if (y + 9 >= 30 && y < minecraft.screen.height) {
             Rectangle lineBounds = new Rectangle(bounds.x + 4, y, bounds.width - 8, 9);
             modIdDrawer.setTo(lineBounds.contains(mouseX, mouseY), ConfigObject.getInstance().isReducedMotion() ? 0 : 400);
-            int xo = font.drawShadow(poses, Component.translatable("text.rei.collapsible.entries.source").append(" "), bounds.x + 4, y, 0xFFAAAAAA);
-            try (CloseableScissors scissors = scissor(poses, lineBounds)) {
-                poses.pushPose();
+            int xo = graphics.drawString(font, Component.translatable("text.rei.collapsible.entries.source").append(" "), bounds.x + 4, y, 0xFFAAAAAA);
+            try (CloseableScissors scissors = scissor(graphics, lineBounds)) {
+                graphics.pose().pushPose();
                 if (this.custom) {
-                    renderTextScrolling(poses, TextTransformations.applyRainbow(Component.translatable("text.rei.collapsible.entries.source.custom").getVisualOrderText(), xo - 1, y), xo - 1, y, bounds.getWidth() - 8, 0xFFAAAAAA);
+                    renderTextScrolling(graphics, TextTransformations.applyRainbow(Component.translatable("text.rei.collapsible.entries.source.custom").getVisualOrderText(), xo - 1, y), xo - 1, y, bounds.getWidth() - 8, 0xFFAAAAAA);
                 } else {
-                    poses.translate(0, -modIdDrawer.progress() * 10, 0);
-                    renderTextScrolling(poses, Component.literal(ClientHelper.getInstance().getModFromModId(this.id.getNamespace())), xo - 1, y, bounds.getMaxX() - 4 - (xo - 1), 0xFF777777);
-                    renderTextScrolling(poses, Component.literal(this.id.getNamespace().toString()), xo - 1, y + 10, bounds.getMaxX() - 4 - (xo - 1), 0xFF777777);
+                    graphics.pose().translate(0, -modIdDrawer.progress() * 10, 0);
+                    renderTextScrolling(graphics, Component.literal(ClientHelper.getInstance().getModFromModId(this.id.getNamespace())), xo - 1, y, bounds.getMaxX() - 4 - (xo - 1), 0xFF777777);
+                    renderTextScrolling(graphics, Component.literal(this.id.getNamespace().toString()), xo - 1, y + 10, bounds.getMaxX() - 4 - (xo - 1), 0xFF777777);
                 }
-                poses.popPose();
+                graphics.pose().popPose();
             }
         }
-        renderStacks(poses, mouseX, mouseY, delta, bounds, y);
+        renderStacks(graphics, mouseX, mouseY, delta, bounds, y);
         bounds.y = this.y;
         
-        poses.pushPose();
-        poses.translate(0, 0, 400);
+        graphics.pose().pushPose();
+        graphics.pose().translate(0, 0, 400);
         this.toggleButton.setX(bounds.getMaxX() - 4 - toggleButton.getWidth());
         this.toggleButton.setY(bounds.getMaxY() - 4 - toggleButton.getHeight());
-        this.toggleButton.render(poses, mouseX, mouseY, delta);
+        this.toggleButton.render(graphics, mouseX, mouseY, delta);
         if (this.toggleButton.isMouseOver(mouseX, mouseY)) {
             ScreenOverlayImpl.getInstance().clearTooltips();
         }
         if (this.custom) {
             this.deleteButton.setX(toggleButton.getX() - 2 - deleteButton.getWidth());
             this.deleteButton.setY(bounds.getMaxY() - 4 - deleteButton.getHeight());
-            this.deleteButton.render(poses, mouseX, mouseY, delta);
+            this.deleteButton.render(graphics, mouseX, mouseY, delta);
             if (this.deleteButton.isMouseOver(mouseX, mouseY)) {
                 ScreenOverlayImpl.getInstance().clearTooltips();
             }
             this.configureButton.setX(deleteButton.getX() - 2 - configureButton.getWidth());
             this.configureButton.setY(bounds.getMaxY() - 4 - configureButton.getHeight());
-            this.configureButton.render(poses, mouseX, mouseY, delta);
+            this.configureButton.render(graphics, mouseX, mouseY, delta);
             if (this.configureButton.isMouseOver(mouseX, mouseY)) {
                 ScreenOverlayImpl.getInstance().clearTooltips();
             }
         }
-        poses.popPose();
+        graphics.pose().popPose();
     }
     
-    private void renderStacks(PoseStack poses, int mouseX, int mouseY, float delta, Rectangle bounds, int y) {
-        poses.pushPose();
-        try (CloseableScissors outerScissors = scissor(poses, new Rectangle(bounds.x, y, bounds.width, bounds.getMaxY() - 3 - y))) {
+    private void renderStacks(GuiGraphics graphics, int mouseX, int mouseY, float delta, Rectangle bounds, int y) {
+        graphics.pose().pushPose();
+        try (CloseableScissors outerScissors = scissor(graphics, new Rectangle(bounds.x, y, bounds.width, bounds.getMaxY() - 3 - y))) {
             y = bounds.y + 37 - this.scroller.scrollAmountInt();
             int x = bounds.getCenterX() - 8 * rowSize;
             int xIndex = 0;
-            poses.translate(0, 0, 100);
+            graphics.pose().translate(0, 0, 100);
             BatchedEntryRendererManager<EntryWidget> manager = new BatchedEntryRendererManager<>();
             for (Slot stack : this.stacks) {
                 if (y + 16 >= 30 && y + 16 >= bounds.y + 37) {
@@ -243,10 +244,10 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
                     }
                 }
             }
-            try (CloseableScissors scissors = scissor(poses, new Rectangle(x, bounds.y + 37, 16 * rowSize, bounds.getMaxY() - 4 - (bounds.y + 37)))) {
-                manager.render(poses, mouseX, mouseY, delta);
+            try (CloseableScissors scissors = scissor(graphics, new Rectangle(x, bounds.y + 37, 16 * rowSize, bounds.getMaxY() - 4 - (bounds.y + 37)))) {
+                manager.render(graphics, mouseX, mouseY, delta);
             }
-            poses.translate(0, 0, 300);
+            graphics.pose().translate(0, 0, 300);
             
             if (this.stacks.size() > rowSize * 3) {
                 Tesselator tesselator = Tesselator.getInstance();
@@ -255,7 +256,7 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
                 RenderSystem.defaultBlendFunc();
                 RenderSystem.setShader(GameRenderer::getPositionColorShader);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-                Matrix4f matrix = poses.last().pose();
+                Matrix4f matrix = graphics.pose().last().pose();
                 buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
                 buffer.vertex(matrix, this.x + 1, this.y + this.height - 1, 0.0F).color(0xFF000000).endVertex();
                 buffer.vertex(matrix, this.x + this.width - 1, this.y + this.height - 1, 0.0F).color(0xFF000000).endVertex();
@@ -265,25 +266,25 @@ public class CollapsibleEntryWidget extends WidgetWithBounds {
                 RenderSystem.disableBlend();
             }
         }
-        poses.popPose();
+        graphics.pose().popPose();
     }
     
-    private void renderTextScrolling(PoseStack poses, Component text, int x, int y, int width, int color) {
-        this.renderTextScrolling(poses, text.getVisualOrderText(), x, y, width, color);
+    private void renderTextScrolling(GuiGraphics graphics, Component text, int x, int y, int width, int color) {
+        this.renderTextScrolling(graphics, text.getVisualOrderText(), x, y, width, color);
     }
     
-    private void renderTextScrolling(PoseStack poses, FormattedCharSequence text, int x, int y, int width, int color) {
-        try (CloseableScissors scissors = scissor(poses, new Rectangle(x, y, width, y + 9))) {
+    private void renderTextScrolling(GuiGraphics graphics, FormattedCharSequence text, int x, int y, int width, int color) {
+        try (CloseableScissors scissors = scissor(graphics, new Rectangle(x, y, width, y + 9))) {
             int textWidth = this.font.width(text);
             if (textWidth > width) {
-                poses.pushPose();
+                graphics.pose().pushPose();
                 float textX = (System.currentTimeMillis() % ((textWidth + 10) * textWidth / 3)) / (float) textWidth * 3;
-                poses.translate(-textX, 0, 0);
-                font.drawShadow(poses, text, x + width - textWidth - 10, y, color);
-                font.drawShadow(poses, text, x + width, y, color);
-                poses.popPose();
+                graphics.pose().translate(-textX, 0, 0);
+                graphics.drawString(font, text, x + width - textWidth - 10, y, color, false);
+                graphics.drawString(font, text, x + width, y, color, false);
+                graphics.pose().popPose();
             } else {
-                font.drawShadow(poses, text, x, y, color);
+                graphics.drawString(font, text, x, y, color, false);
             }
         }
     }

@@ -232,11 +232,11 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
     
     @Deprecated
     protected void renderBackBackground(GuiGraphics graphics, BufferBuilder buffer, Tesselator tessellator) {
-        DynamicErrorFreeEntryListWidget.renderBackBackground(matrices, buffer, tessellator, backgroundLocation,
+        DynamicErrorFreeEntryListWidget.renderBackBackground(graphics, buffer, tessellator, backgroundLocation,
                 left, top, right, bottom, (int) getScroll(), 32);
     }
     
-    public static void renderBackBackground(PoseStack matrices, BufferBuilder buffer, Tesselator tesselator,
+    public static void renderBackBackground(GuiGraphics graphics, BufferBuilder buffer, Tesselator tesselator,
             ResourceLocation backgroundLocation, int left, int top, int right, int bottom, int yOffset, int color) {
         RenderSystem.setShaderTexture(0, backgroundLocation);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);

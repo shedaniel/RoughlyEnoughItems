@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.config.components;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Label;
@@ -36,6 +35,7 @@ import me.shedaniel.rei.impl.client.gui.config.options.OptionCategory;
 import me.shedaniel.rei.impl.client.gui.config.options.OptionGroup;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.resources.ResourceLocation;
 
@@ -56,14 +56,14 @@ public class ConfigSearchWidget {
                 bounds,
                 new Widget() {
                     @Override
-                    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+                    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
                         boolean hovering = new Rectangle(-1, -1, width.getAsInt() + 2, 21).contains(mouseX, mouseY);
                         for (Widget widget : List.of(Widgets.createFilledRectangle(new Rectangle(1, 1, width.getAsInt() - 2, 18), hovering ? 0x50FFFFFF : 0x25FFFFFF),
                                 Widgets.createFilledRectangle(new Rectangle(-1, -1, width.getAsInt() + 2, 1), hovering ? 0x90FFFFFF : 0x45FFFFFF),
                                 Widgets.createFilledRectangle(new Rectangle(-1, 20, width.getAsInt() + 2, 1), hovering ? 0x90FFFFFF : 0x45FFFFFF),
                                 Widgets.createFilledRectangle(new Rectangle(-1, 0, 1, 20), hovering ? 0x90FFFFFF : 0x45FFFFFF),
                                 Widgets.createFilledRectangle(new Rectangle(width.getAsInt(), 0, 1, 20), hovering ? 0x90FFFFFF : 0x45FFFFFF))) {
-                            widget.render(poses, mouseX, mouseY, delta);
+                            widget.render(graphics, mouseX, mouseY, delta);
                         }
                         label.setColor(hovering ? 0xFFE1E1E1 : 0xFFC0C0C0);
                     }
@@ -96,18 +96,18 @@ public class ConfigSearchWidget {
                 bounds,
                 new Widget() {
                     @Override
-                    public void render(PoseStack poses, int mouseX, int mouseY, float delta) {
+                    public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
                         boolean hovering = new Rectangle(-1, -1, 18, 18).contains(mouseX, mouseY);
-                        poses.pushPose();
-                        poses.translate(-0.5, -0.5, 0);
+                        graphics.pose().pushPose();
+                        graphics.pose().translate(-0.5, -0.5, 0);
                         for (Widget widget : List.of(Widgets.createFilledRectangle(new Rectangle(-1, -1, 18, 18), hovering ? 0x50FFFFFF : 0x25FFFFFF),
                                 Widgets.createFilledRectangle(new Rectangle(-3, -3, 22, 1), hovering ? 0x90FFFFFF : 0x45FFFFFF),
                                 Widgets.createFilledRectangle(new Rectangle(-3, 18, 22, 1), hovering ? 0x90FFFFFF : 0x45FFFFFF),
                                 Widgets.createFilledRectangle(new Rectangle(-3, -2, 1, 20), hovering ? 0x90FFFFFF : 0x45FFFFFF),
                                 Widgets.createFilledRectangle(new Rectangle(18, -2, 1, 20), hovering ? 0x90FFFFFF : 0x45FFFFFF))) {
-                            widget.render(poses, mouseX, mouseY, delta);
+                            widget.render(graphics, mouseX, mouseY, delta);
                         }
-                        poses.popPose();
+                        graphics.pose().popPose();
                     }
                     
                     @Override

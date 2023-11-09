@@ -85,7 +85,7 @@ public class VStackWidget {
         Rectangle bounds = new Rectangle(point.x, point.y, collectMaximumWidth(entries), collectTotalHeight(entries, gap));
         
         List<CellWidget<T>> wrapped = CollectionUtils.map(entries, CellWidget::new);
-        Widget update = Widgets.createDrawableWidget((helper, matrices, mouseX, mouseY, delta) -> {
+        Widget update = Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             if (calculateWidthDynamically) {
                 bounds.width = collectMaximumWidth(entries);
             }
