@@ -407,7 +407,6 @@
   "config.rei.options.groups.search.advanced": "Advanced",
   "config.rei.options.search.async_search": "Async Search",
   "config.rei.options.search.async_search.desc": "Parallelize search with multiple threads. This usually improves performance and \"snappiness\" of search.",
-  "config.rei.options.search.async_search.mode": "Mode",
   "config.rei.options.search.async_search.partition_size": "Partition Size",
   "config.rei.options.search.async_search.patch_thread_crash": "Patch Thread Crash",
   "config.rei.options.groups.filtering.filtering": "Filtering",

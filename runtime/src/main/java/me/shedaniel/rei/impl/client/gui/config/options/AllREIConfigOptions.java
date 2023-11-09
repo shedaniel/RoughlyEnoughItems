@@ -219,7 +219,8 @@ public interface AllREIConfigOptions {
             .enumOptions();
     CompositeOption<SearchMode> IDENTIFIER_SEARCH = make("search.identifier_search", i -> i.advanced.search.identifierSearch, (i, v) -> i.advanced.search.identifierSearch = v)
             .enumOptions();
-    // TODO: ASYNC_SEARCH
+    CompositeOption<Boolean> ASYNC_SEARCH = make("search.async_search", i -> i.advanced.search.asyncSearch, (i, v) -> i.advanced.search.asyncSearch = v)
+            .enabledDisabled();
     CompositeOption<CheatingMode> CHEATS_MODE = make("cheats.mode", i -> i.basics.cheating, (i, v) -> i.basics.cheating = v)
             .enumOptions();
     CompositeOption<ItemCheatingStyle> CHEATS_METHOD = make("cheats.method", i -> i.basics.cheatingStyle, (i, v) -> i.basics.cheatingStyle = v)
@@ -243,7 +244,6 @@ public interface AllREIConfigOptions {
             .enabledDisabled();
     CompositeOption<Boolean> ENTRY_LIST_PERFORMANCE = make("debug.entry_list_performance", i -> i.advanced.layout.debugRenderTimeRequired, (i, v) -> i.advanced.layout.debugRenderTimeRequired = v)
             .enabledDisabled();
-    // TODO: RELOAD
     CompositeOption<Object> RELOAD_PLUGINS = make("reset.reload_plugins", i -> null, (i, v) -> new Object())
             .reload((access, option, onClose) -> {
                 RoughlyEnoughItemsCore.PERFORMANCE_LOGGER.clear();
