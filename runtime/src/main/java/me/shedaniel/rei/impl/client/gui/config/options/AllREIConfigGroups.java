@@ -97,7 +97,8 @@ public interface AllREIConfigGroups {
             .add(TOOLTIP_SEARCH)
             .add(TAG_SEARCH)
             .add(IDENTIFIER_SEARCH);
-    OptionGroup SEARCH_ADVANCED = make("search.advanced");
+    OptionGroup SEARCH_ADVANCED = make("search.advanced")
+            .add(ASYNC_SEARCH);
     OptionGroup CHEATS_CHEATS = make("cheats.cheats")
             .add(CHEATS_MODE)
             .add(CHEATS_METHOD)
