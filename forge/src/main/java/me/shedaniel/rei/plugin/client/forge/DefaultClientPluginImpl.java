@@ -76,9 +76,9 @@ public class DefaultClientPluginImpl extends DefaultClientPlugin {
         }
         for (Potion potion : potions) {
             for (PotionBrewing.Mix<Item> mix : PotionBrewing.CONTAINER_MIXES) {
-                Holder.Reference<Item> from = mix.f_43532_;
+                Holder.Reference<Item> from = mix.from;
                 Ingredient ingredient = mix.ingredient;
-                Holder.Reference<Item> to = mix.f_43534_;
+                Holder.Reference<Item> to = mix.to;
                 Ingredient base = Ingredient.of(PotionUtils.setPotion(new ItemStack(from.get()), potion));
                 ItemStack output = PotionUtils.setPotion(new ItemStack(to.get()), potion);
                 clientPlugin.registerBrewingRecipe(base, ingredient, output);
