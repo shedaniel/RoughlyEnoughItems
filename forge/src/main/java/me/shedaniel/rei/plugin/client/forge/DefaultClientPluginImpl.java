@@ -59,9 +59,9 @@ public class DefaultClientPluginImpl extends DefaultClientPlugin {
         Set<Potion> potions = Sets.newLinkedHashSet();
         for (Ingredient container : PotionBrewing.ALLOWED_CONTAINERS) {
             for (PotionBrewing.Mix<Potion> mix : PotionBrewing.POTION_MIXES) {
-                Holder.Reference<Potion> from = mix.f_43532_;
+                Holder.Reference<Potion> from = mix.from;
                 Ingredient ingredient = mix.ingredient;
-                Holder.Reference<Potion> to = mix.f_43534_;
+                Holder.Reference<Potion> to = mix.to;
                 Ingredient base = Ingredient.of(Arrays.stream(container.getItems())
                         .map(ItemStack::copy)
                         .map(stack -> PotionUtils.setPotion(stack, from.get())));
