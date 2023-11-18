@@ -23,25 +23,30 @@
 
 package me.shedaniel.rei.mixin.forge;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.rei.api.client.config.ConfigObject;
-import net.minecraft.client.gui.components.toasts.RecipeToast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(RecipeToast.class)
-public class MixinRecipeToast {
-    @Inject(method = "addOrUpdate", at = @At("HEAD"), cancellable = true)
-    private static void addOrUpdate(ToastComponent toastGui, RecipeHolder<?> recipe, CallbackInfo info) {
-        if (disableRecipeBook()) info.cancel();
+@Mixin(InputConstants.class)
+public class MixinInputConstants {
+    @Inject(method = "isKeyDown", at = @At("HEAD"), cancellable = true)
+    private static void isKeyDown(long windowId, int key, CallbackInfoReturnable<Boolean> cir) {
+        if (isPatchingAsyncThreadCrash() && !RenderSystem.isOnRenderThread()) {
+            cir.setReturnValue(false);
+        }
     }
     
     @Unique
-    private static boolean disableRecipeBook() {
-        return ConfigObject.getInstance().doesDisableRecipeBook();
+    private static boolean isPatchingAsyncThreadCrash() {
+        try {
+            return ConfigObject.getInstance().isPatchingAsyncThreadCrash();
+        } catch (Throwable throwable) {
+            return false;
+        }
     }
 }

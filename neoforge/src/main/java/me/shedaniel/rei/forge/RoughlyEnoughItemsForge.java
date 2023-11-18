@@ -21,27 +21,25 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.mixin.forge;
+package me.shedaniel.rei.forge;
 
-import me.shedaniel.rei.api.client.config.ConfigObject;
-import net.minecraft.client.gui.components.toasts.RecipeToast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import me.shedaniel.rei.impl.init.RoughlyEnoughItemsInitializer;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.DistExecutor;
+import net.neoforged.fml.IExtensionPoint;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.data.loading.DatagenModLoader;
+import org.jetbrains.annotations.ApiStatus;
 
-@Mixin(RecipeToast.class)
-public class MixinRecipeToast {
-    @Inject(method = "addOrUpdate", at = @At("HEAD"), cancellable = true)
-    private static void addOrUpdate(ToastComponent toastGui, RecipeHolder<?> recipe, CallbackInfo info) {
-        if (disableRecipeBook()) info.cancel();
-    }
-    
-    @Unique
-    private static boolean disableRecipeBook() {
-        return ConfigObject.getInstance().doesDisableRecipeBook();
+@Mod("roughlyenoughitems")
+@ApiStatus.Internal
+public class RoughlyEnoughItemsForge {
+    public RoughlyEnoughItemsForge() {
+        ModLoadingContext.get().registerExtensionPoint(IExtensionPoint.DisplayTest.class, () -> new IExtensionPoint.DisplayTest(() -> "", (a, b) -> true));
+        if (!DatagenModLoader.isRunningDataGen()) {
+            RoughlyEnoughItemsInitializer.onInitialize();
+            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> RoughlyEnoughItemsInitializer::onInitializeClient);
+        }
     }
 }

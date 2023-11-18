@@ -21,27 +21,14 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.mixin.forge;
+package me.shedaniel.rei.forge;
 
-import me.shedaniel.rei.api.client.config.ConfigObject;
-import net.minecraft.client.gui.components.toasts.RecipeToast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Mixin(RecipeToast.class)
-public class MixinRecipeToast {
-    @Inject(method = "addOrUpdate", at = @At("HEAD"), cancellable = true)
-    private static void addOrUpdate(ToastComponent toastGui, RecipeHolder<?> recipe, CallbackInfo info) {
-        if (disableRecipeBook()) info.cancel();
-    }
-    
-    @Unique
-    private static boolean disableRecipeBook() {
-        return ConfigObject.getInstance().doesDisableRecipeBook();
-    }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface REIPluginLoaderCommon {
 }

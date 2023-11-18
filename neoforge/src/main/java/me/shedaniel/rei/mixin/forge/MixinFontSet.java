@@ -23,25 +23,40 @@
 
 package me.shedaniel.rei.mixin.forge;
 
-import me.shedaniel.rei.api.client.config.ConfigObject;
-import net.minecraft.client.gui.components.toasts.RecipeToast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import com.mojang.blaze3d.font.GlyphInfo;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import it.unimi.dsi.fastutil.ints.IntList;
+import me.shedaniel.rei.impl.client.CodepointMapWrapper;
+import net.minecraft.client.gui.font.CodepointMap;
+import net.minecraft.client.gui.font.FontSet;
+import net.minecraft.client.gui.font.FontTexture;
+import net.minecraft.client.gui.font.glyphs.BakedGlyph;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.resources.ResourceLocation;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(RecipeToast.class)
-public class MixinRecipeToast {
-    @Inject(method = "addOrUpdate", at = @At("HEAD"), cancellable = true)
-    private static void addOrUpdate(ToastComponent toastGui, RecipeHolder<?> recipe, CallbackInfo info) {
-        if (disableRecipeBook()) info.cancel();
-    }
+import java.util.Collections;
+import java.util.List;
+
+@Mixin(FontSet.class)
+public class MixinFontSet {
+    @Shadow @Mutable @Final private CodepointMap<BakedGlyph> glyphs;
+    @Shadow @Mutable @Final private CodepointMap<?> glyphInfos;
+    @Shadow @Mutable @Final private Int2ObjectMap<IntList> glyphsByWidth;
+    @Shadow @Mutable @Final private List<FontTexture> textures;
     
-    @Unique
-    private static boolean disableRecipeBook() {
-        return ConfigObject.getInstance().doesDisableRecipeBook();
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void init(TextureManager textureManager, ResourceLocation id, CallbackInfo ci) {
+        this.glyphs = new CodepointMapWrapper<>(this.glyphs);
+        this.glyphInfos = new CodepointMapWrapper<>(this.glyphInfos);
+        this.glyphsByWidth = Int2ObjectMaps.synchronize(this.glyphsByWidth);
+        this.textures = Collections.synchronizedList(this.textures);
     }
 }

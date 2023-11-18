@@ -4,7 +4,7 @@ plugins {
 
 architectury {
     platformSetupLoomIde()
-    forge()
+    neoForge()
 }
 
 configurations {
@@ -49,82 +49,19 @@ processServerComponentResources {
 }
 
 loom {
-    forge {
-        mixinConfig "rei.mixins.json"
-    }
 }
 
 def depProjects = [":api", ":runtime", ":default-plugin"]
 
 dependencies {
-    forge("net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}")
-    modApi("me.shedaniel.cloth:cloth-config-forge:${cloth_config_version}")
-    modApi("dev.architectury:architectury-forge:${architectury_version}")
+    neoForge("net.neoforged:neoforge:${rootProject.neoforge_version}")
+    modApi("me.shedaniel.cloth:cloth-config-neoforge:${cloth_config_version}")
+    modApi("dev.architectury:architectury-neoforge:${architectury_version}")
 
     depProjects.forEach {
         common(project(path: it, configuration: "namedElements")) { transitive false }
-        shadowCommon(project(path: it, configuration: "transformProductionForge")) { transitive false }
+        shadowCommon(project(path: it, configuration: "transformProductionNeoForge")) { transitive false }
     }
-
-    // modRuntime("curse.maven:lazy-dfu-forge-460819:3544496")
-    // modRuntime("curse.maven:chiselsbits-231095:3492889")
-    // modRuntime("curse.maven:jumbofurnace-390880:3120970")
-    // modRuntime("curse.maven:cyclic-239286:3221427")
-    // modRuntime("curse.maven:mekanism-268560:3743835")
-    // modRuntime("curse.maven:mekanism-tools-268567:3743838")
-    // modRuntime("curse.maven:mekanism-generators-268566:3743837")
-    // modRuntime("curse.maven:immersive-engineering-231951:3721708")
-    // modRuntime("curse.maven:autoreglib-250363:3326041")
-    // modRuntime("curse.maven:ars-nouveau-401955:3814106")
-    // modRuntime("curse.maven:patchouli-306770:3843443")
-    // modRuntime("curse.maven:curios-309927:3748873")
-    // modRuntime("software.bernie.geckolib:geckolib-forge-1.18:3.0.57")
-    // modRuntime("curse.maven:little-logistics-570050:3818773")
-    // modRuntime("curse.maven:refined-storage-243076:3623324")
-    // modRuntime("appeng:appliedenergistics2:10.0.1")
-    // modRuntime("curse.maven:tcon-74072:3784732")
-    // modRuntime("curse.maven:mantle-74924:3784500")
-    // modRuntime("curse.maven:jer-240630:3575590")
-    // modRuntime("curse.maven:jep-417645:3550303")
-    // modRuntime("curse.maven:simple-storage-network-268495:3594529")
-    // modRuntime("curse.maven:create-328085:3737418")
-    // modRuntime("curse.maven:flywheel-486392:3737402")
-    // modRuntime("curse.maven:industrial-foregoing-266515:3446262")
-    // modRuntime("curse.maven:titanium-287342:3346366")
-    // modRuntime("curse.maven:extended-crafting-268387:3606681")
-    // modRuntime("curse.maven:cucumber-272335:3623830")
-    // modRuntime("curse.maven:crafttweaker-239197:3602440")
-    // modRuntime("curse.maven:jeitweaker-368718:3602846")
-    // modRuntime("curse.maven:eidolon-429625:3157832")
-    // modRuntime("curse.maven:token-enchanter-444421:3449483")
-    // modRuntime("curse.maven:silent-lib-242998:3400030")
-    // modRuntime("curse.maven:resourceful-bees-384508:3485315")
-    // modRuntime("curse.maven:thermal-expansion-69163:3803489")
-    // modRuntime("curse.maven:thermal-foundation-222880:3803495")
-    // modRuntime("curse.maven:cofh-core-69162:3803484")
-    // modRuntime("curse.maven:advanced-peripherals-431725:3525665")
-    // modRuntime("curse.maven:cc-tweaked-282001:3434680")
-    // modRuntime("curse.maven:ender-storage-245174:3361748")
-    // modRuntime("curse.maven:codechicken-242818:3528603")
-    // modRuntime("curse.maven:recipe-stages-280554:3492760")
-    // modRuntime("curse.maven:game-stages-268655:3437962")
-    // modRuntime("curse.maven:bookshelf-228525:3474499")
-    // modRuntime("curse.maven:kubejs-238086:3533307")
-    // modRuntime("curse.maven:rhino-416294:3525704")
-    // modRuntime("curse.maven:enchantment-descriptions-250419:3566741")
-    // modRuntime("curse.maven:natures-aura-306626:3587798")
-    // modRuntime("curse.maven:integrated-dynamics-236307:3631804")
-    // modRuntime("curse.maven:common-capabilities-247007:3614900")
-    // modRuntime("curse.maven:evilcraft-74610:3795956")
-    // modRuntime("curse.maven:cyclops-core-236307:3778682")
-    // modRuntime("curse.maven:elemental-craft-395158:3593428")
-    // modRuntime("curse.maven:datapack-anvil-432817:3569515")
-    // modRuntime("curse.maven:assemblylinemachines-388282:3623609")
-    // modRuntime("curse.maven:mystical-agriculture-246640:3645812")
-    // modRuntime("curse.maven:oreberries-replanted-454062:3776180")
-    // modRuntime("curse.maven:farmers-delight-398521:3784851")
-    // modRuntime("curse.maven:nomadic-tents-238794:3829966")
-    // modRuntime("curse.maven:caelus-308989:3650485")
 }
 
 def modRuntime(str) {
@@ -180,29 +117,29 @@ components.java {
 
 publishing {
     publications {
-        mavenForge(MavenPublication) {
+        mavenNeoForge(MavenPublication) {
             artifactId = rootProject.name + "-" + project.name
             from components.java
         }
         ["api", "default-plugin"].forEach { projectName ->
-            def remapSrg = tasks.create("remapSrgJarFor$projectName", net.fabricmc.loom.task.RemapJarTask) {
+            def remapMojang = tasks.create("remapMojangJarFor$projectName", net.fabricmc.loom.task.RemapJarTask) {
                 inputFile = project(":" + projectName).tasks.jar.archiveFile
-                archiveClassifier = "srg-remapped-$projectName"
-                targetNamespace = "srg"
+                archiveClassifier = "mojang-remapped-$projectName"
+                targetNamespace = "mojang"
             }
-            def remapSrgSourcesJar = tasks.create("remapSrgSourcesFor$projectName", net.fabricmc.loom.task.RemapSourcesJarTask) {
+            def remapMojangSourcesJar = tasks.create("remapMojangSourcesFor$projectName", net.fabricmc.loom.task.RemapSourcesJarTask) {
                 inputFile = project(":" + projectName).tasks.sourcesJar.archiveFile
-                archiveClassifier = "srg-remapped-$projectName-sources"
-                targetNamespace = "srg"
+                archiveClassifier = "mojang-remapped-$projectName-sources"
+                targetNamespace = "mojang"
             }
-            create(projectName + "Forge", MavenPublication.class) { publication ->
-                publication.artifactId = rootProject.name + "-" + projectName + "-forge"
+            create(projectName + "NeoForge", MavenPublication.class) { publication ->
+                publication.artifactId = rootProject.name + "-" + projectName + "-neoforge"
                 project.afterEvaluate {
                     def project = project(":" + projectName)
-                    remapSrg.inputFile = project.fakeForgeJar.archiveFile
-                    publication.artifact(remapSrg) { classifier null }
-                    publication.artifact(remapSrgSourcesJar) {
-                        builtBy remapSrgSourcesJar
+                    remapMojang.inputFile = project.fakeForgeJar.archiveFile
+                    publication.artifact(remapMojang) { classifier null }
+                    publication.artifact(remapMojangSourcesJar) {
+                        builtBy remapMojangSourcesJar
                         classifier "sources"
                     }
                 }
@@ -213,10 +150,10 @@ publishing {
 
 unifiedPublishing {
     project {
-        displayName = "[Forge $rootProject.supported_version] v$project.version"
+        displayName = "[NeoForge $rootProject.supported_version] v$project.version"
         releaseType = "beta"
         gameVersions = []
-        gameLoaders = ["forge"]
+        gameLoaders = ["neoforge"]
         changelog = rootProject.releaseChangelog
 
         mainPublication remapJar
@@ -255,10 +192,10 @@ unifiedPublishing {
         }
     }
     project {
-        displayName = "[Forge $rootProject.supported_version] v$project.version"
+        displayName = "[NeoForge $rootProject.supported_version] v$project.version"
         releaseType = "release"
         gameVersions = []
-        gameLoaders = ["forge"]
+        gameLoaders = ["neoforge"]
         changelog = rootProject.releaseChangelog
 
         mainPublication serverOnlyJar

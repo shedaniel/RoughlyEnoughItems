@@ -1,7 +1,7 @@
 archivesBaseName = rootProject.name + "-" + project.name
 
 architectury {
-    common(forgeEnabled.toBoolean())
+    common(platforms.split(","))
 }
 
 loom {
@@ -12,8 +12,8 @@ dependencies {
     modCompileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
     modApi("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
     modApi("dev.architectury:architectury:${architectury_version}")
-    compileClasspath(annotationProcessor("org.projectlombok:lombok:1.18.22"))
-    compileClasspath(project(path: ":api", configuration: "namedElements"))
+    compileOnly(annotationProcessor("org.projectlombok:lombok:1.18.22"))
+    compileOnly(project(path: ":api", configuration: "namedElements"))
     testImplementation(project(path: ":api", configuration: "namedElements"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
 }
@@ -23,7 +23,7 @@ test {
 }
 
 remapJar {
-    classifier "raw"
+    archiveClassifier = "raw"
 }
 
 task fakeJar(type: Jar, dependsOn: remapJar) {
@@ -31,7 +31,7 @@ task fakeJar(type: Jar, dependsOn: remapJar) {
     from(rootProject.file("fake/fabric.mod.json")) {
         into ""
     }
-    classifier null
+    archiveClassifier = null
 }
 
 artifacts {

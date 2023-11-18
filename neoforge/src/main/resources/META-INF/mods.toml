@@ -1,0 +1,38 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+issueTrackerURL = "https://github.com/shedaniel/RoughlyEnoughItems/issues"
+logoFile = "icon.png"
+authors = "shedaniel"
+license = "MIT"
+
+[[mods]]
+modId = "roughlyenoughitems"
+version = "${version}"
+displayName = "Roughly Enough Items (REI)"
+description = '''
+To allow players to view items and recipes.
+'''
+
+[[dependencies.roughlyenoughitems]]
+modId = "architectury"
+mandatory = true
+versionRange = "[8,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.roughlyenoughitems]]
+modId = "cloth_config"
+mandatory = true
+versionRange = "[10.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.roughlyenoughitems]]
+modId = "neoforge"
+mandatory = true
+versionRange = "[20.2.0,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[mixins]]
+config = "rei.mixins.json"

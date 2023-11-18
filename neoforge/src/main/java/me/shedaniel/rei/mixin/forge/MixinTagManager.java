@@ -23,25 +23,25 @@
 
 package me.shedaniel.rei.mixin.forge;
 
-import me.shedaniel.rei.api.client.config.ConfigObject;
-import net.minecraft.client.gui.components.toasts.RecipeToast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.tags.TagManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(RecipeToast.class)
-public class MixinRecipeToast {
-    @Inject(method = "addOrUpdate", at = @At("HEAD"), cancellable = true)
-    private static void addOrUpdate(ToastComponent toastGui, RecipeHolder<?> recipe, CallbackInfo info) {
-        if (disableRecipeBook()) info.cancel();
-    }
-    
-    @Unique
-    private static boolean disableRecipeBook() {
-        return ConfigObject.getInstance().doesDisableRecipeBook();
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+
+@Mixin(TagManager.class)
+public abstract class MixinTagManager<T> {
+    @Inject(method = "createLoader", at = @At("HEAD"))
+    private void load(ResourceManager resourceManager, Executor executor, RegistryAccess.RegistryEntry<T> registryEntry, CallbackInfoReturnable<CompletableFuture<TagManager.LoadResult<T>>> cir) {
+        ResourceKey<? extends Registry<T>> resourceKey = registryEntry.key();
+        TagNodes.TAG_DIR_MAP.put(TagManager.getTagDir(resourceKey), resourceKey);
     }
 }

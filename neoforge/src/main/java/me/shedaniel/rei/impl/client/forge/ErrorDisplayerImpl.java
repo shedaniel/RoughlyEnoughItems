@@ -21,27 +21,35 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.mixin.forge;
+package me.shedaniel.rei.impl.client.forge;
 
-import me.shedaniel.rei.api.client.config.ConfigObject;
-import net.minecraft.client.gui.components.toasts.RecipeToast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import me.shedaniel.rei.impl.client.ErrorDisplayer;
+import net.minecraft.client.gui.screens.Screen;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.common.NeoForge;
 
-@Mixin(RecipeToast.class)
-public class MixinRecipeToast {
-    @Inject(method = "addOrUpdate", at = @At("HEAD"), cancellable = true)
-    private static void addOrUpdate(ToastComponent toastGui, RecipeHolder<?> recipe, CallbackInfo info) {
-        if (disableRecipeBook()) info.cancel();
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.UnaryOperator;
+
+public class ErrorDisplayerImpl implements ErrorDisplayer.ErrorGuiInitializer {
+    private static final List<UnaryOperator<Screen>> CONSUMERS = new ArrayList<>();
+    
+    static {
+        NeoForge.EVENT_BUS.addListener(ErrorDisplayerImpl::onGuiOpen);
     }
     
-    @Unique
-    private static boolean disableRecipeBook() {
-        return ConfigObject.getInstance().doesDisableRecipeBook();
+    @Override
+    public void registerGuiInit(UnaryOperator<Screen> consumer) {
+        CONSUMERS.add(consumer);
+    }
+    
+    public static void onGuiOpen(ScreenEvent.Opening event) {
+        for (UnaryOperator<Screen> consumer : CONSUMERS) {
+            Screen screen = consumer.apply(event.getScreen());
+            if (screen != null) {
+                event.setNewScreen(screen);
+            }
+        }
     }
 }

@@ -31,8 +31,8 @@ import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;

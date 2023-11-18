@@ -21,27 +21,14 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.mixin.forge;
+package me.shedaniel.rei.impl.client.gui.credits.forge;
 
-import me.shedaniel.rei.api.client.config.ConfigObject;
-import net.minecraft.client.gui.components.toasts.RecipeToast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import me.shedaniel.rei.impl.client.gui.credits.CreditsScreen;
+import net.minecraft.util.Tuple;
 
-@Mixin(RecipeToast.class)
-public class MixinRecipeToast {
-    @Inject(method = "addOrUpdate", at = @At("HEAD"), cancellable = true)
-    private static void addOrUpdate(ToastComponent toastGui, RecipeHolder<?> recipe, CallbackInfo info) {
-        if (disableRecipeBook()) info.cancel();
-    }
-    
-    @Unique
-    private static boolean disableRecipeBook() {
-        return ConfigObject.getInstance().doesDisableRecipeBook();
+import java.util.List;
+
+public class CreditsScreenImpl {
+    public static void fillTranslators(Exception[] exception, List<Tuple<String, List<CreditsScreen.TranslatorEntry>>> translators) {
     }
 }

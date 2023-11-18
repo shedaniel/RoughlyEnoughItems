@@ -23,25 +23,29 @@
 
 package me.shedaniel.rei.mixin.forge;
 
-import me.shedaniel.rei.api.client.config.ConfigObject;
-import net.minecraft.client.gui.components.toasts.RecipeToast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.common.ClientboundUpdateTagsPacket;
+import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
+import net.minecraft.world.item.crafting.RecipeManager;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(RecipeToast.class)
-public class MixinRecipeToast {
-    @Inject(method = "addOrUpdate", at = @At("HEAD"), cancellable = true)
-    private static void addOrUpdate(ToastComponent toastGui, RecipeHolder<?> recipe, CallbackInfo info) {
-        if (disableRecipeBook()) info.cancel();
+@Mixin(ClientPacketListener.class)
+public class MixinClientPacketListener {
+    @Shadow @Final private RecipeManager recipeManager;
+    
+    @Inject(method = "handleUpdateRecipes", at = @At("HEAD"))
+    private void handleUpdateRecipes(ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket, CallbackInfo ci) {
+        RoughlyEnoughItemsCoreClient.PRE_UPDATE_RECIPES.invoker().update(recipeManager);
     }
     
-    @Unique
-    private static boolean disableRecipeBook() {
-        return ConfigObject.getInstance().doesDisableRecipeBook();
+    @Inject(method = "handleUpdateTags", at = @At("HEAD"))
+    private void handleUpdateTags(ClientboundUpdateTagsPacket packet, CallbackInfo ci) {
+        RoughlyEnoughItemsCoreClient.POST_UPDATE_TAGS.invoker().run();
     }
 }

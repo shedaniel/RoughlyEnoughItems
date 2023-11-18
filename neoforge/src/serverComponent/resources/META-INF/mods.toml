@@ -1,0 +1,28 @@
+modLoader = "javafml"
+loaderVersion = "[41,)"
+issueTrackerURL = "https://github.com/shedaniel/RoughlyEnoughItems/issues"
+logoFile = "icon.png"
+authors = "shedaniel"
+license = "MIT"
+
+[[mods]]
+modId = "roughlyenoughitems_servercomponent"
+version = "${version}"
+displayName = "Roughly Enough Items Server Component (REI)"
+description = '''
+To allow players to view items and recipes.
+'''
+
+[[dependencies.roughlyenoughitems_servercomponent]]
+modId = "architectury"
+mandatory = true
+versionRange = "[5.7,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.roughlyenoughitems_servercomponent]]
+modId = "cloth_config"
+mandatory = true
+versionRange = "[7.0,)"
+ordering = "NONE"
+side = "BOTH"

@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "package": "me.shedaniel.rei.mixin.forge",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "MixinClientPacketListener",
+    "MixinEffectRenderingInventoryScreen",
+    "MixinFontSet",
+    "MixinInputConstants",
+    "MixinInputConstantsKey",
+    "MixinRecipeToast"
+  ],
+  "mixins": [
+    "MixinPacketEncoder",
+    "MixinTagLoader",
+    "MixinTagManager"
+  ],
+  "injectors": {
+    "maxShiftBy": 5,
+    "defaultRequire": 1
+  }
+}

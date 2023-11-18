@@ -1,6 +1,6 @@
 plugins {
     id("architectury-plugin") version("3.4-SNAPSHOT")
-    id("dev.architectury.loom") version("0.12.0-SNAPSHOT") apply false
+    id("dev.architectury.loom") version("1.4-SNAPSHOT") apply false
     id("org.cadixdev.licenser") version("0.6.1")
     id("me.shedaniel.unified-publishing") version("0.1.+")
     id("maven-publish")
@@ -28,6 +28,10 @@ subprojects {
         silentMojangMappingsLicense()
     }
 
+    repositories {
+        maven { url "https://maven.neoforged.net/releases/" }
+    }
+
     dependencies {
         minecraft("com.mojang:minecraft:${rootProject.minecraft_version}")
         mappings(loom.layered {
@@ -48,7 +52,7 @@ subprojects {
 }
 
 subprojects {
-    if (project.path == ':fabric' || project.path == ':forge') {
+    if (project.path == ':fabric' || project.path == ':forge' || project.path == ':neoforge') {
         loom {
             mods {
                 main { // to match the default mod generated for Forge
@@ -153,6 +157,9 @@ task releaseOnCf {
     releaseChangelog = changes.toString()
     if (subprojects.any { it.name == "forge" }) {
         dependsOn project("forge").tasks.getByName("publishUnified")
+    }
+    if (subprojects.any { it.name == "neoforge" }) {
+        dependsOn project("neoforge").tasks.getByName("publishUnified")
     }
     if (subprojects.any { it.name == "fabric" }) {
         dependsOn project("fabric").tasks.getByName("publishUnified")

@@ -8,15 +8,15 @@ dependencies {
     modCompileOnly("net.fabricmc:fabric-loader:${project.fabricloader_version}")
     modApi("me.shedaniel.cloth:cloth-config:${cloth_config_version}")
     modApi("dev.architectury:architectury:${architectury_version}")
-    compileClasspath(project(path: ":api", configuration: "namedElements"))
+    compileOnly(project(path: ":api", configuration: "namedElements"))
 }
 
 architectury {
-    common(forgeEnabled.toBoolean())
+    common(platforms.split(","))
 }
 
 remapJar {
-    classifier "raw"
+    archiveClassifier = "raw"
 }
 
 task fakeJar(type: Jar, dependsOn: remapJar) {
@@ -24,7 +24,7 @@ task fakeJar(type: Jar, dependsOn: remapJar) {
     from(rootProject.file("fake/fabric.mod.json")) {
         into ""
     }
-    classifier null
+    archiveClassifier = null
 }
 
 task fakeForgeJar(type: Jar, dependsOn: jar) {
@@ -38,7 +38,7 @@ task fakeForgeJar(type: Jar, dependsOn: jar) {
             into "me/shedaniel/rei/forge"
         }
     }
-    classifier "fake-forge"
+    archiveClassifier = "fake-forge"
 }
 
 artifacts {

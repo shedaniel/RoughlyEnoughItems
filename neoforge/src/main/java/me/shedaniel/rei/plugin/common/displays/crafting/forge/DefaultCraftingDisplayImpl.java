@@ -21,27 +21,20 @@
  * SOFTWARE.
  */
 
-package me.shedaniel.rei.mixin.forge;
+package me.shedaniel.rei.plugin.common.displays.crafting.forge;
 
-import me.shedaniel.rei.api.client.config.ConfigObject;
-import net.minecraft.client.gui.components.toasts.RecipeToast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import me.shedaniel.rei.plugin.common.displays.crafting.CraftingRecipeSizeProvider;
+import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
+import net.neoforged.neoforge.common.crafting.IShapedRecipe;
 
-@Mixin(RecipeToast.class)
-public class MixinRecipeToast {
-    @Inject(method = "addOrUpdate", at = @At("HEAD"), cancellable = true)
-    private static void addOrUpdate(ToastComponent toastGui, RecipeHolder<?> recipe, CallbackInfo info) {
-        if (disableRecipeBook()) info.cancel();
-    }
-    
-    @Unique
-    private static boolean disableRecipeBook() {
-        return ConfigObject.getInstance().doesDisableRecipeBook();
+public class DefaultCraftingDisplayImpl {
+    public static void registerPlatformSizeProvider() {
+        DefaultCraftingDisplay.registerSizeProvider(recipe -> {
+            if (recipe instanceof IShapedRecipe<?>) {
+                return new CraftingRecipeSizeProvider.Size(((IShapedRecipe<?>) recipe).getRecipeWidth(), ((IShapedRecipe<?>) recipe).getRecipeHeight());
+            }
+            
+            return null;
+        });
     }
 }

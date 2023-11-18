@@ -9,11 +9,11 @@ dependencies {
 }
 
 architectury {
-    common(forgeEnabled.toBoolean())
+    common(platforms.split(","))
 }
 
 remapJar {
-    classifier "raw"
+    archiveClassifier = "raw"
 }
 
 task fakeJar(type: Jar, dependsOn: remapJar) {
@@ -21,7 +21,7 @@ task fakeJar(type: Jar, dependsOn: remapJar) {
     from(rootProject.file("fake/fabric.mod.json")) {
         into ""
     }
-    classifier null
+    archiveClassifier = null
 }
 
 task fakeForgeJar(type: Jar, dependsOn: jar) {
@@ -35,7 +35,7 @@ task fakeForgeJar(type: Jar, dependsOn: jar) {
             into "me/shedaniel/rei/forge"
         }
     }
-    classifier "fake-forge"
+    archiveClassifier = "fake-forge"
 }
 
 artifacts {
