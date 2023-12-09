@@ -30,11 +30,11 @@ import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.DefaultPlugin;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.util.LazyOptional;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 public class DefaultPluginImpl extends DefaultPlugin {
@@ -43,7 +43,7 @@ public class DefaultPluginImpl extends DefaultPlugin {
         super.registerFluidSupport(support);
         support.register(stack -> {
             ItemStack itemStack = stack.getValue();
-            LazyOptional<IFluidHandlerItem> handlerOptional = FluidUtil.getFluidHandler(itemStack);
+            Optional<IFluidHandlerItem> handlerOptional = FluidUtil.getFluidHandler(itemStack);
             if (handlerOptional.isPresent()) {
                 IFluidHandlerItem handler = handlerOptional.orElse(null);
                 if (handler.getTanks() > 0) {

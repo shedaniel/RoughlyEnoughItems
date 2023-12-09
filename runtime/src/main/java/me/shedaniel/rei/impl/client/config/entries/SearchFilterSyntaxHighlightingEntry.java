@@ -49,9 +49,9 @@ public class SearchFilterSyntaxHighlightingEntry extends TooltipListEntry<Syntax
         type = SyntaxHighlightingMode.values()[(type.ordinal() + 1) % SyntaxHighlightingMode.values().length];
     }, Supplier::get) {
         @Override
-        public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             setMessage(Component.literal(type.toString()));
-            super.render(graphics, mouseX, mouseY, delta);
+            super.renderWidget(graphics, mouseX, mouseY, delta);
         }
     };
     private final List<AbstractWidget> children = ImmutableList.of(buttonWidget);

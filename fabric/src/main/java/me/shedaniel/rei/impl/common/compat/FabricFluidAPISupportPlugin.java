@@ -44,7 +44,7 @@ public class FabricFluidAPISupportPlugin implements REIServerPlugin {
     public void registerFluidSupport(FluidSupportProvider support) {
         support.register(entry -> {
             ItemStack stack = entry.getValue().copy();
-            Storage<FluidVariant> storage = FluidStorage.ITEM.find(stack, ContainerItemContext.withInitial(stack));
+            Storage<FluidVariant> storage = FluidStorage.ITEM.find(stack, ContainerItemContext.withConstant(stack));
             if (storage != null) {
                 List<EntryStack<FluidStack>> result = StreamSupport.stream(storage.spliterator(), false)
                         .filter(view -> !view.isResourceBlank())

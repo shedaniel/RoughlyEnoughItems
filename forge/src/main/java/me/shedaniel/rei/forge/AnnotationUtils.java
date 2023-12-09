@@ -28,7 +28,6 @@ import me.shedaniel.rei.impl.init.PrimitivePlatformAdapter;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fml.loading.moddiscovery.ModAnnotation;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.apache.commons.lang3.tuple.ImmutableTriple;
@@ -67,14 +66,14 @@ public class AnnotationUtils {
                     
                     if (value instanceof Dist[]) {
                         enabled = Arrays.asList((Dist[]) value).contains(FMLEnvironment.dist);
-                    } else if (value instanceof ModAnnotation.EnumHolder) {
-                        enabled = Objects.equals(((ModAnnotation.EnumHolder) value).getValue(), FMLEnvironment.dist.name());
+                    } else if (value instanceof ModFileScanData.EnumData) {
+                        enabled = Objects.equals(((ModFileScanData.EnumData) value).value(), FMLEnvironment.dist.name());
                     } else if (value instanceof List) {
-                        List<ModAnnotation.EnumHolder> holders = ((List<?>) value).stream().filter(o -> o instanceof ModAnnotation.EnumHolder)
-                                .map(o -> (ModAnnotation.EnumHolder) o).toList();
+                        List<ModFileScanData.EnumData> holders = ((List<?>) value).stream().filter(o -> o instanceof ModFileScanData.EnumData)
+                                .map(o -> (ModFileScanData.EnumData) o).toList();
                         if (!holders.isEmpty()) {
                             enabled = holders.stream()
-                                    .anyMatch(o -> Objects.equals(o.getValue(), FMLEnvironment.dist.name()));
+                                    .anyMatch(o -> Objects.equals(o.value(), FMLEnvironment.dist.name()));
                         } else {
                             enabled = true;
                         }

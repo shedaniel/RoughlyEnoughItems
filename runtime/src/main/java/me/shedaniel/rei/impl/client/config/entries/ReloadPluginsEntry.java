@@ -54,12 +54,12 @@ public class ReloadPluginsEntry extends AbstractConfigListEntry<Unit> {
         RoughlyEnoughItemsCoreClient.reloadPlugins(null, null);
     }, Supplier::get) {
         @Override
-        public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             if (PluginManager.areAnyReloading()) {
                 Screen screen = Minecraft.getInstance().screen;
                 Minecraft.getInstance().setScreen(new ConfigReloadingScreen(Component.translatable("text.rei.config.is.reloading"), PluginManager::areAnyReloading, () -> Minecraft.getInstance().setScreen(screen), null));
             } else {
-                super.render(graphics, mouseX, mouseY, delta);
+                super.renderWidget(graphics, mouseX, mouseY, delta);
             }
         }
     };
