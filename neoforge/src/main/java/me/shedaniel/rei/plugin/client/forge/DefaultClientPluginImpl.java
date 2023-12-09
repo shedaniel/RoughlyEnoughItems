@@ -27,7 +27,6 @@ import com.google.common.collect.Sets;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
 import me.shedaniel.rei.plugin.client.BuiltinClientPlugin;
 import me.shedaniel.rei.plugin.client.DefaultClientPlugin;
-import net.minecraft.core.Holder;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
@@ -59,28 +58,28 @@ public class DefaultClientPluginImpl extends DefaultClientPlugin {
         Set<Potion> potions = Sets.newLinkedHashSet();
         for (Ingredient container : PotionBrewing.ALLOWED_CONTAINERS) {
             for (PotionBrewing.Mix<Potion> mix : PotionBrewing.POTION_MIXES) {
-                Holder.Reference<Potion> from = mix.from;
+                Potion from = mix.from;
                 Ingredient ingredient = mix.ingredient;
-                Holder.Reference<Potion> to = mix.to;
+                Potion to = mix.to;
                 Ingredient base = Ingredient.of(Arrays.stream(container.getItems())
                         .map(ItemStack::copy)
-                        .map(stack -> PotionUtils.setPotion(stack, from.get())));
+                        .map(stack -> PotionUtils.setPotion(stack, from)));
                 ItemStack output = Arrays.stream(container.getItems())
                         .map(ItemStack::copy)
-                        .map(stack -> PotionUtils.setPotion(stack, to.get()))
+                        .map(stack -> PotionUtils.setPotion(stack, to))
                         .findFirst().orElse(ItemStack.EMPTY);
                 clientPlugin.registerBrewingRecipe(base, ingredient, output);
-                potions.add(from.get());
-                potions.add(to.get());
+                potions.add(from);
+                potions.add(to);
             }
         }
         for (Potion potion : potions) {
             for (PotionBrewing.Mix<Item> mix : PotionBrewing.CONTAINER_MIXES) {
-                Holder.Reference<Item> from = mix.from;
+                Item from = mix.from;
                 Ingredient ingredient = mix.ingredient;
-                Holder.Reference<Item> to = mix.to;
-                Ingredient base = Ingredient.of(PotionUtils.setPotion(new ItemStack(from.get()), potion));
-                ItemStack output = PotionUtils.setPotion(new ItemStack(to.get()), potion);
+                Item to = mix.to;
+                Ingredient base = Ingredient.of(PotionUtils.setPotion(new ItemStack(from), potion));
+                ItemStack output = PotionUtils.setPotion(new ItemStack(to), potion);
                 clientPlugin.registerBrewingRecipe(base, ingredient, output);
             }
         }
