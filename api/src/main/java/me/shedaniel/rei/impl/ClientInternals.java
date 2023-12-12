@@ -228,9 +228,15 @@ public final class ClientInternals {
         
         Widget concatWidgets(List<Widget> widgets);
         
+        WidgetWithBounds concatWidgetsWithBounds(Supplier<Rectangle> bounds, List<Widget> widgets);
+        
         WidgetWithBounds noOp();
         
         WidgetWithBounds wrapOverflow(Rectangle bounds, WidgetWithBounds widget);
+        
+        WidgetWithBounds wrapScissored(Rectangle bounds, Widget widget);
+        
+        WidgetWithBounds wrapScissored(WidgetWithBounds widget);
         
         WidgetWithBounds wrapPadded(int padLeft, int padRight, int padTop, int padBottom, WidgetWithBounds widget);
     }

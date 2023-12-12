@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.client.registry.category;
 
 import com.google.common.base.MoreObjects;
 import dev.architectury.event.EventResult;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.ButtonArea;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
@@ -58,6 +59,8 @@ public class CategoryRegistryImpl implements CategoryRegistry {
         this.categories.clear();
         this.listeners.clear();
         this.visibilityPredicates.clear();
+        this.registerVisibilityPredicate(category -> ConfigObject.getInstance().getHiddenCategories().contains(category.getCategoryIdentifier())
+                ? EventResult.interruptFalse() : EventResult.pass());
     }
     
     @Override

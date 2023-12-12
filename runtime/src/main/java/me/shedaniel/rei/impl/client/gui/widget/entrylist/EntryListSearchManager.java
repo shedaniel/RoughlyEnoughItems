@@ -32,16 +32,19 @@ import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.EntryPanelOrdering;
 import me.shedaniel.rei.api.client.registry.entry.CollapsibleEntryRegistry;
 import me.shedaniel.rei.api.client.registry.entry.EntryRegistry;
+import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.view.Views;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
+import me.shedaniel.rei.impl.client.config.collapsible.CollapsibleConfigManager;
 import me.shedaniel.rei.impl.client.search.AsyncSearchManager;
 import me.shedaniel.rei.impl.client.search.collapsed.CollapsedEntriesCache;
 import me.shedaniel.rei.impl.common.InternalLogger;
 import me.shedaniel.rei.impl.common.entry.type.EntryRegistryImpl;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsedStack;
 import me.shedaniel.rei.impl.common.entry.type.collapsed.CollapsibleEntryRegistryImpl;
+import me.shedaniel.rei.impl.common.util.HNEntryStackWrapper;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -67,7 +70,7 @@ public class EntryListSearchManager {
     
     public static final EntryListSearchManager INSTANCE = new EntryListSearchManager();
     
-    private final AsyncSearchManager searchManager = new AsyncSearchManager(((EntryRegistryImpl) EntryRegistry.getInstance())::getPreFilteredComplexList, () -> {
+    private final AsyncSearchManager searchManager = new AsyncSearchManager(EntryListSearchManager::getAllEntriesContextually, () -> {
         boolean checkCraftable = ConfigManager.getInstance().isCraftableOnlyEnabled();
         LongSet workingItems = checkCraftable ? new LongOpenHashSet() : null;
         if (checkCraftable) {
@@ -77,6 +80,15 @@ public class EntryListSearchManager {
         }
         return checkCraftable ? stack -> workingItems.contains(stack.hashExact()) : stack -> true;
     }, HashedEntryStackWrapper::normalize);
+    
+    private static List<HNEntryStackWrapper> getAllEntriesContextually(SearchFilter filter) {
+        if (EntryRegistry.getInstance().isReloading()) return List.of();
+        if (ConfigObject.getInstance().isHidingEntryPanelIfIdle() && filter.getFilter().isEmpty()) {
+            return List.of();
+        }
+        
+        return ((EntryRegistryImpl) EntryRegistry.getInstance()).getPreFilteredComplexList();
+    }
     
     public void update(String searchTerm, boolean ignoreLastSearch, Consumer<List</*EntryStack<?> | CollapsedStack*/ Object>> update) {
         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -116,9 +128,18 @@ public class EntryListSearchManager {
     private List</*EntryStack<?> | CollapsedStack*/ Object> collapse(List<HashedEntryStackWrapper> stacks, BooleanSupplier isValid) {
         CollapsibleEntryRegistryImpl collapsibleRegistry = (CollapsibleEntryRegistryImpl) CollapsibleEntryRegistry.getInstance();
         Map<CollapsibleEntryRegistryImpl.Entry, @Nullable CollapsedStack> entries = new HashMap<>();
+        CollapsibleConfigManager.CollapsibleConfigObject collapsibleConfig = CollapsibleConfigManager.getInstance().getConfig();
         
         for (CollapsibleEntryRegistryImpl.Entry entry : collapsibleRegistry.getEntries()) {
-            entries.put(entry, null);
+            if (!collapsibleConfig.disabledGroups.contains(entry.getId())) {
+                entries.put(entry, null);
+            }
+        }
+        
+        for (CollapsibleEntryRegistryImpl.Entry entry : collapsibleRegistry.getCustomEntries()) {
+            if (!collapsibleConfig.disabledGroups.contains(entry.getId())) {
+                entries.put(entry, null);
+            }
         }
         
         if (entries.isEmpty()) return (List<Object>) (List<?>) new AbstractList<EntryStack<?>>() {

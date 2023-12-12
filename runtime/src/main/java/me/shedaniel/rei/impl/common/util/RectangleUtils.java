@@ -29,6 +29,18 @@ import java.util.Comparator;
 import java.util.stream.Stream;
 
 public class RectangleUtils {
+    public static Rectangle inset(Rectangle rectangle, int inset) {
+        return inset(rectangle, inset, inset);
+    }
+    
+    public static Rectangle inset(Rectangle rectangle, int insetX, int insetY) {
+        return inset(rectangle, insetX, insetY, insetX, insetY);
+    }
+    
+    public static Rectangle inset(Rectangle rectangle, int insetLeft, int insetTop, int insetRight, int insetBottom) {
+        return new Rectangle(rectangle.x + insetLeft, rectangle.y + insetTop, rectangle.width - insetLeft - insetRight, rectangle.height - insetTop - insetBottom);
+    }
+    
     public static Rectangle excludeZones(Rectangle rectangle, Stream<Rectangle> exclusionZones) {
         return exclusionZones
                 .filter(rect -> rect.intersects(rectangle))

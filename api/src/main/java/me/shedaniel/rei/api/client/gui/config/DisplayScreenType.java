@@ -37,6 +37,6 @@ public enum DisplayScreenType {
     
     @Override
     public String toString() {
-        return I18n.get("config.roughlyenoughitems.recipeScreenType." + name().toLowerCase(Locale.ROOT));
+        return I18n.get("config.rei.value.appearance.recipe_lookup_style." + name().toLowerCase(Locale.ROOT));
     }
 }

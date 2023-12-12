@@ -37,7 +37,7 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * A renderer to render a {@link EntryStack}.
- * Use {@link me.shedaniel.rei.api.client.util.ClientEntryStacks#setRenderer} to change the {@link EntryRenderer} for a {@link EntryStack}.
+ * Use {@link EntryStack#withRenderer} to change the {@link EntryRenderer} for a {@link EntryStack}.
  *
  * @param <T> the entry type
  * @see BatchedEntryRenderer

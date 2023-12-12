@@ -58,7 +58,7 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
                 this.alpha.setAs(0);
                 break;
             case AUTO_HIDE:
-                this.alpha.setTo(hovered ? 1f : isAvailable(mouseX, mouseY) ? 0.5f : 0f, 260);
+                this.alpha.setTo(hovered ? 1f : isAvailable(mouseX, mouseY) ? 0.5f : 0f, ConfigObject.getInstance().isReducedMotion() ? 0 : 260);
                 break;
             case ALWAYS_VISIBLE:
                 this.alpha.setAs(hovered ? 1f : 0.5f);

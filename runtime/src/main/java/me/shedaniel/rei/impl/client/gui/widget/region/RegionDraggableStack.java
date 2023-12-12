@@ -23,11 +23,9 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.region;
 
-import me.shedaniel.math.Point;
 import me.shedaniel.rei.api.client.entry.region.RegionEntry;
 import me.shedaniel.rei.api.client.gui.drag.DraggableStack;
 import me.shedaniel.rei.api.client.gui.drag.DraggedAcceptorResult;
-import me.shedaniel.rei.api.client.gui.drag.DraggingContext;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 
@@ -35,7 +33,6 @@ public class RegionDraggableStack<T extends RegionEntry<T>> implements Draggable
     private RealRegionEntry<T> entry;
     private EntryStack<?> stack;
     private WidgetWithBounds showcaseWidget;
-    private int previousIndex = -1;
     
     public RegionDraggableStack(RealRegionEntry<T> entry, WidgetWithBounds showcaseWidget) {
         this.entry = entry;
@@ -50,10 +47,6 @@ public class RegionDraggableStack<T extends RegionEntry<T>> implements Draggable
     
     @Override
     public void drag() {
-        if (showcaseWidget == null && entry.region.listener.removeOnDrag()) {
-            previousIndex = entry.region.indexOf(entry);
-            entry.region.remove(entry, EntryStacksRegionWidget.RemovalMode.MIGRATED);
-        }
     }
     
     public RealRegionEntry<T> getEntry() {
@@ -62,24 +55,6 @@ public class RegionDraggableStack<T extends RegionEntry<T>> implements Draggable
     
     @Override
     public void release(DraggedAcceptorResult result) {
-        if (result != DraggedAcceptorResult.CONSUMED) {
-            if (!entry.region.listener.removeOnDrag()) {
-                DraggingContext.getInstance().renderBackToPosition(this, DraggingContext.getInstance().getCurrentPosition(),
-                        () -> entry.pos.value().getLocation());
-            } else if (showcaseWidget != null) {
-                DraggingContext.getInstance().renderBackToPosition(this, DraggingContext.getInstance().getCurrentPosition(),
-                        () -> new Point(showcaseWidget.getBounds().x, showcaseWidget.getBounds().y));
-            } else if (result == DraggedAcceptorResult.ACCEPTED) {
-                DraggingContext<?> context = DraggingContext.getInstance();
-                double x = context.getCurrentPosition().x;
-                double y = context.getCurrentPosition().y + entry.region.getScrollAmount();
-                entry.region.drop(entry, x, y, previousIndex);
-            } else {
-                entry.region.drop(entry);
-            }
-        } else {
-            entry.region.listener.onConsumed(entry);
-        }
     }
     
     public WidgetWithBounds getShowcaseWidget() {
