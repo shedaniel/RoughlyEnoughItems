@@ -55,6 +55,16 @@ remapJar {
     archiveClassifier = null
 }
 
+task renameJarForPublication(type: Zip, dependsOn: remapJar) {
+    from remapJar.archiveFile.map { zipTree(it) }
+    metadataCharset "UTF-8"
+    archiveExtension = "jar"
+    destinationDirectory = base.libsDirectory
+    archiveClassifier = project.name
+}
+
+assemble.dependsOn renameJarForPublication
+
 jar {
     archiveClassifier = "dev"
 }
@@ -110,7 +120,7 @@ unifiedPublishing {
         gameLoaders = ["fabric"]
         changelog = rootProject.releaseChangelog
 
-        mainPublication remapJar
+        mainPublication renameJarForPublication
 
         relations {
             depends {
