@@ -15,21 +15,21 @@ To allow players to view items and recipes.
 
 [[dependencies.roughlyenoughitems]]
 modId = "architectury"
-mandatory = true
+type = "required"
 versionRange = "[8,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.roughlyenoughitems]]
 modId = "cloth_config"
-mandatory = true
+type = "required"
 versionRange = "[10.0,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.roughlyenoughitems]]
 modId = "neoforge"
-mandatory = true
+type = "required"
 versionRange = "[20.2.0,)"
 ordering = "NONE"
 side = "BOTH"
