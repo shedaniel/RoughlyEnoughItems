@@ -23,9 +23,9 @@
 
 package me.shedaniel.rei.impl.client.config.entries;
 
-import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
+import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -37,7 +37,6 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 
 import java.util.Collections;
@@ -64,7 +63,7 @@ public class FilteringCategoriesScreen extends Screen {
                 this.parent = null;
             }, Supplier::get) {});
         }
-        listWidget = addWidget(new ListWidget(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
+        listWidget = addWidget(new ListWidget(minecraft, width, height, 30, height));
         for (CategoryRegistry.CategoryConfiguration<?> configuration : CategoryRegistry.getInstance()) {
             listWidget.addItem(new DefaultListEntry(configuration));
         }
@@ -72,16 +71,16 @@ public class FilteringCategoriesScreen extends Screen {
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        this.listWidget.render(graphics, mouseX, mouseY, delta);
         super.render(graphics, mouseX, mouseY, delta);
+        this.listWidget.render(graphics, mouseX, mouseY, delta);
         graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
     }
     
-    private static class ListWidget extends DynamicElementListWidget<ListEntry> {
+    private static class ListWidget extends UpdatedListWidget<ListEntry> {
         private boolean inFocus;
         
-        public ListWidget(Minecraft client, int width, int height, int top, int bottom, ResourceLocation backgroundLocation) {
-            super(client, width, height, top, bottom, backgroundLocation);
+        public ListWidget(Minecraft client, int width, int height, int top, int bottom) {
+            super(client, width, height, top, bottom);
         }
         
         @Override
@@ -125,7 +124,7 @@ public class FilteringCategoriesScreen extends Screen {
         }
     }
     
-    private static abstract class ListEntry extends DynamicElementListWidget.ElementEntry<ListEntry> {
+    private static abstract class ListEntry extends UpdatedListWidget.ElementEntry<ListEntry> {
         @Override
         public int getItemHeight() {
             return 35;

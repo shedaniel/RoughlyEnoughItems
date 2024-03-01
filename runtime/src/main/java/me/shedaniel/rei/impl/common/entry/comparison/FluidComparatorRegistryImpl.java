@@ -30,7 +30,7 @@ import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import net.minecraft.world.level.material.Fluid;
 
 public class FluidComparatorRegistryImpl extends EntryComparatorRegistryImpl<FluidStack, Fluid> implements FluidComparatorRegistry {
-    private final EntryComparator<FluidStack> fluidNbt = EntryComparator.fluidNbt();
+    private final EntryComparator<FluidStack> fluidNbt = EntryComparator.fluidComponents();
     private final EntryComparator<FluidStack> defaultComparator = (context, stack) -> {
         if (context.isExact()) {
             return fluidNbt.hash(context, stack);

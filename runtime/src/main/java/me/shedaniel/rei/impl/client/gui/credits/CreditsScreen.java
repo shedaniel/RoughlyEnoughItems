@@ -153,10 +153,13 @@ public class CreditsScreen extends Screen {
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        this.renderDirtBackground(graphics);
-        this.entryListWidget.render(graphics, mouseX, mouseY, delta);
-        graphics.drawCenteredString(this.font, I18n.get("text.rei.credits"), this.width / 2, 16, 16777215);
         super.render(graphics, mouseX, mouseY, delta);
+        graphics.drawCenteredString(this.font, I18n.get("text.rei.credits"), this.width / 2, 16, 16777215);
     }
     
+    @Override
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        super.renderBackground(graphics, mouseX, mouseY, delta);
+        this.entryListWidget.render(graphics, mouseX, mouseY, delta);
+    }
 }

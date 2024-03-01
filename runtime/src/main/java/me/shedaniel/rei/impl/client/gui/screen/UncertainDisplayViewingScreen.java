@@ -206,6 +206,9 @@ public class UncertainDisplayViewingScreen extends Screen {
                 graphics.pose().popPose();
             }
         }
+        int k = 10, l = 44, m = width - 20, n = height - l - 10 - 5;
+        graphics.fill( k + 1, l, k + m, l + n, -16777216);
+        graphics.renderOutline(k, l, m, n, -1);
         for (Widget widget : widgets) {
             widget.render(graphics, int_1, int_2, float_1);
         }
@@ -213,12 +216,12 @@ public class UncertainDisplayViewingScreen extends Screen {
             graphics.pose().pushPose();
             graphics.pose().translate(0, -(scroll.floatValue() / 200f * height), 0);
             updateFramePosition(float_1);
-            int x = (int) (width / 2 - 205 + (210 * frame));
+            int x = (int) (width / 2 - 205 + (200 * frame)) + 10;
             int y = height / 2 - 112 / 2 - 10;
-            graphics.fillGradient(x - 2, y - 4, x - 6 + 208, y - 4 + 2, -1778384897, -1778384897);
-            graphics.fillGradient(x - 2, y - 4 + 126 - 2, x - 6 + 208, y - 4 + 126, -1778384897, -1778384897);
+            graphics.fillGradient(x - 2, y - 4, x - 6 + 208- 10, y - 4 + 2, -1778384897, -1778384897);
+            graphics.fillGradient(x - 2, y - 4 + 126 - 2, x - 6 + 208- 10, y - 4 + 126, -1778384897, -1778384897);
             graphics.fillGradient(x - 4, y - 4, x - 4 + 2, y - 4 + 126, -1778384897, -1778384897);
-            graphics.fillGradient(x - 4 + 208 - 2, y - 4, x - 4 + 208, y - 4 + 126, -1778384897, -1778384897);
+            graphics.fillGradient(x - 4 + 208 - 2 - 10, y - 4, x - 4 + 208 - 10, y - 4 + 126, -1778384897, -1778384897);
             graphics.pose().popPose();
         }
         ScissorsHandler.INSTANCE.removeLastScissor();
@@ -227,11 +230,7 @@ public class UncertainDisplayViewingScreen extends Screen {
     
     @Override
     public void renderBackground(GuiGraphics graphics, int i, int j, float f) {
-        if (this.minecraft.level != null) {
-            super.renderBackground(graphics, i, j, f);
-        } else {
-            graphics.fillGradient(0, 0, this.width, this.height, -16777216, -16777216);
-        }
+        super.renderBackground(graphics, i, j, f);
     }
     
     private void updateFramePosition(float delta) {

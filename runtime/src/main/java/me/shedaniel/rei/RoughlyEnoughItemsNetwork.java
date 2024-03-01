@@ -87,9 +87,12 @@ public class RoughlyEnoughItemsNetwork {
                 player.displayClientMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
                 return;
             }
-            ItemStack stack = buf.readItem();
+            ItemStack stack = buf.readJsonWithCodec(ItemStack.OPTIONAL_CODEC);
             if (player.getInventory().add(stack.copy())) {
-                NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.copy()).writeUtf(player.getScoreboardName(), 32767));
+                FriendlyByteBuf newBuf = new FriendlyByteBuf(Unpooled.buffer());
+                newBuf.writeJsonWithCodec(ItemStack.OPTIONAL_CODEC, stack.copy());
+                newBuf.writeUtf(player.getScoreboardName(), 32767);
+                NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, newBuf);
             } else {
                 player.displayClientMessage(Component.translatable("text.rei.failed_cheat_items"), false);
             }
@@ -102,7 +105,7 @@ public class RoughlyEnoughItemsNetwork {
             }
             
             AbstractContainerMenu menu = player.containerMenu;
-            ItemStack itemStack = buf.readItem();
+            ItemStack itemStack = buf.readJsonWithCodec(ItemStack.OPTIONAL_CODEC);
             ItemStack stack = itemStack.copy();
             if (!menu.getCarried().isEmpty() && ItemStack.isSameItemSameTags(menu.getCarried(), stack)) {
                 stack.setCount(Mth.clamp(stack.getCount() + menu.getCarried().getCount(), 1, stack.getMaxStackSize()));
@@ -111,7 +114,10 @@ public class RoughlyEnoughItemsNetwork {
             }
             menu.setCarried(stack.copy());
             menu.broadcastChanges();
-            NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(itemStack.copy()).writeUtf(player.getScoreboardName(), 32767));
+            FriendlyByteBuf newBuf = new FriendlyByteBuf(Unpooled.buffer());
+            newBuf.writeJsonWithCodec(ItemStack.OPTIONAL_CODEC, stack.copy());
+            newBuf.writeUtf(player.getScoreboardName(), 32767);
+            NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, newBuf);
         });
         NetworkManager.registerReceiver(NetworkManager.c2s(), CREATE_ITEMS_HOTBAR_PACKET, Collections.singletonList(new SplitPacketTransformer()), (buf, context) -> {
             ServerPlayer player = (ServerPlayer) context.getPlayer();
@@ -119,13 +125,16 @@ public class RoughlyEnoughItemsNetwork {
                 player.displayClientMessage(Component.translatable("text.rei.no_permission_cheat").withStyle(ChatFormatting.RED), false);
                 return;
             }
-            ItemStack stack = buf.readItem();
+            ItemStack stack = buf.readJsonWithCodec(ItemStack.OPTIONAL_CODEC);
             int hotbarSlotId = buf.readVarInt();
             if (hotbarSlotId >= 0 && hotbarSlotId < 9) {
                 AbstractContainerMenu menu = player.containerMenu;
                 player.getInventory().items.set(hotbarSlotId, stack.copy());
                 menu.broadcastChanges();
-                NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.copy()).writeUtf(player.getScoreboardName(), 32767));
+                FriendlyByteBuf newBuf = new FriendlyByteBuf(Unpooled.buffer());
+                newBuf.writeJsonWithCodec(ItemStack.OPTIONAL_CODEC, stack.copy());
+                newBuf.writeUtf(player.getScoreboardName(), 32767);
+                NetworkManager.sendToPlayer(player, RoughlyEnoughItemsNetwork.CREATE_ITEMS_MESSAGE_PACKET, newBuf);
             } else {
                 player.displayClientMessage(Component.translatable("text.rei.failed_cheat_items"), false);
             }

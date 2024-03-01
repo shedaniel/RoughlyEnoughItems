@@ -28,7 +28,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.ApiStatus;
@@ -91,7 +91,7 @@ public class ErrorsScreen extends Screen {
         this.minecraft.level.disconnect();
         
         if (localServer) {
-            this.minecraft.disconnect(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
+            this.minecraft.disconnect(new GenericMessageScreen(Component.translatable("menu.savingLevel")));
         } else {
             this.minecraft.disconnect();
         }
@@ -108,10 +108,13 @@ public class ErrorsScreen extends Screen {
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        this.renderDirtBackground(graphics);
-        this.listWidget.render(graphics, mouseX, mouseY, delta);
-        graphics.drawCenteredString(this.font, getTitle(), this.width / 2, 16, 16777215);
         super.render(graphics, mouseX, mouseY, delta);
+        graphics.drawCenteredString(this.font, getTitle(), this.width / 2, 16, 16777215);
     }
     
+    @Override
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+        super.renderBackground(graphics, mouseX, mouseY, delta);
+        this.listWidget.render(graphics, mouseX, mouseY, delta);
+    }
 }

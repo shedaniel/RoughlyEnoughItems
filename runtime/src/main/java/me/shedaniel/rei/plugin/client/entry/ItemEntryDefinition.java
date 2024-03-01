@@ -27,7 +27,6 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.architectury.hooks.item.ItemStackHooks;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
@@ -38,6 +37,7 @@ import me.shedaniel.rei.api.client.entry.renderer.BatchedEntryRenderer;
 import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
+import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
@@ -56,8 +56,11 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -68,6 +71,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 
 import java.util.List;
 import java.util.Optional;
@@ -182,12 +186,12 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     
     @Override
     public CompoundTag save(EntryStack<ItemStack> entry, ItemStack value) {
-        return value.save(new CompoundTag());
+        return (CompoundTag) value.save(BasicDisplay.registryAccess());
     }
     
     @Override
     public ItemStack read(CompoundTag tag) {
-        return ItemStack.of(tag);
+        return ItemStack.parseOptional(BasicDisplay.registryAccess(), tag);
     }
     
     private static final ReferenceSet<Item> SEARCH_BLACKLISTED = new ReferenceOpenHashSet<>();
@@ -243,7 +247,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         ItemStack stack = entry.getValue();
         category.setDetail("Item Type", () -> String.valueOf(stack.getItem()));
         category.setDetail("Item Damage", () -> String.valueOf(stack.getDamageValue()));
-        category.setDetail("Item NBT", () -> String.valueOf(stack.getTag()));
+        category.setDetail("Item Components", () -> DataComponentPatch.CODEC.encodeStart(BasicDisplay.registryAccess().createSerializationContext(NbtOps.INSTANCE), stack.getComponentsPatch()).result().map(Tag::toString).orElse("Error"));
         category.setDetail("Item Foil", () -> String.valueOf(stack.hasFoil()));
     }
     
@@ -266,7 +270,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
                 ItemStack value = entry.getValue();
                 graphics.pose().pushPose();
                 graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY(), 0);
-                graphics.pose().mulPoseMatrix(new Matrix4f().scaling(1.0F, -1.0F, 1.0F));
+                graphics.pose().mulPose(new Matrix4f().scaling(1.0F, -1.0F, 1.0F));
                 graphics.pose().scale(bounds.getWidth(), bounds.getHeight(), (bounds.getWidth() + bounds.getHeight()) / 2.0F);
                 MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
                 Minecraft.getInstance().getItemRenderer().render(value, ItemDisplayContext.GUI, false, graphics.pose(), immediate,
@@ -274,14 +278,14 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
                 immediate.endBatch();
                 graphics.pose().popPose();
             }
-            PoseStack modelViewStack = RenderSystem.getModelViewStack();
-            modelViewStack.pushPose();
-            modelViewStack.mulPoseMatrix(graphics.pose().last().pose());
+            Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
+            modelViewStack.pushMatrix();
+            modelViewStack.mul(graphics.pose().last().pose());
             modelViewStack.translate(bounds.x, bounds.y, 0);
             modelViewStack.scale(bounds.width / 16f, (bounds.getWidth() + bounds.getHeight()) / 2f / 16f, 1.0F);
             RenderSystem.applyModelViewMatrix();
             renderOverlay(new GuiGraphics(Minecraft.getInstance(), graphics.bufferSource()), entry, bounds);
-            modelViewStack.popPose();
+            modelViewStack.popMatrix();
             endGL(entry, model);
             RenderSystem.applyModelViewMatrix();
         }
@@ -294,10 +298,6 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         @Override
         public void startBatch(EntryStack<ItemStack> entry, BakedModel model, GuiGraphics graphics, float delta) {
             setupGL(entry, model);
-            PoseStack modelViewStack = RenderSystem.getModelViewStack();
-            modelViewStack.pushPose();
-            modelViewStack.scale(SCALE, -SCALE, 1.0F);
-            RenderSystem.applyModelViewMatrix();
         }
         
         public void setupGL(EntryStack<ItemStack> entry, BakedModel model) {
@@ -315,8 +315,8 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
             if (!entry.isEmpty()) {
                 ItemStack value = entry.getValue();
                 graphics.pose().pushPose();
-                graphics.pose().translate(bounds.getCenterX() / SCALE, bounds.getCenterY() / -SCALE, 0);
-                graphics.pose().scale(bounds.getWidth() / SCALE, (bounds.getWidth() + bounds.getHeight()) / 2f / SCALE, 1.0F);
+                graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY(), 0);
+                graphics.pose().scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, (bounds.getWidth() + bounds.getHeight()) / 2f);
                 Minecraft.getInstance().getItemRenderer().render(value, ItemDisplayContext.GUI, false, graphics.pose(), immediate,
                         ITEM_LIGHT, OverlayTexture.NO_OVERLAY, model);
                 graphics.pose().popPose();
@@ -326,20 +326,18 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         @Override
         public void afterBase(EntryStack<ItemStack> entry, BakedModel model, GuiGraphics graphics, float delta) {
             endGL(entry, model);
-            RenderSystem.getModelViewStack().popPose();
-            RenderSystem.applyModelViewMatrix();
         }
         
         @Override
         public void renderOverlay(EntryStack<ItemStack> entry, BakedModel model, GuiGraphics graphics, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
-            PoseStack modelViewStack = RenderSystem.getModelViewStack();
-            modelViewStack.pushPose();
-            modelViewStack.mulPoseMatrix(graphics.pose().last().pose());
+            Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
+            modelViewStack.pushMatrix();
+            modelViewStack.mul(graphics.pose().last().pose());
             modelViewStack.translate(bounds.x, bounds.y, 0);
             modelViewStack.scale(bounds.width / 16f, (bounds.getWidth() + bounds.getHeight()) / 2f / 16f, 1.0F);
             RenderSystem.applyModelViewMatrix();
             renderOverlay(new GuiGraphics(Minecraft.getInstance(), graphics.bufferSource()), entry, bounds);
-            modelViewStack.popPose();
+            modelViewStack.popMatrix();
             RenderSystem.applyModelViewMatrix();
         }
         

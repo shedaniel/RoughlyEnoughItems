@@ -28,6 +28,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -50,7 +51,7 @@ public class SearchFilterSyntaxHighlightingScreen extends Screen {
     protected void renderHoleBackground(GuiGraphics graphics, int y1, int y2, int tint, int alpha1, int alpha2) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.getBuilder();
-        RenderSystem.setShaderTexture(0, BACKGROUND_LOCATION);
+        RenderSystem.setShaderTexture(0, InternalTextures.LEGACY_DIRT);
         Matrix4f matrix = graphics.pose().last().pose();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);

@@ -27,6 +27,7 @@ import com.google.common.collect.Lists;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializer;
+import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
@@ -104,10 +105,10 @@ public class DefaultInformationDisplay implements Display {
             @Override
             public CompoundTag save(CompoundTag tag, DefaultInformationDisplay display) {
                 tag.put("stacks", display.getEntryStacks().saveIngredient());
-                tag.putString("name", Component.Serializer.toJson(display.getName()));
+                tag.putString("name", Component.Serializer.toJson(display.getName(), BasicDisplay.registryAccess()));
                 ListTag descriptions = new ListTag();
                 for (Component text : display.getTexts()) {
-                    descriptions.add(StringTag.valueOf(Component.Serializer.toJson(text)));
+                    descriptions.add(StringTag.valueOf(Component.Serializer.toJson(text, BasicDisplay.registryAccess())));
                 }
                 tag.put("descriptions", descriptions);
                 return tag;
@@ -116,10 +117,10 @@ public class DefaultInformationDisplay implements Display {
             @Override
             public DefaultInformationDisplay read(CompoundTag tag) {
                 EntryIngredient stacks = EntryIngredient.read(tag.getList("stacks", Tag.TAG_COMPOUND));
-                Component name = Component.Serializer.fromJson(tag.getString("name"));
+                Component name = Component.Serializer.fromJson(tag.getString("name"), BasicDisplay.registryAccess());
                 List<Component> descriptions = new ArrayList<>();
                 for (Tag descriptionTag : tag.getList("descriptions", Tag.TAG_STRING)) {
-                    descriptions.add(Component.Serializer.fromJson(descriptionTag.getAsString()));
+                    descriptions.add(Component.Serializer.fromJson(descriptionTag.getAsString(), BasicDisplay.registryAccess()));
                 }
                 return new DefaultInformationDisplay(stacks, name).lines(descriptions);
             }

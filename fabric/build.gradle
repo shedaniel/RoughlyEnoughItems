@@ -115,7 +115,7 @@ publishing {
 unifiedPublishing {
     project {
         displayName = "[Fabric $rootProject.supported_version] v$project.version"
-        releaseType = "release"
+        releaseType = rootProject.unstable == "false" ? "release" : "alpha"
         gameVersions = []
         gameLoaders = ["fabric"]
         changelog = rootProject.releaseChangelog
@@ -141,7 +141,7 @@ unifiedPublishing {
             curseforge {
                 token = project.hasProperty("danielshe_curse_api_key") ? project.property("danielshe_curse_api_key") : System.getenv("danielshe_curse_api_key")
                 id = "310111"
-                gameVersions.addAll "Java 17", "1.20.2-Snapshot", project.minecraft_version
+                gameVersions.addAll "Java 17", "1.20.5-Snapshot"//, project.minecraft_version
             }
         }
 

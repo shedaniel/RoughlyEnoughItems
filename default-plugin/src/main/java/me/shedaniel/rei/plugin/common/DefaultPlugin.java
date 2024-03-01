@@ -27,13 +27,9 @@ import dev.architectury.event.CompoundEventResult;
 import dev.architectury.hooks.fluid.FluidBucketHooks;
 import dev.architectury.hooks.fluid.FluidStackHooks;
 import me.shedaniel.rei.api.common.display.DisplaySerializerRegistry;
-import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.api.common.entry.comparison.ItemComparatorRegistry;
 import me.shedaniel.rei.api.common.fluid.FluidSupportProvider;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
-import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
-import me.shedaniel.rei.api.common.transfer.info.simple.RecipeBookGridMenuInfo;
-import me.shedaniel.rei.api.common.transfer.info.simple.SimpleMenuInfoProvider;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.plugin.common.displays.*;
 import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconBaseDisplay;
@@ -46,14 +42,16 @@ import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmeltingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.DefaultSmokingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.item.*;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -65,23 +63,20 @@ public class DefaultPlugin implements BuiltinPlugin, REIServerPlugin {
     
     @Override
     public void registerItemComparators(ItemComparatorRegistry registry) {
-        EntryComparator<Tag> nbtHasher = EntryComparator.nbt();
-        Function<ItemStack, ListTag> enchantmentTag = stack -> {
-            CompoundTag tag = stack.getTag();
-            if (tag == null) return null;
-            if (!tag.contains(ItemStack.TAG_ENCH, Tag.TAG_LIST)) {
-                if (tag.contains(EnchantedBookItem.TAG_STORED_ENCHANTMENTS, Tag.TAG_LIST)) {
-                    return tag.getList(EnchantedBookItem.TAG_STORED_ENCHANTMENTS, Tag.TAG_COMPOUND);
+        Function<ItemStack, ItemEnchantments> enchantmentTag = stack -> {
+            if (!stack.has(DataComponents.ENCHANTMENTS)) {
+                if (stack.has(DataComponents.STORED_ENCHANTMENTS)) {
+                    return stack.get(DataComponents.STORED_ENCHANTMENTS);
                 }
                 return null;
             }
-            return tag.getList(ItemStack.TAG_ENCH, Tag.TAG_COMPOUND);
+            return stack.get(DataComponents.ENCHANTMENTS);
         };
-        registry.register((context, stack) -> nbtHasher.hash(context, enchantmentTag.apply(stack)), Items.ENCHANTED_BOOK);
-        registry.registerNbt(Items.POTION);
-        registry.registerNbt(Items.SPLASH_POTION);
-        registry.registerNbt(Items.LINGERING_POTION);
-        registry.registerNbt(Items.TIPPED_ARROW);
+        registry.register((context, stack) -> Objects.hashCode(enchantmentTag.apply(stack)), Items.ENCHANTED_BOOK);
+        registry.registerComponents(Items.POTION);
+        registry.registerComponents(Items.SPLASH_POTION);
+        registry.registerComponents(Items.LINGERING_POTION);
+        registry.registerComponents(Items.TIPPED_ARROW);
     }
     
     @Override

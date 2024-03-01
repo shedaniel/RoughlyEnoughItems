@@ -24,75 +24,61 @@
 package me.shedaniel.rei.impl.common.entry.comparison;
 
 import com.google.common.base.Predicates;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
 import me.shedaniel.rei.api.common.entry.comparison.EntryComparator;
 import me.shedaniel.rei.impl.Internals;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.PatchedDataComponentMap;
+import net.minecraft.core.component.TypedDataComponent;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public enum NbtHasherProviderImpl implements Internals.NbtHasherProvider {
     INSTANCE;
-    private final EntryComparator<Tag> defaultHasher = _provide();
+    private final EntryComparator<DataComponentMap> defaultHasher = _provide();
     
     @Override
-    public EntryComparator<Tag> provide(String... ignoredKeys) {
+    public EntryComparator<DataComponentMap> provide(DataComponentType<?>... ignoredKeys) {
         if (ignoredKeys == null || ignoredKeys.length == 0) return defaultHasher;
         return _provide(ignoredKeys);
     }
     
-    private EntryComparator<Tag> _provide(String... ignoredKeys) {
+    private EntryComparator<DataComponentMap> _provide(DataComponentType<?>... ignoredKeys) {
         return new Hasher(ignoredKeys);
     }
     
-    private static class Hasher implements EntryComparator<Tag> {
-        private final Predicate<String> filter;
+    private static class Hasher implements EntryComparator<DataComponentMap> {
+        @Nullable
+        private final Predicate<DataComponentType<?>> filter;
         
-        private Hasher(@Nullable String[] ignoredKeys) {
+        private Hasher(@Nullable DataComponentType<?>[] ignoredKeys) {
             if (ignoredKeys == null || ignoredKeys.length == 0) {
-                this.filter = key -> true;
+                this.filter = null;
             } else if (ignoredKeys.length == 1) {
-                String s = ignoredKeys[0];
+                DataComponentType<?> s = ignoredKeys[0];
                 this.filter = key -> !Objects.equals(s, key);
             } else {
-                Set<String> set = new HashSet<>(Arrays.asList(ignoredKeys));
+                Set<DataComponentType<?>> set = new ReferenceOpenHashSet<>(Arrays.asList(ignoredKeys));
                 this.filter = Predicates.not(set::contains);
             }
         }
         
-        private boolean shouldHash(String key) {
-            return filter.test(key);
-        }
-        
         @Override
-        public long hash(ComparisonContext context, Tag value) {
-            return hashTag(value);
+        public long hash(ComparisonContext context, DataComponentMap value) {
+            return this.filter == null && value instanceof PatchedDataComponentMap ? value.hashCode() : hashIgnoringKeys(value);
         }
         
-        private int hashTag(Tag tag) {
-            if (tag == null) return 0;
-            if (tag instanceof ListTag list) return hashListTag(list);
-            if (tag instanceof CompoundTag compound) return hashCompoundTag(compound);
-            return tag.hashCode();
-        }
-        
-        private int hashListTag(ListTag tag) {
-            int i = tag.size();
-            for (Tag innerTag : tag) {
-                i = i * 31 + hashTag(innerTag);
-            }
-            return i;
-        }
-        
-        private int hashCompoundTag(CompoundTag tag) {
-            int i = 1;
-            for (Map.Entry<String, Tag> entry : tag.tags.entrySet()) {
-                if (shouldHash(entry.getKey())) {
-                    i = i * 31 + (Objects.hashCode(entry.getKey()) ^ hashTag(entry.getValue()));
+        private long hashIgnoringKeys(DataComponentMap tag) {
+            long i = 1L;
+            for (TypedDataComponent<?> entry : tag) {
+                if (filter.test(entry.type())) {
+                    i = i * 31 + (Objects.hashCode(entry.type()) ^ Objects.hashCode(entry.value()));
                 }
             }
             return i;

@@ -219,7 +219,9 @@ public class ClientHelperImpl implements ClientHelper {
                 return false;
             }
             try {
-                NetworkManager.sendToServer(ConfigObject.getInstance().isGrabbingItems() ? RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET : RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(cheatedStack));
+                FriendlyByteBuf newBuf = new FriendlyByteBuf(Unpooled.buffer());
+                newBuf.writeJsonWithCodec(ItemStack.OPTIONAL_CODEC, cheatedStack);
+                NetworkManager.sendToServer(ConfigObject.getInstance().isGrabbingItems() ? RoughlyEnoughItemsNetwork.CREATE_ITEMS_GRAB_PACKET : RoughlyEnoughItemsNetwork.CREATE_ITEMS_PACKET, newBuf);
                 return true;
             } catch (Exception exception) {
                 return false;
@@ -229,7 +231,7 @@ public class ClientHelperImpl implements ClientHelper {
             if (identifier == null) {
                 return false;
             }
-            String tagMessage = cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().getAsString() : "";
+            String tagMessage = /* TODO 24w09a: cheatedStack.copy().getTag() != null && !cheatedStack.copy().getTag().isEmpty() ? cheatedStack.copy().getTag().getAsString() :*/ "";
             String og = cheatedStack.getCount() == 1 ? ConfigObject.getInstance().getGiveCommand().replaceAll(" \\{count}", "") : ConfigObject.getInstance().getGiveCommand();
             String madeUpCommand = og.replaceAll("\\{player_name}", Minecraft.getInstance().player.getScoreboardName()).replaceAll("\\{item_name}", identifier.getPath()).replaceAll("\\{item_identifier}", identifier.toString()).replaceAll("\\{nbt}", tagMessage).replaceAll("\\{count}", String.valueOf(cheatedStack.getCount()));
             if (madeUpCommand.length() > 256) {
@@ -264,7 +266,10 @@ public class ClientHelperImpl implements ClientHelper {
                 return false;
             }
             try {
-                NetworkManager.sendToServer(RoughlyEnoughItemsNetwork.CREATE_ITEMS_HOTBAR_PACKET, new FriendlyByteBuf(Unpooled.buffer()).writeItem(stack.getValue().copy()).writeVarInt(hotbarSlotId));
+                FriendlyByteBuf newBuf = new FriendlyByteBuf(Unpooled.buffer());
+                newBuf.writeJsonWithCodec(ItemStack.OPTIONAL_CODEC, stack.getValue().copy());
+                newBuf.writeVarInt(hotbarSlotId);
+                NetworkManager.sendToServer(RoughlyEnoughItemsNetwork.CREATE_ITEMS_HOTBAR_PACKET, newBuf);
                 return true;
             } catch (Exception exception) {
                 return false;

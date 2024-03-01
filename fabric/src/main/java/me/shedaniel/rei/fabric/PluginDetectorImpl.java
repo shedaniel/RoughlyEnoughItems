@@ -127,7 +127,7 @@ public class PluginDetectorImpl implements PluginDetector {
     public void detectServerPlugins() {
         loadPlugin(REIServerPlugin.class, ((PluginView<REIServerPlugin>) PluginManager.getServerInstance())::registerPlugin);
         try {
-            PluginView.getServerInstance().registerPlugin((REIServerPlugin) Class.forName("me.shedaniel.rei.impl.common.compat.FabricFluidAPISupportPlugin").getConstructor().newInstance());
+            // TODO 24w09a: PluginView.getServerInstance().registerPlugin((REIServerPlugin) Class.forName("me.shedaniel.rei.impl.common.compat.FabricFluidAPISupportPlugin").getConstructor().newInstance());
         } catch (Throwable throwable) {
             throwable.printStackTrace();
         }

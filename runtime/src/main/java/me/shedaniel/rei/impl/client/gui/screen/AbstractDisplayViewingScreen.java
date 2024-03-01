@@ -210,6 +210,11 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         selectCategory(categories.get(currentCategoryIndex).getCategoryIdentifier());
     }
     
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int i, int j, float f) {
+        this.renderTransparentBackground(guiGraphics);
+    }
+    
     protected void transformIngredientNotice(List<Widget> setupDisplay, List<EntryStack<?>> noticeStacks) {
         transformNotice(Slot.INPUT, setupDisplay, noticeStacks);
     }

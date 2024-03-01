@@ -41,20 +41,20 @@ public interface ItemComparatorRegistry extends EntryComparatorRegistry<ItemStac
     }
     
     /**
-     * Registers an item to compare via its nbt.
+     * Registers an item to compare via its components.
      *
      * @param item the item to compare
      */
-    default void registerNbt(Item item) {
-        register(EntryComparator.itemNbt(), item);
+    default void registerComponents(Item item) {
+        register(EntryComparator.itemComponents(), item);
     }
     
     /**
-     * Registers items to compare via their nbt.
+     * Registers items to compare via their components.
      *
      * @param items the items to compare
      */
-    default void registerNbt(Item... items) {
-        register(EntryComparator.itemNbt(), items);
+    default void registerComponents(Item... items) {
+        register(EntryComparator.itemComponents(), items);
     }
 }

@@ -24,9 +24,9 @@
 package me.shedaniel.rei.impl.client.config.entries;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
+import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
@@ -76,7 +76,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
             }, Supplier::get) {
             });
         }
-        rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
+        rulesList = addWidget(new RulesList(minecraft, width, height, 30, height));
         addEntries(ruleEntry -> rulesList.addItem(ruleEntry));
     }
     
@@ -96,14 +96,14 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        this.rulesList.render(graphics, mouseX, mouseY, delta);
         super.render(graphics, mouseX, mouseY, delta);
+        this.rulesList.render(graphics, mouseX, mouseY, delta);
         graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
     }
     
-    public static class RulesList extends DynamicElementListWidget<RuleEntry> {
-        public RulesList(Minecraft client, int width, int height, int top, int bottom, ResourceLocation backgroundLocation) {
-            super(client, width, height, top, bottom, backgroundLocation);
+    public static class RulesList extends UpdatedListWidget<RuleEntry> {
+        public RulesList(Minecraft client, int width, int height, int top, int bottom) {
+            super(client, width, height, top, bottom);
         }
         
         @Override
@@ -122,7 +122,7 @@ public abstract class FilteringRuleOptionsScreen<T extends FilteringRule<?>> ext
         }
     }
     
-    public static abstract class RuleEntry extends DynamicElementListWidget.ElementEntry<RuleEntry> {
+    public static abstract class RuleEntry extends UpdatedListWidget.ElementEntry<RuleEntry> {
         private final FilteringRule<?> rule;
         
         public RuleEntry(FilteringRule<?> rule) {

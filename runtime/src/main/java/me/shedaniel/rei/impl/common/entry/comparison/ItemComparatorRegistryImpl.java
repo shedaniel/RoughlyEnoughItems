@@ -30,7 +30,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public class ItemComparatorRegistryImpl extends EntryComparatorRegistryImpl<ItemStack, Item> implements ItemComparatorRegistry {
-    private final EntryComparator<ItemStack> itemNbt = EntryComparator.itemNbt();
+    private final EntryComparator<ItemStack> itemNbt = EntryComparator.itemComponents();
     private final EntryComparator<ItemStack> defaultComparator = (context, stack) -> {
         if (context.isExact()) {
             return itemNbt.hash(context, stack);

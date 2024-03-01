@@ -24,7 +24,6 @@
 package me.shedaniel.rei.impl.client.config.entries;
 
 import com.google.common.base.Suppliers;
-import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
@@ -36,6 +35,7 @@ import me.shedaniel.rei.impl.client.entry.filtering.rules.ManualFilteringRule;
 import me.shedaniel.rei.impl.client.entry.filtering.rules.SearchFilteringRuleType;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import me.shedaniel.rei.impl.common.entry.type.FilteringLogic;
 import me.shedaniel.rei.impl.common.util.HashedEntryStackWrapper;
 import net.minecraft.client.Minecraft;
@@ -48,7 +48,6 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 
 import java.util.*;
@@ -87,7 +86,7 @@ public class FilteringRulesScreen extends Screen {
             }, Supplier::get) {
             });
         }
-        rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
+        rulesList = addWidget(new RulesList(minecraft, width, height, 30, height));
         for (int i = entry.rules.size() - 1; i >= 0; i--) {
             FilteringRule<?> rule = entry.rules.get(i);
             if (rule instanceof ManualFilteringRule)
@@ -102,16 +101,16 @@ public class FilteringRulesScreen extends Screen {
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        this.rulesList.render(graphics, mouseX, mouseY, delta);
         super.render(graphics, mouseX, mouseY, delta);
+        this.rulesList.render(graphics, mouseX, mouseY, delta);
         graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
     }
     
-    public static class RulesList extends DynamicElementListWidget<RuleEntry> {
+    public static class RulesList extends UpdatedListWidget<RuleEntry> {
         private boolean inFocus;
         
-        public RulesList(Minecraft client, int width, int height, int top, int bottom, ResourceLocation backgroundLocation) {
-            super(client, width, height, top, bottom, backgroundLocation);
+        public RulesList(Minecraft client, int width, int height, int top, int bottom) {
+            super(client, width, height, top, bottom);
         }
         
         @Override
@@ -150,7 +149,7 @@ public class FilteringRulesScreen extends Screen {
         }
     }
     
-    public static abstract class RuleEntry extends DynamicElementListWidget.ElementEntry<RuleEntry> {
+    public static abstract class RuleEntry extends UpdatedListWidget.ElementEntry<RuleEntry> {
         private final FilteringRule<?> rule;
         
         public RuleEntry(FilteringRule<?> rule) {

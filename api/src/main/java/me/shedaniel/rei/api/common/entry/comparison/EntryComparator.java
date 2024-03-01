@@ -25,8 +25,8 @@ package me.shedaniel.rei.api.common.entry.comparison;
 
 import dev.architectury.fluid.FluidStack;
 import me.shedaniel.rei.impl.Internals;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Objects;
@@ -47,40 +47,38 @@ public interface EntryComparator<T> {
     }
     
     /**
-     * Creates an {@link EntryComparator} that compares the {@link ItemStack}'s NBT.
+     * Creates an {@link EntryComparator} that compares the {@link ItemStack}'s components.
      *
-     * @return an {@link EntryComparator} that compares the {@link ItemStack}'s NBT
+     * @return an {@link EntryComparator} that compares the {@link ItemStack}'s components
      */
-    static EntryComparator<ItemStack> itemNbt() {
-        EntryComparator<Tag> nbtHasher = nbt("Count");
+    static EntryComparator<ItemStack> itemComponents() {
+        EntryComparator<DataComponentMap> componentHasher = component();
         return (context, stack) -> {
-            CompoundTag tag = stack.getTag();
-            return tag == null ? 0L : nbtHasher.hash(context, tag);
+            return componentHasher.hash(context, stack.getComponents());
         };
     }
     
     /**
-     * Creates an {@link EntryComparator} that compares the {@link FluidStack}'s NBT.
+     * Creates an {@link EntryComparator} that compares the {@link FluidStack}'s components.
      *
-     * @return an {@link EntryComparator} that compares the {@link FluidStack}'s NBT
+     * @return an {@link EntryComparator} that compares the {@link FluidStack}'s components
      */
-    static EntryComparator<FluidStack> fluidNbt() {
-        EntryComparator<Tag> nbtHasher = nbt("Amount");
+    static EntryComparator<FluidStack> fluidComponents() {
+        EntryComparator<DataComponentMap> componentHasher = component();
         return (context, stack) -> {
-            CompoundTag tag = stack.getTag();
-            return tag == null ? 0L : nbtHasher.hash(context, tag);
+            return 0L;
         };
     }
     
     /**
-     * Creates an {@link EntryComparator} that compares the nbt, but
+     * Creates an {@link EntryComparator} that compares the components, but
      * ignoring some given keys.
      *
      * @param ignoredKeys the keys to ignore
-     * @return an {@link EntryComparator} that compares the nbt
+     * @return an {@link EntryComparator} that compares the components
      */
-    static EntryComparator<Tag> nbt(String... ignoredKeys) {
-        return Internals.getNbtHasher(ignoredKeys);
+    static EntryComparator<DataComponentMap> component(DataComponentType<?>... ignoredKeys) {
+        return Internals.getComponentHasher(ignoredKeys);
     }
     
     /**

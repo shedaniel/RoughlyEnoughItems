@@ -23,14 +23,13 @@
 
 package me.shedaniel.rei.impl.client.gui.credits;
 
-import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
 import me.shedaniel.rei.impl.client.gui.text.TextTransformations;
+import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
@@ -43,11 +42,11 @@ import java.util.Collections;
 import java.util.List;
 
 @ApiStatus.Internal
-public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidget<CreditsEntryListWidget.CreditsItem> {
+public class CreditsEntryListWidget extends UpdatedListWidget<CreditsEntryListWidget.CreditsItem> {
     private boolean inFocus;
     
     public CreditsEntryListWidget(Minecraft client, int width, int height, int startY, int endY) {
-        super(client, width, height, startY, endY, Screen.BACKGROUND_LOCATION);
+        super(client, width, height, startY, endY);
     }
     
     public void creditsClearEntries() {
@@ -72,7 +71,7 @@ public class CreditsEntryListWidget extends DynamicSmoothScrollingEntryListWidge
         return width - 40;
     }
     
-    public static abstract class CreditsItem extends DynamicSmoothScrollingEntryListWidget.Entry<CreditsItem> {
+    public static abstract class CreditsItem extends UpdatedListWidget.Entry<CreditsItem> {
         @Override
         public List<? extends NarratableEntry> narratables() {
             return Collections.emptyList();

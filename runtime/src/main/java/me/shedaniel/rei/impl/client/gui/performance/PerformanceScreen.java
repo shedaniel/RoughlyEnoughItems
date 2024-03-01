@@ -24,12 +24,12 @@
 package me.shedaniel.rei.impl.client.gui.performance;
 
 import com.mojang.datafixers.util.Pair;
-import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.rei.RoughlyEnoughItemsCore;
 import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIPluginProvider;
 import me.shedaniel.rei.impl.client.gui.performance.entry.PerformanceEntryImpl;
 import me.shedaniel.rei.impl.client.gui.performance.entry.SubCategoryListEntry;
+import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -185,17 +185,16 @@ public class PerformanceScreen extends Screen {
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        renderDirtBackground(graphics);
+        super.render(graphics, mouseX, mouseY, delta);
         list.render(graphics, mouseX, mouseY, delta);
         graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
-        super.render(graphics, mouseX, mouseY, delta);
     }
     
-    public static abstract class PerformanceEntry extends DynamicElementListWidget.ElementEntry<PerformanceEntry> {
+    public static abstract class PerformanceEntry extends UpdatedListWidget.ElementEntry<PerformanceEntry> {
     }
     
-    private class PerformanceEntryListWidget extends DynamicElementListWidget<PerformanceEntry> {
-        public PerformanceEntryListWidget() {super(PerformanceScreen.this.minecraft, PerformanceScreen.this.width, PerformanceScreen.this.height, 30, PerformanceScreen.this.height, Screen.BACKGROUND_LOCATION);}
+    private class PerformanceEntryListWidget extends UpdatedListWidget<PerformanceEntry> {
+        public PerformanceEntryListWidget() {super(PerformanceScreen.this.minecraft, PerformanceScreen.this.width, PerformanceScreen.this.height, 30, PerformanceScreen.this.height);}
         
         @Override
         public int getItemWidth() {

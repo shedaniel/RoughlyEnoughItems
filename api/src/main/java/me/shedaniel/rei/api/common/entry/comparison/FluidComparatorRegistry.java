@@ -46,7 +46,7 @@ public interface FluidComparatorRegistry extends EntryComparatorRegistry<FluidSt
      * @param fluid the fluid to compare
      */
     default void registerNbt(Fluid fluid) {
-        register(EntryComparator.fluidNbt(), fluid);
+        register(EntryComparator.fluidComponents(), fluid);
     }
     
     /**
@@ -55,6 +55,6 @@ public interface FluidComparatorRegistry extends EntryComparatorRegistry<FluidSt
      * @param fluids the fluids to compare
      */
     default void registerNbt(Fluid... fluids) {
-        register(EntryComparator.fluidNbt(), fluids);
+        register(EntryComparator.fluidComponents(), fluids);
     }
 }

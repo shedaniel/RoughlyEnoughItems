@@ -24,6 +24,7 @@
 package me.shedaniel.rei.plugin.client;
 
 import com.google.common.collect.*;
+import com.google.gson.internal.LinkedTreeMap;
 import dev.architectury.event.EventResult;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
@@ -80,7 +81,9 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.*;
 import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -92,7 +95,7 @@ import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionBrewing;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
@@ -293,8 +296,8 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         ReferenceSet<Potion> registeredPotions = new ReferenceOpenHashSet<>();
         EntryRegistry.getInstance().getEntryStacks().filter(entry -> entry.getValueType() == ItemStack.class && entry.<ItemStack>castValue().getItem() == Items.LINGERING_POTION).forEach(entry -> {
             ItemStack itemStack = (ItemStack) entry.getValue();
-            Potion potion = PotionUtils.getPotion(itemStack);
-            if (registeredPotions.add(potion)) {
+            PotionContents potionContents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+            if (potionContents.potion().isPresent() && registeredPotions.add(potionContents.potion().get().value())) {
                 List<EntryIngredient> input = new ArrayList<>();
                 for (int i = 0; i < 4; i++)
                     input.add(arrowStack);
@@ -302,8 +305,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 for (int i = 0; i < 4; i++)
                     input.add(arrowStack);
                 ItemStack outputStack = new ItemStack(Items.TIPPED_ARROW, 8);
-                PotionUtils.setPotion(outputStack, potion);
-                PotionUtils.setCustomEffects(outputStack, PotionUtils.getCustomEffects(itemStack));
+                outputStack.set(DataComponents.POTION_CONTENTS, potionContents);
                 EntryIngredient output = EntryIngredients.of(outputStack);
                 registry.add(new DefaultCustomDisplay(null, input, Collections.singletonList(output)));
             }
@@ -337,31 +339,34 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             registry.add(new DefaultOxidationScrapingDisplay(EntryStacks.of(set.getKey()), EntryStacks.of(set.getValue())));
         });
         if (Platform.isFabric()) {
-            Set<Potion> potions = Sets.newLinkedHashSet();
+            Set<Holder<Potion>> potions = Collections.newSetFromMap(new LinkedTreeMap<>(Comparator.comparing(Holder::getRegisteredName), false));
             for (Ingredient container : PotionBrewing.ALLOWED_CONTAINERS) {
                 for (PotionBrewing.Mix<Potion> mix : PotionBrewing.POTION_MIXES) {
-                    Potion from = mix.from;
-                    Ingredient ingredient = mix.ingredient;
-                    Potion to = mix.to;
+                    Holder<Potion> from = mix.from();
+                    Ingredient ingredient = mix.ingredient();
+                    Holder<Potion> to = mix.to();
                     Ingredient base = Ingredient.of(Arrays.stream(container.getItems())
                             .map(ItemStack::copy)
-                            .map(stack -> PotionUtils.setPotion(stack, from)));
+                            .peek(stack -> stack.set(DataComponents.POTION_CONTENTS, new PotionContents(from))));
                     ItemStack output = Arrays.stream(container.getItems())
                             .map(ItemStack::copy)
-                            .map(stack -> PotionUtils.setPotion(stack, to))
+                            .peek(stack -> stack.set(DataComponents.POTION_CONTENTS, new PotionContents(to)))
                             .findFirst().orElse(ItemStack.EMPTY);
                     registerBrewingRecipe(base, ingredient, output);
                     potions.add(from);
                     potions.add(to);
                 }
             }
-            for (Potion potion : potions) {
+            for (Holder<Potion> potion : potions) {
                 for (PotionBrewing.Mix<Item> mix : PotionBrewing.CONTAINER_MIXES) {
-                    Item from = mix.from;
-                    Ingredient ingredient = mix.ingredient;
-                    Item to = mix.to;
-                    Ingredient base = Ingredient.of(PotionUtils.setPotion(new ItemStack(from), potion));
-                    ItemStack output = PotionUtils.setPotion(new ItemStack(to), potion);
+                    Holder<Item> from = mix.from();
+                    Ingredient ingredient = mix.ingredient();
+                    Holder<Item> to = mix.to();
+                    ItemStack baseStack = new ItemStack(from);
+                    baseStack.set(DataComponents.POTION_CONTENTS, new PotionContents(potion));
+                    Ingredient base = Ingredient.of(baseStack);
+                    ItemStack output = new ItemStack(to);
+                    output.set(DataComponents.POTION_CONTENTS, new PotionContents(potion));
                     registerBrewingRecipe(base, ingredient, output);
                 }
             }
@@ -375,7 +380,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     }
     
     protected void registerForgePotions(DisplayRegistry registry, BuiltinClientPlugin clientPlugin) {
-    
+        
     }
     
     @Override
@@ -438,8 +443,8 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     }
     
     public static class DummyShovelItem extends ShovelItem {
-        public DummyShovelItem(Tier tier, float f, float g, Properties properties) {
-            super(tier, f, g, properties);
+        public DummyShovelItem(Tier tier, Properties properties) {
+            super(tier, properties);
         }
         
         public static Map<Block, BlockState> getPathBlocksMap() {
@@ -448,8 +453,8 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
     }
     
     public static class DummyAxeItem extends AxeItem {
-        public DummyAxeItem(Tier tier, float f, float g, Properties properties) {
-            super(tier, f, g, properties);
+        public DummyAxeItem(Tier tier, Properties properties) {
+            super(tier, properties);
         }
         
         public static Map<Block, Block> getStrippedBlocksMap() {

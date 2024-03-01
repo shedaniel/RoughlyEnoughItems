@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.impl.client.config.entries;
 
-import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRule;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleType;
 import me.shedaniel.rei.api.client.entry.filtering.FilteringRuleTypeRegistry;
+import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -36,7 +36,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
 
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +64,7 @@ public class FilteringAddRuleScreen extends Screen {
             }, Supplier::get) {
             });
         }
-        rulesList = addWidget(new RulesList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
+        rulesList = addWidget(new RulesList(minecraft, width, height, 30, height));
         for (FilteringRuleType<?> rule : FilteringRuleTypeRegistry.getInstance()) {
             if (!rule.isSingular())
                 rulesList.addItem(new DefaultRuleEntry(parent, entry, rule.createNew(), null));
@@ -75,16 +74,16 @@ public class FilteringAddRuleScreen extends Screen {
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        this.rulesList.render(graphics, mouseX, mouseY, delta);
         super.render(graphics, mouseX, mouseY, delta);
+        this.rulesList.render(graphics, mouseX, mouseY, delta);
         graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
     }
     
-    public static class RulesList extends DynamicElementListWidget<RuleEntry> {
+    public static class RulesList extends UpdatedListWidget<RuleEntry> {
         private boolean inFocus;
         
-        public RulesList(Minecraft client, int width, int height, int top, int bottom, ResourceLocation backgroundLocation) {
-            super(client, width, height, top, bottom, backgroundLocation);
+        public RulesList(Minecraft client, int width, int height, int top, int bottom) {
+            super(client, width, height, top, bottom);
         }
         
         @Override
@@ -108,7 +107,7 @@ public class FilteringAddRuleScreen extends Screen {
         }
     }
     
-    public static abstract class RuleEntry extends DynamicElementListWidget.ElementEntry<RuleEntry> {
+    public static abstract class RuleEntry extends UpdatedListWidget.ElementEntry<RuleEntry> {
         private final FilteringRule<?> rule;
         
         public RuleEntry(FilteringRule<?> rule) {

@@ -46,12 +46,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemInput;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.GameType;
 import org.jetbrains.annotations.TestOnly;
 
@@ -128,12 +129,14 @@ public class REITestPlugin implements REIClientPlugin {
     
     @Override
     public void registerItemComparators(ItemComparatorRegistry registry) {
-        registry.registerNbt(BuiltInRegistries.ITEM.stream().toArray(Item[]::new));
+        registry.registerComponents(BuiltInRegistries.ITEM.stream().toArray(Item[]::new));
     }
     
     public EntryStack<ItemStack> transformStack(EntryStack<ItemStack> stack) {
-        CompoundTag tag = stack.getValue().getOrCreateTag();
-        tag.putInt("Whatever", random.nextInt(Integer.MAX_VALUE));
+        CustomData data = stack.getValue().getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).update(tag -> {
+            tag.putInt("Whatever", random.nextInt(Integer.MAX_VALUE));
+        });
+        stack.getValue().set(DataComponents.CUSTOM_DATA, data);
         return stack;
     }
     

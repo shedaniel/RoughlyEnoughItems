@@ -26,6 +26,7 @@ package me.shedaniel.rei.impl.client.gui.error;
 import com.mojang.blaze3d.platform.NativeImage;
 import me.shedaniel.clothconfig2.gui.widget.DynamicEntryListWidget;
 import me.shedaniel.clothconfig2.gui.widget.DynamicSmoothScrollingEntryListWidget;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -59,7 +60,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
     private boolean inFocus;
     
     public ErrorsEntryListWidget(Minecraft client, int width, int height, int startY, int endY) {
-        super(client, width, height, startY, endY, Screen.BACKGROUND_LOCATION);
+        super(client, width, height, startY, endY, InternalTextures.LEGACY_DIRT);
     }
     
     public void _clearItems() {

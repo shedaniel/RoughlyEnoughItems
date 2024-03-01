@@ -35,7 +35,8 @@ import me.shedaniel.rei.api.common.plugins.REIPlugin;
 import me.shedaniel.rei.api.common.plugins.REIServerPlugin;
 import me.shedaniel.rei.api.common.transfer.info.MenuInfoRegistry;
 import me.shedaniel.rei.impl.common.InternalLogger;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.ApiStatus;
@@ -105,7 +106,7 @@ public final class Internals {
         return serverPluginManager.get();
     }
     
-    public static EntryComparator<Tag> getNbtHasher(String[] ignoredKeys) {
+    public static EntryComparator<DataComponentMap> getComponentHasher(DataComponentType<?>[] ignoredKeys) {
         return nbtHasherProvider.get().provide(ignoredKeys);
     }
     
@@ -138,6 +139,6 @@ public final class Internals {
     }
     
     public interface NbtHasherProvider {
-        EntryComparator<Tag> provide(String... ignoredKeys);
+        EntryComparator<DataComponentMap> provide(DataComponentType<?>... ignoredKeys);
     }
 }

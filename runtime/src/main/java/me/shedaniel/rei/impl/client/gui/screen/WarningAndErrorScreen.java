@@ -25,6 +25,7 @@ package me.shedaniel.rei.impl.client.gui.screen;
 
 import com.google.common.collect.ImmutableList;
 import me.shedaniel.rei.RoughlyEnoughItemsState;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.widget.DynamicErrorFreeEntryListWidget;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -133,14 +134,13 @@ public class WarningAndErrorScreen extends Screen {
     
     @Override
     public void render(GuiGraphics graphics, int int_1, int int_2, float float_1) {
-        this.renderDirtBackground(graphics);
+        super.render(graphics, int_1, int_2, float_1);
         this.listWidget.render(graphics, int_1, int_2, float_1);
         if (RoughlyEnoughItemsState.getErrors().isEmpty()) {
             graphics.drawCenteredString(this.font, "Warnings during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
         } else {
             graphics.drawCenteredString(this.font, "Errors during Roughly Enough Items' " + action, this.width / 2, 16, 16777215);
         }
-        super.render(graphics, int_1, int_2, float_1);
         this.buttonExit.render(graphics, int_1, int_2, float_1);
     }
     
@@ -149,7 +149,7 @@ public class WarningAndErrorScreen extends Screen {
         private int max = 80;
         
         public StringEntryListWidget(Minecraft client, int width, int height, int startY, int endY) {
-            super(client, width, height, startY, endY, Screen.BACKGROUND_LOCATION);
+            super(client, width, height, startY, endY, InternalTextures.LEGACY_DIRT);
         }
         
         public void creditsClearEntries() {

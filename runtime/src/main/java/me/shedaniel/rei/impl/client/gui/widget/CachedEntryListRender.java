@@ -28,7 +28,6 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import dev.architectury.registry.ReloadListenerRegistry;
@@ -54,6 +53,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Unit;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 
 import java.util.List;
 
@@ -149,10 +149,10 @@ public class CachedEntryListRender {
         target.bindWrite(true);
         Matrix4f projectionMatrix = new Matrix4f().setOrtho(0.0F, width, height, 0.0F, 1000.0F, 3000.0F);
         RenderSystem.setProjectionMatrix(projectionMatrix, VertexSorting.ORTHOGRAPHIC_Z);
-        PoseStack modelViewStack = RenderSystem.getModelViewStack();
-        modelViewStack.pushPose();
-        modelViewStack.setIdentity();
-        modelViewStack.translate(0.0D, 0.0D, -2000.0D);
+        Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
+        modelViewStack.pushMatrix();
+        modelViewStack.identity();
+        modelViewStack.translate(0.0F, 0.0F, -2000.0F);
         RenderSystem.applyModelViewMatrix();
         
         Lighting.setupFor3DItems();
@@ -182,7 +182,7 @@ public class CachedEntryListRender {
         Minecraft.getInstance().levelRenderer.graphicsChanged();
         Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
         
-        modelViewStack.popPose();
+        modelViewStack.popMatrix();
         RenderSystem.applyModelViewMatrix();
     }
     

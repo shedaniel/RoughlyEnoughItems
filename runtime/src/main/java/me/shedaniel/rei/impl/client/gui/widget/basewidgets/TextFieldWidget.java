@@ -33,7 +33,6 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.TextField;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
-import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
@@ -43,6 +42,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -55,7 +55,7 @@ import java.util.function.Predicate;
 
 @ApiStatus.Internal
 public class TextFieldWidget extends WidgetWithBounds implements TickableWidget, TextField {
-    public Function<String, String> stripInvalid = SharedConstants::filterText;
+    public Function<String, String> stripInvalid = StringUtil::filterText;
     protected int frame;
     protected boolean editable = true;
     protected int firstCharacterIndex;
@@ -354,7 +354,7 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
     @Override
     public boolean charTyped(char character, int modifiers) {
         if (this.isVisible() && this.isFocused()) {
-            if (SharedConstants.isAllowedChatCharacter(character) && !(
+            if (StringUtil.isAllowedChatCharacter(character) && !(
                     Screen.hasControlDown() && !Screen.hasShiftDown() && !Screen.hasAltDown() && (
                             character == 'a' || character == 'c' || character == 'v'
                     )

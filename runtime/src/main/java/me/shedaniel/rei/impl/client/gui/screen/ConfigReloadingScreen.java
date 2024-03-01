@@ -71,22 +71,31 @@ public class ConfigReloadingScreen extends Screen {
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        this.renderDirtBackground(graphics);
         if (!predicate.getAsBoolean()) {
             parent.run();
             return;
         }
-        graphics.drawCenteredString(this.font, title, this.width / 2, this.height / 2 - 50, 0xffffff);
+        super.render(graphics, mouseX, mouseY, delta);
         String text = switch ((int) (Util.getMillis() / 300L % 4L)) {
             case 1, 3 -> "o O o";
             case 2 -> "o o O";
             default -> "O o o";
         };
-        graphics.drawCenteredString(this.font, text, this.width / 2, this.height / 2 - 50 + 9, 0x808080);
         Component subtitle = this.subtitle.get();
+        int width = Math.max(font.width(text), font.width(title)), height = subtitle == null ? 18 : 27;
+        if (subtitle != null) width = Math.max(width, font.width(subtitle));
+        int x = this.width / 2 - width / 2;
+        int k = x - 12;
+        int l = this.height / 2 - height / 2 - 12;
+        int m = width + 12 * 2;
+        int n = height + 12 * 2;
+        int o = this.isFocused() ? -1 : -6250336;
+        graphics.fill(k + 1, l, k + m, l + n, -16777216);
+        graphics.renderOutline(k, l, m, n, o);
+        graphics.drawCenteredString(this.font, title, this.width / 2, l + 12, 0xffffff);
+        graphics.drawCenteredString(this.font, text, this.width / 2, l + 12 + 9, 0x808080);
         if (subtitle != null) {
-            graphics.drawCenteredString(this.font, subtitle, this.width / 2, this.height / 2 - 50 + 9 + 9, 0x808080);
+            graphics.drawCenteredString(this.font, subtitle, this.width / 2, l + 12 + 9 + 9, 0x808080);
         }
-        super.render(graphics, mouseX, mouseY, delta);
     }
 }

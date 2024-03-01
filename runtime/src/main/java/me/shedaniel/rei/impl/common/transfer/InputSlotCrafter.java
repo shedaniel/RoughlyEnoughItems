@@ -30,6 +30,7 @@ import me.shedaniel.rei.api.common.transfer.RecipeFinder;
 import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import me.shedaniel.rei.api.common.util.CollectionUtils;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -150,7 +151,7 @@ public abstract class InputSlotCrafter<T extends AbstractContainerMenu, C extend
     public SlotAccessor takeInventoryStack(ItemStack itemStack) {
         for (SlotAccessor inventoryStack : inventoryStacks) {
             ItemStack itemStack1 = inventoryStack.getItemStack();
-            if (!itemStack1.isEmpty() && areItemsEqual(itemStack, itemStack1) && !itemStack1.isDamaged() && !itemStack1.isEnchanted() && !itemStack1.hasCustomHoverName()) {
+            if (!itemStack1.isEmpty() && areItemsEqual(itemStack, itemStack1) && !itemStack1.isDamaged() && !itemStack1.isEnchanted() && !itemStack1.has(DataComponents.CUSTOM_NAME)) {
                 return inventoryStack;
             }
         }

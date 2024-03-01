@@ -44,9 +44,11 @@ import me.shedaniel.rei.api.client.search.SearchFilter;
 import me.shedaniel.rei.api.client.search.SearchProvider;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.impl.client.gui.InternalTextures;
 import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.widget.BatchedEntryRendererManager;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
+import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import me.shedaniel.rei.impl.client.gui.widget.search.OverlaySearchField;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -209,7 +211,7 @@ public class FilteringScreen extends Screen {
     protected void renderHoleBackground(GuiGraphics graphics, int y1, int y2, int tint, int alpha1, int alpha2) {
         Tesselator tesselator = Tesselator.getInstance();
         BufferBuilder buffer = tesselator.getBuilder();
-        RenderSystem.setShaderTexture(0, BACKGROUND_LOCATION);
+        RenderSystem.setShaderTexture(0, InternalTextures.LEGACY_DIRT);
         Matrix4f matrix = graphics.pose().last().pose();
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         float float_1 = 32.0F;
@@ -224,10 +226,11 @@ public class FilteringScreen extends Screen {
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        renderHoleBackground(graphics, 0, height, 32, 255, 255);
+        super.render(graphics, mouseX, mouseY, delta);
         updateSelectionCache();
         Rectangle bounds = getBounds();
         tooltip = null;
+        UpdatedListWidget.renderAs(minecraft, width, height, bounds.y, height, graphics, delta);
         if (bounds.isEmpty())
             return;
         ScissorsHandler.INSTANCE.scissor(bounds);
@@ -273,7 +276,6 @@ public class FilteringScreen extends Screen {
         buffer.vertex(matrix, 0, bounds.y, 0.0F).uv(0.0F, 0.0F).color(0, 0, 0, 255).endVertex();
         tesselator.end();
         RenderSystem.disableBlend();
-        renderHoleBackground(graphics, 0, bounds.y, 64, 255, 255);
         
         this.backButton.render(graphics, mouseX, mouseY, delta);
         

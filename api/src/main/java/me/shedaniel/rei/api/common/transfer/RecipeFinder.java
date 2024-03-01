@@ -26,6 +26,7 @@ package me.shedaniel.rei.api.common.transfer;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.ints.*;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -47,7 +48,7 @@ public class RecipeFinder {
     }
     
     public void addNormalItem(ItemStack stack) {
-        if (!stack.isDamaged() && !stack.isEnchanted() && !stack.hasCustomHoverName()) {
+        if (!stack.isDamaged() && !stack.isEnchanted() && !stack.has(DataComponents.CUSTOM_NAME)) {
             this.addItem(stack);
         }
     }

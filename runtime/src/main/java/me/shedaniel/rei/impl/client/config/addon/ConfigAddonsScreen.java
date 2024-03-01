@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.impl.client.config.addon;
 
-import me.shedaniel.clothconfig2.gui.widget.DynamicElementListWidget;
 import me.shedaniel.rei.api.client.config.addon.ConfigAddon;
 import me.shedaniel.rei.api.client.config.addon.ConfigAddonRegistry;
 import me.shedaniel.rei.impl.client.gui.InternalTextures;
+import me.shedaniel.rei.impl.client.gui.widget.UpdatedListWidget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ComponentPath;
 import net.minecraft.client.gui.GuiGraphics;
@@ -38,7 +38,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -63,7 +62,7 @@ public class ConfigAddonsScreen extends Screen {
                 minecraft.setScreen(parent);
             }).bounds(4, 4, Minecraft.getInstance().font.width(backText) + 10, 20).build());
         }
-        rulesList = addWidget(new AddonsList(minecraft, width, height, 30, height, BACKGROUND_LOCATION));
+        rulesList = addWidget(new AddonsList(minecraft, width, height, 30, height));
         ConfigAddonRegistryImpl addonRegistry = (ConfigAddonRegistryImpl) ConfigAddonRegistry.getInstance();
         for (ConfigAddon addon : addonRegistry.getAddons()) {
             rulesList.addItem(new DefaultAddonEntry(parent, addon));
@@ -77,11 +76,11 @@ public class ConfigAddonsScreen extends Screen {
         graphics.drawString(this.font, this.title.getVisualOrderText(), (int) (this.width / 2.0F - this.font.width(this.title) / 2.0F), 12, -1);
     }
     
-    public static class AddonsList extends DynamicElementListWidget<AddonEntry> {
+    public static class AddonsList extends UpdatedListWidget<AddonEntry> {
         private boolean inFocus;
         
-        public AddonsList(Minecraft client, int width, int height, int top, int bottom, ResourceLocation backgroundLocation) {
-            super(client, width, height, top, bottom, backgroundLocation);
+        public AddonsList(Minecraft client, int width, int height, int top, int bottom) {
+            super(client, width, height, top, bottom);
         }
         
         @Override
@@ -105,7 +104,7 @@ public class ConfigAddonsScreen extends Screen {
         }
     }
     
-    public static abstract class AddonEntry extends DynamicElementListWidget.ElementEntry<AddonEntry> {
+    public static abstract class AddonEntry extends UpdatedListWidget.ElementEntry<AddonEntry> {
         @Override
         public int getItemHeight() {
             return 26;

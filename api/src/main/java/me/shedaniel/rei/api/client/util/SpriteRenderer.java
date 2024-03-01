@@ -35,6 +35,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class SpriteRenderer {
@@ -240,37 +241,38 @@ public class SpriteRenderer {
                     
                     this.consumer = consumers.getBuffer(layer);
                     
-                    this.consumer.vertex(this.model, x, y + nSY, z1)
+                    normal(this.consumer.vertex(this.model, x, y + nSY, z1)
                             .color(this.r, this.g, this.b, this.a)
                             .uv(this.uStart, this.vEnd - dY)
                             .overlayCoords(this.u, this.v)
-                            .uv2(this.l)
-                            .normal(this.normal, this.nX, this.nY, this.nZ)
+                            .uv2(this.l), this.normal, this.nX, this.nY, this.nZ)
                             .endVertex();
-                    this.consumer.vertex(this.model, x + nSX, y + nSY, z1)
+                    normal(this.consumer.vertex(this.model, x + nSX, y + nSY, z1)
                             .color(this.r, this.g, this.b, this.a)
                             .uv(this.uEnd - dX, this.vEnd - dY)
                             .overlayCoords(this.u, this.v)
-                            .uv2(this.l)
-                            .normal(this.normal, this.nX, this.nY, this.nZ)
+                            .uv2(this.l), this.normal, this.nX, this.nY, this.nZ)
                             .endVertex();
-                    this.consumer.vertex(this.model, x + nSX, y, z1)
+                    normal(this.consumer.vertex(this.model, x + nSX, y, z1)
                             .color(this.r, this.g, this.b, this.a)
                             .uv(this.uEnd - dX, this.vStart)
                             .overlayCoords(this.u, this.v)
-                            .uv2(this.l)
-                            .normal(this.normal, this.nX, this.nY, this.nZ)
+                            .uv2(this.l), this.normal, this.nX, this.nY, this.nZ)
                             .endVertex();
-                    this.consumer.vertex(this.model, x, y, z1)
+                    normal(this.consumer.vertex(this.model, x, y, z1)
                             .color(this.r, this.g, this.b, this.a)
                             .uv(this.uStart, this.vStart)
                             .overlayCoords(this.u, this.v)
-                            .uv2(this.l)
-                            .normal(this.normal, this.nX, this.nY, this.nZ)
+                            .uv2(this.l), this.normal, this.nX, this.nY, this.nZ)
                             .endVertex();
                 }
             }
             
+        }
+        
+        private static VertexConsumer normal(VertexConsumer consumer, Matrix3f var1, float var2, float var3, float var4) {
+            Vector3f var5 = var1.transform(new Vector3f(var2, var3, var4));
+            return consumer.normal(var5.x(), var5.y(), var5.z());
         }
     }
 }

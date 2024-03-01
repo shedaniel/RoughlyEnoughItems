@@ -29,7 +29,6 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
@@ -42,6 +41,7 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.ApiStatus;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fStack;
 
 import java.io.File;
 import java.io.IOException;
@@ -87,10 +87,10 @@ public final class RecipeDisplayExporter {
         RenderSystem.clear(256, Minecraft.ON_OSX);
         Matrix4f matrix4f = new Matrix4f().setOrtho(0.0F, (float) ((double) window.getWidth() / window.getGuiScale()), (float) ((double) window.getHeight() / window.getGuiScale()), 0.0F, 1000.0F, 3000.0F);
         RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
-        PoseStack poseStack = RenderSystem.getModelViewStack();
-        poseStack.pushPose();
-        poseStack.setIdentity();
-        poseStack.translate(0.0D, 0.0D, -2000.0D);
+        Matrix4fStack poseStack = RenderSystem.getModelViewStack();
+        poseStack.pushMatrix();
+        poseStack.identity();
+        poseStack.translate(0.0F, 0.0F, -2000.0F);
         RenderSystem.applyModelViewMatrix();
         Lighting.setupFor3DItems();
         GuiGraphics graphics = new GuiGraphics(client, client.renderBuffers().bufferSource());
@@ -126,7 +126,7 @@ public final class RecipeDisplayExporter {
         renderTarget.destroyBuffers();
         Minecraft.getInstance().levelRenderer.graphicsChanged();
         Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
-        poseStack.popPose();
+        poseStack.popMatrix();
         RenderSystem.applyModelViewMatrix();
     }
 }
