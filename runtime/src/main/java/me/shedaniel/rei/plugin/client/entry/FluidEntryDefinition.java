@@ -36,6 +36,7 @@ import me.shedaniel.rei.api.client.entry.renderer.EntryRenderer;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.api.client.gui.widgets.TooltipContext;
 import me.shedaniel.rei.api.client.util.SpriteRenderer;
+import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.entry.EntrySerializer;
 import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.comparison.ComparisonContext;
@@ -57,8 +58,11 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -127,7 +131,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     public FluidStack normalize(EntryStack<FluidStack> entry, FluidStack value) {
         Fluid fluid = value.getFluid();
         if (fluid instanceof FlowingFluid flowingFluid) fluid = flowingFluid.getSource();
-        return FluidStack.create(fluid, FluidStack.bucketAmount(), value.getTag());
+        return FluidStack.create(fluid, FluidStack.bucketAmount(), value.getPatch());
     }
     
     @Override
@@ -190,12 +194,12 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
     
     @Override
     public CompoundTag save(EntryStack<FluidStack> entry, FluidStack value) {
-        return value.write(new CompoundTag());
+        return (CompoundTag) value.write(BasicDisplay.registryAccess(), new CompoundTag());
     }
     
     @Override
     public FluidStack read(CompoundTag tag) {
-        return FluidStack.read(tag);
+        return FluidStack.read(BasicDisplay.registryAccess(), tag).orElse(FluidStack.empty());
     }
     
     @Override
@@ -214,7 +218,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
         FluidStack stack = entry.getValue();
         category.setDetail("Fluid Type", () -> String.valueOf(BuiltInRegistries.FLUID.getKey(stack.getFluid())));
         category.setDetail("Fluid Amount", () -> String.valueOf(stack.getAmount()));
-        category.setDetail("Fluid NBT", () -> String.valueOf(stack.getTag()));
+        category.setDetail("Fluid NBT", () -> DataComponentPatch.CODEC.encodeStart(BasicDisplay.registryAccess().createSerializationContext(NbtOps.INSTANCE), stack.getPatch()).result().map(Tag::toString).orElse("Error"));
     }
     
     @Environment(EnvType.CLIENT)
