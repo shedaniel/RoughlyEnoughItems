@@ -224,6 +224,11 @@ public class ListWidget {
         }
         
         @Override
+        public boolean containsMouse(double mouseX, double mouseY) {
+            return super.containsMouse(mouseX, mouseY);
+        }
+        
+        @Override
         protected Matrix4f translate() {
             Rectangle bounds = delegate().getBounds();
             return new Matrix4f().translate(position.x - bounds.x, position.y - bounds.y, 0);

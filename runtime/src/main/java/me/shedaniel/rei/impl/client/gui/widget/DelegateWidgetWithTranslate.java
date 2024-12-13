@@ -24,6 +24,7 @@
 package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.mojang.math.Transformation;
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.DelegateWidget;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
@@ -38,11 +39,6 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     private final Supplier<Matrix4f> translate;
     
     public DelegateWidgetWithTranslate(WidgetWithBounds widget, Supplier<Matrix4f> translate) {
-        super(widget);
-        this.translate = translate;
-    }
-    
-    public DelegateWidgetWithTranslate(Widget widget, Supplier<Matrix4f> translate) {
         super(widget);
         this.translate = translate;
     }
@@ -134,5 +130,10 @@ public class DelegateWidgetWithTranslate extends DelegateWidget {
     public double getZRenderingPriority() {
         Transformation transformation = new Transformation(translate());
         return transformation.getTranslation().z() + super.getZRenderingPriority();
+    }
+    
+    @Override
+    public Rectangle getBounds() {
+        return MatrixUtils.transform(translate(), super.getBounds());
     }
 }

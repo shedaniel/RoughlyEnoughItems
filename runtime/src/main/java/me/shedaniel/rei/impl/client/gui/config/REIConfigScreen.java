@@ -62,10 +62,7 @@ import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 import static me.shedaniel.rei.impl.client.gui.config.options.ConfigUtils.literal;
@@ -304,6 +301,25 @@ public class REIConfigScreen extends Screen implements ConfigAccess {
         }
         
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+    
+    @Override
+    public Optional<GuiEventListener> getChildAt(double mouseX, double mouseY) {
+        if (menu != null) {
+            if (menu.containsMouse(mouseX, mouseY)) {
+                return Optional.of(menu);
+            }
+        }
+        
+        // Reverse iteration
+        for (int i = widgets.size() - 1; i >= 0; i--) {
+            Widget widget = widgets.get(i);
+            if (widget.containsMouse(mouseX, mouseY)) {
+                return Optional.of(widget);
+            }
+        }
+        
+        return Optional.empty();
     }
     
     @Override

@@ -32,6 +32,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class MergedWidgetWithBounds extends WidgetWithBounds {
@@ -127,5 +128,23 @@ public class MergedWidgetWithBounds extends WidgetWithBounds {
         getBounds().setBounds(bounds);
         render(graphics, mouseX, mouseY, delta);
         getBounds().setBounds(clone);
+    }
+    
+    @Override
+    public boolean containsMouse(double mouseX, double mouseY) {
+        return getBounds().contains(mouseX, mouseY);
+    }
+    
+    @Override
+    public Optional<GuiEventListener> getChildAt(double mouseX, double mouseY) {
+        // Reverse iteration
+        for (int i = widgets.size() - 1; i >= 0; i--) {
+            Widget widget = widgets.get(i);
+            if (widget.containsMouse(mouseX, mouseY)) {
+                return Optional.of(widget);
+            }
+        }
+        
+        return Optional.empty();
     }
 }

@@ -23,6 +23,7 @@
 
 package me.shedaniel.rei.impl.client.gui.modules;
 
+import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.favorites.FavoriteMenuEntry;
 
 public abstract class AbstractMenuEntry extends FavoriteMenuEntry {
@@ -41,7 +42,7 @@ public abstract class AbstractMenuEntry extends FavoriteMenuEntry {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (isRendering() && mouseX >= getX() && mouseX <= getX() + getWidth() && mouseY >= getY() && mouseY < getY() + getEntryHeight()) {
+        if (containsMouse(mouseX, mouseY)) {
             if (onClick(mouseX, mouseY, button)) {
                 return true;
             }
@@ -75,5 +76,10 @@ public abstract class AbstractMenuEntry extends FavoriteMenuEntry {
     
     public boolean isRendering() {
         return rendering;
+    }
+    
+    @Override
+    public boolean containsMouse(double mouseX, double mouseY) {
+        return isRendering() && new Rectangle(getX(), getY(), getWidth(), getEntryHeight()).contains(mouseX, mouseY);
     }
 }

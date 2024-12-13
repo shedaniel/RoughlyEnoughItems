@@ -176,7 +176,8 @@ public class CachedEntryListRender {
         nativeImage.flipY();
         
         cachedTexture = new DynamicTexture(nativeImage);
-        cachedTextureLocation = minecraft.getTextureManager().register("rei_cached_entries", cachedTexture);
+        cachedTextureLocation = ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "rei_cached_entries");
+        minecraft.getTextureManager().register(cachedTextureLocation, cachedTexture);
         renderType.reset();
         
         target.destroyBuffers();

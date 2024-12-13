@@ -224,6 +224,19 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
     }
     
     @Override
+    public Optional<GuiEventListener> getChildAt(double mouseX, double mouseY) {
+        // Reverse iteration
+        for (int i = widgets.size() - 1; i >= 0; i--) {
+            Widget widget = widgets.get(i);
+            if (widget.containsMouse(mouseX, mouseY)) {
+                return Optional.of(widget);
+            }
+        }
+        
+        return Optional.empty();
+    }
+    
+    @Override
     public boolean charTyped(char char_1, int int_1) {
         for (GuiEventListener listener : children())
             if (listener.charTyped(char_1, int_1))

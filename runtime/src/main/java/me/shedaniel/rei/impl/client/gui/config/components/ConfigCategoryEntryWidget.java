@@ -50,7 +50,7 @@ public class ConfigCategoryEntryWidget {
         Widget descriptionLabel = Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
             renderTextScrolling(graphics, description, 0, 0, (int) ((width - 21 - 6) / 0.75), 0xFFB0B0B0);
         });
-        Rectangle bounds = new Rectangle(0, 0, label.getBounds().getMaxX(), hasDescription ? 24 : 7 * 3);
+        Rectangle bounds = new Rectangle(0, 0, width, hasDescription ? 24 : 7 * 3);
         return Widgets.concatWithBounds(
                 bounds,
                 label,

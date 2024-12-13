@@ -53,10 +53,10 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -245,86 +245,87 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
     }
     
     @Environment(EnvType.CLIENT)
-    public class ItemEntryRenderer implements BatchedEntryRenderer<ItemStack, BakedModel> {
+    public class ItemEntryRenderer implements BatchedEntryRenderer<ItemStack, ItemStackRenderState> {
         private static final float SCALE = 20.0F;
         public static final int ITEM_LIGHT = 0xf000f0;
         
         @Override
-        public BakedModel getExtraData(EntryStack<ItemStack> entry) {
+        public ItemStackRenderState getExtraData(EntryStack<ItemStack> entry) {
             Minecraft minecraft = Minecraft.getInstance();
-            return minecraft.getItemRenderer().getModel(entry.getValue(), minecraft.level, minecraft.player, 0);
+            ItemStackRenderState renderState = new ItemStackRenderState();
+            minecraft.getItemModelResolver().updateForTopItem(renderState, entry.getValue(), ItemDisplayContext.GUI, false, minecraft.level, minecraft.player, 0);
+            return renderState;
         }
         
         @Override
         public void render(EntryStack<ItemStack> entry, GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
-            BakedModel model = getExtraData(entry);
-            setupGL(entry, model);
             if (!entry.isEmpty()) {
                 ItemStack value = entry.getValue();
+                ItemStackRenderState renderState = getExtraData(entry);
+                setupGL(entry, renderState);
                 graphics.pose().pushPose();
                 graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY(), 0);
                 graphics.pose().mulPose(new Matrix4f().scaling(1.0F, -1.0F, 1.0F));
                 graphics.pose().scale(bounds.getWidth(), bounds.getHeight(), (bounds.getWidth() + bounds.getHeight()) / 2.0F);
                 MultiBufferSource.BufferSource immediate = graphics.bufferSource;
-                Minecraft.getInstance().getItemRenderer().render(value, ItemDisplayContext.GUI, false, graphics.pose(), immediate,
-                        ITEM_LIGHT, OverlayTexture.NO_OVERLAY, model);
+                renderState.render(graphics.pose(), immediate, ITEM_LIGHT, OverlayTexture.NO_OVERLAY);
                 immediate.endBatch();
                 graphics.pose().popPose();
+                
+                Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
+                modelViewStack.pushMatrix();
+                modelViewStack.mul(graphics.pose().last().pose());
+                modelViewStack.translate(bounds.x, bounds.y, 0);
+                modelViewStack.scale(bounds.width / 16f, (bounds.getWidth() + bounds.getHeight()) / 2f / 16f, 1.0F);
+                graphics.drawSpecial(source -> {
+                    if (source instanceof MultiBufferSource.BufferSource multiBufferSource) {
+                        renderOverlay(new GuiGraphics(Minecraft.getInstance(), multiBufferSource), entry, bounds);
+                    }
+                });
+                modelViewStack.popMatrix();
+                endGL(entry, renderState);
             }
-            Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
-            modelViewStack.pushMatrix();
-            modelViewStack.mul(graphics.pose().last().pose());
-            modelViewStack.translate(bounds.x, bounds.y, 0);
-            modelViewStack.scale(bounds.width / 16f, (bounds.getWidth() + bounds.getHeight()) / 2f / 16f, 1.0F);
-            graphics.drawSpecial(source -> {
-                if (source instanceof MultiBufferSource.BufferSource multiBufferSource) {
-                    renderOverlay(new GuiGraphics(Minecraft.getInstance(), multiBufferSource), entry, bounds);
-                }
-            });
-            modelViewStack.popMatrix();
-            endGL(entry, model);
         }
         
         @Override
-        public int getBatchIdentifier(EntryStack<ItemStack> entry, Rectangle bounds, BakedModel model) {
-            return 1738923 + (model.usesBlockLight() ? 1 : 0);
+        public int getBatchIdentifier(EntryStack<ItemStack> entry, Rectangle bounds, ItemStackRenderState renderState) {
+            return 1738923 + (renderState.usesBlockLight() ? 1 : 0);
         }
         
         @Override
-        public void startBatch(EntryStack<ItemStack> entry, BakedModel model, GuiGraphics graphics, float delta) {
-            setupGL(entry, model);
+        public void startBatch(EntryStack<ItemStack> entry, ItemStackRenderState renderState, GuiGraphics graphics, float delta) {
+            setupGL(entry, renderState);
         }
         
-        public void setupGL(EntryStack<ItemStack> entry, BakedModel model) {
+        public void setupGL(EntryStack<ItemStack> entry, ItemStackRenderState renderState) {
             Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
             RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            boolean sideLit = model.usesBlockLight();
+            boolean sideLit = renderState.usesBlockLight();
             if (!sideLit) Lighting.setupForFlatItems();
         }
         
         @Override
-        public void renderBase(EntryStack<ItemStack> entry, BakedModel model, GuiGraphics graphics, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        public void renderBase(EntryStack<ItemStack> entry, ItemStackRenderState renderState, GuiGraphics graphics, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
             if (!entry.isEmpty()) {
                 ItemStack value = entry.getValue();
                 graphics.pose().pushPose();
                 graphics.pose().translate(bounds.getCenterX(), bounds.getCenterY(), 0);
                 graphics.pose().scale(bounds.getWidth(), (bounds.getWidth() + bounds.getHeight()) / -2f, (bounds.getWidth() + bounds.getHeight()) / 2f);
-                Minecraft.getInstance().getItemRenderer().render(value, ItemDisplayContext.GUI, false, graphics.pose(), immediate,
-                        ITEM_LIGHT, OverlayTexture.NO_OVERLAY, model);
+                renderState.render(graphics.pose(), immediate, ITEM_LIGHT, OverlayTexture.NO_OVERLAY);
                 graphics.pose().popPose();
             }
         }
         
         @Override
-        public void afterBase(EntryStack<ItemStack> entry, BakedModel model, GuiGraphics graphics, float delta) {
-            endGL(entry, model);
+        public void afterBase(EntryStack<ItemStack> entry, ItemStackRenderState renderState, GuiGraphics graphics, float delta) {
+            endGL(entry, renderState);
         }
         
         @Override
-        public void renderOverlay(EntryStack<ItemStack> entry, BakedModel model, GuiGraphics graphics, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
+        public void renderOverlay(EntryStack<ItemStack> entry, ItemStackRenderState renderState, GuiGraphics graphics, MultiBufferSource.BufferSource immediate, Rectangle bounds, int mouseX, int mouseY, float delta) {
             Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
             modelViewStack.pushMatrix();
             modelViewStack.mul(graphics.pose().last().pose());
@@ -345,12 +346,12 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         }
         
         @Override
-        public void endBatch(EntryStack<ItemStack> entry, BakedModel model, GuiGraphics graphics, float delta) {
+        public void endBatch(EntryStack<ItemStack> entry, ItemStackRenderState renderState, GuiGraphics graphics, float delta) {
         }
         
-        public void endGL(EntryStack<ItemStack> entry, BakedModel model) {
+        public void endGL(EntryStack<ItemStack> entry, ItemStackRenderState renderState) {
             RenderSystem.enableDepthTest();
-            boolean sideLit = model.usesBlockLight();
+            boolean sideLit = renderState.usesBlockLight();
             if (!sideLit) Lighting.setupFor3DItems();
         }
         

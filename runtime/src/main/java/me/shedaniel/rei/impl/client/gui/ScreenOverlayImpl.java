@@ -519,8 +519,11 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
         if (!visible) {
             return false;
         }
+        if (draggingStack != null) {
+            draggingStack.mouseClicked(mouseX, mouseY, button);
+        }
         for (GuiEventListener element : widgets) {
-            if (element != configButton && element != menuHolder.widget() && element != hintsWidget && element.mouseClicked(mouseX, mouseY, button)) {
+            if (element != configButton && element != menuHolder.widget() && element != hintsWidget && element != draggingStack && element.mouseClicked(mouseX, mouseY, button)) {
                 this.setFocused(element);
                 if (button == 0)
                     this.setDragging(true);
@@ -548,6 +551,15 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
             return choosePageWidget.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
         }
         return (this.getFocused() != null && this.isDragging() && button == 0) && this.getFocused().mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    }
+    
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (draggingStack != null) {
+            draggingStack.mouseReleased(mouseX, mouseY, button);
+        }
+        
+        return super.mouseReleased(mouseX, mouseY, button);
     }
     
     @Override

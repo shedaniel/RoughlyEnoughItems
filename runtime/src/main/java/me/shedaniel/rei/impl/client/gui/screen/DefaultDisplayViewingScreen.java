@@ -27,7 +27,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.Tesselator;
 import it.unimi.dsi.fastutil.Pair;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -66,7 +65,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -499,6 +497,19 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+    
+    @Override
+    public Optional<GuiEventListener> getChildAt(double mouseX, double mouseY) {
+        // Reverse iteration
+        for (int i = widgets.size() - 1; i >= 0; i--) {
+            Widget widget = widgets.get(i);
+            if (widget.containsMouse(mouseX, mouseY)) {
+                return Optional.of(widget);
+            }
+        }
+        
+        return Optional.empty();
     }
     
     public static class WorkstationSlotWidget extends EntryWidget {

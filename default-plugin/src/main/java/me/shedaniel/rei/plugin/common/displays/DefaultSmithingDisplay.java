@@ -56,6 +56,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisplay {
     public static final DisplaySerializer<DefaultSmithingDisplay> SERIALIZER = DisplaySerializer.of(
@@ -96,12 +97,12 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
     public static List<DefaultSmithingDisplay> fromTrimming(RecipeHolder<SmithingTrimRecipe> recipe) {
         RegistryAccess registryAccess = BasicDisplay.registryAccess();
         List<DefaultSmithingDisplay> displays = new ArrayList<>();
-        for (Holder<Item> templateItem : recipe.value().templateIngredient().map(Ingredient::items).orElse(List.of())) {
+        for (Holder<Item> templateItem : (Iterable<Holder<Item>>) recipe.value().templateIngredient().map(Ingredient::items).orElse(Stream.of())::iterator) {
             Holder.Reference<TrimPattern> trimPattern = getPatternFromTemplate(registryAccess, templateItem)
                     .orElse(null);
             if (trimPattern == null) continue;
             
-            for (Holder<Item> additionStack : recipe.value().additionIngredient().map(Ingredient::items).orElse(List.of())) {
+            for (Holder<Item> additionStack : (Iterable<Holder<Item>>) recipe.value().additionIngredient().map(Ingredient::items).orElse(Stream.of())::iterator) {
                 Holder.Reference<TrimMaterial> trimMaterial = getMaterialFromIngredient(registryAccess, additionStack)
                         .orElse(null);
                 if (trimMaterial == null) continue;

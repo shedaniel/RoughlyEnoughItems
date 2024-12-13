@@ -32,6 +32,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class MergedWidget extends Widget {
     private final List<Widget> widgets;
@@ -114,5 +115,27 @@ public class MergedWidget extends Widget {
     public double getZRenderingPriority() {
         return CollectionUtils.max(widgets, Comparator.comparingDouble(Widget::getZRenderingPriority))
                 .map(Widget::getZRenderingPriority).orElse(0.0);
+    }
+    
+    @Override
+    public boolean containsMouse(double mouseX, double mouseY) {
+        for (Widget widget : this.widgets) {
+            if (widget.containsMouse(mouseX, mouseY))
+                return true;
+        }
+        return false;
+    }
+    
+    @Override
+    public Optional<GuiEventListener> getChildAt(double mouseX, double mouseY) {
+        // Reverse iteration
+        for (int i = widgets.size() - 1; i >= 0; i--) {
+            Widget widget = widgets.get(i);
+            if (widget.containsMouse(mouseX, mouseY)) {
+                return Optional.of(widget);
+            }
+        }
+        
+        return Optional.empty();
     }
 }

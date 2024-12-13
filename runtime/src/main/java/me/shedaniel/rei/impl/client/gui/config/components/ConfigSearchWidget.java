@@ -51,13 +51,12 @@ public class ConfigSearchWidget {
         Label label = Widgets.createLabel(new Point(21, 6), translatable("config.rei.texts.search_options"))
                 .leftAligned();
         Font font = Minecraft.getInstance().font;
-        Rectangle bounds = new Rectangle(0, 0, label.getBounds().getMaxX(), 7 * 3);
         return Widgets.concatWithBounds(
-                bounds,
-                new Widget() {
+                () -> new Rectangle(0, 0, width.getAsInt(), 7 * 3),
+                new WidgetWithBounds() {
                     @Override
                     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-                        boolean hovering = new Rectangle(-1, -1, width.getAsInt() + 2, 21).contains(mouseX, mouseY);
+                        boolean hovering = containsMouse(mouseX, mouseY);
                         for (Widget widget : List.of(Widgets.createFilledRectangle(new Rectangle(1, 1, width.getAsInt() - 2, 18), hovering ? 0x50FFFFFF : 0x25FFFFFF),
                                 Widgets.createFilledRectangle(new Rectangle(-1, -1, width.getAsInt() + 2, 1), hovering ? 0x90FFFFFF : 0x45FFFFFF),
                                 Widgets.createFilledRectangle(new Rectangle(-1, 20, width.getAsInt() + 2, 1), hovering ? 0x90FFFFFF : 0x45FFFFFF),
@@ -75,18 +74,18 @@ public class ConfigSearchWidget {
                     
                     @Override
                     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                        if (new Rectangle(-1, -1, width.getAsInt() + 2, 21).contains(mouseX, mouseY)) {
-                            Widgets.produceClickSound();
-                            ((REIConfigScreen) Minecraft.getInstance().screen).setSearching(true);
-                            return true;
-                        }
-                        
-                        return false;
+                        Widgets.produceClickSound();
+                        ((REIConfigScreen) Minecraft.getInstance().screen).setSearching(true);
+                        return true;
+                    }
+                    
+                    @Override
+                    public Rectangle getBounds() {
+                        return new Rectangle(-1, -1, width.getAsInt() + 2, 21);
                     }
                 },
                 Widgets.withTranslate(label, 0, 0.5, 0),
                 Widgets.createTexturedWidget(ResourceLocation.parse("roughlyenoughitems:textures/gui/config/search_options.png"), new Rectangle(3, 3, 16, 16), 0, 0, 1, 1, 1, 1)
-        
         );
     }
     
@@ -94,10 +93,10 @@ public class ConfigSearchWidget {
         Rectangle bounds = new Rectangle(0, 0, 16, 16);
         return Widgets.withTooltip(Widgets.concatWithBounds(
                 bounds,
-                new Widget() {
+                new WidgetWithBounds() {
                     @Override
                     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-                        boolean hovering = new Rectangle(-1, -1, 18, 18).contains(mouseX, mouseY);
+                        boolean hovering = containsMouse(mouseX, mouseY);
                         graphics.pose().pushPose();
                         graphics.pose().translate(-0.5, -0.5, 0);
                         for (Widget widget : List.of(Widgets.createFilledRectangle(new Rectangle(-1, -1, 18, 18), hovering ? 0x50FFFFFF : 0x25FFFFFF),
@@ -117,13 +116,14 @@ public class ConfigSearchWidget {
                     
                     @Override
                     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                        if (new Rectangle(-1, -1, 18, 18).contains(mouseX, mouseY)) {
-                            Widgets.produceClickSound();
-                            ((REIConfigScreen) Minecraft.getInstance().screen).setSearching(true);
-                            return true;
-                        }
-                        
-                        return false;
+                        Widgets.produceClickSound();
+                        ((REIConfigScreen) Minecraft.getInstance().screen).setSearching(true);
+                        return true;
+                    }
+                    
+                    @Override
+                    public Rectangle getBounds() {
+                        return new Rectangle(-1, -1, 18, 18);
                     }
                 },
                 Widgets.createTexturedWidget(ResourceLocation.parse("roughlyenoughitems:textures/gui/config/search_options.png"), bounds, 0, 0, 1, 1, 1, 1)

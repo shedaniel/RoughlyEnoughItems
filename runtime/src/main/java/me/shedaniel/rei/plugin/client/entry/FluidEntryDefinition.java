@@ -69,7 +69,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.FlowingFluid;
@@ -282,7 +281,7 @@ public class FluidEntryDefinition implements EntryDefinition<FluidStack>, EntryS
                     .alpha(0xff)
                     .normal(graphics.pose().last().normal(), 0, 0, 0)
                     .position(graphics.pose().last().pose(), bounds.x, bounds.getMaxY() - bounds.height * Mth.clamp(entry.get(EntryStack.Settings.FLUID_RENDER_RATIO), 0, 1), bounds.getMaxX(), bounds.getMaxY(), 0)
-                    .next(InventoryMenu.BLOCK_ATLAS);
+                    .next(TextureAtlas.LOCATION_BLOCKS);
             
             immediate.endBatch();
         }
