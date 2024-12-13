@@ -120,7 +120,10 @@ public class SubMenuEntry extends AbstractMenuEntry {
                 }
                 
                 RenderSystem.disableScissor();
+                GuiGraphics.ScissorStack tmp = graphics.scissorStack;
+                graphics.scissorStack = new GuiGraphics.ScissorStack();
                 menu.render(graphics, mouseX, mouseY, delta);
+                graphics.scissorStack = tmp;
                 graphics.enableScissor(0, 0, 0, 0);
                 graphics.disableScissor();
             }
