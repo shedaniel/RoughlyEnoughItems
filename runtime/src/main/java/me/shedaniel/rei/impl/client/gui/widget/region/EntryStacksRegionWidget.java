@@ -308,7 +308,7 @@ public class EntryStacksRegionWidget<T extends RegionEntry<T>> extends WidgetWit
     
     public Optional<RealRegionEntry<T>> checkDraggedStacks(DraggingContext<Screen> context, DraggableStack stack) {
         EntrySerializer<?> serializer = stack.getStack().getDefinition().getSerializer();
-        if (serializer != null && stack instanceof RegionDraggableStack) {
+        if (serializer != null) {
             try {
                 T regionEntry = stack instanceof RegionDraggableStack ? ((RegionDraggableStack<T>) stack).getEntry().getEntry().copy()
                         : listener.convertDraggableStack(context, stack);
