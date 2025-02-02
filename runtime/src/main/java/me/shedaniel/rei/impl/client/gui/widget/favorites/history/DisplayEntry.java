@@ -41,6 +41,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
+import me.shedaniel.rei.impl.client.util.SetupDisplayUtils;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -124,16 +125,18 @@ public class DisplayEntry extends WidgetWithBounds {
     }
     
     private List<Widget> setupDisplay(CategoryRegistry.CategoryConfiguration<Display> configuration, Rectangle displayBounds) {
+        List<Widget> result = null;
         try {
-            return configuration.getView(display).setupDisplay(display, displayBounds);
+            result = configuration.getView(display).setupDisplay(display, displayBounds);
         } catch (Throwable throwable) {
             throwable.printStackTrace();
-            List<Widget> w = new ArrayList<>();
-            w.add(Widgets.createRecipeBase(displayBounds).color(0xFFBB0000));
-            w.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() - 8), Component.literal("Failed to initiate setupDisplay")));
-            w.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() + 1), Component.literal("Check console for error")));
-            return w;
+            result = new ArrayList<>();
+            result.add(Widgets.createRecipeBase(displayBounds).color(0xFFBB0000));
+            result.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() - 8), Component.literal("Failed to initiate setupDisplay")));
+            result.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() + 1), Component.literal("Check console for error")));
         }
+        SetupDisplayUtils.TransformFiltering(result);
+        return result;
     }
     
     @Override
