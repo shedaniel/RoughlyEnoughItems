@@ -59,6 +59,9 @@ public abstract class InputSlotCrafter<T extends AbstractContainerMenu, C extend
         this.populateRecipeFinder(recipeFinder);
         List<List<ItemStack>> ingredients = new ArrayList<>();
         for (InputIngredient<ItemStack> itemStacks : this.getInputs()) {
+            if (itemStacks.get().isEmpty()) {
+                continue;
+            }
             ingredients.add(itemStacks.get());
         }
         
