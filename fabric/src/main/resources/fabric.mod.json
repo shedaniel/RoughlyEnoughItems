@@ -119,6 +119,7 @@
     }
   },
   "depends": {
-    "minecraft": "~1.21-"
+    "minecraft": "~1.21-",
+    "architectury": ">=15.0.2"
   }
 }
