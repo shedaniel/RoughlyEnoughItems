@@ -30,7 +30,7 @@ side = "BOTH"
 [[dependencies.roughlyenoughitems]]
 modId = "neoforge"
 type = "required"
-versionRange = "[21.0,)"
+versionRange = "[21.4.84-beta,)"
 ordering = "NONE"
 side = "BOTH"
 
