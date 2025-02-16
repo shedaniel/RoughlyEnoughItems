@@ -36,9 +36,6 @@
   "mixins": [
     "rei.mixins.json"
   ],
-  "breaks": {
-    "cloth-config2": "<6.2-"
-  },
   "custom": {
     "rei:translators": {
       "English": [
@@ -119,6 +116,8 @@
     }
   },
   "depends": {
+    "architectury": "*",
+    "cloth-config": ">=6.2-",
     "minecraft": "~1.21-"
   }
 }
