@@ -25,8 +25,10 @@ package me.shedaniel.rei.plugin.common.displays.tag;
 
 import com.mojang.serialization.DataResult;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
+import dev.architectury.impl.NetworkAggregator;
 import dev.architectury.networking.NetworkManager;
 import dev.architectury.networking.transformers.SplitPacketTransformer;
+import dev.architectury.platform.Platform;
 import dev.architectury.utils.Env;
 import dev.architectury.utils.EnvExecutor;
 import io.netty.buffer.Unpooled;
@@ -122,6 +124,12 @@ public class TagNodes {
     
     public static void init() {
         EnvExecutor.runInEnv(Env.CLIENT, () -> Client::init);
+
+        // Fix for TagNodes not being loaded on the server
+        // A bit hacky as it uses Architectury's internal API, but this class needs rewriting to use codecs due to the deprecation of the old serialization system anyway.
+        if(Platform.getEnvironment() != Env.CLIENT) {
+            NetworkAggregator.registerS2CType(REQUEST_TAGS_PACKET_S2C, Collections.singletonList(new SplitPacketTransformer()));
+        }
         
         NetworkManager.registerReceiver(NetworkManager.c2s(), REQUEST_TAGS_PACKET_C2S, Collections.singletonList(new SplitPacketTransformer()), (buf, context) -> {
             UUID uuid = buf.readUUID();
