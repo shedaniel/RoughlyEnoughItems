@@ -86,7 +86,7 @@ public class CachedEntryListRender {
     static {
         ReloadListenerRegistry.register(PackType.CLIENT_RESOURCES, (barrier, resourceManager, preparationExecutor, reloadExecutor) -> {
             return barrier.wait(Unit.INSTANCE).thenRunAsync(CachedEntryListRender::refresh, reloadExecutor);
-        });
+        }, ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "cached_entries"));
     }
     
     public static void refresh() {

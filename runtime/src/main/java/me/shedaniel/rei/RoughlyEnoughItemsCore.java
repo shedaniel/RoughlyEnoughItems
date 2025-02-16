@@ -157,7 +157,7 @@ public class RoughlyEnoughItemsCore {
                     if (GameInstance.getServer() == null) return;
                     ReloadManagerImpl.reloadPlugins(null, ReloadInterruptionContext.ofNever());
                 }, executor2);
-            });
+            }, ResourceLocation.fromNamespaceAndPath("roughlyenoughitems", "reload_plugins"));
         }
     }
     
