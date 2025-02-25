@@ -153,22 +153,24 @@ public final class EntryIngredients {
     }
     
     public static EntryIngredient ofIngredient(Ingredient ingredient) {
-        return ofItemsHolderSet(ingredient.values);
+        return Internals.toEntryIngredient(ingredient);
     }
     
     public static List<EntryIngredient> ofIngredients(List<Ingredient> ingredients) {
         if (ingredients.size() == 0) return Collections.emptyList();
         if (ingredients.size() == 1) {
             Ingredient ingredient = ingredients.get(0);
-            if (ingredient.values.size() == 0) return List.of();
-            return List.of(ofIngredient(ingredient));
+            EntryIngredient entryIngredient = ofIngredient(ingredient);
+            if (entryIngredient.isEmpty()) return List.of();
+            return List.of(entryIngredient);
         }
         boolean emptyFlag = true;
         List<EntryIngredient> result = new ArrayList<>(ingredients.size());
         for (int i = ingredients.size() - 1; i >= 0; i--) {
             Ingredient ingredient = ingredients.get(i);
-            if (emptyFlag && ingredient.values.size() == 0) continue;
-            result.add(0, ofIngredient(ingredient));
+            EntryIngredient entryIngredient = ofIngredient(ingredient);
+            if (emptyFlag && entryIngredient.isEmpty()) continue;
+            result.add(0, entryIngredient);
             emptyFlag = false;
         }
         return ImmutableList.copyOf(result);

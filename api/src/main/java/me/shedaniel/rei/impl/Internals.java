@@ -38,6 +38,7 @@ import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Unit;
+import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Field;
@@ -46,6 +47,7 @@ import java.util.function.Supplier;
 
 @ApiStatus.Internal
 public final class Internals {
+    private static Function<Ingredient, EntryIngredient> ingredientToEntryIngredient = (object) -> throwNotSetup();
     private static Supplier<EntryStackProvider> entryStackProvider = Internals::throwNotSetup;
     private static Supplier<EntryIngredientProvider> entryIngredientProvider = Internals::throwNotSetup;
     private static Function<ResourceLocation, EntryType<?>> entryTypeDeferred = (object) -> throwNotSetup();
@@ -82,6 +84,10 @@ public final class Internals {
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+    }
+    
+    public static EntryIngredient toEntryIngredient(Ingredient ingredient) {
+        return ingredientToEntryIngredient.apply(ingredient);
     }
     
     public static EntryStackProvider getEntryStackProvider() {
