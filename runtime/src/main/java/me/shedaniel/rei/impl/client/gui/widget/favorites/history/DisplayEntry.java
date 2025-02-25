@@ -125,18 +125,18 @@ public class DisplayEntry extends WidgetWithBounds {
     }
     
     private List<Widget> setupDisplay(CategoryRegistry.CategoryConfiguration<Display> configuration, Rectangle displayBounds) {
-        List<Widget> result = null;
         try {
-            result = configuration.getView(display).setupDisplay(display, displayBounds);
+            List<Widget> widgets = configuration.getView(display).setupDisplay(display, displayBounds);
+            SetupDisplayUtils.TransformFiltering(widgets);
+            return widgets;
         } catch (Throwable throwable) {
             throwable.printStackTrace();
-            result = new ArrayList<>();
-            result.add(Widgets.createRecipeBase(displayBounds).color(0xFFBB0000));
-            result.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() - 8), Component.literal("Failed to initiate setupDisplay")));
-            result.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() + 1), Component.literal("Check console for error")));
+            List<Widget> w = new ArrayList<>();
+            w.add(Widgets.createRecipeBase(displayBounds).color(0xFFBB0000));
+            w.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() - 8), Component.literal("Failed to initiate setupDisplay")));
+            w.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() + 1), Component.literal("Check console for error")));
+            return w;
         }
-        SetupDisplayUtils.TransformFiltering(result);
-        return result;
     }
     
     @Override
