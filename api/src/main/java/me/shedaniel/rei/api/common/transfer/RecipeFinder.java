@@ -71,6 +71,7 @@ public class RecipeFinder<T> {
     class Filter {
         private final List<Ingredient<T>> ingredients;
         private final int ingredientCount;
+        private final int ingredientNonNullCount;
         private final List<T> items;
         private final int itemCount;
         private final BitSet data;
@@ -79,6 +80,13 @@ public class RecipeFinder<T> {
         public Filter(final List<Ingredient<T>> list) {
             this.ingredients = list;
             this.ingredientCount = this.ingredients.size();
+            int cnt = 0;
+            for (Ingredient<T> elt : list){
+                if(! elt.elements().isEmpty()){
+                    cnt++;
+                }
+            }
+            this.ingredientNonNullCount = cnt;
             this.items = this.getUniqueAvailableIngredientItems();
             this.itemCount = this.items.size();
             this.data = new BitSet(this.visitedIngredientCount() + this.visitedItemCount() + this.satisfiedCount() + this.connectionCount() + this.residualCount());
@@ -106,20 +114,27 @@ public class RecipeFinder<T> {
                 while (true) {
                     IntList intList = this.tryAssigningNewItem(maxCrafts);
                     if (intList == null) {
-                        boolean bl = j == this.ingredientCount;
+                        boolean bl = j == this.ingredientNonNullCount;
                         boolean bl2 = bl && output != null;
                         this.clearAllVisited();
                         this.clearSatisfied();
                         
                         for (int l = 0; l < this.ingredientCount; l++) {
-                            for (int m = 0; m < this.itemCount; m++) {
-                                if (this.isAssigned(m, l)) {
-                                    this.unassign(m, l);
-                                    put(this.items.get(m), maxCrafts);
-                                    if (bl2) {
-                                        output.accept(this.items.get(m));
+                            if (this.ingredients.get(l).elements().isEmpty()) {
+                                if (bl2) {
+                                    output.accept(null);
+                                }
+                            }
+                            else {
+                                for (int m = 0; m < this.itemCount; m++) {
+                                    if (this.isAssigned(m, l)) {
+                                        this.unassign(m, l);
+                                        put(this.items.get(m), maxCrafts);
+                                        if (bl2) {
+                                            output.accept(this.items.get(m));
+                                        }
+                                        break;
                                     }
-                                    break;
                                 }
                             }
                         }
@@ -388,6 +403,9 @@ public class RecipeFinder<T> {
             int i = Integer.MAX_VALUE;
             
             for (Ingredient<T> ingredient : this.ingredients) {
+                if (ingredient.elements().isEmpty()){
+                    continue;
+                }
                 int j = 0;
                 
                 for (T object : ingredient.elements()) {
