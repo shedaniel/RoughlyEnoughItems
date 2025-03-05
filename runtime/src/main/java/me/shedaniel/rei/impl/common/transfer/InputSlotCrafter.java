@@ -134,6 +134,9 @@ public abstract class InputSlotCrafter<T extends AbstractContainerMenu, C extend
             int finalCraftsAmount = amountToFill;
             
             for (ItemStack itemId : recipeItems) {
+                if (itemId.isEmpty()){
+                    continue;
+                }
                 finalCraftsAmount = Math.min(finalCraftsAmount, itemId.getMaxStackSize());
             }
             
