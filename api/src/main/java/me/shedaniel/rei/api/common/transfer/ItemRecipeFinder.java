@@ -76,7 +76,11 @@ public class ItemRecipeFinder {
     public boolean findRecipe(List<List<ItemStack>> list, int maxCrafts, @Nullable Consumer<ItemStack> output) {
         return finder.findRecipe(CollectionUtils.map(list, this::ofKeys), maxCrafts, itemKey -> {
             if (output != null) {
-                output.accept(new ItemStack(itemKey.item(), 1, itemKey.patch()));
+                if (itemKey==null){
+                    output.accept(ItemStack.EMPTY);
+                } else {
+                    output.accept(new ItemStack(itemKey.item(), 1, itemKey.patch()));
+                }
             }
         });
     }
@@ -84,7 +88,11 @@ public class ItemRecipeFinder {
     public int countRecipeCrafts(List<List<ItemStack>> list, int maxCrafts, @Nullable Consumer<ItemStack> output) {
         return finder.countRecipeCrafts(CollectionUtils.map(list, this::ofKeys), maxCrafts, itemKey -> {
             if (output != null) {
-                output.accept(new ItemStack(itemKey.item(), 1, itemKey.patch()));
+                if (itemKey==null){
+                    output.accept(ItemStack.EMPTY);
+                } else {
+                    output.accept(new ItemStack(itemKey.item(), 1, itemKey.patch()));
+                }
             }
         });
     }
