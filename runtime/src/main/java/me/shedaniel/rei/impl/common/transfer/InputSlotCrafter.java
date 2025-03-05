@@ -57,13 +57,19 @@ public abstract class InputSlotCrafter<T extends AbstractContainerMenu, C extend
         
         ItemRecipeFinder recipeFinder = new ItemRecipeFinder();
         this.populateRecipeFinder(recipeFinder);
-        List<List<ItemStack>> ingredients = new ArrayList<>();
+        List<List<ItemStack>> ingredients_calc  = new ArrayList<>();
+        List<List<ItemStack>> ingredients_shape = new ArrayList<>();
         for (InputIngredient<ItemStack> itemStacks : this.getInputs()) {
-            ingredients.add(itemStacks.get());
+            if (!itemStacks.get().isEmpty()) {
+//                continue;
+                ingredients_calc.add(itemStacks.get());
+            }
+            ingredients_shape.add(itemStacks.get());
+            
         }
         
-        if (recipeFinder.findRecipe(ingredients, 1, null)) {
-            this.fillInputSlots(recipeFinder, ingredients, hasShift);
+        if (recipeFinder.findRecipe(ingredients_calc, 1, null)) {
+            this.fillInputSlots(recipeFinder, ingredients_calc, ingredients_shape, hasShift);
         } else {
             this.cleanInputs();
             this.markDirty();
@@ -83,6 +89,19 @@ public abstract class InputSlotCrafter<T extends AbstractContainerMenu, C extend
     
     protected abstract void markDirty();
     
+    public void alignRecipeToGrid(Iterable<SlotAccessor> inputStacks, Iterator<ItemStack> recipeItems, Iterator<List<ItemStack>> shape, int craftsAmount) {
+        for (SlotAccessor inputStack : inputStacks) {
+            if (!recipeItems.hasNext() || !shape.hasNext()) {
+                return;
+            }
+            if (shape.next().isEmpty()) {
+                continue;
+            }
+            this.acceptAlignedInput(recipeItems.next(), inputStack, craftsAmount);
+        }
+    }
+
+
     public void alignRecipeToGrid(Iterable<SlotAccessor> inputStacks, Iterator<ItemStack> recipeItems, int craftsAmount) {
         for (SlotAccessor inputStack : inputStacks) {
             if (!recipeItems.hasNext()) {
@@ -126,7 +145,19 @@ public abstract class InputSlotCrafter<T extends AbstractContainerMenu, C extend
         }
     }
     
-    protected void fillInputSlots(ItemRecipeFinder recipeFinder, List<List<ItemStack>> ingredients, boolean hasShift) {
+    protected void fillInputSlots(ItemRecipeFinder recipeFinder, List<List<ItemStack>> shape, boolean hasShift) {
+        List<List<ItemStack>> ing_currated = new ArrayList<>();
+        for (List<ItemStack> elt : shape) {
+            if (elt.isEmpty()) {
+                continue;
+            }
+            ing_currated.add(elt);
+        }
+        this.fillInputSlots(recipeFinder, ing_currated, shape, hasShift);
+        
+    }
+
+    protected void fillInputSlots(ItemRecipeFinder recipeFinder, List<List<ItemStack>> ingredients, List<List<ItemStack>> shape, boolean hasShift) {
         int recipeCrafts = recipeFinder.countRecipeCrafts(ingredients, Integer.MAX_VALUE, null);
         int amountToFill = hasShift ? recipeCrafts : 1;
         List<ItemStack> recipeItems = new ArrayList<>();
@@ -134,6 +165,9 @@ public abstract class InputSlotCrafter<T extends AbstractContainerMenu, C extend
             int finalCraftsAmount = amountToFill;
             
             for (ItemStack itemId : recipeItems) {
+                if (itemId.isEmpty()) {
+                    continue;
+                }
                 finalCraftsAmount = Math.min(finalCraftsAmount, itemId.getMaxStackSize());
             }
             
@@ -141,10 +175,11 @@ public abstract class InputSlotCrafter<T extends AbstractContainerMenu, C extend
             
             if (recipeFinder.findRecipe(ingredients, finalCraftsAmount, recipeItems::add)) {
                 this.cleanInputs();
-                this.alignRecipeToGrid(inputStacks, recipeItems.iterator(), finalCraftsAmount);
+                this.alignRecipeToGrid(inputStacks, recipeItems.iterator(), shape.iterator(), finalCraftsAmount);
             }
         }
     }
+    
     
     protected abstract void cleanInputs();
     
