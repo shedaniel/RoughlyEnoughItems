@@ -35,6 +35,7 @@ import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
+import me.shedaniel.rei.impl.client.util.SetupDisplayUtils;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -60,6 +61,7 @@ public class DisplayTooltipComponent implements TooltipComponent, ClientTooltipC
         DisplayCategory<Display> category = configuration.getCategory();
         this.bounds = new Rectangle(0, 0, category.getDisplayWidth(internalDisplay), category.getDisplayHeight());
         List<Widget> widgets = configuration.getView(internalDisplay).setupDisplay(internalDisplay, bounds);
+        SetupDisplayUtils.TransformFiltering(widgets);
         
         this.display = display;
         this.widgets = widgets;

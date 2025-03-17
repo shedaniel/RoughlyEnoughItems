@@ -259,25 +259,6 @@ public abstract class AbstractDisplayViewingScreen extends Screen implements Dis
         }
     }
     
-    @SuppressWarnings("RedundantCast")
-    protected void transformFiltering(List<? extends GuiEventListener> setupDisplay) {
-        for (EntryWidget widget : Widgets.<EntryWidget>walk(setupDisplay, EntryWidget.class::isInstance)) {
-            if (widget.getEntries().size() > 1) {
-                Collection<EntryStack<?>> refiltered = EntryRegistry.getInstance().refilterNew(false, widget.getEntries());
-                EntryIngredient asEntryIngredient = widget.getEntries() instanceof EntryIngredient ingredient ? ingredient : null;
-                if (!refiltered.isEmpty() && !widget.getEntries().equals(refiltered)) {
-                    widget.clearStacks();
-                    EntryIngredient newIngredient = EntryIngredient.of(refiltered);
-                    if (asEntryIngredient != null && (Object) asEntryIngredient.getSetting(EntryIngredientSetting.FOCUS_UUID) instanceof UUID uuid) {
-                        newIngredient.setting(EntryIngredientSetting.FOCUS_UUID,
-                                new UUID(uuid.getMostSignificantBits() ^ refiltered.size(), uuid.getLeastSignificantBits() ^ refiltered.size()));
-                    }
-                    widget.entries(newIngredient);
-                }
-            }
-        }
-    }
-    
     protected static long hashFocusIngredient(EntryIngredient ingredient) {
         UUID uuid = ingredient.getSetting(EntryIngredientSetting.FOCUS_UUID);
         if (uuid == null) return System.identityHashCode(ingredient);

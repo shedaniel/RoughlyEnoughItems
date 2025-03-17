@@ -41,6 +41,7 @@ import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.impl.client.ClientHelperImpl;
 import me.shedaniel.rei.impl.client.gui.widget.AutoCraftingEvaluator;
+import me.shedaniel.rei.impl.client.util.SetupDisplayUtils;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -125,7 +126,9 @@ public class DisplayEntry extends WidgetWithBounds {
     
     private List<Widget> setupDisplay(CategoryRegistry.CategoryConfiguration<Display> configuration, Rectangle displayBounds) {
         try {
-            return configuration.getView(display).setupDisplay(display, displayBounds);
+            List<Widget> widgets = configuration.getView(display).setupDisplay(display, displayBounds);
+            SetupDisplayUtils.TransformFiltering(widgets);
+            return widgets;
         } catch (Throwable throwable) {
             throwable.printStackTrace();
             List<Widget> w = new ArrayList<>();

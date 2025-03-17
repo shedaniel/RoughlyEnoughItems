@@ -47,6 +47,7 @@ import me.shedaniel.rei.api.common.entry.EntryIngredient;
 import me.shedaniel.rei.impl.client.REIRuntimeImpl;
 import me.shedaniel.rei.impl.client.gui.widget.EntryWidget;
 import me.shedaniel.rei.impl.client.gui.widget.InternalWidgets;
+import me.shedaniel.rei.impl.client.util.SetupDisplayUtils;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -147,7 +148,7 @@ public class CompositeDisplayViewingScreen extends AbstractDisplayViewingScreen 
             setupDisplay.add(Widgets.createLabel(new Point(recipeBounds.getCenterX(), recipeBounds.getCenterY() + 1), Component.literal("Check console for error")));
         }
         setupTags(setupDisplay);
-        transformFiltering(setupDisplay);
+        SetupDisplayUtils.TransformFiltering(setupDisplay);
         transformIngredientNotice(setupDisplay, ingredientStackToNotice);
         transformResultNotice(setupDisplay, resultStackToNotice);
         unifyIngredients(setupDisplay);

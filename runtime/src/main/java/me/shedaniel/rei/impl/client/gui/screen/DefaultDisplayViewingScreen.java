@@ -60,6 +60,7 @@ import me.shedaniel.rei.impl.client.gui.ScreenOverlayImpl;
 import me.shedaniel.rei.impl.client.gui.toast.ExportRecipeIdentifierToast;
 import me.shedaniel.rei.impl.client.gui.widget.*;
 import me.shedaniel.rei.impl.client.gui.widget.basewidgets.PanelWidget;
+import me.shedaniel.rei.impl.client.util.SetupDisplayUtils;
 import me.shedaniel.rei.impl.display.DisplaySpec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -253,7 +254,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                 setupDisplay.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() + 1), Component.literal("Check console for error")));
             }
             setupTags(setupDisplay);
-            transformFiltering(setupDisplay);
+            SetupDisplayUtils.TransformFiltering(setupDisplay);
             transformIngredientNotice(setupDisplay, ingredientStackToNotice);
             transformResultNotice(setupDisplay, resultStackToNotice);
             unifyIngredients(setupDisplay);
@@ -445,7 +446,7 @@ public class DefaultDisplayViewingScreen extends AbstractDisplayViewingScreen {
                                 setupDisplay.add(Widgets.createLabel(new Point(displayBounds.getCenterX(), displayBounds.getCenterY() + 1), Component.literal("Check console for error")));
                             }
                             setupTags(setupDisplay);
-                            transformFiltering(setupDisplay);
+                            SetupDisplayUtils.TransformFiltering(setupDisplay);
                             transformIngredientNotice(setupDisplay, ingredientStackToNotice);
                             transformResultNotice(setupDisplay, resultStackToNotice);
                             unifyIngredients(setupDisplay);
