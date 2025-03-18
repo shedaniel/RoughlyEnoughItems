@@ -93,6 +93,10 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     public DefaultDisplayChoosePageWidget choosePageWidget;
     private final MenuHolder menuHolder = new MenuHolder();
     private final HintsContainerWidget hintsWidget = new HintsContainerWidget();
+
+    // EDIT: Needed for fix in line 386
+    private final ArrayList<String> keysPressed = new ArrayList<>();
+    // END EDIT
     
     public static EntryListWidget getEntryListWidget() {
         boolean widgetScrolled = ConfigObject.getInstance().isEntryListWidgetScrolled();
@@ -378,6 +382,18 @@ public abstract class ScreenOverlayImpl extends ScreenOverlay {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (!hasSpace()) return false;
+
+        // FIX FOR: https://github.com/shedaniel/RoughlyEnoughItems/discussions/1789
+        // EDIT: keyPressed triggers two times (on press and on release). The following code prevents reacting a second time
+        String keyPressed = Arrays.toString(new int[]{keyCode, scanCode, modifiers});
+        if (keysPressed.contains(keyPressed)) {
+            keysPressed.remove(keyPressed);
+            return false;
+        }
+
+        keysPressed.add(keyPressed);
+        // END EDIT
+        
         if (REIRuntime.getInstance().isOverlayVisible()) {
             if (keyCode == 256 && choosePageWidget != null) {
                 choosePageWidget = null;
