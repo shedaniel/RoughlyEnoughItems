@@ -134,6 +134,10 @@ public abstract class InputSlotCrafter<T extends AbstractContainerMenu, C extend
             int finalCraftsAmount = amountToFill;
             
             for (ItemStack itemId : recipeItems) {
+                // Fix issue with empty item id (grid slot) [shift-click issue]
+                if (itemId == 0) {
+                    continue;
+                }
                 finalCraftsAmount = Math.min(finalCraftsAmount, itemId.getMaxStackSize());
             }
             
