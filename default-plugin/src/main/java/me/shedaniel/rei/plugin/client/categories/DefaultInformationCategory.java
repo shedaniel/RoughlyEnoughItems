@@ -24,7 +24,6 @@
 package me.shedaniel.rei.plugin.client.categories;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
@@ -99,7 +98,6 @@ public class DefaultInformationCategory implements DisplayCategory<DefaultInform
         return new Renderer() {
             @Override
             public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
-                RenderSystem.setShaderTexture(0, REIRuntime.getInstance().getDefaultDisplayTexture());
                 graphics.pose().pushPose();
                 graphics.pose().translate(-1.2f, -1, 0);
                 Matrix4f matrix = graphics.pose().last().pose();

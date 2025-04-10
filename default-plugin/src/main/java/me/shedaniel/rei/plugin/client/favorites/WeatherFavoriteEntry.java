@@ -197,7 +197,7 @@ public class WeatherFavoriteEntry extends FavoriteEntry {
         
         @Override
         public DataResult<WeatherFavoriteEntry> read(CompoundTag object) {
-            String stringValue = object.getString(KEY);
+            String stringValue = object.getStringOr(KEY, "NOT_SET");
             Weather weather = stringValue.equals("NOT_SET") ? null : Weather.valueOf(stringValue);
             return DataResult.success(new WeatherFavoriteEntry(weather), Lifecycle.stable());
         }

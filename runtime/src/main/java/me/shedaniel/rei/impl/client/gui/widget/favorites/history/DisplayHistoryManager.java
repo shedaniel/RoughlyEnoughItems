@@ -90,17 +90,17 @@ public class DisplayHistoryManager {
         entries.clear();
         displayToEntries.clear();
         for (CompoundTag tag : displayHistory) {
-            String uuid = tag.getString("DisplayHistoryUUID");
+            String uuid = tag.getString("DisplayHistoryUUID").orElseThrow();
             
             DisplayEntry entry = copy.get(uuid);
             if (entry != null) {
                 entries.put(entry.getUuid().toString(), entry);
                 displayToEntries.put(entry.getDisplay(), entry);
-            } else if (tag.getBoolean("DisplayHistoryContains")) {
+            } else if (tag.getBooleanOr("DisplayHistoryContains", false)) {
                 try {
-                    CategoryIdentifier<?> categoryIdentifier = CategoryIdentifier.of(tag.getString("DisplayHistoryCategory"));
+                    CategoryIdentifier<?> categoryIdentifier = CategoryIdentifier.of(tag.getString("DisplayHistoryCategory").orElseThrow());
                     if (CategoryRegistry.getInstance().tryGet(categoryIdentifier).isPresent()) {
-                        DataResult<Display> result = Display.codec().parse(BasicDisplay.registryAccess().createSerializationContext(NbtOps.INSTANCE), tag.getCompound("DisplayHistoryData"));
+                        DataResult<Display> result = Display.codec().parse(BasicDisplay.registryAccess().createSerializationContext(NbtOps.INSTANCE), tag.getCompound("DisplayHistoryData").orElseThrow());
                         Display display = result.getOrThrow();
                         DisplayEntry newEntry = new DisplayEntry(parent, display, null);
                         newEntry.setUuid(UUID.fromString(uuid));
@@ -161,7 +161,7 @@ public class DisplayHistoryManager {
     private void save() {
         List<CompoundTag> displayHistory = ConfigManagerImpl.getInstance().getConfig().getDisplayHistory();
         for (CompoundTag compoundTag : displayHistory) {
-            String uuid = compoundTag.getString("DisplayHistoryUUID");
+            String uuid = compoundTag.getString("DisplayHistoryUUID").orElseThrow();
             DisplayEntry entry = entries.get(uuid);
             
             if (entry != null) {

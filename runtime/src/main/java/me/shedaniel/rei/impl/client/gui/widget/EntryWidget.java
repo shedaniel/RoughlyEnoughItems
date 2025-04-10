@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.api.ModifierKeyCode;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -422,9 +421,6 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     protected void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (background) {
             darkBackgroundAlpha.update(delta);
-            RenderSystem.enableBlend();
-            RenderSystem.blendFuncSeparate(770, 771, 1, 0);
-            RenderSystem.blendFunc(770, 771);
             graphics.blit(RenderType::guiTextured, InternalTextures.CHEST_GUI_TEXTURE, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height, 256, 256);
             if (darkBackgroundAlpha.value() > 0.0F) {
                 graphics.blit(RenderType::guiTextured, InternalTextures.CHEST_GUI_TEXTURE_DARK, bounds.x, bounds.y, 0, 222, bounds.width, bounds.height, 256, 256, ARGB.white(darkBackgroundAlpha.value()));
@@ -535,14 +531,10 @@ public class EntryWidget extends Slot implements DraggableStackProviderWidget {
     
     protected void drawHighlighted(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         darkHighlightedAlpha.update(delta);
-        RenderSystem.disableDepthTest();
-        RenderSystem.colorMask(true, true, true, false);
         Rectangle bounds = getInnerBounds();
         graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0x80ffffff, 0x80ffffff);
         int darkColor = 0x111111 | ((int) (90 * darkHighlightedAlpha.value()) << 24);
         graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), darkColor, darkColor);
-        RenderSystem.colorMask(true, true, true, true);
-        RenderSystem.enableDepthTest();
     }
     
     @Override

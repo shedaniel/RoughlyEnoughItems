@@ -32,7 +32,6 @@ import me.shedaniel.rei.api.client.registry.transfer.TransferHandler;
 import me.shedaniel.rei.api.client.registry.transfer.TransferHandlerMeta;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.entry.EntryStack;
 import me.shedaniel.rei.api.common.entry.InputIngredient;
 import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
@@ -46,7 +45,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -80,7 +78,7 @@ public interface SimpleTransferHandler extends TransferHandler, TransferHandlerM
             public Iterable<SlotAccessor> getInventorySlots(Context context) {
                 LocalPlayer player = context.getMinecraft().player;
                 Inventory inventory = player.getInventory();
-                return IntStream.range(0, inventory.items.size())
+                return IntStream.range(0, inventory.getNonEquipmentItems().size())
                         .mapToObj(index -> SlotAccessor.fromPlayerInventory(player, index))
                         .collect(Collectors.toList());
             }

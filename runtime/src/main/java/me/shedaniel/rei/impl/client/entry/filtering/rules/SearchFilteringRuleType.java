@@ -65,8 +65,8 @@ public enum SearchFilteringRuleType implements FilteringRuleType<SearchFiltering
     
     @Override
     public SearchFilteringRule readFrom(CompoundTag tag) {
-        String filter = tag.getString("filter");
-        boolean show = tag.getBoolean("show");
+        String filter = tag.getString("filter").orElseThrow();
+        boolean show = tag.getBoolean("show").orElseThrow();
         return new SearchFilteringRule(filter, show);
     }
     

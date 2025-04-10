@@ -36,7 +36,7 @@ public class MatrixUtils {
         Transformation transformation = new Transformation(matrix);
         Transformation inverse = transformation.inverse();
         if (inverse != null) inverse.getScale(); // This has a side effect
-        return inverse == null ? Transformation.identity().getMatrix() : inverse.getMatrix();
+        return inverse == null ? Transformation.identity().getMatrixCopy() : inverse.getMatrixCopy();
     }
     
     public static Rectangle transform(Matrix4f matrix, Rectangle rectangle) {

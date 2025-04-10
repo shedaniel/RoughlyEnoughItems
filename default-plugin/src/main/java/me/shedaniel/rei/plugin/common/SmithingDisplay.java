@@ -26,9 +26,11 @@ package me.shedaniel.rei.plugin.common;
 import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
 import me.shedaniel.rei.api.common.display.Display;
+import net.minecraft.core.Holder;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ByIdMap;
+import net.minecraft.world.item.equipment.trim.TrimPattern;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +39,10 @@ import java.util.function.IntFunction;
 public interface SmithingDisplay extends Display {
     @Nullable
     SmithingRecipeType type();
+    
+    interface Trimming {
+        Holder<TrimPattern> pattern();
+    }
     
     @ApiStatus.Experimental
     enum SmithingRecipeType {

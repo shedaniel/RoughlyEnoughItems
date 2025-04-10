@@ -58,6 +58,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
@@ -70,6 +71,7 @@ import java.util.Locale;
 @ApiStatus.Internal
 @Environment(EnvType.CLIENT)
 public class ConfigManagerImpl implements ConfigManager {
+    private static final TagParser<Tag> NBT_OPS_PARSER = TagParser.create(NbtOps.INSTANCE);
     private boolean craftableOnly = false;
     private final Gson gson = new GsonBuilder().create();
     private ConfigObjectImpl object;
@@ -138,7 +140,7 @@ public class ConfigManagerImpl implements ConfigManager {
         });
         builder.registerDeserializer(String.class, Tag.class, (value, marshaller) -> {
             try {
-                return TagParser.parseTag(value);
+                return NBT_OPS_PARSER.parseFully(value);
             } catch (CommandSyntaxException e) {
                 throw new DeserializationException(e);
             }
@@ -150,7 +152,7 @@ public class ConfigManagerImpl implements ConfigManager {
         });
         builder.registerDeserializer(String.class, CompoundTag.class, (value, marshaller) -> {
             try {
-                return TagParser.parseTag(value);
+                return TagParser.parseCompoundFully(value);
             } catch (CommandSyntaxException e) {
                 throw new DeserializationException(e);
             }
@@ -170,7 +172,7 @@ public class ConfigManagerImpl implements ConfigManager {
         });
         builder.registerDeserializer(String.class, EntryStackProvider.class, (value, marshaller) -> {
             try {
-                return EntryStackProvider.defer(new TagParser(new StringReader(value)).readValue());
+                return EntryStackProvider.defer(NBT_OPS_PARSER.parseFully(new StringReader(value)));
             } catch (CommandSyntaxException e) {
                 e.printStackTrace();
                 return EntryStackProvider.ofStack(EntryStack.empty());
@@ -196,7 +198,7 @@ public class ConfigManagerImpl implements ConfigManager {
         });
         builder.registerDeserializer(String.class, FilteringRule.class, (value, marshaller) -> {
             try {
-                return FilteringRuleType.read(TagParser.parseTag(value));
+                return FilteringRuleType.read(TagParser.parseCompoundFully(value));
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -217,7 +219,7 @@ public class ConfigManagerImpl implements ConfigManager {
         });
         builder.registerDeserializer(String.class, FavoriteEntry.class, (value, marshaller) -> {
             try {
-                CompoundTag tag = TagParser.parseTag(value);
+                CompoundTag tag = TagParser.parseCompoundFully(value);
                 return FavoriteEntry.readDelegated(tag);
             } catch (Exception e) {
                 e.printStackTrace();

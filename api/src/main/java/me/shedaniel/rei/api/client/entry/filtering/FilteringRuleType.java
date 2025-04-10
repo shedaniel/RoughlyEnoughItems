@@ -74,9 +74,9 @@ public interface FilteringRuleType<T extends FilteringRule<?>> {
      */
     @Nullable
     static FilteringRule<?> read(CompoundTag tag) {
-        FilteringRuleType<?> type = FilteringRuleTypeRegistry.getInstance().get(ResourceLocation.tryParse(tag.getString("id")));
+        FilteringRuleType<?> type = FilteringRuleTypeRegistry.getInstance().get(ResourceLocation.tryParse(tag.getString("id").orElseThrow()));
         if (type == null) return null;
-        return type.readFrom(tag.getCompound("rule"));
+        return type.readFrom(tag.getCompoundOrEmpty("rule"));
     }
     
     /**

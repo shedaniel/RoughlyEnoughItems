@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
@@ -83,19 +82,14 @@ public final class ArrowWidget extends Arrow {
     }
     
     public void renderBackground(GuiGraphics graphics, boolean dark, float alpha) {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(770, 771, 1, 0);
-        RenderSystem.blendFunc(770, 771);
         ResourceLocation texture = REIRuntime.getInstance().getDefaultDisplayTexture(dark);
         if (getAnimationDuration() > 0) {
             int width = Mth.ceil((System.currentTimeMillis() / (animationDuration / 24) % 24d));
-            graphics.blit(RenderType::guiTextured, texture, getX() + width, getY(), 106 + width, 91, 24 - width, 17, 256, 256);
-            graphics.blit(RenderType::guiTextured, texture, getX(), getY(), 82, 91, width, 17, 256, 256);
+            graphics.blit(RenderType::guiTextured, texture, getX() + width, getY(), 106 + width, 91, 24 - width, 17, 256, 256, 0xFFFFFF | (int) (alpha * 255) << 24);
+            graphics.blit(RenderType::guiTextured, texture, getX(), getY(), 82, 91, width, 17, 256, 256, 0xFFFFFF | (int) (alpha * 255) << 24);
         } else {
-            graphics.blit(RenderType::guiTextured, texture, getX(), getY(), 106, 91, 24, 17, 256, 256);
+            graphics.blit(RenderType::guiTextured, texture, getX(), getY(), 106, 91, 24, 17, 256, 256, 0xFFFFFF | (int) (alpha * 255) << 24);
         }
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
     
     @Override

@@ -293,7 +293,6 @@ public abstract class OptionEntriesScreen extends Screen {
         
         @Override
         public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-            RenderSystem.setShaderTexture(0, CONFIG_TEX);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             this.widget.rectangle.x = x + 3;
             this.widget.rectangle.y = y;

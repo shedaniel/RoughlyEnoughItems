@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.screen.collapsible.selection;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
@@ -467,9 +466,7 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
             if (isSelected()) {
                 boolean filtered = isFiltered();
                 Rectangle bounds = getBounds();
-                RenderSystem.disableDepthTest();
                 graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), filtered ? 0x70ffffff : 0x55ffffff, filtered ? 0x70ffffff : 0x55ffffff);
-                RenderSystem.enableDepthTest();
             }
         }
         
@@ -489,9 +486,7 @@ public class CustomCollapsibleEntrySelectionScreen extends Screen {
         protected void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             if (isFiltered()) {
                 Rectangle bounds = getBounds();
-                RenderSystem.disableDepthTest();
                 graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0xff873e23, 0xff873e23);
-                RenderSystem.enableDepthTest();
             }
         }
         

@@ -46,7 +46,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
-import org.joml.Matrix4f;
 
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -86,12 +85,11 @@ public class ConfigOptionValueWidget {
         
         setText.accept(option.getEntry().getOption(access.get(option)));
         
-        Matrix4f[] matrix = {new Matrix4f()};
         Label label = Widgets.createLabel(new Point(), text[0]).rightAligned()
                 .color(0xFFE0E0E0)
                 .hoveredColor(0xFFE0E0E0)
                 .onRender((poses, l) -> {
-                    if (MatrixUtils.transform(matrix[0], l.getBounds()).contains(PointHelper.ofMouse())) {
+                    if (MatrixUtils.transform(poses.pose().last().pose(), l.getBounds()).contains(PointHelper.ofMouse())) {
                         l.setMessage(text[0].copy().withStyle(ChatFormatting.UNDERLINE));
                     } else {
                         l.setMessage(text[0]);
@@ -99,9 +97,9 @@ public class ConfigOptionValueWidget {
                 });
         
         if (option.getEntry() instanceof OptionValueEntry.Selection<T> selection) {
-            applySelection(access, option, selection, label, setText, matrix);
+            applySelection(access, option, selection, label, setText);
         } else if (access.get(option) instanceof ModifierKeyCode) {
-            applyKeycode(access, option, label, setText, matrix);
+            applyKeycode(access, option, label, setText);
         } else if (option.getEntry() instanceof OptionValueEntry.Configure<T>) {
             label.clickable().onClick($ -> {
                 ((OptionValueEntry.Configure<T>) option.getEntry()).configure(access, option, () -> {
@@ -113,13 +111,18 @@ public class ConfigOptionValueWidget {
         
         return Widgets.concatWithBounds(() -> new Rectangle(-label.getBounds().width, 0, label.getBounds().width + 8, 14),
                 label,
-                Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> matrix[0] = graphics.pose().last().pose()),
                 Widgets.withTranslate(Widgets.createTexturedWidget(ResourceLocation.parse("roughlyenoughitems:textures/gui/config/selector.png"),
                         new Rectangle(1, 1, 4, 6), 0, 0, 1, 1, 1, 1), 0, 0.5, 0)
         );
     }
     
-    private static <T> void applySelection(ConfigAccess access, CompositeOption<T> option, OptionValueEntry.Selection<T> selection, Label label, Consumer<Component> setText, Matrix4f[] matrix) {
+    private static <T> void applySelection(ConfigAccess access, CompositeOption<T> option, OptionValueEntry.Selection<T> selection, Label label, Consumer<Component> setText) {
+        Rectangle bounds = new Rectangle();
+        BiConsumer<GuiGraphics, Label> render = label.getOnRender();
+        label.onRender((poses, $) -> {
+            render.accept(poses, $);
+            bounds.setBounds(MatrixUtils.transform(poses.pose().last().pose(), label.getBounds()));
+        });
         int noOfOptions = selection.getOptions().size();
         if (noOfOptions == 2) {
             label.clickable().onClick($ -> {
@@ -128,7 +131,7 @@ public class ConfigOptionValueWidget {
             });
         } else if (noOfOptions >= 2) {
             label.clickable().onClick($ -> {
-                Menu menu = new Menu(MatrixUtils.transform(matrix[0], label.getBounds()), CollectionUtils.map(selection.getOptions(), opt -> {
+                Menu menu = new Menu(bounds, CollectionUtils.map(selection.getOptions(), opt -> {
                     Component selectionOption = selection.getOption(opt);
                     if (opt.equals(access.getDefault(option))) {
                         selectionOption = translatable("config.rei.value.default", selectionOption);
@@ -146,7 +149,7 @@ public class ConfigOptionValueWidget {
         }
     }
     
-    private static <T> void applyKeycode(ConfigAccess access, CompositeOption<T> option, Label label, Consumer<Component> setText, Matrix4f[] matrix) {
+    private static <T> void applyKeycode(ConfigAccess access, CompositeOption<T> option, Label label, Consumer<Component> setText) {
         label.clickable().onClick($ -> {
             access.closeMenu();
             access.focusKeycode((CompositeOption<ModifierKeyCode>) option);

@@ -57,7 +57,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -128,7 +127,7 @@ public class ClientHelperImpl implements ClientHelper {
     }
     
     public boolean canDeleteItems() {
-        return hasPermissionToUsePackets() || Minecraft.getInstance().gameMode.hasInfiniteItems();
+        return hasPermissionToUsePackets() || Minecraft.getInstance().player.hasInfiniteMaterials();
     }
     
     @Override
@@ -286,12 +285,10 @@ public class ClientHelperImpl implements ClientHelper {
             return Long2LongMaps.EMPTY_MAP;
         }
         Long2LongOpenHashMap map = new Long2LongOpenHashMap();
-        for (NonNullList<ItemStack> compartment : Minecraft.getInstance().player.getInventory().compartments) {
-            for (ItemStack stack : compartment) {
-                long hash = definition.hash(null, stack, ComparisonContext.FUZZY);
-                long newCount = map.getOrDefault(hash, 0) + Math.max(0, stack.getCount());
-                map.put(hash, newCount);
-            }
+        for (ItemStack stack : Minecraft.getInstance().player.getInventory().getNonEquipmentItems()) {
+            long hash = definition.hash(null, stack, ComparisonContext.FUZZY);
+            long newCount = map.getOrDefault(hash, 0) + Math.max(0, stack.getCount());
+            map.put(hash, newCount);
         }
         return map;
     }

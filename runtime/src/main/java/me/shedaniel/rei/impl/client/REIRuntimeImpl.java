@@ -256,11 +256,11 @@ public class REIRuntimeImpl implements REIRuntime {
     public void startReload() {
         getOverlay().ifPresent(ScreenOverlay::queueReloadOverlay);
         lastDisplayScreen.clear();
-        if (!RenderSystem.isOnRenderThread()) {
+        /*if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(CachedEntryListRender::refresh);
         } else {
             CachedEntryListRender.refresh();
-        }
+        }*/
     }
     
     @Override

@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.gui.widget.search;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
@@ -146,9 +145,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     public void laterRender(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         progress.update(delta);
-        RenderSystem.disableDepthTest();
         if (isMain) drawHint(graphics, mouseX, mouseY);
-        RenderSystem.enableDepthTest();
     }
     
     private void drawHint(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -357,9 +354,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
-        RenderSystem.disableDepthTest();
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
         super.render(graphics, mouseX, mouseY, delta);
-        RenderSystem.enableDepthTest();
     }
 }

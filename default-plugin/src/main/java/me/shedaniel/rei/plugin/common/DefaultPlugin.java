@@ -163,6 +163,7 @@ public class DefaultPlugin implements BuiltinPlugin, REICommonPlugin {
         registry.register(id("default/composting"), DefaultCompostingDisplay.SERIALIZER);
         registry.register(id("default/fuel"), DefaultFuelDisplay.SERIALIZER);
         registry.register(id("default/smithing"), DefaultSmithingDisplay.SERIALIZER);
+        registry.register(id("default/smithing/trimming"), DefaultSmithingDisplay.Trimming.SERIALIZER);
         registry.register(id("default/anvil"), DefaultAnvilDisplay.SERIALIZER);
         registry.register(id("default/beacon_base"), DefaultBeaconBaseDisplay.SERIALIZER);
         registry.register(id("default/beacon_payment"), DefaultBeaconPaymentDisplay.SERIALIZER);

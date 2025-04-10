@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.basewidgets;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.clothconfig2.api.animator.NumberAnimator;
 import me.shedaniel.clothconfig2.api.animator.ValueAnimator;
 import me.shedaniel.math.Rectangle;
@@ -77,19 +76,14 @@ public final class BurningFireWidget extends BurningFire {
     }
     
     public void renderBackground(GuiGraphics graphics, boolean dark, float alpha) {
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(770, 771, 1, 0);
-        RenderSystem.blendFunc(770, 771);
         ResourceLocation texture = REIRuntime.getInstance().getDefaultDisplayTexture(dark);
         if (getAnimationDuration() > 0) {
             int height = 14 - Mth.ceil((System.currentTimeMillis() / (animationDuration / 14) % 14d));
-            graphics.blit(RenderType::guiTextured, texture, getX(), getY(), 1, 74, 14, 14 - height, 256, 256);
-            graphics.blit(RenderType::guiTextured, texture, getX(), getY() + 14 - height, 82, 77 + (14 - height), 14, height, 256, 256);
+            graphics.blit(RenderType::guiTextured, texture, getX(), getY(), 1, 74, 14, 14 - height, 256, 256, 0xFFFFFF | (int) (alpha * 255) << 24);
+            graphics.blit(RenderType::guiTextured, texture, getX(), getY() + 14 - height, 82, 77 + (14 - height), 14, height, 256, 256, 0xFFFFFF | (int) (alpha * 255) << 24);
         } else {
-            graphics.blit(RenderType::guiTextured, texture, getX(), getY(), 1, 74, 14, 14, 256, 256);
+            graphics.blit(RenderType::guiTextured, texture, getX(), getY(), 1, 74, 14, 14, 256, 256, 0xFFFFFF | (int) (alpha * 255) << 24);
         }
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
     
     @Override

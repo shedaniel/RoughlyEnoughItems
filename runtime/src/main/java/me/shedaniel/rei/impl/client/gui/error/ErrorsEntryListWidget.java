@@ -38,7 +38,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
@@ -316,8 +315,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
             if (style != null && screen != null) {
                 if (style.getHoverEvent() != null) {
                     HoverEvent hoverEvent = style.getHoverEvent();
-                    Component component = hoverEvent.getValue(HoverEvent.Action.SHOW_TEXT);
-                    if (component != null) {
+                    if (hoverEvent instanceof HoverEvent.ShowText(Component component)) {
                         graphics.renderTooltip(Minecraft.getInstance().font, Minecraft.getInstance().font.split(component, Math.max(this.width / 2, 200)), x, y);
                     }
                 }
@@ -334,14 +332,7 @@ public class ErrorsEntryListWidget extends DynamicSmoothScrollingEntryListWidget
             if (button == 0) {
                 Style style = this.getTextAt(mouseX, mouseY);
                 if (style != null && style.getClickEvent() != null) {
-                    ClickEvent clickEvent = style.getClickEvent();
-                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                    try {
-                        Util.getPlatform().openUri(new URI(clickEvent.getValue()));
-                        return true;
-                    } catch (URISyntaxException e) {
-                        e.printStackTrace();
-                    }
+                    Minecraft.getInstance().screen.handleComponentClicked(style);
                     return true;
                 }
             }

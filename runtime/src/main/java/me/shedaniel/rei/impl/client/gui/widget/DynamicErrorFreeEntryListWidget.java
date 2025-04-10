@@ -25,7 +25,8 @@ package me.shedaniel.rei.impl.client.gui.widget;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -257,27 +258,14 @@ public abstract class DynamicErrorFreeEntryListWidget<E extends DynamicErrorFree
         if (this.renderSelection)
             this.renderHeader(graphics, rowLeft, startY);
         this.renderList(graphics, rowLeft, startY, mouseX, mouseY, delta);
-        RenderSystem.disableDepthTest();
         this.renderHoleBackground(graphics, 0, this.top, 255, 255);
         this.renderHoleBackground(graphics, this.bottom, this.height, 255, 255);
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(770, 771, 0, 1);
-        Matrix4f matrix = graphics.pose().last().pose();
-        BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        buffer.addVertex(matrix, this.left, this.top + 4, 0.0F).setUv(0, 1).setColor(0, 0, 0, 0);
-        buffer.addVertex(matrix, this.right, this.top + 4, 0.0F).setUv(1, 1).setColor(0, 0, 0, 0);
-        buffer.addVertex(matrix, this.right, this.top, 0.0F).setUv(1, 0).setColor(0, 0, 0, 255);
-        buffer.addVertex(matrix, this.left, this.top, 0.0F).setUv(0, 0).setColor(0, 0, 0, 255);
-        buffer.addVertex(matrix, this.left, this.bottom, 0.0F).setUv(0, 1).setColor(0, 0, 0, 255);
-        buffer.addVertex(matrix, this.right, this.bottom, 0.0F).setUv(1, 1).setColor(0, 0, 0, 255);
-        buffer.addVertex(matrix, this.right, this.bottom - 4, 0.0F).setUv(1, 0).setColor(0, 0, 0, 0);
-        buffer.addVertex(matrix, this.left, this.bottom - 4, 0.0F).setUv(0, 0).setColor(0, 0, 0, 0);
-        BufferUploader.drawWithShader(buffer.buildOrThrow());
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        graphics.blit(RenderType::guiTextured, Screen.HEADER_SEPARATOR, this.left, this.top - 2, 0.0F, 0.0F, this.width, 2, 32, 2);
+        graphics.blit(RenderType::guiTextured, Screen.FOOTER_SEPARATOR, this.left, this.bottom, 0.0F, 0.0F, this.width, 2, 32, 2);
         int maxScroll = this.getMaxScroll();
-        renderScrollBar(graphics, maxScroll, scrollbarPosition, int_4);
-        
+        this.renderScrollBar(graphics, maxScroll, scrollbarPosition, int_4);
         this.renderDecorations(graphics, mouseX, mouseY);
-        RenderSystem.disableBlend();
     }
     
     protected void renderScrollBar(GuiGraphics graphics, int maxScroll, int scrollbarPositionMinX, int scrollbarPositionMaxX) {

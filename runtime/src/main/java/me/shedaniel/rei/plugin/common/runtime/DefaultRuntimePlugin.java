@@ -71,7 +71,7 @@ public class DefaultRuntimePlugin implements REICommonPlugin {
                 new SlotAccessorRegistry.Serializer() {
                     @Override
                     public SlotAccessor read(AbstractContainerMenu menu, Player player, CompoundTag tag) {
-                        int slot = tag.getInt("Slot");
+                        int slot = tag.getInt("Slot").orElseThrow();
                         return new VanillaSlotAccessor(menu.slots.get(slot));
                     }
                     
@@ -91,7 +91,7 @@ public class DefaultRuntimePlugin implements REICommonPlugin {
                 new SlotAccessorRegistry.Serializer() {
                     @Override
                     public SlotAccessor read(AbstractContainerMenu menu, Player player, CompoundTag tag) {
-                        int slot = tag.getInt("Slot");
+                        int slot = tag.getInt("Slot").orElseThrow();
                         return new PlayerInventorySlotAccessor(player, slot);
                     }
                     

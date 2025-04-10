@@ -24,7 +24,6 @@
 package me.shedaniel.rei.plugin.client.entry;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.serialization.Codec;
@@ -55,7 +54,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
@@ -253,7 +251,7 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         public ItemStackRenderState getExtraData(EntryStack<ItemStack> entry) {
             Minecraft minecraft = Minecraft.getInstance();
             ItemStackRenderState renderState = new ItemStackRenderState();
-            minecraft.getItemModelResolver().updateForTopItem(renderState, entry.getValue(), ItemDisplayContext.GUI, false, minecraft.level, minecraft.player, 0);
+            minecraft.getItemModelResolver().updateForTopItem(renderState, entry.getValue(), ItemDisplayContext.GUI, minecraft.level, minecraft.player, 0);
             return renderState;
         }
         
@@ -298,10 +296,6 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         }
         
         public void setupGL(EntryStack<ItemStack> entry, ItemStackRenderState renderState) {
-            Minecraft.getInstance().getTextureManager().getTexture(TextureAtlas.LOCATION_BLOCKS).setFilter(false, false);
-            RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS);
-            RenderSystem.enableBlend();
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             boolean sideLit = renderState.usesBlockLight();
             if (!sideLit) Lighting.setupForFlatItems();
@@ -350,7 +344,6 @@ public class ItemEntryDefinition implements EntryDefinition<ItemStack>, EntrySer
         }
         
         public void endGL(EntryStack<ItemStack> entry, ItemStackRenderState renderState) {
-            RenderSystem.enableDepthTest();
             boolean sideLit = renderState.usesBlockLight();
             if (!sideLit) Lighting.setupFor3DItems();
         }

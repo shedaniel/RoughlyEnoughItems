@@ -45,7 +45,6 @@ import me.shedaniel.rei.api.common.plugins.PluginManager;
 import me.shedaniel.rei.api.common.transfer.info.stack.SlotAccessor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.data.models.blockstates.PropertyDispatch;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.nbt.CompoundTag;
@@ -84,7 +83,7 @@ public final class ClientInternals {
     private static Function<Boolean, ClickArea.Result> clickAreaHandlerResult = (result) -> throwNotSetup();
     private static BiConsumer<List<ClientTooltipComponent>, TooltipComponent> clientTooltipComponentProvider = (tooltip, result) -> throwNotSetup();
     private static BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip> tooltipProvider = (point, texts) -> throwNotSetup();
-    private static PropertyDispatch.QuadFunction<Point, @Nullable TooltipFlag, Boolean, Item.TooltipContext, TooltipContext> tooltipContextProvider = (point, texts, search, context) -> throwNotSetup();
+    private static QuadFunction<Point, @Nullable TooltipFlag, Boolean, Item.TooltipContext, TooltipContext> tooltipContextProvider = (point, texts, search, context) -> throwNotSetup();
     private static Function<Object, Tooltip.Entry> tooltipEntryProvider = (component) -> throwNotSetup();
     private static Supplier<List<String>> jeiCompatMods = ClientInternals::throwNotSetup;
     private static Supplier<Object> builtinClientPlugin = ClientInternals::throwNotSetup;
@@ -242,5 +241,9 @@ public final class ClientInternals {
     
     public interface SimpleTransferHandler {
         TransferHandler.Result handle(TransferHandler.Context context, me.shedaniel.rei.api.client.registry.transfer.simple.SimpleTransferHandler.MissingInputRenderer missingInputRenderer, List<InputIngredient<ItemStack>> inputs, Iterable<SlotAccessor> inputSlots, Iterable<SlotAccessor> inventorySlots);
+    }
+    
+    public interface QuadFunction<T, U, V, W, R> {
+        R apply(T t, U u, V v, W w);
     }
 }

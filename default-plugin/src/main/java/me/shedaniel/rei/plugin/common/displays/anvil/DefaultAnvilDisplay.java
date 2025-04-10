@@ -34,11 +34,13 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityEquipment;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.item.ItemStack;
@@ -86,7 +88,7 @@ public class DefaultAnvilDisplay extends BasicDisplay {
     }
     
     public DefaultAnvilDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location, CompoundTag tag) {
-        this(inputs, outputs, location, tag.contains("Cost") ? OptionalInt.of(tag.getInt("Cost")) : OptionalInt.empty());
+        this(inputs, outputs, location, tag.contains("Cost") ? Util.make(() -> tag.getInt("Cost").isPresent() ? OptionalInt.of(tag.getInt("Cost").get()) : OptionalInt.empty()) : OptionalInt.empty());
     }
     
     public DefaultAnvilDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location, OptionalInt cost) {
@@ -114,7 +116,7 @@ public class DefaultAnvilDisplay extends BasicDisplay {
     public static Optional<Pair<ItemStack, Integer>> calculateOutput(ItemStack left, ItemStack right) {
         try {
             if (Minecraft.getInstance().player == null) return Optional.empty();
-            AnvilMenu menu = new AnvilMenu(0, new Inventory(Minecraft.getInstance().player));
+            AnvilMenu menu = new AnvilMenu(0, new Inventory(Minecraft.getInstance().player, new EntityEquipment()));
             menu.setItem(0, menu.incrementStateId(), left);
             menu.setItem(1, menu.incrementStateId(), right);
             ItemStack output = menu.getSlot(2).getItem().copy();

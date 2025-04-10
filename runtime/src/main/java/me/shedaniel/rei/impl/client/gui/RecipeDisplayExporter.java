@@ -80,9 +80,9 @@ public final class RecipeDisplayExporter {
     }
     
     private static void exportRecipe(Rectangle rectangle, DisplaySpec display, List<Widget> widgets) {
-        Minecraft client = Minecraft.getInstance();
+        /*Minecraft client = Minecraft.getInstance();
         Window window = client.getWindow();
-        RenderTarget renderTarget = new TextureTarget(window.getWidth(), window.getHeight(), true);
+        RenderTarget renderTarget = new TextureTarget(null, window.getWidth(), window.getHeight(), true);
         renderTarget.setClearColor(0, 0, 0, 0);
         renderTarget.bindWrite(true);
         RenderSystem.clear(256);
@@ -126,6 +126,6 @@ public final class RecipeDisplayExporter {
         renderTarget.destroyBuffers();
         // Minecraft.getInstance().levelRenderer.graphicsChanged();
         Minecraft.getInstance().getMainRenderTarget().bindWrite(true);
-        poseStack.popMatrix();
+        poseStack.popMatrix();*/
     }
 }

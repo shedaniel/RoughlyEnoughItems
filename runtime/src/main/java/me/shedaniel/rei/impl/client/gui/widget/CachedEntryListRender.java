@@ -23,10 +23,11 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.ProjectionType;
+/*import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -45,6 +46,7 @@ import me.shedaniel.rei.impl.common.InternalLogger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.CoreShaders;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -57,16 +59,17 @@ import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 
 import java.util.List;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
 
 public class CachedEntryListRender {
     public static final int RESOLUTION = 64;
     public static DynamicTexture cachedTexture;
     public static ResourceLocation cachedTextureLocation;
     public static Long2LongMap hash = new Long2LongOpenHashMap();
-    public static LazyResettable<RenderType> renderType = new LazyResettable<>(() -> RenderType.create("rei_cache", DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.QUADS, 256,
+    public static LazyResettable<RenderType> renderType = new LazyResettable<>(() -> RenderType.create("rei_cache", RenderType.TRANSIENT_BUFFER_SIZE, RenderPipelines.GUI_TEXTURED, VertexFormat.Mode.QUADS, 256,
             RenderType.CompositeState.builder()
                     .setTextureState(new RenderStateShard.TextureStateShard(cachedTextureLocation, TriState.DEFAULT, false))
-                    .setShaderState(new RenderStateShard.ShaderStateShard(CoreShaders.POSITION_TEX))
                     .createCompositeState(false)));
     
     public static class Sprite {
@@ -146,9 +149,7 @@ public class CachedEntryListRender {
         
         hash = new Long2LongOpenHashMap(list.size() + 10);
         Minecraft minecraft = Minecraft.getInstance();
-        TextureTarget target = new TextureTarget(width, height, true);
-        target.setClearColor(0, 0, 0, 0);
-        target.bindWrite(true);
+        TextureTarget target = new TextureTarget(null, width, height, true);
         Matrix4f projectionMatrix = new Matrix4f().setOrtho(0.0F, width, height, 0.0F, 1000.0F, 3000.0F);
         RenderSystem.setProjectionMatrix(projectionMatrix, ProjectionType.ORTHOGRAPHIC);
         Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
@@ -189,5 +190,26 @@ public class CachedEntryListRender {
     
     private static long pack(int x, int y) {
         return ((long) x << 32) | (y & 0xFFFFFFFFL);
+    }
+}*/
+
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.function.Supplier;
+
+public class CachedEntryListRender {
+    public static final ResourceLocation cachedTextureLocation = null;
+    public static final Supplier<RenderType> renderType = null;
+    
+    public static Sprite get(Object o) {
+        return null;
+    }
+    
+    public static class Sprite {
+        public float u0;
+        public float u1;
+        public float v0;
+        public float v1;
     }
 }

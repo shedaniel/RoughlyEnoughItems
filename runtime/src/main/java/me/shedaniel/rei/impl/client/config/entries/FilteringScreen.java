@@ -25,7 +25,6 @@ package me.shedaniel.rei.impl.client.config.entries;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import me.shedaniel.clothconfig2.ClothConfigInitializer;
 import me.shedaniel.clothconfig2.api.scroll.ScrollingContainer;
@@ -460,9 +459,7 @@ public class FilteringScreen extends Screen {
             if (isSelected()) {
                 boolean filtered = isFiltered();
                 Rectangle bounds = getBounds();
-                RenderSystem.disableDepthTest();
                 graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), filtered ? 0x90ffffff : 0x55ffffff, filtered ? 0x90ffffff : 0x55ffffff);
-                RenderSystem.enableDepthTest();
             }
         }
         
@@ -482,9 +479,7 @@ public class FilteringScreen extends Screen {
         protected void drawBackground(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
             if (isFiltered()) {
                 Rectangle bounds = getBounds();
-                RenderSystem.disableDepthTest();
                 graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), 0xffff0000, 0xffff0000);
-                RenderSystem.enableDepthTest();
             }
         }
         

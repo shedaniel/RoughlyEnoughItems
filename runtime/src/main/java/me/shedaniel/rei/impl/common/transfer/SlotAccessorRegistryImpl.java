@@ -95,7 +95,7 @@ public class SlotAccessorRegistryImpl implements SlotAccessorRegistry {
     
     @Override
     public SlotAccessor read(AbstractContainerMenu menu, Player player, CompoundTag tag) {
-        String id = tag.getString("id");
+        String id = tag.getString("id").orElseThrow();
         Serializer serializer = map.get(ResourceLocation.parse(id));
         if (serializer == null) {
             throw new NullPointerException("No serializer found for " + id);

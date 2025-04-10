@@ -100,8 +100,8 @@ public class DefaultSmithingCategory implements DisplayCategory<SmithingDisplay>
     
     @ApiStatus.Experimental
     private static EntryIngredient getOutput(SmithingDisplay display, RegistryAccess registryAccess, EntryStack<?> template, EntryStack<?> base, EntryStack<?> addition) {
-        if (display.type() == SmithingDisplay.SmithingRecipeType.TRIM) {
-            EntryIngredient output = DefaultSmithingDisplay.getTrimmingOutput(registryAccess, template, base, addition);
+        if (display.type() == SmithingDisplay.SmithingRecipeType.TRIM && display instanceof SmithingDisplay.Trimming trimming) {
+            EntryIngredient output = DefaultSmithingDisplay.getTrimmingOutput(registryAccess, trimming.pattern(), base, addition);
             if (!output.isEmpty()) return output;
         }
         

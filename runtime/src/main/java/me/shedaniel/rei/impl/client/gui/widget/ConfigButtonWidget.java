@@ -71,7 +71,7 @@ public class ConfigButtonWidget {
                     if (!ClientHelper.getInstance().isCheating() || Minecraft.getInstance().screen instanceof DisplayScreen) {
                         button.removeTint();
                     } else if (!ClientHelperImpl.getInstance().hasOperatorPermission()) {
-                        if (Minecraft.getInstance().gameMode.hasInfiniteItems()) {
+                        if (Minecraft.getInstance().player.hasInfiniteMaterials()) {
                             button.setTint(0x2aff0000);
                         } else {
                             button.setTint(0x58fcf003);
@@ -107,7 +107,7 @@ public class ConfigButtonWidget {
                     if (!ClientHelper.getInstance().isCheating())
                         return Component.translatable("text.rei.cheating_disabled");
                     else if (!ClientHelperImpl.getInstance().hasOperatorPermission()) {
-                        if (Minecraft.getInstance().gameMode.hasInfiniteItems())
+                        if (Minecraft.getInstance().player.hasInfiniteMaterials())
                             return Component.translatable("text.rei.cheating_limited_creative_enabled");
                         else return Component.translatable("text.rei.cheating_enabled_no_perms");
                     } else if (ClientHelperImpl.getInstance().hasPermissionToUsePackets())
@@ -162,11 +162,11 @@ public class ConfigButtonWidget {
                                 config::isEntryListWidgetScrolled,
                                 config::setEntryListWidgetScrolled
                         ),
-                        new SeparatorMenuEntry(),
+                        /*new SeparatorMenuEntry(),
                         ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.caching_entry_rendering"),
                                 config::doesCacheEntryRendering,
                                 config::setDoesCacheEntryRendering
-                        ),
+                        ),*/
                         new SeparatorMenuEntry(),
                         ToggleMenuEntry.of(Component.translatable("text.rei.config.menu.display.syntax_highlighting"),
                                 () -> config.getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL || config.getSyntaxHighlightingMode() == SyntaxHighlightingMode.COLORFUL_UNDERSCORED,

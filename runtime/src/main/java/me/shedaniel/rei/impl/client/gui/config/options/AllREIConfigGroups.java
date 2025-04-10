@@ -50,7 +50,7 @@ public interface AllREIConfigGroups {
             .add(FOCUS_SEARCH_KEYBIND)
             .add(COPY_RECIPE_ID_KEYBIND)
             .add(FAVORITE_KEYBIND)
-            .add(EXPORT_IMAGE_KEYBIND)
+            /*.add(EXPORT_IMAGE_KEYBIND)*/
             .add(BACK_KEYBIND);
     OptionGroup INPUT_ADVANCED = make("input.advanced")
             .add(USE_NATIVE_KEYBINDS);
@@ -112,7 +112,7 @@ public interface AllREIConfigGroups {
             .add(GIVE_COMMAND);
     OptionGroup PERFORMANCE_RENDERING = make("performance.rendering")
             .add(BATCHED_RENDERING)
-            .add(CACHED_RENDERING);
+            /*.add(CACHED_RENDERING)*/;
     OptionGroup PERFORMANCE_RELOAD = make("performance.reload")
             .add(RELOAD_THREAD)
             .add(CACHED_DISPLAY_LOOKUP);

@@ -223,7 +223,7 @@ public class TimeFavoriteEntry extends FavoriteEntry {
         
         @Override
         public DataResult<TimeFavoriteEntry> read(CompoundTag object) {
-            String stringValue = object.getString(KEY);
+            String stringValue = object.getStringOr(KEY, "NOT_SET");
             Time type = stringValue.equals("NOT_SET") ? null : Time.valueOf(stringValue);
             return DataResult.success(new TimeFavoriteEntry(type), Lifecycle.stable());
         }

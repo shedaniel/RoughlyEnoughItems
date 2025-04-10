@@ -57,7 +57,7 @@ public class DefaultFuelDisplay extends BasicDisplay {
     private final int fuelTime;
     
     public DefaultFuelDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, CompoundTag tag) {
-        this(inputs, outputs, tag.getInt("fuelTime"));
+        this(inputs, outputs, tag.getInt("fuelTime").orElseThrow());
     }
     
     public DefaultFuelDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, int fuelTime) {

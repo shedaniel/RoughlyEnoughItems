@@ -193,7 +193,7 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         
         @Override
         public DataResult<GameModeFavoriteEntry> read(CompoundTag object) {
-            String stringValue = object.getString(KEY);
+            String stringValue = object.getStringOr(KEY, "NOT_SET");
             GameType type = stringValue.equals("NOT_SET") ? null : GameType.valueOf(stringValue);
             return DataResult.success(new GameModeFavoriteEntry(type), Lifecycle.stable());
         }

@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Color;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import me.shedaniel.rei.impl.client.config.ConfigManagerImpl;
@@ -41,8 +40,6 @@ public class EntryHighlighter {
         int dimColor = Color.ofRGBA(20 / 255F, 20 / 255F, 20 / 255F, dimOpacity).getColor();
         int borderColor = Color.ofRGBA(0x5f / 255F, 0xff / 255F, 0x3b / 255F, opacity).getColor();
         int color = Color.ofRGBA(0x5f / 255F, 0xff / 255F, 0x3b / 255F, opacity * 0x34 / 255F).getColor();
-        RenderSystem.disableDepthTest();
-        RenderSystem.colorMask(true, true, true, false);
         if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> containerScreen) {
             int x = containerScreen.leftPos, y = containerScreen.topPos;
             for (Slot slot : containerScreen.getMenu().slots) {
@@ -62,7 +59,5 @@ public class EntryHighlighter {
                 }
             }
         }
-        RenderSystem.colorMask(true, true, true, true);
-        RenderSystem.enableDepthTest();
     }
 }

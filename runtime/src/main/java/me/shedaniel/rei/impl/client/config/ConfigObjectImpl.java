@@ -370,6 +370,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     
     @Override
     public ModifierKeyCode getExportImageKeybind() {
+        if (true) return ModifierKeyCode.unknown();
         return basics.keyBindings.exportImageKeybind == null ? ModifierKeyCode.unknown() : basics.keyBindings.exportImageKeybind;
     }
     

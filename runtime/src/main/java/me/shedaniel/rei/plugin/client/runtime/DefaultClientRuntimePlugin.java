@@ -200,7 +200,7 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         @Override
         public DataResult<EntryStackFavoriteEntry> read(CompoundTag object) {
             try {
-                return EntryStack.codec().parse(BasicDisplay.registryAccess().createSerializationContext(NbtOps.INSTANCE), object.getCompound(key))
+                return EntryStack.codec().parse(BasicDisplay.registryAccess().createSerializationContext(NbtOps.INSTANCE), object.getCompound(key).orElseThrow())
                         .map(EntryStackFavoriteEntry::new)
                         .setLifecycle(Lifecycle.stable());
             } catch (Throwable throwable) {
@@ -286,10 +286,10 @@ public class DefaultClientRuntimePlugin implements REIClientPlugin {
         public DataResult<DisplayFavoriteEntry> read(CompoundTag object) {
             try {
                 if (object.contains("Data")) {
-                    DataResult<Display> result = Display.codec().parse(BasicDisplay.registryAccess().createSerializationContext(NbtOps.INSTANCE), object.getCompound("Data"));
-                    return DataResult.success(new DisplayFavoriteEntry(result.getOrThrow(), UUID.fromString(object.getString("UUID"))), Lifecycle.stable());
+                    DataResult<Display> result = Display.codec().parse(BasicDisplay.registryAccess().createSerializationContext(NbtOps.INSTANCE), object.getCompound("Data").orElseThrow());
+                    return DataResult.success(new DisplayFavoriteEntry(result.getOrThrow(), UUID.fromString(object.getString("UUID").orElseThrow())), Lifecycle.stable());
                 } else {
-                    return DataResult.success(new DisplayFavoriteEntry(null, UUID.fromString(object.getString("UUID"))), Lifecycle.stable());
+                    return DataResult.success(new DisplayFavoriteEntry(null, UUID.fromString(object.getString("UUID").orElseThrow())), Lifecycle.stable());
                 }
             } catch (Throwable throwable) {
                 return DataResult.error(throwable::getMessage);

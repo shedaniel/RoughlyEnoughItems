@@ -448,7 +448,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
             ItemStack itemStack = stack.castValue();
             if (!itemStack.isEnchantable()) return;
             for (Pair<EnchantmentInstance, ItemStack> pair : enchantmentBooks) {
-                if (!pair.getKey().enchantment.value().canEnchant(itemStack)) continue;
+                if (!pair.getKey().enchantment().value().canEnchant(itemStack)) continue;
                 Optional<Pair<ItemStack, Integer>> output = DefaultAnvilDisplay.calculateOutput(itemStack, pair.getValue());
                 if (output.isEmpty()) continue;
                 registry.add(new DefaultAnvilDisplay(List.of(EntryIngredients.of(itemStack), EntryIngredients.of(pair.getValue())),

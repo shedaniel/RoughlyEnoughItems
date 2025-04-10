@@ -23,7 +23,6 @@
 
 package me.shedaniel.rei.impl.client.gui.widget;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -44,18 +43,14 @@ public class HoleWidget {
     
     public static Widget createMenuBackground(Rectangle bounds) {
         return Widgets.withBounds(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
-            RenderSystem.enableBlend();
             graphics.blit(RenderType::guiTextured, ResourceLocation.withDefaultNamespace("textures/gui/menu_list_background.png"), bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), bounds.width, bounds.height, 32, 32);
-            RenderSystem.disableBlend();
         }), bounds);
     }
     
     public static Widget createListBorders(Rectangle bounds) {
         return Widgets.withBounds(Widgets.createDrawableWidget((graphics, mouseX, mouseY, delta) -> {
-            RenderSystem.enableBlend();
             graphics.blit(RenderType::guiTextured, CreateWorldScreen.HEADER_SEPARATOR, bounds.x, bounds.y - 2, 0.0F, 0.0F, bounds.width, 2, 32, 2);
             graphics.blit(RenderType::guiTextured, CreateWorldScreen.FOOTER_SEPARATOR, bounds.x, bounds.getMaxY(), 0.0F, 0.0F, bounds.width, 2, 32, 2);
-            RenderSystem.disableBlend();
         }), bounds);
     }
 }

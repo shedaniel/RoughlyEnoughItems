@@ -168,7 +168,7 @@ unifiedPublishing {
     project {
         displayName = "[NeoForge $rootProject.supported_version] v$project.version"
         releaseType = "beta"
-        gameVersions = ["1.21.4"]
+        gameVersions = ["1.21.5"]
         gameLoaders = ["neoforge"]
         changelog = rootProject.releaseChangelog
 
@@ -208,7 +208,7 @@ unifiedPublishing {
     project {
         displayName = "[NeoForge $rootProject.supported_version] v$project.version"
         releaseType = "release"
-        gameVersions = ["1.21.4"]
+        gameVersions = ["1.21.5"]
         gameLoaders = ["neoforge"]
         changelog = rootProject.releaseChangelog
 

@@ -99,7 +99,6 @@ import me.shedaniel.rei.plugin.test.REITestPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.data.models.blockstates.PropertyDispatch;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -140,14 +139,14 @@ public class RoughlyEnoughItemsCoreClient {
         ClientInternals.attachInstance((Supplier<EntryRenderer<?>>) () -> emptyEntryRenderer, "emptyEntryRenderer");
         ClientInternals.attachInstance((BiFunction<Supplier<DataResult<FavoriteEntry>>, Supplier<CompoundTag>, FavoriteEntry>) DelegatingFavoriteEntryProviderImpl::new, "delegateFavoriteEntry");
         ClientInternals.attachInstance((Function<CompoundTag, DataResult<FavoriteEntry>>) (object) -> {
-            String type = object.getString(FavoriteEntry.TYPE_KEY);
+            String type = object.getString(FavoriteEntry.TYPE_KEY).orElseThrow();
             ResourceLocation id = ResourceLocation.parse(type);
             FavoriteEntryType<FavoriteEntry> entryType = FavoriteEntryType.registry().get(id);
             if (entryType == null) return DataResult.error(() -> "Unknown favorite type: " + id + ", json: " + object);
             return entryType.read(object);
         }, "favoriteEntryFromJson");
         ClientInternals.attachInstance((BiFunction<@Nullable Point, Collection<Tooltip.Entry>, Tooltip>) QueuedTooltip::impl, "tooltipProvider");
-        ClientInternals.attachInstance((PropertyDispatch.QuadFunction<Point, @Nullable TooltipFlag, Boolean, Item.TooltipContext, TooltipContext>) TooltipContextImpl::new, "tooltipContextProvider");
+        ClientInternals.attachInstance((ClientInternals.QuadFunction<Point, @Nullable TooltipFlag, Boolean, Item.TooltipContext, TooltipContext>) TooltipContextImpl::new, "tooltipContextProvider");
         ClientInternals.attachInstance((Function<Object, Tooltip.Entry>) QueuedTooltip.TooltipEntryImpl::new, "tooltipEntryProvider");
         ClientInternals.attachInstance((BiFunction<Component, List<FavoriteMenuEntry>, FavoriteMenuEntry>) SubMenuEntry::new, "subMenuEntry");
         ClientInternals.attachInstance((BiFunction<Component, BooleanValue, FavoriteMenuEntry>) (text, value) -> ToggleMenuEntry.of(text, value::get, value), "toggleEntry");

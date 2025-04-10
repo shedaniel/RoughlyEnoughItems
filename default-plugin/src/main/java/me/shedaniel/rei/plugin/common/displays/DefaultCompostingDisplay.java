@@ -76,7 +76,7 @@ public class DefaultCompostingDisplay extends BasicDisplay {
     
     @ApiStatus.Internal
     public DefaultCompostingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, CompoundTag tag) {
-        this(inputs, outputs, tag.getInt("page"));
+        this(inputs, outputs, tag.getInt("page").orElseThrow());
     }
     
     public DefaultCompostingDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs) {

@@ -72,7 +72,7 @@ public class DefaultCampfireDisplay extends BasicDisplay implements CampfireDisp
     }
     
     public DefaultCampfireDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location, CompoundTag tag) {
-        this(inputs, outputs, location, tag.getDouble("cookTime"));
+        this(inputs, outputs, location, tag.getDouble("cookTime").orElseThrow());
     }
     
     public DefaultCampfireDisplay(List<EntryIngredient> inputs, List<EntryIngredient> outputs, Optional<ResourceLocation> location, double cookTime) {

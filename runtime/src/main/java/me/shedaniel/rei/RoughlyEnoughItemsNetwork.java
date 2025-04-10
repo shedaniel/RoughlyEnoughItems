@@ -132,7 +132,7 @@ public class RoughlyEnoughItemsNetwork {
             int hotbarSlotId = buf.readVarInt();
             if (hotbarSlotId >= 0 && hotbarSlotId < 9) {
                 AbstractContainerMenu menu = player.containerMenu;
-                player.getInventory().items.set(hotbarSlotId, stack.copy());
+                player.getInventory().setItem(hotbarSlotId, stack.copy());
                 menu.broadcastChanges();
                 RegistryFriendlyByteBuf newBuf = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.registryAccess());
                 newBuf.writeJsonWithCodec(ItemStack.OPTIONAL_CODEC, stack.copy());
@@ -151,11 +151,11 @@ public class RoughlyEnoughItemsNetwork {
                 boolean shift = packetByteBuf.readBoolean();
                 try {
                     CompoundTag nbt = packetByteBuf.readNbt();
-                    int version = nbt.getInt("Version");
+                    int version = nbt.getInt("Version").orElse(-1);
                     if (version != 1) throw new IllegalStateException("Server and client REI protocol version mismatch! Server: 1, Client: " + version);
-                    List<InputIngredient<ItemStack>> inputs = readInputs(context.registryAccess(), nbt.getList("Inputs", Tag.TAG_COMPOUND));
-                    List<SlotAccessor> input = readSlots(container, player, nbt.getList("InputSlots", Tag.TAG_COMPOUND));
-                    List<SlotAccessor> inventory = readSlots(container, player, nbt.getList("InventorySlots", Tag.TAG_COMPOUND));
+                    List<InputIngredient<ItemStack>> inputs = readInputs(context.registryAccess(), nbt.getListOrEmpty("Inputs"));
+                    List<SlotAccessor> input = readSlots(container, player, nbt.getListOrEmpty("InputSlots"));
+                    List<SlotAccessor> inventory = readSlots(container, player, nbt.getListOrEmpty("InventorySlots"));
                     NewInputSlotCrafter<AbstractContainerMenu, Container> crafter = new NewInputSlotCrafter<>(container, input, inventory, inputs);
                     crafter.fillInputSlots(player, shift);
                 } catch (InputSlotCrafter.NotEnoughMaterialsException e) {
@@ -189,7 +189,7 @@ public class RoughlyEnoughItemsNetwork {
         List<InputIngredient<ItemStack>> inputs = new ArrayList<>();
         for (Tag t : tag) {
             CompoundTag compoundTag = (CompoundTag) t;
-            InputIngredient<EntryStack<?>> stacks = InputIngredient.of(compoundTag.getInt("Index"), EntryIngredient.codec().parse(registryAccess.createSerializationContext(NbtOps.INSTANCE), compoundTag.getList("Ingredient", Tag.TAG_COMPOUND)).getOrThrow());
+            InputIngredient<EntryStack<?>> stacks = InputIngredient.of(compoundTag.getInt("Index").orElseThrow(), EntryIngredient.codec().parse(registryAccess.createSerializationContext(NbtOps.INSTANCE), compoundTag.getListOrEmpty("Ingredient")).getOrThrow());
             inputs.add(InputIngredient.withType(stacks, VanillaEntryTypes.ITEM));
         }
         return inputs;
