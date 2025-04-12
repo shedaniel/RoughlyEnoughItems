@@ -118,7 +118,7 @@ public class DisplayHistoryManager {
         this.entries.remove(entry.getUuid().toString());
         this.displayToEntries.remove(entry.getDisplay());
         List<CompoundTag> displayHistory = ConfigManagerImpl.getInstance().getConfig().getDisplayHistory();
-        displayHistory.removeIf(tag -> tag.getString("DisplayHistoryUUID").equals(entry.getUuid().toString()));
+        displayHistory.removeIf(tag -> tag.getString("DisplayHistoryUUID").orElse(null).equals(entry.getUuid().toString()));
         save();
     }
     
@@ -128,7 +128,7 @@ public class DisplayHistoryManager {
         while (iterator.hasNext()) {
             DisplayEntry entry = iterator.next();
             if (entry.getDisplay() == display) {
-                displayHistory.removeIf(tag -> tag.getString("DisplayHistoryUUID").equals(entry.getUuid().toString()));
+                displayHistory.removeIf(tag -> tag.getString("DisplayHistoryUUID").orElse(null).equals(entry.getUuid().toString()));
                 this.displayToEntries.remove(entry.getDisplay());
                 iterator.remove();
             }
@@ -144,7 +144,7 @@ public class DisplayHistoryManager {
         }
         while (entries.size() >= 10) {
             DisplayEntry entry = Iterables.get(entries.values(), entries.size() - 1);
-            displayHistory.removeIf(tag -> tag.getString("DisplayHistoryUUID").equals(entry.getUuid().toString()));
+            displayHistory.removeIf(tag -> tag.getString("DisplayHistoryUUID").orElse(null).equals(entry.getUuid().toString()));
             this.entries.remove(entry.getUuid().toString());
             this.displayToEntries.remove(entry.getDisplay());
         }
