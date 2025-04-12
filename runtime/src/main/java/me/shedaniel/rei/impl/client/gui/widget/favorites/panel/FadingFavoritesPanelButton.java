@@ -105,6 +105,7 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (isVisible() && containsMouse(mouseX, mouseY)) {
             this.wasClicked = true;
+            return true;
         }
         return false;
     }

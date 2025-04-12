@@ -275,14 +275,16 @@ public class GameModeFavoriteEntry extends FavoriteEntry {
         
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            Minecraft.getInstance().player.connection.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", gameMode.name().toLowerCase(Locale.ROOT)), "/"));
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            closeMenu();
+            return true;
+        }
+        
+        @Override
+        public boolean containsMouse(double mouseX, double mouseY) {
             boolean disabled = this.minecraft.gameMode.getPlayerMode() == gameMode;
-            if (!disabled && rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12) {
-                Minecraft.getInstance().player.connection.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getGamemodeCommand().replaceAll("\\{gamemode}", gameMode.name().toLowerCase(Locale.ROOT)), "/"));
-                minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                closeMenu();
-                return true;
-            }
-            return super.mouseClicked(mouseX, mouseY, button);
+            return rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12 && !disabled;
         }
     }
 }

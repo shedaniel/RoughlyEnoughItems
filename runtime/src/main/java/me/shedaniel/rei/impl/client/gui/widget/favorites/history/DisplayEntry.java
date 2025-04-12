@@ -234,9 +234,11 @@ public class DisplayEntry extends WidgetWithBounds {
                     return true;
                 }
             }
+            
+            return true;
         }
         
-        return super.mouseClicked(mouseX, mouseY, button);
+        return false;
     }
     
     @Override

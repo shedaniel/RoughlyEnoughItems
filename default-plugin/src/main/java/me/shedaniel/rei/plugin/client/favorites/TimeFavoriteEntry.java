@@ -300,13 +300,15 @@ public class TimeFavoriteEntry extends FavoriteEntry {
         
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12) {
-                Minecraft.getInstance().player.connection.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getTimeCommand().replaceAll("\\{time}", time.getPart().toLowerCase(Locale.ROOT)), "/"));
-                minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-                closeMenu();
-                return true;
-            }
-            return super.mouseClicked(mouseX, mouseY, button);
+            Minecraft.getInstance().player.connection.sendCommand(StringUtils.removeStart(ConfigObject.getInstance().getTimeCommand().replaceAll("\\{time}", time.getPart().toLowerCase(Locale.ROOT)), "/"));
+            minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            closeMenu();
+            return true;
+        }
+        
+        @Override
+        public boolean containsMouse(double mouseX, double mouseY) {
+            return rendering && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + 12;
         }
     }
 }
