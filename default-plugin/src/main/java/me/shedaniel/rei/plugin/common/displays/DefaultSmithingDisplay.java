@@ -171,7 +171,7 @@ public class DefaultSmithingDisplay extends BasicDisplay implements SmithingDisp
                 RecordCodecBuilder.mapCodec(instance -> instance.group(
                         EntryIngredient.codec().listOf().fieldOf("inputs").forGetter(DefaultSmithingDisplay.Trimming::getInputEntries),
                         EntryIngredient.codec().listOf().fieldOf("outputs").forGetter(DefaultSmithingDisplay.Trimming::getOutputEntries),
-                        SmithingRecipeType.CODEC.optionalFieldOf("type").forGetter(d -> d.type),
+                        SmithingRecipeType.CODEC.optionalFieldOf("smithing_type").forGetter(d -> d.type),
                         ResourceLocation.CODEC.optionalFieldOf("location").forGetter(DefaultSmithingDisplay.Trimming::getDisplayLocation),
                         TrimPattern.CODEC.fieldOf("pattern").forGetter(DefaultSmithingDisplay.Trimming::pattern)
                 ).apply(instance, DefaultSmithingDisplay.Trimming::new)),
