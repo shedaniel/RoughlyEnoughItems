@@ -32,7 +32,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
-import org.joml.Vector4f;
 
 import java.util.List;
 import java.util.function.IntFunction;
@@ -90,12 +89,7 @@ public class CompoundFavoriteRenderer implements Renderer {
     @Override
     public void render(GuiGraphics graphics, Rectangle bounds, int mouseX, int mouseY, float delta) {
         updateAnimator(delta);
-        Vector4f vector4f = new Vector4f(bounds.x, bounds.y, 0, 1.0F);
-        graphics.pose().last().pose().transform(vector4f);
-        Vector4f vector4f2 = new Vector4f(bounds.getMaxX(), bounds.getMaxY(), 0, 1.0F);
-        graphics.pose().last().pose().transform(vector4f2);
-        scissorArea.setBounds((int) vector4f.x(), (int) vector4f.y(), (int) vector4f2.x() - (int) vector4f.x(), (int) vector4f2.y() - (int) vector4f.y());
-        graphics.enableScissor(scissorArea.x, scissorArea.y, scissorArea.getMaxX(), scissorArea.getMaxY());
+        graphics.enableScissor(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY());
         graphics.pose().pushPose();
         graphics.pose().translate(0, this.offset.floatValue() * -bounds.getHeight(), 0);
         for (int i = 0; i < count; i++) {

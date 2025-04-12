@@ -29,7 +29,6 @@ import me.shedaniel.math.Rectangle;
 import me.shedaniel.math.impl.PointHelper;
 import me.shedaniel.rei.api.client.gui.AbstractContainerEventHandler;
 import me.shedaniel.rei.api.client.gui.Renderer;
-import me.shedaniel.rei.api.client.util.MatrixUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -119,7 +118,6 @@ public abstract class Widget extends AbstractContainerEventHandler implements Re
     
     @ApiStatus.Experimental
     public static CloseableScissors scissor(GuiGraphics graphics, Rectangle bounds) {
-        bounds = MatrixUtils.transform(graphics.pose().last().pose(), bounds);
         graphics.enableScissor(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY());
         return graphics::disableScissor;
     }

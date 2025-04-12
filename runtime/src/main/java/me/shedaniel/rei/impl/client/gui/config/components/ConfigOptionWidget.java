@@ -31,7 +31,6 @@ import me.shedaniel.rei.api.client.gui.widgets.Label;
 import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
-import me.shedaniel.rei.api.client.util.MatrixUtils;
 import me.shedaniel.rei.impl.client.gui.config.ConfigAccess;
 import me.shedaniel.rei.impl.client.gui.config.options.AllREIConfigOptions;
 import me.shedaniel.rei.impl.client.gui.config.options.CompositeOption;
@@ -127,7 +126,7 @@ public class ConfigOptionWidget {
                     this.previewLabel.render(graphics, mouseX, mouseY, delta);
                     
                     if (this.preview != null && this.previewHeight.value() > 0.1f) {
-                        Rectangle rectangle = MatrixUtils.transform(graphics.pose().last().pose(), new Rectangle(0, 24 + 12 * split.size() - (nextLinePreview ? 0 : 12), width, this.previewHeight.value()));
+                        Rectangle rectangle = new Rectangle(0, 24 + 12 * split.size() - (nextLinePreview ? 0 : 12), width, this.previewHeight.value());
                         graphics.enableScissor(rectangle.x, rectangle.y, rectangle.getMaxX(), rectangle.getMaxY());
                         this.previewTranslation = new Matrix4f().translate(0, 12 + 12 * split.size(), 100);
                         this.preview.render(graphics, mouseX, mouseY, delta);
