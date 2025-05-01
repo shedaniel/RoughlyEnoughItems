@@ -84,6 +84,8 @@ public interface AllREIConfigOptions {
             .enabledDisabled();
     CompositeOption<Boolean> APPEND_FAVORITES_HINT = make("appearance.append_favorites_hint", i -> i.advanced.tooltips.displayFavoritesTooltip, (i, v) -> i.advanced.tooltips.displayFavoritesTooltip = v)
             .enabledDisabled();
+    CompositeOption<Boolean> PARTIAL_RECIPES_WARNING = make("appearance.partial_recipes_warning", i -> i.advanced.tooltips.doesPartialRecipesWarning, (i, v) -> i.advanced.tooltips.doesPartialRecipesWarning = v)
+            .enabledDisabled();
     CompositeOption<ModifierKeyCode> RECIPE_KEYBIND = make("input.recipe", i -> i.basics.keyBindings.recipeKeybind.copy(), (i, v) -> i.basics.keyBindings.recipeKeybind = v)
             .keybind();
     CompositeOption<ModifierKeyCode> USAGE_KEYBIND = make("input.usage", i -> i.basics.keyBindings.usageKeybind.copy(), (i, v) -> i.basics.keyBindings.usageKeybind = v)

@@ -280,7 +280,9 @@ public interface ConfigObject {
     
     @ApiStatus.Experimental
     boolean doDisplayIMEHints();
-    
+
+    boolean doesPartialRecipesWarning();
+
     boolean doesFastEntryRendering();
     
     boolean doesCacheEntryRendering();

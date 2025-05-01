@@ -293,7 +293,12 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     public void setDoDisplayIMEHints(boolean displayIMEHints) {
         advanced.tooltips.displayIMEHints = displayIMEHints;
     }
-    
+
+    @Override
+    public boolean doesPartialRecipesWarning() {
+        return advanced.tooltips.doesPartialRecipesWarning;
+    }
+
     @Override
     public boolean doesFastEntryRendering() {
         return advanced.miscellaneous.newFastEntryRendering;
@@ -679,6 +684,7 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
             @Comment("Declares whether favorites tooltip should be displayed.")
             public boolean displayFavoritesTooltip = false;
             public boolean displayIMEHints = true;
+            public boolean doesPartialRecipesWarning = true;
         }
         
         public static class Layout {
