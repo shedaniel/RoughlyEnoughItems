@@ -47,4 +47,3 @@ mutable field net/minecraft/client/gui/GuiGraphics scissorStack Lnet/minecraft/c
 accessible class net/minecraft/client/gui/GuiGraphics$ScissorStack
 accessible field net/minecraft/client/gui/GuiGraphics$ScissorStack stack Ljava/util/Deque;
 accessible method net/minecraft/client/gui/GuiGraphics$ScissorStack <init> ()V
-accessible method net/minecraft/world/inventory/GrindstoneMenu$4 getExperienceFromItem (Lnet/minecraft/world/item/ItemStack;)I

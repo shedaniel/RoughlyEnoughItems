@@ -464,10 +464,6 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                         Collections.singletonList(EntryIngredients.of(output.get().getLeft())), Optional.empty(), OptionalInt.of(output.get().getRight())));
             }
         });
-        
-        for (Registry<?> reg : BuiltInRegistries.REGISTRY) {
-            reg.getTags().forEach(tagPair -> tagPair.unwrap().ifLeft(registry::add));
-        }
 
         // grindstone combining recipes
         BuiltInRegistries.ITEM.forEach(item -> {
@@ -506,6 +502,10 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                         OptionalDouble.of(output.get().averageExp())));
             }
         });
+
+        for (Registry<?> reg : BuiltInRegistries.REGISTRY) {
+            reg.getTags().forEach(tagPair -> tagPair.unwrap().ifLeft(registry::add));
+        }
     }
     
     protected void registerForgePotions(DisplayRegistry registry, BuiltinClientPlugin clientPlugin) {

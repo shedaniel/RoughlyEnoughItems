@@ -79,7 +79,6 @@ public class DefaultGrindstoneCategory implements DisplayCategory<DefaultGrindst
                 int xpLeftPos = textboxLeftPos - 2;
                 int xpTopPos = textboxTopPos;
                 int xpRightPos = startPoint.x + 102;
-                int xpBottomPos = textboxTopPos + 12;
                 graphics.drawString(font, componentXp, textboxLeftPos, textboxTopPos + 2, 0x80ff20);
                 textboxLeftPos += font.width(componentXp) / 2 - font.width(componentAverage) / 2;
                 textboxTopPos += font.lineHeight + 3;

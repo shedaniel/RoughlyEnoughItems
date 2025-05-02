@@ -25,6 +25,7 @@ package me.shedaniel.rei.plugin.common.displays.grindstone;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.architectury.platform.Platform;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializer;
@@ -34,6 +35,7 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -44,11 +46,11 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.GrindstoneMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.apache.commons.lang3.concurrent.LazyInitializer;
-import org.apache.commons.lang3.reflect.MethodUtils;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.*;
 
 public class DefaultGrindstoneDisplay extends BasicDisplay {
@@ -72,14 +74,7 @@ public class DefaultGrindstoneDisplay extends BasicDisplay {
             ));
     
     private final OptionalDouble averageXpReward;
-    private final static LazyInitializer<Method> getExperienceFromItem = LazyInitializer.<Method>builder()
-            .setInitializer(() -> {
-                if (Minecraft.getInstance().player == null) return null;  // should never happen
-                GrindstoneMenu menu = new GrindstoneMenu(0, new Inventory(Minecraft.getInstance().player, new EntityEquipment()));
-                Slot outputSlot = menu.getSlot(2);
-                // use reflection since it's a method from an anonymous class
-                return MethodUtils.getAccessibleMethod(outputSlot.getClass().getDeclaredMethod("getExperienceFromItem", ItemStack.class));
-            }).get();
+    private static MethodHandle getExperienceFromItem;
 
 
     public DefaultGrindstoneDisplay(GrindstoneRecipe recipe) {
@@ -140,9 +135,23 @@ public class DefaultGrindstoneDisplay extends BasicDisplay {
             menu.setItem(0, menu.incrementStateId(), top);
             menu.setItem(1, menu.incrementStateId(), bottom);
             Slot outputSlot = menu.getSlot(2);
-            int expLeft  = (Integer) getExperienceFromItem.get().invoke(outputSlot, top);
-            int expRight = (Integer) getExperienceFromItem.get().invoke(outputSlot, bottom);
-            int maxExp = expLeft + expRight;
+            if (getExperienceFromItem == null) {
+                String methodName = "getExperienceFromItem";
+                if (Platform.isFabric() && !FabricLoader.getInstance().isDevelopmentEnvironment()) {
+                    methodName = "method_16696";
+                }
+                MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(
+                        outputSlot.getClass(), MethodHandles.lookup()
+                );
+                getExperienceFromItem = lookup.findVirtual(
+                        outputSlot.getClass(),
+                        methodName,
+                        MethodType.methodType(int.class, ItemStack.class)
+                );
+            }
+            int expTop = (Integer) getExperienceFromItem.invoke(outputSlot, top);
+            int expBottom = (Integer) getExperienceFromItem.invoke(outputSlot, bottom);
+            int maxExp = expTop + expBottom;
             ItemStack outputStack = outputSlot.getItem().copy();
             if (!outputStack.isEmpty()) {
                 return Optional.of(new GrindStoneRecipeResult(outputStack, maxExp * 0.75));  // vanilla randomizes between 0.5 and 1.0 of max exp
