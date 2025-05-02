@@ -30,8 +30,10 @@ import dev.architectury.networking.NetworkManager;
 import dev.architectury.platform.Platform;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import me.shedaniel.math.Rectangle;
+import me.shedaniel.rei.api.client.entry.type.BuiltinClientEntryTypes;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntry;
 import me.shedaniel.rei.api.client.favorites.FavoriteEntryType;
+import me.shedaniel.rei.api.client.gui.Renderer;
 import me.shedaniel.rei.api.client.plugins.REIClientPlugin;
 import me.shedaniel.rei.api.client.registry.category.CategoryRegistry;
 import me.shedaniel.rei.api.client.registry.display.DisplayRegistry;
@@ -56,6 +58,7 @@ import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconBaseCategor
 import me.shedaniel.rei.plugin.client.categories.beacon.DefaultBeaconPaymentCategory;
 import me.shedaniel.rei.plugin.client.categories.cooking.DefaultCookingCategory;
 import me.shedaniel.rei.plugin.client.categories.crafting.DefaultCraftingCategory;
+import me.shedaniel.rei.plugin.client.categories.grindstone.DefaultGrindstoneCategory;
 import me.shedaniel.rei.plugin.client.categories.tag.DefaultTagCategory;
 import me.shedaniel.rei.plugin.client.displays.ClientsidedCookingDisplay;
 import me.shedaniel.rei.plugin.client.displays.ClientsidedCraftingDisplay;
@@ -72,6 +75,8 @@ import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconBaseDisplay;
 import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconPaymentDisplay;
 import me.shedaniel.rei.plugin.common.displays.brewing.BrewingRecipe;
 import me.shedaniel.rei.plugin.common.displays.brewing.DefaultBrewingDisplay;
+import me.shedaniel.rei.plugin.common.displays.grindstone.DefaultGrindstoneDisplay;
+import me.shedaniel.rei.plugin.common.displays.grindstone.GrindstoneRecipe;
 import me.shedaniel.rei.plugin.common.displays.tag.DefaultTagDisplay;
 import me.shedaniel.rei.plugin.common.displays.tag.TagNodes;
 import net.fabricmc.api.EnvType;
@@ -220,6 +225,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 new DefaultStrippingCategory(),
                 new DefaultSmithingCategory(),
                 new DefaultAnvilCategory(),
+                new DefaultGrindstoneCategory(),
                 new DefaultBeaconBaseCategory(),
                 new DefaultBeaconPaymentCategory(),
                 new DefaultTillingCategory(),
@@ -238,6 +244,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         registry.addWorkstations(FUEL, EntryStacks.of(Items.FURNACE), EntryStacks.of(Items.SMOKER), EntryStacks.of(Items.BLAST_FURNACE));
         registry.addWorkstations(BREWING, EntryStacks.of(Items.BREWING_STAND));
         registry.addWorkstations(ANVIL, EntryStacks.of(Items.ANVIL));
+        registry.addWorkstations(GRINDSTONE, EntryStacks.of(Items.GRINDSTONE));
         registry.addWorkstations(STONE_CUTTING, EntryStacks.of(Items.STONECUTTER));
         registry.addWorkstations(COMPOSTING, EntryStacks.of(Items.COMPOSTER));
         registry.addWorkstations(SMITHING, EntryStacks.of(Items.SMITHING_TABLE));
@@ -313,6 +320,8 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
                 .fill(ClientsidedCookingDisplay.Blasting::new);
         registry.beginFiller(AnvilRecipe.class)
                 .fill(DefaultAnvilDisplay::new);
+        registry.beginFiller(GrindstoneRecipe.class)
+                .fill(DefaultGrindstoneDisplay::new);
         registry.beginFiller(BrewingRecipe.class)
                 .fill(DefaultBrewingDisplay::new);
         registry.beginFiller(TagKey.class)
@@ -446,7 +455,7 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         EntryRegistry.getInstance().getEntryStacks().forEach(stack -> {
             if (stack.getType() != VanillaEntryTypes.ITEM) return;
             ItemStack itemStack = stack.castValue();
-            if (!itemStack.isEnchantable()) return;
+            if (!itemStack.isEnchantable() && !itemStack.is(Items.ELYTRA) && !itemStack.is(Items.SHIELD)) return;
             for (Pair<EnchantmentInstance, ItemStack> pair : enchantmentBooks) {
                 if (!pair.getKey().enchantment().value().canEnchant(itemStack)) continue;
                 Optional<Pair<ItemStack, Integer>> output = DefaultAnvilDisplay.calculateOutput(itemStack, pair.getValue());
@@ -459,6 +468,44 @@ public class DefaultClientPlugin implements REIClientPlugin, BuiltinClientPlugin
         for (Registry<?> reg : BuiltInRegistries.REGISTRY) {
             reg.getTags().forEach(tagPair -> tagPair.unwrap().ifLeft(registry::add));
         }
+
+        // grindstone combining recipes
+        BuiltInRegistries.ITEM.forEach(item -> {
+            ItemStack base = item.getDefaultInstance();
+            if (!base.isDamageableItem() || !item.components().has(DataComponents.REPAIRABLE)) return;
+            ItemStack a = base.copy();
+            a.setDamageValue(base.getMaxDamage() - 1);
+            ItemStack b = a.copy();
+            Optional<DefaultGrindstoneDisplay.GrindStoneRecipeResult> output = DefaultGrindstoneDisplay.calculateOutput(a, b);
+            if (output.isEmpty()) return;
+            Renderer renderer = EntryStack.of(VanillaEntryTypes.ITEM.getDefinition(), output.get().itemStack());
+            registry.add(new DefaultGrindstoneDisplay(
+                    List.of(EntryIngredients.of(a), EntryIngredients.of(b)),
+                    List.of(EntryIngredient.of(EntryStack.of(BuiltinClientEntryTypes.RENDERING, renderer))),
+                    Optional.empty(),
+                    OptionalDouble.of(output.get().averageExp())
+            ));
+        });
+
+        // grindstone disenchanting recipes
+        EntryRegistry.getInstance().getEntryStacks().forEach(stack -> {
+            if (stack.getType() != VanillaEntryTypes.ITEM) return;
+            ItemStack itemStack = stack.castValue();
+            if (!itemStack.isEnchantable() && !itemStack.is(Items.ELYTRA) && !itemStack.is(Items.SHIELD)) return;
+            for (Pair<EnchantmentInstance, ItemStack> pair : enchantmentBooks) {
+                if (!pair.getKey().enchantment().value().canEnchant(itemStack)) continue;
+                Optional<Pair<ItemStack, Integer>> input = DefaultAnvilDisplay.calculateOutput(itemStack, pair.getValue());
+                if (input.isEmpty()) continue;
+                Optional<DefaultGrindstoneDisplay.GrindStoneRecipeResult> output = DefaultGrindstoneDisplay.calculateOutput(input.get().getLeft(), ItemStack.EMPTY);
+                if (output.isEmpty()) continue;
+                Renderer renderer = EntryStack.of(VanillaEntryTypes.ITEM.getDefinition(), output.get().itemStack());
+                registry.add(new DefaultGrindstoneDisplay(
+                        List.of(EntryIngredients.of(input.get().getLeft()), EntryIngredient.empty()),
+                        List.of(EntryIngredient.of(EntryStack.of(BuiltinClientEntryTypes.RENDERING, renderer))),
+                        Optional.empty(),
+                        OptionalDouble.of(output.get().averageExp())));
+            }
+        });
     }
     
     protected void registerForgePotions(DisplayRegistry registry, BuiltinClientPlugin clientPlugin) {
