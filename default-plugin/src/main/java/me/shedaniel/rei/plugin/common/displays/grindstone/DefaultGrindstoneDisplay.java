@@ -25,7 +25,6 @@ package me.shedaniel.rei.plugin.common.displays.grindstone;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.architectury.platform.Platform;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
 import me.shedaniel.rei.api.common.display.Display;
 import me.shedaniel.rei.api.common.display.DisplaySerializer;
@@ -35,7 +34,6 @@ import me.shedaniel.rei.api.common.util.EntryIngredients;
 import me.shedaniel.rei.plugin.common.BuiltinPlugin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -48,10 +46,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.util.*;
+import java.util.function.BiFunction;
 
 public class DefaultGrindstoneDisplay extends BasicDisplay {
     public static final DisplaySerializer<DefaultGrindstoneDisplay> SERIALIZER = DisplaySerializer.of(
@@ -72,10 +68,9 @@ public class DefaultGrindstoneDisplay extends BasicDisplay {
                     d -> d.averageXpReward.stream().boxed().findFirst(),
                     (inputs, outputs, location, averageXpReward) -> new DefaultGrindstoneDisplay(inputs, outputs, location, averageXpReward.stream().mapToDouble(d -> d).findFirst())
             ));
-    
+    // cannot get the function immediately, since it is located in an anonymous class, so it is lazily initialized with mixins
+    public static BiFunction<Slot, ItemStack, Integer> getExperienceFromItem;
     private final OptionalDouble averageXpReward;
-    private static MethodHandle getExperienceFromItem;
-
 
     public DefaultGrindstoneDisplay(GrindstoneRecipe recipe) {
         this(
@@ -135,22 +130,8 @@ public class DefaultGrindstoneDisplay extends BasicDisplay {
             menu.setItem(0, menu.incrementStateId(), top);
             menu.setItem(1, menu.incrementStateId(), bottom);
             Slot outputSlot = menu.getSlot(2);
-            if (getExperienceFromItem == null) {
-                String methodName = "getExperienceFromItem";
-                if (Platform.isFabric() && !FabricLoader.getInstance().isDevelopmentEnvironment()) {
-                    methodName = "method_16696";
-                }
-                MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(
-                        outputSlot.getClass(), MethodHandles.lookup()
-                );
-                getExperienceFromItem = lookup.findVirtual(
-                        outputSlot.getClass(),
-                        methodName,
-                        MethodType.methodType(int.class, ItemStack.class)
-                );
-            }
-            int expTop = (Integer) getExperienceFromItem.invoke(outputSlot, top);
-            int expBottom = (Integer) getExperienceFromItem.invoke(outputSlot, bottom);
+            int expTop = getExperienceFromItem.apply(outputSlot, top);
+            int expBottom = getExperienceFromItem.apply(outputSlot, bottom);
             int maxExp = expTop + expBottom;
             ItemStack outputStack = outputSlot.getItem().copy();
             if (!outputStack.isEmpty()) {
