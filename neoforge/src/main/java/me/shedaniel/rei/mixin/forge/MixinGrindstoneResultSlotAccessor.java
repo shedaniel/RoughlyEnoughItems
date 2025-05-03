@@ -23,12 +23,13 @@
 
 package me.shedaniel.rei.mixin.forge;
 
+import me.shedaniel.rei.plugin.common.displays.grindstone.GrindstoneResultSlotAccessor;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(targets = "net.minecraft.world.inventory.GrindstoneMenu$4")
-public interface MixinGrindstoneResultSlotAccessor {
+public interface MixinGrindstoneResultSlotAccessor extends GrindstoneResultSlotAccessor {
     @Invoker("getExperienceFromItem")
     int invokeGetExperienceFromItem(ItemStack stack);
 }

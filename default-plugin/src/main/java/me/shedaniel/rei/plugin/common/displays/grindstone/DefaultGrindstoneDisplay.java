@@ -47,7 +47,6 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
-import java.util.function.BiFunction;
 
 public class DefaultGrindstoneDisplay extends BasicDisplay {
     public static final DisplaySerializer<DefaultGrindstoneDisplay> SERIALIZER = DisplaySerializer.of(
@@ -69,7 +68,6 @@ public class DefaultGrindstoneDisplay extends BasicDisplay {
                     (inputs, outputs, location, averageXpReward) -> new DefaultGrindstoneDisplay(inputs, outputs, location, averageXpReward.stream().mapToDouble(d -> d).findFirst())
             ));
     // cannot get the function immediately, since it is located in an anonymous class, so it is lazily initialized with mixins
-    public static BiFunction<Slot, ItemStack, Integer> getExperienceFromItem;
     private final OptionalDouble averageXpReward;
 
     public DefaultGrindstoneDisplay(GrindstoneRecipe recipe) {
@@ -130,8 +128,9 @@ public class DefaultGrindstoneDisplay extends BasicDisplay {
             menu.setItem(0, menu.incrementStateId(), top);
             menu.setItem(1, menu.incrementStateId(), bottom);
             Slot outputSlot = menu.getSlot(2);
-            int expTop = getExperienceFromItem.apply(outputSlot, top);
-            int expBottom = getExperienceFromItem.apply(outputSlot, bottom);
+            GrindstoneResultSlotAccessor outputSlotAccessor = (GrindstoneResultSlotAccessor) outputSlot;
+            int expTop = outputSlotAccessor.invokeGetExperienceFromItem(top);
+            int expBottom = outputSlotAccessor.invokeGetExperienceFromItem(bottom);
             int maxExp = expTop + expBottom;
             ItemStack outputStack = outputSlot.getItem().copy();
             if (!outputStack.isEmpty()) {
