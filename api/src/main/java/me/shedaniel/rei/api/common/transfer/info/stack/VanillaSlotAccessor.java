@@ -55,12 +55,19 @@ public class VanillaSlotAccessor implements SlotAccessor {
     public Slot getSlot() {
         return slot;
     }
-    
+
+    /**
+     * Since NeoForge implemented slots may not pick up & take when it's empty, although the slot is still modifiable.
+     * A {@link VanillaSlotAccessor#canPlace(ItemStack)} check is performed later on, so this should not cause illegal modification theoretically.
+     *
+     * @see <a href="https://github.com/neoforged/NeoForge/blob/413dad9137f0e3fef53ce7dcf46f361ea5032d1a/src/main/java/net/neoforged/neoforge/items/SlotItemHandler.java#L26">SlotItemHandler::mayPlace</a>,
+     * <a href="https://github.com/neoforged/NeoForge/blob/413dad9137f0e3fef53ce7dcf46f361ea5032d1a/src/main/java/net/neoforged/neoforge/items/SlotItemHandler.java#L65">SlotItemHandler::mayPickup</a>
+     */
     @Override
     public boolean allowModification(Player player) {
-        return slot.allowModification(player);
+        return !slot.hasItem() || slot.allowModification(player);
     }
-    
+
     @Override
     public boolean canPlace(ItemStack stack) {
         return slot.mayPlace(stack);
