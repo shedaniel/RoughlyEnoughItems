@@ -283,6 +283,8 @@ public interface ConfigObject {
 
     boolean doesPartialRecipesWarning();
 
+    void setDoesPartialRecipesWarning(boolean showWarning);
+
     boolean doesFastEntryRendering();
     
     boolean doesCacheEntryRendering();

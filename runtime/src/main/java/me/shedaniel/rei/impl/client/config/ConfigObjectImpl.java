@@ -299,6 +299,10 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         return advanced.tooltips.doesPartialRecipesWarning;
     }
 
+    public void setDoesPartialRecipesWarning(boolean showWarning) {
+        advanced.tooltips.doesPartialRecipesWarning = showWarning;
+    }
+
     @Override
     public boolean doesFastEntryRendering() {
         return advanced.miscellaneous.newFastEntryRendering;

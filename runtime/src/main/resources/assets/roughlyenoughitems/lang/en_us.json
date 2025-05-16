@@ -24,6 +24,7 @@
   "text.rei.recipes.not.full.title": "Partial Recipes Data Warning",
   "text.rei.recipes.not.full.desc": "REI does not have access to all recipes data!\nHere's what you can do:\n• If you are on a vanilla server and have operator permissions, running %s will unlock some recipes.\n• If you are on a modded server, ask the server owner to install REI on the server.",
   "text.rei.recipes.not.full.desc.command": "/recipe give @p *",
+  "text.rei.recipes.not.full.button.do_not_show_again": "Do not show again",
   "text.rei.recipes.not.full.button.okay": "Okay, I understand!",
   "text.rei.config.menu.dark_theme": "Dark Theme",
   "text.rei.config.menu.reduced_motion": "Reduced Motion",
