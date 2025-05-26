@@ -78,13 +78,13 @@ public interface AllREIConfigOptions {
     CompositeOption<DisplayScreenType> RECIPE_LOOKUP_STYLE = make("appearance.recipe_lookup_style", i -> i.appearance.recipeScreenType, (i, v) -> i.appearance.recipeScreenType = v)
             .options(DisplayScreenType.ORIGINAL, DisplayScreenType.COMPOSITE)
             .defaultValue(() -> DisplayScreenType.ORIGINAL);
+    CompositeOption<Boolean> PARTIAL_RECIPES_WARNING = make("appearance.partial_recipes_warning", i -> i.advanced.doesPartialRecipesWarning, (i, v) -> i.advanced.doesPartialRecipesWarning = v)
+            .enabledDisabled();
     CompositeOption<Boolean> RAINBOW = make("appearance.rainbow", i -> i.appearance.rainbow, (i, v) -> i.appearance.rainbow = v)
             .enabledDisabled();
     CompositeOption<Boolean> APPEND_MOD_NAMES = make("appearance.append_mod_names", i -> i.advanced.tooltips.appendModNames, (i, v) -> i.advanced.tooltips.appendModNames = v)
             .enabledDisabled();
     CompositeOption<Boolean> APPEND_FAVORITES_HINT = make("appearance.append_favorites_hint", i -> i.advanced.tooltips.displayFavoritesTooltip, (i, v) -> i.advanced.tooltips.displayFavoritesTooltip = v)
-            .enabledDisabled();
-    CompositeOption<Boolean> PARTIAL_RECIPES_WARNING = make("appearance.partial_recipes_warning", i -> i.advanced.tooltips.doesPartialRecipesWarning, (i, v) -> i.advanced.tooltips.doesPartialRecipesWarning = v)
             .enabledDisabled();
     CompositeOption<ModifierKeyCode> RECIPE_KEYBIND = make("input.recipe", i -> i.basics.keyBindings.recipeKeybind.copy(), (i, v) -> i.basics.keyBindings.recipeKeybind = v)
             .keybind();

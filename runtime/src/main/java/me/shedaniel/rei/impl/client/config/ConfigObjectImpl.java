@@ -296,11 +296,11 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
 
     @Override
     public boolean doesPartialRecipesWarning() {
-        return advanced.tooltips.doesPartialRecipesWarning;
+        return advanced.doesPartialRecipesWarning;
     }
 
     public void setDoesPartialRecipesWarning(boolean showWarning) {
-        advanced.tooltips.doesPartialRecipesWarning = showWarning;
+        advanced.doesPartialRecipesWarning = showWarning;
     }
 
     @Override
@@ -681,14 +681,15 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         public Commands commands = new Commands();
         public Miscellaneous miscellaneous = new Miscellaneous();
         public Filtering filtering = new Filtering();
-        
+
+        public boolean doesPartialRecipesWarning = true;
+
         public static class Tooltips {
             @Comment("Declares whether REI should append mod names to entries.")
             public boolean appendModNames = true;
             @Comment("Declares whether favorites tooltip should be displayed.")
             public boolean displayFavoritesTooltip = false;
             public boolean displayIMEHints = true;
-            public boolean doesPartialRecipesWarning = true;
         }
         
         public static class Layout {
