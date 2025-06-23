@@ -244,6 +244,15 @@ public class OverlayCalculatorField extends TextFieldWidget {
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        boolean contains = containsMouse(mouseX, mouseY);
+        if (isVisible() && contains && button == 1)
+            setText("");
+
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         if (!isFocused() && getText().isEmpty()) {
             setSuggestion("put numbers into me...");
