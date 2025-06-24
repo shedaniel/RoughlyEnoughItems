@@ -231,7 +231,7 @@ public class OverlayCalculatorField extends TextFieldWidget {
                     String result = getCalculatorResult();
                     addToHistory(equation, result);
 
-                    Minecraft.getInstance().keyboardHandler.setClipboard(result);
+                    Minecraft.getInstance().keyboardHandler.setClipboard(result.replace(",", " "));
 
                     setText("");
                 }
