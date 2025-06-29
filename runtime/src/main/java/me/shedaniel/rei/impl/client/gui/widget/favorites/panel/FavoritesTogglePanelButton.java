@@ -23,10 +23,10 @@
 
 package me.shedaniel.rei.impl.client.gui.widget.favorites.panel;
 
+import me.shedaniel.clothconfig2.api.animator.ProgressValueAnimator;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.REIRuntime;
-import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.widgets.Tooltip;
 import me.shedaniel.rei.impl.client.gui.widget.favorites.FavoritesListWidget;
 import net.minecraft.client.gui.Font;
@@ -36,42 +36,53 @@ import net.minecraft.network.chat.Component;
 
 @SuppressWarnings("UnstableApiUsage")
 public class FavoritesTogglePanelButton extends FadingFavoritesPanelButton {
-    public FavoritesTogglePanelButton(FavoritesListWidget parent) {
+    private final int i;
+    private final Component tooltip;
+    private final ProgressValueAnimator<Boolean> progress;
+    private final Runnable onClick;
+    
+    public FavoritesTogglePanelButton(FavoritesListWidget parent, int i, Component tooltip, ProgressValueAnimator<Boolean> progress, Runnable onClick) {
         super(parent);
+        this.i = i;
+        this.tooltip = tooltip;
+        this.progress = progress;
+        this.onClick = onClick;
     }
     
     @Override
     protected void onClick() {
-        parent.favoritePanel.expendState.setTo(!parent.favoritePanel.expendState.target(), ConfigObject.getInstance().isReducedMotion() ? 0 : 1500);
-        parent.favoritePanel.resetRows();
+        this.onClick.run();
     }
     
     @Override
     protected void queueTooltip() {
-        Tooltip.create(Component.translatable("text.rei.add_favorite_widget")).queue();
+        Tooltip.create(this.tooltip).queue();
     }
     
     @Override
     protected Rectangle updateArea(Rectangle fullArea) {
-        return new Rectangle(fullArea.x + 4, fullArea.getMaxY() - 16 - 4, 16, 16);
+        return new Rectangle(fullArea.x + 4 + i * 20, fullArea.getMaxY() - 16 - 4, 16, 16);
     }
     
     @Override
     protected boolean isAvailable(int mouseX, int mouseY) {
-        boolean expended = parent.favoritePanel.expendState.value();
+        boolean expended = this.progress.value();
         return parent.fullBounds.contains(mouseX, mouseY) || REIRuntime.getInstance().getOverlay().orElseThrow().getEntryList().containsMouse(new Point(mouseX, mouseY)) || expended;
     }
     
     @Override
-    protected void renderButtonText(GuiGraphics graphics, MultiBufferSource bufferSource) {
-        float expendProgress = (float) parent.favoritePanel.expendState.progress();
-        if (expendProgress < .9f) {
-            int textColor = 0xFFFFFF | (Math.round(0xFF * alpha.floatValue() * (1 - expendProgress)) << 24);
-            font.drawInBatch("+", bounds.getCenterX() - 2.5f, bounds.getCenterY() - 3, textColor, false, graphics.pose().last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
-        }
-        if (expendProgress > .1f) {
-            int textColor = 0xFFFFFF | (Math.round(0xFF * alpha.floatValue() * expendProgress) << 24);
-            font.drawInBatch("+", bounds.getCenterX() - 2.5f, bounds.getCenterY() - 3, textColor, false, graphics.pose().last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
-        }
+    protected void renderContents(GuiGraphics graphics) {
+        graphics.drawSpecial(source -> {
+            float expendProgress = (float) this.progress.progress();
+            if (expendProgress < .9f) {
+                int textColor = 0xFFFFFF | (Math.round(0xFF * alpha.floatValue() * (1 - expendProgress)) << 24);
+                font.drawInBatch("+", bounds.getCenterX() - 2.5f, bounds.getCenterY() - 3, textColor, false, graphics.pose().last().pose(), source, Font.DisplayMode.NORMAL, 0, 15728880);
+            }
+            if (expendProgress > .1f) {
+                int textColor = 0xFFFFFF | (Math.round(0xFF * alpha.floatValue() * expendProgress) << 24);
+                font.drawInBatch("+", bounds.getCenterX() - 2.5f, bounds.getCenterY() - 3, textColor, false, graphics.pose().last().pose(), source, Font.DisplayMode.NORMAL, 0, 15728880);
+            }
+        });
+        graphics.flush();
     }
 }

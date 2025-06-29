@@ -67,10 +67,7 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
         int buttonColor = 0xFFFFFF | (Math.round(0x74 * alpha.floatValue()) << 24);
         graphics.fillGradient(bounds.x, bounds.y, bounds.getMaxX(), bounds.getMaxY(), buttonColor, buttonColor);
         if (isVisible()) {
-            graphics.drawSpecial(source -> {
-                renderButtonText(graphics, source);
-            });
-            graphics.flush();
+            renderContents(graphics);
         }
         if (hovered) {
             queueTooltip();
@@ -79,7 +76,7 @@ public abstract class FadingFavoritesPanelButton extends WidgetWithBounds {
     
     protected abstract boolean isAvailable(int mouseX, int mouseY);
     
-    protected abstract void renderButtonText(GuiGraphics graphics, MultiBufferSource bufferSource);
+    protected abstract void renderContents(GuiGraphics graphics);
     
     @Override
     public Rectangle getBounds() {

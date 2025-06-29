@@ -77,7 +77,7 @@ public class EntryListSearchManager {
     public void update(String searchTerm, boolean ignoreLastSearch, Consumer<List</*EntryStack<?> | CollapsedStack*/ Object>> update) {
         Stopwatch stopwatch = Stopwatch.createStarted();
         if (ignoreLastSearch) searchManager.markDirty();
-        searchManager.updateFilter(searchTerm);
+        searchManager.updateFilter(!searchTerm.isEmpty() && searchTerm.charAt(0) == '=' ? "" : searchTerm);
         if (searchManager.isDirty()) {
             searchManager.getAsync((list, filter) -> {
                 if (!filter.getFilter().equals(searchTerm)) return;

@@ -45,7 +45,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("UnstableApiUsage")
 public class FavoritesPanel extends WidgetWithBounds {
     private final FavoritesListWidget parent;
     public final ProgressValueAnimator<Boolean> expendState = ValueAnimator.ofBoolean(0.1, false);

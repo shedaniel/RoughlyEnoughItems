@@ -71,9 +71,11 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     public static boolean isHighlighting = false;
     private static final Style SPLITTER_STYLE = Style.EMPTY.withColor(ChatFormatting.GRAY);
     private static final Style QUOTES_STYLE = Style.EMPTY.withColor(ChatFormatting.GOLD);
+    private static final Style BRACKETS_STYLE = Style.EMPTY.withColor(ChatFormatting.AQUA);
     private static final Style ERROR_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xff5555));
     private boolean previouslyClicking = false;
     private final OverlaySearchFieldSyntaxHighlighter highlighter = new OverlaySearchFieldSyntaxHighlighter(getText());
+    private final CalculatorDisplay calculator = new CalculatorDisplay(this);
     public long keybindFocusTime = -1;
     public int keybindFocusKey = -1;
     public boolean isMain = true;
@@ -85,7 +87,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         super(x, y, width, height);
         setMaxLength(10000);
         setFormatter(this);
-        super.setResponder(highlighter);
+        super.setResponder(highlighter.andThen(calculator));
     }
     
     @Override
@@ -95,10 +97,9 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
         return TextTransformations.forwardWithTransformation(text, (s, charIndex, c) -> {
             byte arg = highlighter.highlighted[charIndex + index];
             Style style = Style.EMPTY;
-            if (isMain && ScreenOverlayImpl.getEntryListWidget().isEmpty() && !getText().isEmpty()) {
+            if ((isMain && ScreenOverlayImpl.getEntryListWidget().isEmpty() && !getText().isEmpty()) || arg == -128) {
                 style = ERROR_STYLE;
-            }
-            if (arg > 0) {
+            } else if (arg > 0) {
                 ArgumentType<?, ?> argumentType = ArgumentTypesRegistry.ARGUMENT_TYPE_LIST.get((arg - 1) / 2);
                 if (!isPlain) {
                     style = argumentType.getHighlightedStyle();
@@ -111,6 +112,8 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
                     style = SPLITTER_STYLE;
                 } else if (arg == -2) {
                     style = QUOTES_STYLE;
+                } else if (arg == -3) {
+                    style = BRACKETS_STYLE;
                 }
             }
             
@@ -123,7 +126,7 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     
     @Override
     public void setResponder(Consumer<String> responder) {
-        super.setResponder(highlighter.andThen(responder));
+        super.setResponder(highlighter.andThen(calculator).andThen(responder));
     }
     
     @Override
@@ -353,8 +356,18 @@ public class OverlaySearchField extends TextFieldWidget implements TextFieldWidg
     }
     
     @Override
+    public int getWidth() {
+        if (this.calculator.width() > 0) {
+            return super.getWidth() - this.calculator.width() - 2;
+        }
+        
+        return super.getWidth();
+    }
+    
+    @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         setSuggestion(!isFocused() && getText().isEmpty() ? I18n.get("text.rei.search.field.suggestion") : null);
         super.render(graphics, mouseX, mouseY, delta);
+        this.calculator.render(graphics, mouseX, mouseY, delta);
     }
 }

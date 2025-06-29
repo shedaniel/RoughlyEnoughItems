@@ -64,6 +64,7 @@ import me.shedaniel.rei.impl.client.gui.widget.region.RegionDraggableStack;
 import me.shedaniel.rei.impl.common.util.RectangleUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.ApiStatus;
@@ -87,8 +88,17 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
     public final FavoritesPanel favoritePanel = new FavoritesPanel(this);
     public final TrashWidget trash = new TrashWidget(this);
     public final DisplayHistoryWidget displayHistory = new DisplayHistoryWidget(this);
-    public final FavoritesTogglePanelButton togglePanelButton = new FavoritesTogglePanelButton(this);
-    private List<Widget> children = ImmutableList.of(favoritePanel, togglePanelButton, systemRegion, region);
+    public final FavoritesTogglePanelButton togglePanelButton = new FavoritesTogglePanelButton(this, 0, Component.translatable("text.rei.add_favorite_widget"),
+            favoritePanel.expendState, () -> {
+        favoritePanel.expendState.setTo(!favoritePanel.expendState.target(), ConfigObject.getInstance().isReducedMotion() ? 0 : 1500);
+        favoritePanel.resetRows();
+    });
+    public final FavoritesTogglePanelButton calculatorPanelButton = new FavoritesTogglePanelButton(this, 1, Component.translatable("text.rei.calculator_widget"),
+            favoritePanel.expendState, () -> {
+        favoritePanel.expendState.setTo(!favoritePanel.expendState.target(), ConfigObject.getInstance().isReducedMotion() ? 0 : 1500);
+        favoritePanel.resetRows();
+    });
+    private final List<Widget> children = ImmutableList.of(favoritePanel, togglePanelButton, calculatorPanelButton, systemRegion, region);
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amountX, double amountY) {
@@ -260,6 +270,7 @@ public class FavoritesListWidget extends WidgetWithBounds implements DraggableCo
     private void renderAddFavorite(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         this.favoritePanel.render(graphics, mouseX, mouseY, delta);
         this.togglePanelButton.render(graphics, mouseX, mouseY, delta);
+        this.calculatorPanelButton.render(graphics, mouseX, mouseY, delta);
     }
     
     @Override

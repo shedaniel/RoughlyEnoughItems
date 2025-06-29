@@ -384,13 +384,13 @@ public class TextFieldWidget extends WidgetWithBounds implements TickableWidget,
             }
             
             if (this.focused && hovered && button == 0) {
-                int int_2 = Mth.floor(mouseX) - this.bounds.x;
+                int xOffset = Mth.floor(mouseX) - this.bounds.x;
                 if (this.hasBorder) {
-                    int_2 -= 4;
+                    xOffset -= 4;
                 }
                 
                 String string_1 = this.font.plainSubstrByWidth(this.text.substring(this.firstCharacterIndex), this.getWidth());
-                this.moveCursorTo(this.font.plainSubstrByWidth(string_1, int_2).length() + this.firstCharacterIndex);
+                this.moveCursorTo(this.font.plainSubstrByWidth(string_1, xOffset).length() + this.firstCharacterIndex);
                 return true;
             } else {
                 return false;

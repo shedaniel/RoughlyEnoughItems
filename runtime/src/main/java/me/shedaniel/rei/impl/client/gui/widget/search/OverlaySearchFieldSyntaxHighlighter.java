@@ -42,6 +42,32 @@ public class OverlaySearchFieldSyntaxHighlighter implements Consumer<String> {
     @Override
     public void accept(String text) {
         this.highlighted = new byte[text.length()];
+        
+        if (!text.isEmpty() && text.charAt(0) == '=') {
+            highlighted[0] = -1;
+            boolean hasError = false;
+            
+            for (int i = 1; i < text.length(); i++) {
+                char c = text.charAt(i);
+                if (c == '*' || c == '+' || c == '-' || c == '/') {
+                    highlighted[i] = -2;
+                } else if (c == '(' || c == ')') {
+                    highlighted[i] = -3;
+                } else if ((c < '0' || c > '9') && c != '.' && c != 'e' && c != 'E' && c != 'b' && c != 'B' && c != 'k' && c != 'K' && c != 'm' && c != 'M' && c != 't' && c != 'T') {
+                    highlighted[i] = -128;
+                    hasError = true;
+                }
+            }
+            
+            if (!hasError && !TextCalculator.isValid(text)) {
+                for (int i = 0; i < text.length(); i++) {
+                    highlighted[i] = -128;
+                }
+            }
+            
+            return;
+        }
+       
         Argument.bakeArguments(text, new Argument.ProcessedSink() {
             @Override
             public void addQuote(int index) {
