@@ -33,12 +33,14 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class ItemRecipeFinder {
     private final Interner<ItemKey> keys = Interners.newWeakInterner();
-    private final RecipeFinder<ItemKey> finder = new RecipeFinder<>();
+    private final RecipeFinder<ItemKey, Ingredient> finder = new RecipeFinder<>();
     
     public boolean contains(ItemStack item) {
         return finder.contains(ofKey(item));
@@ -74,27 +76,54 @@ public class ItemRecipeFinder {
     }
     
     public boolean findRecipe(List<List<ItemStack>> list, int maxCrafts, @Nullable Consumer<ItemStack> output) {
-        return finder.findRecipe(CollectionUtils.map(list, this::ofKeys), maxCrafts, itemKey -> {
+        return finder.findRecipe(toIngredients(list), maxCrafts, flatten(itemStack -> {
             if (output != null) {
-                output.accept(new ItemStack(itemKey.item(), 1, itemKey.patch()));
+                output.accept(itemStack);
             }
-        });
+        }));
     }
     
     public int countRecipeCrafts(List<List<ItemStack>> list, int maxCrafts, @Nullable Consumer<ItemStack> output) {
-        return finder.countRecipeCrafts(CollectionUtils.map(list, this::ofKeys), maxCrafts, itemKey -> {
+        return finder.countRecipeCrafts(toIngredients(list), maxCrafts, flatten(itemStack -> {
             if (output != null) {
-                output.accept(new ItemStack(itemKey.item(), 1, itemKey.patch()));
+                output.accept(itemStack);
             }
-        });
+        }));
     }
     
     private ItemKey ofKey(ItemStack itemStack) {
         return keys.intern(new ItemKey(itemStack.getItemHolder(), itemStack.getComponentsPatch()));
     }
     
-    private RecipeFinder.Ingredient<ItemKey> ofKeys(List<ItemStack> itemStack) {
-        return new RecipeFinder.Ingredient<>(CollectionUtils.map(itemStack, this::ofKey));
+    private Ingredient ofKeys(int index, List<ItemStack> itemStack) {
+        return new Ingredient(index, CollectionUtils.map(itemStack, this::ofKey));
+    }
+    
+    private List<Ingredient> toIngredients(List<List<ItemStack>> list) {
+        List<Ingredient> ingredients = new ArrayList<>();
+        
+        for (int i = 0; i < list.size(); i++) {
+            List<ItemStack> stacks = list.get(i);
+            if (!stacks.isEmpty()) {
+                ingredients.add(ofKeys(i, stacks));
+            }
+        }
+        
+        return ingredients;
+    }
+    
+    private static BiConsumer<ItemKey, Ingredient> flatten(Consumer<ItemStack> consumer) {
+        int[] lastIndex = {-1};
+        return (itemKey, ingredient) -> {
+            for (int i = lastIndex[0] + 1; i < ingredient.index(); i++) {
+                consumer.accept(ItemStack.EMPTY);
+            }
+            consumer.accept(new ItemStack(itemKey.item(), 1, itemKey.patch()));
+            lastIndex[0] = ingredient.index();
+        };
+    }
+    
+    private record Ingredient(int index, List<ItemKey> elements) implements RecipeFinder.Ingredient<ItemKey> {
     }
     
     private record ItemKey(Holder<Item> item, DataComponentPatch patch) {
