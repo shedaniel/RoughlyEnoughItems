@@ -293,7 +293,16 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
     public void setDoDisplayIMEHints(boolean displayIMEHints) {
         advanced.tooltips.displayIMEHints = displayIMEHints;
     }
-    
+
+    @Override
+    public boolean doesPartialRecipesWarning() {
+        return advanced.doesPartialRecipesWarning;
+    }
+
+    public void setDoesPartialRecipesWarning(boolean showWarning) {
+        advanced.doesPartialRecipesWarning = showWarning;
+    }
+
     @Override
     public boolean doesFastEntryRendering() {
         return advanced.miscellaneous.newFastEntryRendering;
@@ -672,7 +681,9 @@ public class ConfigObjectImpl implements ConfigObject, ConfigData {
         public Commands commands = new Commands();
         public Miscellaneous miscellaneous = new Miscellaneous();
         public Filtering filtering = new Filtering();
-        
+
+        public boolean doesPartialRecipesWarning = true;
+
         public static class Tooltips {
             @Comment("Declares whether REI should append mod names to entries.")
             public boolean appendModNames = true;

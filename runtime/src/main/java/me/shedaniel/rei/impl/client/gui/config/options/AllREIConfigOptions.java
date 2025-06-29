@@ -78,6 +78,8 @@ public interface AllREIConfigOptions {
     CompositeOption<DisplayScreenType> RECIPE_LOOKUP_STYLE = make("appearance.recipe_lookup_style", i -> i.appearance.recipeScreenType, (i, v) -> i.appearance.recipeScreenType = v)
             .options(DisplayScreenType.ORIGINAL, DisplayScreenType.COMPOSITE)
             .defaultValue(() -> DisplayScreenType.ORIGINAL);
+    CompositeOption<Boolean> PARTIAL_RECIPES_WARNING = make("appearance.partial_recipes_warning", i -> i.advanced.doesPartialRecipesWarning, (i, v) -> i.advanced.doesPartialRecipesWarning = v)
+            .enabledDisabled();
     CompositeOption<Boolean> RAINBOW = make("appearance.rainbow", i -> i.appearance.rainbow, (i, v) -> i.appearance.rainbow = v)
             .enabledDisabled();
     CompositeOption<Boolean> APPEND_MOD_NAMES = make("appearance.append_mod_names", i -> i.advanced.tooltips.appendModNames, (i, v) -> i.advanced.tooltips.appendModNames = v)

@@ -26,6 +26,8 @@ package me.shedaniel.rei.impl.client.gui.hints;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.RoughlyEnoughItemsCoreClient;
 import me.shedaniel.rei.api.client.ClientHelper;
+import me.shedaniel.rei.api.client.config.ConfigManager;
+import me.shedaniel.rei.api.client.config.ConfigObject;
 import me.shedaniel.rei.api.client.gui.config.DisplayPanelLocation;
 import me.shedaniel.rei.api.client.gui.widgets.WidgetWithBounds;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
@@ -50,7 +52,8 @@ public class ImportantWarningsWidget extends WidgetWithBounds {
     private static boolean dirty = false;
     private boolean visible;
     private final Rectangle bounds;
-    private final Rectangle buttonBounds = new Rectangle();
+    private final Rectangle okayButtonBounds = new Rectangle();
+    private final Rectangle doNotShowButtonBounds = new Rectangle();
     private List<Component> texts;
     
     public ImportantWarningsWidget() {
@@ -66,7 +69,7 @@ public class ImportantWarningsWidget extends WidgetWithBounds {
             dirty = dirty && !ClientHelper.getInstance().canUseMovePackets();
         }
         
-        this.visible = dirty;
+        this.visible = dirty && ConfigObject.getInstance().doesPartialRecipesWarning();
         this.texts = List.of(
                 Component.translatable("text.rei.recipes.not.full.title").withStyle(ChatFormatting.RED),
                 Component.translatable("text.rei.recipes.not.full.desc", Component.translatable("text.rei.recipes.not.full.desc.command").withStyle(ChatFormatting.AQUA, ChatFormatting.UNDERLINE)).withStyle(ChatFormatting.GRAY)
@@ -102,23 +105,46 @@ public class ImportantWarningsWidget extends WidgetWithBounds {
             y += Minecraft.getInstance().font.wordWrapHeight(text, bounds.width * 2) / 2 + 5;
             graphics.pose().popPose();
         }
-        
+
+        MutableComponent doNotShowText = Component.translatable("text.rei.recipes.not.full.button.do_not_show_again").
+                withStyle(ChatFormatting.RED);
         MutableComponent okayText = Component.translatable("text.rei.recipes.not.full.button.okay");
+        int doNotShowTextWidth = Minecraft.getInstance().font.width(doNotShowText);
+        int okayTextWidth = Minecraft.getInstance().font.width(okayText);
+        int boundsMaxY = bounds.getMaxY();
+
         graphics.pose().pushPose();
-        graphics.pose().translate(bounds.x + bounds.width / 2 - Minecraft.getInstance().font.width(okayText) * 0.75 / 2, bounds.getMaxY() - 9, 0);
+        graphics.pose().translate(bounds.x, boundsMaxY - 9, 0);
         graphics.pose().scale(0.75f, 0.75f, 1);
-        this.buttonBounds.setBounds(bounds.x, bounds.getMaxY() - 20, bounds.width, 20);
-        graphics.drawString(Minecraft.getInstance().font, okayText, 0, 0,
-                buttonBounds.contains(mouseX, mouseY) ? 0xfffff8de : 0xAAFFFFFF);
+
+        int textHeight = 10;
+        int buttonSpacingGap = 6;
+        int doNotShowButtonAlignCenter = (int) (bounds.x + bounds.width / 2.0 - Minecraft.getInstance().font.width(doNotShowText) * 0.75 / 2);
+        int okayButtonAlignCenter = (int) (bounds.x + bounds.width / 2.0 - Minecraft.getInstance().font.width(okayText) * 0.75 / 2);
+
+        this.doNotShowButtonBounds.setBounds(bounds.x, boundsMaxY - (textHeight * 2),
+                bounds.getMaxX(), textHeight);
+        this.okayButtonBounds.setBounds(bounds.x, boundsMaxY - textHeight + buttonSpacingGap,
+                bounds.getMaxX(), textHeight - buttonSpacingGap);
+
+        graphics.drawString(Minecraft.getInstance().font, doNotShowText,
+                doNotShowButtonAlignCenter, -textHeight,
+                doNotShowButtonBounds.contains(mouseX, mouseY) ? 0xfffff8de : 0xAAFFFFFF);
+        graphics.drawString(Minecraft.getInstance().font, okayText,
+                okayButtonAlignCenter, buttonSpacingGap,
+                okayButtonBounds.contains(mouseX, mouseY) ? 0xfffff8de : 0xAAFFFFFF);
         graphics.pose().popPose();
         graphics.pose().popPose();
     }
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (this.visible && button == 0 && buttonBounds.contains(mouseX, mouseY)) {
+        if ((this.visible && button == 0) && (okayButtonBounds.contains(mouseX, mouseY) || doNotShowButtonBounds.contains(mouseX, mouseY))) {
             dirty = false;
             this.visible = false;
+            if (doNotShowButtonBounds.contains(mouseX, mouseY)) {
+                ConfigObject.getInstance().setDoesPartialRecipesWarning(false);
+            }
             Widgets.produceClickSound();
             return true;
         }

@@ -40,6 +40,7 @@ public interface AllREIConfigGroups {
             .add(APPEND_MOD_NAMES)
             .add(APPEND_FAVORITES_HINT);
     OptionGroup APPEARANCE_ADVANCED = make("appearance.advanced")
+            .add(PARTIAL_RECIPES_WARNING)
             .add(RAINBOW);
     OptionGroup INPUT_KEYBINDS = make("input.keybinds")
             .add(RECIPE_KEYBIND)
