@@ -32,9 +32,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.BitSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
-public class RecipeFinder<T> {
+public class RecipeFinder<T, I extends RecipeFinder.Ingredient<T>> {
     public final Reference2IntOpenHashMap<T> amounts = new Reference2IntOpenHashMap<>();
     
     public boolean contains(T item) {
@@ -56,11 +56,11 @@ public class RecipeFinder<T> {
         this.amounts.addTo(item, amount);
     }
     
-    public boolean findRecipe(List<Ingredient<T>> list, int maxCrafts, @Nullable Consumer<T> output) {
+    public boolean findRecipe(List<I> list, int maxCrafts, @Nullable BiConsumer<T, I> output) {
         return new Filter(list).tryPick(maxCrafts, output);
     }
     
-    public int countRecipeCrafts(List<Ingredient<T>> list, int maxCrafts, @Nullable Consumer<T> output) {
+    public int countRecipeCrafts(List<I> list, int maxCrafts, @Nullable BiConsumer<T, I> output) {
         return new Filter(list).tryPickAll(maxCrafts, output);
     }
     
@@ -69,14 +69,14 @@ public class RecipeFinder<T> {
     }
     
     class Filter {
-        private final List<Ingredient<T>> ingredients;
+        private final List<I> ingredients;
         private final int ingredientCount;
         private final List<T> items;
         private final int itemCount;
         private final BitSet data;
         private final IntList path = new IntArrayList();
         
-        public Filter(final List<Ingredient<T>> list) {
+        public Filter(final List<I> list) {
             this.ingredients = list;
             this.ingredientCount = this.ingredients.size();
             this.items = this.getUniqueAvailableIngredientItems();
@@ -87,7 +87,7 @@ public class RecipeFinder<T> {
         
         private void setInitialConnections() {
             for (int i = 0; i < this.ingredientCount; i++) {
-                List<T> list = ((Ingredient<T>) this.ingredients.get(i)).elements();
+                List<T> list = this.ingredients.get(i).elements();
                 
                 for (int j = 0; j < this.itemCount; j++) {
                     if (list.contains(this.items.get(j))) {
@@ -97,7 +97,7 @@ public class RecipeFinder<T> {
             }
         }
         
-        public boolean tryPick(int maxCrafts, @Nullable Consumer<T> output) {
+        public boolean tryPick(int maxCrafts, @Nullable BiConsumer<T, I> output) {
             if (maxCrafts <= 0) {
                 return true;
             } else {
@@ -117,7 +117,7 @@ public class RecipeFinder<T> {
                                     this.unassign(m, l);
                                     put(this.items.get(m), maxCrafts);
                                     if (bl2) {
-                                        output.accept(this.items.get(m));
+                                        output.accept(this.items.get(m), this.ingredients.get(l));
                                     }
                                     break;
                                 }
@@ -362,7 +362,7 @@ public class RecipeFinder<T> {
             this.data.clear(i, i + j);
         }
         
-        public int tryPickAll(int i, @Nullable Consumer<T> output) {
+        public int tryPickAll(int i, @Nullable BiConsumer<T, I> output) {
             int j = 0;
             int k = Math.min(i, this.getMinIngredientCount()) + 1;
             
@@ -403,6 +403,7 @@ public class RecipeFinder<T> {
         }
     }
     
-    public record Ingredient<T>(List<T> elements) {
+    public interface Ingredient<T> {
+        List<T> elements();
     }
 }
