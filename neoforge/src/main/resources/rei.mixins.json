@@ -6,6 +6,7 @@
     "MixinClientPacketListener",
     "MixinEffectsInInventory",
     "MixinFontSet",
+    "MixinGrindstoneResultSlotAccessor",
     "MixinInputConstants",
     "MixinInputConstantsKey",
     "MixinRecipeToast"

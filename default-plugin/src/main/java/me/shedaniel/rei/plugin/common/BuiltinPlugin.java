@@ -31,6 +31,7 @@ import me.shedaniel.rei.plugin.common.displays.beacon.DefaultBeaconPaymentDispla
 import me.shedaniel.rei.plugin.common.displays.brewing.DefaultBrewingDisplay;
 import me.shedaniel.rei.plugin.common.displays.cooking.CookingDisplay;
 import me.shedaniel.rei.plugin.common.displays.crafting.CraftingDisplay;
+import me.shedaniel.rei.plugin.common.displays.grindstone.DefaultGrindstoneDisplay;
 import me.shedaniel.rei.plugin.common.displays.tag.DefaultTagDisplay;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -47,6 +48,7 @@ public interface BuiltinPlugin {
     CategoryIdentifier<DefaultFuelDisplay> FUEL = CategoryIdentifier.of("minecraft", "plugins/fuel");
     CategoryIdentifier<SmithingDisplay> SMITHING = CategoryIdentifier.of("minecraft", "plugins/smithing");
     CategoryIdentifier<DefaultAnvilDisplay> ANVIL = CategoryIdentifier.of("minecraft", "plugins/anvil");
+    CategoryIdentifier<DefaultGrindstoneDisplay> GRINDSTONE = CategoryIdentifier.of("minecraft", "plugins/grindstone");
     CategoryIdentifier<DefaultBeaconBaseDisplay> BEACON_BASE = CategoryIdentifier.of("minecraft", "plugins/beacon_base");
     CategoryIdentifier<DefaultBeaconPaymentDisplay> BEACON_PAYMENT = CategoryIdentifier.of("minecraft", "plugins/beacon_payment");
     CategoryIdentifier<DefaultTillingDisplay> TILLING = CategoryIdentifier.of("minecraft", "plugins/tilling");

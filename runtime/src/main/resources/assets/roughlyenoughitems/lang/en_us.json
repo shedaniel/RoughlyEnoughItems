@@ -55,6 +55,8 @@
   "category.rei.campfire": "Campfire",
   "category.rei.campfire.time": "%s sec",
   "category.rei.stone_cutting": "Stone Cutting",
+  "category.rei.grindstone.xp": "+%f XP",
+  "category.rei.grindstone.average": "avg.",
   "category.rei.brewing": "Brewing",
   "category.rei.brewing.input": "Original Potion",
   "category.rei.brewing.reactant": "Ingredient",
